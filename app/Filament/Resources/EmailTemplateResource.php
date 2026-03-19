@@ -58,7 +58,7 @@ class EmailTemplateResource extends Resource
                         ->label('HTML Body')
                         ->toolbarButtons([
                             'bold', 'italic', 'underline', 'strike',
-                            'link', 'orderedList', 'unorderedList',
+                            'link', 'orderedList', 'bulletList',
                             'h2', 'h3', 'blockquote', 'codeBlock',
                         ])
                         ->columnSpanFull(),
@@ -121,3 +121,4 @@ class EmailTemplateResource extends Resource
         ];
     }
 }
+
