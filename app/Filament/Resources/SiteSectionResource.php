@@ -59,7 +59,7 @@ class SiteSectionResource extends Resource
                         ->columnSpanFull(),
                     Forms\Components\RichEditor::make('body')
                         ->label('Body Content')
-                        ->toolbarButtons(['bold', 'italic', 'underline', 'link', 'orderedList', 'unorderedList', 'h2', 'h3', 'blockquote'])
+                        ->toolbarButtons(['bold', 'italic', 'underline', 'link', 'orderedList', 'bulletList', 'h2', 'h3', 'blockquote'])
                         ->columnSpanFull(),
                 ]),
 
@@ -145,3 +145,4 @@ class SiteSectionResource extends Resource
         ];
     }
 }
+

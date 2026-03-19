@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Lead;
 use App\Models\PipelineStage;
 use Filament\Pages\Page;
+use Filament\Support\Enums\Width;
 
 class PipelinePage extends Page
 {
@@ -13,6 +14,11 @@ class PipelinePage extends Page
     protected static ?string $navigationLabel = 'Sales Pipeline';
     protected static ?int $navigationSort = 3;
     protected string $view = 'filament.pages.pipeline';
+
+    public function getMaxContentWidth(): Width|string|null
+    {
+        return Width::Full;
+    }
 
     public function getTitle(): string
     {
@@ -34,10 +40,11 @@ class PipelinePage extends Page
             ->groupBy('pipeline_stage_id');
 
         $totals = Lead::withoutTrashed()
-            ->selectRaw('pipeline_stage_id, COUNT(*) as count, SUM(value) as total_value')
+            ->selectRaw('pipeline_stage_id, COUNT(*) as `count`, SUM(value) as total_value')
             ->groupBy('pipeline_stage_id')
-            ->pluck(null, 'pipeline_stage_id')
-            ->map(fn ($r) => ['count' => $r->count, 'total' => $r->total_value]);
+            ->get()
+            ->keyBy('pipeline_stage_id')
+            ->map(fn ($r) => ['count' => (int) $r->count, 'total' => (float) $r->total_value]);
 
         return [
             'stages' => $stages,

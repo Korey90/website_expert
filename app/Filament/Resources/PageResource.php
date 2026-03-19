@@ -39,7 +39,7 @@ class PageResource extends Resource
                     Forms\Components\TextInput::make('sort_order')->numeric()->default(0),
                     Forms\Components\RichEditor::make('content')
                         ->columnSpanFull()
-                        ->toolbarButtons(['bold', 'italic', 'underline', 'link', 'orderedList', 'unorderedList', 'h2', 'h3', 'blockquote', 'codeBlock']),
+                        ->toolbarButtons(['bold', 'italic', 'underline', 'link', 'orderedList', 'bulletList', 'h2', 'h3', 'blockquote', 'codeBlock']),
                     Forms\Components\TextInput::make('meta_title')->maxLength(255),
                     Forms\Components\TextInput::make('meta_description')->maxLength(500),
                 ]),
@@ -84,4 +84,5 @@ class PageResource extends Resource
         return parent::getEloquentQuery()->withTrashed();
     }
 }
+
 

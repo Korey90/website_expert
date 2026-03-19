@@ -1,4 +1,35 @@
-export default function Hero() {
+const DEFAULT_TITLE_LINE1 = 'Twoja strona.';
+const DEFAULT_TITLE_LINE2 = 'Twój wzrost.';
+const DEFAULT_TITLE_LINE3 = 'Nasz kod.';
+const DEFAULT_SUBTITLE =
+    'Tworzymy strony i aplikacje internetowe dla małych i\u00a0średnich firm. ' +
+    'Od wizytówki po zaawansowany sklep \u2013 dostarczamy gotowe do zarabiania rozwiązania.';
+const DEFAULT_BADGE    = 'Nowe projekty \u2013 od 2\u00a0tygodni';
+const DEFAULT_BTN1_TEXT = 'Sprawdź koszt projektu';
+const DEFAULT_BTN1_URL  = '#kalkulator';
+const DEFAULT_BTN2_TEXT = 'Zobacz nasze realizacje';
+const DEFAULT_BTN2_URL  = '#portfolio';
+
+export default function Hero({ section }) {
+    const title       = section?.title    ?? null;
+    const subtitle    = section?.subtitle ?? DEFAULT_SUBTITLE;
+    const extra       = section?.extra    ?? {};
+
+    const badgeText   = extra.badge_text           ?? DEFAULT_BADGE;
+    const btn1Text    = section?.button_text        ?? DEFAULT_BTN1_TEXT;
+    const btn1Url     = section?.button_url         ?? DEFAULT_BTN1_URL;
+    const btn2Text    = extra.secondary_button_text ?? DEFAULT_BTN2_TEXT;
+    const btn2Url     = extra.secondary_button_url  ?? DEFAULT_BTN2_URL;
+
+    // Parse title into up to 3 lines split by newline, falling back to hardcoded Polish lines
+    let titleLines;
+    if (title) {
+        const parts = title.split(/\n/);
+        titleLines = [parts[0] ?? '', parts[1] ?? '', parts[2] ?? ''];
+    } else {
+        titleLines = [DEFAULT_TITLE_LINE1, DEFAULT_TITLE_LINE2, DEFAULT_TITLE_LINE3];
+    }
+
     return (
         <section id="hero" className="relative min-h-screen flex items-center overflow-hidden pt-16 md:pt-20">
             {/* Background */}
@@ -11,32 +42,31 @@ export default function Hero() {
                 <div>
                     <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-600 dark:text-brand-400 mb-6">
                         <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
-                        Nowe projekty – od 2&nbsp;tygodni
+                        {badgeText}
                     </span>
                     <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-neutral-900 dark:text-white">
-                        Twoja strona.<br />
-                        <span className="text-brand-500">Twój wzrost.</span><br />
-                        Nasz kod.
+                        {titleLines[0]}{titleLines[0] && <br />}
+                        {titleLines[1] && <><span className="text-brand-500">{titleLines[1]}</span><br /></>}
+                        {titleLines[2]}
                     </h1>
                     <p className="mt-6 text-lg text-neutral-600 dark:text-neutral-400 max-w-xl leading-relaxed">
-                        Tworzymy strony i aplikacje internetowe dla małych i&nbsp;średnich firm.
-                        Od wizytówki po zaawansowany sklep – dostarczamy gotowe do zarabiania rozwiązania.
+                        {subtitle}
                     </p>
                     <div className="mt-8 flex flex-col sm:flex-row gap-3">
                         <a
-                            href="#kalkulator"
+                            href={btn1Url}
                             className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-500 text-white font-semibold text-base hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/25"
                         >
-                            Sprawdź koszt projektu
+                            {btn1Text}
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </a>
                         <a
-                            href="#portfolio"
+                            href={btn2Url}
                             className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-transparent border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 font-semibold text-base hover:border-brand-500 hover:text-brand-500 active:scale-95 transition-all"
                         >
-                            Zobacz nasze realizacje
+                            {btn2Text}
                         </a>
                     </div>
 
