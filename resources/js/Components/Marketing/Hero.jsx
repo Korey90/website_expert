@@ -1,4 +1,23 @@
-export default function Hero() {
+const DEFAULTS = {
+    title:       'Twoja strona.\nTwoj wzrost.\nNasz kod.',
+    subtitle:    'Tworzymy strony i aplikacje internetowe dla malych i srednich firm. Od wizytowki po zaawansowany sklep.',
+    button_text: 'Sprawdz koszt projektu',
+    button_url:  '#kalkulator',
+    extra: {
+        badge_text:             'Nowe projekty – od 2 tygodni',
+        secondary_button_text:  'Zobacz nasze realizacje',
+        secondary_button_url:   '#portfolio',
+        stats: [],
+    },
+};
+
+export default function Hero({ data }) {
+    const d = data ?? DEFAULTS;
+    const extra = d.extra ?? DEFAULTS.extra;
+
+    // Title may contain \n for line breaks
+    const titleLines = (d.title ?? DEFAULTS.title).split('\n');
+
     return (
         <section id="hero" className="relative min-h-screen flex items-center overflow-hidden pt-16 md:pt-20">
             {/* Background */}
@@ -9,50 +28,61 @@ export default function Hero() {
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 md:py-28 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                 {/* Text */}
                 <div>
-                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-600 dark:text-brand-400 mb-6">
-                        <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
-                        Nowe projekty – od 2&nbsp;tygodni
-                    </span>
+                    {extra.badge_text && (
+                        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-600 dark:text-brand-400 mb-6">
+                            <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
+                            {extra.badge_text}
+                        </span>
+                    )}
+
                     <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-neutral-900 dark:text-white">
-                        Twoja strona.<br />
-                        <span className="text-brand-500">Twój wzrost.</span><br />
-                        Nasz kod.
+                        {titleLines.map((line, i) => (
+                            <span key={i}>
+                                {i === 1
+                                    ? <span className="text-brand-500">{line}</span>
+                                    : line}
+                                {i < titleLines.length - 1 && <br />}
+                            </span>
+                        ))}
                     </h1>
-                    <p className="mt-6 text-lg text-neutral-600 dark:text-neutral-400 max-w-xl leading-relaxed">
-                        Tworzymy strony i aplikacje internetowe dla małych i&nbsp;średnich firm.
-                        Od wizytówki po zaawansowany sklep – dostarczamy gotowe do zarabiania rozwiązania.
-                    </p>
+
+                    {d.subtitle && (
+                        <p className="mt-6 text-lg text-neutral-600 dark:text-neutral-400 max-w-xl leading-relaxed">
+                            {d.subtitle}
+                        </p>
+                    )}
+
                     <div className="mt-8 flex flex-col sm:flex-row gap-3">
                         <a
-                            href="#kalkulator"
+                            href={d.button_url ?? '#kalkulator'}
                             className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-500 text-white font-semibold text-base hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/25"
                         >
-                            Sprawdź koszt projektu
+                            {d.button_text ?? DEFAULTS.button_text}
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </a>
-                        <a
-                            href="#portfolio"
-                            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-transparent border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 font-semibold text-base hover:border-brand-500 hover:text-brand-500 active:scale-95 transition-all"
-                        >
-                            Zobacz nasze realizacje
-                        </a>
+                        {extra.secondary_button_text && (
+                            <a
+                                href={extra.secondary_button_url ?? '#portfolio'}
+                                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-transparent border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 font-semibold text-base hover:border-brand-500 hover:text-brand-500 active:scale-95 transition-all"
+                            >
+                                {extra.secondary_button_text}
+                            </a>
+                        )}
                     </div>
 
-                    {/* Social proof */}
-                    <div className="mt-10 flex items-center gap-4">
-                        <div className="flex -space-x-2">
-                            {[['AK','brand'], ['MB','neutral'], ['PW','brand']].map(([init, color]) => (
-                                <div key={init} className={`w-9 h-9 rounded-full bg-${color}-200 dark:bg-${color}-900 border-2 border-white dark:border-neutral-950 flex items-center justify-center text-xs font-bold text-${color}-700 dark:text-${color}-300`}>
-                                    {init}
+                    {/* Stats from backend */}
+                    {extra.stats && extra.stats.length > 0 && (
+                        <div className="mt-10 flex flex-wrap gap-8">
+                            {extra.stats.map((stat) => (
+                                <div key={stat.label}>
+                                    <p className="text-2xl font-extrabold text-neutral-900 dark:text-white">{stat.value}</p>
+                                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">{stat.label}</p>
                                 </div>
                             ))}
                         </div>
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                            <span className="font-semibold text-neutral-800 dark:text-neutral-200">+50 firm</span> już nam zaufało
-                        </p>
-                    </div>
+                    )}
                 </div>
 
                 {/* Browser mockup */}
@@ -97,9 +127,9 @@ export default function Hero() {
             <a
                 href="#o-nas"
                 className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce text-neutral-400 hover:text-brand-500 transition-colors"
-                aria-label="Przewiń do sekcji O nas"
+                aria-label="Przewin do sekcji O nas"
             >
-                <span className="text-xs">Przewiń</span>
+                <span className="text-xs">Przewin</span>
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
