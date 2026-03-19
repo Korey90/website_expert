@@ -137,5 +137,5 @@ class PageResource extends Resource
     {
         return parent::getEloquentQuery()->withTrashed();
     }
-}
 
+}
