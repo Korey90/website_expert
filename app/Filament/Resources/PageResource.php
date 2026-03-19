@@ -6,6 +6,8 @@ use App\Filament\Resources\PageResource\Pages;
 use App\Models\Page;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -23,25 +25,70 @@ class PageResource extends Resource
 
     public static function form(Schema $form): Schema
     {
+        $locales = config('languages', ['en' => 'English', 'pl' => 'Polski']);
+
         return $form->schema([
-            Section::make()
+
+            Section::make('Page Settings')
                 ->columns(2)
                 ->schema([
-                    Forms\Components\TextInput::make('title')->required()->maxLength(255)->columnSpanFull(),
-                    Forms\Components\TextInput::make('slug')->required()->unique(ignoreRecord: true)->maxLength(255),
+                    Forms\Components\TextInput::make('slug')
+                        ->required()
+                        ->unique(ignoreRecord: true)
+                        ->maxLength(255)
+                        ->helperText('URL: /p/{slug}'),
                     Forms\Components\Select::make('type')
-                        ->options(['page' => 'Page', 'policy' => 'Privacy Policy', 'terms' => 'Terms & Conditions', 'cookie_policy' => 'Cookie Policy', 'other' => 'Other'])
-                        ->default('page')->required(),
+                        ->options([
+                            'page'          => 'Page',
+                            'policy'        => 'Privacy Policy',
+                            'terms'         => 'Terms & Conditions',
+                            'cookie_policy' => 'Cookie Policy',
+                            'other'         => 'Other',
+                        ])
+                        ->default('page')
+                        ->required(),
                     Forms\Components\Select::make('status')
                         ->options(['draft' => 'Draft', 'published' => 'Published'])
-                        ->default('draft')->required(),
-                    Forms\Components\Toggle::make('show_in_footer')->default(false),
+                        ->default('draft')
+                        ->required(),
                     Forms\Components\TextInput::make('sort_order')->numeric()->default(0),
-                    Forms\Components\RichEditor::make('content')
-                        ->columnSpanFull()
-                        ->toolbarButtons(['bold', 'italic', 'underline', 'link', 'orderedList', 'unorderedList', 'h2', 'h3', 'blockquote', 'codeBlock']),
-                    Forms\Components\TextInput::make('meta_title')->maxLength(255),
-                    Forms\Components\TextInput::make('meta_description')->maxLength(500),
+                    Forms\Components\Toggle::make('show_in_footer')
+                        ->label('Show in footer navigation')
+                        ->default(false)
+                        ->columnSpanFull(),
+                ]),
+
+            Section::make('Content')
+                ->schema([
+                    Tabs::make('Translations')
+                        ->tabs(
+                            array_map(
+                                fn (string $locale, string $label) => Tab::make($label)
+                                    ->schema([
+                                        Forms\Components\TextInput::make("title.{$locale}")
+                                            ->label("Title ({$locale})")
+                                            ->required()
+                                            ->maxLength(255),
+                                        Forms\Components\RichEditor::make("content.{$locale}")
+                                            ->label("Content ({$locale})")
+                                            ->toolbarButtons([
+                                                'bold', 'italic', 'underline', 'strike',
+                                                'link', 'orderedList', 'bulletList',
+                                                'h2', 'h3', 'blockquote', 'codeBlock',
+                                            ]),
+                                        Forms\Components\TextInput::make("meta_title.{$locale}")
+                                            ->label("Meta title ({$locale})")
+                                            ->maxLength(100),
+                                        Forms\Components\Textarea::make("meta_description.{$locale}")
+                                            ->label("Meta description ({$locale})")
+                                            ->rows(2)
+                                            ->maxLength(300),
+                                    ]),
+                                array_keys($locales),
+                                array_values($locales),
+                            )
+                        )
+                        ->columnSpanFull(),
                 ]),
         ]);
     }
@@ -50,19 +97,26 @@ class PageResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('title')
+                    ->getStateUsing(fn ($record) => $record->getTranslation('title', 'en'))
+                    ->searchable(query: fn ($query, $value) => $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(title, '$.en')) LIKE ?", ["%{$value}%"]))
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('slug')->searchable(),
                 Tables\Columns\TextColumn::make('type')->badge(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->color(fn ($state) => match($state) { 'draft' => 'gray', 'published' => 'success', default => 'gray' }),
+                    ->color(fn ($state) => match ($state) {
+                        'published' => 'success',
+                        default     => 'gray',
+                    }),
                 Tables\Columns\IconColumn::make('show_in_footer')->boolean(),
                 Tables\Columns\TextColumn::make('updated_at')->date()->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
                     ->options(['page' => 'Page', 'policy' => 'Policy', 'terms' => 'Terms', 'cookie_policy' => 'Cookies']),
-                Tables\Filters\SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published']),
+                Tables\Filters\SelectFilter::make('status')
+                    ->options(['draft' => 'Draft', 'published' => 'Published']),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([EditAction::make(), DeleteAction::make()])

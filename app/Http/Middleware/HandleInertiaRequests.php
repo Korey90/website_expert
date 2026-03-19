@@ -29,11 +29,19 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $supported = array_keys(config('languages'));
+        $locale    = session('locale') ?? $request->getPreferredLanguage($supported) ?? $supported[0];
+        if (! in_array($locale, $supported)) {
+            $locale = $supported[0];
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
             ],
+            'locale'            => $locale,
+            'available_locales' => config('languages'),
         ];
     }
 }

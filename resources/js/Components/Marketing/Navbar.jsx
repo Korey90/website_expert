@@ -1,18 +1,50 @@
 import { useState, useEffect, useRef } from 'react';
+import { usePage, router } from '@inertiajs/react';
 
-const LANG_OPTIONS = [
-    { code: 'pl', flag: '🇵🇱', label: 'Polski' },
-    { code: 'en', flag: '🇬🇧', label: 'English' },
-    { code: 'pt', flag: '🇵🇹', label: 'Português' },
+// Flag emoji map – add more as needed
+const FLAG = { en: '🇬🇧', pl: '🇵🇱', de: '🇩🇪', fr: '🇫🇷', es: '🇪🇸', pt: '🇵🇹', uk: '🇺🇦' };
+
+const LINK_DEFAULTS = [
+    { href: '#o-nas',      label_en: 'About Us',        label_pl: 'O nas' },
+    { href: '#oferta',     label_en: 'Services',        label_pl: 'Oferta' },
+    { href: '#portfolio',  label_en: 'Portfolio',       label_pl: 'Portfolio' },
+    { href: '#kalkulator', label_en: 'Cost Calculator', label_pl: 'Kalkulator' },
+    { href: '#kontakt',    label_en: 'Contact',         label_pl: 'Kontakt' },
 ];
 
-export default function Navbar({ auth }) {
+export default function Navbar({ auth, data = null }) {
+    const page = usePage();
+    const { locale, available_locales } = page.props;
+    const isHome = page.url === '/' || page.url.startsWith('/?');
+    const resolveHref = (href) => href.startsWith('#') && !isHome ? '/' + href : href;
+
+    const extra = data?.extra ?? {};
+    const nt    = (key, fb = '') => extra[`${key}_${locale}`] ?? extra[`${key}_en`] ?? fb;
+
+    const rawLinks = Array.isArray(extra.links) ? extra.links : LINK_DEFAULTS;
+    const navLinks = rawLinks.map(l => ({
+        href:  resolveHref(l.href),
+        label: l[`label_${locale}`] ?? l.label_en ?? l.href,
+    }));
+    const ctaText = nt('cta_text', locale === 'pl' ? 'Bezpłatna wycena' : 'Free Quote');
+    const ctaHref = resolveHref(extra.cta_href || '#kontakt');
+
+    const langOptions = Object.entries(available_locales ?? {}).map(([code, label]) => ({
+        code,
+        label: label.replace(/\s*\p{Emoji_Presentation}+$/u, '').trim(),
+        flag: FLAG[code] ?? '🌐',
+    }));
+
     const [mobileOpen, setMobileOpen] = useState(false);
     const [scrolled, setScrolled]     = useState(false);
     const [dark, setDark]             = useState(() => (localStorage.getItem('theme') || 'dark') === 'dark');
     const [langOpen, setLangOpen]     = useState(false);
-    const [lang, setLang]             = useState('pl');
     const langRef = useRef(null);
+
+    const switchLang = (code) => {
+        setLangOpen(false);
+        router.visit(`/lang/${code}`, { preserveScroll: false });
+    };
 
     // Apply dark class on mount and toggle
     useEffect(() => {
@@ -36,15 +68,7 @@ export default function Navbar({ auth }) {
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    const currentLang = LANG_OPTIONS.find(l => l.code === lang);
-
-    const navLinks = [
-        { href: '#o-nas',     label: 'O nas' },
-        { href: '#oferta',    label: 'Oferta' },
-        { href: '#portfolio', label: 'Portfolio' },
-        { href: '#kalkulator',label: 'Kalkulator' },
-        { href: '#kontakt',   label: 'Kontakt' },
-    ];
+    const currentLang = langOptions.find(l => l.code === locale) ?? langOptions[0];
 
     return (
         <header
@@ -58,7 +82,7 @@ export default function Navbar({ auth }) {
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 md:h-20">
 
                 {/* Logo */}
-                <a href="#hero" className="flex items-center gap-2 group" aria-label="Website Expert – strona główna">
+                <a href={resolveHref('#hero')} className="flex items-center gap-2 group" aria-label="Website Expert – strona główna">
                     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="shrink-0" aria-hidden="true">
                         <rect width="36" height="36" rx="8" className="fill-brand-500" />
                         <path d="M9 12L18 8L27 12V18C27 23.1 22.8 27.7 18 29C13.2 27.7 9 23.1 9 18V12Z" fill="white" opacity="0.2" />
@@ -102,14 +126,14 @@ export default function Navbar({ auth }) {
                                 aria-label="Dostępne języki"
                                 className="absolute right-0 mt-1 w-36 rounded-xl border border-neutral-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-lg py-1 z-50 text-sm font-medium"
                             >
-                                {LANG_OPTIONS.map(opt => (
+                                {langOptions.map(opt => (
                                     <li
                                         key={opt.code}
                                         role="option"
-                                        aria-selected={lang === opt.code}
-                                        onClick={() => { setLang(opt.code); setLangOpen(false); /* TODO: i18n */ }}
+                                        aria-selected={locale === opt.code}
+                                        onClick={() => switchLang(opt.code)}
                                         className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer transition-colors ${
-                                            lang === opt.code
+                                            locale === opt.code
                                                 ? 'text-brand-500 bg-brand-50 dark:bg-brand-500/10'
                                                 : 'text-neutral-700 dark:text-neutral-300 hover:text-brand-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'
                                         }`}
@@ -143,10 +167,10 @@ export default function Navbar({ auth }) {
 
                     {/* CTA button */}
                     <a
-                        href="#kontakt"
+                        href={ctaHref}
                         className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 active:scale-95 transition-all"
                     >
-                        Bezpłatna wycena
+                        {ctaText}
                     </a>
 
                     {/* Mobile hamburger */}
@@ -186,12 +210,12 @@ export default function Navbar({ auth }) {
                         <li className="border-t border-neutral-100 dark:border-neutral-800 pt-3 mt-1">
                             <p className="text-xs text-neutral-400 uppercase tracking-widest mb-2">Język / Language</p>
                             <div className="flex gap-2">
-                                {LANG_OPTIONS.map(opt => (
+                                {langOptions.map(opt => (
                                     <button
                                         key={opt.code}
-                                        onClick={() => { setLang(opt.code); /* TODO: i18n */ }}
+                                        onClick={() => switchLang(opt.code)}
                                         className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm transition-colors ${
-                                            lang === opt.code
+                                            locale === opt.code
                                                 ? 'border-brand-500 text-brand-500 bg-brand-50 dark:bg-brand-500/10 font-semibold'
                                                 : 'border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 font-medium hover:text-brand-500 hover:border-brand-500'
                                         }`}
@@ -204,11 +228,11 @@ export default function Navbar({ auth }) {
 
                         <li className="pt-2">
                             <a
-                                href="#kontakt"
+                                href={ctaHref}
                                 onClick={() => setMobileOpen(false)}
                                 className="block text-center px-4 py-3 rounded-lg bg-brand-500 text-white font-semibold hover:bg-brand-600 transition-colors"
                             >
-                                Bezpłatna wycena
+                                {ctaText}
                             </a>
                         </li>
                     </ul>

@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Translatable\HasTranslations;
 
 class Page extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasTranslations;
+
+    public array $translatable = ['title', 'content', 'meta_title', 'meta_description'];
 
     protected $fillable = [
         'title', 'slug', 'content', 'meta_title', 'meta_description',
@@ -26,3 +29,4 @@ class Page extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 }
+

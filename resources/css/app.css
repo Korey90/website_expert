@@ -72,6 +72,17 @@
   }
 }
 
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar              { width: 8px; height: 8px; }
+::-webkit-scrollbar-track        { background: #1a1a1a; }
+::-webkit-scrollbar-thumb        { background: #ff2b17; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover  { background: #ed1a07; }
+
+.dark ::-webkit-scrollbar-track  { background: #0d0d0d; }
+
+/* Firefox */
+* { scrollbar-width: thin; scrollbar-color: #ff2b17 #1a1a1a; }
+
 @media (prefers-reduced-motion: reduce) {
   .reveal { @apply opacity-100 translate-y-0 transition-none; }
 }

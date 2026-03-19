@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a2e4a"/>
+      <stop offset="100%" style="stop-color:#0f1e32"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#c9a84c"/>
+      <stop offset="100%" style="stop-color:#e8c96a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="450" fill="url(#bg)"/>
+
+  <!-- Nav bar -->
+  <rect x="0" y="0" width="800" height="52" fill="#0d1e33"/>
+  <!-- Logo text -->
+  <rect x="32" y="18" width="6" height="16" fill="url(#gold)" rx="1"/>
+  <rect x="44" y="22" width="80" height="8" fill="#c9a84c" rx="2"/>
+  <rect x="44" y="32" width="50" height="5" fill="#c9a84c" opacity="0.4" rx="1"/>
+  <!-- Nav links -->
+  <rect x="360" y="22" width="40" height="6" fill="#8899aa" rx="2"/>
+  <rect x="416" y="22" width="50" height="6" fill="#8899aa" rx="2"/>
+  <rect x="482" y="22" width="40" height="6" fill="#8899aa" rx="2"/>
+  <rect x="538" y="22" width="44" height="6" fill="#8899aa" rx="2"/>
+  <!-- CTA button in nav -->
+  <rect x="622" y="16" width="110" height="22" fill="url(#gold)" rx="4"/>
+  <rect x="636" y="23" width="82" height="6" fill="#1a2e4a" rx="2"/>
+
+  <!-- Gold accent bar -->
+  <rect x="0" y="52" width="800" height="3" fill="url(#gold)"/>
+
+  <!-- Hero section -->
+  <rect x="0" y="55" width="800" height="220" fill="#1a2e4a"/>
+  <!-- Gold vertical accent line -->
+  <rect x="60" y="90" width="3" height="90" fill="url(#gold)" rx="1"/>
+  <!-- Eyebrow -->
+  <rect x="74" y="90" width="100" height="8" fill="#c9a84c" opacity="0.7" rx="2"/>
+  <!-- H1 headline lines -->
+  <rect x="74" y="108" width="280" height="16" fill="#ffffff" rx="3"/>
+  <rect x="74" y="130" width="230" height="16" fill="#ffffff" opacity="0.9" rx="3"/>
+  <!-- Subheadline -->
+  <rect x="74" y="158" width="260" height="7" fill="#8899aa" rx="2"/>
+  <rect x="74" y="170" width="220" height="7" fill="#8899aa" opacity="0.7" rx="2"/>
+  <!-- CTA buttons -->
+  <rect x="74" y="192" width="130" height="34" fill="url(#gold)" rx="6"/>
+  <rect x="90" y="206" width="98" height="7" fill="#1a2e4a" rx="2"/>
+  <rect x="218" y="192" width="110" height="34" fill="transparent" stroke="#c9a84c" stroke-width="1.5" rx="6"/>
+  <rect x="232" y="206" width="82" height="7" fill="#c9a84c" rx="2"/>
+
+  <!-- Right image placeholder in hero -->
+  <rect x="430" y="68" width="320" height="175" fill="#0d1e33" rx="8" opacity="0.8"/>
+  <rect x="450" y="88" width="280" height="10" fill="#2a3e54" rx="2"/>
+  <rect x="450" y="104" width="220" height="10" fill="#2a3e54" rx="2"/>
+  <rect x="450" y="120" width="260" height="60" fill="#1a2e4a" rx="4"/>
+  <rect x="460" y="130" width="60" height="8" fill="#c9a84c" opacity="0.5" rx="2"/>
+  <rect x="460" y="144" width="180" height="6" fill="#8899aa" rx="2"/>
+  <rect x="460" y="154" width="150" height="6" fill="#8899aa" opacity="0.6" rx="2"/>
+  <rect x="450" y="192" width="80" height="22" fill="#c9a84c" opacity="0.3" rx="4"/>
+  <rect x="540" y="192" width="80" height="22" fill="#2a3e54" rx="4"/>
+
+  <!-- Stats strip -->
+  <rect x="0" y="275" width="800" height="64" fill="#0d1e33"/>
+  <rect x="60" y="290" width="60" height="14" fill="#c9a84c" rx="2"/>
+  <rect x="60" y="308" width="90" height="7" fill="#8899aa" rx="2"/>
+  <rect x="225" y="290" width="50" height="14" fill="#c9a84c" rx="2"/>
+  <rect x="225" y="308" width="80" height="7" fill="#8899aa" rx="2"/>
+  <rect x="390" y="290" width="60" height="14" fill="#c9a84c" rx="2"/>
+  <rect x="390" y="308" width="90" height="7" fill="#8899aa" rx="2"/>
+  <rect x="560" y="290" width="70" height="14" fill="#c9a84c" rx="2"/>
+  <rect x="560" y="308" width="80" height="7" fill="#8899aa" rx="2"/>
+
+  <!-- Practice areas cards -->
+  <rect x="32" y="354" width="224" height="80" fill="#0d1e33" rx="8" stroke="#1e3050" stroke-width="1"/>
+  <rect x="48" y="370" width="16" height="16" fill="#c9a84c" opacity="0.4" rx="3"/>
+  <rect x="70" y="372" width="100" height="8" fill="#ffffff" rx="2"/>
+  <rect x="70" y="386" width="140" height="6" fill="#8899aa" rx="2"/>
+  <rect x="70" y="396" width="120" height="6" fill="#8899aa" opacity="0.6" rx="2"/>
+  <rect x="48" y="412" width="60" height="6" fill="#c9a84c" rx="2"/>
+
+  <rect x="288" y="354" width="224" height="80" fill="#0d1e33" rx="8" stroke="#1e3050" stroke-width="1"/>
+  <rect x="304" y="370" width="16" height="16" fill="#c9a84c" opacity="0.4" rx="3"/>
+  <rect x="326" y="372" width="110" height="8" fill="#ffffff" rx="2"/>
+  <rect x="326" y="386" width="140" height="6" fill="#8899aa" rx="2"/>
+  <rect x="326" y="396" width="110" height="6" fill="#8899aa" opacity="0.6" rx="2"/>
+  <rect x="304" y="412" width="60" height="6" fill="#c9a84c" rx="2"/>
+
+  <rect x="544" y="354" width="224" height="80" fill="#0d1e33" rx="8" stroke="#1e3050" stroke-width="1"/>
+  <rect x="560" y="370" width="16" height="16" fill="#c9a84c" opacity="0.4" rx="3"/>
+  <rect x="582" y="372" width="90" height="8" fill="#ffffff" rx="2"/>
+  <rect x="582" y="386" width="140" height="6" fill="#8899aa" rx="2"/>
+  <rect x="582" y="396" width="120" height="6" fill="#8899aa" opacity="0.6" rx="2"/>
+  <rect x="560" y="412" width="60" height="6" fill="#c9a84c" rx="2"/>
+</svg>

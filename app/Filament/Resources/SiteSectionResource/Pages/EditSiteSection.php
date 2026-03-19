@@ -14,4 +14,19 @@ class EditSiteSection extends EditRecord
     {
         return [DeleteAction::make()];
     }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $record = $this->getRecord();
+
+        foreach (['title', 'subtitle', 'body', 'button_text'] as $field) {
+            $data[$field] = $record->getTranslations($field);
+        }
+
+        // Expose nested extra keys so Repeaters can bind to extra.highlights / extra.stats
+        $extra = $record->extra ?? [];
+        $data['extra'] = $extra;
+
+        return $data;
+    }
 }
