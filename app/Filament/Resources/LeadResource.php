@@ -1,0 +1,118 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\LeadResource\Pages;
+use App\Models\Client;
+use App\Models\Lead;
+use App\Models\PipelineStage;
+use App\Models\User;
+use Filament\Forms;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Tables\Table;
+
+class LeadResource extends Resource
+{
+    protected static ?string $model = Lead::class;
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-funnel';
+    protected static \UnitEnum|string|null $navigationGroup = 'CRM';
+    protected static ?int $navigationSort = 2;
+
+    public static function form(Schema $form): Schema
+    {
+        return $form->schema([
+            Section::make('Lead Details')
+                ->columns(2)
+                ->schema([
+                    Forms\Components\TextInput::make('title')->required()->maxLength(255)->columnSpanFull(),
+                    Forms\Components\Select::make('client_id')
+                        ->label('Client')
+                        ->options(Client::pluck('company_name', 'id'))
+                        ->searchable()
+                        ->createOptionForm([
+                            Forms\Components\TextInput::make('company_name')->required(),
+                            Forms\Components\TextInput::make('primary_contact_email')->email(),
+                        ]),
+                    Forms\Components\Select::make('pipeline_stage_id')
+                        ->label('Stage')
+                        ->options(PipelineStage::orderBy('order')->pluck('name', 'id'))
+                        ->required(),
+                    Forms\Components\Select::make('assigned_to')
+                        ->label('Assigned To')
+                        ->options(User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'manager']))->pluck('name', 'id'))
+                        ->searchable(),
+                    Forms\Components\Select::make('source')
+                        ->options(['calculator' => 'Calculator', 'contact_form' => 'Contact Form', 'referral' => 'Referral', 'cold_outreach' => 'Cold Outreach', 'social_media' => 'Social Media', 'other' => 'Other'])
+                        ->default('contact_form'),
+                    Forms\Components\TextInput::make('value')->numeric()->prefix('£'),
+                    Forms\Components\Select::make('currency')->options(['GBP' => '£ GBP', 'EUR' => '€ EUR', 'USD' => '$ USD'])->default('GBP'),
+                    Forms\Components\DatePicker::make('expected_close_date'),
+                ]),
+
+            Section::make('Calculator Data')
+                ->collapsed()
+                ->schema([
+                    Forms\Components\KeyValue::make('calculator_data')
+                        ->label('Calculator Configuration')
+                        ->columnSpanFull(),
+                ]),
+
+            Forms\Components\Textarea::make('notes')->rows(4)->columnSpanFull(),
+        ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('client.company_name')->label('Client')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('stage.name')->label('Stage')->badge(),
+                Tables\Columns\TextColumn::make('value')->money('GBP')->sortable(),
+                Tables\Columns\TextColumn::make('source')->badge(),
+                Tables\Columns\TextColumn::make('assignedTo.name')->label('Assigned'),
+                Tables\Columns\TextColumn::make('expected_close_date')->date()->sortable(),
+                Tables\Columns\TextColumn::make('created_at')->date()->sortable(),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('pipeline_stage_id')
+                    ->label('Stage')
+                    ->options(PipelineStage::orderBy('order')->pluck('name', 'id')),
+                Tables\Filters\SelectFilter::make('source')
+                    ->options(['calculator' => 'Calculator', 'contact_form' => 'Contact Form', 'referral' => 'Referral']),
+                Tables\Filters\TrashedFilter::make(),
+            ])
+            ->actions([
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ])
+            ->defaultSort('created_at', 'desc');
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index'  => Pages\ListLeads::route('/'),
+            'create' => Pages\CreateLead::route('/create'),
+            'edit'   => Pages\EditLead::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->withTrashed();
+    }
+}
+

@@ -1,0 +1,214 @@
+/* =====================================================
+   WebsiteExpert – custom.css
+   Tailwind handles utilities; this file covers:
+   - CSS custom properties (design tokens)
+   - Base resets & fine-grained overrides
+   - Utility classes Tailwind can't express inline
+   - Print styles
+   ===================================================== */
+
+/* ── Design tokens ──────────────────────────────────── */
+:root {
+  --brand:        #ff2b17;
+  --brand-light:  #ff5747;
+  --brand-dark:   #c21208;
+  --radius-card:  16px;
+  --radius-btn:   12px;
+  --transition:   0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Base ────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Respect user preference */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-bounce { animation: none !important; }
+  * { transition: none !important; }
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* ── Typography ─────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Syne', 'Inter', system-ui, sans-serif;
+}
+
+/* ── Section label utility ──────────────────────────── */
+.section-label {
+  display: inline-block;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brand);
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+.section-label::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background-color: var(--brand);
+}
+
+/* ── Scroll reveal – initial state ─────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.reveal.animate-fade-up {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Service card focus ring ────────────────────────── */
+.service-card:focus-within {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ── Testimonial card ───────────────────────────────── */
+.testimonial-card {
+  background: var(--tw-bg, white);
+  border-radius: var(--radius-card);
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.07);
+  border: 1px solid rgb(0 0 0 / 0.06);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.dark .testimonial-card {
+  background: #1a1a1a;
+  border-color: rgb(255 255 255 / 0.06);
+}
+
+.testimonial-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgb(0 0 0 / 0.12);
+}
+
+/* ── Calculator component ───────────────────────────── */
+.calc-step {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.calc-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  border: 2px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  text-align: left;
+  transition: border-color var(--transition), background var(--transition), color var(--transition);
+}
+
+.dark .calc-option-btn {
+  background: #1a1a1a;
+  border-color: #2d2d2d;
+  color: #d1d5db;
+}
+
+.calc-option-btn:hover,
+.calc-option-btn.selected {
+  border-color: var(--brand);
+  background: rgb(255 43 23 / 0.04);
+  color: var(--brand);
+}
+
+.dark .calc-option-btn:hover,
+.dark .calc-option-btn.selected {
+  background: rgb(255 43 23 / 0.08);
+}
+
+.calc-option-btn.selected {
+  font-weight: 600;
+}
+
+/* Range input custom styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: #e5e7eb;
+  outline: none;
+  cursor: pointer;
+}
+
+.dark input[type="range"] {
+  background: #374151;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--brand);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgb(255 43 23 / 0.35);
+  transition: transform var(--transition);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: var(--brand);
+  cursor: pointer;
+}
+
+/* ── Focus visible ──────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Smooth checkbox ────────────────────────────────── */
+input[type="checkbox"] {
+  accent-color: var(--brand);
+}
+
+/* ── Print ──────────────────────────────────────────── */
+@media print {
+  header, footer, #kalkulator, #cta-main { display: none; }
+  section { page-break-inside: avoid; }
+}

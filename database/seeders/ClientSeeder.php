@@ -1,0 +1,202 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Client;
+use App\Models\Contact;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+
+class ClientSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $manager   = User::where('email', 'manager@websiteexpert.co.uk')->first();
+        $developer = User::where('email', 'developer@websiteexpert.co.uk')->first();
+
+        $clients = [
+            [
+                'company_name'          => 'Hargreaves & Sons Solicitors',
+                'trading_name'          => 'Hargreaves Solicitors',
+                'companies_house_number'=> '08234561',
+                'vat_number'            => 'GB 234 561 78',
+                'website'               => 'https://hargreavessolicitors.co.uk',
+                'status'                => 'active',
+                'source'                => 'referral',
+                'industry'              => 'Legal Services',
+                'address_line1'         => '14 King Street',
+                'address_line2'         => 'City Centre',
+                'city'                  => 'Manchester',
+                'county'                => 'Greater Manchester',
+                'postcode'              => 'M2 4LQ',
+                'country' => 'GB',
+                'primary_contact_name'  => 'Robert Hargreaves',
+                'primary_contact_email' => 'robert@hargreavessolicitors.co.uk',
+                'primary_contact_phone' => '0161 834 2200',
+                'assigned_to'           => $manager?->id,
+                'lifetime_value'        => 8500.00,
+                'currency'              => 'GBP',
+                'notes'                 => 'Long-term client. Needs redesign every 3 years. Very responsive.',
+            ],
+            [
+                'company_name'          => 'Oakfield Dental Practice',
+                'trading_name'          => null,
+                'companies_house_number'=> '09871234',
+                'vat_number'            => null,
+                'website'               => 'https://oakfielddental.co.uk',
+                'status'                => 'active',
+                'source' => 'google_ads',
+                'industry'              => 'Healthcare',
+                'address_line1'         => '3 Oakfield Road',
+                'address_line2'         => null,
+                'city'                  => 'Birmingham',
+                'county'                => 'West Midlands',
+                'postcode'              => 'B29 7EH',
+                'country' => 'GB',
+                'primary_contact_name'  => 'Dr Priya Patel',
+                'primary_contact_email' => 'priya@oakfielddental.co.uk',
+                'primary_contact_phone' => '0121 445 8833',
+                'assigned_to'           => $developer?->id,
+                'lifetime_value'        => 2400.00,
+                'currency'              => 'GBP',
+                'notes'                 => 'Booked via Google Ads. Wants patient booking integration.',
+            ],
+            [
+                'company_name'          => 'Northern Trade Supplies Ltd',
+                'trading_name'          => 'NTS Direct',
+                'companies_house_number'=> '07654321',
+                'vat_number'            => 'GB 765 432 10',
+                'website'               => 'https://ntsdirect.co.uk',
+                'status'                => 'active',
+                'source'                => 'cold_outreach',
+                'industry'              => 'Trade & Distribution',
+                'address_line1'         => 'Unit 7, Trafford Park',
+                'address_line2'         => 'Europa Way',
+                'city'                  => 'Manchester',
+                'county'                => 'Greater Manchester',
+                'postcode'              => 'M17 1PZ',
+                'country' => 'GB',
+                'primary_contact_name'  => 'Lisa Thornton',
+                'primary_contact_email' => 'lisa.thornton@ntsdirect.co.uk',
+                'primary_contact_phone' => '0161 748 9000',
+                'assigned_to'           => $manager?->id,
+                'lifetime_value'        => 14200.00,
+                'currency'              => 'GBP',
+                'notes'                 => 'E-commerce project. Approx 3,500 SKUs. Needs WooCommerce with B2B pricing.',
+            ],
+            [
+                'company_name'          => 'Bloom & Grow Garden Centre',
+                'trading_name'          => null,
+                'companies_house_number'=> '10234789',
+                'vat_number'            => 'GB 102 347 89',
+                'website'               => 'https://bloomandgrow.co.uk',
+                'status'                => 'active',
+                'source'                => 'social_media',
+                'industry'              => 'Retail',
+                'address_line1'         => 'Chorley Road',
+                'address_line2'         => null,
+                'city'                  => 'Bolton',
+                'county'                => 'Greater Manchester',
+                'postcode'              => 'BL1 5AY',
+                'country' => 'GB',
+                'primary_contact_name'  => 'Helen Moss',
+                'primary_contact_email' => 'helen@bloomandgrow.co.uk',
+                'primary_contact_phone' => '01204 558 712',
+                'assigned_to'           => $developer?->id,
+                'lifetime_value'        => 3600.00,
+                'currency'              => 'GBP',
+                'notes'                 => 'Found us on Instagram. Wants seasonal promotions and local SEO.',
+            ],
+            [
+                'company_name'          => 'Pinnacle Recruitment Group',
+                'trading_name'          => 'Pinnacle Recruit',
+                'companies_house_number'=> '06123456',
+                'vat_number'            => 'GB 612 345 67',
+                'website'               => 'https://pinnaclerecruitment.co.uk',
+                'status'                => 'active',
+                'source'                => 'referral',
+                'industry'              => 'Recruitment',
+                'address_line1'         => '55 Spring Gardens',
+                'address_line2'         => '4th Floor',
+                'city'                  => 'Manchester',
+                'county'                => 'Greater Manchester',
+                'postcode'              => 'M2 2BG',
+                'country' => 'GB',
+                'primary_contact_name'  => 'Daniel Walsh',
+                'primary_contact_email' => 'dwalsh@pinnaclerecruitment.co.uk',
+                'primary_contact_phone' => '0161 235 7700',
+                'assigned_to'           => $manager?->id,
+                'lifetime_value'        => 6800.00,
+                'currency'              => 'GBP',
+                'notes'                 => 'Referred by Hargreaves Solicitors. Custom job board application required.',
+            ],
+            [
+                'company_name'          => 'Coastal Escapes Holiday Rentals',
+                'trading_name'          => 'Coastal Escapes',
+                'companies_house_number'=> '11345678',
+                'vat_number'            => null,
+                'website'               => 'https://coastalescapes.co.uk',
+                'status'                => 'inactive',
+                'source'                => 'website',
+                'industry'              => 'Hospitality & Tourism',
+                'address_line1'         => '21 Harbour View',
+                'address_line2'         => null,
+                'city'                  => 'Falmouth',
+                'county'                => 'Cornwall',
+                'postcode'              => 'TR11 3DF',
+                'country' => 'GB',
+                'primary_contact_name'  => 'Mark Stevens',
+                'primary_contact_email' => 'mark@coastalescapes.co.uk',
+                'primary_contact_phone' => '01326 312 455',
+                'assigned_to'           => $manager?->id,
+                'lifetime_value'        => 1800.00,
+                'currency'              => 'GBP',
+                'notes'                 => 'Website delivered and paid. Currently inactive — follow up Q1 next year re: SEO retainer.',
+            ],
+            [
+                'company_name'          => 'TechStart Labs Ltd',
+                'trading_name'          => 'TechStart',
+                'companies_house_number'=> '12876543',
+                'vat_number'            => 'GB 287 654 31',
+                'website'               => null,
+                'status'                => 'prospect',
+                'source' => 'google_ads',
+                'industry'              => 'Technology',
+                'address_line1'         => 'Floor 3, WeWork',
+                'address_line2'         => '1 Spinningfields Square',
+                'city'                  => 'Manchester',
+                'county'                => 'Greater Manchester',
+                'postcode'              => 'M3 3AP',
+                'country' => 'GB',
+                'primary_contact_name'  => 'Aisha Rahman',
+                'primary_contact_email' => 'aisha@techstartlabs.co.uk',
+                'primary_contact_phone' => '07812 334 567',
+                'assigned_to'           => $manager?->id,
+                'lifetime_value'        => 0.00,
+                'currency'              => 'GBP',
+                'notes'                 => 'Pre-seed startup. Looking for MVP web app. Budget TBC. Call scheduled.',
+            ],
+        ];
+
+        foreach ($clients as $data) {
+            $client = Client::firstOrCreate(
+                ['companies_house_number' => $data['companies_house_number']],
+                $data
+            );
+
+            // Create primary contact
+            Contact::firstOrCreate(
+                ['email' => $data['primary_contact_email']],
+                [
+                    'client_id'  => $client->id,
+                    'first_name' => explode(' ', $data['primary_contact_name'])[0],
+                    'last_name'  => implode(' ', array_slice(explode(' ', $data['primary_contact_name']), 1)) ?: 'N/A',
+                    'email'      => $data['primary_contact_email'],
+                    'phone'      => $data['primary_contact_phone'],
+                    'position'   => 'Primary Contact',
+                    'is_primary' => true,
+                ]
+            );
+        }
+    }
+}
