@@ -11,7 +11,7 @@ import Contact       from '@/Components/Marketing/Contact';
 import Footer        from '@/Components/Marketing/Footer';
 import useScrollReveal from '@/Hooks/useScrollReveal';
 
-export default function Welcome({ auth }) {
+export default function Welcome({ auth, hero }) {
     useScrollReveal('.reveal');
 
     return (
@@ -25,7 +25,7 @@ export default function Welcome({ auth }) {
                 <Navbar auth={auth} />
 
                 <main>
-                    <Hero />
+                    <Hero section={hero} />
                     <About />
                     <CtaBanner />
                     <TrustStrip />
