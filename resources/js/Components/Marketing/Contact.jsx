@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { usePage } from '@inertiajs/react';
+import { pushEvent } from '@/utils/dataLayer';
 
 const inputClass = 'w-full px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition';
 const labelClass = 'block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5';
@@ -63,6 +64,11 @@ export default function Contact({ data = null }) {
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '' },
                 body: JSON.stringify(form),
             });
+            pushEvent('generate_lead', {
+                lead_source:  'contact',
+                project_type: form.project_type,
+            });
+            if (typeof window.fbq === 'function') window.fbq('track', 'Lead');
             setStatus('success');
         } catch {
             setStatus('success'); // optimistic for prototype

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\Setting;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -42,6 +43,17 @@ class HandleInertiaRequests extends Middleware
             ],
             'locale'            => $locale,
             'available_locales' => config('languages'),
+            'tracking'          => [
+                'gtm_enabled'            => (bool) Setting::get('gtm_enabled', false),
+                'gtm_id'                 => Setting::get('gtm_id', ''),
+                'ga4_enabled'            => (bool) Setting::get('ga4_enabled', false),
+                'ga4_id'                 => Setting::get('ga4_id', ''),
+                'pixel_enabled'          => (bool) Setting::get('pixel_enabled', false),
+                'pixel_id'               => Setting::get('pixel_id', ''),
+                'gads_enabled'           => (bool) Setting::get('gads_enabled', false),
+                'gads_id'                => Setting::get('gads_id', ''),
+                'cookie_consent_enabled' => (bool) Setting::get('cookie_consent_enabled', true),
+            ],
         ];
     }
 }

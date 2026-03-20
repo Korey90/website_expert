@@ -1,4 +1,5 @@
 import { usePage } from '@inertiajs/react';
+import { useConsentContext } from '@/Contexts/ConsentContext';
 
 const SOCIAL_ICONS = {
     linkedin: (
@@ -57,6 +58,8 @@ const SOCIAL_DEFAULTS = [
 
 export default function Footer({ data = null }) {
     const { locale = 'en' } = usePage().props;
+    const consentCtx = useConsentContext();
+    const reopenBanner = consentCtx?.reopenBanner ?? null;
     const extra = data?.extra ?? {};
     const t = (key, fallback = '') => extra[`${key}_${locale}`] ?? extra[`${key}_en`] ?? fallback;
 
@@ -131,7 +134,17 @@ export default function Footer({ data = null }) {
 
                 <div className="border-t border-neutral-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-500">
                     <p>&copy; {new Date().getFullYear()} {brandName}. {copyright}</p>
-                    <p>{builtWith}</p>
+                    <div className="flex items-center gap-4">
+                        {reopenBanner && (
+                            <button
+                                onClick={reopenBanner}
+                                className="hover:text-neutral-300 transition-colors underline"
+                            >
+                                {locale === 'pl' ? 'Zarządzaj cookies' : 'Manage cookies'}
+                            </button>
+                        )}
+                        <p>{builtWith}</p>
+                    </div>
                 </div>
             </div>
         </footer>

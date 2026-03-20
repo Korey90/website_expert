@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>PROJECT_SUMMARY.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="podsumowanie-projektu--web-dev-app">Podsumowanie projektu — <code>web-dev-app</code></h1>
+<blockquote>
+<p>Wygenerowano: 20.03.2026</p>
+</blockquote>
+<hr>
+<h2 id="1-cel-projektu">1. Cel projektu</h2>
+<p>Kompletna platforma dla agencji web-dev (<strong>Website Expert</strong>) obsługująca:</p>
+<ul>
+<li><strong>Stronę marketingową</strong> (landing page, kalkulator wyceny, formularz kontaktowy)</li>
+<li><strong>Panel CRM / admin</strong> (Filament) do zarządzania klientami, leadami, projektami, fakturami, wycenami</li>
+<li><strong>Portal klienta</strong> — dedykowany widok dla klientów (projekty, faktury, wyceny, wiadomości)</li>
+<li><strong>Analitykę / tracking</strong> — GTM + GA4 + Meta Pixel z GDPR Consent Mode v2</li>
+</ul>
+<hr>
+<h2 id="2-stack-technologiczny">2. Stack technologiczny</h2>
+<table>
+<thead>
+<tr>
+<th>Warstwa</th>
+<th>Technologia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PHP</td>
+<td>8.3+</td>
+</tr>
+<tr>
+<td>Framework</td>
+<td>Laravel 13</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td>React 18 + Inertia.js 2.0</td>
+</tr>
+<tr>
+<td>Build</td>
+<td>Vite 8</td>
+</tr>
+<tr>
+<td>CSS</td>
+<td>Tailwind CSS 3 + @tailwindcss/forms</td>
+</tr>
+<tr>
+<td>Admin panel</td>
+<td>Filament 5.4</td>
+</tr>
+<tr>
+<td>Auth scaffolding</td>
+<td>Laravel Breeze 2</td>
+</tr>
+<tr>
+<td>Uprawnienia</td>
+<td>Spatie Laravel Permission 7</td>
+</tr>
+<tr>
+<td>Tłumaczenia (DB)</td>
+<td>Spatie Laravel Translatable 6</td>
+</tr>
+<tr>
+<td>Płatności</td>
+<td>Stripe PHP SDK 19</td>
+</tr>
+<tr>
+<td>PDF</td>
+<td>DomPDF 3</td>
+</tr>
+<tr>
+<td>Eksport Excel/CSV</td>
+<td>PhpSpreadsheet 5</td>
+</tr>
+<tr>
+<td>Named routes w JS</td>
+<td>Ziggy 2</td>
+</tr>
+<tr>
+<td>WYSIWYG</td>
+<td>TinyMCE (własny wrapper <code>TinyEditor.js</code>)</td>
+</tr>
+<tr>
+<td>UI primitives</td>
+<td>Headless UI 2</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="3-struktura-katalog%C3%B3w">3. Struktura katalogów</h2>
+<pre class="hljs"><code><div>web-dev-app/
+├── app/
+│   ├── Console/Commands/
+│   ├── Filament/
+│   │   ├── Pages/           ← PipelinePage, TrackingSettingsPage
+│   │   ├── Resources/       ← 13 zasobów CRUD
+│   │   └── Widgets/         ← 8 widgetów dashboard
+│   ├── Forms/Components/
+│   ├── Http/
+│   │   ├── Controllers/     ← 11 kontrolerów + Auth/
+│   │   ├── Middleware/
+│   │   └── Requests/
+│   ├── Jobs/                ← ProcessAutomationJob
+│   ├── Listeners/           ← AutomationEventListener
+│   ├── Mail/                ← 4 klasy Mailable
+│   ├── Models/              ← 21 modeli Eloquent
+│   └── Providers/
+├── database/
+│   ├── migrations/          ← 30 migracji
+│   └── seeders/
+├── resources/
+│   ├── js/
+│   │   ├── app.jsx          ← punkt wejścia Inertia
+│   │   ├── Pages/           ← 16 stron Inertia
+│   │   ├── Components/      ← komponenty UI
+│   │   ├── Layouts/         ← 4 layouty
+│   │   ├── Hooks/           ← 3 hooki
+│   │   ├── Contexts/        ← ConsentContext
+│   │   └── utils/dataLayer.js
+│   └── views/               ← Blade (Filament + PDF)
+├── routes/
+│   ├── web.php
+│   └── auth.php
+└── szablon/                 ← Statyczny szablon HTML
+</div></code></pre>
+<hr>
+<h2 id="4-baza-danych--tabele">4. Baza danych — Tabele</h2>
+<table>
+<thead>
+<tr>
+<th>Tabela</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>users</code></td>
+<td>Użytkownicy (admin, manager, developer, portal)</td>
+</tr>
+<tr>
+<td><code>clients</code></td>
+<td>Klienci z danymi firmy (Companies House, VAT), statusem, źródłem, adresem</td>
+</tr>
+<tr>
+<td><code>contacts</code></td>
+<td>Kontakty powiązane z klientem</td>
+</tr>
+<tr>
+<td><code>pipeline_stages</code></td>
+<td>Etapy lejka sprzedażowego (won/lost flagi)</td>
+</tr>
+<tr>
+<td><code>leads</code></td>
+<td>Leady CRM — powiązane z klientem, etapem, kalkulatorem</td>
+</tr>
+<tr>
+<td><code>project_templates</code></td>
+<td>Szablony projektów z fazami (JSON)</td>
+</tr>
+<tr>
+<td><code>projects</code></td>
+<td>Projekty z tokenem portalu (64-znakowy unikalny)</td>
+</tr>
+<tr>
+<td><code>project_phases</code></td>
+<td>Fazy w projekcie</td>
+</tr>
+<tr>
+<td><code>project_tasks</code></td>
+<td>Zadania w fazach</td>
+</tr>
+<tr>
+<td><code>project_files</code></td>
+<td>Pliki uploadowane do projektów</td>
+</tr>
+<tr>
+<td><code>project_messages</code></td>
+<td>Wiadomości projektu (polimorficzny sender: User lub Contact)</td>
+</tr>
+<tr>
+<td><code>quotes</code></td>
+<td>Wyceny z pozycjami, rabatem, VAT</td>
+</tr>
+<tr>
+<td><code>quote_items</code></td>
+<td>Pozycje wyceny (ilość × cena = kwota, auto)</td>
+</tr>
+<tr>
+<td><code>invoices</code></td>
+<td>Faktury (statusy: draft/sent/partially_paid/paid/overdue/cancelled)</td>
+</tr>
+<tr>
+<td><code>invoice_items</code></td>
+<td>Pozycje faktury</td>
+</tr>
+<tr>
+<td><code>payments</code></td>
+<td>Płatności (Stripe <code>payment_intent_id</code>)</td>
+</tr>
+<tr>
+<td><code>email_templates</code></td>
+<td>Szablony emaili (subject/body jako JSON per locale)</td>
+</tr>
+<tr>
+<td><code>automation_rules</code></td>
+<td>Reguły automatyzacji (trigger + conditions + actions jako JSON)</td>
+</tr>
+<tr>
+<td><code>calculator_pricing</code></td>
+<td>Cennik kalkulatora (kategoria/klucz/koszt)</td>
+</tr>
+<tr>
+<td><code>pages</code></td>
+<td>Strony CMS (tytuł/treść tłumaczalne przez Spatie)</td>
+</tr>
+<tr>
+<td><code>site_sections</code></td>
+<td>Sekcje strony marketingowej (hero, about, services, itp.)</td>
+</tr>
+<tr>
+<td><code>settings</code></td>
+<td>Ustawienia k/v (klucz jako PK string, cache 1 dzień)</td>
+</tr>
+<tr>
+<td><code>cache</code>, <code>cache_locks</code></td>
+<td>Cache DB</td>
+</tr>
+<tr>
+<td><code>jobs</code>, <code>job_batches</code>, <code>failed_jobs</code></td>
+<td>Kolejki</td>
+</tr>
+<tr>
+<td><code>roles</code>, <code>permissions</code>, + tabele pivot</td>
+<td>Spatie Permission</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="5-modele-eloquent-21">5. Modele Eloquent (21)</h2>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Cechy szczególne</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>User</code></td>
+<td><code>HasRoles</code>; <code>canAccessPanel()</code> → wymaga <code>is_active</code> + rola admin/manager/developer</td>
+</tr>
+<tr>
+<td><code>Client</code></td>
+<td>SoftDeletes; <code>fullAddress</code> accessor; <code>lifetime_value</code>, <code>portal_user_id</code> FK</td>
+</tr>
+<tr>
+<td><code>Contact</code></td>
+<td>SoftDeletes; <code>fullName</code> accessor</td>
+</tr>
+<tr>
+<td><code>Lead</code></td>
+<td>SoftDeletes; <code>calculator_data</code> cast → array</td>
+</tr>
+<tr>
+<td><code>PipelineStage</code></td>
+<td><code>is_won</code> / <code>is_lost</code> flagi</td>
+</tr>
+<tr>
+<td><code>Project</code></td>
+<td>SoftDeletes; auto-generuje <code>portal_token</code> na create; relacje do faz, zadań, plików, wiadomości</td>
+</tr>
+<tr>
+<td><code>Quote</code></td>
+<td>SoftDeletes; metoda <code>recalculate()</code> przelicza totale</td>
+</tr>
+<tr>
+<td><code>QuoteItem</code></td>
+<td><code>amount</code> auto na saving</td>
+</tr>
+<tr>
+<td><code>Invoice</code></td>
+<td>SoftDeletes; <code>isOverdue()</code>; <code>recalculate()</code>; numer formatu <code>INV-2026-XXX</code></td>
+</tr>
+<tr>
+<td><code>InvoiceItem</code></td>
+<td><code>amount</code> auto na saving</td>
+</tr>
+<tr>
+<td><code>Payment</code></td>
+<td><code>stripe_payment_intent_id</code></td>
+</tr>
+<tr>
+<td><code>EmailTemplate</code></td>
+<td>JSON per locale; metoda <code>getForLocale($locale)</code></td>
+</tr>
+<tr>
+<td><code>AutomationRule</code></td>
+<td><code>conditions</code>, <code>actions</code> JSON; używane przez <code>ProcessAutomationJob</code></td>
+</tr>
+<tr>
+<td><code>CalculatorPricing</code></td>
+<td>Cennik kalkulatora</td>
+</tr>
+<tr>
+<td><code>Page</code></td>
+<td><code>HasTranslations</code>; pola title/content/meta jako JSON</td>
+</tr>
+<tr>
+<td><code>SiteSection</code></td>
+<td><code>HasTranslations</code>; pola title/subtitle/body/button_text jako JSON; <code>extra</code> JSON</td>
+</tr>
+<tr>
+<td><code>Setting</code></td>
+<td>String PK; <code>Setting::get($key, $default)</code> (cache 1d); <code>Setting::set($key, $val)</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="6-routes">6. Routes</h2>
+<h3 id="publiczne-webphp">Publiczne (<code>web.php</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Metoda</th>
+<th>URL</th>
+<th>Akcja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/</code></td>
+<td><code>WelcomeController</code> — strona marketingowa</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/kalkulator</code></td>
+<td><code>KalkulatorController</code> — standalone kalkulator</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/p/{slug}</code></td>
+<td><code>PageController@show</code> — strony CMS</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/lang/{locale}</code></td>
+<td>Zmiana języka (session)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/contact</code></td>
+<td><code>ContactController@store</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/calculator-lead</code></td>
+<td><code>CalculatorLeadController@store</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/stripe/webhook</code></td>
+<td><code>StripeWebhookController@handle</code> (CSRF-exempt)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="zalogowani">Zalogowani</h3>
+<table>
+<thead>
+<tr>
+<th>Metoda</th>
+<th>URL</th>
+<th>Akcja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/dashboard</code></td>
+<td>Inertia Dashboard</td>
+</tr>
+<tr>
+<td>GET/PATCH/DELETE</td>
+<td><code>/profile</code></td>
+<td><code>ProfileController</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/invoices/{invoice}/pdf</code></td>
+<td><code>InvoicePdfController</code> — download PDF</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/reports/{type}/{format}</code></td>
+<td><code>ReportController</code> — HTML/PDF/XLSX/CSV</td>
+</tr>
+</tbody>
+</table>
+<h3 id="portal-klienta-portal">Portal klienta (<code>/portal/*</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>URL</th>
+<th>Akcja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/portal/</code></td>
+<td><code>PortalController@dashboard</code></td>
+</tr>
+<tr>
+<td><code>/portal/projects</code></td>
+<td>Lista projektów klienta</td>
+</tr>
+<tr>
+<td><code>/portal/projects/{id}</code></td>
+<td>Szczegóły projektu + wiadomości</td>
+</tr>
+<tr>
+<td><code>/portal/invoices</code></td>
+<td>Faktury klienta</td>
+</tr>
+<tr>
+<td><code>/portal/quotes</code></td>
+<td>Wyceny klienta</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="7-kontrolery-11">7. Kontrolery (11)</h2>
+<table>
+<thead>
+<tr>
+<th>Kontroler</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WelcomeController</code></td>
+<td>Ładuje wszystkie SiteSection, przekazuje do <code>Welcome.jsx</code></td>
+</tr>
+<tr>
+<td><code>KalkulatorController</code></td>
+<td>Renderuje standalone kalkulator</td>
+</tr>
+<tr>
+<td><code>PageController</code></td>
+<td>Wyświetla CMS Page po slug</td>
+</tr>
+<tr>
+<td><code>ContactController</code></td>
+<td>Tworzy klienta + lead, wysyła <code>NewLeadMail</code> w kolejce</td>
+</tr>
+<tr>
+<td><code>CalculatorLeadController</code></td>
+<td>Jak ContactController, z danymi kalkulatora</td>
+</tr>
+<tr>
+<td><code>PortalController</code></td>
+<td>Pełny portal klienta (5 akcji)</td>
+</tr>
+<tr>
+<td><code>ProfileController</code></td>
+<td>Edycja profilu (Breeze)</td>
+</tr>
+<tr>
+<td><code>InvoicePdfController</code></td>
+<td>Generuje PDF faktury przez DomPDF</td>
+</tr>
+<tr>
+<td><code>ReportController</code></td>
+<td>Raporty leads/invoices/projects × HTML/PDF/XLSX/CSV</td>
+</tr>
+<tr>
+<td><code>StripeWebhookController</code></td>
+<td>Obsługa webhooków Stripe (5 eventów)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="8-strony-inertia-resourcesjspages">8. Strony Inertia (<code>resources/js/Pages/</code>)</h2>
+<table>
+<thead>
+<tr>
+<th>Strona</th>
+<th>Trasa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Welcome.jsx</code></td>
+<td><code>/</code></td>
+</tr>
+<tr>
+<td><code>Kalkulator.jsx</code></td>
+<td><code>/kalkulator</code></td>
+</tr>
+<tr>
+<td><code>CmsPage.jsx</code></td>
+<td><code>/p/{slug}</code></td>
+</tr>
+<tr>
+<td><code>Dashboard.jsx</code></td>
+<td><code>/dashboard</code></td>
+</tr>
+<tr>
+<td><code>Auth/Login.jsx</code></td>
+<td><code>/login</code></td>
+</tr>
+<tr>
+<td><code>Auth/Register.jsx</code></td>
+<td><code>/register</code></td>
+</tr>
+<tr>
+<td><code>Auth/ForgotPassword.jsx</code></td>
+<td><code>/forgot-password</code></td>
+</tr>
+<tr>
+<td><code>Auth/ResetPassword.jsx</code></td>
+<td><code>/reset-password/{token}</code></td>
+</tr>
+<tr>
+<td><code>Profile/Edit.jsx</code></td>
+<td><code>/profile</code></td>
+</tr>
+<tr>
+<td><code>Portal/Dashboard.jsx</code></td>
+<td><code>/portal/</code></td>
+</tr>
+<tr>
+<td><code>Portal/Projects.jsx</code></td>
+<td><code>/portal/projects</code></td>
+</tr>
+<tr>
+<td><code>Portal/Project.jsx</code></td>
+<td><code>/portal/projects/{id}</code></td>
+</tr>
+<tr>
+<td><code>Portal/Invoices.jsx</code></td>
+<td><code>/portal/invoices</code></td>
+</tr>
+<tr>
+<td><code>Portal/Quotes.jsx</code></td>
+<td><code>/portal/quotes</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="9-komponenty-react-resourcesjscomponents">9. Komponenty React (<code>resources/js/Components/</code>)</h2>
+<h3 id="generyczne-breezeui">Generyczne (Breeze/UI)</h3>
+<p><code>ApplicationLogo</code>, <code>Checkbox</code>, <code>DangerButton</code>, <code>Dropdown</code>, <code>InputError</code>, <code>InputLabel</code>, <code>Modal</code>, <code>NavLink</code>, <code>PrimaryButton</code>, <code>ResponsiveNavLink</code>, <code>SecondaryButton</code>, <code>TextInput</code>, <code>TinyEditor</code></p>
+<h3 id="marketing">Marketing</h3>
+<table>
+<thead>
+<tr>
+<th>Komponent</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Navbar.jsx</code></td>
+<td>Nawigacja (dane z <code>navbar</code> SiteSection)</td>
+</tr>
+<tr>
+<td><code>Footer.jsx</code></td>
+<td>Stopka + przycisk &quot;Zarządzaj cookies&quot;</td>
+</tr>
+<tr>
+<td><code>CookieBanner.jsx</code></td>
+<td>Baner GDPR — granular consent (analytics/marketing/preferences)</td>
+</tr>
+<tr>
+<td><code>Hero.jsx</code></td>
+<td>Sekcja hero</td>
+</tr>
+<tr>
+<td><code>About.jsx</code></td>
+<td>Sekcja &quot;o nas&quot;</td>
+</tr>
+<tr>
+<td><code>Services.jsx</code></td>
+<td>Sekcja usług</td>
+</tr>
+<tr>
+<td><code>Portfolio.jsx</code></td>
+<td>Portfolio/realizacje</td>
+</tr>
+<tr>
+<td><code>Contact.jsx</code></td>
+<td>Formularz kontaktowy → <code>/contact</code></td>
+</tr>
+<tr>
+<td><code>CostCalculator.jsx</code></td>
+<td>Kalkulator wyceny → <code>/calculator-lead</code></td>
+</tr>
+<tr>
+<td><code>CtaBanner.jsx</code></td>
+<td>Baner CTA</td>
+</tr>
+<tr>
+<td><code>TrustStrip.jsx</code></td>
+<td>Pasek zaufania (loga, certyfikaty)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="10-layouty">10. Layouty</h2>
+<table>
+<thead>
+<tr>
+<th>Layout</th>
+<th>Używany przez</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MarketingLayout.jsx</code></td>
+<td>Welcome, Kalkulator, CmsPage — zawiera Navbar + Footer + CookieBanner; opakowuje przez <code>ConsentContext.Provider</code>; inicjuje <code>useMetaPixel</code></td>
+</tr>
+<tr>
+<td><code>GuestLayout.jsx</code></td>
+<td>Strony auth (Login, Register, itd.)</td>
+</tr>
+<tr>
+<td><code>AuthenticatedLayout.jsx</code></td>
+<td>Dashboard, Profile</td>
+</tr>
+<tr>
+<td><code>PortalLayout.jsx</code></td>
+<td>Portal klienta — sidebar z nawigacją</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="11-hooki-konteksty-narz%C4%99dzia">11. Hooki, Konteksty, Narzędzia</h2>
+<h3 id="hooki-resourcesjshooks">Hooki (<code>resources/js/Hooks/</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>useConsent.js</code></td>
+<td>Zarządzanie zgodami GDPR — <code>localStorage</code> (<code>cookie_consent</code> v1.0), push do GTM <code>dataLayer</code>, <code>window.gtag('consent','update',…)</code>, lazy-init Meta Pixel przy pierwszym marketing=granted</td>
+</tr>
+<tr>
+<td><code>useMetaPixel.js</code></td>
+<td>Wstrzykuje skrypt Pixel gdy <code>consent.marketing === true</code> i pixel jeszcze nie załadowany</td>
+</tr>
+<tr>
+<td><code>useScrollReveal.js</code></td>
+<td>IntersectionObserver — dodaje klasę <code>visible</code> do <code>.reveal</code> elementów przy 15% widoczności</td>
+</tr>
+</tbody>
+</table>
+<h3 id="konteksty">Konteksty</h3>
+<table>
+<thead>
+<tr>
+<th>Kontekst</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ConsentContext.js</code></td>
+<td>Eksportuje <code>ConsentContext</code> i <code>useConsentContext()</code> — udostępnia stan zgód bez prop-drillingu</td>
+</tr>
+</tbody>
+</table>
+<h3 id="narz%C4%99dzia">Narzędzia</h3>
+<table>
+<thead>
+<tr>
+<th>Plik</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>utils/dataLayer.js</code></td>
+<td><code>pushEvent(event, params)</code> — thin wrapper do <code>window.dataLayer.push()</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="12-panel-filament">12. Panel Filament</h2>
+<h3 id="zasoby-13">Zasoby (13)</h3>
+<table>
+<thead>
+<tr>
+<th>Zasób</th>
+<th>Model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AutomationRuleResource</code></td>
+<td>AutomationRule</td>
+</tr>
+<tr>
+<td><code>CalculatorPricingResource</code></td>
+<td>CalculatorPricing</td>
+</tr>
+<tr>
+<td><code>ClientResource</code></td>
+<td>Client</td>
+</tr>
+<tr>
+<td><code>EmailTemplateResource</code></td>
+<td>EmailTemplate</td>
+</tr>
+<tr>
+<td><code>InvoiceResource</code></td>
+<td>Invoice</td>
+</tr>
+<tr>
+<td><code>LeadResource</code></td>
+<td>Lead</td>
+</tr>
+<tr>
+<td><code>PageResource</code></td>
+<td>Page</td>
+</tr>
+<tr>
+<td><code>PipelineStageResource</code></td>
+<td>PipelineStage</td>
+</tr>
+<tr>
+<td><code>ProjectResource</code></td>
+<td>Project</td>
+</tr>
+<tr>
+<td><code>QuoteResource</code></td>
+<td>Quote</td>
+</tr>
+<tr>
+<td><code>RoleResource</code></td>
+<td>Spatie Role</td>
+</tr>
+<tr>
+<td><code>SiteSectionResource</code></td>
+<td>SiteSection</td>
+</tr>
+<tr>
+<td><code>UserResource</code></td>
+<td>User</td>
+</tr>
+</tbody>
+</table>
+<h3 id="strony-w%C5%82asne-2">Strony własne (2)</h3>
+<table>
+<thead>
+<tr>
+<th>Strona</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PipelinePage</code></td>
+<td>Kanban lejka sprzedażowego — leady pogrupowane po etapach, licznik + wartość</td>
+</tr>
+<tr>
+<td><code>TrackingSettingsPage</code></td>
+<td>Konfiguracja GTM / GA4 / Meta Pixel / Google Ads + toggle Cookie Consent</td>
+</tr>
+</tbody>
+</table>
+<h3 id="widgety-dashboard-8">Widgety dashboard (8)</h3>
+<p><code>StatsOverviewWidget</code>, <code>RecentLeadsWidget</code>, <code>LeadsBySourceWidget</code>, <code>ActiveProjectsWidget</code>, <code>ProjectStatusWidget</code>, <code>RevenueChartWidget</code>, <code>OverdueInvoicesWidget</code>, <code>QuickActionsWidget</code></p>
+<hr>
+<h2 id="13-tracking--analytics">13. Tracking &amp; Analytics</h2>
+<h3 id="aktualna-konfiguracja-db">Aktualna konfiguracja (DB)</h3>
+<table>
+<thead>
+<tr>
+<th>Klucz</th>
+<th>Wartość</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gtm_enabled</code></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>gtm_id</code></td>
+<td><code>GTM-K749NJ7Q</code></td>
+</tr>
+<tr>
+<td><code>pixel_enabled</code></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>pixel_id</code></td>
+<td><code>1455716816214418</code></td>
+</tr>
+<tr>
+<td><code>gads_enabled</code></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>gads_id</code></td>
+<td><em>(pusty — do uzupełnienia)</em></td>
+</tr>
+<tr>
+<td><code>cookie_consent_enabled</code></td>
+<td><code>1</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="przep%C5%82yw">Przepływ</h3>
+<pre class="hljs"><code><div>app.blade.php
+  │
+  ├── window.dataLayer = [] + gtag('consent','default', {all: denied, wait_for_update: 10000})
+  ├── GTM snippet (GTM-K749NJ7Q) — warunkowy z DB
+  └── window._metaPixelId = '...' — warunkowy z DB
+
+useConsent.js (mount)
+  │
+  ├── Czyta localStorage → jeśli consent istnieje → gtag('consent','update',…)
+  ├── Pushuje 'consent_update' do dataLayer
+  └── Jeśli marketing=granted → wstrzykuje fbevents.js + fbq('init') + fbq('track','PageView')
+
+CostCalculator.jsx / Contact.jsx (po submit)
+  ├── pushEvent('generate_lead', { lead_source, project_type, ... })
+  └── fbq('track', 'Lead')
+</div></code></pre>
+<h3 id="ga4-events">GA4 Events</h3>
+<table>
+<thead>
+<tr>
+<th>Zdarzenie</th>
+<th>Źródło</th>
+<th>Parametry</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generate_lead</code></td>
+<td>CostCalculator</td>
+<td><code>lead_source: 'calculator'</code>, <code>project_type</code>, <code>estimate_low</code>, <code>estimate_high</code></td>
+</tr>
+<tr>
+<td><code>generate_lead</code></td>
+<td>Contact</td>
+<td><code>lead_source: 'contact'</code>, <code>project_type</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="14-system-ustawie%C5%84-settings">14. System ustawień (Settings)</h2>
+<ul>
+<li><strong>Tabela:</strong> <code>settings</code> (<code>key</code> STRING PK, <code>value</code> TEXT, <code>group</code> INDEX)</li>
+<li><strong>Odczyt:</strong> <code>Setting::get($key, $default)</code> — cached <code>1 dzień</code> w DB cache</li>
+<li><strong>Zapis:</strong> <code>Setting::set($key, $value)</code> → <code>updateOrCreate</code> + <code>cache()-&gt;forget(&quot;settings.{$key}&quot;)</code></li>
+<li><strong>Admin UI:</strong> Filament <code>TrackingSettingsPage</code> — <code>ToggleButton</code> + <code>TextInput</code> per usługa</li>
+<li><strong>JS:</strong> Przez Inertia shared props (<code>tracking</code>) — <code>usePage().props.tracking</code></li>
+</ul>
+<hr>
+<h2 id="15-middleware">15. Middleware</h2>
+<table>
+<thead>
+<tr>
+<th>Middleware</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HandleInertiaRequests</code></td>
+<td>Udostępnia <code>auth.user</code>, <code>locale</code>, <code>available_locales</code> i pełny obiekt <code>tracking</code> każdej stronie Inertia</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="16-internacjonalizacja-i18n">16. Internacjonalizacja (i18n)</h2>
+<ul>
+<li><strong>Języki:</strong> EN + PL (konfiguracja w <code>config/languages.php</code>)</li>
+<li><strong>Detekcja:</strong> <code>Accept-Language</code> → session override → <code>/lang/{locale}</code> route</li>
+<li><strong>Tłumaczenia DB:</strong> Spatie Translatable na <code>Page</code> i <code>SiteSection</code> — pola jako <code>{&quot;en&quot;:&quot;...&quot;,&quot;pl&quot;:&quot;...&quot;}</code> JSON</li>
+<li><strong>Lokalizacja Filament:</strong> automatyczna przez Filament's built-in i18n</li>
+</ul>
+<hr>
+<h2 id="17-kluczowe-decyzje-architektoniczne">17. Kluczowe decyzje architektoniczne</h2>
+<table>
+<thead>
+<tr>
+<th>Decyzja</th>
+<th>Uzasadnienie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DB-driven settings z cache</td>
+<td>Zmiana GTM/Pixel bez deploymentu</td>
+</tr>
+<tr>
+<td>Consent Mode v2 (default denied)</td>
+<td>Zgodność z GDPR / Google EU</td>
+</tr>
+<tr>
+<td>Meta Pixel lazy-loaded</td>
+<td>Ładowany tylko po marketing=granted</td>
+</tr>
+<tr>
+<td>Queue dla maili</td>
+<td>Bezpieczeństwo — żaden mail nie blokuje response</td>
+</tr>
+<tr>
+<td>Polimorficzny <code>sender</code> w wiadomościach</td>
+<td>Wiadomości mogą wysyłać i pracownicy i kontakty klientów</td>
+</tr>
+<tr>
+<td><code>portal_token</code> (64 znaków)</td>
+<td>Bezpieczny dostęp do portalu bez pełnego auth</td>
+</tr>
+<tr>
+<td>Single <code>ReportController</code></td>
+<td>Leads/Invoices/Projects × 4 formaty jednym kodem</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="18-co-zosta%C5%82o-zrobione-tracking-plan-2222-%E2%9C%85">18. Co zostało zrobione (tracking plan 22/22 ✅)</h2>
+<ul>
+<li><input type="checkbox" id="checkbox0" checked="true"><label for="checkbox0">Migracja + model + seeder + Filament page dla ustawień</label></li>
+<li><input type="checkbox" id="checkbox1" checked="true"><label for="checkbox1">Consent Mode v2 (default denied) przed GTM</label></li>
+<li><input type="checkbox" id="checkbox2" checked="true"><label for="checkbox2">GTM ładowany warunkowo z DB</label></li>
+<li><input type="checkbox" id="checkbox3" checked="true"><label for="checkbox3">GA4 skonfigurowane w GTM (zweryfikowane)</label></li>
+<li><input type="checkbox" id="checkbox4" checked="true"><label for="checkbox4"></label><code>generate_lead</code> z obu formularzy (zweryfikowane w GA4)</li>
+<li><input type="checkbox" id="checkbox5" checked="true"><label for="checkbox5">Meta Pixel lazy-loaded po marketing consent (zweryfikowane przez Pixel Helper)</label></li>
+<li><input type="checkbox" id="checkbox6" checked="true"><label for="checkbox6"></label><code>fbq('track','Lead')</code> w obu formularzach</li>
+<li><input type="checkbox" id="checkbox7" checked="true"><label for="checkbox7">Cookie banner z granular consent</label></li>
+<li><input type="checkbox" id="checkbox8" checked="true"><label for="checkbox8">ConsentContext + link &quot;Zarządzaj cookies&quot; w Footer</label></li>
+<li><input type="checkbox" id="checkbox9" checked="true"><label for="checkbox9"></label><code>pushEvent</code> utility</li>
+<li><input type="checkbox" id="checkbox10" checked="true"><label for="checkbox10">HandleInertiaRequests sharing tracking props</label></li>
+</ul>
+<h2 id="co-pozosta%C5%82o">Co pozostało</h2>
+<ul>
+<li><input type="checkbox" id="checkbox11"><label for="checkbox11"></label><strong>Google Ads</strong> — infrastruktura gotowa (<code>gads_enabled=0</code>), wymaga założenia konta Google Ads → ID w formacie <code>AW-XXXXXXXXX</code> → wpisanie w Filament → tagi w GTM</li>
+<li><input type="checkbox" id="checkbox12"><label for="checkbox12"></label><strong>Opublikowanie GTM</strong> — kontener na wersji Preview/5, wymaga publikacji na produkcję</li>
+</ul>
+<hr>
+<h2 id="19-zmienne-%C5%9Brodowiskowe-env">19. Zmienne środowiskowe (<code>.env</code>)</h2>
+<pre class="hljs"><code><div>APP_NAME, APP_ENV, APP_KEY, APP_DEBUG, APP_URL
+APP_LOCALE, APP_FALLBACK_LOCALE
+DB_CONNECTION, DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
+SESSION_DRIVER=database, SESSION_LIFETIME
+QUEUE_CONNECTION=database
+CACHE_STORE=database
+MAIL_MAILER, MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD
+MAIL_FROM_ADDRESS, MAIL_FROM_NAME
+MAIL_ADMIN_ADDRESS=admin@websiteexpert.co.uk
+STRIPE_KEY, STRIPE_SECRET, STRIPE_WEBHOOK_SECRET
+TINYMCE_API_KEY
+VITE_APP_NAME
+</div></code></pre>
+
+</body>
+</html>

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { usePage } from '@inertiajs/react';
+import { pushEvent } from '@/utils/dataLayer';
 
 const fmt = v =>
     new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0 }).format(v);
@@ -172,6 +173,13 @@ export default function CostCalculator({ data = null }) {
             // non-blocking — show success regardless
         } finally {
             setSubmitting(false);
+            pushEvent('generate_lead', {
+                lead_source:  'calculator',
+                project_type: a.projectType,
+                estimate_low:  estimate?.low,
+                estimate_high: estimate?.high,
+            });
+            if (typeof window.fbq === 'function') window.fbq('track', 'Lead');
             setSubmitted(true);
         }
     }, [a, estimate, submitting]);

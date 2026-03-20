@@ -2,8 +2,7 @@ import Checkbox from '@/Components/Checkbox';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
-import Navbar from '@/Components/Marketing/Navbar';
-import Footer from '@/Components/Marketing/Footer';
+import MarketingLayout from '@/Layouts/MarketingLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Login({ status, canResetPassword }) {
@@ -21,12 +20,10 @@ export default function Login({ status, canResetPassword }) {
     };
 
     return (
-        <>
+        <MarketingLayout>
             <Head title="Log in" />
 
             <div className="min-h-screen bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white flex flex-col">
-                <Navbar />
-
                 <main className="flex-1 flex items-center justify-center px-4 py-20">
                     <div className="w-full max-w-md">
                         <h1 className="text-3xl font-bold mb-2 text-neutral-900 dark:text-white">Sign in</h1>
@@ -98,10 +95,8 @@ export default function Login({ status, canResetPassword }) {
                         </form>
                     </div>
                 </main>
-
-                <Footer />
             </div>
-        </>
+        </MarketingLayout>
     );
 }
 
