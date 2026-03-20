@@ -8,6 +8,9 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use App\Forms\Components\TinyEditor;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -23,6 +26,21 @@ class EmailTemplateResource extends Resource
 
     public static function form(Schema $form): Schema
     {
+        $langTab = fn (string $code, string $label) => Tab::make($label)->schema([
+            Forms\Components\TextInput::make("subject.{$code}")
+                ->label('Email Subject')
+                ->maxLength(255)
+                ->helperText('Supports variables: {{client_name}}, {{project_title}}, {{invoice_number}}, etc.'),
+            TinyEditor::make("body_html.{$code}")
+                ->label('HTML Body')
+                ->columnSpanFull(),
+            Forms\Components\Textarea::make("body_text.{$code}")
+                ->label('Plain Text Fallback')
+                ->rows(8)
+                ->columnSpanFull()
+                ->helperText('Fallback for email clients that do not support HTML.'),
+        ]);
+
         return $form->schema([
             Section::make('Template Details')
                 ->columns(2)
@@ -37,12 +55,6 @@ class EmailTemplateResource extends Resource
                         ->unique(ignoreRecord: true)
                         ->maxLength(100)
                         ->helperText('Used in automation rules, e.g. welcome_email'),
-                    Forms\Components\TextInput::make('subject')
-                        ->label('Email Subject')
-                        ->required()
-                        ->maxLength(255)
-                        ->columnSpanFull()
-                        ->helperText('Supports variables: {{client_name}}, {{project_title}}, {{invoice_number}}, etc.'),
                     Forms\Components\Toggle::make('is_active')
                         ->label('Active')
                         ->default(true),
@@ -52,26 +64,12 @@ class EmailTemplateResource extends Resource
                         ->placeholder('Add variable name'),
                 ]),
 
-            Section::make('HTML Content')
-                ->schema([
-                    Forms\Components\RichEditor::make('body_html')
-                        ->label('HTML Body')
-                        ->toolbarButtons([
-                            'bold', 'italic', 'underline', 'strike',
-                            'link', 'orderedList', 'unorderedList',
-                            'h2', 'h3', 'blockquote', 'codeBlock',
-                        ])
-                        ->columnSpanFull(),
-                ]),
-
-            Section::make('Plain Text Fallback')
-                ->collapsed()
-                ->schema([
-                    Forms\Components\Textarea::make('body_text')
-                        ->label('Plain Text Body')
-                        ->rows(10)
-                        ->columnSpanFull()
-                        ->helperText('Fallback for email clients that do not support HTML.'),
+            Tabs::make('Languages')
+                ->columnSpanFull()
+                ->tabs([
+                    $langTab('en', '🇬🇧 English'),
+                    $langTab('pl', '🇵🇱 Polish'),
+                    $langTab('pt', '🇵🇹 Portuguese'),
                 ]),
         ]);
     }
@@ -88,7 +86,8 @@ class EmailTemplateResource extends Resource
                     ->copyable()
                     ->badge()
                     ->color('gray'),
-                Tables\Columns\TextColumn::make('subject')
+                Tables\Columns\TextColumn::make('subject.en')
+                    ->label('Subject (EN)')
                     ->searchable()
                     ->limit(50),
                 Tables\Columns\IconColumn::make('is_active')
@@ -121,3 +120,4 @@ class EmailTemplateResource extends Resource
         ];
     }
 }
+

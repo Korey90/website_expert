@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Forms\Components\TinyEditor;
 use App\Filament\Resources\PageResource\Pages;
 use App\Models\Page;
 use Filament\Forms;
@@ -69,13 +70,8 @@ class PageResource extends Resource
                                             ->label("Title ({$locale})")
                                             ->required()
                                             ->maxLength(255),
-                                        Forms\Components\RichEditor::make("content.{$locale}")
-                                            ->label("Content ({$locale})")
-                                            ->toolbarButtons([
-                                                'bold', 'italic', 'underline', 'strike',
-                                                'link', 'orderedList', 'bulletList',
-                                                'h2', 'h3', 'blockquote', 'codeBlock',
-                                            ]),
+                                        TinyEditor::make("content.{$locale}")
+                                            ->label("Content ({$locale})"),
                                         Forms\Components\TextInput::make("meta_title.{$locale}")
                                             ->label("Meta title ({$locale})")
                                             ->maxLength(100),

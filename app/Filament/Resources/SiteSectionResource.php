@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Forms\Components\TinyEditor;
 use App\Filament\Resources\SiteSectionResource\Pages;
 use App\Models\SiteSection;
 use Filament\Actions\DeleteAction;
@@ -64,9 +65,8 @@ class SiteSectionResource extends Resource
                                             ->label("Subtitle ({$locale})")
                                             ->maxLength(500)
                                             ->columnSpanFull(),
-                                        Forms\Components\RichEditor::make("body.{$locale}")
+                                        TinyEditor::make("body.{$locale}")
                                             ->label("Body ({$locale})")
-                                            ->toolbarButtons(['bold', 'italic', 'underline', 'link', 'orderedList', 'bulletList', 'h2', 'h3', 'blockquote'])
                                             ->columnSpanFull(),
                                         Forms\Components\TextInput::make("button_text.{$locale}")
                                             ->label("Button Text ({$locale})")

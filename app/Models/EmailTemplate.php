@@ -14,7 +14,26 @@ class EmailTemplate extends Model
     ];
 
     protected $casts = [
+        'subject'   => 'array',
+        'body_html' => 'array',
+        'body_text' => 'array',
         'variables' => 'array',
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Resolve subject/body for a given locale, falling back to English.
+     */
+    public function getForLocale(string $locale = 'en'): array
+    {
+        $subject   = $this->subject   ?? [];
+        $body_html = $this->body_html ?? [];
+        $body_text = $this->body_text ?? [];
+
+        return [
+            'subject'   => $subject[$locale]   ?? $subject['en']   ?? '',
+            'body_html' => $body_html[$locale] ?? $body_html['en'] ?? '',
+            'body_text' => $body_text[$locale] ?? $body_text['en'] ?? '',
+        ];
+    }
 }

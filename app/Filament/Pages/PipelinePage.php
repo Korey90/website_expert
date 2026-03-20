@@ -36,8 +36,9 @@ class PipelinePage extends Page
         $totals = Lead::withoutTrashed()
             ->selectRaw('pipeline_stage_id, COUNT(*) as count, SUM(value) as total_value')
             ->groupBy('pipeline_stage_id')
-            ->pluck(null, 'pipeline_stage_id')
-            ->map(fn ($r) => ['count' => $r->count, 'total' => $r->total_value]);
+            ->get()
+            ->keyBy('pipeline_stage_id')
+            ->map(fn ($r) => ['count' => $r->count, 'total' => $r->total_value ?? 0]);
 
         return [
             'stages' => $stages,

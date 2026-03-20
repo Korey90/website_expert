@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProjectResource\Pages;
+use App\Filament\Resources\ProjectResource\RelationManagers\MessagesRelationManager;
 use App\Models\Client;
 use App\Models\Project;
 use App\Models\ProjectTemplate;
@@ -94,12 +95,20 @@ class ProjectResource extends Resource
             ->defaultSort('created_at', 'desc');
     }
 
+    public static function getRelations(): array
+    {
+        return [
+            MessagesRelationManager::class,
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
             'index'  => Pages\ListProjects::route('/'),
             'create' => Pages\CreateProject::route('/create'),
             'edit'   => Pages\EditProject::route('/{record}/edit'),
+            'tasks'  => Pages\ManageProjectTasks::route('/{record}/tasks'),
         ];
     }
 

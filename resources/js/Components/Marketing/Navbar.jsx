@@ -165,6 +165,17 @@ export default function Navbar({ auth, data = null }) {
                         )}
                     </button>
 
+                    {/* Client Portal */}
+                    <a
+                        href="/portal"
+                        className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 text-sm font-semibold text-neutral-700 dark:text-neutral-200 hover:border-brand-500 hover:text-brand-500 dark:hover:text-brand-400 transition-colors"
+                    >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {locale === 'pl' ? 'Portal Klienta' : locale === 'pt' ? 'Portal do Cliente' : 'Client Portal'}
+                    </a>
+
                     {/* CTA button */}
                     <a
                         href={ctaHref}
@@ -226,6 +237,15 @@ export default function Navbar({ auth, data = null }) {
                             </div>
                         </li>
 
+                        <li className="pt-2">
+                            <a
+                                href="/portal"
+                                onClick={() => setMobileOpen(false)}
+                                className="block text-center px-4 py-3 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-200 font-semibold hover:text-brand-500 hover:border-brand-500 transition-colors"
+                            >
+                                {locale === 'pl' ? '🔒 Portal Klienta' : locale === 'pt' ? '🔒 Portal do Cliente' : '🔒 Client Portal'}
+                            </a>
+                        </li>
                         <li className="pt-2">
                             <a
                                 href={ctaHref}

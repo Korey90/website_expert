@@ -12,10 +12,14 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
+use App\Filament\Widgets\QuickActionsWidget;
 use App\Filament\Widgets\StatsOverviewWidget;
 use App\Filament\Widgets\RecentLeadsWidget;
 use App\Filament\Widgets\OverdueInvoicesWidget;
 use App\Filament\Widgets\ActiveProjectsWidget;
+use App\Filament\Widgets\RevenueChartWidget;
+use App\Filament\Widgets\LeadsBySourceWidget;
+use App\Filament\Widgets\ProjectStatusWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -53,10 +57,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                QuickActionsWidget::class,
                 StatsOverviewWidget::class,
                 RecentLeadsWidget::class,
                 OverdueInvoicesWidget::class,
                 ActiveProjectsWidget::class,
+                RevenueChartWidget::class,
+                LeadsBySourceWidget::class,
+                ProjectStatusWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

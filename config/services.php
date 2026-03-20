@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'stripe' => [
+        'key'            => env('STRIPE_KEY'),
+        'secret'         => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+
+    'tinymce' => [
+        'api_key' => env('TINYMCE_API_KEY', 'no-api-key'),
+    ],
+
 ];

@@ -36,6 +36,7 @@ const NAV_DEFAULTS = [
             { label_en: 'Portfolio',       label_pl: 'Portfolio',          href: '#portfolio' },
             { label_en: 'Cost Calculator', label_pl: 'Kalkulator kosztów', href: '#kalkulator' },
             { label_en: 'Contact',         label_pl: 'Kontakt',            href: '#kontakt' },
+            { label_en: 'Client Portal',   label_pl: 'Portal Klienta',     href: '/portal' },
         ],
     },
     {

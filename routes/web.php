@@ -1,9 +1,14 @@
 <?php
 
+use App\Http\Controllers\CalculatorLeadController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\InvoicePdfController;
 use App\Http\Controllers\KalkulatorController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,10 +24,11 @@ Route::get('/lang/{locale}', function (string $locale) {
     return redirect()->back(302, [], route('home'));
 })->where('locale', '[a-z]{2}')->name('lang.switch');
 
-Route::post('/contact', function (\Illuminate\Http\Request $request) {
-    // TODO: implement email sending / store in DB
-    return back()->with('success', 'Wiadomosc wyslana.');
-})->name('contact.store');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::post('/calculator-lead', [CalculatorLeadController::class, 'store'])->name('calculator.lead');
+
+// Stripe webhook — CSRF exempt (see bootstrap/app.php)
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
 Route::get('/dashboard', function () {
     return inertia('Dashboard');
@@ -34,6 +40,25 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/invoices/{invoice}/pdf', InvoicePdfController::class)->name('invoice.pdf');
+
+    // Client Portal
+    Route::prefix('portal')->name('portal.')->group(function () {
+        Route::get('/', [PortalController::class, 'dashboard'])->name('dashboard');
+        Route::get('/projects', [PortalController::class, 'projects'])->name('projects');
+        Route::get('/projects/{project}', [PortalController::class, 'project'])->name('project');
+        Route::post('/projects/{project}/messages', [PortalController::class, 'postMessage'])->name('messages.store');
+        Route::get('/invoices', [PortalController::class, 'invoices'])->name('invoices');
+        Route::get('/quotes', [PortalController::class, 'quotes'])->name('quotes');
+    });
+
+    // Reports — admin only
+    Route::prefix('reports')->name('reports.')->group(function () {
+        foreach (['html', 'pdf', 'xlsx', 'csv'] as $format) {
+            Route::get("leads/{$format}",    [ReportController::class, 'leads'])->defaults('format', $format)->name("leads.{$format}");
+            Route::get("invoices/{$format}", [ReportController::class, 'invoices'])->defaults('format', $format)->name("invoices.{$format}");
+            Route::get("projects/{$format}", [ReportController::class, 'projects'])->defaults('format', $format)->name("projects.{$format}");
+        }
+    });
 });
 
 require __DIR__.'/auth.php';

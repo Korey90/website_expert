@@ -141,6 +141,7 @@ export default function CostCalculator({ data = null }) {
     const [step, setStep]         = useState(1);
     const [a, setA]               = useState({ projectType: '', pages: 5, design: '', cms: '', integrations: [], seoPackage: '', deadline: '', hosting: '', companyName: '', contactEmail: '' });
     const [submitted, setSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const set      = useCallback((k, v) => setA(prev => ({ ...prev, [k]: v })), []);
     const toggleInt = useCallback((k) => setA(prev => {
@@ -152,6 +153,28 @@ export default function CostCalculator({ data = null }) {
     const back = () => setStep(s => s - 1);
     const reset = () => { setStep(1); setA({ projectType: '', pages: 5, design: '', cms: '', integrations: [], seoPackage: '', deadline: '', hosting: '', companyName: '', contactEmail: '' }); setSubmitted(false); };
     const estimate = calcEstimate(a);
+
+    const handleCalcSubmit = useCallback(async () => {
+        if (!a.contactEmail || submitting) return;
+        setSubmitting(true);
+        try {
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+            await fetch(route('calculator.lead'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+                body: JSON.stringify({
+                    ...a,
+                    estimateLow:  estimate?.low,
+                    estimateHigh: estimate?.high,
+                }),
+            });
+        } catch (_) {
+            // non-blocking — show success regardless
+        } finally {
+            setSubmitting(false);
+            setSubmitted(true);
+        }
+    }, [a, estimate, submitting]);
 
     const d            = data ?? {};
     const extra        = d.extra ?? {};
@@ -246,11 +269,11 @@ export default function CostCalculator({ data = null }) {
                         </div>
                         <button
                             type="button"
-                            disabled={!a.contactEmail}
-                            onClick={() => { if (a.contactEmail) setSubmitted(true); }}
-                            className={`inline-flex items-center gap-2 px-8 py-3 rounded-xl font-semibold text-sm transition-all ${a.contactEmail ? 'bg-brand-500 text-white hover:opacity-90 active:scale-95' : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'}`}
+                            disabled={!a.contactEmail || submitting}
+                            onClick={handleCalcSubmit}
+                            className={`inline-flex items-center gap-2 px-8 py-3 rounded-xl font-semibold text-sm transition-all ${a.contactEmail && !submitting ? 'bg-brand-500 text-white hover:opacity-90 active:scale-95' : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'}`}
                         >
-                            {tx('submit_btn', 'Send enquiry 🚀')}
+                            {submitting ? (tx('submitting_btn', 'Sending…')) : tx('submit_btn', 'Send enquiry 🚀')}
                         </button>
                     </div>
                 ) : (
