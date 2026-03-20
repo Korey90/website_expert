@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', WelcomeController::class)->name('home');
 Route::get('/kalkulator', KalkulatorController::class)->name('kalkulator');
 Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');
+Route::get('/{slug}', [PageController::class, 'show'])->name('page.show.clean')
+    ->where('slug', 'privacy-policy|terms-and-conditions|cookies|accessibility');
 
 Route::get('/lang/{locale}', function (string $locale) {
     $supported = array_keys(config('languages'));

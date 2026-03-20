@@ -11,9 +11,8 @@ export default function CmsPage({ auth, page, navbar, footer }) {
 
     return (
         <>
-            <Head>
-                <title>{metaTitle} – WebsiteExpert</title>
-                {metaDesc && <meta name="description" content={metaDesc} />}
+            <Head title={`${String(metaTitle || 'WebsiteExpert')} – WebsiteExpert`}>
+                <meta name="description" content={String(metaDesc || '')} />
             </Head>
 
             <div className="min-h-screen bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white flex flex-col">

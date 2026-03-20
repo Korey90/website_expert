@@ -38,10 +38,10 @@ class PageController extends Controller
 
         return Inertia::render('CmsPage', [
             'page'   => [
-                'title'            => $page->title,
-                'content'          => $page->content,
-                'meta_title'       => $page->meta_title,
-                'meta_description' => $page->meta_description,
+                'title'            => $page->getTranslation('title', $locale, true),
+                'content'          => $page->getTranslation('content', $locale, true),
+                'meta_title'       => $page->getTranslation('meta_title', $locale, true),
+                'meta_description' => $page->getTranslation('meta_description', $locale, true),
                 'slug'             => $page->slug,
                 'type'             => $page->type,
             ],

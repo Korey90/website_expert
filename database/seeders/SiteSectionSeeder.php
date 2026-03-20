@@ -820,9 +820,9 @@ class SiteSectionSeeder extends Seeder
                             'title_pl' => 'Prawne',
                             'title_pt' => 'Legal',
                             'links'    => [
-                                ['label_en' => 'Privacy Policy', 'label_pl' => 'Polityka prywatności', 'label_pt' => 'Política de Privacidade', 'href' => '#'],
-                                ['label_en' => 'Terms of Use',   'label_pl' => 'Regulamin',            'label_pt' => 'Termos de Uso',          'href' => '#'],
-                                ['label_en' => 'Cookies',        'label_pl' => 'Cookies',              'label_pt' => 'Cookies',                'href' => '#'],
+                                ['label_en' => 'Privacy Policy', 'label_pl' => 'Polityka prywatności', 'label_pt' => 'Política de Privacidade', 'href' => '/privacy-policy'],
+                                ['label_en' => 'Terms of Use',   'label_pl' => 'Regulamin',            'label_pt' => 'Termos de Uso',          'href' => '/terms-and-conditions'],
+                                ['label_en' => 'Cookies',        'label_pl' => 'Cookies',              'label_pt' => 'Cookies',                'href' => '/cookies'],
                             ],
                         ],
                     ],
