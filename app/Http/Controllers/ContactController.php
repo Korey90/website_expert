@@ -24,8 +24,8 @@ class ContactController extends Controller
                 'primary_contact_name'  => $data['name'],
                 'primary_contact_phone' => $data['phone'] ?? null,
                 'vat_number'            => $data['nip'] ?? null,
-                'status'                => 'lead',
-                'source'                => 'contact_form',
+                'status'                => 'prospect',
+                'source'                => 'website',
                 'country'               => 'GB',
                 'currency'              => 'GBP',
             ]

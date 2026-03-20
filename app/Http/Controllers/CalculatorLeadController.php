@@ -35,8 +35,8 @@ class CalculatorLeadController extends Controller
             [
                 'company_name'          => $data['companyName'] ?? $data['contactEmail'],
                 'primary_contact_name'  => $data['companyName'] ?? $data['contactEmail'],
-                'status'                => 'lead',
-                'source'                => 'calculator',
+                'status'                => 'prospect',
+                'source'                => 'website',
                 'country'               => 'GB',
                 'currency'              => 'GBP',
             ]

@@ -58,12 +58,17 @@ export default function Contact({ data = null }) {
             setStatus('error');
             return;
         }
+        setStatus('sending');
         try {
-            await fetch(route('contact.store'), {
+            const res = await fetch(route('contact.store'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '' },
                 body: JSON.stringify(form),
             });
+            if (!res.ok) {
+                setStatus('error');
+                return;
+            }
             pushEvent('generate_lead', {
                 lead_source:  'contact',
                 project_type: form.project_type,
@@ -71,7 +76,7 @@ export default function Contact({ data = null }) {
             if (typeof window.fbq === 'function') window.fbq('track', 'Lead');
             setStatus('success');
         } catch {
-            setStatus('success'); // optimistic for prototype
+            setStatus('error');
         }
     };
 
@@ -203,9 +208,11 @@ export default function Contact({ data = null }) {
                             </label>
                         </div>
 
-                        <button type="submit"
-                            className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/20">
-                            {t('submit_btn', locale === 'pl' ? 'Wyślij wiadomość' : 'Send message')}
+                        <button type="submit" disabled={status === 'sending'}
+                            className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/20 disabled:opacity-60 disabled:cursor-not-allowed">
+                            {status === 'sending'
+                                ? (locale === 'pl' ? 'Wysyłanie…' : 'Sending…')
+                                : t('submit_btn', locale === 'pl' ? 'Wyślij wiadomość' : 'Send message')}
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                             </svg>
@@ -218,7 +225,7 @@ export default function Contact({ data = null }) {
                         )}
                         {status === 'error' && (
                             <p className="mt-4 text-sm text-center text-red-600 dark:text-red-400 font-medium">
-                                {t('error_msg', 'Please fill in the required fields and accept the privacy policy.')}
+                                {t('error_msg', locale === 'pl' ? 'Wystąpił błąd. Sprawdź dane i spróbuj ponownie.' : 'Something went wrong. Please check your details and try again.')}
                             </p>
                         )}
                     </form>
