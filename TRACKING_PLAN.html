@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown转换文档</title>
+  <style>
+    body { 
+      font-family: 'Microsoft YaHei', 'SimSun', sans-serif; 
+      margin: 0 auto; 
+      max-width: 960px; 
+      padding: 20px; 
+      line-height: 1.6;
+    }
+    pre { 
+      background-color: #f8f8f8; 
+      border: 1px solid #ddd; 
+      padding: 10px; 
+      border-radius: 3px; 
+      overflow: auto; 
+    }
+    code { 
+      font-family: Consolas, Monaco, monospace; 
+      background-color: #f8f8f8; 
+      padding: 2px 5px; 
+      border-radius: 3px; 
+    }
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      margin-bottom: 20px;
+    }
+    th, td { 
+      border: 1px solid #ddd; 
+      padding: 8px; 
+    }
+    th { 
+      background-color: #f2f2f2; 
+      text-align: left; 
+    }
+    tr:nth-child(even) { 
+      background-color: #f9f9f9; 
+    }
+    img { 
+      max-width: 100%; 
+      height: auto; 
+    }
+    .toc-placeholder { 
+      margin: 20px 0; 
+      padding: 10px; 
+      background-color: #f0f0f0; 
+      border: 1px dashed #ccc; 
+      text-align: center; 
+      color: #666; 
+    }
+  </style>
+</head>
+<body>
+  <h1>Plan integracji narzędzi śledzących</h1>
+<blockquote>
+<p>Wersja: 1.0 | Data: 20.03.2026<br />
+Stack: Laravel 13 + Inertia.js + React | Plik wejściowy: <code>resources/views/app.blade.php</code></p>
+</blockquote>
+<hr />
+<h2>Architektura</h2>
+<pre><code>app.blade.php  ←  centrum ładowania wszystkich skryptów
+     │
+     ├─ GTM &lt;head&gt; snippet  (podmiana tytułu w &lt;head&gt;)
+     ├─ GTM &lt;body&gt; noscript  (za @inertia)
+     └─ Inertia shared props  ←  GTM ID, pixel ID itp. z .env
+</code></pre>
+<p>Wszystkie klucze/ID trzymamy w <code>.env</code> → <code>config/services.php</code> → przekazujemy do frontu przez <code>HandleInertiaRequests.php</code> jako shared props. Dzięki temu:</p>
+<ul>
+<li>żaden klucz nie jest hardcoded w kodzie</li>
+<li>zmiana środowiska (staging/prod) = zmiana <code>.env</code></li>
+<li>GTM zarządza wszystkim reszta (GA4, Ads, Pixel) — <strong>jeden snippet w kodzie źródłowym</strong></li>
+</ul>
+<hr />
+<h2>Krok 0 — Zarządzanie konfiguracją z panelu admina</h2>
+<p>Wszystkie ID i flagi są edytowalne przez admina w Filament — bez dostępu do serwera.<br />
+Wartości z DB nadpisują <code>.env</code> (DB = źródło prawdy w runtime; <code>.env</code> = fallback/dev).</p>
+<h3>Architektura</h3>
+<pre><code>Filament TrackingSettingsPage
+        │  zapis
+        ▼
+   settings (tabela DB)  ──→  cache('settings.*')  TTL 1 dzień
+        │                              │
+        └──────────────────────────────┤
+                                       ▼
+                         HandleInertiaRequests::share()
+                                       │
+                                       ▼
+                              React (window props)
+                         GTM snippet / fbq / dataLayer
+</code></pre>
+<h3>0.1 Migracja — tabela <code>settings</code></h3>
+<pre><code class="language-php">// database/migrations/xxxx_create_settings_table.php
+Schema::create('settings', function (Blueprint $table) {
+    $table-&gt;string('key')-&gt;primary();
+    $table-&gt;text('value')-&gt;nullable();
+    $table-&gt;string('group')-&gt;default('general')-&gt;index();
+    $table-&gt;timestamps();
+});
+</code></pre>
+<h3>0.2 Model <code>Setting</code></h3>
+<pre><code class="language-php">// app/Models/Setting.php
+class Setting extends Model
+{
+    protected $primaryKey = 'key';
+    public $incrementing  = false;
+    protected $keyType    = 'string';
+    protected $fillable   = ['key', 'value', 'group'];
+
+    /** Pobierz wartość z cache (1 dzień TTL). */
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        return cache()-&gt;remember(&quot;settings.{$key}&quot;, now()-&gt;addDay(), function () use ($key, $default) {
+            return static::find($key)?-&gt;value ?? $default;
+        });
+    }
+
+    /** Zapisz wartość i wyczyść cache. */
+    public static function set(string $key, mixed $value, string $group = 'general'): void
+    {
+        static::updateOrCreate(['key' =&gt; $key], ['value' =&gt; $value, 'group' =&gt; $group]);
+        cache()-&gt;forget(&quot;settings.{$key}&quot;);
+    }
+}
+</code></pre>
+<h3>0.3 Seeder — domyślne wartości (z <code>.env</code> jako fallback)</h3>
+<pre><code class="language-php">// database/seeders/SettingSeeder.php
+$defaults = [
+    // GTM
+    ['key' =&gt; 'gtm_enabled',   'value' =&gt; '0',                         'group' =&gt; 'tracking'],
+    ['key' =&gt; 'gtm_id',        'value' =&gt; env('GTM_ID', ''),           'group' =&gt; 'tracking'],
+    // GA4
+    ['key' =&gt; 'ga4_enabled',   'value' =&gt; '0',                         'group' =&gt; 'tracking'],
+    ['key' =&gt; 'ga4_id',        'value' =&gt; env('GA4_ID', ''),           'group' =&gt; 'tracking'],
+    // Meta Pixel
+    ['key' =&gt; 'pixel_enabled', 'value' =&gt; '0',                         'group' =&gt; 'tracking'],
+    ['key' =&gt; 'pixel_id',      'value' =&gt; env('META_PIXEL_ID', ''),    'group' =&gt; 'tracking'],
+    // Google Ads
+    ['key' =&gt; 'gads_enabled',  'value' =&gt; '0',                         'group' =&gt; 'tracking'],
+    ['key' =&gt; 'gads_id',       'value' =&gt; env('GOOGLE_ADS_ID', ''),    'group' =&gt; 'tracking'],
+    // Cookie Consent
+    ['key' =&gt; 'cookie_consent_enabled', 'value' =&gt; '1',                'group' =&gt; 'tracking'],
+    ['key' =&gt; 'cookiebot_id',           'value' =&gt; '',                 'group' =&gt; 'tracking'],
+];
+
+foreach ($defaults as $row) {
+    Setting::firstOrCreate(['key' =&gt; $row['key']], $row);
+}
+</code></pre>
+<p>Uruchomienie:</p>
+<pre><code class="language-bash">php artisan db:seed --class=SettingSeeder
+</code></pre>
+<h3>0.4 Filament — strona ustawień śledzenia</h3>
+<pre><code class="language-php">// app/Filament/Pages/TrackingSettingsPage.php
+class TrackingSettingsPage extends Page
+{
+    protected static string $view = 'filament.pages.tracking-settings';
+    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $navigationIcon  = 'heroicon-o-chart-bar';
+    protected static ?string $navigationLabel = 'Tracking &amp; Analytics';
+    protected static ?int    $navigationSort  = 10;
+
+    public string $gtm_id        = '';
+    public bool   $gtm_enabled   = false;
+    public string $ga4_id        = '';
+    public bool   $ga4_enabled   = false;
+    public string $pixel_id      = '';
+    public bool   $pixel_enabled = false;
+    public string $gads_id       = '';
+    public bool   $gads_enabled  = false;
+    public bool   $cookie_consent_enabled = true;
+    public string $cookiebot_id  = '';
+
+    public function mount(): void
+    {
+        $this-&gt;gtm_id        = Setting::get('gtm_id', '');
+        $this-&gt;gtm_enabled   = (bool) Setting::get('gtm_enabled', false);
+        $this-&gt;ga4_id        = Setting::get('ga4_id', '');
+        $this-&gt;ga4_enabled   = (bool) Setting::get('ga4_enabled', false);
+        $this-&gt;pixel_id      = Setting::get('pixel_id', '');
+        $this-&gt;pixel_enabled = (bool) Setting::get('pixel_enabled', false);
+        $this-&gt;gads_id       = Setting::get('gads_id', '');
+        $this-&gt;gads_enabled  = (bool) Setting::get('gads_enabled', false);
+        $this-&gt;cookie_consent_enabled = (bool) Setting::get('cookie_consent_enabled', true);
+        $this-&gt;cookiebot_id  = Setting::get('cookiebot_id', '');
+    }
+
+    public function save(): void
+    {
+        Setting::set('gtm_id',        $this-&gt;gtm_id,        'tracking');
+        Setting::set('gtm_enabled',   $this-&gt;gtm_enabled ? '1' : '0', 'tracking');
+        Setting::set('ga4_id',        $this-&gt;ga4_id,        'tracking');
+        Setting::set('ga4_enabled',   $this-&gt;ga4_enabled ? '1' : '0', 'tracking');
+        Setting::set('pixel_id',      $this-&gt;pixel_id,      'tracking');
+        Setting::set('pixel_enabled', $this-&gt;pixel_enabled ? '1' : '0', 'tracking');
+        Setting::set('gads_id',       $this-&gt;gads_id,       'tracking');
+        Setting::set('gads_enabled',  $this-&gt;gads_enabled ? '1' : '0', 'tracking');
+        Setting::set('cookie_consent_enabled', $this-&gt;cookie_consent_enabled ? '1' : '0', 'tracking');
+        Setting::set('cookiebot_id',  $this-&gt;cookiebot_id,  'tracking');
+
+        Notification::make()-&gt;title('Settings saved')-&gt;success()-&gt;send();
+    }
+
+    protected function getFormSchema(): array
+    {
+        return [
+            Section::make('Google Tag Manager')
+                -&gt;schema([
+                    Toggle::make('gtm_enabled')-&gt;label('Enable GTM'),
+                    TextInput::make('gtm_id')-&gt;label('GTM Container ID')
+                        -&gt;placeholder('GTM-XXXXXXX')
+                        -&gt;helperText('From tagmanager.google.com → Container → ID'),
+                ]),
+            Section::make('Google Analytics 4')
+                -&gt;schema([
+                    Toggle::make('ga4_enabled')-&gt;label('Enable GA4 direct snippet')
+                        -&gt;helperText('Use only if NOT loading GA4 through GTM'),
+                    TextInput::make('ga4_id')-&gt;label('Measurement ID')
+                        -&gt;placeholder('G-XXXXXXXXXX'),
+                ]),
+            Section::make('Meta Pixel')
+                -&gt;schema([
+                    Toggle::make('pixel_enabled')-&gt;label('Enable Meta Pixel'),
+                    TextInput::make('pixel_id')-&gt;label('Pixel ID')
+                        -&gt;placeholder('XXXXXXXXXXXXXXXXX'),
+                ]),
+            Section::make('Google Ads')
+                -&gt;schema([
+                    Toggle::make('gads_enabled')-&gt;label('Enable Google Ads tags'),
+                    TextInput::make('gads_id')-&gt;label('Conversion ID')
+                        -&gt;placeholder('AW-XXXXXXXXX'),
+                ]),
+            Section::make('Cookie Consent')
+                -&gt;schema([
+                    Toggle::make('cookie_consent_enabled')-&gt;label('Show cookie consent banner'),
+                    TextInput::make('cookiebot_id')-&gt;label('Cookiebot Domain Group ID')
+                        -&gt;placeholder('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx')
+                        -&gt;helperText('Leave empty to use custom banner instead'),
+                ]),
+        ];
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            Action::make('save')
+                -&gt;label('Save settings')
+                -&gt;action('save')
+                -&gt;icon('heroicon-o-check'),
+        ];
+    }
+}
+</code></pre>
+<h3>0.5 Blade view (Livewire-based, minimal)</h3>
+<pre><code class="language-blade">{{-- resources/views/filament/pages/tracking-settings.blade.php --}}
+&lt;x-filament-panels::page&gt;
+    &lt;form wire:submit.prevent=&quot;save&quot;&gt;
+        {{ $this-&gt;form }}
+        &lt;div class=&quot;mt-6&quot;&gt;
+            {{ $this-&gt;saveAction }}
+        &lt;/div&gt;
+    &lt;/form&gt;
+&lt;/x-filament-panels::page&gt;
+</code></pre>
+<h3>0.6 HandleInertiaRequests — przekazanie ustawień do frontu</h3>
+<pre><code class="language-php">// app/Http/Middleware/HandleInertiaRequests.php
+public function share(Request $request): array
+{
+    return array_merge(parent::share($request), [
+        // ... istniejące props ...
+        'tracking' =&gt; [
+            'gtm_enabled'            =&gt; (bool) Setting::get('gtm_enabled'),
+            'gtm_id'                 =&gt; Setting::get('gtm_id', ''),
+            'ga4_enabled'            =&gt; (bool) Setting::get('ga4_enabled'),
+            'ga4_id'                 =&gt; Setting::get('ga4_id', ''),
+            'pixel_enabled'          =&gt; (bool) Setting::get('pixel_enabled'),
+            'pixel_id'               =&gt; Setting::get('pixel_id', ''),
+            'gads_enabled'           =&gt; (bool) Setting::get('gads_enabled'),
+            'gads_id'                =&gt; Setting::get('gads_id', ''),
+            'cookie_consent_enabled' =&gt; (bool) Setting::get('cookie_consent_enabled', true),
+            'cookiebot_id'           =&gt; Setting::get('cookiebot_id', ''),
+        ],
+    ]);
+}
+</code></pre>
+<h3>0.7 app.blade.php — warunkowe GTM na podstawie DB</h3>
+<pre><code class="language-blade">@php $tracking = app(\App\Services\TrackingService::class); @endphp
+
+@if($tracking-&gt;gtmEnabled())
+&lt;script&gt;/* GTM snippet z $tracking-&gt;gtmId() */&lt;/script&gt;
+@endif
+</code></pre>
+<p>Lub prościej — GTM snippet czyta <code>tracking.gtm_id</code> z Inertia shared props w React i sam zarządza ładowaniem przez <code>dataLayer</code>. Patrz krok 1.3.</p>
+<hr />
+<h2>Krok 1 — Google Tag Manager (GTM)</h2>
+<h3>1.1 Zmienne środowiskowe (fallback dla seedera)</h3>
+<pre><code class="language-dotenv"># .env — używane tylko jako wartość domyślna przy seederze
+GTM_ID=GTM-XXXXXXX
+</code></pre>
+<p>Docelowa wartość runtime pochodzi z tabeli <code>settings</code> (krok 0).</p>
+<h3>1.2 config/services.php</h3>
+<pre><code class="language-php">'gtm' =&gt; [
+    'id' =&gt; env('GTM_ID'),   // fallback gdy brak DB
+],
+</code></pre>
+<h3>1.3 Blade — app.blade.php</h3>
+<p>GTM ładuje się gdy <code>gtm_enabled = true</code> i <code>gtm_id</code> jest ustawione. Wartość czytana jest z <code>Setting::get()</code> (cache):</p>
+<pre><code class="language-html">@php
+    $gtmId = \App\Models\Setting::get('gtm_enabled') &amp;&amp; \App\Models\Setting::get('gtm_id')
+        ? \App\Models\Setting::get('gtm_id')
+        : null;
+@endphp
+
+@if($gtmId)
+{{-- Google Tag Manager --}}
+&lt;script&gt;(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','{{ $gtmId }}');&lt;/script&gt;
+{{-- End Google Tag Manager --}}
+@endif
+</code></pre>
+<p>Dodać na początku <code>&lt;body&gt;</code> przed <code>@inertia</code>:</p>
+<pre><code class="language-html">@if($gtmId)
+&lt;noscript&gt;&lt;iframe src=&quot;https://www.googletagmanager.com/ns.html?id={{ $gtmId }}&quot;
+height=&quot;0&quot; width=&quot;0&quot; style=&quot;display:none;visibility:hidden&quot;&gt;&lt;/iframe&gt;&lt;/noscript&gt;
+@endif
+</code></pre>
+<hr />
+<h2>Krok 2 — Google Analytics 4 (GA4) przez GTM</h2>
+<p>GA4 jest konfigurowane <strong>wyłącznie w panelu GTM</strong> — bez dodatkowego kodu w aplikacji.</p>
+<h3>Kroki w GTM:</h3>
+<ol>
+<li><strong>Nowy tag</strong> → typ: <em>Google Analytics: GA4 Configuration</em></li>
+<li><strong>Measurement ID</strong>: <code>G-XXXXXXXXXX</code> (z Google Analytics → Data Streams)</li>
+<li><strong>Trigger</strong>: All Pages</li>
+<li><strong>Publish</strong> kontenera</li>
+</ol>
+<h3>Opcjonalnie — Enhanced Measurement:</h3>
+<ul>
+<li>W GA4: Admin → Data Streams → Enhanced Measurement → włączyć scroll, outbound clicks, file downloads</li>
+</ul>
+<h3>Weryfikacja:</h3>
+<ul>
+<li>GA4 DebugView (Admin → DebugView)</li>
+<li>Chrome extension: Google Analytics Debugger</li>
+</ul>
+<hr />
+<h2>Krok 3 — Google Ads Remarketing + Conversion Tracking przez GTM</h2>
+<h3>Kroki w GTM:</h3>
+<h4>3.1 Remarketing tag</h4>
+<ol>
+<li><strong>Nowy tag</strong> → typ: <em>Google Ads Remarketing</em></li>
+<li><strong>Conversion ID</strong>: <code>AW-XXXXXXXXX</code></li>
+<li><strong>Trigger</strong>: All Pages</li>
+</ol>
+<h4>3.2 Conversion tracking (np. formularz kontaktowy)</h4>
+<ol>
+<li><strong>Nowy tag</strong> → typ: <em>Google Ads Conversion Tracking</em></li>
+<li><strong>Conversion ID</strong>: <code>AW-XXXXXXXXX</code></li>
+<li><strong>Conversion Label</strong>: z Google Ads → Cele → szczegóły konwersji</li>
+<li><strong>Trigger</strong>: Custom Event — <code>contact_form_submitted</code></li>
+</ol>
+<h4>3.3 Wywołanie eventu z React</h4>
+<p>W <code>ContactController.php</code> (lub React <code>handleSubmit</code>) po sukcesie:</p>
+<pre><code class="language-js">// resources/js/Components/Marketing/Contact.jsx — po sukcesie formularza
+window.dataLayer = window.dataLayer || [];
+window.dataLayer.push({ event: 'contact_form_submitted' });
+</code></pre>
+<p>Podobnie dla kalkulatora:</p>
+<pre><code class="language-js">window.dataLayer.push({ event: 'calculator_lead_submitted' });
+</code></pre>
+<hr />
+<h2>Krok 4 — Meta Pixel (Facebook/Instagram Ads + Analytics)</h2>
+<h3>4.1 Zmienne środowiskowe (fallback dla seedera)</h3>
+<pre><code class="language-dotenv"># .env — używane tylko jako wartość domyślna przy seederze
+META_PIXEL_ID=XXXXXXXXXXXXXXXXX
+</code></pre>
+<h3>4.2 config/services.php</h3>
+<pre><code class="language-php">'meta' =&gt; [
+    'pixel_id' =&gt; env('META_PIXEL_ID'),
+],
+</code></pre>
+<h3>4.3 Shared props — HandleInertiaRequests.php</h3>
+<p>Już obsłużone w kroku 0.6 — <code>tracking.pixel_enabled</code> i <code>tracking.pixel_id</code> dostępne globalnie.</p>
+<h3>4.4 React — inicjalizacja Pixela</h3>
+<pre><code class="language-js">// resources/js/Hooks/useMetaPixel.js
+import { useEffect } from 'react';
+import { usePage } from '@inertiajs/react';
+
+export default function useMetaPixel() {
+    const { tracking } = usePage().props;
+
+    useEffect(() =&gt; {
+        if (!tracking?.pixel_enabled || !tracking?.pixel_id || window.fbq) return;
+
+        !function(f,b,e,v,n,t,s){
+            if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)
+        }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+
+        window.fbq('init', tracking.pixel_id);
+        window.fbq('track', 'PageView');
+    }, [tracking?.pixel_id, tracking?.pixel_enabled]);
+}
+</code></pre>
+<h3>4.5 Użycie w Welcome.jsx i innych stronach</h3>
+<pre><code class="language-jsx">import useMetaPixel from '@/Hooks/useMetaPixel';
+
+export default function Welcome(props) {
+    useMetaPixel();
+    // ...
+}
+</code></pre>
+<h3>4.6 Śledzenie konwersji (formularze)</h3>
+<pre><code class="language-js">// Po sukcesie formularza kontaktowego
+window.fbq?.('track', 'Lead');
+
+// Po wysłaniu kalkulatora
+window.fbq?.('track', 'Lead', { content_name: 'Calculator' });
+
+// Po wysłaniu zapytania o wycenę
+window.fbq?.('track', 'SubmitApplication');
+</code></pre>
+<hr />
+<h2>Krok 5 — Cookie Consent (GDPR) — własny komponent</h2>
+<p>Przed załadowaniem GTM i Pixela wymagana jest zgoda użytkownika (RODO / UK GDPR).<br />
+Implementacja: <strong>własny komponent React</strong> bez zewnętrznych SaaS.</p>
+<h3>Wymagania prawne (RODO)</h3>
+<ul>
+<li>Granularny wybór kategorii — użytkownik musi móc zaakceptować tylko wybrane</li>
+<li>Odmowa musi być równie łatwa jak akceptacja (żadnych preklikowanych checkboxów)</li>
+<li>Możliwość wycofania zgody w dowolnym momencie (link w stopce → ponowne otwarcie banera)</li>
+<li>Zapis daty i wersji polityki przy zgodzie (do localStorage)</li>
+<li>Brak śledzenia analitycznego/marketingowego przed udzieleniem zgody</li>
+</ul>
+<h3>Kategorie cookies</h3>
+<table>
+<thead>
+<tr>
+<th>Klucz</th>
+<th>Nazwa</th>
+<th>Domyślnie</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>necessary</code></td>
+<td>Niezbędne</td>
+<td>zawsze <code>true</code> (zablokowane)</td>
+<td>Sesja, CSRF, preferencje językowe</td>
+</tr>
+<tr>
+<td><code>analytics</code></td>
+<td>Analityczne</td>
+<td><code>false</code></td>
+<td>GA4 via GTM</td>
+</tr>
+<tr>
+<td><code>marketing</code></td>
+<td>Marketingowe</td>
+<td><code>false</code></td>
+<td>Meta Pixel, Google Ads</td>
+</tr>
+<tr>
+<td><code>preferences</code></td>
+<td>Preferencje</td>
+<td><code>false</code></td>
+<td>Zapamiętanie ustawień interfejsu</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>5.1 Hook <code>useConsent</code></h3>
+<p>Stworzyć <code>resources/js/Hooks/useConsent.js</code>:</p>
+<pre><code class="language-js">import { useState, useEffect, useCallback } from 'react';
+
+const STORAGE_KEY = 'cookie_consent';
+const CONSENT_VERSION = '1.0'; // zmień przy nowej polityce cookies
+
+const defaultConsent = {
+    necessary: true,   // zawsze true, nie można wyłączyć
+    analytics: false,
+    marketing: false,
+    preferences: false,
+};
+
+function readConsent() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        // Jeśli zmieniono wersję polityki — traktuj jako brak zgody
+        if (parsed.version !== CONSENT_VERSION) return null;
+        return parsed;
+    } catch {
+        return null;
+    }
+}
+
+function writeConsent(consent) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        ...consent,
+        version: CONSENT_VERSION,
+        timestamp: new Date().toISOString(),
+    }));
+}
+
+function pushConsentToGTM(consent) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+        event: 'consent_update',
+        analytics_storage:   consent.analytics   ? 'granted' : 'denied',
+        ad_storage:          consent.marketing   ? 'granted' : 'denied',
+        functionality_storage: consent.preferences ? 'granted' : 'denied',
+        security_storage:    'granted',
+    });
+    // GTM Consent Mode v2
+    if (typeof window.gtag === 'function') {
+        window.gtag('consent', 'update', {
+            analytics_storage:    consent.analytics   ? 'granted' : 'denied',
+            ad_storage:           consent.marketing   ? 'granted' : 'denied',
+            functionality_storage: consent.preferences ? 'granted' : 'denied',
+        });
+    }
+}
+
+export default function useConsent() {
+    const [consent, setConsent]     = useState(defaultConsent);
+    const [resolved, setResolved]   = useState(false); // czy użytkownik już podjął decyzję
+    const [bannerOpen, setBannerOpen] = useState(false);
+
+    useEffect(() =&gt; {
+        const saved = readConsent();
+        if (saved) {
+            setConsent(saved);
+            setResolved(true);
+            pushConsentToGTM(saved);
+        } else {
+            setBannerOpen(true);
+        }
+    }, []);
+
+    const acceptAll = useCallback(() =&gt; {
+        const full = { necessary: true, analytics: true, marketing: true, preferences: true };
+        writeConsent(full);
+        setConsent(full);
+        setResolved(true);
+        setBannerOpen(false);
+        pushConsentToGTM(full);
+    }, []);
+
+    const rejectAll = useCallback(() =&gt; {
+        const minimal = { ...defaultConsent };
+        writeConsent(minimal);
+        setConsent(minimal);
+        setResolved(true);
+        setBannerOpen(false);
+        pushConsentToGTM(minimal);
+    }, []);
+
+    const saveCustom = useCallback((custom) =&gt; {
+        const merged = { ...defaultConsent, ...custom, necessary: true };
+        writeConsent(merged);
+        setConsent(merged);
+        setResolved(true);
+        setBannerOpen(false);
+        pushConsentToGTM(merged);
+    }, []);
+
+    const reopenBanner = useCallback(() =&gt; setBannerOpen(true), []);
+
+    return { consent, resolved, bannerOpen, acceptAll, rejectAll, saveCustom, reopenBanner };
+}
+</code></pre>
+<hr />
+<h3>5.2 Komponent <code>&lt;CookieBanner&gt;</code></h3>
+<p>Stworzyć <code>resources/js/Components/Marketing/CookieBanner.jsx</code>:</p>
+<pre><code class="language-jsx">import { useState } from 'react';
+import useConsent from '@/Hooks/useConsent';
+
+export default function CookieBanner() {
+    const { bannerOpen, acceptAll, rejectAll, saveCustom } = useConsent();
+    const [showDetails, setShowDetails] = useState(false);
+    const [custom, setCustom] = useState({
+        analytics: false,
+        marketing: false,
+        preferences: false,
+    });
+
+    if (!bannerOpen) return null;
+
+    return (
+        &lt;div className=&quot;fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 shadow-2xl p-6&quot;&gt;
+            &lt;div className=&quot;max-w-5xl mx-auto&quot;&gt;
+                &lt;p className=&quot;text-sm text-neutral-700 dark:text-neutral-300 mb-4&quot;&gt;
+                    Używamy plików cookies, aby poprawić działanie serwisu.
+                    Możesz zaakceptować wszystkie lub wybrać kategorie.{' '}
+                    &lt;a href=&quot;/cookies&quot; className=&quot;underline text-red-600&quot;&gt;Polityka cookies&lt;/a&gt;
+                &lt;/p&gt;
+
+                {showDetails &amp;&amp; (
+                    &lt;div className=&quot;grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4&quot;&gt;
+                        {[
+                            { key: 'analytics',   label: 'Analityczne',   desc: 'Google Analytics (GA4)' },
+                            { key: 'marketing',   label: 'Marketingowe',  desc: 'Meta Pixel, Google Ads' },
+                            { key: 'preferences', label: 'Preferencje',   desc: 'Zapamiętanie ustawień' },
+                        ].map(({ key, label, desc }) =&gt; (
+                            &lt;label key={key} className=&quot;flex items-start gap-2 cursor-pointer&quot;&gt;
+                                &lt;input
+                                    type=&quot;checkbox&quot;
+                                    checked={custom[key]}
+                                    onChange={e =&gt; setCustom(p =&gt; ({ ...p, [key]: e.target.checked }))}
+                                    className=&quot;mt-1 accent-red-600&quot;
+                                /&gt;
+                                &lt;span className=&quot;text-sm&quot;&gt;
+                                    &lt;span className=&quot;font-medium text-neutral-800 dark:text-neutral-200&quot;&gt;{label}&lt;/span&gt;
+                                    &lt;br /&gt;
+                                    &lt;span className=&quot;text-neutral-500 dark:text-neutral-400 text-xs&quot;&gt;{desc}&lt;/span&gt;
+                                &lt;/span&gt;
+                            &lt;/label&gt;
+                        ))}
+                    &lt;/div&gt;
+                )}
+
+                &lt;div className=&quot;flex flex-wrap gap-2&quot;&gt;
+                    &lt;button onClick={acceptAll}
+                        className=&quot;px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md&quot;&gt;
+                        Akceptuj wszystkie
+                    &lt;/button&gt;
+                    &lt;button onClick={rejectAll}
+                        className=&quot;px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-sm rounded-md text-neutral-700 dark:text-neutral-300&quot;&gt;
+                        Tylko niezbędne
+                    &lt;/button&gt;
+                    {showDetails
+                        ? &lt;button onClick={() =&gt; saveCustom(custom)}
+                            className=&quot;px-4 py-2 border border-red-600 text-red-600 text-sm rounded-md&quot;&gt;
+                            Zapisz wybór
+                          &lt;/button&gt;
+                        : &lt;button onClick={() =&gt; setShowDetails(true)}
+                            className=&quot;px-4 py-2 text-sm text-neutral-500 underline&quot;&gt;
+                            Dostosuj
+                          &lt;/button&gt;
+                    }
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    );
+}
+</code></pre>
+<hr />
+<h3>5.3 Inicjalizacja GTM Consent Mode (domyślne odmowy)</h3>
+<p>W <code>app.blade.php</code>, <strong>przed</strong> skryptem GTM, dodać Consent Initialization:</p>
+<pre><code class="language-html">&lt;!-- Cookie Consent Mode v2 — domyślna odmowa --&gt;
+&lt;script&gt;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+
+    gtag('consent', 'default', {
+        'analytics_storage':    'denied',
+        'ad_storage':           'denied',
+        'functionality_storage': 'denied',
+        'security_storage':     'granted',
+        'wait_for_update':      500
+    });
+&lt;/script&gt;
+</code></pre>
+<p>GTM i Pixel nie śledzą nic dopóki <code>useConsent</code> nie wywoła <code>gtag('consent', 'update', {...})</code> po przyjęciu zgody przez użytkownika.</p>
+<hr />
+<h3>5.4 Montowanie banera w layoutach</h3>
+<p>Dodać <code>&lt;CookieBanner /&gt;</code> do głównego layoutu Inertia — <code>resources/js/Layouts/MarketingLayout.jsx</code> (lub <code>app.jsx</code>):</p>
+<pre><code class="language-jsx">import CookieBanner from '@/Components/Marketing/CookieBanner';
+
+// W JSX:
+&lt;&gt;
+    {/* reszta layoutu */}
+    &lt;CookieBanner /&gt;
+&lt;/&gt;
+</code></pre>
+<hr />
+<h3>5.5 Link “Zarządzaj cookies” w stopce</h3>
+<p>Stopka powinna zawierać link otwierający baner ponownie. Wymaga udostępnienia <code>reopenBanner</code> przez React Context lub prop drilling.</p>
+<p><strong>Rozwiązanie — ConsentContext:</strong></p>
+<p>Stworzyć <code>resources/js/Contexts/ConsentContext.js</code>:</p>
+<pre><code class="language-js">import { createContext, useContext } from 'react';
+
+export const ConsentContext = createContext(null);
+export const useConsentContext = () =&gt; useContext(ConsentContext);
+</code></pre>
+<p>W <code>MarketingLayout.jsx</code>:</p>
+<pre><code class="language-jsx">import useConsent from '@/Hooks/useConsent';
+import { ConsentContext } from '@/Contexts/ConsentContext';
+import CookieBanner from '@/Components/Marketing/CookieBanner';
+
+export default function MarketingLayout({ children }) {
+    const consent = useConsent();
+
+    return (
+        &lt;ConsentContext.Provider value={consent}&gt;
+            &lt;Navbar /&gt;
+            &lt;main&gt;{children}&lt;/main&gt;
+            &lt;Footer /&gt;
+            &lt;CookieBanner /&gt;
+        &lt;/ConsentContext.Provider&gt;
+    );
+}
+</code></pre>
+<p>W <code>Footer.jsx</code> — przycisk wycofania zgody:</p>
+<pre><code class="language-jsx">import { useConsentContext } from '@/Contexts/ConsentContext';
+
+const { reopenBanner } = useConsentContext();
+
+&lt;button onClick={reopenBanner} className=&quot;text-sm text-neutral-500 hover:underline&quot;&gt;
+    Zarządzaj cookies
+&lt;/button&gt;
+</code></pre>
+<hr />
+<h3>5.6 Warunkowe uruchamianie Meta Pixel i GA4</h3>
+<p>Hook <code>useMetaPixel</code> (Krok 4) musi sprawdzać zgodę przed inicjalizacją:</p>
+<pre><code class="language-js">import { useConsentContext } from '@/Contexts/ConsentContext';
+
+export default function useMetaPixel() {
+    const { tracking } = usePage().props;
+    const { consent } = useConsentContext();
+
+    useEffect(() =&gt; {
+        if (!tracking?.pixel_enabled || !tracking?.pixel_id) return;
+        if (!consent.marketing) return; // brak zgody marketingowej
+        if (window.fbq) return;
+        // ... inicjalizacja fbq
+    }, [tracking?.pixel_id, consent.marketing]);
+}
+</code></pre>
+<p>GA4 jest ładowane przez GTM — GTM sam czeka na <code>gtag('consent', 'update')</code> z powrotem z <code>useConsent</code>.</p>
+<hr />
+<h3>5.7 Pliki do stworzenia</h3>
+<table>
+<thead>
+<tr>
+<th>Plik</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>resources/js/Hooks/useConsent.js</code></td>
+<td>Logika zgód, localStorage, GTM push</td>
+</tr>
+<tr>
+<td><code>resources/js/Components/Marketing/CookieBanner.jsx</code></td>
+<td>UI banera</td>
+</tr>
+<tr>
+<td><code>resources/js/Contexts/ConsentContext.js</code></td>
+<td>React Context do współdzielenia stanu</td>
+</tr>
+</tbody>
+</table>
+<h3>5.8 Modyfikacje istniejących plików</h3>
+<table>
+<thead>
+<tr>
+<th>Plik</th>
+<th>Zmiana</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>resources/views/app.blade.php</code></td>
+<td>Dodać Consent Default przed GTM snippetem</td>
+</tr>
+<tr>
+<td><code>resources/js/Layouts/MarketingLayout.jsx</code></td>
+<td>Owrapować w <code>ConsentContext.Provider</code>, dodać <code>&lt;CookieBanner /&gt;</code></td>
+</tr>
+<tr>
+<td><code>resources/js/Components/Marketing/Footer.jsx</code></td>
+<td>Dodać przycisk “Zarządzaj cookies”</td>
+</tr>
+<tr>
+<td><code>resources/js/Hooks/useMetaPixel.js</code></td>
+<td>Sprawdzać <code>consent.marketing</code> przed inicjalizacją</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Krok 6 — DataLayer helper (React)</h2>
+<p>Stworzyć <code>resources/js/utils/dataLayer.js</code>:</p>
+<pre><code class="language-js">export function pushEvent(event, params = {}) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event, ...params });
+}
+</code></pre>
+<p>Użycie w komponentach:</p>
+<pre><code class="language-js">import { pushEvent } from '@/utils/dataLayer';
+
+// Formularz kontaktowy
+pushEvent('contact_form_submitted', { form_type: 'contact' });
+
+// Kalkulator
+pushEvent('calculator_lead_submitted', { budget: selectedBudget });
+
+// Kliknięcie CTA
+pushEvent('cta_click', { location: 'hero', text: ctaLabel });
+</code></pre>
+<hr />
+<h2>Kolejność implementacji</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Zadanie</th>
+<th>Priorytet</th>
+<th>Czas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Migracja <code>settings</code> + <code>SettingSeeder</code> + <code>TrackingSettingsPage</code> w Filament</td>
+<td>🔴 Krytyczne</td>
+<td>2 h</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Dodać GTM snippet do <code>app.blade.php</code> (czyta z DB przez <code>Setting::get()</code>)</td>
+<td>🔴 Krytyczne</td>
+<td>30 min</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Skonfigurować GA4 w GTM (tag + trigger All Pages)</td>
+<td>🔴 Krytyczne</td>
+<td>20 min</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Dodać <code>useMetaPixel</code> hook (czyta <code>tracking.pixel_id</code> ze shared props)</td>
+<td>🟠 Ważne</td>
+<td>1 h</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Dodać <code>pushEvent</code> util + wywołania w Contact.jsx i CostCalculator.jsx</td>
+<td>🟠 Ważne</td>
+<td>1 h</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Google Ads Remarketing tag w GTM</td>
+<td>🟠 Ważne</td>
+<td>20 min</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Google Ads Conversion Tracking dla formularzy</td>
+<td>🟠 Ważne</td>
+<td>30 min</td>
+</tr>
+<tr>
+<td>7a</td>
+<td><code>useConsent</code> hook + localStorage + GTM Consent Mode v2 default (5.1 + 5.3)</td>
+<td>🟡 Uzupełniające</td>
+<td>2 h</td>
+</tr>
+<tr>
+<td>7b</td>
+<td>Komponent <code>&lt;CookieBanner&gt;</code> (UI, 3 kategorie, Dostosuj) (5.2)</td>
+<td>🟡 Uzupełniające</td>
+<td>1.5 h</td>
+</tr>
+<tr>
+<td>7c</td>
+<td><code>ConsentContext</code> + integracja w <code>MarketingLayout</code> + Footer link (5.4–5.5)</td>
+<td>🟡 Uzupełniające</td>
+<td>1 h</td>
+</tr>
+<tr>
+<td>7d</td>
+<td>Podpięcie zgody do <code>useMetaPixel</code> i GTM (5.6)</td>
+<td>🟡 Uzupełniające</td>
+<td>30 min</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Testowanie: GTM Preview, GA4 DebugView, Meta Pixel Helper</td>
+<td>🟡 Uzupełniające</td>
+<td>1 h</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Zmienne .env — podsumowanie</h2>
+<blockquote>
+<p><strong>Uwaga:</strong> Po wdrożeniu Kroku 0 wartości <code>.env</code> służą wyłącznie jako wartości domyślne dla <code>SettingSeeder</code>.<br />
+Faktyczna konfiguracja odbywa się z poziomu panelu admina → <strong>Settings → Tracking</strong>.</p>
+</blockquote>
+<pre><code class="language-dotenv"># ─── Tracking (fallback dla SettingSeeder) ─────────────
+GTM_ID=GTM-XXXXXXX
+META_PIXEL_ID=XXXXXXXXXXXXXXXXX
+GOOGLE_ADS_ID=AW-XXXXXXXXX
+COOKIEBOT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+</code></pre>
+<hr />
+<h2>Notatki bezpieczeństwa</h2>
+<ul>
+<li>Nigdy nie wstrzykiwać ID przez <code>{!! !!}</code> bez sanityzacji — używać <code>{{ }}</code> (auto-escape) w Blade lub <code>@js()</code> w Inertia</li>
+<li>GTM container access: tylko zaufane osoby mają prawo publishować — błędny tag może złamać stronę</li>
+<li>Pixel + GA4 — dane osobowe (IP, email) nie mogą być wysyłane bez zgody użytkownika (UK GDPR)</li>
+<li>Server-side events (Meta CAPI / GA4 Measurement Protocol) jako uzupełnienie — przydatne gdy adblockers blokują klienta</li>
+</ul>
+
+</body>
+</html>
