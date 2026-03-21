@@ -54,7 +54,7 @@
                                  class="relative rounded-xl border border-gray-200 bg-white shadow-sm transition hover:border-primary-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-900 dark:hover:border-primary-600">
 
                                 {{-- Clickable card body --}}
-                                <a href="{{ route('filament.admin.resources.leads.edit', $lead) }}"
+                                <a href="{{ route('filament.admin.resources.leads.view', $lead) }}"
                                    class="block p-3 pr-9 rounded-xl">
                                     <p class="text-sm font-semibold text-gray-900 dark:text-white leading-tight">{{ $lead->title }}</p>
 
