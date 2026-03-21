@@ -43,6 +43,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/invoices/{invoice}/pdf', InvoicePdfController::class)->name('invoice.pdf');
 
+    Route::patch('/lead-notes/{note}/unpin', function (\App\Models\LeadNote $note) {
+        $note->update(['is_pinned' => false]);
+        return back();
+    })->name('lead-notes.unpin');
+
     // Client Portal
     Route::prefix('portal')->name('portal.')->group(function () {
         Route::get('/', [PortalController::class, 'dashboard'])->name('dashboard');

@@ -11,6 +11,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use App\Filament\Widgets\QuickActionsWidget;
 use App\Filament\Widgets\StatsOverviewWidget;
@@ -43,6 +44,18 @@ class AdminPanelProvider extends PanelProvider
                 'primary'  => Color::hex('#ff2b17'),
                 'gray'     => Color::Zinc,
             ])
+            ->sidebarCollapsibleOnDesktop()
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_END,
+                function (): \Illuminate\View\View {
+                    $pinnedNotes = \App\Models\LeadNote::where('is_pinned', true)
+                        ->with('lead')
+                        ->orderByDesc('created_at')
+                        ->limit(15)
+                        ->get();
+                    return view('filament.components.pinned-notes', compact('pinnedNotes'));
+                },
+            )
             ->navigationGroups([
                 NavigationGroup::make('CRM'),
                 NavigationGroup::make('Projects'),
