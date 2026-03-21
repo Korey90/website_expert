@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -17,11 +18,14 @@ class Lead extends Model
         'assigned_to', 'value', 'currency', 'source',
         'calculator_data', 'notes', 'expected_close_date',
         'won_at', 'lost_at', 'lost_reason',
+        'budget_min', 'budget_max',
     ];
 
     protected $casts = [
         'calculator_data'      => 'array',
         'value'                => 'decimal:2',
+        'budget_min'           => 'decimal:2',
+        'budget_max'           => 'decimal:2',
         'expected_close_date'  => 'date',
         'won_at'               => 'datetime',
         'lost_at'              => 'datetime',
@@ -50,5 +54,15 @@ class Lead extends Model
     public function project(): HasOne
     {
         return $this->hasOne(Project::class);
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(LeadActivity::class)->latest();
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(LeadNote::class)->latest();
     }
 }

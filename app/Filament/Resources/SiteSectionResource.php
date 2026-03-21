@@ -7,6 +7,7 @@ use App\Filament\Resources\SiteSectionResource\Pages;
 use App\Models\SiteSection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -570,7 +571,7 @@ class SiteSectionResource extends Resource
             ])
             ->defaultSort('sort_order')
             ->reorderable('sort_order')
-            ->actions([EditAction::make(), DeleteAction::make()])
+            ->actions([ViewAction::make(), EditAction::make(), DeleteAction::make()])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Status')
@@ -584,6 +585,7 @@ class SiteSectionResource extends Resource
         return [
             'index'  => Pages\ListSiteSections::route('/'),
             'create' => Pages\CreateSiteSection::route('/create'),
+            'view'   => Pages\ViewSiteSection::route('/{record}'),
             'edit'   => Pages\EditSiteSection::route('/{record}/edit'),
         ];
     }

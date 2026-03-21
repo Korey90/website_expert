@@ -8,6 +8,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -54,6 +55,43 @@ class PipelineStageResource extends Resource
                         ->helperText('Leads in this stage are counted as closed-lost.')
                         ->inline(false),
                 ]),
+
+            Section::make('Stage Checklist')
+                ->description('Tasks that should be completed before moving the lead to the next stage. These appear as a live to-do on each lead\'s detail page.')
+                ->schema([
+                    Forms\Components\Repeater::make('checklist')
+                        ->label('')
+                        ->schema([
+                            Forms\Components\TextInput::make('label')
+                                ->required()
+                                ->placeholder('e.g. Send proposal to client')
+                                ->columnSpan(2),
+                            Forms\Components\Select::make('condition')
+                                ->label('Auto-complete condition')
+                                ->helperText('When this condition is met on the lead, the item is automatically marked done.')
+                                ->placeholder('Manual only (no auto-detect)')
+                                ->options([
+                                    'has_assignee'     => '👤 Lead has an assigned user',
+                                    'has_value'        => '💰 Deal value is set',
+                                    'has_client'       => '🏢 Client is linked',
+                                    'has_contact'      => '👥 Contact person is linked',
+                                    'has_expected_close' => '📅 Expected close date is set',
+                                    'has_phone'        => '📞 Client has a phone number',
+                                    'has_email'        => '✉️ Client has an email address',
+                                    'email_sent'       => '📤 At least one email has been sent',
+                                    'has_project'      => '📁 Project has been created',
+                                    'has_notes'        => '📝 At least one note exists',
+                                    'has_calculator_data' => '🧮 Calculator data is present',
+                                ])
+                                ->columnSpan(1),
+                        ])
+                        ->columns(3)
+                        ->addActionLabel('Add checklist item')
+                        ->defaultItems(0)
+                        ->reorderable()
+                        ->collapsible()
+                        ->columnSpanFull(),
+                ]),
         ]);
     }
 
@@ -76,6 +114,7 @@ class PipelineStageResource extends Resource
             ->defaultSort('order')
             ->reorderable('order')
             ->actions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make()
                     ->requiresConfirmation()
@@ -97,6 +136,7 @@ class PipelineStageResource extends Resource
         return [
             'index'  => Pages\ListPipelineStages::route('/'),
             'create' => Pages\CreatePipelineStage::route('/create'),
+            'view'   => Pages\ViewPipelineStage::route('/{record}'),
             'edit'   => Pages\EditPipelineStage::route('/{record}/edit'),
         ];
     }

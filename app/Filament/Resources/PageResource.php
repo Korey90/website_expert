@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
 class PageResource extends Resource
@@ -115,7 +116,7 @@ class PageResource extends Resource
                     ->options(['draft' => 'Draft', 'published' => 'Published']),
                 Tables\Filters\TrashedFilter::make(),
             ])
-            ->actions([EditAction::make(), DeleteAction::make()])
+            ->actions([ViewAction::make(), EditAction::make(), DeleteAction::make()])
             ->reorderable('sort_order')
             ->defaultSort('sort_order');
     }
@@ -125,6 +126,7 @@ class PageResource extends Resource
         return [
             'index'  => Pages\ListPages::route('/'),
             'create' => Pages\CreatePage::route('/create'),
+            'view'   => Pages\ViewPage::route('/{record}'),
             'edit'   => Pages\EditPage::route('/{record}/edit'),
         ];
     }

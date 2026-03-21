@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
 class CalculatorPricingResource extends Resource
@@ -54,7 +55,7 @@ class CalculatorPricingResource extends Resource
                 Tables\Filters\SelectFilter::make('category')
                     ->options(['project_type' => 'Project Type', 'cms' => 'CMS', 'pages_addon' => 'Pages', 'hosting' => 'Hosting', 'extra' => 'Extra']),
             ])
-            ->actions([EditAction::make(), DeleteAction::make()])
+            ->actions([ViewAction::make(), EditAction::make(), DeleteAction::make()])
             ->reorderable('sort_order')
             ->defaultSort('sort_order');
     }
@@ -64,6 +65,7 @@ class CalculatorPricingResource extends Resource
         return [
             'index'  => Pages\ListCalculatorPricings::route('/'),
             'create' => Pages\CreateCalculatorPricing::route('/create'),
+            'view'   => Pages\ViewCalculatorPricing::route('/{record}'),
             'edit'   => Pages\EditCalculatorPricing::route('/{record}/edit'),
         ];
     }

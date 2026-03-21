@@ -6,6 +6,7 @@ use App\Http\Requests\ContactRequest;
 use App\Mail\NewLeadMail;
 use App\Models\Client;
 use App\Models\Lead;
+use App\Models\LeadActivity;
 use App\Models\PipelineStage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
@@ -46,6 +47,13 @@ class ContactController extends Controller
             'notes'              => $data['message'],
             'calculator_data'    => $data,
         ]);
+
+        LeadActivity::log($lead->id, 'created', 'Lead created via contact form', [
+            'name'         => $data['name'],
+            'email'        => $data['email'],
+            'project_type' => $data['project_type'] ?? null,
+            'source'       => 'contact_form',
+        ], null);
 
         // Notify admin
         $adminEmail = config('mail.admin_address', 'admin@websiteexpert.co.uk');

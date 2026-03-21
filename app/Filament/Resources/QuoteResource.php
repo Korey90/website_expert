@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
 class QuoteResource extends Resource
@@ -81,7 +82,7 @@ class QuoteResource extends Resource
                     ->options(['draft' => 'Draft', 'sent' => 'Sent', 'accepted' => 'Accepted', 'rejected' => 'Rejected']),
                 Tables\Filters\TrashedFilter::make(),
             ])
-            ->actions([EditAction::make(), DeleteAction::make()])
+            ->actions([ViewAction::make(), EditAction::make(), DeleteAction::make()])
             ->defaultSort('created_at', 'desc');
     }
 
@@ -90,6 +91,7 @@ class QuoteResource extends Resource
         return [
             'index'  => Pages\ListQuotes::route('/'),
             'create' => Pages\CreateQuote::route('/create'),
+            'view'   => Pages\ViewQuote::route('/{record}'),
             'edit'   => Pages\EditQuote::route('/{record}/edit'),
         ];
     }

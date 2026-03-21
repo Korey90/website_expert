@@ -13,6 +13,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 use Spatie\Permission\Models\Role;
 
@@ -65,6 +66,7 @@ class UserResource extends Resource
                     ->relationship('roles', 'name'),
             ])
             ->actions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
@@ -78,6 +80,7 @@ class UserResource extends Resource
         return [
             'index'  => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
+            'view'   => Pages\ViewUser::route('/{record}'),
             'edit'   => Pages\EditUser::route('/{record}/edit'),
         ];
     }

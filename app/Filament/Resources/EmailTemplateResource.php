@@ -6,6 +6,7 @@ use App\Filament\Resources\EmailTemplateResource\Pages;
 use App\Models\EmailTemplate;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -105,6 +106,7 @@ class EmailTemplateResource extends Resource
                     ->falseLabel('Inactive only'),
             ])
             ->actions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
@@ -116,6 +118,7 @@ class EmailTemplateResource extends Resource
         return [
             'index'  => Pages\ListEmailTemplates::route('/'),
             'create' => Pages\CreateEmailTemplate::route('/create'),
+            'view'   => Pages\ViewEmailTemplate::route('/{record}'),
             'edit'   => Pages\EditEmailTemplate::route('/{record}/edit'),
         ];
     }

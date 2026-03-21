@@ -11,12 +11,13 @@ class PipelineStage extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'slug', 'color', 'description', 'order', 'is_won', 'is_lost',
+        'name', 'slug', 'color', 'description', 'checklist', 'order', 'is_won', 'is_lost',
     ];
 
     protected $casts = [
-        'is_won'  => 'boolean',
-        'is_lost' => 'boolean',
+        'checklist' => 'array',
+        'is_won'    => 'boolean',
+        'is_lost'   => 'boolean',
     ];
 
     public function leads(): HasMany

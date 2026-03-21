@@ -8,6 +8,7 @@ use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
@@ -106,6 +107,7 @@ class ClientResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
@@ -129,6 +131,7 @@ class ClientResource extends Resource
         return [
             'index'  => Pages\ListClients::route('/'),
             'create' => Pages\CreateClient::route('/create'),
+            'view'   => Pages\ViewClient::route('/{record}'),
             'edit'   => Pages\EditClient::route('/{record}/edit'),
         ];
     }

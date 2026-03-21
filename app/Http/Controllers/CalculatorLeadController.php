@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\NewLeadMail;
 use App\Models\Client;
 use App\Models\Lead;
+use App\Models\LeadActivity;
 use App\Models\PipelineStage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,6 +57,14 @@ class CalculatorLeadController extends Controller
             'value'             => isset($data['estimateLow']) ? round(($data['estimateLow'] + ($data['estimateHigh'] ?? $data['estimateLow'])) / 2, 2) : null,
             'calculator_data'   => $data,
         ]);
+
+        LeadActivity::log($lead->id, 'created', 'Lead created via cost calculator', [
+            'email'        => $data['contactEmail'],
+            'project_type' => $projectType,
+            'estimate_low' => $data['estimateLow'] ?? null,
+            'estimate_high'=> $data['estimateHigh'] ?? null,
+            'source'       => 'calculator',
+        ], null);
 
         $adminEmail = config('mail.admin_address', 'admin@websiteexpert.co.uk');
         Mail::to($adminEmail)->queue(new NewLeadMail(

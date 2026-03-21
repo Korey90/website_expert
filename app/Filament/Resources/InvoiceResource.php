@@ -17,6 +17,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
 class InvoiceResource extends Resource
@@ -104,6 +105,7 @@ class InvoiceResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                ViewAction::make(),
                 EditAction::make(),
                 Action::make('pdf')
                     ->label('PDF')
@@ -125,6 +127,7 @@ class InvoiceResource extends Resource
         return [
             'index'  => Pages\ListInvoices::route('/'),
             'create' => Pages\CreateInvoice::route('/create'),
+            'view'   => Pages\ViewInvoice::route('/{record}'),
             'edit'   => Pages\EditInvoice::route('/{record}/edit'),
         ];
     }

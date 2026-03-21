@@ -17,6 +17,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
 class ProjectResource extends Resource
@@ -84,6 +85,7 @@ class ProjectResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
@@ -107,6 +109,7 @@ class ProjectResource extends Resource
         return [
             'index'  => Pages\ListProjects::route('/'),
             'create' => Pages\CreateProject::route('/create'),
+            'view'   => Pages\ViewProject::route('/{record}'),
             'edit'   => Pages\EditProject::route('/{record}/edit'),
             'tasks'  => Pages\ManageProjectTasks::route('/{record}/tasks'),
         ];

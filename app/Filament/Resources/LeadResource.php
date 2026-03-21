@@ -16,6 +16,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
 class LeadResource extends Resource
@@ -90,6 +91,7 @@ class LeadResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
@@ -106,6 +108,7 @@ class LeadResource extends Resource
         return [
             'index'  => Pages\ListLeads::route('/'),
             'create' => Pages\CreateLead::route('/create'),
+            'view'   => Pages\ViewLead::route('/{record}'),
             'edit'   => Pages\EditLead::route('/{record}/edit'),
         ];
     }

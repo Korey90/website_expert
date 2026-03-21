@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\RoleResource\Pages;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -89,7 +90,7 @@ class RoleResource extends Resource
                     ->date()
                     ->sortable(),
             ])
-            ->actions([EditAction::make(), DeleteAction::make()])
+            ->actions([ViewAction::make(), EditAction::make(), DeleteAction::make()])
             ->defaultSort('name');
     }
 
@@ -98,6 +99,7 @@ class RoleResource extends Resource
         return [
             'index'  => Pages\ListRoles::route('/'),
             'create' => Pages\CreateRole::route('/create'),
+            'view'   => Pages\ViewRole::route('/{record}'),
             'edit'   => Pages\EditRole::route('/{record}/edit'),
         ];
     }

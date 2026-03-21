@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
 class AutomationRuleResource extends Resource
@@ -80,7 +81,7 @@ class AutomationRuleResource extends Resource
                 Tables\Columns\TextColumn::make('delay_minutes')->suffix(' min'),
                 Tables\Columns\IconColumn::make('is_active')->boolean(),
             ])
-            ->actions([EditAction::make(), DeleteAction::make()])
+            ->actions([ViewAction::make(), EditAction::make(), DeleteAction::make()])
             ->defaultSort('name');
     }
 
@@ -89,6 +90,7 @@ class AutomationRuleResource extends Resource
         return [
             'index'  => Pages\ListAutomationRules::route('/'),
             'create' => Pages\CreateAutomationRule::route('/create'),
+            'view'   => Pages\ViewAutomationRule::route('/{record}'),
             'edit'   => Pages\EditAutomationRule::route('/{record}/edit'),
         ];
     }
