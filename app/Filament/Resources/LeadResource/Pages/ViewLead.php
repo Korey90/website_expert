@@ -15,6 +15,8 @@ use App\Models\PipelineStage;
 use App\Models\Project;
 use App\Models\Quote;
 use App\Models\QuoteItem;
+use App\Models\SmsTemplate;
+use App\Services\SmsService;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
@@ -60,6 +62,11 @@ class ViewLead extends ViewRecord
     public string $modalPhone              = '';
     public string $modalEmail              = '';
 
+    // ── SMS modal ─────────────────────────────────────────────────────────
+    public bool            $showSmsModal   = false;
+    public string|int|null $smsTemplateId  = null;
+    public string          $smsMessage     = '';
+
     // ── Proposal builder ─────────────────────────────────────────────────
     public bool   $showProposalModal  = false;
     public ?int   $proposalQuoteId    = null;
@@ -99,6 +106,7 @@ class ViewLead extends ViewRecord
         $allStages      = PipelineStage::orderBy('order')->get();
         $hasProject     = $this->record->project !== null;
         $emailTemplates = EmailTemplate::where('is_active', true)->orderBy('name')->get();
+        $smsTemplates   = SmsTemplate::where('is_active', true)->orderBy('name')->get();
 
         $stageChecklist = $this->record->stage?->checklist ?? [];
         $completedItems = LeadChecklistItem::where('lead_id', $this->record->id)
@@ -119,7 +127,7 @@ class ViewLead extends ViewRecord
             ->latest()
             ->first();
 
-        return compact('activities', 'leadNotes', 'allStages', 'hasProject', 'emailTemplates', 'stageChecklist', 'completedItems', 'autoSatisfied', 'users', 'existingQuote');
+        return compact('activities', 'leadNotes', 'allStages', 'hasProject', 'emailTemplates', 'smsTemplates', 'stageChecklist', 'completedItems', 'autoSatisfied', 'users', 'existingQuote');
     }
 
     // ── Email ─────────────────────────────────────────────────────────────
@@ -216,6 +224,72 @@ class ViewLead extends ViewRecord
     }
 
     // ── Notes CRUD ────────────────────────────────────────────────────────
+
+    // ── SMS ───────────────────────────────────────────────────────────────
+
+    public function openSmsModal(): void
+    {
+        $this->smsTemplateId = null;
+        $this->smsMessage    = '';
+        $this->showSmsModal  = true;
+    }
+
+    public function updatedSmsTemplateId(string|int|null $value): void
+    {
+        $id = $value ? (int) $value : null;
+        if (! $id) {
+            $this->smsMessage = '';
+            return;
+        }
+
+        $tpl = SmsTemplate::find($id);
+        if (! $tpl) {
+            return;
+        }
+
+        $lead = Lead::with(['client', 'stage', 'assignedTo'])->find($this->record->id);
+        $vars = [
+            'client_name'   => $lead?->client?->primary_contact_name ?? '',
+            'company_name'  => $lead?->client?->company_name         ?? '',
+            'lead_title'    => $lead?->title                         ?? '',
+            'stage_name'    => $lead?->stage?->name                  ?? '',
+            'assigned_name' => $lead?->assignedTo?->name             ?? '',
+            'project_name'  => $lead?->project?->name                ?? '',
+            'today'         => now()->format('d M Y'),
+        ];
+
+        $this->smsMessage = $tpl->render($vars);
+    }
+
+    public function sendSmsFromLead(): void
+    {
+        $this->validate([
+            'smsMessage' => ['required', 'string', 'max:1600'],
+        ]);
+
+        $lead  = Lead::with('client')->findOrFail($this->record->id);
+        $phone = $lead->client?->primary_contact_phone;
+
+        if (! $phone) {
+            Notification::make()->title('No phone number on file for this client')->danger()->send();
+            return;
+        }
+
+        $sent = app(SmsService::class)->send($phone, $this->smsMessage);
+
+        if (! $sent) {
+            Notification::make()->title('SMS failed — check logs')->danger()->send();
+            return;
+        }
+
+        LeadActivity::log($this->record->id, 'sms_sent', 'SMS sent to ' . $phone . ': "' . mb_substr($this->smsMessage, 0, 80) . (mb_strlen($this->smsMessage) > 80 ? '…' : '') . '"');
+
+        $this->showSmsModal  = false;
+        $this->smsTemplateId = null;
+        $this->smsMessage    = '';
+
+        Notification::make()->title('SMS sent to ' . $phone)->success()->send();
+    }
 
     public function addNote(): void
     {

@@ -45,4 +45,10 @@ return [
         'api_key' => env('TINYMCE_API_KEY', 'no-api-key'),
     ],
 
+    'twilio' => [
+        'sid'   => env('TWILIO_ACCOUNT_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'from'  => env('TWILIO_FROM_NUMBER'),
+    ],
+
 ];

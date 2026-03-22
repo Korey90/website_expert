@@ -12,6 +12,9 @@ use App\Models\Invoice;
 use App\Models\Lead;
 use App\Models\Project;
 use App\Models\Quote;
+use App\Models\SmsTemplate;
+use App\Models\User;
+use App\Services\SmsService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -34,17 +37,38 @@ class ProcessAutomationJob implements ShouldQueue
 
     public function __construct(
         public readonly string $triggerEvent,
-        public readonly array  $context,  // e.g. ['lead_id' => 5, 'project_id' => 2]
+        public readonly array  $context,
+        public readonly ?int   $singleRuleId = null, // used for delayed per-rule dispatch
     ) {}
 
     public function handle(): void
     {
+        // When dispatched with a specific rule ID (delayed execution), run only that rule.
+        if ($this->singleRuleId !== null) {
+            $rule = AutomationRule::where('is_active', true)->find($this->singleRuleId);
+            if ($rule && $this->conditionsMet($rule->conditions ?? [])) {
+                foreach ($rule->actions ?? [] as $action) {
+                    $this->executeAction($action);
+                }
+            }
+            return;
+        }
+
         $rules = AutomationRule::where('trigger_event', $this->triggerEvent)
             ->where('is_active', true)
             ->get();
 
         foreach ($rules as $rule) {
             if (! $this->conditionsMet($rule->conditions ?? [])) {
+                continue;
+            }
+
+            $delay = (int) ($rule->delay_minutes ?? 0);
+
+            if ($delay > 0) {
+                // Dispatch a new job scoped to this rule with the specified delay.
+                self::dispatch($this->triggerEvent, $this->context, $rule->id)
+                    ->delay(now()->addMinutes($delay));
                 continue;
             }
 
@@ -88,6 +112,8 @@ class ProcessAutomationJob implements ShouldQueue
             match ($type) {
                 'send_email'          => $this->sendEmail($action),
                 'send_internal_email' => $this->sendInternalEmail($action),
+                'send_sms'            => $this->sendSms($action),
+                'notify_admin'        => $this->notifyAdmin($action),
                 'add_tag'             => $this->addTag($action),
                 'change_status'       => $this->changeStatus($action),
                 default               => null,
@@ -123,6 +149,35 @@ class ProcessAutomationJob implements ShouldQueue
         });
     }
 
+    private function sendSms(array $action): void
+    {
+        $phone = $this->resolveRecipientPhone($action['recipient'] ?? $action['to'] ?? 'client');
+        if (! $phone) {
+            return;
+        }
+
+        $template = SmsTemplate::find($action['template_id'] ?? null);
+        if (! $template) {
+            Log::warning('ProcessAutomationJob: send_sms action has no valid template_id.', ['action' => $action]);
+            return;
+        }
+
+        $message = $template->render($this->buildTemplateVars());
+
+        app(SmsService::class)->send($phone, $message);
+    }
+
+    private function notifyAdmin(array $action): void
+    {
+        $to      = config('mail.admin_address', 'admin@websiteexpert.co.uk');
+        $subject = $action['subject'] ?? 'Admin Notification — ' . $this->triggerEvent;
+        $body    = $action['body']    ?? 'Automation rule triggered: ' . $this->triggerEvent . "\n\nContext: " . json_encode($this->context);
+
+        Mail::raw($body, function ($msg) use ($to, $subject) {
+            $msg->to($to)->subject($subject);
+        });
+    }
+
     private function addTag(array $action): void
     {
         $tag = $action['tag'] ?? null;
@@ -154,6 +209,48 @@ class ProcessAutomationJob implements ShouldQueue
         }
     }
 
+    /**
+     * Build a flat array of template variable values from the current context.
+     * Used by SmsTemplate::render().
+     */
+    private function buildTemplateVars(): array
+    {
+        $vars = ['today' => now()->format('d M Y')];
+
+        if (isset($this->context['lead_id'])) {
+            $lead = Lead::with(['client', 'stage', 'assignedTo'])->find($this->context['lead_id']);
+            if ($lead) {
+                $vars['lead_title']    = $lead->title ?? '';
+                $vars['client_name']   = $lead->client?->primary_contact_name ?? '';
+                $vars['company_name']  = $lead->client?->company_name ?? '';
+                $vars['stage_name']    = $lead->stage?->name ?? '';
+                $vars['assigned_name'] = $lead->assignedTo?->name ?? '';
+                $vars['project_name']  = $lead->project?->name ?? '';
+            }
+        }
+
+        if (isset($this->context['project_id'])) {
+            $project = Project::with(['client', 'assignedTo'])->find($this->context['project_id']);
+            if ($project) {
+                $vars['project_name']  = $project->name ?? '';
+                $vars['client_name']   = $vars['client_name']  ?? ($project->client?->primary_contact_name ?? '');
+                $vars['company_name']  = $vars['company_name'] ?? ($project->client?->company_name ?? '');
+                $vars['assigned_name'] = $vars['assigned_name'] ?? ($project->assignedTo?->name ?? '');
+            }
+        }
+
+        if (isset($this->context['invoice_id'])) {
+            $invoice = Invoice::with('client')->find($this->context['invoice_id']);
+            if ($invoice) {
+                $vars['invoice_number'] = $invoice->invoice_number ?? "#{$invoice->id}";
+                $vars['client_name']    = $vars['client_name']  ?? ($invoice->client?->primary_contact_name ?? '');
+                $vars['company_name']   = $vars['company_name'] ?? ($invoice->client?->company_name ?? '');
+            }
+        }
+
+        return $vars;
+    }
+
     private function resolveRecipientEmail(string $recipient): ?string
     {
         return match ($recipient) {
@@ -161,6 +258,36 @@ class ProcessAutomationJob implements ShouldQueue
             'admin'  => config('mail.admin_address', 'admin@websiteexpert.co.uk'),
             default  => filter_var($recipient, FILTER_VALIDATE_EMAIL) ? $recipient : null,
         };
+    }
+
+    private function resolveRecipientPhone(string $recipient): ?string
+    {
+        return match ($recipient) {
+            'client' => $this->resolveClientPhone(),
+            default  => preg_match('/^\+?[\d\s\-()]{7,}$/', $recipient) ? $recipient : null,
+        };
+    }
+
+    private function resolveClientPhone(): ?string
+    {
+        if (isset($this->context['client_id'])) {
+            return Client::find($this->context['client_id'])?->phone;
+        }
+        if (isset($this->context['lead_id'])) {
+            $lead = Lead::find($this->context['lead_id']);
+            return $lead?->client?->phone ?? $lead?->phone;
+        }
+        if (isset($this->context['project_id'])) {
+            return Project::find($this->context['project_id'])?->client?->phone;
+        }
+        if (isset($this->context['invoice_id'])) {
+            return Invoice::find($this->context['invoice_id'])?->client?->phone;
+        }
+        if (isset($this->context['quote_id'])) {
+            return Quote::find($this->context['quote_id'])?->client?->phone;
+        }
+
+        return null;
     }
 
     private function resolveClientEmail(): ?string

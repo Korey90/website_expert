@@ -23,8 +23,11 @@ class AutomationEventListener
         // Lead created
         $events->listen('eloquent.created: ' . Lead::class, [self::class, 'onLeadCreated']);
 
-        // Lead status changed
+        // Lead status / stage changed
         $events->listen('eloquent.updated: ' . Lead::class, [self::class, 'onLeadUpdated']);
+
+        // Project created
+        $events->listen('eloquent.created: ' . Project::class, [self::class, 'onProjectCreated']);
 
         // Project status changed
         $events->listen('eloquent.updated: ' . Project::class, [self::class, 'onProjectUpdated']);
@@ -56,6 +59,24 @@ class AutomationEventListener
                 'status'     => $lead->status,
             ]);
         }
+
+        if ($lead->wasChanged('stage')) {
+            $this->dispatch('lead.stage_changed', [
+                'lead_id'   => $lead->id,
+                'client_id' => $lead->client_id,
+                'old_stage' => $lead->getOriginal('stage'),
+                'stage'     => $lead->stage,
+            ]);
+        }
+    }
+
+    public function onProjectCreated(Project $project): void
+    {
+        $this->dispatch('project.created', [
+            'project_id' => $project->id,
+            'client_id'  => $project->client_id,
+            'status'     => $project->status,
+        ]);
     }
 
     public function onProjectUpdated(Project $project): void

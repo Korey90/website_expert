@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AutomationRuleResource\Pages;
 use App\Models\AutomationRule;
+use App\Models\SmsTemplate;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -60,8 +61,10 @@ class AutomationRuleResource extends Resource
                             Forms\Components\TextInput::make('template_slug')
                                 ->label('Email Template Slug')
                                 ->visible(fn (Get $get) => $get('type') === 'send_email'),
-                            Forms\Components\TextInput::make('message')
-                                ->label('SMS Message')
+                            Forms\Components\Select::make('template_id')
+                                ->label('SMS Template')
+                                ->options(fn () => SmsTemplate::where('is_active', true)->orderBy('name')->pluck('name', 'id'))
+                                ->searchable()
                                 ->visible(fn (Get $get) => $get('type') === 'send_sms'),
                         ])
                         ->columns(2)

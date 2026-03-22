@@ -585,6 +585,13 @@
                             Send Email
                         </button>
 
+                        {{-- Send SMS --}}
+                        <button wire:click="openSmsModal"
+                                class="flex w-full items-center gap-2.5 rounded-xl border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-medium text-green-700 transition hover:bg-green-100 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30">
+                            <x-heroicon-m-device-phone-mobile class="h-4 w-4 shrink-0" />
+                            Send SMS
+                        </button>
+
                         {{-- ── Proposal ────────────────────────────────── --}}
                         @if($existingQuote)
                             @php
@@ -984,6 +991,108 @@
 </div>
 
 {{-- ══════════════════════════════════════════════════════════════════════════
+     SMS MODAL
+══════════════════════════════════════════════════════════════════════════ --}}
+<div x-data
+     x-show="$wire.showSmsModal"
+     x-cloak
+     @keydown.escape.window="$wire.set('showSmsModal', false)"
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+
+    <div @click.stop
+         x-show="$wire.showSmsModal"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-2"
+         class="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 shadow-2xl border border-gray-200 dark:border-gray-700">
+
+        {{-- Header --}}
+        <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <div class="flex items-center gap-2.5">
+                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/40">
+                    <x-heroicon-m-device-phone-mobile class="h-4 w-4 text-green-600 dark:text-green-400" />
+                </span>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Send SMS</h3>
+                @if($record->client?->primary_contact_phone)
+                    <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-500 dark:bg-gray-800 dark:text-gray-400">{{ $record->client->primary_contact_phone }}</span>
+                @endif
+            </div>
+            <button wire:click="$set('showSmsModal', false)"
+                    class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                <x-heroicon-m-x-mark class="h-5 w-5" />
+            </button>
+        </div>
+
+        {{-- Body --}}
+        <div class="px-6 py-5 space-y-4">
+
+            {{-- Template selector --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Template
+                    <span class="ml-1 text-xs font-normal text-gray-400">(fills message below)</span>
+                </label>
+                <select wire:model.live="smsTemplateId"
+                        class="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <option value="">— Select a template —</option>
+                    @foreach($smsTemplates as $tpl)
+                        <option value="{{ $tpl->id }}">{{ $tpl->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Message --}}
+            <div x-data="{ count: 0 }" x-init="count = $refs.msg.value.length">
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Message <span class="text-red-500">*</span>
+                    </label>
+                    <span class="text-xs text-gray-400" x-text="count + ' chars / ' + Math.ceil(count / 160) + ' SMS'"></span>
+                </div>
+                <textarea wire:model="smsMessage"
+                          x-ref="msg"
+                          x-on:input="count = $event.target.value.length"
+                          rows="5"
+                          maxlength="1600"
+                          placeholder="Type your message or select a template above..."
+                          class="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-y"></textarea>
+                @error('smsMessage')
+                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                @enderror
+            </div>
+
+            @unless($record->client?->primary_contact_phone)
+                <div class="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
+                    No phone number on file for this client — SMS cannot be sent.
+                </div>
+            @endunless
+
+        </div>
+
+        {{-- Footer --}}
+        <div class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+            <button wire:click="$set('showSmsModal', false)"
+                    class="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition">
+                Cancel
+            </button>
+            <button wire:click="sendSmsFromLead"
+                    wire:loading.attr="disabled"
+                    @unless($record->client?->primary_contact_phone) disabled @endunless
+                    class="flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2 text-sm font-semibold text-white hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                <span wire:loading.remove wire:target="sendSmsFromLead">
+                    <x-heroicon-m-paper-airplane class="h-4 w-4 inline mr-1" />
+                    Send SMS
+                </span>
+                <span wire:loading wire:target="sendSmsFromLead">Sending…</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- ══════════════════════════════════════════════════════════════════════════
      PROPOSAL BUILDER MODAL
 ══════════════════════════════════════════════════════════════════════════ --}}
 <div
@@ -1007,7 +1116,7 @@
         x-transition:leave="ease-in duration-150"
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95"
-        class="my-8 w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-700">
+        class="my-8 w-full max-w-7xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-700">
 
         {{-- Header --}}
         <div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
@@ -1065,22 +1174,21 @@
             <div class="flex-1 overflow-x-auto">
 
                 {{-- Table header --}}
-                <div class="grid grid-cols-12 border-b border-gray-200 bg-gray-50/70 px-6 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:border-gray-700 dark:bg-gray-800/30">
-                    <div class="col-span-5">Description</div>
+                <div class="grid grid-cols-11 border-b border-gray-200 bg-gray-50/70 px-6 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:border-gray-700 dark:bg-gray-800/30">
+                    <div class="col-span-6">Description</div>
                     <div class="col-span-3">Details</div>
                     <div class="col-span-1 text-right">Qty</div>
-                    <div class="col-span-2 text-right">Unit Price</div>
-                    <div class="col-span-1"></div>
+                    <div class="col-span-1 text-right">Unit Price</div>
                 </div>
 
                 {{-- Items --}}
                 <div class="divide-y divide-gray-100 dark:divide-gray-800">
                     @foreach($proposalItems as $i => $item)
-                        <div class="grid grid-cols-12 items-center gap-2 px-6 py-3">
+                        <div class="relative grid grid-cols-11 items-start gap-2 py-3 pl-6 pr-10">
 
                             {{-- Description with autocomplete --}}
                             <div
-                                class="relative col-span-5"
+                                class="relative col-span-6"
                                 x-data="{
                                     open: false,
                                     suggestions: [],
@@ -1116,7 +1224,7 @@
                                     @blur="syncToWire()"
                                     @keydown.escape="open = false"
                                     placeholder="Service or item description…"
-                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
+                                    class="h-[54px] w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
 
                                 {{-- Suggestions dropdown --}}
                                 <div
@@ -1130,8 +1238,13 @@
                                                 @click="pick(s)"
                                                 class="flex w-full items-center gap-3 border-b border-gray-100 px-3 py-2 text-left text-sm last:border-0 hover:bg-primary-50 dark:border-gray-700 dark:hover:bg-primary-900/20">
                                             <div class="min-w-0 flex-1">
-                                                <p class="truncate font-medium text-gray-900 dark:text-white" x-text="s.label"></p>
-                                                <p class="truncate text-xs text-gray-400" x-text="s.description || s.category"></p>
+                                                <div class="flex items-center gap-2">
+                                                    <p class="truncate font-medium text-gray-900 dark:text-white" x-text="s.label"></p>
+                                                    <span x-show="s.category"
+                                                          x-text="s.category"
+                                                          class="shrink-0 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400"></span>
+                                                </div>
+                                                <p x-show="s.description" class="truncate text-xs text-gray-400 mt-0.5" x-text="s.description"></p>
                                             </div>
                                             <span class="shrink-0 rounded bg-primary-50 px-1.5 py-0.5 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-400"
                                                   x-text="'£' + Number(s.base_cost).toFixed(2)"></span>
@@ -1142,28 +1255,26 @@
 
                             <div class="col-span-3">
                                 <textarea wire:model.blur="proposalItems.{{ $i }}.details"
-                                          rows="1"
+                                          rows="2"
                                           placeholder="Optional details…"
-                                          class="w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs text-gray-600 placeholder-gray-400 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"></textarea>
+                                          class="h-[54px] w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-600 placeholder-gray-400 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"></textarea>
                             </div>
                             <div class="col-span-1">
                                 <input wire:model.live="proposalItems.{{ $i }}.quantity"
                                        type="number" min="0.01" step="0.5"
-                                       class="w-full rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-right text-sm text-gray-900 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
+                                       class="h-[54px] w-full rounded-lg border border-gray-300 bg-white px-2 py-2 text-right text-sm text-gray-900 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
                             </div>
-                            <div class="col-span-2">
+                            <div class="col-span-1">
                                 <input wire:model.live="proposalItems.{{ $i }}.unit_price"
                                        type="number" min="0" step="10"
-                                       class="w-full rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-right text-sm text-gray-900 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
+                                       class="h-[54px] w-full rounded-lg border border-gray-300 bg-white px-2 py-2 text-right text-sm text-gray-900 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
                             </div>
-                            <div class="col-span-1 flex justify-end">
-                                @if(count($proposalItems) > 1)
-                                    <button wire:click="removeProposalItem({{ $i }})"
-                                            class="rounded p-1 text-gray-300 transition hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
-                                        <x-heroicon-m-x-mark class="h-4 w-4" />
-                                    </button>
-                                @endif
-                            </div>
+                            @if(count($proposalItems) > 1)
+                            <button wire:click="removeProposalItem({{ $i }})"
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-gray-300 transition hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
+                                <x-heroicon-m-x-mark class="h-4 w-4" />
+                            </button>
+                            @endif
                         </div>
                     @endforeach
                 </div>
