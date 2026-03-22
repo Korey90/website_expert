@@ -52,7 +52,12 @@ class AutomationRuleResource extends Resource
                     Forms\Components\Repeater::make('actions')
                         ->schema([
                             Forms\Components\Select::make('type')
-                                ->options(['send_email' => 'Send Email', 'send_sms' => 'Send SMS', 'notify_admin' => 'Notify Admin'])
+                                ->options([
+                                    'send_email'           => 'Send Email',
+                                    'send_sms'             => 'Send SMS',
+                                    'notify_admin'         => 'Notify Admin',
+                                    'create_portal_access' => 'Create Portal Access',
+                                ])
                                 ->required()
                                 ->reactive(),
                             Forms\Components\Select::make('to')

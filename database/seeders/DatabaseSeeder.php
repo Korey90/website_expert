@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
 
         // Content & settings
         $this->call(EmailTemplateSeeder::class);
+        $this->call(SmsTemplateSeeder::class);
         $this->call(AutomationRuleSeeder::class);
         $this->call(CalculatorPricingSeeder::class);
         $this->call(PageSeeder::class);

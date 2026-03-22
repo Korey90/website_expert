@@ -15,6 +15,8 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Forms;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
@@ -27,6 +29,144 @@ class ClientResource extends Resource
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-building-office-2';
     protected static \UnitEnum|string|null $navigationGroup = 'CRM';
     protected static ?int $navigationSort = 1;
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->schema([
+            Section::make('Dane firmy')
+                ->columns(3)
+                ->schema([
+                    TextEntry::make('company_name')
+                        ->label('Nazwa firmy')
+                        ->weight('bold')
+                        ->size('lg')
+                        ->columnSpan(2),
+
+                    TextEntry::make('status')
+                        ->label('Status')
+                        ->badge()
+                        ->color(fn ($state) => match ($state) {
+                            'prospect' => 'gray',
+                            'active'   => 'success',
+                            'inactive' => 'warning',
+                            'archived' => 'danger',
+                            default    => 'gray',
+                        }),
+
+                    TextEntry::make('trading_name')
+                        ->label('Nazwa handlowa')
+                        ->placeholder('—'),
+
+                    TextEntry::make('industry')
+                        ->label('Branża')
+                        ->placeholder('—'),
+
+                    TextEntry::make('website')
+                        ->label('Strona WWW')
+                        ->url(fn ($state) => $state)
+                        ->openUrlInNewTab()
+                        ->placeholder('—'),
+
+                    TextEntry::make('companies_house_number')
+                        ->label('Companies House')
+                        ->placeholder('—'),
+
+                    TextEntry::make('vat_number')
+                        ->label('NIP / VAT')
+                        ->placeholder('—'),
+
+                    TextEntry::make('source')
+                        ->label('Źródło')
+                        ->badge()
+                        ->color('info')
+                        ->placeholder('—'),
+                ]),
+
+            Section::make('Kontakt główny')
+                ->columns(3)
+                ->schema([
+                    TextEntry::make('primary_contact_name')
+                        ->label('Imię i nazwisko')
+                        ->placeholder('—'),
+
+                    TextEntry::make('primary_contact_email')
+                        ->label('E-mail')
+                        ->copyable()
+                        ->placeholder('—'),
+
+                    TextEntry::make('primary_contact_phone')
+                        ->label('Telefon')
+                        ->copyable()
+                        ->placeholder('—'),
+                ]),
+
+            Section::make('Adres')
+                ->columns(3)
+                ->collapsed()
+                ->schema([
+                    TextEntry::make('address_line1')->label('Ulica / linia 1')->placeholder('—'),
+                    TextEntry::make('address_line2')->label('Ulica / linia 2')->placeholder('—'),
+                    TextEntry::make('city')->label('Miasto')->placeholder('—'),
+                    TextEntry::make('county')->label('Hrabstwo / powiat')->placeholder('—'),
+                    TextEntry::make('postcode')->label('Kod pocztowy')->placeholder('—'),
+                    TextEntry::make('country')->label('Kraj')->placeholder('—'),
+                ]),
+
+            Section::make('Finanse & Przypisanie')
+                ->columns(3)
+                ->schema([
+                    TextEntry::make('lifetime_value')
+                        ->label('Lifetime Value')
+                        ->money('GBP')
+                        ->placeholder('—'),
+
+                    TextEntry::make('currency')
+                        ->label('Waluta')
+                        ->badge()
+                        ->color('gray'),
+
+                    TextEntry::make('assignedTo.name')
+                        ->label('Opiekun')
+                        ->placeholder('—'),
+                ]),
+
+            Section::make('Dostęp do portalu klienta')
+                ->icon('heroicon-o-lock-closed')
+                ->columns(3)
+                ->schema([
+                    IconEntry::make('portal_user_id')
+                        ->label('Status konta')
+                        ->boolean()
+                        ->trueIcon('heroicon-o-check-circle')
+                        ->falseIcon('heroicon-o-x-circle')
+                        ->trueColor('success')
+                        ->falseColor('danger')
+                        ->getStateUsing(fn ($record) => (bool) $record->portal_user_id),
+
+                    TextEntry::make('portalUser.email')
+                        ->label('Login (e-mail)')
+                        ->copyable()
+                        ->placeholder('Brak konta')
+                        ->icon('heroicon-m-envelope'),
+
+                    TextEntry::make('portalUser.last_login_at')
+                        ->label('Ostatnie logowanie')
+                        ->dateTime('d M Y, H:i')
+                        ->since()
+                        ->placeholder('Nigdy'),
+                ]),
+
+            Section::make('Notatki')
+                ->collapsed()
+                ->schema([
+                    TextEntry::make('notes')
+                        ->label('')
+                        ->prose()
+                        ->columnSpanFull()
+                        ->placeholder('Brak notatek.'),
+                ]),
+        ]);
+    }
 
     public static function form(Schema $form): Schema
     {

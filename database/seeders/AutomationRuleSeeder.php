@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\AutomationRule;
 use App\Models\EmailTemplate;
+use App\Models\PipelineStage;
 use Illuminate\Database\Seeder;
 
 class AutomationRuleSeeder extends Seeder
@@ -16,6 +17,7 @@ class AutomationRuleSeeder extends Seeder
         $quoteSentTpl     = EmailTemplate::where('slug', 'quote_sent')->value('id');
         $launchedTpl      = EmailTemplate::where('slug', 'project_launched')->value('id');
         $phaseTpl         = EmailTemplate::where('slug', 'project_phase_complete')->value('id');
+        $wonStageId       = PipelineStage::where('is_won', true)->value('id');
 
         $rules = [
             [
@@ -105,6 +107,18 @@ class AutomationRuleSeeder extends Seeder
                 ],
                 'delay_minutes' => 0,
                 'is_active'     => false,
+            ],
+            [
+                'name'          => 'Create Portal Account on Lead Won',
+                'trigger_event' => 'lead.stage_changed',
+                'conditions'    => [
+                    ['field' => 'stage_id', 'operator' => '=', 'value' => $wonStageId],
+                ],
+                'actions'       => [
+                    ['type' => 'create_portal_access'],
+                ],
+                'delay_minutes' => 0,
+                'is_active'     => true,
             ],
         ];
 

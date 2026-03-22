@@ -8,6 +8,9 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Html;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -24,6 +27,91 @@ class EmailTemplateResource extends Resource
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
     protected static ?string $navigationLabel = 'Email Templates';
     protected static ?int $navigationSort = 1;
+
+    public static function infolist(Schema $schema): Schema
+    {
+        $langTab = fn (string $code, string $flag) => Tab::make($flag)
+            ->schema([
+                TextEntry::make("subject.{$code}")
+                    ->label('Subject Line')
+                    ->copyable()
+                    ->copyMessage('Subject copied!')
+                    ->icon('heroicon-m-envelope')
+                    ->weight('bold')
+                    ->columnSpanFull(),
+
+                Html::make(fn ($record) =>
+                    '<div style="border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;background:#f1f5f9;">'
+                    . '<div style="background:#f8fafc;padding:8px 16px;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b;font-family:monospace;display:flex;align-items:center;gap:8px;">'
+                    . '<span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block;"></span>'
+                    . '<span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block;margin:0 2px;"></span>'
+                    . '<span style="width:10px;height:10px;border-radius:50%;background:#10b981;display:inline-block;"></span>'
+                    . '<span style="margin-left:8px;">Email Preview – ' . strtoupper($code) . '</span>'
+                    . '<a href="' . route('admin.email-preview', [$record->id, $code]) . '" target="_blank" style="margin-left:auto;color:#4F46E5;text-decoration:none;font-size:11px;font-family:sans-serif;">&#8599; open full page</a>'
+                    . '</div>'
+                    . '<iframe src="' . route('admin.email-preview', [$record->id, $code]) . '" loading="lazy" style="width:100%;height:560px;border:none;display:block;"></iframe>'
+                    . '</div>'
+                )->columnSpanFull(),
+
+                TextEntry::make("body_text.{$code}")
+                    ->label('Plain Text Fallback')
+                    ->wrap()
+                    ->fontFamily('mono')
+                    ->columnSpanFull()
+                    ->placeholder('— not set —'),
+            ]);
+
+        return $schema->schema([
+            Section::make()
+                ->columns(4)
+                ->schema([
+                    TextEntry::make('name')
+                        ->label('Template Name')
+                        ->weight('bold')
+                        ->size('lg')
+                        ->columnSpan(2),
+
+                    TextEntry::make('slug')
+                        ->label('Identifier (Slug)')
+                        ->badge()
+                        ->color('gray')
+                        ->copyable()
+                        ->copyMessage('Slug copied!'),
+
+                    IconEntry::make('is_active')
+                        ->label('Status')
+                        ->boolean()
+                        ->trueIcon('heroicon-o-check-circle')
+                        ->falseIcon('heroicon-o-x-circle')
+                        ->trueColor('success')
+                        ->falseColor('danger'),
+
+                    TextEntry::make('variables')
+                        ->label('Available Variables')
+                        ->badge()
+                        ->color('info')
+                        ->columnSpanFull()
+                        ->placeholder('No variables defined'),
+
+                    TextEntry::make('updated_at')
+                        ->label('Last Updated')
+                        ->dateTime('d M Y, H:i')
+                        ->since(),
+
+                    TextEntry::make('created_at')
+                        ->label('Created At')
+                        ->dateTime('d M Y, H:i'),
+                ]),
+
+            Tabs::make('Languages')
+                ->columnSpanFull()
+                ->tabs([
+                    $langTab('en', '🇬🇧 English'),
+                    $langTab('pl', '🇵🇱 Polish'),
+                    $langTab('pt', '🇵🇹 Portuguese'),
+                ]),
+        ]);
+    }
 
     public static function form(Schema $form): Schema
     {

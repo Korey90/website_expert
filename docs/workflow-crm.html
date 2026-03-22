@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>workflow-crm.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="crm-workflow--websiteexpert">CRM Workflow — WebsiteExpert</h1>
+<h2 id="od-leada-do-odbioru-projektu-przez-klienta">Od leada do odbioru projektu przez klienta</h2>
+<blockquote>
+<p>Dokument opisuje pełny przepływ pracy w systemie CRM — od momentu pojawienia się leada,
+przez wszystkie etapy lejka sprzedażowego, realizację projektu, fakturowanie, aż po
+finalne zamknięcie i odbiór przez klienta. Służy jako podstawa do testowania aplikacji.</p>
+</blockquote>
+<hr>
+<h2 id="przegl%C4%85d-lejka-sprzeda%C5%BCowego">Przegląd lejka sprzedażowego</h2>
+<pre class="hljs"><code><div>[New Lead] → [Contacted] → [Proposal Sent] → [Negotiation] → [Won] ──→ PROJECT
+                                                                ↓
+                                                             [Lost]
+</div></code></pre>
+<hr>
+<h2 id="etap-1--new-lead">ETAP 1 — New Lead</h2>
+<p><strong>Opis:</strong> Lead pojawia się w systemie — może to być formularz ze strony, telefon,<br>
+polecenie lub ręczne dodanie przez marketera/managera.</p>
+<h3 id="akcje-w-crm">Akcje w CRM</h3>
+<ol>
+<li><strong>Dodaj leada</strong> (<code>Leads → New Lead</code>)
+<ul>
+<li>Uzupełnij: tytuł leada, klient (istniejący lub nowy), typ usługi, szacowana wartość</li>
+<li>Przypisz właściciela (assigned to)</li>
+<li>Ustaw oczekiwaną datę zamknięcia (<code>Expected Close</code>)</li>
+</ul>
+</li>
+<li><strong>Uzupełnij profil klienta</strong> (<code>Clients → Client record</code>)
+<ul>
+<li>Imię i nazwisko osoby kontaktowej</li>
+<li>Telefon (wymagany do SMS), e-mail</li>
+<li>Nazwa firmy</li>
+</ul>
+</li>
+<li><strong>Ustaw stage:</strong> <code>New Lead</code></li>
+</ol>
+<h3 id="checklist-system-automatycznie-sprawdza">Checklist (system automatycznie sprawdza)</h3>
+<ul>
+<li><input type="checkbox" id="checkbox0"><label for="checkbox0">Zapisane dane kontaktowe (</label><code>has_client</code>)</li>
+<li><input type="checkbox" id="checkbox1"><label for="checkbox1">Potwierdzony budżet / wartość leada (</label><code>has_value</code>)</li>
+<li><input type="checkbox" id="checkbox2"><label for="checkbox2">Zidentyfikowany typ projektu (</label><code>has_calculator_data</code>)</li>
+<li><input type="checkbox" id="checkbox3"><label for="checkbox3">Lead przypisany do właściciela (</label><code>has_assignee</code>)</li>
+</ul>
+<h3 id="automatyzacje-do-skonfigurowania-w-marketing-%E2%86%92-automation-rules">Automatyzacje (do skonfigurowania w Marketing → Automation Rules)</h3>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Akcja</th>
+<th>Przykład</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lead.created</code></td>
+<td><code>send_sms</code></td>
+<td>SMS do klienta: &quot;Dziękujemy za kontakt, odezwiemy się wkrótce&quot;</td>
+</tr>
+<tr>
+<td><code>lead.created</code></td>
+<td><code>notify_admin</code></td>
+<td>E-mail do managera: &quot;Nowy lead: {{lead_title}}&quot;</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cel-etapu">Cel etapu</h3>
+<p>Kwalifikacja leada — upewnij się, że warto poświęcić czas na dalszy kontakt.</p>
+<hr>
+<h2 id="etap-2--contacted">ETAP 2 — Contacted</h2>
+<p><strong>Opis:</strong> Nawiązano pierwszy kontakt z klientem. Cel: poznać wymagania i umówić rozmowę.</p>
+<h3 id="akcje-w-crm">Akcje w CRM</h3>
+<ol>
+<li><strong>Zmień stage</strong> na <code>Contacted</code></li>
+<li><strong>Wyślij e-mail powitalny</strong> (<code>Send Email</code> na stronie leada)
+<ul>
+<li>Przedstaw firmę</li>
+<li>Zaproponuj termin rozmowy odkrywczej</li>
+</ul>
+</li>
+<li><strong>Zanotuj ustalenia</strong> (Notes / Activity log na stronie leada)</li>
+<li><strong>Zaktualizuj dane leada</strong> — wpisz szczegóły wymagań w opisie / notes</li>
+</ol>
+<h3 id="checklist">Checklist</h3>
+<ul>
+<li><input type="checkbox" id="checkbox4"><label for="checkbox4">Wysłany e-mail powitalny (</label><code>email_sent</code>)</li>
+<li><input type="checkbox" id="checkbox5"><label for="checkbox5">Umówiona rozmowa discovery</label></li>
+<li><input type="checkbox" id="checkbox6"><label for="checkbox6">Zakwalifikowane wymagania i cele projektu</label></li>
+<li><input type="checkbox" id="checkbox7"><label for="checkbox7">Potwierdzony kontakt z osobą decyzyjną (</label><code>has_contact</code>)</li>
+</ul>
+<h3 id="automatyzacje">Automatyzacje</h3>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Akcja</th>
+<th>Przykład</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lead.stage_changed</code> (→ Contacted)</td>
+<td><code>send_email</code></td>
+<td>E-mail: &quot;Dzień dobry, skontaktujemy się w ciągu 24h&quot;</td>
+</tr>
+<tr>
+<td><code>lead.stage_changed</code> (→ Contacted)</td>
+<td><code>send_sms</code></td>
+<td>SMS: &quot;Cześć {{client_name}}, oddzwonimy dziś!&quot;</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cel-etapu">Cel etapu</h3>
+<p>Przeprowadzenie rozmowy kwalifikacyjnej i zebranie brief'u do wyceny.</p>
+<hr>
+<h2 id="etap-3--proposal-sent">ETAP 3 — Proposal Sent</h2>
+<p><strong>Opis:</strong> Przygotowanie i wysłanie oferty/wyceny do klienta.</p>
+<h3 id="akcje-w-crm">Akcje w CRM</h3>
+<ol>
+<li><strong>Zmień stage</strong> na <code>Proposal Sent</code></li>
+<li><strong>Skorzystaj z Proposal Builder</strong> (przycisk na stronie leada)
+<ul>
+<li>Wybierz typ projektu, dodaj pozycje wyceny</li>
+<li>Ustaw wartość leada (<code>value</code>) na kwotę z wyceny</li>
+</ul>
+</li>
+<li><strong>Wyślij propozycję e-mailem</strong> (<code>Send Email</code> → dołącz PDF lub link)</li>
+<li><strong>Ustaw follow-up reminder</strong> w <code>Expected Close</code> lub jako notatkę</li>
+</ol>
+<h3 id="checklist">Checklist</h3>
+<ul>
+<li><input type="checkbox" id="checkbox8"><label for="checkbox8">Przygotowana spersonalizowana oferta</label></li>
+<li><input type="checkbox" id="checkbox9"><label for="checkbox9">Oferta zweryfikowana z zespołem</label></li>
+<li><input type="checkbox" id="checkbox10"><label for="checkbox10">Oferta wysłana do klienta (</label><code>email_sent</code>)</li>
+<li><input type="checkbox" id="checkbox11"><label for="checkbox11">Follow-up zaplanowany na +3 dni</label></li>
+</ul>
+<h3 id="automatyzacje">Automatyzacje</h3>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Akcja</th>
+<th>Przykład</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lead.stage_changed</code> (→ Proposal Sent)</td>
+<td><code>send_email</code></td>
+<td>&quot;Przesyłam Państwu ofertę na {{lead_title}}&quot;</td>
+</tr>
+<tr>
+<td><code>lead.stage_changed</code> (→ Proposal Sent)</td>
+<td><code>delay_minutes</code> + <code>send_sms</code></td>
+<td>Po 3 dniach: SMS &quot;Czy dotarła Pani/Pana nasza oferta?&quot;</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cel-etapu">Cel etapu</h3>
+<p>Klient zapoznaje się z ofertą. Oczekuj odpowiedzi lub inicjuj follow-up.</p>
+<hr>
+<h2 id="etap-4--negotiation">ETAP 4 — Negotiation</h2>
+<p><strong>Opis:</strong> Klient wyraził zainteresowanie. Negocjacje warunków, zakresu i płatności.</p>
+<h3 id="akcje-w-crm">Akcje w CRM</h3>
+<ol>
+<li><strong>Zmień stage</strong> na <code>Negotiation</code></li>
+<li><strong>Zaktualizuj notes</strong> na podstawie rozmów — co klient chce zmienić</li>
+<li><strong>Zaktualizuj wartość leada</strong> jeśli zakres się zmienił</li>
+<li><strong>Ustaw <code>Expected Close</code></strong> na realną datę podpisania umowy</li>
+<li><strong>Odnotuj uzgodnione warunki płatności</strong> (np. 50% zaliczka, 50% po odbiorze)</li>
+</ol>
+<h3 id="checklist">Checklist</h3>
+<ul>
+<li><input type="checkbox" id="checkbox12"><label for="checkbox12">Omówione zmiany i rewizje oferty</label></li>
+<li><input type="checkbox" id="checkbox13"><label for="checkbox13">Potwierdzony harmonogram projektu (</label><code>has_expected_close</code>)</li>
+<li><input type="checkbox" id="checkbox14"><label for="checkbox14">Uzgodnione warunki płatności</label></li>
+<li><input type="checkbox" id="checkbox15"><label for="checkbox15">Podpisana umowa lub wpłacona zaliczka</label></li>
+</ul>
+<h3 id="cel-etapu">Cel etapu</h3>
+<p>Zamknięcie leada jako <code>Won</code> po podpisaniu umowy i/lub wpłacie zaliczki.</p>
+<hr>
+<h2 id="etap-5a--won-wygrany-lead">ETAP 5A — Won (Wygrany Lead)</h2>
+<p><strong>Opis:</strong> Klient zaakceptował ofertę. Czas uruchomić projekt.</p>
+<h3 id="akcje-w-crm">Akcje w CRM</h3>
+<ol>
+<li><strong>Zmień stage</strong> na <code>Won</code> (lub użyj przycisku <code>Mark as Won</code> → status = <code>won</code>)</li>
+<li><strong>Utwórz projekt</strong> (<code>Convert to Project</code> na stronie leada)
+<ul>
+<li>Wybierz szablon projektu (Business Card / E-Commerce / Web Application)</li>
+<li>Ustaw datę startu i deadline</li>
+<li>Przypisz team (developer, designer)</li>
+</ul>
+</li>
+<li><strong>Wystaw fakturę zaliczkową</strong> (np. 50%)
+<ul>
+<li><code>Projects → Invoices → New Invoice</code></li>
+<li>Pozycja: &quot;Zaliczka — {{lead_title}}&quot;</li>
+</ul>
+</li>
+<li><strong>Wyślij fakturę</strong> (<code>Send Invoice</code> — e-mailem)</li>
+<li><strong>Przeprowadź Kickoff Call</strong> i zanotuj ustalenia</li>
+</ol>
+<h3 id="checklist">Checklist</h3>
+<ul>
+<li><input type="checkbox" id="checkbox16"><label for="checkbox16">Lead przekształcony w projekt (</label><code>has_project</code>)</li>
+<li><input type="checkbox" id="checkbox17"><label for="checkbox17">Umówiony kickoff call</label></li>
+<li><input type="checkbox" id="checkbox18"><label for="checkbox18">Wysłane materiały onboardingowe / dostępy (</label><code>email_sent</code>)</li>
+</ul>
+<h3 id="automatyzacje">Automatyzacje</h3>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Akcja</th>
+<th>Przykład</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lead.stage_changed</code> (→ Won)</td>
+<td><code>send_email</code></td>
+<td>&quot;Gratulacje! Zaczynamy projekt 🎉 — kickoff w piątek o 10:00&quot;</td>
+</tr>
+<tr>
+<td><code>project.created</code></td>
+<td><code>notify_admin</code></td>
+<td>&quot;Nowy projekt: {{project_name}} przypisany do {{assigned_name}}&quot;</td>
+</tr>
+<tr>
+<td><code>invoice.sent</code></td>
+<td><code>send_email</code></td>
+<td>Automatyczne powiadomienie o fakturze do klienta</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="etap-5b--lost-przegrany-lead">ETAP 5B — Lost (Przegrany Lead)</h2>
+<p><strong>Opis:</strong> Klient odmówił lub nie odpowiedział po wielu follow-upach.</p>
+<h3 id="akcje-w-crm">Akcje w CRM</h3>
+<ol>
+<li><strong>Zmień status</strong> na <code>Lost</code> (przycisk <code>Mark as Lost</code>)</li>
+<li><strong>Wpisz powód</strong> w notes (cena, czas, konkurencja, brak budżetu)</li>
+<li><strong>Wyślij grzeczną wiadomość zamykającą</strong> (<code>Send Email</code>)</li>
+<li><strong>Opcjonalnie:</strong> oznacz klienta tagiem &quot;re-engagement&quot; do przyszłych kampanii</li>
+</ol>
+<h3 id="checklist">Checklist</h3>
+<ul>
+<li><input type="checkbox" id="checkbox19"><label for="checkbox19">Odnotowany powód przegranej</label></li>
+<li><input type="checkbox" id="checkbox20"><label for="checkbox20">Wysłany e-mail zamykający (</label><code>email_sent</code>)</li>
+<li><input type="checkbox" id="checkbox21"><label for="checkbox21">Klient dodany do listy re-engagement</label></li>
+</ul>
+<hr>
+<h2 id="etap-6--realizacja-projektu">ETAP 6 — Realizacja Projektu</h2>
+<p>Po konwersji leada do projektu, praca odbywa się w zakładce <code>Projects</code>.</p>
+<h3 id="6a--wizyt%C3%B3wka-business-card-website">6A — Wizytówka (Business Card Website)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Faza</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Discovery &amp; Brief</strong></td>
+<td>Zebranie treści, logotypu, kolorów, referencji od klienta</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Design Mockups</strong></td>
+<td>Projektowanie makiet w Figma — 2 propozycje layoutu</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Development</strong></td>
+<td>Kodowanie strony (HTML/CSS/Laravel/WordPress)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Content Integration</strong></td>
+<td>Wgranie tekstów, zdjęć, optymalizacja</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Testing &amp; QA</strong></td>
+<td>Testy na urządzeniach mobilnych, przeglądarkach, GTMetrix</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Launch &amp; Handover</strong></td>
+<td>Deploy na produkcję, przekazanie dostępów, szkolenie</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Akcje CRM per faza:</strong></p>
+<ul>
+<li>Zmień fazę projektu gdy praca jest ukończona</li>
+<li>Wyślij klientowi aktualizację statusu e-mailem / SMS</li>
+<li>Zbierz feedback po Design Mockups przed przejściem do Development</li>
+</ul>
+<hr>
+<h3 id="6b--e-commerce-store">6B — E-Commerce Store</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Faza</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Discovery &amp; Strategy</strong></td>
+<td>Analiza konkurencji, strategia UX, dobór platformy</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>UX / Wireframes</strong></td>
+<td>Szkice ścieżki zakupowej, layout kategorii i produktu</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Design</strong></td>
+<td>Projekt graficzny w Figma, identyfikacja wizualna sklepu</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Development</strong></td>
+<td>Wdrożenie szablonu, konfiguracja CMS / WooCommerce</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Product Import</strong></td>
+<td>Import produktów, zdjęć, opisów, kategorii</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Payment Integration</strong></td>
+<td>Konfiguracja bramek płatności (Przelewy24, Stripe, PayU)</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Testing &amp; QA</strong></td>
+<td>Testy całej ścieżki zakupowej, bezpieczeństwo</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>SEO &amp; Analytics Setup</strong></td>
+<td>Google Analytics, Search Console, sitemap, meta tagi</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Launch</strong></td>
+<td>Deploy, DNS, monitoring, brief szkoleniowy</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="6c--web-application">6C — Web Application</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Faza</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Discovery &amp; Requirements</strong></td>
+<td>Spisanie wymagań funkcjonalnych i niefunkcjonalnych</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>System Architecture</strong></td>
+<td>Projekt bazy danych, API design, schemat architektury</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>UI/UX Design</strong></td>
+<td>Prototypy Figma, design system</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Backend Development</strong></td>
+<td>Laravel API, modele, logika biznesowa</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Frontend Development</strong></td>
+<td>React / Inertia / Blade, komponenty</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Integration &amp; API</strong></td>
+<td>Integracje zewnętrzne (płatności, SMS, e-mail, itp.)</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Testing &amp; QA</strong></td>
+<td>Testy jednostkowe, E2E, penetracyjne</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Deployment</strong></td>
+<td>CI/CD, serwer produkcyjny, SSL, backup</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Documentation</strong></td>
+<td>Dokumentacja techniczna i użytkownika</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="etap-7--fakturowanie">ETAP 7 — Fakturowanie</h2>
+<h3 id="schemat-faktur-przyk%C5%82adowy-projekt-standard">Schemat faktur przykładowy (projekt standard)</h3>
+<pre class="hljs"><code><div>Faktura 1 — Zaliczka (50%)    →  Wystawiana przy starcie projektu (Won)
+Faktura 2 — Płatność końcowa (50%)  →  Wystawiana przy odbiorze
+</div></code></pre>
+<h3 id="akcje-w-crm">Akcje w CRM</h3>
+<ol>
+<li><strong>Utwórz fakturę:</strong> <code>Projects → [Projekt] → Invoices → New Invoice</code></li>
+<li><strong>Dodaj pozycje</strong> (usługa, godziny lub ryczałt)</li>
+<li><strong>Wyślij fakturę</strong> klientowi (<code>Send Invoice</code>) — system wyśle e-mail z PDF</li>
+<li><strong>Odznacz jako &quot;Paid&quot;</strong> gdy wpłata przychodzi</li>
+<li><strong>Śledź zaległości</strong> — faktury po terminie widoczne w dashboardzie</li>
+</ol>
+<h3 id="automatyzacje-fakturowania">Automatyzacje fakturowania</h3>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Akcja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>invoice.sent</code></td>
+<td>E-mail do klienta z informacją o fakturze</td>
+</tr>
+<tr>
+<td><code>invoice.overdue</code></td>
+<td>SMS/e-mail przypomnienie o zaległej fakturze</td>
+</tr>
+<tr>
+<td><code>invoice.paid</code></td>
+<td>E-mail potwierdzenie / notify_admin</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="etap-8--finalizacja-i-odbi%C3%B3r">ETAP 8 — Finalizacja i Odbiór</h2>
+<p><strong>Opis:</strong> Projekt gotowy do prezentacji klientowi.</p>
+<h3 id="akcje-w-crm">Akcje w CRM</h3>
+<ol>
+<li><strong>Przesuń projekt do ostatniej fazy</strong> (np. <code>Launch &amp; Handover</code> / <code>Deployment</code>)</li>
+<li><strong>Przeprowadź sesję odbioru</strong> z klientem (screen share lub spotkanie)</li>
+<li><strong>Zbierz podpis odbioru</strong> (PDF lub e-mail potwierdzający acceptance)</li>
+<li><strong>Wystaw fakturę końcową</strong> (pozostałe 50%)</li>
+<li><strong>Zmień status projektu</strong> na <code>Completed</code></li>
+<li><strong>Wyślij e-mail podsumowujący</strong> z:
+<ul>
+<li>Danymi dostępowymi (hosting, CMS, etc.)</li>
+<li>Instrukcją obsługi</li>
+<li>Informacją o gwarancji / support package</li>
+</ul>
+</li>
+<li><strong>Poproś o referencje</strong> (review Google, LinkedIn recommendation)</li>
+</ol>
+<h3 id="opcjonalnie--po-zamkni%C4%99ciu">Opcjonalnie — po zamknięciu</h3>
+<ul>
+<li>Dodaj klienta do segmentu &quot;Aktywni klienci&quot; (tagi w CRM)</li>
+<li>Utwórz nowego leada dla kolejnego projektu (upsell)</li>
+<li>Zaplanuj check-in po 30/60 dniach</li>
+</ul>
+<hr>
+<h2 id="podsumowanie--mapa-akcji-crm">Podsumowanie — mapa akcji CRM</h2>
+<pre class="hljs"><code><div>LEAD CREATED
+  ├─ Auto SMS: &quot;Dziękujemy za kontakt&quot;
+  ├─ Auto Email: notify admin
+  └─ Checklist: dane, budżet, typ, owner
+
+CONTACTED
+  ├─ Email powitalny (ręcznie lub auto)
+  └─ Checklist: discovery call, kwalifikacja
+
+PROPOSAL SENT
+  ├─ Proposal Builder → PDF
+  ├─ Email z ofertą
+  └─ Follow-up: SMS po 3 dniach
+
+NEGOTIATION
+  ├─ Notes z ustaleniami
+  └─ Podpisana umowa + zaliczka
+
+WON
+  ├─ Convert → Project (wybierz template)
+  ├─ Faktura zaliczkowa 50%
+  ├─ Auto Email: kickoff info
+  └─ Projekt → fazy → tasks
+
+  PROJECT PHASES
+    ├─ Discovery → Design → Development
+    ├─ QA → Launch
+    └─ Per faza: update status, email do klienta
+
+INVOICE
+  ├─ send: auto email
+  ├─ overdue: auto SMS/email reminder
+  └─ paid: auto notify + confirmation
+
+DONE
+  ├─ Faktura końcowa 50%
+  ├─ Project status = Completed
+  ├─ Email: dostępy + instrukcje
+  └─ Prośba o referencje
+</div></code></pre>
+<hr>
+<h2 id="scenariusze-do-przetestowania">Scenariusze do przetestowania</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Scenariusz</th>
+<th>Co testujemy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T1</td>
+<td>Dodaj nowego leada ręcznie</td>
+<td>Formularz, walidacja, auto SMS/email</td>
+</tr>
+<tr>
+<td>T2</td>
+<td>Przesuń lead przez wszystkie etapy</td>
+<td>Zmiana stage, checklisty, automaty</td>
+</tr>
+<tr>
+<td>T3</td>
+<td>Wyślij e-mail z szablonu z leada</td>
+<td>Modal email, zmienne, log aktywności</td>
+</tr>
+<tr>
+<td>T4</td>
+<td>Wyślij SMS z leada</td>
+<td>Modal SMS, template, char counter, log</td>
+</tr>
+<tr>
+<td>T5</td>
+<td>Ustaw leada jako Won → utwórz projekt</td>
+<td>Konwersja, template projektu, fazy</td>
+</tr>
+<tr>
+<td>T6</td>
+<td>Wystaw i wyślij fakturę</td>
+<td>PDF, e-mail, status paid/overdue</td>
+</tr>
+<tr>
+<td>T7</td>
+<td>Stwórz regułę automation</td>
+<td>Trigger + akcja, delay, warunek stage</td>
+</tr>
+<tr>
+<td>T8</td>
+<td>Automation: SMS przy zmianie stage</td>
+<td>ProcessAutomationJob, kolejka, log</td>
+</tr>
+<tr>
+<td>T9</td>
+<td>Lead → Lost → re-engagement</td>
+<td>Status, notes, email zamykający</td>
+</tr>
+<tr>
+<td>T10</td>
+<td>Przejście przez wszystkie fazy projektu</td>
+<td>Update fazy, notes, finalna faktura</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>Dokument wygenerowany: 22 marca 2026 — wersja 1.0</em></p>
+
+</body>
+</html>

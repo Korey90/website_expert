@@ -7,6 +7,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return; // SQLite does not enforce enums; base migration TEXT column is sufficient
+        }
+
         DB::statement("ALTER TABLE `lead_activities` MODIFY COLUMN `type` ENUM(
             'created',
             'stage_moved',
@@ -26,6 +30,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement("ALTER TABLE `lead_activities` MODIFY COLUMN `type` ENUM(
             'created',
             'stage_moved',

@@ -60,12 +60,12 @@ class AutomationEventListener
             ]);
         }
 
-        if ($lead->wasChanged('stage')) {
+        if ($lead->wasChanged('pipeline_stage_id')) {
             $this->dispatch('lead.stage_changed', [
-                'lead_id'   => $lead->id,
-                'client_id' => $lead->client_id,
-                'old_stage' => $lead->getOriginal('stage'),
-                'stage'     => $lead->stage,
+                'lead_id'      => $lead->id,
+                'client_id'    => $lead->client_id,
+                'stage_id'     => $lead->pipeline_stage_id,
+                'old_stage_id' => $lead->getOriginal('pipeline_stage_id'),
             ]);
         }
     }

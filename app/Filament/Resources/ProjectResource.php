@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\ProjectTemplate;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
@@ -26,6 +27,266 @@ class ProjectResource extends Resource
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-briefcase';
     protected static \UnitEnum|string|null $navigationGroup = 'Projects';
     protected static ?int $navigationSort = 1;
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->columns(3)->schema([
+
+            // ── Stats bar ────────────────────────────────────────────────────
+            Section::make()
+                ->columnSpanFull()
+                ->schema([
+                    TextEntry::make('_stats')
+                        ->label('')
+                        ->html()
+                        ->state(function ($record) {
+                            $totalTasks  = $record->tasks()->count();
+                            $doneTasks   = $record->tasks()->where('status', 'done')->count();
+                            $totalPhases = $record->phases()->count();
+                            $donePhases  = $record->phases()->where('status', 'completed')->count();
+                            $taskPct     = $totalTasks  > 0 ? round($doneTasks  / $totalTasks  * 100) : 0;
+                            $phasePct    = $totalPhases > 0 ? round($donePhases / $totalPhases * 100) : 0;
+
+                            $invoiced    = $record->invoices()->whereNotIn('status', ['draft', 'cancelled'])->sum('total');
+                            $budget      = (float) ($record->budget ?? 0);
+                            $currency    = match ($record->currency ?? 'GBP') { 'GBP' => '£', 'EUR' => '€', 'USD' => '$', 'PLN' => 'zł', default => $record->currency };
+                            $budgetPct   = $budget > 0 ? min(round($invoiced / $budget * 100), 100) : 0;
+
+                            $daysLeft  = $record->deadline ? (int) now()->diffInDays($record->deadline, false) : null;
+                            $daysLabel = $daysLeft === null ? 'No deadline' : ($daysLeft > 0 ? $daysLeft . ' days left' : ($daysLeft === 0 ? 'Due today' : abs($daysLeft) . ' days overdue'));
+                            $deadlineColor = $daysLeft === null ? '#64748b' : ($daysLeft < 0 ? '#f87171' : ($daysLeft <= 7 ? '#fbbf24' : '#4ade80'));
+
+                            $activePhase = $record->phases()->where('status', 'in_progress')->orderBy('order')->first();
+                            $phaseLabel  = $activePhase ? $activePhase->name : ($donePhases === $totalPhases && $totalPhases > 0 ? 'All done' : 'Not started');
+
+                            $card = fn (string $label, string $value, string $sub, string $color, int $pct = -1) =>
+                                '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top:3px solid ' . $color . ';border-radius:10px;padding:16px 20px;flex:1;min-width:0;">'
+                                . '<p style="margin:0 0 4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:' . $color . ';">' . $label . '</p>'
+                                . '<p style="margin:0 0 2px;font-size:22px;font-weight:800;color:#f1f5f9;">' . $value . '</p>'
+                                . '<p style="margin:0 0 ' . ($pct >= 0 ? '8' : '0') . 'px;font-size:12px;color:#64748b;">' . $sub . '</p>'
+                                . ($pct >= 0
+                                    ? '<div style="background:rgba(255,255,255,0.08);border-radius:4px;height:5px;"><div style="background:' . $color . ';border-radius:4px;height:5px;width:' . $pct . '%;transition:width .3s;"></div></div>'
+                                    : '')
+                                . '</div>';
+
+                            return '<div style="display:flex;gap:14px;">'
+                                . $card('Task Progress',  $taskPct . '%',                          $doneTasks . ' of ' . $totalTasks . ' tasks done',         '#818cf8', $taskPct)
+                                . $card('Phase Progress', $phasePct . '%',                         $donePhases . ' of ' . $totalPhases . ' phases done',       '#38bdf8', $phasePct)
+                                . $card('Active Phase',   $phaseLabel,                             $totalPhases . ' phases total',                             '#a78bfa')
+                                . $card('Budget Spent',   $currency . number_format($invoiced, 0), 'of ' . $currency . number_format($budget, 0) . ' (' . $budgetPct . '%)', '#34d399', $budgetPct)
+                                . $card('Deadline',       $daysLabel,                              $record->deadline?->format('d M Y') ?? '—',                $deadlineColor)
+                                . '</div>';
+                        }),
+                ]),
+
+            // ── Project Phases (left 2/3) ────────────────────────────────────
+            Section::make('Project Phases')
+                ->columnSpan(2)
+                ->schema([
+                    TextEntry::make('_phases')
+                        ->label('')
+                        ->html()
+                        ->state(function ($record) {
+                            $phases = $record->phases()->orderBy('order')->get();
+
+                            if ($phases->isEmpty()) {
+                                return '<div style="text-align:center;padding:32px 0;color:#64748b;">'
+                                    . '<p style="margin:0;font-size:14px;">No phases yet.</p>'
+                                    . '<p style="margin:4px 0 0;font-size:13px;">Apply a project template or create phases from the Edit page.</p>'
+                                    . '</div>';
+                            }
+
+                            $statusMeta = [
+                                'pending'     => ['label' => 'Pending',     'bg' => 'rgba(255,255,255,0.03)', 'border' => 'rgba(255,255,255,0.08)', 'dot' => '#64748b', 'text' => '#94a3b8'],
+                                'in_progress' => ['label' => 'In Progress', 'bg' => 'rgba(251,191,36,0.07)',  'border' => 'rgba(251,191,36,0.25)',  'dot' => '#fbbf24', 'text' => '#fbbf24'],
+                                'completed'   => ['label' => 'Completed',   'bg' => 'rgba(74,222,128,0.07)',  'border' => 'rgba(74,222,128,0.25)',  'dot' => '#4ade80', 'text' => '#4ade80'],
+                                'cancelled'   => ['label' => 'Cancelled',   'bg' => 'rgba(248,113,113,0.07)', 'border' => 'rgba(248,113,113,0.25)', 'dot' => '#f87171', 'text' => '#f87171'],
+                            ];
+
+                            $html  = '<div style="display:flex;flex-direction:column;gap:8px;">';
+                            $total = $phases->count();
+                            $done  = $phases->where('status', 'completed')->count();
+
+                            $pct  = $total > 0 ? round($done / $total * 100) : 0;
+                            $html .= '<div style="margin-bottom:16px;">'
+                                . '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
+                                . '<span style="font-size:13px;font-weight:600;color:#cbd5e1;">Overall Phase Progress</span>'
+                                . '<span style="font-size:13px;font-weight:700;color:#818cf8;">' . $pct . '%</span>'
+                                . '</div>'
+                                . '<div style="background:rgba(255,255,255,0.08);border-radius:6px;height:8px;">'
+                                . '<div style="background:linear-gradient(90deg,#818cf8,#a78bfa);border-radius:6px;height:8px;width:' . $pct . '%;"></div>'
+                                . '</div>'
+                                . '</div>';
+
+                            foreach ($phases as $phase) {
+                                $meta     = $statusMeta[$phase->status] ?? $statusMeta['pending'];
+                                $tasks    = $phase->tasks()->count();
+                                $taskDone = $phase->tasks()->where('status', 'done')->count();
+                                $taskPct  = $tasks > 0 ? round($taskDone / $tasks * 100) : 0;
+                                $desc     = $phase->description
+                                    ? '<p style="margin:6px 0 0;font-size:13px;color:#64748b;line-height:1.5;">' . e($phase->description) . '</p>'
+                                    : '';
+
+                                $taskBadge = $tasks > 0
+                                    ? '<span style="font-size:12px;color:#94a3b8;background:rgba(255,255,255,0.06);border-radius:12px;padding:2px 8px;">' . $taskDone . '/' . $tasks . ' tasks</span>'
+                                    : '<span style="font-size:12px;color:#475569;">No tasks</span>';
+
+                                $progressBar = $tasks > 0
+                                    ? '<div style="margin-top:10px;background:rgba(255,255,255,0.08);border-radius:4px;height:4px;">'
+                                    . '<div style="background:' . $meta['dot'] . ';border-radius:4px;height:4px;width:' . $taskPct . '%;"></div>'
+                                    . '</div>'
+                                    : '';
+
+                                $html .= '<div style="background:' . $meta['bg'] . ';border:1px solid ' . $meta['border'] . ';border-left:4px solid ' . $meta['dot'] . ';border-radius:8px;padding:14px 18px;">'
+                                    . '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">'
+                                    . '<div style="display:flex;align-items:center;gap:10px;min-width:0;">'
+                                    . '<span style="flex-shrink:0;background:rgba(255,255,255,0.1);color:#e2e8f0;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">' . $phase->order . '</span>'
+                                    . '<span style="font-weight:600;font-size:14px;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' . e($phase->name) . '</span>'
+                                    . '</div>'
+                                    . '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
+                                    . $taskBadge
+                                    . '<span style="color:' . $meta['text'] . ';background:rgba(255,255,255,0.05);border:1px solid ' . $meta['border'] . ';border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600;">' . $meta['label'] . '</span>'
+                                    . '</div>'
+                                    . '</div>'
+                                    . $desc
+                                    . $progressBar
+                                    . '</div>';
+                            }
+
+                            $html .= '</div>';
+                            return $html;
+                        }),
+                ]),
+
+            // ── Sidebar (right 1/3) ──────────────────────────────────────────
+            Section::make('Project Details')
+                ->columnSpan(1)
+                ->schema([
+                    TextEntry::make('_sidebar')
+                        ->label('')
+                        ->html()
+                        ->state(function ($record) {
+                            $currency = match ($record->currency ?? 'GBP') {
+                                'GBP' => '£', 'EUR' => '€', 'USD' => '$', 'PLN' => 'zł', default => $record->currency,
+                            };
+                            $statusColors = [
+                                'draft'     => ['bg' => 'rgba(255,255,255,0.05)', 'text' => '#94a3b8',  'border' => 'rgba(255,255,255,0.1)'],
+                                'active'    => ['bg' => 'rgba(74,222,128,0.1)',   'text' => '#4ade80',  'border' => 'rgba(74,222,128,0.3)'],
+                                'on_hold'   => ['bg' => 'rgba(251,191,36,0.1)',   'text' => '#fbbf24',  'border' => 'rgba(251,191,36,0.3)'],
+                                'completed' => ['bg' => 'rgba(129,140,248,0.1)',  'text' => '#818cf8',  'border' => 'rgba(129,140,248,0.3)'],
+                                'cancelled' => ['bg' => 'rgba(248,113,113,0.1)',  'text' => '#f87171',  'border' => 'rgba(248,113,113,0.3)'],
+                            ];
+                            $sc     = $statusColors[$record->status] ?? $statusColors['draft'];
+                            $status = ucwords(str_replace('_', ' ', $record->status ?? 'draft'));
+
+                            $row = fn (string $icon, string $label, string $value) =>
+                                '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">'
+                                . '<span style="color:#475569;font-size:16px;margin-top:1px;">' . $icon . '</span>'
+                                . '<div style="min-width:0;">'
+                                . '<p style="margin:0;font-size:11px;color:#475569;text-transform:uppercase;letter-spacing:.5px;font-weight:500;">' . $label . '</p>'
+                                . '<p style="margin:2px 0 0;font-size:14px;font-weight:600;color:#e2e8f0;word-break:break-word;">' . $value . '</p>'
+                                . '</div></div>';
+
+                            $invoicePaid  = $record->invoices()->where('status', 'paid')->sum('total');
+                            $invoiceTotal = $record->invoices()->whereNotIn('status', ['draft', 'cancelled'])->sum('total');
+                            $serviceLabels = ['wizytowka' => 'Business Card', 'landing' => 'Landing Page', 'ecommerce' => 'E-Commerce', 'aplikacja' => 'Web Application', 'seo' => 'SEO'];
+
+                            $html = '<div>'
+                                . '<div style="background:' . $sc['bg'] . ';border:1px solid ' . $sc['border'] . ';border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">'
+                                . '<span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#475569;">Status</span>'
+                                . '<span style="color:' . $sc['text'] . ';font-weight:700;font-size:13px;">' . $status . '</span>'
+                                . '</div>'
+
+                                . $row('🏢', 'Client', e($record->client?->company_name ?? '—'))
+                                . $row('👤', 'Lead Developer', e($record->assignedTo?->name ?? '—'))
+                                . $row('⚙️', 'Service Type', $serviceLabels[$record->service_type] ?? ucfirst($record->service_type ?? '—'))
+                                . $row('📅', 'Start Date', $record->start_date?->format('d M Y') ?? '—')
+                                . $row('⏰', 'Deadline', $record->deadline?->format('d M Y') ?? '—')
+                                . ($record->completed_at ? $row('✅', 'Completed', $record->completed_at->format('d M Y')) : '')
+
+                                . '<div style="margin-top:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:12px 14px;">'
+                                . '<p style="margin:0 0 10px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#475569;">Finances</p>'
+                                . '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
+                                . '<span style="font-size:13px;color:#64748b;">Budget</span>'
+                                . '<span style="font-size:13px;font-weight:700;color:#e2e8f0;">' . ($record->budget ? $currency . number_format((float) $record->budget, 0) : '—') . '</span>'
+                                . '</div>'
+                                . '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
+                                . '<span style="font-size:13px;color:#64748b;">Invoiced</span>'
+                                . '<span style="font-size:13px;font-weight:700;color:#e2e8f0;">' . $currency . number_format($invoiceTotal, 0) . '</span>'
+                                . '</div>'
+                                . '<div style="display:flex;justify-content:space-between;">'
+                                . '<span style="font-size:13px;color:#64748b;">Paid</span>'
+                                . '<span style="font-size:13px;font-weight:700;color:#4ade80;">' . $currency . number_format($invoicePaid, 0) . '</span>'
+                                . '</div>'
+                                . '</div>'
+                                . '</div>';
+
+                            return $html;
+                        }),
+                ]),
+
+            // ── Description ──────────────────────────────────────────────────
+            Section::make('Description')
+                ->columnSpanFull()
+                ->collapsed()
+                ->schema([
+                    TextEntry::make('description')
+                        ->label('')
+                        ->prose()
+                        ->placeholder('No description provided.'),
+                ]),
+
+            // ── Invoices ──────────────────────────────────────────────────────
+            Section::make('Invoices')
+                ->columnSpanFull()
+                ->collapsed()
+                ->schema([
+                    TextEntry::make('_invoices')
+                        ->label('')
+                        ->html()
+                        ->state(function ($record) {
+                            $invoices = $record->invoices()->orderBy('created_at', 'desc')->get();
+                            if ($invoices->isEmpty()) {
+                                return '<p style="color:#475569;font-size:14px;">No invoices linked to this project yet.</p>';
+                            }
+
+                            $currency = match ($record->currency ?? 'GBP') {
+                                'GBP' => '£', 'EUR' => '€', 'USD' => '$', 'PLN' => 'zł', default => $record->currency,
+                            };
+                            $statusMeta = [
+                                'draft'     => ['bg' => 'rgba(255,255,255,0.06)', 'text' => '#94a3b8'],
+                                'sent'      => ['bg' => 'rgba(129,140,248,0.15)', 'text' => '#818cf8'],
+                                'paid'      => ['bg' => 'rgba(74,222,128,0.15)',  'text' => '#4ade80'],
+                                'overdue'   => ['bg' => 'rgba(248,113,113,0.15)', 'text' => '#f87171'],
+                                'cancelled' => ['bg' => 'rgba(255,255,255,0.04)', 'text' => '#475569'],
+                            ];
+
+                            $html = '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+                                . '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1);">'
+                                . '<th style="text-align:left;padding:8px 12px;color:#475569;font-weight:600;">Number</th>'
+                                . '<th style="text-align:left;padding:8px 12px;color:#475569;font-weight:600;">Issue Date</th>'
+                                . '<th style="text-align:left;padding:8px 12px;color:#475569;font-weight:600;">Due Date</th>'
+                                . '<th style="text-align:right;padding:8px 12px;color:#475569;font-weight:600;">Total</th>'
+                                . '<th style="text-align:center;padding:8px 12px;color:#475569;font-weight:600;">Status</th>'
+                                . '</tr></thead><tbody>';
+
+                            foreach ($invoices as $inv) {
+                                $sm = $statusMeta[$inv->status] ?? $statusMeta['draft'];
+                                $html .= '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">'
+                                    . '<td style="padding:10px 12px;font-weight:600;color:#e2e8f0;">' . e($inv->number ?? "#{$inv->id}") . '</td>'
+                                    . '<td style="padding:10px 12px;color:#64748b;">' . ($inv->issue_date?->format('d M Y') ?? '—') . '</td>'
+                                    . '<td style="padding:10px 12px;color:#64748b;">' . ($inv->due_date?->format('d M Y') ?? '—') . '</td>'
+                                    . '<td style="padding:10px 12px;text-align:right;font-weight:700;color:#e2e8f0;">' . $currency . number_format((float) $inv->total, 2) . '</td>'
+                                    . '<td style="padding:10px 12px;text-align:center;"><span style="background:' . $sm['bg'] . ';color:' . $sm['text'] . ';border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;text-transform:uppercase;">' . $inv->status . '</span></td>'
+                                    . '</tr>';
+                            }
+
+                            $html .= '</tbody></table>';
+                            return $html;
+                        }),
+                ]),
+        ]);
+    }
 
     public static function form(Schema $form): Schema
     {

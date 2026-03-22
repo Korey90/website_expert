@@ -7,6 +7,7 @@ use App\Http\Controllers\KalkulatorController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\EmailTemplatePreviewController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\WelcomeController;
@@ -57,6 +58,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/invoices', [PortalController::class, 'invoices'])->name('invoices');
         Route::get('/quotes', [PortalController::class, 'quotes'])->name('quotes');
     });
+
+    // Email template preview (admin only)
+    Route::get('/admin/email-preview/{template}/{locale?}', [EmailTemplatePreviewController::class, 'show'])
+        ->name('admin.email-preview');
 
     // Reports — admin only
     Route::prefix('reports')->name('reports.')->group(function () {

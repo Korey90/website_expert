@@ -7,527 +7,460 @@ use Illuminate\Database\Seeder;
 
 class EmailTemplateSeeder extends Seeder
 {
+    // ── Shared inline-style helpers ──────────────────────────────────────────
+
+    private static function box(string $content, string $color = '#4F46E5', string $bg = '#f8fafc', string $border = '#e2e8f0'): string
+    {
+        return '<div style="background:' . $bg . ';border:1px solid ' . $border . ';border-left:4px solid ' . $color . ';border-radius:6px;padding:20px 24px;margin:24px 0;">' . $content . '</div>';
+    }
+
+    private static function row(string $label, string $value): string
+    {
+        return '<tr><td style="padding:7px 0;color:#64748b;font-size:13px;font-weight:500;width:45%;vertical-align:top;">' . $label . '</td><td style="padding:7px 0;color:#1e293b;font-weight:700;font-size:14px;">' . $value . '</td></tr>';
+    }
+
+    private static function table(string ...$rows): string
+    {
+        return '<table style="width:100%;border-collapse:collapse;">' . implode('', $rows) . '</table>';
+    }
+
+    private static function btn(string $label, string $url, string $color = '#4F46E5'): string
+    {
+        return '<div style="text-align:center;margin:28px 0;"><a href="' . $url . '" style="display:inline-block;background:' . $color . ';color:#ffffff;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:700;font-size:15px;letter-spacing:0.3px;">' . $label . '</a></div>';
+    }
+
+    private static function sig(string $name, bool $pl = false): string
+    {
+        $regards = $pl ? 'Z poważaniem' : 'Kind regards';
+        return '<hr style="border:none;border-top:1px solid #e5e7eb;margin:32px 0 20px;">'
+            . '<p style="margin:0;font-size:14px;color:#374151;">' . $regards . ',<br><strong style="color:#1e293b;">' . $name . '</strong></p>';
+    }
+
     public function run(): void
     {
+        $T = fn (string $pl, string $en, string $pt = '') => ['pl' => $pl, 'en' => $en, 'pt' => $pt ?: $en];
+
         $templates = [
+
+            // ── 1. Welcome / Project Kickoff ────────────────────────────────
             [
-                'name'      => 'Welcome Email',
+                'name'      => 'Powitanie – Start projektu',
                 'slug'      => 'welcome_email',
-                'subject'   => [
-                    'en' => 'Welcome to WebsiteExpert – Your Project Journey Starts Here',
-                    'pl' => 'Witaj w WebsiteExpert – Twój projekt się zaczyna!',
-                    'pt' => 'Bem-vindo à WebsiteExpert – A sua jornada começa agora',
-                ],
+                'subject'   => $T('Witamy! Twój projekt {{project_title}} ruszył – co dalej?', 'Welcome! Your project {{project_title}} is starting – next steps inside'),
                 'variables' => ['client_name', 'project_title', 'manager_name', 'portal_url'],
                 'is_active' => true,
-                'body_html' => [
-                    'en' => <<<'HTML'
-<p>Dear {{client_name}},</p>
+                'body_html' => $T(
+                    // PL
+                    '<p>Szanowny/a <strong>{{client_name}}</strong>,</p>'
+                    . '<p>Cieszymy się, że możemy razem zrealizować projekt <strong>{{project_title}}</strong>. To oficjalny start naszej współpracy!</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#1e293b;font-size:14px;">SZCZEGÓŁY PROJEKTU</p>'
+                        . self::table(
+                            self::row('Projekt:', '{{project_title}}'),
+                            self::row('Opiekun projektu:', '{{manager_name}}'),
+                            self::row('Portal klienta:', '<a href="{{portal_url}}" style="color:#4F46E5;">{{portal_url}}</a>'),
+                        )
+                    )
+                    . '<p>Przez <strong>portal klienta</strong> możesz na bieżąco śledzić postępy, przeglądać etapy i komunikować się z zespołem — 24/7, z dowolnego urządzenia.</p>'
+                    . self::btn('Przejdź do portalu klienta', '{{portal_url}}')
+                    . '<p>W razie pytań jesteśmy do dyspozycji pod adresem <a href="mailto:hello@noname.agency">hello@noname.agency</a>.</p>'
+                    . self::sig('{{manager_name}}', true),
 
-<p>Thank you for choosing <strong>WebsiteExpert</strong>. We're thrilled to be working with you on <strong>{{project_title}}</strong>.</p>
-
-<p>Your dedicated project manager is <strong>{{manager_name}}</strong>, who will be your primary point of contact throughout the project.</p>
-
-<p>You can track your project progress, review milestones, and send us messages via your secure client portal:</p>
-
-<p><a href="{{portal_url}}" style="background:#4F46E5;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Access Your Portal</a></p>
-
-<p>If you have any questions, please don't hesitate to reach out to us at <a href="mailto:hello@websiteexpert.co.uk">hello@websiteexpert.co.uk</a>.</p>
-
-<p>Warm regards,<br>
-<strong>The WebsiteExpert Team</strong></p>
-HTML,
-                    'pl' => <<<'HTML'
-<p>Szanowny/a {{client_name}},</p>
-
-<p>Dziękujemy za wybór <strong>WebsiteExpert</strong>. Cieszymy się, że będziemy współpracować przy projekcie <strong>{{project_title}}</strong>.</p>
-
-<p>Twoim dedykowanym menedżerem projektu jest <strong>{{manager_name}}</strong>, który będzie Twoim głównym punktem kontaktu przez cały czas trwania projektu.</p>
-
-<p>Możesz śledzić postęp projektu, przeglądać kamienie milowe i wysyłać do nas wiadomości za pośrednictwem swojego bezpiecznego portalu klienta:</p>
-
-<p><a href="{{portal_url}}" style="background:#4F46E5;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Przejdź do portalu</a></p>
-
-<p>Jeśli masz jakiekolwiek pytania, skontaktuj się z nami pod adresem <a href="mailto:hello@websiteexpert.co.uk">hello@websiteexpert.co.uk</a>.</p>
-
-<p>Z poważaniem,<br>
-<strong>Zespół WebsiteExpert</strong></p>
-HTML,
-                    'pt' => <<<'HTML'
-<p>Caro/a {{client_name}},</p>
-
-<p>Obrigado por escolher a <strong>WebsiteExpert</strong>. Estamos entusiasmados por trabalhar consigo no projeto <strong>{{project_title}}</strong>.</p>
-
-<p>O seu gestor de projeto dedicado é <strong>{{manager_name}}</strong>, que será o seu principal ponto de contacto ao longo do projeto.</p>
-
-<p>Pode acompanhar o progresso do projeto, rever marcos e enviar-nos mensagens através do seu portal de cliente seguro:</p>
-
-<p><a href="{{portal_url}}" style="background:#4F46E5;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Aceder ao Portal</a></p>
-
-<p>Se tiver alguma dúvida, não hesite em contactar-nos em <a href="mailto:hello@websiteexpert.co.uk">hello@websiteexpert.co.uk</a>.</p>
-
-<p>Com os melhores cumprimentos,<br>
-<strong>A Equipa WebsiteExpert</strong></p>
-HTML,
-                ],
-                'body_text' => [
-                    'en' => "Dear {{client_name}},\n\nThank you for choosing WebsiteExpert. We're thrilled to be working with you on {{project_title}}.\n\nYour dedicated project manager is {{manager_name}}.\n\nTrack your project: {{portal_url}}\n\nWarm regards,\nThe WebsiteExpert Team",
-                    'pl' => "Szanowny/a {{client_name}},\n\nDziękujemy za wybór WebsiteExpert. Cieszymy się ze współpracy przy projekcie {{project_title}}.\n\nTwój menedżer projektu: {{manager_name}}.\n\nPortal klienta: {{portal_url}}\n\nZ poważaniem,\nZespół WebsiteExpert",
-                    'pt' => "Caro/a {{client_name}},\n\nObrigado por escolher a WebsiteExpert. Estamos entusiasmados por trabalhar consigo no projeto {{project_title}}.\n\nO seu gestor de projeto: {{manager_name}}.\n\nPortal do cliente: {{portal_url}}\n\nCom os melhores cumprimentos,\nA Equipa WebsiteExpert",
-                ],
+                    // EN
+                    '<p>Dear <strong>{{client_name}}</strong>,</p>'
+                    . '<p>We\'re thrilled to be working with you on <strong>{{project_title}}</strong>. This is the official start of our collaboration!</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#1e293b;font-size:14px;">PROJECT DETAILS</p>'
+                        . self::table(
+                            self::row('Project:', '{{project_title}}'),
+                            self::row('Project Manager:', '{{manager_name}}'),
+                            self::row('Client Portal:', '<a href="{{portal_url}}" style="color:#4F46E5;">{{portal_url}}</a>'),
+                        )
+                    )
+                    . '<p>Via your <strong>client portal</strong> you can track progress, review milestones and communicate with the team — 24/7, from any device.</p>'
+                    . self::btn('Access Your Client Portal', '{{portal_url}}')
+                    . '<p>If you have any questions, reach us at <a href="mailto:hello@noname.agency">hello@noname.agency</a>.</p>'
+                    . self::sig('{{manager_name}}')
+                ),
+                'body_text' => $T(
+                    "Szanowny/a {{client_name}},\n\nProjekt {{project_title}} ruszył!\n\nOpiekun: {{manager_name}}\nPortal: {{portal_url}}\n\nZ poważaniem,\n{{manager_name}}",
+                    "Dear {{client_name}},\n\nProject {{project_title}} is starting!\n\nManager: {{manager_name}}\nPortal: {{portal_url}}\n\nKind regards,\n{{manager_name}}"
+                ),
             ],
+
+            // ── 2. Invoice Sent ──────────────────────────────────────────────
             [
-                'name'      => 'Invoice Sent',
+                'name'      => 'Faktura – do opłacenia',
                 'slug'      => 'invoice_sent',
-                'subject'   => [
-                    'en' => 'Invoice {{invoice_number}} from WebsiteExpert – Payment Due {{due_date}}',
-                    'pl' => 'Faktura {{invoice_number}} od WebsiteExpert – Termin płatności: {{due_date}}',
-                    'pt' => 'Fatura {{invoice_number}} da WebsiteExpert – Pagamento até {{due_date}}',
-                ],
+                'subject'   => $T(
+                    'Faktura {{invoice_number}} – termin płatności: {{due_date}}',
+                    'Invoice {{invoice_number}} – payment due {{due_date}}'
+                ),
                 'variables' => ['client_name', 'invoice_number', 'invoice_total', 'due_date', 'invoice_url', 'payment_link'],
                 'is_active' => true,
-                'body_html' => [
-                    'en' => <<<'HTML'
-<p>Dear {{client_name}},</p>
+                'body_html' => $T(
+                    // PL
+                    '<p>Szanowny/a <strong>{{client_name}}</strong>,</p>'
+                    . '<p>Przesyłamy fakturę do opłacenia. Prosimy o uregulowanie płatności w podanym terminie.</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#1e293b;font-size:14px;">SZCZEGÓŁY FAKTURY</p>'
+                        . self::table(
+                            self::row('Numer faktury:', '<strong>{{invoice_number}}</strong>'),
+                            self::row('Kwota do zapłaty:', '<strong style="font-size:16px;color:#1e293b;">{{invoice_total}}</strong>'),
+                            self::row('Termin płatności:', '<strong style="color:#ef4444;">{{due_date}}</strong>'),
+                        ),
+                        '#10B981', '#f0fdf4', '#bbf7d0'
+                    )
+                    . self::btn('Zapłać online teraz', '{{payment_link}}', '#10B981')
+                    . '<p style="font-size:13px;color:#64748b;">Lub dokonaj przelewu bankowego:<br>'
+                    . '<strong>Nazwa konta:</strong> NoName Agency Ltd &nbsp;|&nbsp; <strong>Sort Code:</strong> 04-00-03 &nbsp;|&nbsp; <strong>Numer konta:</strong> 12345678 &nbsp;|&nbsp; <strong>Tytułem:</strong> {{invoice_number}}</p>'
+                    . '<p>W razie pytań dotyczących faktury skontaktuj się z nami: <a href="mailto:hello@noname.agency">hello@noname.agency</a></p>'
+                    . self::sig('Dział Finansów', true),
 
-<p>Please find attached invoice <strong>{{invoice_number}}</strong> for the amount of <strong>{{invoice_total}}</strong> (inc. VAT).</p>
-
-<p><strong>Payment is due by: {{due_date}}</strong></p>
-
-<p>You can pay securely online using the button below:</p>
-
-<p><a href="{{payment_link}}" style="background:#10B981;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Pay Now</a></p>
-
-<p>Alternatively, you can make a BACS payment using the details below:</p>
-<ul>
-  <li><strong>Account Name:</strong> WebsiteExpert Ltd</li>
-  <li><strong>Sort Code:</strong> 20-00-00</li>
-  <li><strong>Account Number:</strong> 12345678</li>
-  <li><strong>Reference:</strong> {{invoice_number}}</li>
-</ul>
-
-<p>If you have any queries regarding this invoice, please contact us at <a href="mailto:accounts@websiteexpert.co.uk">accounts@websiteexpert.co.uk</a>.</p>
-
-<p>Kind regards,<br>
-<strong>WebsiteExpert Accounts Team</strong></p>
-HTML,
-                    'pl' => <<<'HTML'
-<p>Szanowny/a {{client_name}},</p>
-
-<p>W załączeniu przesyłamy fakturę <strong>{{invoice_number}}</strong> na kwotę <strong>{{invoice_total}}</strong> (brutto).</p>
-
-<p><strong>Termin płatności: {{due_date}}</strong></p>
-
-<p>Możesz dokonać płatności online:</p>
-
-<p><a href="{{payment_link}}" style="background:#10B981;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Zapłać teraz</a></p>
-
-<p>W razie pytań dotyczących faktury prosimy o kontakt: <a href="mailto:accounts@websiteexpert.co.uk">accounts@websiteexpert.co.uk</a>.</p>
-
-<p>Z poważaniem,<br>
-<strong>Dział Księgowości WebsiteExpert</strong></p>
-HTML,
-                    'pt' => <<<'HTML'
-<p>Caro/a {{client_name}},</p>
-
-<p>Segue em anexo a fatura <strong>{{invoice_number}}</strong> no valor de <strong>{{invoice_total}}</strong> (IVA incluído).</p>
-
-<p><strong>Data limite de pagamento: {{due_date}}</strong></p>
-
-<p>Pode pagar de forma segura online:</p>
-
-<p><a href="{{payment_link}}" style="background:#10B981;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Pagar Agora</a></p>
-
-<p>Em alternativa, pode efetuar uma transferência bancária com os seguintes dados:</p>
-<ul>
-  <li><strong>Nome da Conta:</strong> WebsiteExpert Ltd</li>
-  <li><strong>Código Swift/IBAN:</strong> (consultar fatura)</li>
-  <li><strong>Referência:</strong> {{invoice_number}}</li>
-</ul>
-
-<p>Para qualquer esclarecimento, contacte-nos em <a href="mailto:accounts@websiteexpert.co.uk">accounts@websiteexpert.co.uk</a>.</p>
-
-<p>Com os melhores cumprimentos,<br>
-<strong>Departamento Financeiro WebsiteExpert</strong></p>
-HTML,
-                ],
-                'body_text' => [
-                    'en' => "Dear {{client_name}},\n\nPlease find attached invoice {{invoice_number}} for {{invoice_total}} (inc. VAT).\n\nPayment due: {{due_date}}\n\nPay online: {{payment_link}}\n\nBACS: WebsiteExpert Ltd | Sort: 20-00-00 | Acc: 12345678 | Ref: {{invoice_number}}\n\nKind regards,\nWebsiteExpert Accounts Team",
-                    'pl' => "Szanowny/a {{client_name}},\n\nW załączeniu faktura {{invoice_number}} na kwotę {{invoice_total}} (brutto).\n\nTermin płatności: {{due_date}}\n\nPłatność online: {{payment_link}}\n\nZ poważaniem,\nDział Księgowości WebsiteExpert",
-                    'pt' => "Caro/a {{client_name}},\n\nSegue em anexo a fatura {{invoice_number}} no valor de {{invoice_total}} (IVA inclu\u00eddo).\n\nData limite: {{due_date}}\n\nPagar online: {{payment_link}}\n\nCom os melhores cumprimentos,\nDepartamento Financeiro WebsiteExpert",
-                ],
+                    // EN
+                    '<p>Dear <strong>{{client_name}}</strong>,</p>'
+                    . '<p>Please find your invoice below. Kindly arrange payment by the due date.</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#1e293b;font-size:14px;">INVOICE DETAILS</p>'
+                        . self::table(
+                            self::row('Invoice Number:', '<strong>{{invoice_number}}</strong>'),
+                            self::row('Amount Due:', '<strong style="font-size:16px;color:#1e293b;">{{invoice_total}}</strong>'),
+                            self::row('Payment Due:', '<strong style="color:#ef4444;">{{due_date}}</strong>'),
+                        ),
+                        '#10B981', '#f0fdf4', '#bbf7d0'
+                    )
+                    . self::btn('Pay Online Now', '{{payment_link}}', '#10B981')
+                    . '<p style="font-size:13px;color:#64748b;">Or pay by bank transfer:<br>'
+                    . '<strong>Account:</strong> NoName Agency Ltd &nbsp;|&nbsp; <strong>Sort:</strong> 04-00-03 &nbsp;|&nbsp; <strong>Acc:</strong> 12345678 &nbsp;|&nbsp; <strong>Ref:</strong> {{invoice_number}}</p>'
+                    . '<p>Questions? Contact us at <a href="mailto:hello@noname.agency">hello@noname.agency</a></p>'
+                    . self::sig('Accounts Team')
+                ),
+                'body_text' => $T(
+                    "Szanowny/a {{client_name}},\n\nFaktura {{invoice_number}} | Kwota: {{invoice_total}} | Termin: {{due_date}}\n\nPłatność online: {{payment_link}}\n\nZ poważaniem,\nDział Finansów",
+                    "Dear {{client_name}},\n\nInvoice {{invoice_number}} | Amount: {{invoice_total}} | Due: {{due_date}}\n\nPay online: {{payment_link}}\n\nKind regards,\nAccounts Team"
+                ),
             ],
+
+            // ── 3. Invoice Overdue ───────────────────────────────────────────
             [
-                'name'      => 'Invoice Overdue Reminder',
+                'name'      => 'Faktura przeterminowana – przypomnienie',
                 'slug'      => 'invoice_overdue',
-                'subject'   => [
-                    'en' => 'REMINDER: Invoice {{invoice_number}} is Overdue – Action Required',
-                    'pl' => 'PRZYPOMNIENIE: Faktura {{invoice_number}} jest przeterminowana – wymagane działanie',
-                    'pt' => 'LEMBRETE: Fatura {{invoice_number}} em atraso – ação necessária',
-                ],
+                'subject'   => $T(
+                    'PRZYPOMNIENIE: Faktura {{invoice_number}} jest przeterminowana o {{days_overdue}} dni',
+                    'REMINDER: Invoice {{invoice_number}} is {{days_overdue}} days overdue – action required'
+                ),
                 'variables' => ['client_name', 'invoice_number', 'invoice_total', 'due_date', 'days_overdue', 'payment_link'],
                 'is_active' => true,
-                'body_html' => [
-                    'en' => <<<'HTML'
-<p>Dear {{client_name}},</p>
+                'body_html' => $T(
+                    // PL
+                    '<p>Szanowny/a <strong>{{client_name}}</strong>,</p>'
+                    . '<p>Prosimy o pilne uregulowanie zaległej płatności. Poniżej szczegóły przeterminowanej faktury.</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#b91c1c;font-size:14px;">⚠ FAKTURA PRZETERMINOWANA</p>'
+                        . self::table(
+                            self::row('Numer faktury:', '<strong>{{invoice_number}}</strong>'),
+                            self::row('Kwota do zapłaty:', '<strong style="font-size:16px;color:#b91c1c;">{{invoice_total}}</strong>'),
+                            self::row('Termin płatności był:', '{{due_date}}'),
+                            self::row('Dni po terminie:', '<strong style="color:#b91c1c;">{{days_overdue}} dni</strong>'),
+                        ),
+                        '#ef4444', '#fff1f2', '#fecdd3'
+                    )
+                    . self::btn('Ureguluj płatność teraz', '{{payment_link}}', '#ef4444')
+                    . '<p>Jeśli płatność została już wykonana, prosimy o zignorowanie tej wiadomości i przepraszamy za niedogodności.</p>'
+                    . '<p>W przypadku trudności z płatnością prosimy o <strong>pilny kontakt</strong>: <a href="mailto:hello@noname.agency">hello@noname.agency</a></p>'
+                    . self::sig('Dział Finansów', true),
 
-<p>This is a friendly reminder that invoice <strong>{{invoice_number}}</strong> for <strong>{{invoice_total}}</strong> was due on <strong>{{due_date}}</strong> and is now <strong>{{days_overdue}} days overdue</strong>.</p>
-
-<p>Please arrange payment at your earliest convenience:</p>
-
-<p><a href="{{payment_link}}" style="background:#EF4444;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Pay Now</a></p>
-
-<p>If you have already made this payment, please disregard this email and accept our apologies for the inconvenience.</p>
-
-<p>If you are experiencing difficulties making payment, please contact us immediately at <a href="mailto:accounts@websiteexpert.co.uk">accounts@websiteexpert.co.uk</a> so we can discuss payment arrangements.</p>
-
-<p>Kind regards,<br>
-<strong>WebsiteExpert Accounts Team</strong></p>
-HTML,
-                    'pl' => <<<'HTML'
-<p>Szanowny/a {{client_name}},</p>
-
-<p>Przypominamy, że faktura <strong>{{invoice_number}}</strong> na kwotę <strong>{{invoice_total}}</strong> była płatna do <strong>{{due_date}}</strong> i jest teraz przeterminowana o <strong>{{days_overdue}} dni</strong>.</p>
-
-<p>Prosimy o jak najszybsze uregulowanie płatności:</p>
-
-<p><a href="{{payment_link}}" style="background:#EF4444;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Zapłać teraz</a></p>
-
-<p>Jeśli masz trudności z płatnością, skontaktuj się z nami natychmiast pod adresem <a href="mailto:accounts@websiteexpert.co.uk">accounts@websiteexpert.co.uk</a>.</p>
-
-<p>Z poważaniem,<br>
-<strong>Dział Księgowości WebsiteExpert</strong></p>
-HTML,
-                    'pt' => <<<'HTML'
-<p>Caro/a {{client_name}},</p>
-
-<p>Este é um aviso amigável de que a fatura <strong>{{invoice_number}}</strong> no valor de <strong>{{invoice_total}}</strong> tinha data limite em <strong>{{due_date}}</strong> e encontra-se atualmente com <strong>{{days_overdue}} dias de atraso</strong>.</p>
-
-<p>Por favor regularize o pagamento o mais brevemente possível:</p>
-
-<p><a href="{{payment_link}}" style="background:#EF4444;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Pagar Agora</a></p>
-
-<p>Se já efetuou este pagamento, por favor ignore este email e pedimos desculpa pelo incidente.</p>
-
-<p>Se tiver dificuldades em efetuar o pagamento, contacte-nos imediatamente em <a href="mailto:accounts@websiteexpert.co.uk">accounts@websiteexpert.co.uk</a>.</p>
-
-<p>Com os melhores cumprimentos,<br>
-<strong>Departamento Financeiro WebsiteExpert</strong></p>
-HTML,
-                ],
-                'body_text' => [
-                    'en' => "Dear {{client_name}},\n\nInvoice {{invoice_number}} for {{invoice_total}} was due on {{due_date}} and is now {{days_overdue}} days overdue.\n\nPay now: {{payment_link}}\n\nIf you have any questions, contact accounts@websiteexpert.co.uk\n\nKind regards,\nWebsiteExpert Accounts Team",
-                    'pl' => "Szanowny/a {{client_name}},\n\nFaktura {{invoice_number}} na kwotę {{invoice_total}} była płatna do {{due_date}} i jest przeterminowana o {{days_overdue}} dni.\n\nZapłać teraz: {{payment_link}}\n\nZ poważaniem,\nDział Księgowości WebsiteExpert",
-                    'pt' => "Caro/a {{client_name}},\n\nA fatura {{invoice_number}} no valor de {{invoice_total}} tinha data limite em {{due_date}} e encontra-se com {{days_overdue}} dias de atraso.\n\nPagar agora: {{payment_link}}\n\nCom os melhores cumprimentos,\nDepartamento Financeiro WebsiteExpert",
-                ],
+                    // EN
+                    '<p>Dear <strong>{{client_name}}</strong>,</p>'
+                    . '<p>This is an urgent reminder regarding an outstanding payment. Please see the overdue invoice details below.</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#b91c1c;font-size:14px;">⚠ OVERDUE INVOICE</p>'
+                        . self::table(
+                            self::row('Invoice Number:', '<strong>{{invoice_number}}</strong>'),
+                            self::row('Amount Due:', '<strong style="font-size:16px;color:#b91c1c;">{{invoice_total}}</strong>'),
+                            self::row('Original Due Date:', '{{due_date}}'),
+                            self::row('Days Overdue:', '<strong style="color:#b91c1c;">{{days_overdue}} days</strong>'),
+                        ),
+                        '#ef4444', '#fff1f2', '#fecdd3'
+                    )
+                    . self::btn('Pay Now', '{{payment_link}}', '#ef4444')
+                    . '<p>If you have already made this payment, please disregard this message — we apologise for the inconvenience.</p>'
+                    . '<p>If you are experiencing difficulties, please contact us <strong>urgently</strong>: <a href="mailto:hello@noname.agency">hello@noname.agency</a></p>'
+                    . self::sig('Accounts Team')
+                ),
+                'body_text' => $T(
+                    "Szanowny/a {{client_name}},\n\nFaktura {{invoice_number}} ({{invoice_total}}) jest przeterminowana o {{days_overdue}} dni.\nTermin był: {{due_date}}\n\nZapłać teraz: {{payment_link}}\n\nZ poważaniem,\nDział Finansów",
+                    "Dear {{client_name}},\n\nInvoice {{invoice_number}} ({{invoice_total}}) is {{days_overdue}} days overdue.\nDue date was: {{due_date}}\n\nPay now: {{payment_link}}\n\nKind regards,\nAccounts Team"
+                ),
             ],
+
+            // ── 4. Quote / Proposal Sent ─────────────────────────────────────
             [
-                'name'      => 'Quote Sent',
+                'name'      => 'Oferta / Wycena',
                 'slug'      => 'quote_sent',
-                'subject'   => [
-                    'en' => 'Your Quote from WebsiteExpert – Ref: {{quote_number}}',
-                    'pl' => 'Twoja wycena od WebsiteExpert – Nr: {{quote_number}}',
-                    'pt' => 'O seu orçamento da WebsiteExpert – Ref: {{quote_number}}',
-                ],
+                'subject'   => $T(
+                    'Twoja wycena od NoName Agency – Nr {{quote_number}}',
+                    'Your quote from NoName Agency – Ref {{quote_number}}'
+                ),
                 'variables' => ['client_name', 'quote_number', 'quote_total', 'valid_until', 'quote_url', 'manager_name'],
                 'is_active' => true,
-                'body_html' => [
-                    'en' => <<<'HTML'
-<p>Dear {{client_name}},</p>
+                'body_html' => $T(
+                    // PL
+                    '<p>Szanowny/a <strong>{{client_name}}</strong>,</p>'
+                    . '<p>Dziękujemy za zapytanie. W załączeniu przesyłamy przygotowaną dla Ciebie spersonalizowaną wycenę.</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#1e293b;font-size:14px;">PODSUMOWANIE WYCENY</p>'
+                        . self::table(
+                            self::row('Numer wyceny:', '<strong>{{quote_number}}</strong>'),
+                            self::row('Łączna kwota brutto:', '<strong style="font-size:16px;color:#1e293b;">{{quote_total}}</strong>'),
+                            self::row('Ważna do:', '<strong>{{valid_until}}</strong>'),
+                            self::row('Opiekun:', '{{manager_name}}'),
+                        )
+                    )
+                    . self::btn('Przejrzyj wycenę online', '{{quote_url}}')
+                    . '<p>Chętnie umówimy się na krótką rozmowę telefoniczną, aby omówić szczegóły — daj nam znać kiedy Ci odpowiada.</p>'
+                    . '<p>Czekamy na Twoją odpowiedź!</p>'
+                    . self::sig('{{manager_name}}', true),
 
-<p>Thank you for your enquiry. Please find attached your personalised quote <strong>{{quote_number}}</strong> from WebsiteExpert.</p>
-
-<p><strong>Quote Summary:</strong><br>
-Total: <strong>{{quote_total}}</strong> (inc. VAT)<br>
-Valid Until: <strong>{{valid_until}}</strong></p>
-
-<p>You can view and accept your quote online:</p>
-
-<p><a href="{{quote_url}}" style="background:#4F46E5;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">View Quote</a></p>
-
-<p>I'd love to jump on a quick call to walk you through everything — feel free to book a time that suits you at your convenience.</p>
-
-<p>I look forward to hearing from you.</p>
-
-<p>Best regards,<br>
-<strong>{{manager_name}}</strong><br>
-WebsiteExpert</p>
-HTML,
-                    'pl' => <<<'HTML'
-<p>Szanowny/a {{client_name}},</p>
-
-<p>Dziękujemy za Twoje zapytanie. W załączeniu przesyłamy spersonalizowaną wycenę <strong>{{quote_number}}</strong>.</p>
-
-<p><strong>Podsumowanie wyceny:</strong><br>
-Kwota: <strong>{{quote_total}}</strong> (brutto)<br>
-Ważna do: <strong>{{valid_until}}</strong></p>
-
-<p>Możesz przejrzeć i zaakceptować wycenę online:</p>
-
-<p><a href="{{quote_url}}" style="background:#4F46E5;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Zobacz wycenę</a></p>
-
-<p>Chętnie porozmawiamy przez telefon, by omówić szczegóły. Daj nam znać, kiedy Ci odpowiada.</p>
-
-<p>Z poważaniem,<br>
-<strong>{{manager_name}}</strong><br>
-WebsiteExpert</p>
-HTML,
-                    'pt' => <<<'HTML'
-<p>Caro/a {{client_name}},</p>
-
-<p>Obrigado pelo seu contacto. Em anexo encontra o seu orçamento personalizado <strong>{{quote_number}}</strong> da WebsiteExpert.</p>
-
-<p><strong>Resumo do Orçamento:</strong><br>
-Total: <strong>{{quote_total}}</strong> (IVA incluído)<br>
-Válido até: <strong>{{valid_until}}</strong></p>
-
-<p>Pode consultar e aceitar o seu orçamento online:</p>
-
-<p><a href="{{quote_url}}" style="background:#4F46E5;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Ver Orçamento</a></p>
-
-<p>Adoraría marcar uma chamada rápida para lhe explicar tudo — avise-nos quando lhe for conveniente.</p>
-
-<p>Aguardo o seu retorno.</p>
-
-<p>Com os melhores cumprimentos,<br>
-<strong>{{manager_name}}</strong><br>
-WebsiteExpert</p>
-HTML,
-                ],
-                'body_text' => [
-                    'en' => "Dear {{client_name}},\n\nPlease find attached your quote {{quote_number}}.\n\nTotal: {{quote_total}} (inc. VAT)\nValid Until: {{valid_until}}\n\nView quote: {{quote_url}}\n\nBest regards,\n{{manager_name}}\nWebsiteExpert",
-                    'pl' => "Szanowny/a {{client_name}},\n\nW załączeniu wycena {{quote_number}}.\n\nKwota: {{quote_total}} (brutto)\nWażna do: {{valid_until}}\n\nZobacz wycenę: {{quote_url}}\n\nZ poważaniem,\n{{manager_name}}\nWebsiteExpert",
-                    'pt' => "Caro/a {{client_name}},\n\nEm anexo o seu orçamento {{quote_number}}.\n\nTotal: {{quote_total}} (IVA incluído)\nVálido até: {{valid_until}}\n\nVer orçamento: {{quote_url}}\n\nCom os melhores cumprimentos,\n{{manager_name}}\nWebsiteExpert",
-                ],
+                    // EN
+                    '<p>Dear <strong>{{client_name}}</strong>,</p>'
+                    . '<p>Thank you for your enquiry. Please find your personalised quote attached below.</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#1e293b;font-size:14px;">QUOTE SUMMARY</p>'
+                        . self::table(
+                            self::row('Quote Reference:', '<strong>{{quote_number}}</strong>'),
+                            self::row('Total (inc. VAT):', '<strong style="font-size:16px;color:#1e293b;">{{quote_total}}</strong>'),
+                            self::row('Valid Until:', '<strong>{{valid_until}}</strong>'),
+                            self::row('Your Manager:', '{{manager_name}}'),
+                        )
+                    )
+                    . self::btn('View Your Quote', '{{quote_url}}')
+                    . '<p>I\'d love to arrange a quick call to walk you through everything — just let me know when suits you.</p>'
+                    . '<p>I look forward to hearing from you!</p>'
+                    . self::sig('{{manager_name}}')
+                ),
+                'body_text' => $T(
+                    "Szanowny/a {{client_name}},\n\nWycena {{quote_number}} | Kwota: {{quote_total}} | Ważna do: {{valid_until}}\n\nZobacz wycenę: {{quote_url}}\n\nZ poważaniem,\n{{manager_name}}",
+                    "Dear {{client_name}},\n\nQuote {{quote_number}} | Total: {{quote_total}} | Valid until: {{valid_until}}\n\nView quote: {{quote_url}}\n\nKind regards,\n{{manager_name}}"
+                ),
             ],
+
+            // ── 5. Quote Accepted – Kickoff ──────────────────────────────────
             [
-                'name'      => 'Quote Accepted – Project Kickoff',
+                'name'      => 'Umowa podpisana – Kickoff',
                 'slug'      => 'quote_accepted',
-                'subject'   => [
-                    'en' => 'Brilliant News! Your Quote is Confirmed – Next Steps Inside',
-                    'pl' => 'Świetna wiadomość! Twoja wycena jest zatwierdzona – sprawdź kolejne kroki',
-                    'pt' => 'Ótimas notícias! O seu orçamento foi confirmado – próximos passos',
-                ],
+                'subject'   => $T(
+                    'Zaczynamy! 🎉 Projekt {{project_title}} – kolejne kroki',
+                    'We\'re go! 🎉 Project {{project_title}} – what happens next'
+                ),
                 'variables' => ['client_name', 'quote_number', 'project_title', 'manager_name', 'deposit_amount', 'invoice_url'],
                 'is_active' => true,
-                'body_html' => [
-                    'en' => <<<'HTML'
-<p>Dear {{client_name}},</p>
+                'body_html' => $T(
+                    // PL
+                    '<p>Szanowny/a <strong>{{client_name}}</strong>,</p>'
+                    . '<p>Świetna wiadomość — wycena <strong>{{quote_number}}</strong> została zatwierdzona i jesteśmy gotowi do startu projektu <strong>{{project_title}}</strong>! 🎉</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#065f46;font-size:14px;">✅ PROJEKT ZATWIERDZONY</p>'
+                        . '<p style="margin:0;color:#374151;">Projekt: <strong>{{project_title}}</strong><br>Opiekun: <strong>{{manager_name}}</strong><br>Zaliczka: <strong>{{deposit_amount}}</strong></p>',
+                        '#10B981', '#f0fdf4', '#bbf7d0'
+                    )
+                    . '<p><strong>Kolejne kroki:</strong></p>'
+                    . '<ol style="padding-left:20px;margin:0 0 20px;">'
+                    . '<li style="margin-bottom:10px;">Opłać <strong>fakturę zaliczkową ({{deposit_amount}})</strong> — <a href="{{invoice_url}}" style="color:#4F46E5;">kliknij tutaj</a></li>'
+                    . '<li style="margin-bottom:10px;">W ciągu 48h od płatności skontaktujemy się z propozycją terminu spotkania kickoff</li>'
+                    . '<li style="margin-bottom:10px;">Otrzymasz dostęp do panelu klienta do śledzenia postępów</li>'
+                    . '</ol>'
+                    . self::btn('Opłać fakturę zaliczkową', '{{invoice_url}}')
+                    . '<p>Bardzo cieszymy się na tę współpracę!</p>'
+                    . self::sig('{{manager_name}}', true),
 
-<p>Fantastic news — your quote <strong>{{quote_number}}</strong> has been confirmed and we're ready to get started on <strong>{{project_title}}</strong>!</p>
-
-<p><strong>Next Steps:</strong></p>
-<ol>
-  <li>Pay your project deposit of <strong>{{deposit_amount}}</strong> — <a href="{{invoice_url}}">view deposit invoice</a></li>
-  <li>We'll schedule a kick-off call within 48 hours of receiving your deposit</li>
-  <li>We'll send you access to your client portal to track progress</li>
-</ol>
-
-<p>We're genuinely excited to work with you. If you have any questions before the kick-off call, please feel free to reach out.</p>
-
-<p>Warm regards,<br>
-<strong>{{manager_name}}</strong><br>
-WebsiteExpert</p>
-HTML,
-                    'pl' => <<<'HTML'
-<p>Szanowny/a {{client_name}},</p>
-
-<p>Fantastyczna wiadomość — Twoja wycena <strong>{{quote_number}}</strong> została zatwierdzona i jesteśmy gotowi do rozpoczęcia prac nad <strong>{{project_title}}</strong>!</p>
-
-<p><strong>Kolejne kroki:</strong></p>
-<ol>
-  <li>Opłać zaliczkę w wysokości <strong>{{deposit_amount}}</strong> — <a href="{{invoice_url}}">przejdź do faktury zaliczkowej</a></li>
-  <li>Zaplanujemy spotkanie inauguracyjne w ciągu 48 godzin od otrzymania zaliczki</li>
-  <li>Wyślemy Ci dostęp do portalu klienta, aby śledzić postęp</li>
-</ol>
-
-<p>Bardzo cieszymy się na współpracę. W razie pytań przed spotkaniem — napisz do nas.</p>
-
-<p>Z poważaniem,<br>
-<strong>{{manager_name}}</strong><br>
-WebsiteExpert</p>
-HTML,
-                    'pt' => <<<'HTML'
-<p>Caro/a {{client_name}},</p>
-
-<p>Notícias fanstásticas — o seu orçamento <strong>{{quote_number}}</strong> foi confirmado e estamos prontos para começar o projeto <strong>{{project_title}}</strong>!</p>
-
-<p><strong>Próximos Passos:</strong></p>
-<ol>
-  <li>Pague o depósito do projeto de <strong>{{deposit_amount}}</strong> — <a href="{{invoice_url}}">ver fatura de depósito</a></li>
-  <li>Iremos agendar uma reunião de arranque nas 48 horas após recebermos o depósito</li>
-  <li>Enviaremos o acesso ao portal do cliente para acompanhar o progresso</li>
-</ol>
-
-<p>Estamos muito entusiasmados por trabalhar consigo. Se tiver alguma dúvida antes da reunião — contacte-nos.</p>
-
-<p>Com os melhores cumprimentos,<br>
-<strong>{{manager_name}}</strong><br>
-WebsiteExpert</p>
-HTML,
-                ],
-                'body_text' => [
-                    'en' => "Dear {{client_name}},\n\nYour quote {{quote_number}} has been confirmed for {{project_title}}.\n\nNext steps:\n1. Pay deposit of {{deposit_amount}}: {{invoice_url}}\n2. Kick-off call within 48 hours\n3. Client portal access\n\nWarm regards,\n{{manager_name}}\nWebsiteExpert",
-                    'pl' => "Szanowny/a {{client_name}},\n\nWycena {{quote_number}} dla projektu {{project_title}} została zatwierdzona.\n\nKolejne kroki:\n1. Wpłać zaliczkę {{deposit_amount}}: {{invoice_url}}\n2. Spotkanie inauguracyjne w ciągu 48 godzin\n3. Dostęp do portalu klienta\n\nZ poważaniem,\n{{manager_name}}\nWebsiteExpert",
-                    'pt' => "Caro/a {{client_name}},\n\nO or\u00e7amento {{quote_number}} para o projeto {{project_title}} foi confirmado.\n\nPr\u00f3ximos passos:\n1. Pague o dep\u00f3sito de {{deposit_amount}}: {{invoice_url}}\n2. Reuni\u00e3o de arranque nas 48 horas seguintes\n3. Acesso ao portal do cliente\n\nCom os melhores cumprimentos,\n{{manager_name}}\nWebsiteExpert",
-                ],
+                    // EN
+                    '<p>Dear <strong>{{client_name}}</strong>,</p>'
+                    . '<p>Fantastic news — quote <strong>{{quote_number}}</strong> has been confirmed and we\'re ready to kick off <strong>{{project_title}}</strong>! 🎉</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#065f46;font-size:14px;">✅ PROJECT CONFIRMED</p>'
+                        . '<p style="margin:0;color:#374151;">Project: <strong>{{project_title}}</strong><br>Manager: <strong>{{manager_name}}</strong><br>Deposit: <strong>{{deposit_amount}}</strong></p>',
+                        '#10B981', '#f0fdf4', '#bbf7d0'
+                    )
+                    . '<p><strong>Next Steps:</strong></p>'
+                    . '<ol style="padding-left:20px;margin:0 0 20px;">'
+                    . '<li style="margin-bottom:10px;">Pay your <strong>deposit invoice ({{deposit_amount}})</strong> — <a href="{{invoice_url}}" style="color:#4F46E5;">click here</a></li>'
+                    . '<li style="margin-bottom:10px;">Within 48 hours of payment we\'ll schedule your kick-off call</li>'
+                    . '<li style="margin-bottom:10px;">You\'ll receive access to your client portal to track progress</li>'
+                    . '</ol>'
+                    . self::btn('Pay Deposit Invoice', '{{invoice_url}}')
+                    . '<p>We\'re genuinely excited to work with you!</p>'
+                    . self::sig('{{manager_name}}')
+                ),
+                'body_text' => $T(
+                    "Szanowny/a {{client_name}},\n\nProjekt {{project_title}} zatwierdzony!\n\n1. Opłać zaliczkę {{deposit_amount}}: {{invoice_url}}\n2. Kickoff w ciągu 48h od płatności\n3. Dostęp do portalu klienta\n\nZ poważaniem,\n{{manager_name}}",
+                    "Dear {{client_name}},\n\nProject {{project_title}} confirmed!\n\n1. Pay deposit {{deposit_amount}}: {{invoice_url}}\n2. Kick-off call within 48h of payment\n3. Client portal access\n\nKind regards,\n{{manager_name}}"
+                ),
             ],
+
+            // ── 6. Project Phase Complete ────────────────────────────────────
             [
-                'name'      => 'Project Phase Complete',
+                'name'      => 'Etap projektu ukończony',
                 'slug'      => 'project_phase_complete',
-                'subject'   => [
-                    'en' => 'Update on {{project_title}}: {{phase_name}} Complete ✓',
-                    'pl' => 'Aktualizacja projektu {{project_title}}: etap {{phase_name}} ukończony ✓',
-                    'pt' => 'Atualização de {{project_title}}: {{phase_name}} concluída ✓',
-                ],
+                'subject'   => $T(
+                    'Aktualizacja: {{phase_name}} ukończony ✓ – {{project_title}}',
+                    'Update: {{phase_name}} complete ✓ – {{project_title}}'
+                ),
                 'variables' => ['client_name', 'project_title', 'phase_name', 'next_phase', 'portal_url', 'manager_name'],
                 'is_active' => true,
-                'body_html' => [
-                    'en' => <<<'HTML'
-<p>Dear {{client_name}},</p>
+                'body_html' => $T(
+                    // PL
+                    '<p>Szanowny/a <strong>{{client_name}}</strong>,</p>'
+                    . '<p>Mamy dla Ciebie aktualności na temat projektu <strong>{{project_title}}</strong>!</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#065f46;font-size:14px;">✅ ETAP UKOŃCZONY</p>'
+                        . self::table(
+                            self::row('Projekt:', '{{project_title}}'),
+                            self::row('Ukończony etap:', '<strong style="color:#10B981;">✓ {{phase_name}}</strong>'),
+                            self::row('Następny etap:', '<strong>▶ {{next_phase}}</strong>'),
+                        ),
+                        '#10B981', '#f0fdf4', '#bbf7d0'
+                    )
+                    . '<p>Zapraszamy do portalu klienta, żeby przejrzeć wyniki i przekazać ewentualne uwagi — Twój feedback jest dla nas bardzo ważny.</p>'
+                    . self::btn('Zobacz postęp w portalu', '{{portal_url}}')
+                    . self::sig('{{manager_name}}', true),
 
-<p>Great progress update for <strong>{{project_title}}</strong> — we've completed the <strong>{{phase_name}}</strong> phase!</p>
-
-<p>We're now moving on to <strong>{{next_phase}}</strong>.</p>
-
-<p>You can review the latest progress and provide any feedback in your client portal:</p>
-
-<p><a href="{{portal_url}}" style="background:#4F46E5;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">View Project Progress</a></p>
-
-<p>If you have any feedback or questions, don't hesitate to drop us a message.</p>
-
-<p>Best regards,<br>
-<strong>{{manager_name}}</strong><br>
-WebsiteExpert</p>
-HTML,
-                    'pl' => <<<'HTML'
-<p>Szanowny/a {{client_name}},</p>
-
-<p>Mamy dla Ciebie dobrą wiadomość dotyczącą projektu <strong>{{project_title}}</strong> — ukończyliśmy etap <strong>{{phase_name}}</strong>!</p>
-
-<p>Przechodzimy teraz do etapu <strong>{{next_phase}}</strong>.</p>
-
-<p>Możesz przejrzeć najnowszy postęp i podzielić się opinią w portalu klienta:</p>
-
-<p><a href="{{portal_url}}" style="background:#4F46E5;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Zobacz postęp projektu</a></p>
-
-<p>Jeśli masz uwagi lub pytania — napisz do nas.</p>
-
-<p>Z poważaniem,<br>
-<strong>{{manager_name}}</strong><br>
-WebsiteExpert</p>
-HTML,
-                    'pt' => <<<'HTML'
-<p>Caro/a {{client_name}},</p>
-
-<p>Temos uma atualização de progresso para o projeto <strong>{{project_title}}</strong> — concluímos a fase <strong>{{phase_name}}</strong>!</p>
-
-<p>Avançamos agora para a fase <strong>{{next_phase}}</strong>.</p>
-
-<p>Pode rever o progresso mais recente e partilhar o seu feedback no portal do cliente:</p>
-
-<p><a href="{{portal_url}}" style="background:#4F46E5;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Ver Progresso do Projeto</a></p>
-
-<p>Se tiver algum comentário ou pergunta, não hesite em enviar-nos uma mensagem.</p>
-
-<p>Com os melhores cumprimentos,<br>
-<strong>{{manager_name}}</strong><br>
-WebsiteExpert</p>
-HTML,
-                ],
-                'body_text' => [
-                    'en' => "Dear {{client_name}},\n\nWe've completed the {{phase_name}} phase of {{project_title}}.\n\nNext up: {{next_phase}}\n\nView progress: {{portal_url}}\n\nBest regards,\n{{manager_name}}\nWebsiteExpert",
-                    'pl' => "Szanowny/a {{client_name}},\n\nUkończyliśmy etap {{phase_name}} projektu {{project_title}}.\n\nNastępny etap: {{next_phase}}\n\nPortal: {{portal_url}}\n\nZ poważaniem,\n{{manager_name}}\nWebsiteExpert",
-                    'pt' => "Caro/a {{client_name}},\n\nConclu\u00edmos a fase {{phase_name}} do projeto {{project_title}}.\n\nPr\u00f3xima fase: {{next_phase}}\n\nPortal: {{portal_url}}\n\nCom os melhores cumprimentos,\n{{manager_name}}\nWebsiteExpert",
-                ],
+                    // EN
+                    '<p>Dear <strong>{{client_name}}</strong>,</p>'
+                    . '<p>We have a progress update on your project <strong>{{project_title}}</strong>!</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#065f46;font-size:14px;">✅ PHASE COMPLETE</p>'
+                        . self::table(
+                            self::row('Project:', '{{project_title}}'),
+                            self::row('Completed Phase:', '<strong style="color:#10B981;">✓ {{phase_name}}</strong>'),
+                            self::row('Next Phase:', '<strong>▶ {{next_phase}}</strong>'),
+                        ),
+                        '#10B981', '#f0fdf4', '#bbf7d0'
+                    )
+                    . '<p>Please visit your client portal to review the deliverables and share any feedback — your input is very important to us.</p>'
+                    . self::btn('View Progress in Portal', '{{portal_url}}')
+                    . self::sig('{{manager_name}}')
+                ),
+                'body_text' => $T(
+                    "Szanowny/a {{client_name}},\n\nEtap {{phase_name}} ukończony!\nNastępny: {{next_phase}}\n\nPortal: {{portal_url}}\n\nZ poważaniem,\n{{manager_name}}",
+                    "Dear {{client_name}},\n\n{{phase_name}} is complete!\nNext: {{next_phase}}\n\nPortal: {{portal_url}}\n\nKind regards,\n{{manager_name}}"
+                ),
             ],
+
+            // ── 7. Project Launched / Delivered ─────────────────────────────
             [
-                'name'      => 'Project Launched',
+                'name'      => 'Projekt ukończony – przekazanie',
                 'slug'      => 'project_launched',
-                'subject'   => [
-                    'en' => '🚀 {{project_title}} is LIVE! Congratulations!',
-                    'pl' => '🚀 {{project_title}} jest już ONLINE! Gratulacje!',
-                    'pt' => '🚀 {{project_title}} está NO AR! Parabéns!',
-                ],
+                'subject'   => $T(
+                    '🚀 {{project_title}} jest LIVE! Gratulacje i co dalej',
+                    '🚀 {{project_title}} is LIVE! Congratulations & what\'s next'
+                ),
                 'variables' => ['client_name', 'project_title', 'website_url', 'manager_name', 'support_email'],
                 'is_active' => true,
-                'body_html' => [
-                    'en' => <<<'HTML'
-<p>Dear {{client_name}},</p>
+                'body_html' => $T(
+                    // PL
+                    '<p>Szanowny/a <strong>{{client_name}}</strong>,</p>'
+                    . '<p>Z ogromną radością informujemy, że projekt <strong>{{project_title}}</strong> jest oficjalnie ukończony i dostępny online! 🎉</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#1e40af;font-size:14px;">🚀 PROJEKT LIVE</p>'
+                        . '<p style="margin:0;"><strong>Adres strony:</strong><br><a href="{{website_url}}" style="color:#4F46E5;font-size:15px;">{{website_url}}</a></p>',
+                        '#4F46E5', '#eff6ff', '#bfdbfe'
+                    )
+                    . '<p><strong>Paczka przekazania zawiera:</strong></p>'
+                    . '<ul style="padding-left:20px;margin:0 0 20px;">'
+                    . '<li style="margin-bottom:8px;">Dane dostępowe do CMS / panelu administracyjnego</li>'
+                    . '<li style="margin-bottom:8px;">Dostęp do panelu hostingowego</li>'
+                    . '<li style="margin-bottom:8px;">Dostęp do Google Analytics / Search Console</li>'
+                    . '<li style="margin-bottom:8px;">Nagranie wideo ze szkolenia</li>'
+                    . '<li style="margin-bottom:8px;">PDF z dokumentacją użytkownika</li>'
+                    . '</ul>'
+                    . self::box(
+                        '<p style="margin:0;font-size:13px;color:#374151;"><strong>Gwarancja i wsparcie:</strong> 3 miesiące bezpłatnych poprawek. W przypadku pytań: <a href="mailto:{{support_email}}" style="color:#4F46E5;">{{support_email}}</a></p>',
+                        '#6366f1', '#f5f3ff', '#ddd6fe'
+                    )
+                    . '<p>Jeśli projekt spełnił Twoje oczekiwania, bylibyśmy bardzo wdzięczni za opinię w Google — to ogromna pomoc dla naszego zespołu.</p>'
+                    . self::sig('{{manager_name}}', true),
 
-<p>We are absolutely thrilled to announce that <strong>{{project_title}}</strong> is now LIVE! 🎉</p>
-
-<p><a href="{{website_url}}">{{website_url}}</a></p>
-
-<p>It's been a pleasure working with you on this project. Here's what's included in your handover pack:</p>
-<ul>
-  <li>Login credentials for your CMS / admin panel</li>
-  <li>Hosting control panel access</li>
-  <li>Google Analytics access</li>
-  <li>Training video recording</li>
-  <li>User guide PDF</li>
-</ul>
-
-<p>For ongoing support, please contact us at <a href="mailto:{{support_email}}">{{support_email}}</a>.</p>
-
-<p>Don't forget to share the website on your social channels — we'd love a tag!</p>
-
-<p>Warmest congratulations,<br>
-<strong>{{manager_name}} & The WebsiteExpert Team</strong></p>
-HTML,
-                    'pl' => <<<'HTML'
-<p>Szanowny/a {{client_name}},</p>
-
-<p>Z ogromną radością informujemy, że <strong>{{project_title}}</strong> jest już ONLINE! 🎉</p>
-
-<p><a href="{{website_url}}">{{website_url}}</a></p>
-
-<p>Była to dla nas prawdziwa przyjemność. Oto co znajdziesz w paczce powitalnej:</p>
-<ul>
-  <li>Dane logowania do CMS / panelu administracyjnego</li>
-  <li>Dostęp do panelu hostingowego</li>
-  <li>Dostęp do Google Analytics</li>
-  <li>Nagranie wideo ze szkolenia</li>
-  <li>Przewodnik użytkownika w PDF</li>
-</ul>
-
-<p>Wsparcie techniczne: <a href="mailto:{{support_email}}">{{support_email}}</a>.</p>
-
-<p>Nie zapomnij podzielić się stroną w mediach społecznościowych — chętnie będziemy oznaczeni!</p>
-
-<p>Serdeczne gratulacje,<br>
-<strong>{{manager_name}} i Zespół WebsiteExpert</strong></p>
-HTML,
-                    'pt' => <<<'HTML'
-<p>Caro/a {{client_name}},</p>
-
-<p>Estamos absolutamente entusiasmados em anunciar que o projeto <strong>{{project_title}}</strong> está agora NO AR! 🎉</p>
-
-<p><a href="{{website_url}}">{{website_url}}</a></p>
-
-<p>Foi um prazer trabalhar consigo neste projeto. Aqui está o que está incluído no seu pack de entrega:</p>
-<ul>
-  <li>Credenciais de acesso ao CMS / painel de administração</li>
-  <li>Acesso ao painel de controlo de alojamento</li>
-  <li>Acesso ao Google Analytics</li>
-  <li>Gravação de vídeo de formação</li>
-  <li>Guia do utilizador em PDF</li>
-</ul>
-
-<p>Para suporte contínuo, contacte-nos em <a href="mailto:{{support_email}}">{{support_email}}</a>.</p>
-
-<p>Não se esqueça de partilhar o website nas suas redes sociais — adoraríamos ser mencionados!</p>
-
-<p>Os mais calorosos parabéns,<br>
-<strong>{{manager_name}} &amp; A Equipa WebsiteExpert</strong></p>
-HTML,
-                ],
-                'body_text' => [
-                    'en' => "Dear {{client_name}},\n\n{{project_title}} is now LIVE!\n\n{{website_url}}\n\nHandover pack sent separately.\n\nFor support: {{support_email}}\n\nCongratulations!\n{{manager_name}} & The WebsiteExpert Team",
-                    'pl' => "Szanowny/a {{client_name}},\n\n{{project_title}} jest już ONLINE!\n\n{{website_url}}\n\nPaczka powitalna wysłana osobno.\n\nWsparcie: {{support_email}}\n\nGratulacje!\n{{manager_name}} i Zespół WebsiteExpert",
-                    'pt' => "Caro/a {{client_name}},\n\n{{project_title}} est\u00e1 agora NO AR!\n\n{{website_url}}\n\nPack de entrega enviado separadamente.\n\nSuporte: {{support_email}}\n\nParab\u00e9ns!\n{{manager_name}} & A Equipa WebsiteExpert",
-                ],
+                    // EN
+                    '<p>Dear <strong>{{client_name}}</strong>,</p>'
+                    . '<p>We are thrilled to announce that <strong>{{project_title}}</strong> is officially live and online! 🎉</p>'
+                    . self::box(
+                        '<p style="margin:0 0 12px;font-weight:700;color:#1e40af;font-size:14px;">🚀 PROJECT IS LIVE</p>'
+                        . '<p style="margin:0;"><strong>Website address:</strong><br><a href="{{website_url}}" style="color:#4F46E5;font-size:15px;">{{website_url}}</a></p>',
+                        '#4F46E5', '#eff6ff', '#bfdbfe'
+                    )
+                    . '<p><strong>Your handover pack includes:</strong></p>'
+                    . '<ul style="padding-left:20px;margin:0 0 20px;">'
+                    . '<li style="margin-bottom:8px;">CMS / admin panel login credentials</li>'
+                    . '<li style="margin-bottom:8px;">Hosting control panel access</li>'
+                    . '<li style="margin-bottom:8px;">Google Analytics / Search Console access</li>'
+                    . '<li style="margin-bottom:8px;">Training video recording</li>'
+                    . '<li style="margin-bottom:8px;">User guide PDF</li>'
+                    . '</ul>'
+                    . self::box(
+                        '<p style="margin:0;font-size:13px;color:#374151;"><strong>Warranty & support:</strong> 3 months of free revisions. For support: <a href="mailto:{{support_email}}" style="color:#4F46E5;">{{support_email}}</a></p>',
+                        '#6366f1', '#f5f3ff', '#ddd6fe'
+                    )
+                    . '<p>If you are happy with the project, we\'d be so grateful for a Google review — it means the world to our team.</p>'
+                    . self::sig('{{manager_name}}')
+                ),
+                'body_text' => $T(
+                    "Szanowny/a {{client_name}},\n\nProjekt {{project_title}} jest LIVE!\n\n{{website_url}}\n\nDokumentacja i dostępy wysłane w osobnej wiadomości.\nWsparcie: {{support_email}}\n\nZ poważaniem,\n{{manager_name}}",
+                    "Dear {{client_name}},\n\n{{project_title}} is LIVE!\n\n{{website_url}}\n\nHandover pack sent separately.\nSupport: {{support_email}}\n\nKind regards,\n{{manager_name}}"
+                ),
             ],
+
+            // ── 8. Portal Invite ─────────────────────────────────────────────
+            [
+                'name'      => 'Portal klienta – zaproszenie',
+                'slug'      => 'portal_invite',
+                'subject'   => $T(
+                    'Twój dostęp do portalu klienta – {{company_name}}',
+                    'Your client portal access – {{company_name}}'
+                ),
+                'variables' => ['client_name', 'login_email', 'plain_password', 'portal_url', 'company_name'],
+                'is_active' => true,
+                'body_html' => $T(
+                    // PL
+                    '<p>Szanowny/a <strong>{{client_name}}</strong>,</p>'
+                    . '<p>Przygotowaliśmy dla Ciebie dostęp do <strong>portalu klienta {{company_name}}</strong>. Za jego pośrednictwem możesz na bieżąco śledzić postępy swoich projektów, sprawdzać faktury i oferty — 24&nbsp;h na dobę, z każdego urządzenia.</p>'
+                    . self::box(
+                        '<p style="margin:0 0 14px;font-weight:700;font-size:14px;color:#1e293b;text-transform:uppercase;letter-spacing:.5px;">Dane logowania</p>'
+                        . self::table(
+                            self::row('Adres e-mail:', '{{login_email}}'),
+                            self::row('Hasło (tymczasowe):', '<code style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:5px;padding:4px 10px;font-size:14px;color:#1e293b;letter-spacing:1px;">{{plain_password}}</code>'),
+                        )
+                    )
+                    . self::btn('Zaloguj się do portalu', '{{portal_url}}')
+                    . self::box(
+                        '<p style="margin:0;font-size:13px;color:#92400e;"><strong>⚠ Ważne:</strong> Ze względów bezpieczeństwa zalecamy zmianę hasła po pierwszym logowaniu. Hasło tymczasowe pozostanie aktywne do czasu jego zmiany.</p>',
+                        '#f59e0b', '#fffbeb', '#fde68a'
+                    )
+                    . self::sig('Zespół {{company_name}}', true),
+
+                    // EN
+                    '<p>Dear <strong>{{client_name}}</strong>,</p>'
+                    . '<p>We have set up your <strong>{{company_name}} client portal</strong> access. Through it, you can track your project progress, review invoices and proposals — 24/7, from any device.</p>'
+                    . self::box(
+                        '<p style="margin:0 0 14px;font-weight:700;font-size:14px;color:#1e293b;text-transform:uppercase;letter-spacing:.5px;">Login Details</p>'
+                        . self::table(
+                            self::row('Email address:', '{{login_email}}'),
+                            self::row('Password (temporary):', '<code style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:5px;padding:4px 10px;font-size:14px;color:#1e293b;letter-spacing:1px;">{{plain_password}}</code>'),
+                        )
+                    )
+                    . self::btn('Log In to Your Portal', '{{portal_url}}')
+                    . self::box(
+                        '<p style="margin:0;font-size:13px;color:#92400e;"><strong>⚠ Important:</strong> For security, we recommend changing your password after your first login. The temporary password will remain active until changed.</p>',
+                        '#f59e0b', '#fffbeb', '#fde68a'
+                    )
+                    . self::sig('{{company_name}} Team')
+                ),
+                'body_text' => $T(
+                    "Szanowny/a {{client_name}},\n\nDostęp do portalu klienta {{company_name}} jest gotowy.\n\nE-mail: {{login_email}}\nHasło: {{plain_password}}\nPortal: {{portal_url}}\n\nProsimy o zmianę hasła po pierwszym logowaniu.\n\nZ poważaniem,\nZespół {{company_name}}",
+                    "Dear {{client_name}},\n\nYour {{company_name}} client portal access is ready.\n\nEmail: {{login_email}}\nPassword: {{plain_password}}\nPortal: {{portal_url}}\n\nPlease change your password after first login.\n\nKind regards,\n{{company_name}} Team"
+                ),
+            ],
+
         ];
 
         foreach ($templates as $data) {
@@ -535,4 +468,3 @@ HTML,
         }
     }
 }
-

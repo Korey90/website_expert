@@ -23,6 +23,8 @@ return new class extends Migration
                 'assigned',
                 'deleted',
                 'restored',
+                'updated',
+                'sms_sent',
                 'other',
             ]);
             $table->string('description');

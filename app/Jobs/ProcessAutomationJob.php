@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Mail\InvoiceSentMail;
 use App\Mail\NewLeadMail;
+use App\Mail\PortalInviteMail;
 use App\Mail\ProjectStatusMail;
 use App\Mail\QuoteSentMail;
 use App\Models\AutomationRule;
@@ -22,6 +23,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 /**
  * Evaluates active AutomationRule records for a given trigger event and
@@ -114,9 +116,10 @@ class ProcessAutomationJob implements ShouldQueue
                 'send_internal_email' => $this->sendInternalEmail($action),
                 'send_sms'            => $this->sendSms($action),
                 'notify_admin'        => $this->notifyAdmin($action),
-                'add_tag'             => $this->addTag($action),
-                'change_status'       => $this->changeStatus($action),
-                default               => null,
+                'add_tag'              => $this->addTag($action),
+                'change_status'        => $this->changeStatus($action),
+                'create_portal_access' => $this->createPortalAccess($action),
+                default                => null,
             };
         } catch (\Throwable $e) {
             Log::error("AutomationRule action failed [{$type}]: " . $e->getMessage(), [
@@ -207,6 +210,62 @@ class ProcessAutomationJob implements ShouldQueue
                 $model::find($this->context[$key])?->update(['status' => $newStatus]);
             }
         }
+    }
+
+    private function createPortalAccess(array $action): void
+    {
+        $client = null;
+
+        if (isset($this->context['client_id'])) {
+            $client = Client::find($this->context['client_id']);
+        } elseif (isset($this->context['lead_id'])) {
+            $lead   = Lead::with('client')->find($this->context['lead_id']);
+            $client = $lead?->client;
+        }
+
+        if (! $client) {
+            Log::warning('ProcessAutomationJob: create_portal_access — no client found.', ['context' => $this->context]);
+            return;
+        }
+
+        // Already has a portal account — skip
+        if ($client->portal_user_id) {
+            return;
+        }
+
+        $email = $client->primary_contact_email;
+        if (! $email) {
+            Log::warning("ProcessAutomationJob: create_portal_access — client #{$client->id} has no email.");
+            return;
+        }
+
+        // Reuse existing user if one already exists with this email
+        $user  = User::where('email', $email)->first();
+        $plain = null;
+
+        if (! $user) {
+            $plain = Str::password(12, symbols: false);
+            $user  = User::create([
+                'name'     => $client->primary_contact_name ?: $client->company_name,
+                'email'    => $email,
+                'password' => bcrypt($plain),
+            ]);
+            $user->assignRole('client');
+        }
+
+        $client->update(['portal_user_id' => $user->id]);
+
+        if ($plain) {
+            Mail::to($email)->queue(new PortalInviteMail(
+                clientName:    $client->primary_contact_name ?: $client->company_name,
+                loginEmail:    $email,
+                plainPassword: $plain,
+                loginUrl:      config('app.url') . '/client',
+                companyName:   config('app.name', 'WebsiteExpert'),
+            ));
+        }
+
+        Log::info("ProcessAutomationJob: portal access created for client #{$client->id} (user #{$user->id}).");
     }
 
     /**
