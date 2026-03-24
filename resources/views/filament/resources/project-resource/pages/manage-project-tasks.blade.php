@@ -40,6 +40,16 @@
                         {{ $task['title'] }}
                     </p>
 
+                    {{-- Phase badge --}}
+                    @if(!empty($task['phase']['name']))
+                    <div class="mb-2">
+                        <span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/50">
+                            <svg class="w-3 h-3 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18"/></svg>
+                            {{ $task['phase']['name'] }}
+                        </span>
+                    </div>
+                    @endif
+
                     {{-- Priority badge --}}
                     <div class="flex flex-wrap items-center gap-1 mb-2">
                         <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium

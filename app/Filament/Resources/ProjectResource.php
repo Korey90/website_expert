@@ -6,10 +6,13 @@ use App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Resources\ProjectResource\RelationManagers\MessagesRelationManager;
 use App\Models\Client;
 use App\Models\Project;
+use App\Models\ProjectPhase;
 use App\Models\ProjectTemplate;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
@@ -83,84 +86,14 @@ class ProjectResource extends Resource
             Section::make('Project Phases')
                 ->columnSpan(2)
                 ->schema([
-                    TextEntry::make('_phases')
+                    ViewEntry::make('_phases')
                         ->label('')
-                        ->html()
-                        ->state(function ($record) {
-                            $phases = $record->phases()->orderBy('order')->get();
-
-                            if ($phases->isEmpty()) {
-                                return '<div style="text-align:center;padding:32px 0;color:#64748b;">'
-                                    . '<p style="margin:0;font-size:14px;">No phases yet.</p>'
-                                    . '<p style="margin:4px 0 0;font-size:13px;">Apply a project template or create phases from the Edit page.</p>'
-                                    . '</div>';
-                            }
-
-                            $statusMeta = [
-                                'pending'     => ['label' => 'Pending',     'bg' => 'rgba(255,255,255,0.03)', 'border' => 'rgba(255,255,255,0.08)', 'dot' => '#64748b', 'text' => '#94a3b8'],
-                                'in_progress' => ['label' => 'In Progress', 'bg' => 'rgba(251,191,36,0.07)',  'border' => 'rgba(251,191,36,0.25)',  'dot' => '#fbbf24', 'text' => '#fbbf24'],
-                                'completed'   => ['label' => 'Completed',   'bg' => 'rgba(74,222,128,0.07)',  'border' => 'rgba(74,222,128,0.25)',  'dot' => '#4ade80', 'text' => '#4ade80'],
-                                'cancelled'   => ['label' => 'Cancelled',   'bg' => 'rgba(248,113,113,0.07)', 'border' => 'rgba(248,113,113,0.25)', 'dot' => '#f87171', 'text' => '#f87171'],
-                            ];
-
-                            $html  = '<div style="display:flex;flex-direction:column;gap:8px;">';
-                            $total = $phases->count();
-                            $done  = $phases->where('status', 'completed')->count();
-
-                            $pct  = $total > 0 ? round($done / $total * 100) : 0;
-                            $html .= '<div style="margin-bottom:16px;">'
-                                . '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
-                                . '<span style="font-size:13px;font-weight:600;color:#cbd5e1;">Overall Phase Progress</span>'
-                                . '<span style="font-size:13px;font-weight:700;color:#818cf8;">' . $pct . '%</span>'
-                                . '</div>'
-                                . '<div style="background:rgba(255,255,255,0.08);border-radius:6px;height:8px;">'
-                                . '<div style="background:linear-gradient(90deg,#818cf8,#a78bfa);border-radius:6px;height:8px;width:' . $pct . '%;"></div>'
-                                . '</div>'
-                                . '</div>';
-
-                            foreach ($phases as $phase) {
-                                $meta     = $statusMeta[$phase->status] ?? $statusMeta['pending'];
-                                $tasks    = $phase->tasks()->count();
-                                $taskDone = $phase->tasks()->where('status', 'done')->count();
-                                $taskPct  = $tasks > 0 ? round($taskDone / $tasks * 100) : 0;
-                                $desc     = $phase->description
-                                    ? '<p style="margin:6px 0 0;font-size:13px;color:#64748b;line-height:1.5;">' . e($phase->description) . '</p>'
-                                    : '';
-
-                                $taskBadge = $tasks > 0
-                                    ? '<span style="font-size:12px;color:#94a3b8;background:rgba(255,255,255,0.06);border-radius:12px;padding:2px 8px;">' . $taskDone . '/' . $tasks . ' tasks</span>'
-                                    : '<span style="font-size:12px;color:#475569;">No tasks</span>';
-
-                                $progressBar = $tasks > 0
-                                    ? '<div style="margin-top:10px;background:rgba(255,255,255,0.08);border-radius:4px;height:4px;">'
-                                    . '<div style="background:' . $meta['dot'] . ';border-radius:4px;height:4px;width:' . $taskPct . '%;"></div>'
-                                    . '</div>'
-                                    : '';
-
-                                $html .= '<div style="background:' . $meta['bg'] . ';border:1px solid ' . $meta['border'] . ';border-left:4px solid ' . $meta['dot'] . ';border-radius:8px;padding:14px 18px;">'
-                                    . '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">'
-                                    . '<div style="display:flex;align-items:center;gap:10px;min-width:0;">'
-                                    . '<span style="flex-shrink:0;background:rgba(255,255,255,0.1);color:#e2e8f0;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">' . $phase->order . '</span>'
-                                    . '<span style="font-weight:600;font-size:14px;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' . e($phase->name) . '</span>'
-                                    . '</div>'
-                                    . '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
-                                    . $taskBadge
-                                    . '<span style="color:' . $meta['text'] . ';background:rgba(255,255,255,0.05);border:1px solid ' . $meta['border'] . ';border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600;">' . $meta['label'] . '</span>'
-                                    . '</div>'
-                                    . '</div>'
-                                    . $desc
-                                    . $progressBar
-                                    . '</div>';
-                            }
-
-                            $html .= '</div>';
-                            return $html;
-                        }),
+                        ->view('filament.infolists.project-phases'),
                 ]),
 
-            // ── Sidebar (right 1/3) ──────────────────────────────────────────
+            // ── Sidebar + Quick Actions (right 1/3) ─────────────────────────
+            Group::make([
             Section::make('Project Details')
-                ->columnSpan(1)
                 ->schema([
                     TextEntry::make('_sidebar')
                         ->label('')
@@ -224,6 +157,15 @@ class ProjectResource extends Resource
                             return $html;
                         }),
                 ]),
+
+            Section::make('Quick Actions')
+                ->schema([
+                    ViewEntry::make('_quick_actions')
+                        ->label('')
+                        ->view('filament.infolists.project-quick-actions'),
+                ]),
+
+            ])->columnSpan(1),
 
             // ── Description ──────────────────────────────────────────────────
             Section::make('Description')

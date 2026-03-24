@@ -50,8 +50,11 @@ class ManageProjectTasks extends Page
         $tasks    = $this->getRecord()
             ->tasks()
             ->with(['assignedTo', 'phase'])
-            ->orderBy('order')
-            ->orderBy('created_at')
+            ->leftJoin('project_phases', 'project_tasks.phase_id', '=', 'project_phases.id')
+            ->orderBy('project_phases.order')
+            ->orderBy('project_tasks.order')
+            ->orderBy('project_tasks.created_at')
+            ->select('project_tasks.*')
             ->get()
             ->groupBy('status')
             ->toArray();
@@ -78,6 +81,24 @@ class ManageProjectTasks extends Page
             'status'       => $status,
             'completed_at' => $status === 'done' ? now() : null,
         ]);
+
+        // Auto-update phase status based on task completion
+        if ($task->phase_id) {
+            $phase       = \App\Models\ProjectPhase::find($task->phase_id);
+            $allTasks    = $phase?->tasks()->count() ?? 0;
+            $doneTasks   = $phase?->tasks()->where('status', 'done')->count() ?? 0;
+            $activeTasks = $phase?->tasks()->whereIn('status', ['in_progress', 'review'])->count() ?? 0;
+
+            if ($phase && $allTasks > 0) {
+                if ($doneTasks === $allTasks) {
+                    $phase->update(['status' => 'completed']);
+                } elseif (($activeTasks > 0 || $doneTasks > 0) && $phase->status === 'pending') {
+                    $phase->update(['status' => 'in_progress']);
+                } elseif ($doneTasks < $allTasks && $phase->status === 'completed') {
+                    $phase->update(['status' => 'in_progress']);
+                }
+            }
+        }
 
         Notification::make()
             ->success()

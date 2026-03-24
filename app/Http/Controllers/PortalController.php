@@ -30,6 +30,12 @@ class PortalController extends Controller
         }
 
         $projects = Project::where('client_id', $client->id)
+            ->withCount([
+                'tasks',
+                'tasks as tasks_done_count' => fn ($q) => $q->where('status', 'done'),
+                'phases',
+                'phases as phases_done_count' => fn ($q) => $q->where('status', 'completed'),
+            ])
             ->latest()
             ->take(5)
             ->get(['id', 'title', 'status', 'deadline', 'start_date']);

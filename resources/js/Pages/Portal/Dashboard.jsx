@@ -80,21 +80,37 @@ export default function Dashboard({ client, projects, invoices, quotes }) {
                                     <tr>
                                         <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Project</th>
                                         <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deadline</th>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Progress</th>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Deadline</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {projects.map(p => (
-                                        <tr key={p.id} className="hover:bg-gray-50">
-                                            <td className="px-5 py-3">
-                                                <Link href={route('portal.project', p.id)} className="text-sm font-medium text-red-600 hover:underline">
-                                                    {p.title}
-                                                </Link>
-                                            </td>
-                                            <td className="px-5 py-3"><StatusBadge status={p.status} /></td>
-                                            <td className="px-5 py-3 text-sm text-gray-600">{p.deadline ?? '—'}</td>
-                                        </tr>
-                                    ))}
+                                    {projects.map(p => {
+                                        const pct = p.tasks_count > 0 ? Math.round((p.tasks_done_count / p.tasks_count) * 100) : null;
+                                        return (
+                                            <tr key={p.id} className="hover:bg-gray-50">
+                                                <td className="px-5 py-3">
+                                                    <Link href={route('portal.project', p.id)} className="text-sm font-medium text-red-600 hover:underline">
+                                                        {p.title}
+                                                    </Link>
+                                                </td>
+                                                <td className="px-5 py-3"><StatusBadge status={p.status} /></td>
+                                                <td className="px-5 py-3 hidden sm:table-cell">
+                                                    {pct !== null ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="flex-1 bg-gray-100 rounded-full h-1.5 w-24">
+                                                                <div className="bg-red-500 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
+                                                            </div>
+                                                            <span className="text-xs text-gray-500 w-8 text-right">{pct}%</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400">—</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-5 py-3 text-sm text-gray-600 hidden sm:table-cell">{p.deadline ?? '—'}</td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         )}

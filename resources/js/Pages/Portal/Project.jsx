@@ -1,7 +1,7 @@
 import PortalLayout from '@/Layouts/PortalLayout';
 import { useForm } from '@inertiajs/react';
 
-const statusColors = {
+const projectStatusColors = {
     planning:  'bg-blue-100 text-blue-800',
     active:    'bg-green-100 text-green-800',
     on_hold:   'bg-yellow-100 text-yellow-800',
@@ -9,8 +9,15 @@ const statusColors = {
     cancelled: 'bg-red-100 text-red-800',
 };
 
+const phaseStatusConfig = {
+    pending:     { label: 'Pending',     dot: 'bg-gray-400',   text: 'text-gray-500',   bar: 'bg-gray-300' },
+    in_progress: { label: 'In Progress', dot: 'bg-yellow-400', text: 'text-yellow-600', bar: 'bg-yellow-400' },
+    completed:   { label: 'Completed',   dot: 'bg-green-500',  text: 'text-green-600',  bar: 'bg-green-500' },
+    cancelled:   { label: 'Cancelled',   dot: 'bg-red-400',    text: 'text-red-500',    bar: 'bg-red-400' },
+};
+
 function StatusBadge({ status }) {
-    const cls = statusColors[status] ?? 'bg-gray-100 text-gray-700';
+    const cls = projectStatusColors[status] ?? 'bg-gray-100 text-gray-700';
     return (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${cls}`}>
             {status?.replace('_', ' ')}
@@ -45,19 +52,54 @@ export default function Project({ client, project }) {
         });
     };
 
+    const phases      = project.phases ?? [];
+    const allTasks    = phases.flatMap(p => p.tasks ?? []);
+    const totalTasks  = allTasks.length;
+    const doneTasks   = allTasks.filter(t => t.status === 'done').length;
+    const totalPhases = phases.length;
+    const donePhases  = phases.filter(p => p.status === 'completed').length;
+    const overallPct  = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+    const currency    = project.currency === 'EUR' ? '€' : project.currency === 'USD' ? '$' : project.currency === 'PLN' ? 'zł' : '£';
+
     return (
         <PortalLayout client={client}>
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Header */}
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">{project.title}</h1>
                         {project.service_type && (
-                            <p className="text-sm text-gray-500 mt-1">{project.service_type}</p>
+                            <p className="text-sm text-gray-500 mt-1 capitalize">{project.service_type?.replace('_', ' ')}</p>
                         )}
                     </div>
                     <StatusBadge status={project.status} />
                 </div>
+
+                {/* Overview stats */}
+                {totalTasks > 0 && (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                        <div className="grid grid-cols-3 divide-x divide-gray-100 mb-4">
+                            <div className="pr-4 text-center">
+                                <div className="text-2xl font-bold text-gray-900">{overallPct}%</div>
+                                <div className="text-xs text-gray-500 mt-0.5">Overall progress</div>
+                            </div>
+                            <div className="px-4 text-center">
+                                <div className="text-2xl font-bold text-gray-900">{doneTasks}<span className="text-gray-400 text-base font-normal">/{totalTasks}</span></div>
+                                <div className="text-xs text-gray-500 mt-0.5">Tasks done</div>
+                            </div>
+                            <div className="pl-4 text-center">
+                                <div className="text-2xl font-bold text-gray-900">{donePhases}<span className="text-gray-400 text-base font-normal">/{totalPhases}</span></div>
+                                <div className="text-xs text-gray-500 mt-0.5">Phases done</div>
+                            </div>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-3">
+                            <div
+                                className="bg-red-500 h-3 rounded-full transition-all duration-500"
+                                style={{ width: `${overallPct}%` }}
+                            />
+                        </div>
+                    </div>
+                )}
 
                 {/* Project details */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
@@ -79,7 +121,7 @@ export default function Project({ client, project }) {
                             <div>
                                 <dt className="text-gray-500">Budget</dt>
                                 <dd className="text-gray-900 font-medium">
-                                    {project.currency ?? '£'}{parseFloat(project.budget).toLocaleString()}
+                                    {currency}{parseFloat(project.budget).toLocaleString()}
                                 </dd>
                             </div>
                         )}
@@ -90,27 +132,38 @@ export default function Project({ client, project }) {
                 </div>
 
                 {/* Phases */}
-                {project.project_phases?.length > 0 && (
+                {phases.length > 0 && (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Progress</h2>
+                        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Project Phases</h2>
                         <div className="space-y-3">
-                            {project.project_phases.map(phase => {
-                                const total = phase.tasks?.length ?? 0;
-                                const done  = phase.tasks?.filter(t => t.status === 'done').length ?? 0;
-                                const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+                            {phases.map(phase => {
+                                const cfg      = phaseStatusConfig[phase.status] ?? phaseStatusConfig['pending'];
+                                const total    = phase.tasks?.length ?? 0;
+                                const done     = phase.tasks?.filter(t => t.status === 'done').length ?? 0;
+                                const pct      = total > 0 ? Math.round((done / total) * 100) : 0;
 
                                 return (
-                                    <div key={phase.id}>
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="font-medium text-gray-700">{phase.name}</span>
-                                            <span className="text-gray-500">{done}/{total} tasks</span>
+                                    <div key={phase.id} className="rounded-lg border border-gray-100 p-4">
+                                        <div className="flex items-center justify-between gap-3 mb-2">
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <span className={`flex-shrink-0 w-2 h-2 rounded-full ${cfg.dot}`} />
+                                                <span className="font-medium text-gray-800 text-sm truncate">{phase.name}</span>
+                                            </div>
+                                            <div className="flex items-center gap-3 flex-shrink-0">
+                                                {total > 0 && (
+                                                    <span className="text-xs text-gray-400">{done}/{total} tasks</span>
+                                                )}
+                                                <span className={`text-xs font-semibold ${cfg.text}`}>{cfg.label}</span>
+                                            </div>
                                         </div>
-                                        <div className="w-full bg-gray-100 rounded-full h-2">
-                                            <div
-                                                className="bg-red-500 h-2 rounded-full transition-all"
-                                                style={{ width: `${pct}%` }}
-                                            />
-                                        </div>
+                                        {total > 0 && (
+                                            <div className="w-full bg-gray-100 rounded-full h-1.5">
+                                                <div
+                                                    className={`${cfg.bar} h-1.5 rounded-full transition-all duration-500`}
+                                                    style={{ width: `${pct}%` }}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
@@ -162,3 +215,4 @@ export default function Project({ client, project }) {
         </PortalLayout>
     );
 }
+
