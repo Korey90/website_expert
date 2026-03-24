@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown转换文档</title>
+  <style>
+    body { 
+      font-family: 'Microsoft YaHei', 'SimSun', sans-serif; 
+      margin: 0 auto; 
+      max-width: 960px; 
+      padding: 20px; 
+      line-height: 1.6;
+    }
+    pre { 
+      background-color: #f8f8f8; 
+      border: 1px solid #ddd; 
+      padding: 10px; 
+      border-radius: 3px; 
+      overflow: auto; 
+    }
+    code { 
+      font-family: Consolas, Monaco, monospace; 
+      background-color: #f8f8f8; 
+      padding: 2px 5px; 
+      border-radius: 3px; 
+    }
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      margin-bottom: 20px;
+    }
+    th, td { 
+      border: 1px solid #ddd; 
+      padding: 8px; 
+    }
+    th { 
+      background-color: #f2f2f2; 
+      text-align: left; 
+    }
+    tr:nth-child(even) { 
+      background-color: #f9f9f9; 
+    }
+    img { 
+      max-width: 100%; 
+      height: auto; 
+    }
+    .toc-placeholder { 
+      margin: 20px 0; 
+      padding: 10px; 
+      background-color: #f0f0f0; 
+      border: 1px dashed #ccc; 
+      text-align: center; 
+      color: #666; 
+    }
+  </style>
+</head>
+<body>
+  <h1>Legal Zone Module — Plan Działania</h1>
+<p><strong>Data:</strong> 24 marca 2026<br />
+<strong>Zakres:</strong> Strefa prawna — 4 dokumenty w CMS Pages<br />
+<strong>Rynki:</strong> Wielka Brytania / Irlandia Północna + Polska<br />
+<strong>Języki:</strong> EN / PL / PT (pełna treść we wszystkich trzech — PT istotne ze względu na dużą społeczność portugalskojęzyczną w UK)</p>
+<hr />
+<h2>1. Diagnoza — stan aktualny</h2>
+<h3>Co już istnieje (dobrze)</h3>
+<ul>
+<li>Model <code>Page</code> z translatability (Spatie) — EN / PL / PT ✅</li>
+<li>Seeder z treścią wszystkich 4 dokumentów (szkielety)</li>
+<li><code>PageResource</code> w Filament z TinyEditor</li>
+<li>Routing slug-based (<code>/privacy-policy</code>, <code>/terms-and-conditions</code>, <code>/cookies</code>, <code>/accessibility</code>)</li>
+<li><code>CmsPage.jsx</code> — komponent React z Inertia</li>
+<li>Model <code>Setting</code> (klucz-wartość z grupami + cache) — używany już przez <code>TrackingSettingsPage</code></li>
+<li>Wzorzec <code>TrackingSettingsPage</code> / <code>IntegrationSettingsPage</code> w Filament — gotowy do powielenia</li>
+</ul>
+<h3>Co wymaga poprawy / uzupełnienia</h3>
+<table>
+<thead>
+<tr>
+<th>Obszar</th>
+<th>Problem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Treść prawna</strong></td>
+<td>Obecna treść jest szkieletem — brakuje wielu obowiązkowych klauzul</td>
+</tr>
+<tr>
+<td><strong>UK/NI compliance</strong></td>
+<td>Brakuje: prawa do reklamacji CRA 2015, UK GDPR art. 13/14 checklisty, PECR 2003, Accessibility Regs 2018</td>
+</tr>
+<tr>
+<td><strong>PL compliance</strong></td>
+<td>Brakuje: RODO art. 13/14, Prawo telekomunikacyjne, Kodeks cywilny, UODO/UOKIK</td>
+</tr>
+<tr>
+<td><strong>PT compliance</strong></td>
+<td>Brakuje pełnej treści po portugalsku — dotychczas tylko szkielet</td>
+</tr>
+<tr>
+<td><strong>Dane faktyczne</strong></td>
+<td>Brakuje: numeru rejestracyjnego firmy, adresu, VAT, numeru ICO — zaszyfrowane na stałe w seederze</td>
+</tr>
+<tr>
+<td><strong>UI dokumentu</strong></td>
+<td>Brak: spisu treści, daty wejścia w życie, wersji, przycisku drukowania</td>
+</tr>
+<tr>
+<td><strong>CMS — brak pól</strong></td>
+<td>Brak: <code>effective_date</code>, <code>version</code> — potrzebne do dokumentów prawnych</td>
+</tr>
+<tr>
+<td><strong>Brak panelu danych firmy</strong></td>
+<td>Dane firmowe (adres, VAT, ICO nr) są hardcode’owane zamiast być zarządzane przez panel</td>
+</tr>
+<tr>
+<td><strong>Accessibility Statement</strong></td>
+<td>Wymaga statusu zgodności z WCAG, listy znanych problemów, procedury egzekucji</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Zakres prac</h2>
+<h3>2.1 Baza danych — nowa migracja</h3>
+<p><strong>Plik:</strong> <code>database/migrations/YYYY_MM_DD_add_legal_fields_to_pages_table.php</code></p>
+<p>Dodamy 2 pola do tabeli <code>pages</code>:</p>
+<pre><code class="language-sql">ALTER TABLE pages
+  ADD COLUMN effective_date DATE NULL,      -- Data wejścia w życie dokumentu
+  ADD COLUMN version VARCHAR(20) NULL;       -- Wersja dokumentu, np. &quot;1.2&quot;, &quot;2025-01&quot;
+</code></pre>
+<p><strong>Dlaczego:</strong><br />
+Dokumenty prawne muszą mieć jawną datę wejścia w życie (wymagane przez UK GDPR art. 12 — przejrzystość). Wersjonowanie umożliwia śledzenie zmian historycznych bez edytowania bieżącej treści.</p>
+<hr />
+<h3>2.2 Model Page.php</h3>
+<p>Dodamy <code>effective_date</code> i <code>version</code> do <code>$fillable</code> oraz castów.</p>
+<hr />
+<h3>2.3 LegalSettingsPage — nowa strona ustawień w Filament (KLUCZOWA ZMIANA)</h3>
+<p><strong>Plik:</strong> <code>app/Filament/Pages/LegalSettingsPage.php</code></p>
+<p>Nowa strona ustawień wzorowana na istniejącym <code>TrackingSettingsPage</code> (ten sam wzorzec: <code>Setting::get</code> / <code>Setting::set</code>, grupy kluczy, cache). Wszystkie dane firmowe będą przechowywane w tabeli <code>settings</code> z grupą <code>legal</code>.</p>
+<h4>Pola formularza — sekcje:</h4>
+<p><strong>Sekcja: Company Details</strong> (używane we wszystkich dokumentach)</p>
+<pre><code>legal.company_name        → &quot;WebsiteExpert Ltd&quot;           (TextInput, required)
+legal.company_number      → &quot;[Companies House No.]&quot;        (TextInput)
+legal.company_address     → &quot;[Registered address]&quot;         (Textarea, 3 lines)
+legal.vat_number          → &quot;GB [numer VAT]&quot;               (TextInput)
+legal.company_phone       → &quot;+44 ...&quot;                      (TextInput)
+legal.company_email       → &quot;hello@websiteexpert.co.uk&quot;    (TextInput)
+</code></pre>
+<p><strong>Sekcja: Data Protection</strong> (Privacy Policy)</p>
+<pre><code>legal.ico_number          → &quot;ZB [ICO Registration No.]&quot;   (TextInput)
+legal.ico_registration_url → &quot;https://ico.org.uk/...&quot;     (TextInput, URL)
+legal.privacy_email       → &quot;privacy@websiteexpert.co.uk&quot; (TextInput, email)
+legal.dpo_name            → &quot;[DPO name, if applicable]&quot;   (TextInput, nullable)
+legal.data_retention_years → &quot;7&quot;                          (TextInput, number)
+</code></pre>
+<p><strong>Sekcja: Customer Service &amp; Complaints</strong> (T&amp;C)</p>
+<pre><code>legal.complaints_email    → &quot;support@websiteexpert.co.uk&quot; (TextInput, email)
+legal.complaints_phone    → &quot;+44 ...&quot;                     (TextInput)
+legal.response_days       → &quot;14&quot;                          (TextInput, number)
+legal.deposit_percent     → &quot;50&quot;                          (TextInput, number, %)
+legal.payment_terms_days  → &quot;30&quot;                          (TextInput, number)
+</code></pre>
+<p><strong>Sekcja: Tracking &amp; Cookies</strong> (Cookie Policy — pobierane z istniejących ustawień!)</p>
+<pre><code>→ Wyświetla (readonly): GTM ID, GA4 ID, Pixel ID z grupy 'tracking'
+   (nie duplikujemy danych — linkujemy do TrackingSettingsPage)
+legal.cookie_policy_email → &quot;privacy@websiteexpert.co.uk&quot; (TextInput)
+</code></pre>
+<p><strong>Sekcja: Document Dates</strong> (wszystkie dokumenty)</p>
+<pre><code>legal.privacy_effective_date   → DatePicker
+legal.privacy_version          → &quot;1.0&quot;
+legal.terms_effective_date     → DatePicker
+legal.terms_version            → &quot;1.0&quot;
+legal.cookies_effective_date   → DatePicker
+legal.cookies_version          → &quot;1.0&quot;
+legal.accessibility_effective_date → DatePicker
+legal.accessibility_version        → &quot;1.0&quot;
+</code></pre>
+<p><strong>Dlaczego to podejście:</strong></p>
+<ul>
+<li>Istniejący <code>Setting</code> model (<code>key</code>, <code>value</code>, <code>group</code>, cache TTL 1d) jest idealny dla tych danych</li>
+<li>Jedna strona ustawień = jedno miejsce, które uzupełniasz raz i wszystkie dokumenty się aktualizują</li>
+<li>Nie trzeba edytować 12 wersji językowych dokumentu gdy zmienia się adres firmy</li>
+<li>Ten sam wzorzec co <code>TrackingSettingsPage</code> — minimalna ilość nowego kodu</li>
+</ul>
+<hr />
+<h3>2.4 System zmiennych w treści dokumentów</h3>
+<p>Treść dokumentów w seederze (i zatem w TinyEditor) będzie używać <strong>tokenów</strong> zamiast hardcode’owanych danych:</p>
+<pre><code>{{legal.company_name}}       → WebsiteExpert Ltd
+{{legal.company_number}}     → 12345678
+{{legal.company_address}}    → 123 High Street, London, W1A 1AA
+{{legal.vat_number}}         → GB 123 456 789
+{{legal.ico_number}}         → ZB1234567
+{{legal.privacy_email}}      → privacy@websiteexpert.co.uk
+{{legal.complaints_email}}   → support@websiteexpert.co.uk
+{{legal.deposit_percent}}    → 50
+{{legal.payment_terms_days}} → 30
+{{legal.data_retention_years}} → 7
+{{legal.privacy_effective_date}} → 1 March 2026
+{{legal.privacy_version}}    → 1.0
+... itd.
+</code></pre>
+<p><strong>Gdzie zamiana tokenów nastąpi:</strong><br />
+W <code>PageController::show()</code> — po pobraniu przetłumaczonej treści, przed przekazaniem do Inertia:</p>
+<pre><code class="language-php">$content = $this-&gt;replaceLegalVars($page-&gt;content);
+
+private function replaceLegalVars(string $content): string
+{
+    $vars = Setting::whereGroup('legal')-&gt;pluck('value', 'key');
+    foreach ($vars as $key =&gt; $value) {
+        $content = str_replace('{{'.$key.'}}', e($value), $content);
+    }
+    return $content;
+}
+</code></pre>
+<p><strong>Zalety:</strong></p>
+<ul>
+<li>Zmienisz adres firmy raz w panelu → wszystkie 3 języki × 4 dokumenty zaktualizowane automatycznie</li>
+<li>Tokeny są czytelne w TinyEditor — redaktor wie, że <code>{{legal.company_name}}</code> zostanie zastąpione</li>
+<li>Bezpieczne — <code>e()</code> escapuje wartości przed wstawieniem do HTML</li>
+</ul>
+<hr />
+<h3>2.5 PageResource.php — Filament Admin</h3>
+<p>Dodamy sekcję <strong>“Document Metadata”</strong> w formularzu (widoczna gdy <code>type</code> ≠ <code>page</code>):</p>
+<ul>
+<li><code>effective_date</code> — DatePicker, label “Effective Date / Data wejścia w życie”</li>
+<li><code>version</code> — TextInput, label “Version”, placeholder “e.g. 1.0”</li>
+</ul>
+<blockquote>
+<p><strong>Uwaga:</strong> <code>effective_date</code> i <code>version</code> PER DOKUMENT są zarządzane przez <code>LegalSettingsPage</code> centralnie. Pola w <code>PageResource</code> służą jako override dla konkretnej strony (advanced use).</p>
+</blockquote>
+<p>W tabeli: dodamy kolumnę <code>effective_date</code> widoczną dla typów policy/terms/cookie_policy.</p>
+<hr />
+<h3>2.6 PageController.php</h3>
+<p>Dwie zmiany:</p>
+<ol>
+<li>Przekazać <code>effective_date</code> i <code>version</code> z modelu <code>Page</code> do frontendu</li>
+<li>Wywołać <code>replaceLegalVars()</code> na treści po tłumaczeniu</li>
+</ol>
+<hr />
+<h3>2.7 CmsPage.jsx — redesign UI</h3>
+<p>Obecny komponent to prosta strona z nagłówkiem i blokiem prozy. Zamienimy go na <strong>profesjonalny layout dokumentu prawnego</strong>.</p>
+<h4>Nowy layout:</h4>
+<pre><code>┌─────────────────────────────────────────────────────────┐
+│ Breadcrumb: Home › Legal                                 │
+├─────────────────────────────────────────────────────────┤
+│ [DOCUMENT HEADER]                                        │
+│   H1: Tytuł dokumentu                                    │
+│   Effective date: DD MMMM YYYY  │  Version: 1.0          │
+│   Last updated: DD MMMM YYYY    │  [Print] [↑ Top]       │
+├──────────────────┬──────────────────────────────────────┤
+│  [TOC SIDEBAR]   │  [DOCUMENT CONTENT]                   │
+│  1. Sekcja 1    │  &lt;h2 id=&quot;s1&quot;&gt;Sekcja 1&lt;/h2&gt;            │
+│  2. Sekcja 2    │  &lt;p&gt;...&lt;/p&gt;                            │
+│  3. ...         │  &lt;h2 id=&quot;s2&quot;&gt;Sekcja 2&lt;/h2&gt;            │
+│  (sticky)       │  ...                                   │
+│                  │                                        │
+└──────────────────┴──────────────────────────────────────┘
+</code></pre>
+<p><strong>Funkcje:</strong></p>
+<ol>
+<li><strong>Auto-TOC</strong> — wyekstrahowany z tagów <code>&lt;h2&gt;</code> w treści HTML (DOMParser lub regex)</li>
+<li><strong>Document header</strong> — tytuł + metadata (effective_date, version, updated_at)</li>
+<li><strong>Print button</strong> — <code>window.print()</code> z ukryciem sidebaru w CSS <code>@media print</code></li>
+<li><strong>Sticky TOC sidebar</strong> — IntersectionObserver do podświetlania aktywnej sekcji</li>
+<li><strong>Anchor links</strong> — każdy <code>&lt;h2&gt;</code> dostaje <code>id</code> (slugified tytuł) via DOM manipulation po renderze</li>
+<li><strong>Responsive</strong> — TOC ukryty na mobile, zastąpiony <code>&lt;select&gt;</code> “Jump to section”</li>
+<li><strong>Language pills</strong> — EN / PL / PT z linkami przełączającymi język (jeśli route obsługuje lang param)</li>
+</ol>
+<p><strong>Stack:</strong> React + Tailwind CSS (istniejący)</p>
+<hr />
+<h3>2.8 Treść dokumentów — PageSeeder.php (pełna przebudowa, 3 języki)</h3>
+<p>Każdy dokument musi mieć <strong>pełną treść w EN, PL i PT</strong> z tokenami zmiennych.<br />
+Treść musi spełniać wymagania obu jurysdykcji.</p>
+<p><strong>Języki i jurysdykcje:</strong></p>
+<ul>
+<li><strong>EN</strong> — UK GDPR, Consumer Rights Act, PECR, Companies Act; styl formalny angielski</li>
+<li><strong>PL</strong> — RODO, Kodeks cywilny, Prawo telekomunikacyjne, UOKIK; styl formalny polski</li>
+<li><strong>PT</strong> — UK GDPR (bo klient mieszka w UK); tłumaczenie EN dostosowane do odbiorcy PT-speaking UK resident</li>
+</ul>
+<hr />
+<h2>3. Regulacje prawne — matryca zgodności</h2>
+<h3>3.1 Polityka Prywatności</h3>
+<table>
+<thead>
+<tr>
+<th>Wymóg</th>
+<th>Regulacja UK</th>
+<th>Regulacja PL</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tożsamość administratora + dane kontaktowe</td>
+<td>UK GDPR Art. 13/14</td>
+<td>RODO Art. 13/14</td>
+<td>❌ Brak adresu, numeru firmy</td>
+</tr>
+<tr>
+<td>Cel i podstawa prawna przetwarzania</td>
+<td>UK GDPR Art. 13(1)(c-d)</td>
+<td>RODO Art. 13(1)(c-d)</td>
+<td>⚠️ Częściowe</td>
+</tr>
+<tr>
+<td>Odbiorcy danych (procesorzy, subprocesory)</td>
+<td>UK GDPR Art. 13(1)(e)</td>
+<td>RODO Art. 13(1)(e)</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Przekazywanie danych poza UK</td>
+<td>UK GDPR Art. 46</td>
+<td>RODO Art. 46</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Okres retencji</td>
+<td>UK GDPR Art. 13(2)(a)</td>
+<td>RODO Art. 13(2)(a)</td>
+<td>⚠️ Ogólnikowe</td>
+</tr>
+<tr>
+<td>Prawa podmiotów danych</td>
+<td>UK GDPR Art. 13(2)(b-d)</td>
+<td>RODO Art. 13(2)(b-d)</td>
+<td>⚠️ Niekompletne</td>
+</tr>
+<tr>
+<td>Prawo wniesienia skargi</td>
+<td>UK GDPR → ICO</td>
+<td>RODO → UODO</td>
+<td>⚠️ Tylko ICO</td>
+</tr>
+<tr>
+<td>Profilowanie / decyzje automatyczne</td>
+<td>UK GDPR Art. 22</td>
+<td>RODO Art. 22</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Źródło danych (gdy pozyskane pośrednio)</td>
+<td>UK GDPR Art. 14</td>
+<td>RODO Art. 14</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Świadomość zmiany polityki</td>
+<td>ICO guidance</td>
+<td>UODO guidance</td>
+<td>❌ Brak</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kluczowe uzupełnienia dla PL:</strong></p>
+<ul>
+<li>Wzmianka o UODO jako organie nadzorczym (nie ICO) dla klientów z Polski</li>
+<li>Informacja o możliwości przekazywania danych do UK (państwo trzecie wobec UE po Brexicie — UK ma adequacy decision do ~2025, wymaga monitorowania)</li>
+<li>Dane w języku polskim muszą spełniać wymogi RODO (nie UK GDPR) dla klientów będących osobami fizycznymi z UE</li>
+</ul>
+<p><strong>Kluczowe uzupełnienia dla UK/NI:</strong></p>
+<ul>
+<li>Numer rejestracyjny ICO (Information Commissioner’s Office) — obowiązek dla firm przetwarzających dane</li>
+<li>Adres biura zarejestrowanego w Anglii/Walii</li>
+<li>NI: NI nie ma oddzielnej regulacji, obowiązuje UK GDPR — jednak procedury sądowe podlegają NI Courts</li>
+</ul>
+<hr />
+<h3>3.2 Regulamin (Terms &amp; Conditions)</h3>
+<table>
+<thead>
+<tr>
+<th>Wymóg</th>
+<th>Regulacja UK</th>
+<th>Regulacja PL</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dane sprzedawcy (adres, reg. nr)</td>
+<td>Companies Act 2006; E-Commerce Regs 2002</td>
+<td>UoŚUDE; KSH</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Opis usługi + zakres</td>
+<td>Consumer Rights Act 2015 s.49</td>
+<td>KC art. 627+</td>
+<td>⚠️ Ogólnikowe</td>
+</tr>
+<tr>
+<td>Ceny, VAT, waluta</td>
+<td>Consumer Rights Act 2015; VAT Act 1994</td>
+<td>Ustawa o cenach; Ustawa VAT</td>
+<td>⚠️ Niekompletne</td>
+</tr>
+<tr>
+<td>Prawo do odstąpienia (14 dni)</td>
+<td>Consumer Contracts Regs 2013 reg. 29</td>
+<td>KC art. 27 UPK; Ustawa o prawach konsumenta</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Realizacja: terminy, opóźnienia</td>
+<td>Supply of Goods &amp; Services Act 1982 s.14</td>
+<td>KC art. 476-480</td>
+<td>⚠️ Ogólnikowe</td>
+</tr>
+<tr>
+<td>Reklamacje / rękojmia</td>
+<td>Consumer Rights Act 2015 s.54-58</td>
+<td>KC art. 556-576 (rękojmia)</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Ograniczenie odpowiedzialności</td>
+<td>Unfair Contract Terms Act 1977 (UCTA)</td>
+<td>KC art. 361-363</td>
+<td>⚠️ Niezgodne z UCTA</td>
+</tr>
+<tr>
+<td>Własność intelektualna</td>
+<td>CDPA 1988; CRA 2015</td>
+<td>Ustawa o prawie autorskim</td>
+<td>⚠️ Ogólnikowe</td>
+</tr>
+<tr>
+<td>Rozstrzyganie sporów (ADR)</td>
+<td>ADR Regulations 2015; ODR Platform</td>
+<td>Ustawa o mediacji; KPC</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Prawo właściwe</td>
+<td>English/NI law</td>
+<td>Prawo polskie (jeśli klient z PL)</td>
+<td>❌ Brak klauzuli</td>
+</tr>
+<tr>
+<td>Siła wyższa</td>
+<td>Common law</td>
+<td>KC art. 471</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Płatności, depozyty, kary umowne</td>
+<td>CRA 2015</td>
+<td>KC art. 483-484 (kary umowne)</td>
+<td>⚠️ Częściowe</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kluczowe uzupełnienia dla PL:</strong></p>
+<ul>
+<li>Klauzula prawa właściwego: dla konsumentów z UE/PL prawo polskie może być bardziej korzystne — klauzula wyboru prawa nie może pozbawiać konsumenta ochrony kraju zamieszkania (Rozporządzenie Rzym I)</li>
+<li>Rękojmia: 2 lata dla konsumentów (nie do wyłączenia)</li>
+<li>Klauzule abuzywne: lista klauzul zabronionych w polskim prawie konsumenckim (art. 385³ KC)</li>
+<li>UOKIK: dozwolone wzorce umowne / niedozwolone klauzule w rejestrze UOKIK</li>
+</ul>
+<p><strong>Kluczowe uzupełnienia dla UK/NI:</strong></p>
+<ul>
+<li>Prawo do reklamacji w ciągu 30 dni (CRA 2015) dla usług cyfrowych</li>
+<li>NI: prawo konsumenta w NI podlega UK CRA i NI-specific rules — Consumerline NI jako punkt kontaktowy</li>
+<li>E-commerce: obowiązek podania danych firmy wynikający z E-Commerce Regulations 2002</li>
+<li>Finansowanie/depozyty: regulacja przez Consumer Credit Act 1974 jeśli &gt;£30k</li>
+</ul>
+<hr />
+<h3>3.3 Polityka Cookies</h3>
+<table>
+<thead>
+<tr>
+<th>Wymóg</th>
+<th>Regulacja UK</th>
+<th>Regulacja PL</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Podstawa prawna</td>
+<td>PECR 2003 (si. 6); ICO guidance</td>
+<td>Prawo telekomunikacyjne art. 173</td>
+<td>⚠️ Ogólnikowe</td>
+</tr>
+<tr>
+<td>Lista plików cookies z nazwami</td>
+<td>ICO cookie guidance 2023</td>
+<td>UODO/UOKIK guidelines</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Czas trwania każdego cookie</td>
+<td>ICO guidance</td>
+<td>—</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Cel każdego cookie</td>
+<td>PECR 2003</td>
+<td>Pr. tel. art. 173</td>
+<td>⚠️ Kategorie, brak szczegółów</td>
+</tr>
+<tr>
+<td>Zgoda przed niezbędnymi cookies</td>
+<td>ICO guidance</td>
+<td>UODO</td>
+<td>⚠️ Brak mechanizmu</td>
+</tr>
+<tr>
+<td>Wycofanie zgody (tak łatwo jak udzielenie)</td>
+<td>PECR 2003 s.6(3)</td>
+<td>Pr. tel. art. 173</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Cookies stron trzecich</td>
+<td>ICO guidance</td>
+<td>UODO</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Instrukcja zarządzania (przeglądarka)</td>
+<td>ICO guidance</td>
+<td>—</td>
+<td>⚠️ Ogólnikowe</td>
+</tr>
+<tr>
+<td>Opt-out dla analityki (GA)</td>
+<td>ICO; GDPR Art. 7</td>
+<td>RODO Art. 7</td>
+<td>❌ Brak</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kluczowe uzupełnienia:</strong></p>
+<ul>
+<li>Konkretna tabela: <code>Nazwa cookie | Dostawca | Cel | Czas trwania | Kategoria</code></li>
+<li>Linki do opt-out narzędzi (Google Analytics opt-out, Google Ads settings)</li>
+<li>Instrukcja usuwania cookies w Chrome/Firefox/Safari/Edge</li>
+<li>Referencja do consent banner (jeśli istnieje) — zarządzanie zgodami</li>
+<li>UK: ICO zaktualizowało wytyczne w 2023 — convenience cookies wymagają zgody</li>
+<li>PL: Prezes UROKIK nałożył kary za brak prawidłowego consent managementu (2023-2024)</li>
+</ul>
+<hr />
+<h3>3.4 Oświadczenie o Dostępności</h3>
+<table>
+<thead>
+<tr>
+<th>Wymóg</th>
+<th>Regulacja UK</th>
+<th>Regulacja PL</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Status zgodności (pełna/częściowa/nie)</td>
+<td>Accessibility Regs 2018</td>
+<td>Ustawa o dostępności cyfrowej 2019</td>
+<td>❌ Brak statusu</td>
+</tr>
+<tr>
+<td>Lista znanych niedostępnych elementów</td>
+<td>Accessibility Regs 2018 Schedule 1</td>
+<td>Ustawa 2019 art. 10</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Uzasadnienie wyjątków</td>
+<td>Regs 2018 reg. 4(1)(b) (disproportionate burden)</td>
+<td>Ustawa 2019 art. 8</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Mechanizm feedbacku</td>
+<td>Regs 2018 reg. 8</td>
+<td>Ustawa 2019 art. 10(2)</td>
+<td>⚠️ Brak formularza/emaila</td>
+</tr>
+<tr>
+<td>Procedura egzekucji</td>
+<td>Regs 2018 reg. 9</td>
+<td>Ustawa 2019 art. 18</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Data ostatniej oceny</td>
+<td>ICO/GDS guidance</td>
+<td>Ustawa 2019</td>
+<td>❌ Brak</td>
+</tr>
+<tr>
+<td>Zakres stosowania</td>
+<td>Regs 2018 reg. 2</td>
+<td>Ustawa 2019 art. 2</td>
+<td>❌ Brak</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Uwagi:</strong></p>
+<ul>
+<li>UK Accessibility Regulations 2018 dotyczą <strong>sektora publicznego</strong> — jeśli WebsiteExpert to prywatna firma, nie mają zastosowania prawnie, ale stanowią dobry standard</li>
+<li>Dla stron e-commerce (private sector) w UK obowiązuje Equality Act 2010 s.29 (reasonable adjustments)</li>
+<li>PL: Ustawa o dostępności cyfrowej z 4 kwietnia 2019 co do zasady dotyczy podmiotów publicznych</li>
+<li>WCAG 2.1 AA: rekomendowany standard zarówno w UK jak i UE (European Accessibility Act 2025!)</li>
+<li><strong>European Accessibility Act (EAA)</strong> — obowiązuje od 28 czerwca 2025 dla produktów i usług cyfrowych w UE → dotyczy polskich klientów B2C!</li>
+</ul>
+<hr />
+<h2>4. Plan realizacji — kolejność kroków</h2>
+<h3>Faza 1 — Infrastruktura (backend + admin)</h3>
+<p><strong>Priorytet: Wysoki | Szacowany nakład: mały</strong></p>
+<ol>
+<li><strong>Migracja</strong> — dodanie <code>effective_date</code> + <code>version</code> do tabeli <code>pages</code></li>
+<li><strong>Model Page.php</strong> — aktualizacja <code>$fillable</code> i <code>$casts</code></li>
+<li><strong>LegalSettingsPage.php</strong> — nowa strona ustawień w Filament (Settings group)</li>
+<li><strong>SettingsSeeder / migracja danych</strong> — wypełnienie tabeli <code>settings</code> placeholderami z kluczem <code>legal.*</code></li>
+<li><strong>PageController.php</strong> — dodanie <code>replaceLegalVars()</code> + przekazanie <code>effective_date</code>, <code>version</code></li>
+<li><strong>PageResource.php</strong> — dodanie pól <code>effective_date</code> + <code>version</code> w formularzu</li>
+</ol>
+<h3>Faza 2 — UI dokumentu (frontend)</h3>
+<p><strong>Priorytet: Wysoki | Szacowany nakład: średni</strong></p>
+<ol start="7">
+<li><strong>CmsPage.jsx</strong> — pełny redesign:
+<ul>
+<li>DocumentHeader (metadata, print button, language pills)</li>
+<li>TableOfContents (auto-generated, sticky, IntersectionObserver)</li>
+<li>Content z anchor ID na h2 (DOM manipulation po renderze)</li>
+<li>Responsive (TOC jako select na mobile)</li>
+</ul>
+</li>
+</ol>
+<h3>Faza 3 — Treść prawna (seeder, 3 języki)</h3>
+<p><strong>Priorytet: Krytyczny | Szacowany nakład: duży</strong></p>
+<ol start="8">
+<li><strong>PageSeeder — Privacy Policy</strong> — pełna wersja EN + PL + PT z tokenami <code>{{legal.*}}</code></li>
+<li><strong>PageSeeder — Terms &amp; Conditions</strong> — pełna wersja EN + PL + PT z tokenami</li>
+<li><strong>PageSeeder — Cookie Policy</strong> — pełna wersja EN + PL + PT (z tabelą cookies + tokenami GA/GTM)</li>
+<li><strong>PageSeeder — Accessibility Statement</strong> — pełna wersja EN + PL + PT</li>
+</ol>
+<h3>Faza 4 — Weryfikacja i testy</h3>
+<p><strong>Priorytet: Wysoki</strong></p>
+<ol start="12">
+<li>Uzupełnienie danych w <code>LegalSettingsPage</code> (dane firmowe) → weryfikacja podstawiania tokenów</li>
+<li><code>npm run build</code> + <code>php artisan db:seed --class=PageSeeder</code></li>
+<li>Test renderowania TOC, print CSS, responsywności</li>
+<li>Walidacja linków zewnętrznych (ICO, UODO, UOKIK)</li>
+</ol>
+<hr />
+<h2>5. Dane wymagane — zarządzane przez LegalSettingsPage</h2>
+<p>Poniższe dane będą wypełniane <strong>bezpośrednio w panelu Filament</strong> → Settings → Legal &amp; Company (nowa strona). Zastępują tabelę z sekcji “dane nieznane” — zamiast edytować seeder, uzupełniasz formularz.</p>
+<table>
+<thead>
+<tr>
+<th>Klucz (<code>legal.*</code>)</th>
+<th>Label w panelu</th>
+<th>Placeholder / Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>company_name</code></td>
+<td>Company legal name</td>
+<td>WebsiteExpert Ltd</td>
+</tr>
+<tr>
+<td><code>company_number</code></td>
+<td>Companies House No.</td>
+<td>❌ do uzupełnienia</td>
+</tr>
+<tr>
+<td><code>company_address</code></td>
+<td>Registered address</td>
+<td>❌ do uzupełnienia</td>
+</tr>
+<tr>
+<td><code>vat_number</code></td>
+<td>VAT number</td>
+<td>GB xxxxxxx</td>
+</tr>
+<tr>
+<td><code>company_email</code></td>
+<td>Contact email</td>
+<td><a href="mailto:hello@websiteexpert.co.uk">hello@websiteexpert.co.uk</a></td>
+</tr>
+<tr>
+<td><code>company_phone</code></td>
+<td>Contact phone</td>
+<td>+44 …</td>
+</tr>
+<tr>
+<td><code>ico_number</code></td>
+<td>ICO Registration No.</td>
+<td>ZB xxxxxxx</td>
+</tr>
+<tr>
+<td><code>ico_registration_url</code></td>
+<td>ICO register URL</td>
+<td><a href="https://ico.org.uk/">https://ico.org.uk/</a>…</td>
+</tr>
+<tr>
+<td><code>privacy_email</code></td>
+<td>Privacy contact email</td>
+<td><a href="mailto:privacy@websiteexpert.co.uk">privacy@websiteexpert.co.uk</a></td>
+</tr>
+<tr>
+<td><code>dpo_name</code></td>
+<td>DPO name (optional)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>data_retention_years</code></td>
+<td>Record retention (years)</td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>complaints_email</code></td>
+<td>Complaints email</td>
+<td><a href="mailto:support@websiteexpert.co.uk">support@websiteexpert.co.uk</a></td>
+</tr>
+<tr>
+<td><code>complaints_phone</code></td>
+<td>Complaints phone</td>
+<td>+44 …</td>
+</tr>
+<tr>
+<td><code>response_days</code></td>
+<td>Response time (days)</td>
+<td>14</td>
+</tr>
+<tr>
+<td><code>deposit_percent</code></td>
+<td>Deposit required (%)</td>
+<td>50</td>
+</tr>
+<tr>
+<td><code>payment_terms_days</code></td>
+<td>Payment terms (days)</td>
+<td>30</td>
+</tr>
+<tr>
+<td><code>cookie_policy_email</code></td>
+<td>Cookie queries email</td>
+<td><a href="mailto:privacy@websiteexpert.co.uk">privacy@websiteexpert.co.uk</a></td>
+</tr>
+<tr>
+<td><code>privacy_effective_date</code></td>
+<td>Privacy Policy — effective from</td>
+<td>❌ do uzupełnienia</td>
+</tr>
+<tr>
+<td><code>privacy_version</code></td>
+<td>Privacy Policy — version</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td><code>terms_effective_date</code></td>
+<td>T&amp;C — effective from</td>
+<td>❌ do uzupełnienia</td>
+</tr>
+<tr>
+<td><code>terms_version</code></td>
+<td>T&amp;C — version</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td><code>cookies_effective_date</code></td>
+<td>Cookie Policy — effective from</td>
+<td>❌ do uzupełnienia</td>
+</tr>
+<tr>
+<td><code>cookies_version</code></td>
+<td>Cookie Policy — version</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td><code>accessibility_effective_date</code></td>
+<td>Accessibility — effective from</td>
+<td>❌ do uzupełnienia</td>
+</tr>
+<tr>
+<td><code>accessibility_version</code></td>
+<td>Accessibility — version</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Pola <strong>❌</strong> muszą być uzupełnione przed wdrożeniem produkcyjnym.<br />
+Panel pokaże ostrzeżenie walidacyjne gdy wymagane pola są puste.</p>
+</blockquote>
+<hr />
+<hr />
+<h2>6. Decyzje techniczne</h2>
+<h3>Architektura zmiennych — dlaczego tokeny <code>{{legal.key}}</code> a nie Blade?</h3>
+<p>Dokumenty są edytowalne przez TinyEditor w Filament. Blade nie działa po stronie React/Inertia, więc używamy własnego systemu tokenów zastępowanych w kontrolerze. Tokeny są czytelne dla redaktora treści, nie wymagają znajomości PHP, i są bezpieczne (escapowane przez <code>e()</code>).</p>
+<h3>Dlaczego LegalSettingsPage zamiast pól w CMS Pages?</h3>
+<p>Dane firmowe (adres, numer VAT) są <strong>globalne</strong> — takie same w wszystkich 4 dokumentach × 3 językach = 12 miejsc. Gdyby były w seederze lub w personal fields każdej strony, zmiana adresu wymagałaby edycji 12 razy. <code>LegalSettingsPage</code> + tokeny → zmiana raz, propagacja automatyczna.</p>
+<h3>Dlaczego Setting model (klucz-wartość) a nie osobna tabela?</h3>
+<p>Projekt już używa <code>Setting</code> z tym wzorcem w <code>TrackingSettingsPage</code>. Spójność architektury + gotowe caching (<code>now()-&gt;addDay()</code>). Brak potrzeby nowej migracji poza wypełnieniem danych.</p>
+<h3>Wielojęzyczność — strategia dla PT</h3>
+<ul>
+<li><strong>EN i PL</strong> — pełna treść z odniesieniami do właściwych jurysdykcji</li>
+<li><strong>PT</strong> — treść oparta na wersji EN (UK GDPR, CRA), przetłumaczona na język portugalski dla społeczności brazylijskiej/portugalskiej mieszkającej w UK. Zawiera adnotację: <em>“If you reside in Portugal or the EU, the GDPR applies…”</em></li>
+</ul>
+<h3>Jak działają language pills w CmsPage.jsx?</h3>
+<p>Komponent otrzymuje z kontrolera <code>availableLocales</code> (np. <code>['en','pl','pt']</code>). Przełącznik języka zmienia parametr <code>?lang=pl</code> w URL → PageController uwzględnia ten parametr przy wyborze tłumaczenia (uzupełnienie kontrolera).</p>
+<hr />
+<h2>7. Kolejność implementacji (dla sesji roboczej)</h2>
+<pre><code>[ ] 1. Migracja: effective_date + version do tabeli pages
+[ ] 2. Model Page.php: $fillable + $casts
+[ ] 3. LegalSettingsPage.php: nowa strona Filament z formularzem danych
+[ ] 4. SettingsSeeder: wypełnienie kluczy legal.* placeholderami
+[ ] 5. PageController.php: replaceLegalVars() + przekazanie nowych pól
+[ ] 6. PageResource.php: pola effective_date + version
+[ ] 7. CmsPage.jsx: redesign (TOC + DocumentHeader + language pills)
+[ ] 8. Privacy Policy: pełna treść EN + PL + PT z tokenami
+[ ] 9. Terms &amp; Conditions: pełna treść EN + PL + PT z tokenami
+[ ] 10. Cookie Policy: pełna treść EN + PL + PT (tabela cookies + tokenami)
+[ ] 11. Accessibility Statement: pełna treść EN + PL + PT
+[ ] 12. npm run build + php artisan db:seed --class=PageSeeder
+[ ] 13. Uzupełnienie danych w LegalSettingsPage → weryfikacja tokenów
+[ ] 14. Weryfikacja end-to-end
+</code></pre>
+<hr />
+<h2>8. Uwagi końcowe</h2>
+<blockquote>
+<p><strong>Zastrzeżenie:</strong> Treść dokumentów prawnych oparta jest na ogólnie dostępnych regulacjach UK GDPR, RODO, PECR, Consumer Rights Act i polskich odpowiednikach. <strong>Przed wdrożeniem produkcyjnym zaleca się konsultację z radcą prawnym lub solicytorem specjalizującym się w prawie UK i UE.</strong> Wygenerowana treść stanowi solidną podstawę roboczą, ale nie zastępuje porady prawnej.</p>
+</blockquote>
+<blockquote>
+<p><strong>Kwestia NI (Irlandia Północna):</strong> Po Brexicie NI ma specyficzny status — podlega UK GDPR w zakresie danych, ale niektóre aspekty regulacji konsumenckich mogą być odmienne. Jeśli firma obsługuje klientów z NI specifically, warto to zaznaczyć.</p>
+</blockquote>
+<blockquote>
+<p><strong>PT — jurysdykcja:</strong> Wersja PT kierowana jest do osób mieszkających w UK i mówiących po portugalsku. Podlega UK GDPR (nie RODO), co jest wyraźnie zaznaczone w treści. Klientów mieszkających w Portugalii/UE obowiązuje RODO — stosowna adnotacja zostanie dodana.</p>
+</blockquote>
+
+</body>
+</html>
