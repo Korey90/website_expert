@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ProjectResource\Pages;
 
+use App\Filament\Resources\ContractResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\ProjectResource;
 use App\Models\Invoice;
@@ -187,6 +188,12 @@ class ViewProject extends ViewRecord
                     Notification::make()->title('Invoice created')->body("Invoice {$invoice->number} created successfully.")->success()->send();
                     $this->redirect(InvoiceResource::getUrl('view', ['record' => $invoice]));
                 }),
+
+            Action::make('newContract')
+                ->label('Create Contract')
+                ->icon('heroicon-o-document-check')
+                ->color('gray')
+                ->url(fn () => ContractResource::getUrl('create') . '?client_id=' . $this->record->client_id . '&project_id=' . $this->record->id),
 
             Action::make('applyTemplate')
                 ->label('Apply Template')

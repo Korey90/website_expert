@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         // Finance
         $this->call(QuoteSeeder::class);
         $this->call(InvoiceSeeder::class);
+        $this->call(ContractTemplateSeeder::class);
 
         // Content & settings
         $this->call(EmailTemplateSeeder::class);
@@ -33,5 +34,6 @@ class DatabaseSeeder extends Seeder
         $this->call(CalculatorPricingSeeder::class);
         $this->call(PageSeeder::class);
         $this->call(SiteSectionSeeder::class);
+        $this->call(LegalSettingsSeeder::class);
     }
 }

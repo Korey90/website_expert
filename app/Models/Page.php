@@ -16,12 +16,14 @@ class Page extends Model
 
     protected $fillable = [
         'title', 'slug', 'content', 'meta_title', 'meta_description',
-        'status', 'type', 'show_in_footer', 'sort_order', 'created_by', 'published_at',
+        'status', 'type', 'show_in_footer', 'sort_order', 'created_by',
+        'published_at', 'effective_date', 'version',
     ];
 
     protected $casts = [
         'show_in_footer' => 'boolean',
         'published_at'   => 'datetime',
+        'effective_date' => 'date',
     ];
 
     public function createdBy(): BelongsTo

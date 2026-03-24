@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Page;
+use App\Models\Setting;
 use App\Models\SiteSection;
 use Illuminate\Support\Facades\App;
 use Inertia\Inertia;
 use Inertia\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PageController extends Controller
 {
@@ -36,17 +36,35 @@ class PageController extends Controller
         $navbar = ($s = $sections->get('navbar')) ? ['extra' => $s->extra] : null;
         $footer = ($s = $sections->get('footer')) ? ['extra' => $s->extra] : null;
 
+        $content = $this->replaceLegalVars(
+            $page->getTranslation('content', $locale, true) ?? ''
+        );
+
         return Inertia::render('CmsPage', [
             'page'   => [
                 'title'            => $page->getTranslation('title', $locale, true),
-                'content'          => $page->getTranslation('content', $locale, true),
+                'content'          => $content,
                 'meta_title'       => $page->getTranslation('meta_title', $locale, true),
                 'meta_description' => $page->getTranslation('meta_description', $locale, true),
                 'slug'             => $page->slug,
                 'type'             => $page->type,
+                'effective_date'   => $page->effective_date?->format('j F Y'),
+                'version'          => $page->version,
+                'updated_at'       => $page->updated_at?->format('j F Y'),
             ],
             'navbar' => $navbar,
             'footer' => $footer,
         ]);
+    }
+
+    private function replaceLegalVars(string $content): string
+    {
+        $vars = Setting::where('group', 'legal')->pluck('value', 'key');
+
+        foreach ($vars as $key => $value) {
+            $content = str_replace('{{' . $key . '}}', htmlspecialchars((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8'), $content);
+        }
+
+        return $content;
     }
 }

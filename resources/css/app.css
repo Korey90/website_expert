@@ -3,6 +3,7 @@
 @import "tailwindcss";
 
 @plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
 
 @variant dark (&:where(.dark, .dark *));
 

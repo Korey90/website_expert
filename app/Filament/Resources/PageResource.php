@@ -41,14 +41,16 @@ class PageResource extends Resource
                         ->helperText('URL: /p/{slug}'),
                     Forms\Components\Select::make('type')
                         ->options([
-                            'page'          => 'Page',
-                            'policy'        => 'Privacy Policy',
-                            'terms'         => 'Terms & Conditions',
-                            'cookie_policy' => 'Cookie Policy',
-                            'other'         => 'Other',
+                            'page'            => 'Page',
+                            'policy'          => 'Privacy Policy',
+                            'terms'           => 'Terms & Conditions',
+                            'cookie_policy'   => 'Cookie Policy',
+                            'accessibility'   => 'Accessibility Statement',
+                            'other'           => 'Other',
                         ])
                         ->default('page')
-                        ->required(),
+                        ->required()
+                        ->live(),
                     Forms\Components\Select::make('status')
                         ->options(['draft' => 'Draft', 'published' => 'Published'])
                         ->default('draft')
@@ -58,6 +60,22 @@ class PageResource extends Resource
                         ->label('Show in footer navigation')
                         ->default(false)
                         ->columnSpanFull(),
+                ]),
+
+            Section::make('Document Metadata')
+                ->description('Effective date and version override per-document. You can also set these globally in Settings → Legal & Company.')
+                ->columns(2)
+                ->collapsed()
+                ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('type') !== 'page')
+                ->schema([
+                    Forms\Components\DatePicker::make('effective_date')
+                        ->label('Effective date')
+                        ->displayFormat('d M Y')
+                        ->helperText('Override the global effective date for this document'),
+                    Forms\Components\TextInput::make('version')
+                        ->label('Document version')
+                        ->placeholder('e.g. 1.0, 2025-01')
+                        ->maxLength(20),
                 ]),
 
             Section::make('Content')
@@ -107,11 +125,20 @@ class PageResource extends Resource
                         default     => 'gray',
                     }),
                 Tables\Columns\IconColumn::make('show_in_footer')->boolean(),
+                Tables\Columns\TextColumn::make('effective_date')
+                    ->label('Effective')
+                    ->date('d M Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('version')
+                    ->badge()
+                    ->color('gray')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')->date()->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
-                    ->options(['page' => 'Page', 'policy' => 'Policy', 'terms' => 'Terms', 'cookie_policy' => 'Cookies']),
+                    ->options(['page' => 'Page', 'policy' => 'Policy', 'terms' => 'Terms', 'cookie_policy' => 'Cookies', 'accessibility' => 'Accessibility', 'other' => 'Other']),
                 Tables\Filters\SelectFilter::make('status')
                     ->options(['draft' => 'Draft', 'published' => 'Published']),
                 Tables\Filters\TrashedFilter::make(),
