@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown转换文档</title>
+  <style>
+    body { 
+      font-family: 'Microsoft YaHei', 'SimSun', sans-serif; 
+      margin: 0 auto; 
+      max-width: 960px; 
+      padding: 20px; 
+      line-height: 1.6;
+    }
+    pre { 
+      background-color: #f8f8f8; 
+      border: 1px solid #ddd; 
+      padding: 10px; 
+      border-radius: 3px; 
+      overflow: auto; 
+    }
+    code { 
+      font-family: Consolas, Monaco, monospace; 
+      background-color: #f8f8f8; 
+      padding: 2px 5px; 
+      border-radius: 3px; 
+    }
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      margin-bottom: 20px;
+    }
+    th, td { 
+      border: 1px solid #ddd; 
+      padding: 8px; 
+    }
+    th { 
+      background-color: #f2f2f2; 
+      text-align: left; 
+    }
+    tr:nth-child(even) { 
+      background-color: #f9f9f9; 
+    }
+    img { 
+      max-width: 100%; 
+      height: auto; 
+    }
+    .toc-placeholder { 
+      margin: 20px 0; 
+      padding: 10px; 
+      background-color: #f0f0f0; 
+      border: 1px dashed #ccc; 
+      text-align: center; 
+      color: #666; 
+    }
+  </style>
+</head>
+<body>
+  <h1>Plan poprawek systemu — Analiza spójności lejka sprzedażowego z treścią kontraktów</h1>
+<p><strong>Data analizy:</strong> 2026-03-24<br />
+<strong>Zakres:</strong> Moduł Leads → Client → Project → Contract + ContractTemplates</p>
+<hr />
+<h2>Podsumowanie problemów</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Obszar</th>
+<th>Priorytet</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Placeholdery <code>{{legal.*}}</code> nigdy nie są zastępowane</td>
+<td>🔴 Krytyczny</td>
+<td>Do zrobienia</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Brak placeholderów <code>{{client.*}}</code> i <code>{{project.*}}</code> w szablonach</td>
+<td>🔴 Krytyczny</td>
+<td>Do zrobienia</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Brak interpolacji przy tworzeniu kontraktu z szablonu</td>
+<td>🔴 Krytyczny</td>
+<td>Do zrobienia</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Lead “Won” nie tworzy automatycznie kontraktu</td>
+<td>🟠 Wysoki</td>
+<td>Do zrobienia</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Brak triggerów automatyzacji dla zdarzeń kontraktu</td>
+<td>🟠 Wysoki</td>
+<td>Do zrobienia</td>
+</tr>
+<tr>
+<td>6</td>
+<td>AutomationEventListener monitoruje <code>status</code> na Lead (pole nie istnieje)</td>
+<td>🟠 Wysoki</td>
+<td>Bug</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Brak <code>contract_template_id</code> na modelu Contract</td>
+<td>🟡 Średni</td>
+<td>Do zrobienia</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Quote → Contract: brak automatycznego przepływu po akceptacji</td>
+<td>🟡 Średni</td>
+<td>Do zrobienia</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Wartość kontraktu nie jest prefillowana z Lead/Project</td>
+<td>🟡 Średni</td>
+<td>Do zrobienia</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Brak sekcji podpisów cyfrowych / potwierdzenia przez klienta</td>
+<td>🟡 Średni</td>
+<td>Do zrobienia</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>1. Placeholdery <code>{{legal.*}}</code> nigdy nie są zastępowane</h2>
+<h3>Problem</h3>
+<p>Szablony kontraktów zawierają tagi np. <code>{{legal.company_name}}</code>, <code>{{legal.deposit_percent}}</code> itd. Model <code>Setting</code> przechowuje te wartości poprawnie. Jednak w <code>ContractResource</code> przy wyborze szablonu — treść jest kopiowana do pola <code>terms</code> bezpośrednio jako surowy HTML, bez żadnej interpolacji.</p>
+<p>Efekt: klient dostaje umowę z dosłownymi <code>{{legal.company_name}}</code> w treści.</p>
+<h3>Placeholdery w użyciu (z seedera)</h3>
+<pre><code>{{legal.company_name}}
+{{legal.company_number}}
+{{legal.vat_number}}
+{{legal.company_address}}
+{{legal.company_email}}
+{{legal.company_phone}}
+{{legal.deposit_percent}}
+{{legal.payment_terms_days}}
+</code></pre>
+<h3>Rozwiązanie</h3>
+<p>Dodać metodę pomocniczą w <code>ContractResource</code> (lub serwisie) która przed wklejeniem treści do pola <code>terms</code> wykonuje <code>str_replace</code> wszystkich <code>{{legal.*}}</code> wartościami z <code>Setting::get(...)</code>.</p>
+<pre><code class="language-php">// app/Services/ContractInterpolationService.php
+public function interpolate(string $content, ?Client $client = null, ?Project $project = null): string
+{
+    $legalKeys = ['company_name','company_number','vat_number','company_address',
+                  'company_email','company_phone','deposit_percent','payment_terms_days'];
+    foreach ($legalKeys as $key) {
+        $content = str_replace(&quot;{{legal.$key}}&quot;, Setting::get(&quot;legal.$key&quot;, ''), $content);
+    }
+    if ($client) {
+        $content = str_replace('{{client.company_name}}', $client-&gt;company_name ?? '', $content);
+        $content = str_replace('{{client.vat_number}}', $client-&gt;vat_number ?? '', $content);
+        $content = str_replace('{{client.address}}', $client-&gt;full_address ?? '', $content);
+        $content = str_replace('{{client.primary_contact_name}}', $client-&gt;primary_contact_name ?? '', $content);
+        $content = str_replace('{{client.primary_contact_email}}', $client-&gt;primary_contact_email ?? '', $content);
+    }
+    if ($project) {
+        $content = str_replace('{{project.title}}', $project-&gt;title ?? '', $content);
+        $content = str_replace('{{project.budget}}', $project-&gt;budget ?? '', $content);
+        $content = str_replace('{{project.deadline}}', $project-&gt;deadline?-&gt;format('Y-m-d') ?? '', $content);
+    }
+    return $content;
+}
+</code></pre>
+<hr />
+<h2>2. Brak placeholderów <code>{{client.*}}</code> i <code>{{project.*}}</code> w szablonach</h2>
+<h3>Problem</h3>
+<p>Dane klienta w szablonach są wpisane jako statyczne bloki do ręcznego uzupełnienia:</p>
+<pre><code>[NAZWA KLIENTA / FIRMY KLIENTA]
+[ADRES REJESTROWY KLIENTA]
+[NUMER REJESTRACYJNY FIRMY, JEŚLI DOTYCZY]
+</code></pre>
+<p>Powoduje to, że każda umowa wymaga ręcznej edycji po wygenerowaniu — zamiast być gotową do wysłania.</p>
+<h3>Rozwiązanie</h3>
+<p>Zaktualizować seeder <code>ContractTemplateSeeder</code> — zamienić statyczne bloki na dynamiczne placeholdery:</p>
+<table>
+<thead>
+<tr>
+<th>Przed</th>
+<th>Po</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[NAZWA KLIENTA / FIRMY KLIENTA]</code></td>
+<td><code>{{client.company_name}}</code></td>
+</tr>
+<tr>
+<td><code>[ADRES REJESTROWY KLIENTA]</code></td>
+<td><code>{{client.address}}</code></td>
+</tr>
+<tr>
+<td><code>[NUMER REJESTRACYJNY FIRMY, JEŚLI DOTYCZY]</code></td>
+<td><code>{{client.companies_house_number}}</code></td>
+</tr>
+<tr>
+<td><code>[OSOBA KONTAKTOWA KLIENTA]</code></td>
+<td><code>{{client.primary_contact_name}}</code></td>
+</tr>
+<tr>
+<td><code>[DATA ZAWARCIA]</code></td>
+<td><code>{{contract.date}}</code></td>
+</tr>
+<tr>
+<td><code>[WARTOŚĆ PROJEKTU]</code></td>
+<td><code>{{project.budget}}</code></td>
+</tr>
+<tr>
+<td><code>[TERMIN REALIZACJI]</code></td>
+<td><code>{{project.deadline}}</code></td>
+</tr>
+<tr>
+<td><code>[NUMER UMOWY]</code></td>
+<td><code>{{contract.number}}</code></td>
+</tr>
+</tbody>
+</table>
+<p>Wymagane nowe placeholdery do dodania do <code>ContractInterpolationService</code>:</p>
+<pre><code>{{client.company_name}}
+{{client.companies_house_number}}
+{{client.vat_number}}
+{{client.address}}
+{{client.primary_contact_name}}
+{{client.primary_contact_email}}
+{{project.title}}
+{{project.budget}}
+{{project.deadline}}
+{{contract.number}}
+{{contract.date}}
+</code></pre>
+<hr />
+<h2>3. Brak interpolacji przy tworzeniu kontraktu z szablonu</h2>
+<h3>Problem</h3>
+<p><code>ContractResource</code> prawdopodobnie zawiera pole <code>Select</code> do wyboru szablonu, ale po wyborze — treść jest kopiowana bez przetworzenia.</p>
+<h3>Rozwiązanie</h3>
+<p>W <code>ContractResource::form()</code> dodać <code>afterStateUpdated</code> na polu wyboru szablonu:</p>
+<pre><code class="language-php">Forms\Components\Select::make('contract_template_id')
+    -&gt;label('Use Template')
+    -&gt;options(ContractTemplate::where('is_active', true)-&gt;pluck('name', 'id'))
+    -&gt;reactive()
+    -&gt;afterStateUpdated(function ($state, Set $set, Get $get) {
+        if (!$state) return;
+        $template = ContractTemplate::find($state);
+        if (!$template) return;
+        $client = Client::find($get('client_id'));
+        $project = Project::find($get('project_id'));
+        $content = app(ContractInterpolationService::class)
+            -&gt;interpolate($template-&gt;content, $client, $project);
+        $set('terms', $content);
+        if (!$get('title')) $set('title', $template-&gt;name);
+    }),
+</code></pre>
+<hr />
+<h2>4. Lead “Won” nie tworzy automatycznie kontraktu</h2>
+<h3>Problem</h3>
+<p>Gdy lead przechodzi do etapu <code>Won</code> (<code>pipeline_stage.is_won = true</code>) — system:</p>
+<ul>
+<li>Tworzy projekt (jeśli jest reguła automatyzacji) ✅</li>
+<li>Nie tworzy kontraktu ❌</li>
+<li>Nie sugeruje wyboru szablonu ❌</li>
+</ul>
+<p>Efekt: handlowiec musi ręcznie pamiętać o wystawieniu umowy.</p>
+<h3>Rozwiązanie (opcje do wyboru)</h3>
+<p><strong>Opcja A — Automatyzacja (prostsza):</strong><br />
+Dodać trigger <code>lead.stage_changed</code> + warunek <code>is_won = true</code> + akcja <code>create_contract</code>.<br />
+Wymaga rozszerzenia <code>ProcessAutomationJob</code> o akcję <code>create_contract</code> z domyślnym szablonem.</p>
+<p><strong>Opcja B — UI prompt (lepsza UX):</strong><br />
+Na stronie <code>ViewLead</code> dodać baner/akcję “This lead is won — create contract” widoczny gdy <code>$lead-&gt;stage-&gt;is_won &amp;&amp; !$lead-&gt;contracts()-&gt;exists()</code>.</p>
+<p><strong>Opcja C — Obie połączone:</strong><br />
+Automatycznie tworzyć draft kontraktu przy przejściu do Won, powiadamiać admina (<code>notify_admin</code>).</p>
+<hr />
+<h2>5. Brak triggerów automatyzacji dla zdarzeń kontraktu</h2>
+<h3>Problem</h3>
+<p><code>AutomationEventListener</code> obsługuje: Lead, Project, Invoice, Quote — ale <strong>brak Contract</strong>.</p>
+<p>Konsekwencja: nie można zautomatyzować:</p>
+<ul>
+<li>Powiadomienia gdy kontrakt zostaje wysłany</li>
+<li>Przypomnienia gdy kontrakt wygasa (<code>expires_at</code>)</li>
+<li>Akcji po podpisaniu kontraktu (np. tworzenie faktury za zaliczkę)</li>
+</ul>
+<h3>Rozwiązanie</h3>
+<p>Rozszerzyć <code>AutomationEventListener</code> o:</p>
+<pre><code class="language-php">Contract::class =&gt; [
+    'contract.created'  =&gt; ['status'],
+    'contract.sent'     =&gt; ['sent_at'],
+    'contract.signed'   =&gt; ['signed_at'],
+    'contract.expired'  =&gt; ['status' =&gt; 'expired'],
+],
+</code></pre>
+<p>Dodać triggery do <code>AutomationRuleResource::TRIGGERS</code>:</p>
+<pre><code class="language-php">'contract.sent'   =&gt; 'Contract Sent',
+'contract.signed' =&gt; 'Contract Signed',
+'contract.expired'=&gt; 'Contract Expired',
+</code></pre>
+<hr />
+<h2>6. Bug: AutomationEventListener monitoruje <code>status</code> na Lead (pole nie istnieje)</h2>
+<h3>Problem</h3>
+<p>W <code>AutomationEventListener</code> jest logika sprawdzająca <code>$model-&gt;status</code> na modelu <code>Lead</code>. Model <code>Lead</code> <strong>nie ma pola <code>status</code></strong> — jego etap to <code>pipeline_stage_id</code>.</p>
+<p>Efekt: trigger <code>lead.stage_changed</code> może nie odpowiadać poprawnie, warunki bazujące na <code>status</code> nigdy nie są spełnione.</p>
+<h3>Rozwiązanie</h3>
+<p>W <code>AutomationEventListener</code>, przy obsłudze Lead, zamienić referencje <code>status</code> na <code>pipeline_stage_id</code> i pobierać nazwę etapu przez <code>$lead-&gt;stage-&gt;name</code> lub <code>$lead-&gt;stage-&gt;slug</code>.</p>
+<hr />
+<h2>7. Brak <code>contract_template_id</code> na modelu Contract</h2>
+<h3>Problem</h3>
+<p>Model <code>Contract</code> nie przechowuje informacji o tym, z jakiego szablonu powstał. Uniemożliwia to:</p>
+<ul>
+<li>Śledzenie popularności szablonów</li>
+<li>Regenerację kontraktu z nową treścią szablonu</li>
+<li>Filtrowanie kontraktów po typie umowy</li>
+</ul>
+<h3>Rozwiązanie</h3>
+<p>Nowa migracja:</p>
+<pre><code class="language-php">$table-&gt;foreignId('contract_template_id')-&gt;nullable()-&gt;constrained()-&gt;nullOnDelete();
+</code></pre>
+<p>Dodać relację <code>belongsTo ContractTemplate</code> na modelu <code>Contract</code>.</p>
+<hr />
+<h2>8. Quote → Contract: brak przepływu po akceptacji</h2>
+<h3>Problem</h3>
+<p>Gdy oferta (<code>Quote</code>) zostaje zaakceptowana (<code>status = accepted</code>), trigger <code>quote.accepted</code> jest obsługiwany durch <code>AutomationEventListener</code>. Jednak brak akcji <code>create_contract</code> — handlowiec musi ręcznie tworzyć kontrakt.</p>
+<h3>Powiązanie z kontraktem</h3>
+<p>Model <code>Contract</code> ma pole <code>quote_id</code> — relacja jest przewidziana ale nie ma automatycznego przepływu.</p>
+<p>Contract powinien dziedziczyć z Quote:</p>
+<ul>
+<li><code>client_id</code></li>
+<li><code>value</code> (z <code>Quote.total</code>)</li>
+<li><code>currency</code></li>
+<li>Wybór szablonu na bazie <code>Quote.service_type</code> (jeśli dostępne)</li>
+</ul>
+<h3>Rozwiązanie</h3>
+<p>Dodać akcję <code>create_contract</code> do <code>ProcessAutomationJob</code> + przycisk “Create Contract from Quote” w <code>ViewQuote</code>.</p>
+<hr />
+<h2>9. Wartość kontraktu nie jest prefillowana z Lead/Project</h2>
+<h3>Problem</h3>
+<p>Gdy tworzony jest kontrakt powiązany z leadem (<code>lead.value</code>) lub projektem (<code>project.budget</code>) — pole <code>Contract.value</code> jest puste i wymaga ręcznego uzupełnienia.</p>
+<h3>Rozwiązanie</h3>
+<p>W <code>ContractResource::form()</code> dodać <code>afterStateUpdated</code> na polach <code>client_id</code> / <code>project_id</code>:</p>
+<pre><code class="language-php">Forms\Components\Select::make('project_id')
+    -&gt;reactive()
+    -&gt;afterStateUpdated(function ($state, Set $set) {
+        $project = Project::find($state);
+        if ($project) {
+            $set('value', $project-&gt;budget);
+            $set('currency', $project-&gt;currency);
+        }
+    }),
+</code></pre>
+<hr />
+<h2>10. Brak sekcji podpisów / potwierdzenia przez klienta</h2>
+<h3>Problem</h3>
+<p>Model <code>Contract</code> ma pola <code>signed_at</code> i <code>status = signed</code>, ale:</p>
+<ul>
+<li>Brak mechanizmu podpisu przez klienta (e-mail z linkiem, portal klienta)</li>
+<li>Brak miejsca na podpis w szablonach HTML</li>
+<li><code>portal_token</code> na <code>Project</code> jest generowany, ale nie ma analogicznego tokenu na <code>Contract</code></li>
+</ul>
+<h3>Rozwiązanie (etapowe)</h3>
+<p><strong>Etap 1 — Minimalne MVP:</strong></p>
+<ul>
+<li>Dodać <code>client_token</code> (UUID) na <code>Contract</code></li>
+<li>Publiczny endpoint <code>GET /contracts/{token}</code> wyświetla treść + przycisk “Potwierdzam i podpisuję”</li>
+<li>Po kliknięciu: <code>signed_at = now()</code>, <code>status = signed</code>, trigger <code>contract.signed</code></li>
+</ul>
+<p><strong>Etap 2 — Podpis w szablonie:</strong><br />
+Dodać na końcu każdego szablonu sekcję:</p>
+<pre><code class="language-html">&lt;h2&gt;PODPISY&lt;/h2&gt;
+&lt;table&gt;
+  &lt;tr&gt;
+    &lt;td&gt;Wykonawca: {{legal.company_name}}&lt;br&gt;Data: ___________&lt;br&gt;Podpis: ___________&lt;/td&gt;
+    &lt;td&gt;Zamawiający: {{client.company_name}}&lt;br&gt;Data: ___________&lt;br&gt;Podpis: ___________&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</code></pre>
+<hr />
+<h2>Plan implementacji (kolejność)</h2>
+<pre><code>Sprint 1 — Podstawowe sprzęgnięcie danych z kontraktem
+  [1] ContractInterpolationService + interpolacja {{legal.*}}
+  [2] Dodanie {{client.*}} i {{project.*}} do seedera szablonów
+  [3] afterStateUpdated w ContractResource — wybór szablonu → interpolacja
+  [4] Prefill wartości kontraktu z Project/Lead
+
+Sprint 2 — Przepływ sprzedażowy
+  [5] Przycisk &quot;Utwórz kontrakt&quot; na ViewLead gdy is_won=true
+  [6] Przycisk &quot;Utwórz kontrakt z oferty&quot; na ViewQuote
+  [7] contract_template_id na modelu Contract
+
+Sprint 3 — Automatyzacje
+  [8] Fix buga: AutomationEventListener Lead.status → pipeline_stage_id
+  [9] Dodanie triggerów contract.sent / contract.signed / contract.expired
+  [10] Akcja create_contract w ProcessAutomationJob
+
+Sprint 4 — Podpisy
+  [11] client_token na Contract + publiczny endpoint podpisu
+  [12] Sekcja podpisów w szablonach HTML
+</code></pre>
+<hr />
+<h2>Techniczne zależności</h2>
+<pre><code>ContractInterpolationService
+    ↓ używa
+Setting::get('legal.*')
+Client-&gt;company_name, vat_number, full_address, primary_contact_*
+Project-&gt;title, budget, deadline, currency
+
+ContractResource::form()
+    ↓ wywołuje
+ContractInterpolationService-&gt;interpolate()
+    ↓ przy wyborze
+contract_template_id (nowe pole)
+
+AutomationEventListener
+    ↓ rozszerzony o
+Contract events (created, updated)
+    ↓ wyzwala
+ProcessAutomationJob z nowymi akcjami
+</code></pre>
+
+</body>
+</html>

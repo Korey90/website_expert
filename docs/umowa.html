@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown转换文档</title>
+  <style>
+    body { 
+      font-family: 'Microsoft YaHei', 'SimSun', sans-serif; 
+      margin: 0 auto; 
+      max-width: 960px; 
+      padding: 20px; 
+      line-height: 1.6;
+    }
+    pre { 
+      background-color: #f8f8f8; 
+      border: 1px solid #ddd; 
+      padding: 10px; 
+      border-radius: 3px; 
+      overflow: auto; 
+    }
+    code { 
+      font-family: Consolas, Monaco, monospace; 
+      background-color: #f8f8f8; 
+      padding: 2px 5px; 
+      border-radius: 3px; 
+    }
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      margin-bottom: 20px;
+    }
+    th, td { 
+      border: 1px solid #ddd; 
+      padding: 8px; 
+    }
+    th { 
+      background-color: #f2f2f2; 
+      text-align: left; 
+    }
+    tr:nth-child(even) { 
+      background-color: #f9f9f9; 
+    }
+    img { 
+      max-width: 100%; 
+      height: auto; 
+    }
+    .toc-placeholder { 
+      margin: 20px 0; 
+      padding: 10px; 
+      background-color: #f0f0f0; 
+      border: 1px dashed #ccc; 
+      text-align: center; 
+      color: #666; 
+    }
+  </style>
+</head>
+<body>
+  <h1>UMOWA O TWORZENIE OPROGRAMOWANIA / STRONY INTERNETOWEJ</h1>
+<h2>1. Strony Umowy</h2>
+<p>Niniejsza Umowa (“Umowa”) zostaje zawarta pomiędzy:</p>
+<p><strong>Wykonawcą:</strong> {{legal.company_name}}, spółką zarejestrowaną w Anglii i Walii (nr: {{legal.company_number}}, VAT: {{legal.vat_number}}), adres: {{legal.company_address}} (“Wykonawca”)</p>
+<p>a</p>
+<p><strong>Zamawiającym:</strong> [DANE KLIENTA] (“Zamawiający”)</p>
+<p>Łącznie: „Strony”.</p>
+<p>Umowa wchodzi w życie z chwilą:<br />
+(a) akceptacji Oferty lub<br />
+(b) dokonania pierwszej płatności.</p>
+<hr />
+<h2>2. Definicje</h2>
+<ul>
+<li><strong>Projekt</strong> – zakres prac określony w Ofercie</li>
+<li><strong>Rezultaty</strong> – kod, aplikacja, UI, systemy backendowe, dokumentacja</li>
+<li><strong>Treści</strong> – materiały dostarczone przez Zamawiającego</li>
+<li><strong>Change Request</strong> – zmiana zakresu</li>
+<li><strong>IP Rights</strong> – prawa własności intelektualnej</li>
+</ul>
+<hr />
+<h2>3. Zakres Usług</h2>
+<p>Zakres określony jest w Ofercie i może obejmować:</p>
+<ul>
+<li>Laravel (backend)</li>
+<li>React / Inertia (frontend)</li>
+<li>Tailwind / custom CSS</li>
+<li>integracje API</li>
+<li>CMS / e-commerce</li>
+<li>deployment</li>
+</ul>
+<p>Oferta ma pierwszeństwo nad ogólnym opisem.</p>
+<hr />
+<h2>4. Model Współpracy (Software House)</h2>
+<p>Projekt realizowany jest w modelu:</p>
+<ul>
+<li>fixed price lub milestone-based</li>
+<li>iteracyjnym (feedback loops)</li>
+</ul>
+<p>Zamawiający akceptuje, że:</p>
+<ul>
+<li>development jest procesem iteracyjnym</li>
+<li>nie wszystkie elementy mogą być przewidziane na start</li>
+</ul>
+<hr />
+<h2>5. Harmonogram</h2>
+<p>Terminy zależą od:</p>
+<ul>
+<li>terminowego feedbacku (do 5 dni roboczych)</li>
+<li>dostarczenia materiałów</li>
+<li>braku zmian scope</li>
+</ul>
+<p>Brak feedbacku = automatyczna akceptacja etapu.</p>
+<hr />
+<h2>6. Wynagrodzenie i Płatności</h2>
+<ul>
+<li>opłata początkowa (non-refundable onboarding fee): {{legal.deposit_percent}}%</li>
+<li>płatności wg milestone</li>
+<li>termin płatności: {{legal.payment_terms_days}} dni</li>
+</ul>
+<p>Brak płatności:</p>
+<ul>
+<li>możliwość wstrzymania prac</li>
+<li>naliczanie odsetek ustawowych</li>
+</ul>
+<hr />
+<h2>7. Własność Intelektualna (UK compliant)</h2>
+<p>Po pełnej zapłacie:</p>
+<p>Wykonawca przenosi na Zamawiającego wszelkie prawa do Rezultatów:</p>
+<ul>
+<li>worldwide</li>
+<li>perpetual</li>
+<li>exclusive</li>
+</ul>
+<p>w zakresie dopuszczonym przez prawo.</p>
+<hr />
+<h3>7.1 Wyłączenia</h3>
+<p>Nie podlegają przeniesieniu:</p>
+<ul>
+<li>frameworki (Laravel, React itd.)</li>
+<li>open-source</li>
+<li>reusable components Wykonawcy</li>
+</ul>
+<hr />
+<h3>7.2 Licencja na komponenty Wykonawcy</h3>
+<p>Zamawiający otrzymuje:</p>
+<ul>
+<li>niewyłączną</li>
+<li>bezterminową</li>
+<li>globalną licencję</li>
+</ul>
+<p>na używanie tych elementów w Projekcie.</p>
+<hr />
+<h3>7.3 Portfolio</h3>
+<p>Wykonawca może prezentować projekt w portfolio.</p>
+<hr />
+<h2>8. Change Requests</h2>
+<p>Zmiany poza zakresem:</p>
+<ul>
+<li>wymagają akceptacji (email wystarczy)</li>
+<li>są dodatkowo płatne</li>
+<li>wpływają na timeline</li>
+</ul>
+<hr />
+<h2>9. Usługi Zewnętrzne</h2>
+<p>Wykonawca nie odpowiada za:</p>
+<ul>
+<li>hosting</li>
+<li>API</li>
+<li>integracje zewnętrzne</li>
+</ul>
+<p>Koszty tych usług ponosi Zamawiający.</p>
+<hr />
+<h2>10. SLA / Utrzymanie (jeśli dotyczy)</h2>
+<p>Jeśli nie zawarto osobnej umowy:</p>
+<ul>
+<li>brak obowiązku maintenance</li>
+<li>brak SLA</li>
+</ul>
+<p>Opcjonalnie:</p>
+<ul>
+<li>maintenance może być wykupiony oddzielnie</li>
+</ul>
+<hr />
+<h2>11. Odbiór Projektu</h2>
+<p>Projekt uznaje się za zaakceptowany gdy:</p>
+<ul>
+<li>Zamawiający zatwierdzi lub</li>
+<li>nie zgłosi uwag w ciągu 5 dni</li>
+</ul>
+<hr />
+<h2>12. Gwarancja</h2>
+<p>30 dni na poprawki błędów:</p>
+<ul>
+<li>wynikających z implementacji</li>
+</ul>
+<p>Nie obejmuje:</p>
+<ul>
+<li>zmian po stronie klienta</li>
+<li>aktualizacji zewnętrznych</li>
+<li>zmian serwera</li>
+</ul>
+<hr />
+<h2>13. Odpowiedzialność</h2>
+<p>W maksymalnym zakresie dopuszczonym przez prawo:</p>
+<ul>
+<li>
+<p>odpowiedzialność ograniczona do wartości umowy</p>
+</li>
+<li>
+<p>brak odpowiedzialności za:</p>
+<ul>
+<li>utracone zyski</li>
+<li>dane</li>
+<li>straty pośrednie</li>
+</ul>
+</li>
+</ul>
+<p>Nie wyłącza:</p>
+<ul>
+<li>odpowiedzialności za śmierć / obrażenia</li>
+<li>fraud</li>
+<li>obowiązków ustawowych</li>
+</ul>
+<hr />
+<h2>14. Dane Osobowe</h2>
+<p>Strony przestrzegają:</p>
+<ul>
+<li>UK GDPR</li>
+<li>EU GDPR (jeśli dotyczy)</li>
+</ul>
+<p>W razie potrzeby zawierana jest DPA.</p>
+<hr />
+<h2>15. Poufność</h2>
+<p>Obowiązuje przez 3 lata od zakończenia.</p>
+<hr />
+<h2>16. Prawo Konsumenta (UK + EU)</h2>
+<p>Jeśli Zamawiający jest konsumentem:</p>
+<ul>
+<li>
+<p>ma prawo odstąpienia w ciągu 14 dni</p>
+</li>
+<li>
+<p>jeśli zażąda rozpoczęcia prac:</p>
+<ul>
+<li>traci pełne prawo zwrotu proporcjonalnie</li>
+</ul>
+</li>
+</ul>
+<p>Nic w tej Umowie nie ogranicza praw konsumenta wynikających z prawa kraju jego zamieszkania.</p>
+<hr />
+<h2>17. Rozwiązanie Umowy</h2>
+<p>Zamawiający:</p>
+<ul>
+<li>14 dni wypowiedzenia</li>
+<li>płatność za wykonane prace</li>
+</ul>
+<p>Wykonawca:</p>
+<ul>
+<li>natychmiast w przypadku naruszenia lub braku płatności</li>
+</ul>
+<hr />
+<h2>18. Siła Wyższa</h2>
+<p>Standardowa klauzula.</p>
+<hr />
+<h2>19. Prawo i Jurysdykcja</h2>
+<p>Umowa podlega prawu Anglii i Walii.</p>
+<p>Dla konsumentów:</p>
+<ul>
+<li>zachowane są prawa do sądów lokalnych</li>
+</ul>
+<hr />
+<h2>20. Całość Umowy</h2>
+<p>Umowa + Oferta = całość porozumienia.</p>
+<hr />
+<h2>21. Podpisy</h2>
+<p>Akceptacja elektroniczna jest wiążąca.</p>
+<hr />
+<h2>22. Repozytoria, Kod Źródłowy i Workflow</h2>
+<h3>22.1 Repozytorium</h3>
+<p>Projekt będzie utrzymywany w systemie kontroli wersji (np. Git).</p>
+<p>Domyślnie:</p>
+<ul>
+<li>
+<p>repozytorium należy do Wykonawcy do momentu pełnej płatności</p>
+</li>
+<li>
+<p>po płatności może zostać:</p>
+<ul>
+<li>przekazane Zamawiającemu lub</li>
+<li>współdzielone (access)</li>
+</ul>
+</li>
+</ul>
+<h3>22.2 Workflow</h3>
+<p>Development odbywa się zgodnie z dobrymi praktykami:</p>
+<ul>
+<li>branch-based workflow</li>
+<li>code review (jeśli stosowane)</li>
+<li>deployment pipeline (jeśli uzgodniony)</li>
+</ul>
+<h3>22.3 Backupy</h3>
+<p>Wykonawca nie gwarantuje długoterminowego przechowywania repozytorium po zakończeniu projektu, chyba że zawarto umowę maintenance.</p>
+<hr />
+<h2>23. Hosting, DevOps i Deployment</h2>
+<h3>23.1 Hosting</h3>
+<p>Jeśli nie ustalono inaczej:</p>
+<ul>
+<li>Zamawiający odpowiada za hosting</li>
+<li>Wykonawca może rekomendować dostawców</li>
+</ul>
+<h3>23.2 Deployment</h3>
+<p>Wykonawca może:</p>
+<ul>
+<li>skonfigurować środowisko</li>
+<li>wdrożyć aplikację</li>
+</ul>
+<p>ale nie odpowiada za:</p>
+<ul>
+<li>ciągłość działania infrastruktury</li>
+<li>awarie serwera</li>
+</ul>
+<h3>23.3 DevOps (opcjonalne)</h3>
+<p>Jeśli wykupione:</p>
+<ul>
+<li>CI/CD</li>
+<li>monitoring</li>
+<li>automatyczne deploye</li>
+</ul>
+<hr />
+<h2>24. SLA (Service Level Agreement – opcjonalne)</h2>
+<p>Jeśli Strony zawarły umowę SLA:</p>
+<h3>24.1 Czas reakcji</h3>
+<ul>
+<li>krytyczny błąd: do 24h</li>
+<li>wysoki: 48h</li>
+<li>niski: 72h</li>
+</ul>
+<h3>24.2 Definicje</h3>
+<ul>
+<li>krytyczny: system nie działa</li>
+<li>wysoki: funkcjonalność ograniczona</li>
+<li>niski: bug kosmetyczny</li>
+</ul>
+<h3>24.3 Wyłączenia SLA</h3>
+<p>Nie obejmuje:</p>
+<ul>
+<li>problemów z hostingiem</li>
+<li>integracji zewnętrznych</li>
+<li>działań Zamawiającego</li>
+</ul>
+<hr />
+<h2>25. Bezpieczeństwo (Security Clause)</h2>
+<h3>25.1 Standardy</h3>
+<p>Wykonawca stosuje dobre praktyki bezpieczeństwa, w tym:</p>
+<ul>
+<li>walidację danych</li>
+<li>ochronę przed podstawowymi atakami (XSS, CSRF, SQL injection)</li>
+</ul>
+<h3>25.2 Odpowiedzialność</h3>
+<p>Po wdrożeniu:</p>
+<ul>
+<li>
+<p>Zamawiający odpowiada za:</p>
+<ul>
+<li>aktualizacje systemu</li>
+<li>zarządzanie dostępem</li>
+<li>bezpieczeństwo infrastruktury</li>
+</ul>
+</li>
+</ul>
+<h3>25.3 Brak gwarancji absolutnego bezpieczeństwa</h3>
+<p>Żaden system nie jest w 100% bezpieczny — Wykonawca nie gwarantuje odporności na wszystkie ataki.</p>
+<hr />
+<h2>26. Maintenance i Wsparcie</h2>
+<p>Jeśli nie zawarto osobnej umowy:</p>
+<ul>
+<li>brak obowiązku wsparcia</li>
+<li>brak aktualizacji</li>
+</ul>
+<p>Maintenance może obejmować:</p>
+<ul>
+<li>aktualizacje Laravel / React</li>
+<li>poprawki bezpieczeństwa</li>
+<li>monitoring</li>
+</ul>
+<hr />
+<h2>27. White-label i Odsprzedaż</h2>
+<h3>27.1 Zakaz odsprzedaży jako produkt</h3>
+<p>Zamawiający nie może:</p>
+<ul>
+<li>sprzedawać Rezultatów jako template</li>
+<li>dystrybuować jako SaaS bez zgody</li>
+</ul>
+<h3>27.2 White-label (opcjonalne)</h3>
+<p>Możliwe po uzgodnieniu:</p>
+<ul>
+<li>agencje mogą sprzedawać dalej</li>
+<li>bez ujawniania Wykonawcy</li>
+</ul>
+<hr />
+<h2>28. Licencje i Open Source</h2>
+<p>Projekt może zawierać:</p>
+<ul>
+<li>Laravel (MIT)</li>
+<li>React (MIT)</li>
+<li>inne biblioteki</li>
+</ul>
+<p>Zamawiający zobowiązuje się:</p>
+<ul>
+<li>przestrzegać licencji open-source</li>
+</ul>
+<hr />
+<h2>29. SEO i Wydajność</h2>
+<p>Wykonawca:</p>
+<ul>
+<li>stosuje dobre praktyki</li>
+</ul>
+<p>ale nie gwarantuje:</p>
+<ul>
+<li>pozycji w Google</li>
+<li>ruchu</li>
+<li>konwersji</li>
+</ul>
+<hr />
+<h2>30. Testy i Jakość</h2>
+<p>Projekt może obejmować:</p>
+<ul>
+<li>testy manualne</li>
+<li>testy przeglądarek</li>
+</ul>
+<p>Automatyczne testy tylko jeśli uzgodnione.</p>
+<hr />
+<h2>31. Odpowiedzialność za Dane</h2>
+<p>Zamawiający odpowiada za:</p>
+<ul>
+<li>backup danych</li>
+<li>treści użytkowników</li>
+<li>zgodność z prawem</li>
+</ul>
+<hr />
+<h2>32. Migracje i Integracje</h2>
+<p>Wykonawca nie odpowiada za:</p>
+<ul>
+<li>błędy danych źródłowych</li>
+<li>ograniczenia API</li>
+</ul>
+<hr />
+<h2>33. Komunikacja Projektowa</h2>
+<p>Oficjalne kanały:</p>
+<ul>
+<li>email</li>
+<li>system ticketowy (jeśli używany)</li>
+</ul>
+<p>Brak odpowiedzi = opóźnienia.</p>
+<hr />
+<h2>34. Priorytetyzacja i Kolejka</h2>
+<p>Wykonawca:</p>
+<ul>
+<li>obsługuje wielu klientów</li>
+<li>nie gwarantuje wyłączności zasobów</li>
+</ul>
+<hr />
+<h2>35. Audit i Compliance</h2>
+<p>Na życzenie:</p>
+<ul>
+<li>możliwy audit (płatny)</li>
+</ul>
+<hr />
+<h2>36. Klauzula Rozsądnego Użytkowania</h2>
+<p>Zamawiający nie może:</p>
+<ul>
+<li>przeciążać systemu</li>
+<li>używać w sposób niezgodny z przeznaczeniem</li>
+</ul>
+<hr />
+<h2>37. Przeniesienie Umowy</h2>
+<p>Zamawiający nie może przenieść umowy bez zgody.</p>
+<p>Wykonawca może:</p>
+<ul>
+<li>korzystać z podwykonawców</li>
+</ul>
+<hr />
+<h2>38. Podwykonawcy</h2>
+<p>Wykonawca może:</p>
+<ul>
+<li>delegować prace</li>
+</ul>
+<p>ale odpowiada za ich wykonanie.</p>
+<hr />
+<h2>39. Non-solicitation</h2>
+<p>Zamawiający nie może zatrudniać pracowników Wykonawcy przez:</p>
+<ul>
+<li>12 miesięcy</li>
+</ul>
+<p>bez zgody.</p>
+<hr />
+<h2>40. Kary umowne (opcjonalne)</h2>
+<p>Mogą być ustalone indywidualnie.</p>
+<hr />
+<h2>41. Postanowienia Końcowe</h2>
+<p>W przypadku konfliktu:</p>
+<ul>
+<li>pierwszeństwo ma Oferta</li>
+</ul>
+<hr />
+<h3>42. Model Umowy: MSA + SOW</h3>
+<h4>42.1 Master Services Agreement (MSA)</h4>
+<p>Niniejsza Umowa stanowi ramową umowę współpracy (MSA).</p>
+<h4>42.2 Statement of Work (SOW)</h4>
+<p>Każdy projekt / etap może być realizowany na podstawie osobnego dokumentu SOW, który określa:</p>
+<ul>
+<li>zakres prac</li>
+<li>harmonogram</li>
+<li>wynagrodzenie</li>
+<li>deliverables</li>
+</ul>
+<p>W przypadku sprzeczności: SOW ma pierwszeństwo w zakresie danego projektu.</p>
+<hr />
+<h3>43. Model Rozliczeń Time &amp; Materials (T&amp;M)</h3>
+<h4>43.1 Zastosowanie</h4>
+<p>Jeśli Strony uzgodnią model T&amp;M:</p>
+<ul>
+<li>rozliczenie odbywa się na podstawie rzeczywistego czasu pracy</li>
+<li>stosowana jest stawka godzinowa / dzienna</li>
+</ul>
+<h4>43.2 Ewidencja czasu</h4>
+<p>Wykonawca może prowadzić:</p>
+<ul>
+<li>timesheety</li>
+<li>raporty pracy</li>
+</ul>
+<h4>43.3 Estymacje</h4>
+<p>Estymacje nie stanowią gwarancji ceny końcowej.</p>
+<hr />
+<h3>44. Equity / Współpraca Startupowa (opcjonalne)</h3>
+<p>Strony mogą uzgodnić częściowe wynagrodzenie w formie udziałów.</p>
+<p>W takim przypadku:</p>
+<ul>
+<li>warunki określa osobna umowa</li>
+<li>niniejsza Umowa nadal obowiązuje operacyjnie</li>
+</ul>
+<p>Wykonawca nie ponosi ryzyka biznesowego projektu Zamawiającego.</p>
+<hr />
+<h3>45. Zaawansowane Ograniczenie Odpowiedzialności (Pro-Level)</h3>
+<h4>45.1 Limit odpowiedzialności</h4>
+<p>O ile prawo nie stanowi inaczej:</p>
+<ul>
+<li>
+<p>odpowiedzialność ograniczona do:</p>
+<ul>
+<li>100% wartości umowy LUB</li>
+<li>wartości z ostatnich 12 miesięcy współpracy</li>
+</ul>
+</li>
+</ul>
+<h4>45.2 Wyłączenia</h4>
+<p>Wykonawca nie odpowiada za:</p>
+<ul>
+<li>utratę danych</li>
+<li>utracone korzyści</li>
+<li>utratę klientów</li>
+<li>przerwy w działalności</li>
+</ul>
+<h4>45.3 Proporcjonalność</h4>
+<p>Odpowiedzialność jest proporcjonalna do wkładu Wykonawcy w powstanie szkody.</p>
+<hr />
+<h3>46. Ubezpieczenie (opcjonalne)</h3>
+<p>Wykonawca może posiadać ubezpieczenie odpowiedzialności zawodowej (PI insurance).</p>
+<p>Na żądanie możliwe jest przedstawienie potwierdzenia.</p>
+<hr />
+<h3>47. Disaster Recovery i Backup</h3>
+<p>Jeśli nie uzgodniono inaczej:</p>
+<ul>
+<li>Zamawiający odpowiada za backup</li>
+</ul>
+<p>Opcjonalnie:</p>
+<ul>
+<li>automatyczne backupy</li>
+<li>disaster recovery plan</li>
+</ul>
+<hr />
+<h3>48. Vendor Lock-in i Przenoszalność</h3>
+<p>Po zakończeniu współpracy:</p>
+<ul>
+<li>Zamawiający może korzystać z projektu niezależnie</li>
+<li>Wykonawca nie blokuje migracji</li>
+</ul>
+<p>Nie obejmuje to narzędzi wewnętrznych Wykonawcy.</p>
+<hr />
+<h3>49. Dokumentacja</h3>
+<p>Dokumentacja może obejmować:</p>
+<ul>
+<li>instrukcje użytkownika</li>
+<li>dokumentację techniczną</li>
+</ul>
+<p>Zakres dokumentacji określa Oferta lub SOW.</p>
+<hr />
+<h3>50. Wersjonowanie i Aktualizacje</h3>
+<p>Wykonawca nie ma obowiązku aktualizacji technologii po zakończeniu projektu, chyba że:</p>
+<ul>
+<li>zawarto umowę maintenance</li>
+</ul>
+<hr />
+<h3>51. Klauzula Całościowa</h3>
+<p>Niniejsza Umowa wraz z:</p>
+<ul>
+<li>Ofertą</li>
+<li>SOW</li>
+</ul>
+<p>stanowi pełne porozumienie Stron.</p>
+<hr />
+<h1>🧠 Real talk (ważne)</h1>
+<p>To co masz teraz to:</p>
+<p>👉 poziom <strong>pełnoprawnej umowy software house (UK/EU compliant)</strong><br />
+👉 możesz spokojnie używać dla klientów:</p>
+<ul>
+<li>UK</li>
+<li>Northern Ireland</li>
+<li>Polska</li>
+<li>UE</li>
+</ul>
+<hr />
+
+</body>
+</html>

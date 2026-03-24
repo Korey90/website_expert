@@ -85,19 +85,64 @@ class ContractTemplateResource extends Resource
             Section::make('Contract Content Preview')
                 ->description('Placeholders like {{legal.company_name}} will be replaced with actual values when used in a contract.')
                 ->schema([
-                    Html::make(fn ($record) =>
-                        '<div class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">'
-                        . '<div class="flex items-center gap-2.5 px-4 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 font-mono text-[11px] text-gray-500 dark:text-gray-400">'
-                        . '<span class="w-2.5 h-2.5 rounded-full bg-red-400 inline-block"></span>'
-                        . '<span class="w-2.5 h-2.5 rounded-full bg-yellow-400 inline-block"></span>'
-                        . '<span class="w-2.5 h-2.5 rounded-full bg-green-400 inline-block"></span>'
-                        . '<span class="ml-1">' . e($record->name) . ' — preview</span>'
-                        . '</div>'
-                        . '<div class="prose prose-sm dark:prose-invert max-w-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" style="padding:32px 20px;max-height:70vh;overflow-y:auto;line-height:1.75;font-size:14px;">'
-                        . $record->content
-                        . '</div>'
-                        . '</div>'
-                    )->columnSpanFull(),
+                    Html::make(function ($record) {
+                        $name = e($record->name);
+                        return <<<HTML
+<style>
+  .cp-wrap{background:#fff;color:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,.12)}
+  .dark .cp-wrap{background:#18181b;color:#e4e4e7;border:1px solid rgba(255,255,255,.08)}
+  .cp-toolbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(0,0,0,.04);border-bottom:1px solid rgba(0,0,0,.08)}
+  .dark .cp-toolbar{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07)}
+  .contract-preview{font-family:Georgia,"Times New Roman",serif;font-size:14px;line-height:1.8;padding:36px 48px;max-height:70vh;overflow-y:auto}
+  .contract-preview h2{font-family:system-ui,sans-serif;font-size:.9rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:2rem 0 .5rem;padding-bottom:.35rem;border-bottom:2px solid rgba(0,0,0,.15)}
+  .dark .contract-preview h2{border-bottom-color:rgba(255,255,255,.12)}
+  .contract-preview h3{font-family:system-ui,sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin:1.4rem 0 .4rem;opacity:.6}
+  .contract-preview p{margin:.65rem 0}
+  .contract-preview ul,.contract-preview ol{margin:.5rem 0 .5rem 1.5rem;padding:0}
+  .contract-preview li{margin:.3rem 0}
+  .contract-preview strong{font-weight:700}
+  .contract-preview a{text-decoration:underline;opacity:.7}
+  .contract-preview table{width:100%;border-collapse:collapse;margin-top:1.5rem}
+  .contract-preview td{vertical-align:top;padding-right:20px}
+  .cp-print-title{display:none;font-family:system-ui,sans-serif;font-size:14pt;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2rem;padding-bottom:1rem;border-bottom:2px solid #111}
+  .cp-btn{display:inline-flex;align-items:center;gap:5px;font-family:system-ui,sans-serif;font-size:11px;font-weight:500;padding:3px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:rgba(0,0,0,.04);color:inherit;cursor:pointer;transition:background .15s;line-height:1.4}
+  .dark .cp-btn{border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
+  .cp-btn:hover{background:rgba(0,0,0,.09)}
+  .dark .cp-btn:hover{background:rgba(255,255,255,.09)}
+  .cp-btn svg{width:12px;height:12px;flex-shrink:0}
+  @media print{
+    *{visibility:hidden!important}
+    .contract-preview,.contract-preview *{visibility:visible!important}
+    .cp-wrap{position:absolute!important;top:0;left:0;width:100%;border:none!important}
+    .contract-preview{position:static!important;max-height:none!important;overflow:visible!important;padding:15mm 20mm!important;background:#fff!important;color:#111!important;font-size:11pt!important;line-height:1.7!important}
+    .cp-toolbar{display:none!important}
+    .cp-print-title{display:block!important}
+    .contract-preview h2{page-break-after:avoid}
+    .contract-preview p,.contract-preview li{orphans:3;widows:3}
+  }
+</style>
+<div x-data="{ copied: false }" class="cp-wrap" data-title="{$name}">
+  <div class="cp-toolbar">
+    <span style="width:10px;height:10px;border-radius:50%;background:#f87171;display:inline-block"></span>
+    <span style="width:10px;height:10px;border-radius:50%;background:#fbbf24;display:inline-block"></span>
+    <span style="width:10px;height:10px;border-radius:50%;background:#34d399;display:inline-block"></span>
+    <span style="font-family:monospace;font-size:11px;opacity:.45;margin-left:2px;flex:1">{$name} — preview</span>
+    <button class="cp-btn" @click="navigator.clipboard.writeText(\$root.dataset.title+'\\n\\n'+\$root.querySelector('.contract-preview').innerText).then(()=>{copied=true;setTimeout(()=>copied=false,2000)})">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span x-text="copied ? 'Copied!' : 'Copy'">Copy</span>
+    </button>
+    <button class="cp-btn" @click="window.print()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      <span>Print</span>
+    </button>
+  </div>
+  <div class="contract-preview">
+    <h1 class="cp-print-title">{$name}</h1>
+    {$record->content}
+  </div>
+</div>
+HTML;
+                    })->columnSpanFull(),
                 ]),
         ]);
     }

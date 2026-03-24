@@ -29,7 +29,7 @@ class ContractTemplateSeeder extends Seeder
             [
                 'type'     => 'web_development',
                 'language' => 'en',
-                'name'     => 'Web Development Agreement (EN)',
+                'name'     => 'Software & Web Development Agreement (EN)',
                 'content'  => <<<'HTML'
 <h2>1. Parties to This Agreement</h2>
 <p>This Web Development &amp; Design Agreement ("Agreement") is made between:</p>
@@ -156,7 +156,7 @@ class ContractTemplateSeeder extends Seeder
 <p>Contact: <a href="mailto:{{legal.company_email}}">{{legal.company_email}}</a> | {{legal.company_phone}}</p>
 
 <h2>20. Signatures</h2>
-<p>By signing below (or confirming acceptance in writing / by email), the Parties agree to be bound by the terms of this Agreement.</p>
+<p>By signing below (or confirming acceptance in writing / by email), the Parties agree to be bound by the terms of this Agreement. Electronic acceptance via email is legally binding.</p>
 <table style="width:100%;border-collapse:collapse;margin-top:24px;">
   <tr>
     <td style="width:50%;padding-right:20px;vertical-align:top;">
@@ -175,6 +175,147 @@ class ContractTemplateSeeder extends Seeder
     </td>
   </tr>
 </table>
+
+<h2>21. Cooperation Model (Software House)</h2>
+<p>The Project is delivered in a software house model — fixed-price or milestone-based. The Client acknowledges that software development is an iterative process and that not all requirements can be fully anticipated at the outset. Changes in scope are handled through the Change Request process described in Clause 8.</p>
+
+<h2>22. Project Acceptance</h2>
+<p>The Project is deemed accepted when: (a) the Client formally approves it in writing; or (b) 5 working days pass after delivery or staging access without written objection from the Client.</p>
+
+<h2>23. Repositories, Source Code &amp; Workflow</h2>
+<h3>23.1 Version Control Repository</h3>
+<p>The Project is maintained in a version control system (e.g. Git). By default, the repository belongs to the Company until full payment. Upon full payment, the repository may be transferred to the Client or shared access granted as agreed.</p>
+<h3>23.2 Development Workflow</h3>
+<p>Development follows professional best practices including branch-based workflow, code review (where applicable), and agreed deployment pipelines.</p>
+<h3>23.3 Repository Backups</h3>
+<p>The Company does not guarantee long-term storage of the repository after project completion unless a maintenance agreement is in place.</p>
+
+<h2>24. Hosting, DevOps &amp; Deployment</h2>
+<h3>24.1 Hosting</h3>
+<p>Unless otherwise agreed, the Client is responsible for hosting infrastructure. The Company may recommend providers but bears no responsibility for their services.</p>
+<h3>24.2 Deployment</h3>
+<p>The Company may configure the server environment and deploy the application but is not responsible for ongoing infrastructure availability after handover.</p>
+<h3>24.3 DevOps (Optional)</h3>
+<p>Where purchased, DevOps services may include CI/CD pipelines, monitoring, and automated deployments. Scope and fees are agreed separately.</p>
+
+<h2>25. Service Level Agreement (Optional)</h2>
+<p>Where the Parties have concluded a separate SLA agreement, the following response times apply:</p>
+<h3>25.1 Response Times</h3>
+<ul>
+  <li><strong>Critical:</strong> response within 24 hours;</li>
+  <li><strong>High priority:</strong> response within 48 hours;</li>
+  <li><strong>Low priority:</strong> response within 72 hours.</li>
+</ul>
+<h3>25.2 Issue Definitions</h3>
+<ul>
+  <li><strong>Critical:</strong> system completely non-functional;</li>
+  <li><strong>High:</strong> core functionality significantly impaired;</li>
+  <li><strong>Low:</strong> cosmetic bug with no business impact.</li>
+</ul>
+<h3>25.3 SLA Exclusions</h3>
+<p>SLA commitments do not cover issues caused by hosting outages, third-party API failures, Client-side modifications, or Force Majeure events.</p>
+
+<h2>26. Security</h2>
+<h3>26.1 Development Standards</h3>
+<p>The Company applies industry-standard security practices including input validation and protection against common attacks such as XSS, CSRF, and SQL injection (OWASP Top 10).</p>
+<h3>26.2 Post-Handover Responsibility</h3>
+<p>After delivery, the Client is solely responsible for system updates, access management, and infrastructure security.</p>
+<h3>26.3 No Absolute Guarantee</h3>
+<p>No system is 100% secure. The Company does not warrant that Deliverables will be resistant to all attacks, particularly those arising from vulnerabilities introduced after delivery.</p>
+
+<h2>27. Maintenance &amp; Support</h2>
+<p>Unless a separate maintenance agreement has been concluded, the Company has no obligation to provide ongoing support, updates, or patches after the warranty period. Optional maintenance services may include framework updates, security patches, and performance monitoring. Scope and fees are agreed separately.</p>
+
+<h2>28. White-Label &amp; Resale</h2>
+<h3>28.1 Prohibition on Template Resale</h3>
+<p>The Client may not sell, distribute, or license the Deliverables as a standalone template or ready-made product without the Company's prior written consent.</p>
+<h3>28.2 White-Label (Optional)</h3>
+<p>Agency clients may be permitted to resell the Deliverables under their own brand without identifying the Company, provided this has been agreed in writing.</p>
+
+<h2>29. Licences &amp; Open-Source Components</h2>
+<p>The Project may incorporate open-source software including Laravel (MIT), React (MIT), and other libraries. The Client agrees to comply with all applicable open-source licence terms. The Company will provide a list of material dependencies upon request.</p>
+
+<h2>30. SEO &amp; Performance</h2>
+<p>The Company applies best practices in performance optimisation and technical SEO. The Company does not guarantee specific search engine rankings, traffic levels, or conversion rates, as these depend on factors outside the Company's control.</p>
+
+<h2>31. Testing &amp; Quality Assurance</h2>
+<p>Standard services include manual functional testing and cross-browser testing. Automated testing is only included where expressly specified in the Quotation or SOW.</p>
+
+<h2>32. Client Data Responsibility</h2>
+<p>The Client is solely responsible for maintaining adequate data backups, ensuring the accuracy and legality of user-generated content, and complying with applicable data laws in connection with the Deliverables.</p>
+
+<h2>33. Migrations &amp; Integrations</h2>
+<p>Where data migration or third-party integrations are performed, the Company is not responsible for errors in source data, loss attributable to the Client's existing systems, or limitations imposed by third-party API providers.</p>
+
+<h2>34. Project Communication</h2>
+<p>Official project communications shall be conducted via email or an agreed project management tool. Verbal instructions must be confirmed in writing. Delays arising from the Client's failure to respond within agreed timeframes are the Client's responsibility.</p>
+
+<h2>35. Prioritisation &amp; Resource Availability</h2>
+<p>The Company serves multiple clients and does not guarantee exclusive allocation of specific personnel unless expressly agreed. Project timelines assume standard resource availability.</p>
+
+<h2>36. Audit &amp; Compliance</h2>
+<p>On reasonable written request, the Company may facilitate a code or process audit. Audits are subject to availability and will be charged at the Company's standard day rate unless otherwise agreed.</p>
+
+<h2>37. Acceptable Use</h2>
+<p>The Client shall not use the Deliverables in a manner that overloads systems, violates applicable laws, or is inconsistent with the intended purpose of the Project as described in the Quotation or SOW.</p>
+
+<h2>38. Assignment</h2>
+<p>The Client may not assign or transfer its rights or obligations under this Agreement without the Company's prior written consent. The Company may assign this Agreement to an affiliate, successor, or in connection with a business sale, providing reasonable written notice to the Client.</p>
+
+<h2>39. Subcontractors</h2>
+<p>The Company may engage subcontractors to perform part of the Services. The Company remains fully responsible for subcontracted work quality and timeliness. Subcontractors are bound by equivalent confidentiality obligations.</p>
+
+<h2>40. Non-Solicitation</h2>
+<p>During this Agreement and for <strong>12 months</strong> after termination, the Client may not directly or indirectly solicit, recruit, or employ any individual engaged by the Company in connection with this Project without prior written consent.</p>
+
+<h2>41. Contractual Penalties (Optional)</h2>
+<p>Where the Parties agree to liquidated damages for specific breaches, the applicable amounts and triggers are specified in the relevant SOW or written addendum. In the absence of such agreement, no party is entitled to pre-determined damages.</p>
+
+<h2>42. Conflict Resolution &amp; Precedence</h2>
+<p>In the event of conflict between this Agreement and a relevant SOW or Quotation, the SOW or Quotation prevails in respect of that specific project or deliverable.</p>
+
+<h2>43. Master Services Agreement &amp; Statement of Work</h2>
+<h3>43.1 Master Services Agreement (MSA)</h3>
+<p>This Agreement constitutes a Master Services Agreement governing the general terms of the commercial relationship between the Parties across all projects.</p>
+<h3>43.2 Statement of Work (SOW)</h3>
+<p>Each project may be carried out under a separate Statement of Work specifying scope, deliverables, timeline, and fees. In the event of conflict, the SOW takes precedence over this Agreement for the specific project it governs.</p>
+
+<h2>44. Time &amp; Materials Model</h2>
+<h3>44.1 Application</h3>
+<p>Where the Parties agree to a Time &amp; Materials (T&amp;M) model, work is billed based on actual time spent at the agreed hourly or day rate.</p>
+<h3>44.2 Time Records</h3>
+<p>The Company will maintain timesheets and provide these to the Client upon request or at agreed intervals.</p>
+<h3>44.3 Estimates</h3>
+<p>Estimates under a T&amp;M model are indicative only and do not constitute a cost cap or guarantee of final cost.</p>
+
+<h2>45. Equity &amp; Startup Arrangement (Optional)</h2>
+<p>Where the Parties agree to partial payment via equity or revenue-sharing, the specific terms are governed by a separate written agreement. This Agreement continues to govern the operational aspects of the engagement. The Company does not assume the Client's business risk.</p>
+
+<h2>46. Advanced Limitation of Liability</h2>
+<h3>46.1 Liability Cap</h3>
+<p>Unless otherwise required by law, the Company's total liability shall not exceed the greater of: (a) 100% of fees paid for the project giving rise to the claim; or (b) total fees paid in the 12 months preceding the relevant event.</p>
+<h3>46.2 Excluded Losses</h3>
+<p>The Company shall not be liable for loss of data, profit, revenue, customers, contracts, wasted expenditure, or business interruption losses, whether direct or indirect.</p>
+<h3>46.3 Proportionality</h3>
+<p>Where loss is partly caused by the Client's own acts or omissions, the Company's liability shall be reduced proportionately.</p>
+
+<h2>47. Professional Indemnity Insurance</h2>
+<p>The Company may maintain professional indemnity (PI) insurance appropriate to the nature of the Services. Evidence of such cover may be provided upon reasonable written request where insurance is held.</p>
+
+<h2>48. Disaster Recovery &amp; Backup</h2>
+<p>Unless a specific backup or disaster recovery service has been agreed and paid for, the Client is solely responsible for maintaining adequate data backups. Optional disaster recovery services may be arranged separately.</p>
+
+<h2>49. Vendor Lock-In &amp; Portability</h2>
+<p>After the conclusion of this Agreement and upon full payment, the Client is free to operate, host, and develop the Deliverables independently. The Company will not deliberately restrict migration of the Project. This provision does not apply to the Company's proprietary internal tools and methodologies.</p>
+
+<h2>50. Documentation</h2>
+<p>Technical or user documentation to be produced as part of the Project is specified in the Quotation or SOW. In the absence of such specification, no documentation is included as standard.</p>
+
+<h2>51. Versioning &amp; Technology Updates</h2>
+<p>The Company has no obligation to update the technology stack, frameworks, or dependencies after project delivery, unless a separate maintenance agreement covering such updates has been concluded.</p>
+
+<h2>52. Entire Agreement</h2>
+<p>This Agreement, together with the Quotation and any applicable SOW, constitutes the complete and exclusive agreement between the Parties with respect to its subject matter, superseding all prior representations, negotiations, and understandings, whether oral or written.</p>
 HTML,
             ],
 
@@ -184,7 +325,7 @@ HTML,
             [
                 'type'     => 'web_development',
                 'language' => 'pl',
-                'name'     => 'Umowa o Tworzenie Strony Internetowej (PL)',
+                'name'     => 'Umowa o Tworzenie Oprogramowania / Strony Internetowej (PL)',
                 'content'  => <<<'HTML'
 <h2>1. Strony Umowy</h2>
 <p>Niniejsza Umowa o Projektowanie i Tworzenie Strony Internetowej ("Umowa") jest zawarta pomiędzy:</p>
@@ -311,7 +452,7 @@ HTML,
 <p>Kontakt: <a href="mailto:{{legal.company_email}}">{{legal.company_email}}</a> | {{legal.company_phone}}</p>
 
 <h2>20. Podpisy</h2>
-<p>Składając podpisy poniżej (lub potwierdzając akceptację w formie pisemnej / pocztą elektroniczną), Strony akceptują warunki niniejszej Umowy i zobowiązują się do jej przestrzegania.</p>
+<p>Składając podpisy poniżej (lub potwierdzając akceptację drogą elektroniczną), Strony akceptują warunki niniejszej Umowy. Akceptacja elektroniczna jest prawnie wiążąca.</p>
 <table style="width:100%;border-collapse:collapse;margin-top:24px;">
   <tr>
     <td style="width:50%;padding-right:20px;vertical-align:top;">
@@ -330,6 +471,147 @@ HTML,
     </td>
   </tr>
 </table>
+
+<h2>21. Model Współpracy (Software House)</h2>
+<p>Projekt realizowany jest w modelu software house — fixed price lub milestone-based. Zamawiający przyjmuje do wiadomości, że software development jest procesem iteracyjnym i nie wszystkie wymagania mogą zostać przewidziane na etapie wyceny. Zmiany zakresu obsługiwane są w trybie Zleceń Zmian opisanych w klauzuli 8.</p>
+
+<h2>22. Odbiór Projektu</h2>
+<p>Projekt uznaje się za odebrany gdy: (a) Zamawiający zatwierdzi go w formie pisemnej; lub (b) upłynie 5 dni roboczych od udostępnienia do odbioru bez pisemnych zastrzeżeń ze strony Zamawiającego.</p>
+
+<h2>23. Repozytoria, Kod Źródłowy i Workflow</h2>
+<h3>23.1 Repozytorium</h3>
+<p>Projekt prowadzony jest w systemie kontroli wersji (np. Git). Repozytorium pozostaje własnością Wykonawcy do momentu pełnej zapłaty. Po uregulowaniu należności może zostać przekazane Zamawiającemu lub udostępnione z prawem dostępu.</p>
+<h3>23.2 Workflow</h3>
+<p>Development odbywa się zgodnie z dobrymi praktykami: branch-based workflow, code review (jeśli stosowane) oraz uzgodniony pipeline deploymentu.</p>
+<h3>23.3 Backupy Repozytorium</h3>
+<p>Wykonawca nie gwarantuje długoterminowego przechowywania repozytorium po zakończeniu projektu, chyba że obejmuje to odrębna umowa maintenance.</p>
+
+<h2>24. Hosting, DevOps i Deployment</h2>
+<h3>24.1 Hosting</h3>
+<p>Jeśli nie uzgodniono inaczej, Zamawiający odpowiada za infrastrukturę hostingową. Wykonawca może rekomendować dostawców, ale nie ponosi odpowiedzialności za jakość ich usług.</p>
+<h3>24.2 Deployment</h3>
+<p>Wykonawca może skonfigurować środowisko serwerowe i wdrożyć aplikację, lecz nie odpowiada za ciągłość działania infrastruktury ani awarie serwera po przekazaniu projektu.</p>
+<h3>24.3 DevOps (opcjonalne)</h3>
+<p>Usługi DevOps (CI/CD, monitoring, automatyczne deploye) mogą być wykupione jako oddzielna usługa. Zakres i opłaty ustalane są odrębnie.</p>
+
+<h2>25. SLA — Service Level Agreement (opcjonalne)</h2>
+<p>W przypadku zawarcia odrębnej umowy SLA obowiązują następujące czasy reakcji:</p>
+<h3>25.1 Czasy Reakcji</h3>
+<ul>
+  <li><strong>Błąd krytyczny:</strong> reakcja w ciągu 24 godzin;</li>
+  <li><strong>Wysoki priorytet:</strong> reakcja w ciągu 48 godzin;</li>
+  <li><strong>Niski priorytet:</strong> reakcja w ciągu 72 godzin.</li>
+</ul>
+<h3>25.2 Definicje Priorytetów</h3>
+<ul>
+  <li><strong>Krytyczny:</strong> system całkowicie niesprawny;</li>
+  <li><strong>Wysoki:</strong> ograniczenie kluczowej funkcjonalności;</li>
+  <li><strong>Niski:</strong> błąd kosmetyczny bez wpływu na działalność.</li>
+</ul>
+<h3>25.3 Wyłączenia SLA</h3>
+<p>Zobowiązania SLA nie obejmują problemów wynikających z awarii hostingu, błędów API zewnętrznych, modyfikacji Zamawiającego ani siły wyższej.</p>
+
+<h2>26. Bezpieczeństwo</h2>
+<h3>26.1 Standardy Deweloperskie</h3>
+<p>Wykonawca stosuje branżowe standardy bezpieczeństwa: walidację danych wejściowych oraz ochronę przed typowymi atakami XSS, CSRF i SQL injection (OWASP Top 10).</p>
+<h3>26.2 Odpowiedzialność Po Wdrożeniu</h3>
+<p>Po przekazaniu projektu Zamawiający ponosi wyłączną odpowiedzialność za aktualizacje systemu, zarządzanie dostępami oraz bezpieczeństwo infrastruktury.</p>
+<h3>26.3 Brak Absolutnej Gwarancji</h3>
+<p>Żaden system nie jest w 100% bezpieczny. Wykonawca nie gwarantuje odporności Rezultatów na wszystkie ataki, w szczególności wynikające z luk wykrytych po wdrożeniu.</p>
+
+<h2>27. Maintenance i Wsparcie</h2>
+<p>O ile nie zawarto odrębnej umowy maintenance, Wykonawca nie ma obowiązku świadczenia wsparcia, aktualizacji ani łatek po upływie okresu gwarancji. Opcjonalne usługi maintenance mogą obejmować: aktualizacje frameworków, poprawki bezpieczeństwa i monitoring wydajności. Zakres i opłaty uzgadniane są odrębnie.</p>
+
+<h2>28. White-Label i Odsprzedaż</h2>
+<h3>28.1 Zakaz Odsprzedaży jako Produkt</h3>
+<p>Zamawiający nie może sprzedawać, dystrybuować ani licencjonować Rezultatów jako samodzielnego szablonu lub produktu gotowego bez pisemnej zgody Wykonawcy.</p>
+<h3>28.2 White-Label (opcjonalne)</h3>
+<p>Klientom agencyjnym może być udzielona zgoda na odsprzedaż Rezultatów pod własną marką bez ujawniania tożsamości Wykonawcy, pod warunkiem wcześniejszego pisemnego uzgodnienia.</p>
+
+<h2>29. Licencje i Open Source</h2>
+<p>Projekt może zawierać oprogramowanie open-source: Laravel (MIT), React (MIT) oraz inne biblioteki. Zamawiający zobowiązuje się przestrzegać licencji open-source. Na żądanie Wykonawca udostępni listę istotnych zależności.</p>
+
+<h2>30. SEO i Wydajność</h2>
+<p>Wykonawca stosuje dobre praktyki optymalizacji wydajności i technicznego SEO. Nie gwarantuje konkretnych pozycji w wyszukiwarkach, ruchu organicznego ani wskaźników konwersji, gdyż zależą one od czynników poza jego kontrolą.</p>
+
+<h2>31. Testy i Zapewnienie Jakości</h2>
+<p>Standardowo projekt poddawany jest testom manualnym i testom wieloprzeglądarkowym. Testy automatyczne realizowane są wyłącznie wtedy, gdy zostały wyraźnie ujęte w Ofercie lub SOW.</p>
+
+<h2>32. Odpowiedzialność za Dane</h2>
+<p>Zamawiający ponosi wyłączną odpowiedzialność za: utrzymanie kopii zapasowych danych, dokładność i zgodność treści użytkowników z prawem oraz przestrzeganie przepisów o danych przetwarzanych przez Rezultaty.</p>
+
+<h2>33. Migracje i Integracje</h2>
+<p>Wykonawca nie ponosi odpowiedzialności za błędy w danych źródłowych, utratę danych wynikającą z systemów Zamawiającego ani ograniczenia nałożone przez zewnętrznych dostawców API.</p>
+
+<h2>34. Komunikacja Projektowa</h2>
+<p>Oficjalna komunikacja projektowa odbywa się drogą elektroniczną lub za pośrednictwem uzgodnionego systemu zarządzania projektami. Ustalenia ustne wymagają pisemnego potwierdzenia. Opóźnienia wynikające z braku odpowiedzi Zamawiającego obciążają Zamawiającego.</p>
+
+<h2>35. Priorytetyzacja i Kolejka</h2>
+<p>Wykonawca obsługuje jednocześnie wielu klientów i nie gwarantuje wyłącznego przydziału konkretnych zasobów do Projektu, chyba że uzgodniono inaczej.</p>
+
+<h2>36. Audit i Compliance</h2>
+<p>Na uzasadnione pisemne żądanie Wykonawca może przeprowadzić audit kodu lub procesu. Audyty wyceniane są według bieżącej stawki dziennej, chyba że uzgodniono inaczej.</p>
+
+<h2>37. Klauzula Rozsądnego Użytkowania</h2>
+<p>Zamawiający nie może używać Rezultatów w sposób przeciążający systemy, naruszający prawo lub niezgodny z przeznaczeniem Projektu określonym w Ofercie lub SOW.</p>
+
+<h2>38. Przeniesienie Umowy</h2>
+<p>Zamawiający nie może przenosić praw i obowiązków bez pisemnej zgody Wykonawcy. Wykonawca może przenosić Umowę na podmiot stowarzyszony lub w związku ze sprzedażą działalności, informując Zamawiającego w rozsądnym terminie.</p>
+
+<h2>39. Podwykonawcy</h2>
+<p>Wykonawca może powierzać realizację prac podwykonawcom, pozostając w pełni odpowiedzialnym za ich jakość i terminowość. Podwykonawcy związani są równoważnymi obowiązkami poufności.</p>
+
+<h2>40. Zakaz Podkupywania Pracowników (Non-solicitation)</h2>
+<p>W trakcie Umowy i przez <strong>12 miesięcy</strong> po jej wygaśnięciu Zamawiający nie może nakłaniać, rekrutować ani zatrudniać pracowników lub współpracowników Wykonawcy zaangażowanych w Projekt bez pisemnej zgody.</p>
+
+<h2>41. Kary Umowne (opcjonalne)</h2>
+<p>Ewentualne kary umowne za konkretne naruszenia określają właściwy SOW lub pisemny aneks. W braku takiego uzgodnienia żadna ze Stron nie jest uprawniona do kar o z góry określonej wartości.</p>
+
+<h2>42. Pierwszeństwo i Rozstrzyganie Konfliktów</h2>
+<p>W przypadku sprzeczności między Umową a SOW lub Ofertą, SOW lub Oferta ma pierwszeństwo w zakresie danego projektu.</p>
+
+<h2>43. Model MSA + SOW</h2>
+<h3>43.1 Master Services Agreement (MSA)</h3>
+<p>Niniejsza Umowa stanowi ramową umowę współpracy (MSA) regulującą ogólne warunki handlowe we wszystkich projektach realizowanych przez Strony.</p>
+<h3>43.2 Statement of Work (SOW)</h3>
+<p>Każdy projekt może być realizowany na podstawie osobnego zlecenia (SOW), które określa: zakres prac, terminy, wynagrodzenie i deliverables. W przypadku sprzeczności SOW ma pierwszeństwo nad Umową w zakresie danego projektu.</p>
+
+<h2>44. Model Time &amp; Materials (T&amp;M)</h2>
+<h3>44.1 Zastosowanie</h3>
+<p>W modelu T&amp;M rozliczenie następuje na podstawie rzeczywistego czasu pracy według uzgodnionej stawki godzinowej lub dziennej.</p>
+<h3>44.2 Ewidencja Czasu</h3>
+<p>Wykonawca prowadzi timesheety udostępniane Zamawiającemu na żądanie lub w uzgodnionych odstępach.</p>
+<h3>44.3 Estymacje</h3>
+<p>Szacunki kosztów w modelu T&amp;M mają charakter orientacyjny i nie stanowią górnego limitu ceny końcowej.</p>
+
+<h2>45. Model Equity / Startup (opcjonalne)</h2>
+<p>W przypadku uzgodnienia wynagrodzenia w formie udziałów lub revenue-sharing, szczegółowe warunki określa odrębna umowa inwestycyjna. Niniejsza Umowa nadal reguluje aspekty operacyjne. Wykonawca nie ponosi ryzyka biznesowego Zamawiającego.</p>
+
+<h2>46. Zaawansowane Ograniczenie Odpowiedzialności</h2>
+<h3>46.1 Limit Odpowiedzialności</h3>
+<p>Łączna odpowiedzialność Wykonawcy nie przekroczy wyższej z kwot: (a) 100% wynagrodzenia za projekt będący podstawą roszczenia; lub (b) łącznego wynagrodzenia zapłaconego w ciągu 12 miesięcy poprzedzających zdarzenie.</p>
+<h3>46.2 Wyłączenia</h3>
+<p>Wykonawca nie ponosi odpowiedzialności za utratę danych, zysku, przychodów, klientów, umów ani przerwy w działalności — niezależnie od tego, czy są to szkody bezpośrednie czy pośrednie.</p>
+<h3>46.3 Proporcjonalność</h3>
+<p>Jeżeli szkoda wynikła częściowo z działań Zamawiającego, odpowiedzialność Wykonawcy zostaje proporcjonalnie zmniejszona.</p>
+
+<h2>47. Ubezpieczenie OC (opcjonalne)</h2>
+<p>Wykonawca może posiadać ubezpieczenie odpowiedzialności zawodowej (PI). Na uzasadnione pisemne żądanie może przedstawić potwierdzenie polisy.</p>
+
+<h2>48. Disaster Recovery i Kopie Zapasowe</h2>
+<p>O ile nie uzgodniono i nie opłacono odrębnej usługi backup/DR, Zamawiający ponosi wyłączną odpowiedzialność za kopie zapasowe. Usługi automatycznych kopii i planowania ciągłości działania dostępne są opcjonalnie.</p>
+
+<h2>49. Vendor Lock-In i Przenoszalność</h2>
+<p>Po zakończeniu Umowy i pełnej zapłacie Zamawiający może samodzielnie obsługiwać i rozwijać Rezultaty u dowolnego dostawcy. Wykonawca nie będzie celowo blokował migracji. Postanowienie nie dotyczy wewnętrznych narzędzi i metodyk zastrzeżonych Wykonawcy.</p>
+
+<h2>50. Dokumentacja</h2>
+<p>Dokumentacja objęta Projektem jest wyszczególniona w Ofercie lub SOW. W braku specyfikacji dokumentacja nie wchodzi w standardowy zakres Usług.</p>
+
+<h2>51. Wersjonowanie i Aktualizacje Technologii</h2>
+<p>Wykonawca nie ma obowiązku aktualizowania stosu technologicznego po wdrożeniu, chyba że zawarto odrębną umowę maintenance obejmującą takie aktualizacje.</p>
+
+<h2>52. Klauzula Całościowa</h2>
+<p>Niniejsza Umowa wraz z Ofertą i obowiązującymi zleceniami SOW stanowi kompletne i wyłączne porozumienie Stron, zastępując wszelkie wcześniejsze uzgodnienia, negocjacje i ustalenia — zarówno ustne, jak i pisemne.</p>
 HTML,
             ],
 
@@ -339,7 +621,7 @@ HTML,
             [
                 'type'     => 'web_development',
                 'language' => 'pt',
-                'name'     => 'Acordo de Desenvolvimento Web (PT)',
+                'name'     => 'Acordo de Desenvolvimento de Software / Website (PT)',
                 'content'  => <<<'HTML'
 <h2>1. Partes do Acordo</h2>
 <p>Este Acordo de Desenvolvimento e Design Web ("Acordo") é celebrado entre:</p>
@@ -466,7 +748,7 @@ HTML,
 <p>Contacto: <a href="mailto:{{legal.company_email}}">{{legal.company_email}}</a> | {{legal.company_phone}}</p>
 
 <h2>20. Assinaturas</h2>
-<p>Ao assinar abaixo (ou confirmar a aceitação por escrito ou por e-mail), as Partes declaram-se vinculadas pelos termos deste Acordo.</p>
+<p>Ao assinar abaixo (ou confirmar a aceitação por escrito ou por e-mail), as Partes declaram-se vinculadas pelos termos deste Acordo. A aceitação eletrónica por e-mail tem força legal vinculativa.</p>
 <table style="width:100%;border-collapse:collapse;margin-top:24px;">
   <tr>
     <td style="width:50%;padding-right:20px;vertical-align:top;">
@@ -485,6 +767,147 @@ HTML,
     </td>
   </tr>
 </table>
+
+<h2>21. Modelo de Cooperação (Software House)</h2>
+<p>O Projeto é realizado no modelo software house — preço fixo ou por marcos. O Cliente reconhece que o desenvolvimento de software é um processo iterativo e que nem todos os requisitos podem ser previstos na fase de orçamentação. As alterações de âmbito são tratadas através do processo de Pedido de Alteração descrito na Cláusula 8.</p>
+
+<h2>22. Aceitação do Projeto</h2>
+<p>O Projeto considera-se aceite quando: (a) o Cliente o aprovar formalmente por escrito; ou (b) decorrerem 5 dias úteis após a entrega ou acesso ao ambiente de staging sem objeções escritas do Cliente.</p>
+
+<h2>23. Repositórios, Código Fonte e Workflow</h2>
+<h3>23.1 Repositório de Controlo de Versões</h3>
+<p>O Projeto é mantido num sistema de controlo de versões (p. ex. Git). Por defeito, o repositório pertence à Empresa até ao pagamento integral. Após o pagamento, pode ser transferido ao Cliente ou concedido acesso partilhado como acordado.</p>
+<h3>23.2 Workflow de Desenvolvimento</h3>
+<p>O desenvolvimento segue boas práticas: workflow baseado em branches, revisão de código (onde aplicável) e pipelines de deployment acordados.</p>
+<h3>23.3 Backups do Repositório</h3>
+<p>A Empresa não garante o armazenamento a longo prazo do repositório após a conclusão do projeto, salvo acordo de manutenção em vigor.</p>
+
+<h2>24. Alojamento, DevOps e Deployment</h2>
+<h3>24.1 Alojamento</h3>
+<p>Salvo acordo em contrário, o Cliente é responsável pela infraestrutura de alojamento. A Empresa pode recomendar fornecedores mas não é responsável pela qualidade dos seus serviços.</p>
+<h3>24.2 Deployment</h3>
+<p>A Empresa pode configurar o ambiente de servidor e implementar a aplicação, mas não é responsável pela disponibilidade contínua da infraestrutura após a entrega.</p>
+<h3>24.3 DevOps (Opcional)</h3>
+<p>Serviços de DevOps (CI/CD, monitorização, deployments automatizados) podem ser adquiridos como serviço separado. Âmbito e honorários acordados separadamente.</p>
+
+<h2>25. Acordo de Nível de Serviço — SLA (Opcional)</h2>
+<p>Caso as Partes tenham celebrado um acordo de SLA separado, aplicam-se os seguintes tempos de resposta:</p>
+<h3>25.1 Tempos de Resposta</h3>
+<ul>
+  <li><strong>Crítico:</strong> resposta em 24 horas;</li>
+  <li><strong>Prioridade alta:</strong> resposta em 48 horas;</li>
+  <li><strong>Prioridade baixa:</strong> resposta em 72 horas.</li>
+</ul>
+<h3>25.2 Definições de Prioridade</h3>
+<ul>
+  <li><strong>Crítico:</strong> sistema completamente inoperacional;</li>
+  <li><strong>Alto:</strong> funcionalidade principal significativamente limitada;</li>
+  <li><strong>Baixo:</strong> erro cosmético sem impacto nos negócios.</li>
+</ul>
+<h3>25.3 Exclusões do SLA</h3>
+<p>Os compromissos de SLA não cobrem problemas causados por interrupções de alojamento, falhas de API de terceiros, modificações do Cliente ou eventos de Força Maior.</p>
+
+<h2>26. Segurança</h2>
+<h3>26.1 Padrões de Desenvolvimento</h3>
+<p>A Empresa aplica práticas de segurança do setor: validação de dados e proteção contra ataques comuns como XSS, CSRF e SQL injection (OWASP Top 10).</p>
+<h3>26.2 Responsabilidade Após a Entrega</h3>
+<p>Após a entrega, o Cliente é exclusivamente responsável por atualizações de sistema, gestão de acessos e segurança da infraestrutura.</p>
+<h3>26.3 Sem Garantia Absoluta</h3>
+<p>Nenhum sistema é 100% seguro. A Empresa não garante que os Entregáveis sejam resistentes a todos os ataques, em particular os decorrentes de vulnerabilidades introduzidas após a entrega.</p>
+
+<h2>27. Manutenção e Suporte</h2>
+<p>Salvo acordo de manutenção separado, a Empresa não tem obrigação de fornecer suporte, atualizações ou correções após o período de garantia. Os serviços opcionais de manutenção podem incluir atualizações de frameworks, patches de segurança e monitorização. Âmbito e honorários acordados separadamente.</p>
+
+<h2>28. White-Label e Revenda</h2>
+<h3>28.1 Proibição de Revenda como Produto</h3>
+<p>O Cliente não pode vender, distribuir ou licenciar os Entregáveis como template autónomo ou produto pronto a usar sem consentimento prévio escrito da Empresa.</p>
+<h3>28.2 White-Label (Opcional)</h3>
+<p>Clientes agência podem ser autorizados a revender os Entregáveis sob a sua própria marca sem identificar a Empresa, desde que acordado por escrito.</p>
+
+<h2>29. Licenças e Componentes Open-Source</h2>
+<p>O Projeto pode incorporar software de código aberto: Laravel (MIT), React (MIT) e outras bibliotecas. O Cliente compromete-se a cumprir os termos de todas as licenças open-source aplicáveis. A Empresa fornecerá uma lista de dependências materiais a pedido.</p>
+
+<h2>30. SEO e Desempenho</h2>
+<p>A Empresa aplica boas práticas de otimização de desempenho e SEO técnico. Não garante posições específicas nos motores de pesquisa, níveis de tráfego ou taxas de conversão, pois dependem de fatores fora do seu controlo.</p>
+
+<h2>31. Testes e Garantia de Qualidade</h2>
+<p>Os serviços padrão incluem testes funcionais manuais e testes entre navegadores. Os testes automatizados só são incluídos quando expressamente especificados no Orçamento ou SOW.</p>
+
+<h2>32. Responsabilidade pelos Dados do Cliente</h2>
+<p>O Cliente é exclusivamente responsável por manter backups adequados dos dados empresariais, garantir a exatidão e legalidade do conteúdo gerado por utilizadores, e cumprir as leis de dados aplicáveis em relação aos Entregáveis.</p>
+
+<h2>33. Migrações e Integrações</h2>
+<p>A Empresa não é responsável por erros nos dados de origem, perdas atribuíveis aos sistemas existentes do Cliente, ou limitações impostas por APIs de terceiros.</p>
+
+<h2>34. Comunicação do Projeto</h2>
+<p>As comunicações oficiais realizam-se por e-mail ou através de uma ferramenta de gestão de projetos acordada. Instruções verbais devem ser confirmadas por escrito. Os atrasos decorrentes da falta de resposta do Cliente são da sua responsabilidade.</p>
+
+<h2>35. Priorização e Disponibilidade de Recursos</h2>
+<p>A Empresa serve múltiplos clientes e não garante a alocação exclusiva de pessoal específico, salvo acordo expresso. Os prazos assumem disponibilidade de recursos padrão.</p>
+
+<h2>36. Auditoria e Conformidade</h2>
+<p>Mediante pedido escrito razoável, a Empresa pode facilitar uma auditoria de código ou processo. As auditorias estão sujeitas a disponibilidade e são cobradas à taxa diária padrão, salvo acordo em contrário.</p>
+
+<h2>37. Utilização Aceitável</h2>
+<p>O Cliente não deve usar os Entregáveis de forma a sobrecarregar os sistemas, violar leis aplicáveis ou de forma inconsistente com o propósito do Projeto descrito no Orçamento ou SOW.</p>
+
+<h2>38. Cessão</h2>
+<p>O Cliente não pode ceder os seus direitos ou obrigações sem consentimento prévio escrito da Empresa. A Empresa pode ceder este Acordo a uma afiliada ou em conexão com uma venda de negócio, comunicando ao Cliente com antecedência razoável.</p>
+
+<h2>39. Subcontratados</h2>
+<p>A Empresa pode contratar subcontratados para parte dos Serviços, permanecendo totalmente responsável pela qualidade e pontualidade do trabalho subcontratado. Os subcontratados estão vinculados por obrigações de confidencialidade equivalentes.</p>
+
+<h2>40. Não Aliciamento</h2>
+<p>Durante o Acordo e por <strong>12 meses</strong> após a sua cessação, o Cliente não pode aliciar, recrutar ou contratar qualquer indivíduo contratado pela Empresa em relação a este Projeto sem consentimento prévio escrito.</p>
+
+<h2>41. Penalizações Contratuais (Opcional)</h2>
+<p>As penalizações acordadas por incumprimentos específicos são especificadas no SOW ou aditamento escrito relevante. Na ausência de tal acordo, nenhuma das Partes tem direito a danos pré-determinados.</p>
+
+<h2>42. Resolução de Conflitos e Precedência</h2>
+<p>Em caso de conflito entre este Acordo e um SOW ou Orçamento relevante, o SOW ou Orçamento prevalece para o projeto específico.</p>
+
+<h2>43. Acordo de Serviços Principais e Declaração de Trabalho</h2>
+<h3>43.1 Master Services Agreement (MSA)</h3>
+<p>Este Acordo constitui um Acordo de Serviços Principais (MSA) que rege os termos gerais da relação comercial entre as Partes.</p>
+<h3>43.2 Statement of Work (SOW)</h3>
+<p>Cada projeto pode ser realizado ao abrigo de uma Declaração de Trabalho separada que especifica âmbito, prazos e honorários. Em caso de conflito, o SOW prevalece sobre o MSA para o projeto em causa.</p>
+
+<h2>44. Modelo Time &amp; Materials (T&amp;M)</h2>
+<h3>44.1 Aplicação</h3>
+<p>Quando acordado, o modelo T&amp;M implica faturação com base no tempo efetivo gasto, à taxa horária ou diária acordada.</p>
+<h3>44.2 Registos de Tempo</h3>
+<p>A Empresa mantém folhas de horas disponibilizadas ao Cliente a pedido ou em intervalos acordados.</p>
+<h3>44.3 Estimativas</h3>
+<p>As estimativas no modelo T&amp;M são indicativas e não constituem um limite ou garantia de custo final.</p>
+
+<h2>45. Acordo de Equity / Startup (Opcional)</h2>
+<p>Se acordado pagamento parcial em equity ou partilha de receitas, os termos específicos são regidos por acordo escrito separado. Este Acordo continua a reger os aspetos operacionais. A Empresa não assume o risco comercial do Cliente.</p>
+
+<h2>46. Limitação Avançada de Responsabilidade</h2>
+<h3>46.1 Limite de Responsabilidade</h3>
+<p>Salvo exigência legal contrária, a responsabilidade total da Empresa não excederá o maior entre: (a) 100% dos honorários pagos pelo projeto que deu origem à reclamação; ou (b) os honorários totais pagos nos 12 meses anteriores ao evento relevante.</p>
+<h3>46.2 Perdas Excluídas</h3>
+<p>A Empresa não é responsável por perda de dados, lucros, receitas, clientes, contratos, despesas desperdiçadas ou interrupção da atividade, sejam diretas ou indiretas.</p>
+<h3>46.3 Proporcionalidade</h3>
+<p>Quando a perda for parcialmente causada por atos ou omissões do Cliente, a responsabilidade da Empresa é proporcionalmente reduzida.</p>
+
+<h2>47. Seguro de Responsabilidade Profissional</h2>
+<p>A Empresa pode manter um seguro de responsabilidade civil profissional (PI) adequado à natureza dos Serviços. Evidência da cobertura pode ser fornecida mediante pedido escrito razoável, quando o seguro for mantido.</p>
+
+<h2>48. Recuperação de Desastres e Backups</h2>
+<p>Salvo serviço de backup/DR especificamente acordado e pago, o Cliente é exclusivamente responsável por manter backups adequados. Serviços opcionais de recuperação de desastres podem ser acordados separadamente.</p>
+
+<h2>49. Dependência do Fornecedor e Portabilidade</h2>
+<p>Após a conclusão do Acordo e pagamento integral, o Cliente pode operar, alojar e desenvolver os Entregáveis de forma independente com qualquer fornecedor. A Empresa não bloqueará deliberadamente a migração do Projeto. Esta disposição não se aplica às ferramentas e metodologias internas proprietárias da Empresa.</p>
+
+<h2>50. Documentação</h2>
+<p>A documentação técnica ou de utilizador a produzir no âmbito do Projeto é especificada no Orçamento ou SOW. Na ausência de tal especificação, nenhuma documentação está incluída como padrão.</p>
+
+<h2>51. Versionamento e Atualizações Tecnológicas</h2>
+<p>A Empresa não tem obrigação de atualizar o stack tecnológico, frameworks ou dependências após a entrega do projeto, salvo acordo de manutenção separado que inclua tais atualizações.</p>
+
+<h2>52. Acordo Integral</h2>
+<p>Este Acordo, juntamente com o Orçamento e quaisquer SOW aplicáveis, constitui o acordo completo e exclusivo entre as Partes relativamente ao seu objeto, substituindo todas as representações, negociações e entendimentos anteriores, orais ou escritos.</p>
 HTML,
             ],
 
