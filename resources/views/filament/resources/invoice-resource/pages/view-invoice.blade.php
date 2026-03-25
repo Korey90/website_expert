@@ -316,6 +316,82 @@
                 @endif
             </div>
 
+            {{-- ── Payment History ─────────────────────────────────── --}}
+            @php $payments = $record->payments()->orderBy('paid_at', 'desc')->get(); @endphp
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+                <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-800">
+                    <div class="flex items-center gap-2">
+                        <x-heroicon-m-banknotes class="h-4 w-4 text-green-500" />
+                        <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            Payment History
+                        </h2>
+                        @if($payments->count() > 0)
+                            <span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                {{ $payments->count() }}
+                            </span>
+                        @endif
+                    </div>
+                    <a href="{{ route('filament.admin.resources.payments.create') }}?invoice_id={{ $record->id }}"
+                       class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-800">
+                        + Add payment
+                    </a>
+                </div>
+                @if($payments->count() > 0)
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800/50">
+                            <tr>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Method</th>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Reference</th>
+                                <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                            @foreach($payments as $payment)
+                            <tr>
+                                <td class="px-4 py-2.5 text-gray-600 dark:text-gray-400">
+                                    {{ $payment->paid_at ? $payment->paid_at->format('d M Y, H:i') : '—' }}
+                                </td>
+                                <td class="px-4 py-2.5">
+                                    @php $methodMap = ['stripe'=>'Stripe','payu'=>'PayU','bank_transfer'=>'Bank Transfer','cash'=>'Cash','cheque'=>'Cheque','other'=>'Other']; @endphp
+                                    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                        {{ $methodMap[$payment->method] ?? $payment->method }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2.5">
+                                    @php
+                                    $sc = match($payment->status) {
+                                        'completed' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                                        'pending'   => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                                        'failed'    => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                                        'refunded'  => 'bg-gray-100 text-gray-600',
+                                        default     => 'bg-gray-100 text-gray-600',
+                                    }; @endphp
+                                    <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $sc }}">
+                                        {{ ucfirst($payment->status) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2.5 font-mono text-xs text-gray-500 dark:text-gray-400">
+                                    {{ $payment->reference ?: '—' }}
+                                </td>
+                                <td class="px-4 py-2.5 text-right font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+                                    {{ number_format($payment->amount, 2) }} {{ $payment->currency }}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @else
+                <div class="py-8 text-center">
+                    <x-heroicon-o-banknotes class="mx-auto mb-2 h-8 w-8 text-gray-300 dark:text-gray-600" />
+                    <p class="text-sm text-gray-400">No payments recorded.</p>
+                </div>
+                @endif
+            </div>
+
             {{-- ── Notes ──────────────────────────────────────────── --}}
             @if($record->notes)
             <div class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">

@@ -1,5 +1,5 @@
 import PortalLayout from '@/Layouts/PortalLayout';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 const statusConfig = {
     sent:           { color: 'bg-blue-100 text-blue-800',    label: 'Sent — Awaiting Payment' },
@@ -20,6 +20,8 @@ function fmtDate(d) {
 
 export default function Invoice({ client, invoice }) {
     const cfg = statusConfig[invoice.status] ?? { color: 'bg-gray-100 text-gray-700', label: invoice.status };
+    const { url } = usePage();
+    const paymentSuccess = new URLSearchParams(url.split('?')[1] ?? '').get('payment') === 'success';
 
     const total      = parseFloat(invoice.total ?? 0);
     const amountPaid = parseFloat(invoice.amount_paid ?? 0);
@@ -51,6 +53,16 @@ export default function Invoice({ client, invoice }) {
                             This invoice is <strong>overdue</strong> — due date was{' '}
                             <strong>{fmtDate(invoice.due_date)}</strong>.
                             Outstanding: <strong>{fmt(amountDue, invoice.currency)}</strong>.
+                        </p>
+                    </div>
+                )}
+
+                {/* Payment success banner */}
+                {paymentSuccess && (
+                    <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-5 py-3">
+                        <span className="text-lg">✅</span>
+                        <p className="text-sm font-medium text-green-700">
+                            Payment received — thank you! Your invoice status will update shortly.
                         </p>
                     </div>
                 )}
@@ -110,17 +122,15 @@ export default function Invoice({ client, invoice }) {
                         </div>
                     )}
 
-                    {/* Stripe pay button */}
-                    {invoice.stripe_payment_link && ['sent', 'overdue', 'partially_paid'].includes(invoice.status) && (
+                    {/* Pay Online button */}
+                    {['sent', 'overdue', 'partially_paid'].includes(invoice.status) && (
                         <div className="border-t border-gray-100 px-6 py-4">
-                            <a
-                                href={invoice.stripe_payment_link}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            <Link
+                                href={route('portal.invoices.pay', invoice.id)}
                                 className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors"
                             >
-                                💳 Pay Now via Stripe
-                            </a>
+                                💳 Pay Online
+                            </Link>
                         </div>
                     )}
                 </div>

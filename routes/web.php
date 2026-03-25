@@ -5,6 +5,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\InvoicePdfController;
 use App\Http\Controllers\KalkulatorController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PayuWebhookController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EmailTemplatePreviewController;
@@ -33,6 +34,9 @@ Route::post('/calculator-lead', [CalculatorLeadController::class, 'store'])->nam
 // Stripe webhook — CSRF exempt (see bootstrap/app.php)
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
+// PayU IPN — CSRF exempt (see bootstrap/app.php)
+Route::post('/payu/notify', [PayuWebhookController::class, 'notify'])->name('payu.notify');
+
 Route::get('/dashboard', function () {
     return inertia('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -57,6 +61,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/projects/{project}/messages', [PortalController::class, 'postMessage'])->name('messages.store');
         Route::get('/invoices', [PortalController::class, 'invoices'])->name('invoices');
         Route::get('/invoices/{invoice}', [PortalController::class, 'invoice'])->name('invoice');
+        Route::get('/invoices/{invoice}/pay', [PortalController::class, 'selectPaymentMethod'])->name('invoices.pay');
+        Route::post('/invoices/{invoice}/pay/stripe', [PortalController::class, 'stripeCheckout'])->name('invoices.pay.stripe');
+        Route::post('/invoices/{invoice}/pay/payu', [PortalController::class, 'payuInitiate'])->name('invoices.pay.payu');
         Route::get('/quotes', [PortalController::class, 'quotes'])->name('quotes');
         Route::get('/quotes/{quote}', [PortalController::class, 'quote'])->name('quote');
         Route::post('/quotes/{quote}/accept', [PortalController::class, 'acceptQuote'])->name('quotes.accept');

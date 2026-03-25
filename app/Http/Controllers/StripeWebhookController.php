@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PaymentReceivedMail;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\Setting;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Webhook;
 
@@ -22,7 +26,7 @@ class StripeWebhookController extends Controller
     {
         $payload   = $request->getContent();
         $sigHeader = $request->header('Stripe-Signature');
-        $secret    = config('services.stripe.webhook_secret');
+        $secret    = Setting::get('stripe_webhook_secret', config('services.stripe.webhook_secret', ''));
 
         try {
             $event = Webhook::constructEvent($payload, $sigHeader, $secret);
@@ -133,8 +137,47 @@ class StripeWebhookController extends Controller
             'paid_at'                   => now(),
         ]);
 
-        $invoice->update(['status' => 'paid']);
+        $invoice->update(['status' => 'paid', 'paid_at' => now()]);
+
+        // Reload to send notification with full data
+        $payment = Payment::where('reference', $session->id)->latest()->first();
+        if ($payment) {
+            $this->sendPaymentNotifications($payment);
+        }
 
         Log::info("Stripe: Checkout session {$session->id} completed — Invoice #{$invoice->id} paid");
+    }
+
+    private function sendPaymentNotifications(Payment $payment): void
+    {
+        $invoice = $payment->invoice;
+        $client  = $invoice?->client;
+
+        if (! $client) {
+            return;
+        }
+
+        // Email confirmation
+        try {
+            $email = $client->primary_contact_email;
+            if ($email) {
+                Mail::to($email)->send(new PaymentReceivedMail($payment));
+            }
+        } catch (\Throwable $e) {
+            Log::error('Payment notification email failed: ' . $e->getMessage());
+        }
+
+        // SMS confirmation (if Twilio is enabled)
+        try {
+            $phone = $client->primary_contact_phone;
+            if ($phone && Setting::get('twilio_enabled')) {
+                $sms = new SmsService();
+                $amount    = strtoupper($payment->currency ?? 'GBP') . ' ' . number_format($payment->amount, 2);
+                $invoiceNo = $invoice?->number ?? '';
+                $sms->send($phone, "WebsiteExpert: Payment of {$amount} received for invoice {$invoiceNo}. Thank you!");
+            }
+        } catch (\Throwable $e) {
+            Log::error('Payment notification SMS failed: ' . $e->getMessage());
+        }
     }
 }
