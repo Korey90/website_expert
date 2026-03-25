@@ -16,19 +16,24 @@ class ViewContract extends ViewRecord
 {
     protected static string $resource = ContractResource::class;
 
+    protected string $view = 'filament.resources.contract-resource.pages.view-contract';
+
     protected function getHeaderActions(): array
     {
         return [
             EditAction::make(),
-            Action::make('markSent')
-                ->label('Mark Sent')
+            Action::make('sendToPortal')
+                ->label('Send to Portal')
                 ->icon('heroicon-o-paper-airplane')
-                ->color('info')
+                ->color('primary')
                 ->visible(fn () => $this->record->status === 'draft')
                 ->requiresConfirmation()
+                ->modalHeading('Send Contract to Client Portal')
+                ->modalDescription('The contract will be marked as Sent and become visible to the client in their portal for signing.')
+                ->modalSubmitActionLabel('Yes, Send')
                 ->action(function () {
                     $this->record->update(['status' => 'sent', 'sent_at' => now()]);
-                    Notification::make()->success()->title('Contract marked as sent')->send();
+                    Notification::make()->success()->title('Contract sent to portal')->send();
                     $this->refreshFormData(['status', 'sent_at']);
                 }),
             Action::make('markSigned')

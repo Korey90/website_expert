@@ -34,7 +34,7 @@ class QuoteResource extends Resource
                         ->required(),
                     Forms\Components\Select::make('client_id')
                         ->label('Client')
-                        ->options(Client::pluck('company_name', 'id'))
+                        ->options(Client::withTrashed()->pluck('company_name', 'id'))
                         ->searchable()->required(),
                     Forms\Components\Select::make('status')
                         ->options(['draft' => 'Draft', 'sent' => 'Sent', 'accepted' => 'Accepted', 'rejected' => 'Rejected', 'expired' => 'Expired'])

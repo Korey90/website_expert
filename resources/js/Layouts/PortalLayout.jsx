@@ -8,6 +8,7 @@ export default function PortalLayout({ client, children }) {
     const nav = [
         { href: route('portal.dashboard'), label: 'Dashboard', icon: '🏠' },
         { href: route('portal.projects'), label: 'Projects', icon: '📁' },
+        { href: route('portal.contracts'), label: 'Contracts', icon: '📝' },
         { href: route('portal.invoices'), label: 'Invoices', icon: '🧾' },
         { href: route('portal.quotes'), label: 'Quotes', icon: '📋' },
     ];

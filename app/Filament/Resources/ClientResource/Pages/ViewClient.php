@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ClientResource\Pages;
 
 use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\ContractResource;
+use App\Filament\Resources\LeadResource;
 use App\Mail\PortalInviteMail;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -23,10 +24,17 @@ class ViewClient extends ViewRecord
 {
     protected static string $resource = ClientResource::class;
 
+    protected string $view = 'filament.resources.client-resource.pages.view-client';
+
     protected function getHeaderActions(): array
     {
         return [
             $this->portalAccessAction(),
+            Action::make('createLead')
+                ->label('Create Lead')
+                ->icon('heroicon-o-funnel')
+                ->color('warning')
+                ->url(fn () => LeadResource::getUrl('create', ['client_id' => $this->record->id])),
             Action::make('newContract')
                 ->label('New Contract')
                 ->icon('heroicon-o-document-check')

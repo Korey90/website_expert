@@ -11,6 +11,8 @@ class ViewRole extends ViewRecord
 {
     protected static string $resource = RoleResource::class;
 
+    protected string $view = 'filament.resources.role-resource.pages.view-role';
+
     protected function getHeaderActions(): array
     {
         return [

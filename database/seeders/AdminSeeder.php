@@ -25,22 +25,44 @@ class AdminSeeder extends Seeder
         // Permissions
         // ---------------------------------------------------
         $permissions = [
-            // clients
+            // CRM — ClientResource
             'view_clients', 'create_clients', 'edit_clients', 'delete_clients',
-            // leads
+            // CRM — LeadResource / PipelinePage
             'view_leads', 'create_leads', 'edit_leads', 'delete_leads',
-            // projects
-            'view_projects', 'create_projects', 'edit_projects', 'delete_projects',
-            // invoices
-            'view_invoices', 'create_invoices', 'edit_invoices', 'delete_invoices',
-            // quotes
+            // CRM — ContractResource
+            'view_contracts', 'create_contracts', 'edit_contracts', 'delete_contracts',
+            // Finance — QuoteResource
             'view_quotes', 'create_quotes', 'edit_quotes', 'delete_quotes',
-            // users
+            // Finance — InvoiceResource
+            'view_invoices', 'create_invoices', 'edit_invoices', 'delete_invoices',
+            // Projects — ProjectResource
+            'view_projects', 'create_projects', 'edit_projects', 'delete_projects',
+            // Templates — ContractTemplateResource
+            'view_contract_templates', 'create_contract_templates', 'edit_contract_templates', 'delete_contract_templates',
+            // Templates — EmailTemplateResource
+            'view_email_templates', 'create_email_templates', 'edit_email_templates', 'delete_email_templates',
+            // Templates — SmsTemplateResource
+            'view_sms_templates', 'create_sms_templates', 'edit_sms_templates', 'delete_sms_templates',
+            // Automations — AutomationRuleResource
+            'view_automations', 'create_automations', 'edit_automations', 'delete_automations',
+            // Website CMS — PageResource
+            'view_pages', 'create_pages', 'edit_pages', 'delete_pages',
+            // Website CMS — SiteSectionResource
+            'view_site_sections', 'create_site_sections', 'edit_site_sections', 'delete_site_sections',
+            // Users — UserResource
             'view_users', 'create_users', 'edit_users', 'delete_users',
-            // reports
+            // Reports
             'view_reports', 'export_reports',
-            // settings
-            'manage_settings', 'manage_roles',
+            // System Settings — IntegrationSettingsPage, LegalSettingsPage, TrackingSettingsPage
+            'manage_settings',
+            // System Settings — RoleResource
+            'manage_roles',
+            // System Config — PipelineStageResource
+            'manage_pipeline',
+            // System Config — CalculatorPricingResource
+            'manage_calculator',
+            // System Config — ProjectTemplateResource
+            'manage_project_templates',
         ];
 
         foreach ($permissions as $perm) {
@@ -50,11 +72,19 @@ class AdminSeeder extends Seeder
         // Admin gets all
         $admin->syncPermissions($permissions);
 
-        // Manager: everything except user/role management
-        $manager->syncPermissions(array_filter($permissions, fn ($p) => ! in_array($p, ['manage_roles', 'delete_users'])));
+        // Manager: full CRM/Finance/Projects access; no role/user admin
+        $managerExclude = ['manage_roles', 'delete_users', 'manage_pipeline', 'manage_project_templates'];
+        $manager->syncPermissions(array_values(array_filter($permissions, fn ($p) => ! in_array($p, $managerExclude))));
 
-        // Developer: projects + own tasks
-        $developer->syncPermissions(['view_clients', 'view_projects', 'edit_projects', 'view_invoices']);
+        // Developer: read-only on CRM/Finance + edit projects/contracts
+        $developer->syncPermissions([
+            'view_clients',
+            'view_leads',
+            'view_quotes',
+            'view_invoices',
+            'view_contracts',
+            'view_projects', 'edit_projects',
+        ]);
 
         // ---------------------------------------------------
         // Default admin user

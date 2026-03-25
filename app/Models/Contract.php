@@ -12,9 +12,10 @@ class Contract extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'number', 'title', 'client_id', 'project_id', 'quote_id', 'created_by',
+        'number', 'title', 'client_id', 'project_id', 'quote_id', 'contract_template_id', 'created_by',
         'status', 'currency', 'value', 'terms', 'notes', 'file_path',
         'starts_at', 'expires_at', 'sent_at', 'signed_at',
+        'signature_data', 'signer_ip', 'signer_name',
     ];
 
     protected $casts = [
@@ -27,17 +28,17 @@ class Contract extends Model
 
     public function client(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Client::class)->withTrashed();
     }
 
     public function project(): BelongsTo
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(Project::class)->withTrashed();
     }
 
     public function quote(): BelongsTo
     {
-        return $this->belongsTo(Quote::class);
+        return $this->belongsTo(Quote::class)->withTrashed();
     }
 
     public function createdBy(): BelongsTo
@@ -45,6 +46,10 @@ class Contract extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function contractTemplate(): BelongsTo
+    {
+        return $this->belongsTo(ContractTemplate::class);
+    }
     public function statusColor(): string
     {
         return match ($this->status) {

@@ -35,7 +35,7 @@ class ContractTemplateSeeder extends Seeder
 <p>This Web Development &amp; Design Agreement ("Agreement") is made between:</p>
 <ul>
   <li><strong>Service Provider:</strong> {{legal.company_name}}, registered in England and Wales (Company No. {{legal.company_number}}, VAT No. {{legal.vat_number}}), registered address: {{legal.company_address}} ("the Company"); and</li>
-  <li><strong>Client:</strong> [CLIENT NAME / COMPANY NAME], [CLIENT REGISTERED ADDRESS] [COMPANY REGISTRATION NUMBER IF APPLICABLE] ("the Client").</li>
+  <li><strong>Client:</strong> {{client.company_name}}, {{client.address}} {{client.companies_house_number}} ("the Client").</li>
 </ul>
 <p>Together referred to as "the Parties". This Agreement takes effect on the date the Client accepts the Company's quotation in writing or makes the deposit payment, whichever is earlier.</p>
 
@@ -168,7 +168,7 @@ class ContractTemplateSeeder extends Seeder
     </td>
     <td style="width:50%;padding-left:20px;vertical-align:top;">
       <p><strong>For and on behalf of the Client:</strong></p>
-      <p>[CLIENT NAME]</p>
+      <p>{{client.company_name}}</p>
       <p style="margin-top:48px;border-top:1px solid #555;padding-top:8px;">Signature &amp; Date</p>
       <p>Printed Name: _______________________</p>
       <p>Position: ___________________________</p>
@@ -331,7 +331,7 @@ HTML,
 <p>Niniejsza Umowa o Projektowanie i Tworzenie Strony Internetowej ("Umowa") jest zawarta pomiędzy:</p>
 <ul>
   <li><strong>Wykonawcą:</strong> {{legal.company_name}}, spółką zarejestrowaną w Anglii i Walii (numer rejestracyjny: {{legal.company_number}}, numer VAT: {{legal.vat_number}}), adres rejestrowy: {{legal.company_address}} ("Wykonawca"); oraz</li>
-  <li><strong>Zamawiającym:</strong> [NAZWA KLIENTA / FIRMY KLIENTA], [ADRES REJESTROWY KLIENTA] [NUMER REJESTRACYJNY FIRMY, JEŚLI DOTYCZY] ("Zamawiający").</li>
+  <li><strong>Zamawiającym:</strong> {{client.company_name}}, {{client.address}} {{client.companies_house_number}} ("Zamawiający").</li>
 </ul>
 <p>Łącznie zwane "Stronami". Niniejsza Umowa wchodzi w życie z dniem akceptacji przez Zamawiającego oferty Wykonawcy w formie pisemnej lub dokonania wpłaty zaliczki — w zależności od tego, które z tych zdarzeń nastąpi wcześniej.</p>
 
@@ -464,7 +464,7 @@ HTML,
     </td>
     <td style="width:50%;padding-left:20px;vertical-align:top;">
       <p><strong>W imieniu Zamawiającego:</strong></p>
-      <p>[NAZWA KLIENTA]</p>
+      <p>{{client.company_name}}</p>
       <p style="margin-top:48px;border-top:1px solid #555;padding-top:8px;">Podpis i data</p>
       <p>Imię i nazwisko: ____________________</p>
       <p>Stanowisko: _________________________</p>
@@ -627,7 +627,7 @@ HTML,
 <p>Este Acordo de Desenvolvimento e Design Web ("Acordo") é celebrado entre:</p>
 <ul>
   <li><strong>Prestador de Serviços:</strong> {{legal.company_name}}, empresa registada em Inglaterra e no País de Gales (N.º de empresa: {{legal.company_number}}, N.º de IVA: {{legal.vat_number}}), morada registada: {{legal.company_address}} ("a Empresa"); e</li>
-  <li><strong>Cliente:</strong> [NOME DO CLIENTE / EMPRESA DO CLIENTE], [MORADA REGISTADA DO CLIENTE] [NÚMERO DE REGISTO SE APLICÁVEL] ("o Cliente").</li>
+  <li><strong>Cliente:</strong> {{client.company_name}}, {{client.address}} {{client.companies_house_number}} ("o Cliente").</li>
 </ul>
 <p>Conjuntamente designados como "as Partes". Este Acordo entra em vigor na data em que o Cliente aceita o Orçamento da Empresa por escrito ou efetua o pagamento do depósito, consoante o que ocorrer primeiro.</p>
 
@@ -760,7 +760,7 @@ HTML,
     </td>
     <td style="width:50%;padding-left:20px;vertical-align:top;">
       <p><strong>Em nome do Cliente:</strong></p>
-      <p>[NOME DO CLIENTE]</p>
+      <p>{{client.company_name}}</p>
       <p style="margin-top:48px;border-top:1px solid #555;padding-top:8px;">Assinatura e Data</p>
       <p>Nome: _______________________________</p>
       <p>Cargo: ______________________________</p>
@@ -923,7 +923,7 @@ HTML,
 <p>This Website Maintenance &amp; Support Agreement ("Agreement") is made between:</p>
 <ul>
   <li><strong>Service Provider:</strong> {{legal.company_name}}, registered in England and Wales (Company No. {{legal.company_number}}, VAT No. {{legal.vat_number}}), {{legal.company_address}} ("the Company"); and</li>
-  <li><strong>Client:</strong> [CLIENT NAME / COMPANY NAME], [CLIENT ADDRESS] ("the Client").</li>
+  <li><strong>Client:</strong> {{client.company_name}}, {{client.address}} ("the Client").</li>
 </ul>
 <p>This Agreement commences on [START DATE] and continues on a rolling monthly basis unless terminated in accordance with clause 8.</p>
 
@@ -1003,7 +1003,7 @@ HTML,
     </td>
     <td style="width:50%;padding-left:20px;vertical-align:top;">
       <p><strong>For and on behalf of the Client:</strong></p>
-      <p>[CLIENT NAME]</p>
+      <p>{{client.company_name}}</p>
       <p style="margin-top:48px;border-top:1px solid #555;padding-top:8px;">Signature &amp; Date</p>
       <p>Printed Name: _______________________</p>
       <p>Position: ___________________________</p>
@@ -1025,9 +1025,9 @@ HTML,
 <p>Niniejsza Umowa o Utrzymanie i Wsparcie Strony Internetowej ("Umowa") jest zawarta pomiędzy:</p>
 <ul>
   <li><strong>Wykonawcą:</strong> {{legal.company_name}}, spółką zarejestrowaną w Anglii i Walii (numer rejestracyjny: {{legal.company_number}}, numer VAT: {{legal.vat_number}}), adres: {{legal.company_address}} ("Wykonawca"); oraz</li>
-  <li><strong>Zamawiającym:</strong> [NAZWA KLIENTA / FIRMY KLIENTA], [ADRES KLIENTA] ("Zamawiający").</li>
+  <li><strong>Zamawiającym:</strong> {{client.company_name}}, {{client.address}} ("Zamawiający").</li>
 </ul>
-<p>Niniejsza Umowa obowiązuje od [DATA ROZPOCZĘCIA] i ulega automatycznemu odnowieniu na kolejne miesiące kalendarzowe, o ile nie zostanie wypowiedziana zgodnie z pkt 8.</p>
+<p>Niniejsza Umowa obowiązuje od {{contract.date}} i ulega automatycznemu odnowieniu na kolejne miesiące kalendarzowe, o ile nie zostanie wypowiedziana zgodnie z pkt 8.</p>
 
 <h2>2. Zakres Usług</h2>
 <p>Miesięczny abonament serwisowy obejmuje następujące usługi zgodne z uzgodnionym planem:</p>
@@ -1105,7 +1105,7 @@ HTML,
     </td>
     <td style="width:50%;padding-left:20px;vertical-align:top;">
       <p><strong>W imieniu Zamawiającego:</strong></p>
-      <p>[NAZWA KLIENTA]</p>
+      <p>{{client.company_name}}</p>
       <p style="margin-top:48px;border-top:1px solid #555;padding-top:8px;">Podpis i data</p>
       <p>Imię i nazwisko: ____________________</p>
       <p>Stanowisko: _________________________</p>
@@ -1127,9 +1127,9 @@ HTML,
 <p>Este Acordo de Manutenção e Suporte de Website ("Acordo") é celebrado entre:</p>
 <ul>
   <li><strong>Prestador de Serviços:</strong> {{legal.company_name}}, registada em Inglaterra e no País de Gales (N.º de empresa: {{legal.company_number}}, N.º de IVA: {{legal.vat_number}}), {{legal.company_address}} ("a Empresa"); e</li>
-  <li><strong>Cliente:</strong> [NOME DO CLIENTE / EMPRESA DO CLIENTE], [MORADA DO CLIENTE] ("o Cliente").</li>
+  <li><strong>Cliente:</strong> {{client.company_name}}, {{client.address}} ("o Cliente").</li>
 </ul>
-<p>Este Acordo entra em vigor em [DATA DE INÍCIO] e renova-se automaticamente mensalmente, salvo rescisão nos termos da cláusula 8.</p>
+<p>Este Acordo entra em vigor em {{contract.date}} e renova-se automaticamente mensalmente, salvo rescisão nos termos da cláusula 8.</p>
 
 <h2>2. Serviços Incluídos</h2>
 <p>A mensalidade de manutenção cobre os seguintes serviços, de acordo com o plano acordado:</p>
@@ -1207,7 +1207,7 @@ HTML,
     </td>
     <td style="width:50%;padding-left:20px;vertical-align:top;">
       <p><strong>Em nome do Cliente:</strong></p>
-      <p>[NOME DO CLIENTE]</p>
+      <p>{{client.company_name}}</p>
       <p style="margin-top:48px;border-top:1px solid #555;padding-top:8px;">Assinatura e Data</p>
       <p>Nome: _______________________________</p>
       <p>Cargo: ______________________________</p>

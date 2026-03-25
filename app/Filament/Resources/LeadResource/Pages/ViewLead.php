@@ -6,6 +6,7 @@ use App\Filament\Resources\LeadResource;
 use App\Mail\ClientEmailMail;
 use App\Mail\QuoteSentMail;
 use App\Models\CalculatorPricing;
+use App\Models\Contract;
 use App\Models\EmailTemplate;
 use App\Models\Lead;
 use App\Models\LeadActivity;
@@ -17,6 +18,7 @@ use App\Models\Quote;
 use App\Models\QuoteItem;
 use App\Models\SmsTemplate;
 use App\Services\SmsService;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
@@ -80,7 +82,19 @@ class ViewLead extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        $lead = $this->record;
         return [
+            Action::make('create_contract')
+                ->label('Create Contract')
+                ->icon('heroicon-o-document-check')
+                ->color('success')
+                ->visible(fn () => $lead->stage?->is_won && !Contract::where('client_id', $lead->client_id)->where('project_id', $lead->project?->id)->exists())
+                ->url(fn () => route('filament.admin.resources.contracts.create', [
+                    'client_id'  => $lead->client_id,
+                    'project_id' => $lead->project?->id,
+                    'value'      => $lead->value,
+                    'currency'   => $lead->currency,
+                ])),
             EditAction::make(),
             DeleteAction::make(),
             ForceDeleteAction::make(),

@@ -9,6 +9,7 @@ use App\Models\LeadActivity;
 use App\Models\LeadNote;
 use App\Models\PipelineStage;
 use App\Models\Project;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
@@ -47,6 +48,30 @@ class PipelinePage extends Page
     public function getTitle(): string
     {
         return 'Sales Pipeline';
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        return [
+            route('filament.admin.resources.leads.index') => 'Leads',
+            'Sales Pipeline',
+        ];
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('list_view')
+                ->label('List View')
+                ->icon('heroicon-o-list-bullet')
+                ->color('gray')
+                ->url(route('filament.admin.resources.leads.index')),
+            Action::make('new_lead')
+                ->label('New Lead')
+                ->icon('heroicon-o-plus')
+                ->color('primary')
+                ->url(route('filament.admin.resources.leads.create')),
+        ];
     }
 
     public function getViewData(): array

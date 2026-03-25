@@ -22,6 +22,6 @@ class Payment extends Model
 
     public function invoice(): BelongsTo
     {
-        return $this->belongsTo(Invoice::class);
+        return $this->belongsTo(Invoice::class)->withTrashed();
     }
 }

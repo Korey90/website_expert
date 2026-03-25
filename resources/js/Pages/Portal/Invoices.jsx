@@ -1,4 +1,5 @@
 import PortalLayout from '@/Layouts/PortalLayout';
+import { Link } from '@inertiajs/react';
 
 const statusColors = {
     draft:   'bg-gray-100 text-gray-700',
@@ -67,16 +68,24 @@ export default function Invoices({ client, invoices }) {
                                         </td>
                                         <td className="px-5 py-3 text-sm text-gray-600">{inv.due_date ?? '—'}</td>
                                         <td className="px-5 py-3">
-                                            {inv.stripe_payment_link && ['sent', 'overdue'].includes(inv.status) ? (
-                                                <a
-                                                    href={inv.stripe_payment_link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors"
+                                            <div className="flex items-center gap-2">
+                                                <Link
+                                                    href={route('portal.invoice', inv.id)}
+                                                    className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors"
                                                 >
-                                                    Pay Now
-                                                </a>
-                                            ) : null}
+                                                    View →
+                                                </Link>
+                                                {inv.stripe_payment_link && ['sent', 'overdue'].includes(inv.status) ? (
+                                                    <a
+                                                        href={inv.stripe_payment_link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors"
+                                                    >
+                                                        Pay Now
+                                                    </a>
+                                                ) : null}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

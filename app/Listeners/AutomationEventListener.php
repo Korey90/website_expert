@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Jobs\ProcessAutomationJob;
+use App\Models\Contract;
 use App\Models\Invoice;
 use App\Models\Lead;
 use App\Models\Project;
@@ -37,6 +38,10 @@ class AutomationEventListener
 
         // Quote status changed
         $events->listen('eloquent.updated: ' . Quote::class, [self::class, 'onQuoteUpdated']);
+
+        // Contract created / status changed
+        $events->listen('eloquent.created: ' . Contract::class, [self::class, 'onContractCreated']);
+        $events->listen('eloquent.updated: ' . Contract::class, [self::class, 'onContractUpdated']);
     }
 
     public function onLeadCreated(Lead $lead): void
@@ -45,21 +50,11 @@ class AutomationEventListener
             'lead_id'   => $lead->id,
             'client_id' => $lead->client_id,
             'source'    => $lead->source,
-            'status'    => $lead->status,
         ]);
     }
 
     public function onLeadUpdated(Lead $lead): void
     {
-        if ($lead->wasChanged('status')) {
-            $this->dispatch('lead.status_changed', [
-                'lead_id'    => $lead->id,
-                'client_id'  => $lead->client_id,
-                'old_status' => $lead->getOriginal('status'),
-                'status'     => $lead->status,
-            ]);
-        }
-
         if ($lead->wasChanged('pipeline_stage_id')) {
             $this->dispatch('lead.stage_changed', [
                 'lead_id'      => $lead->id,
@@ -133,6 +128,45 @@ class AutomationEventListener
                     'client_id'  => $quote->client_id,
                     'old_status' => $quote->getOriginal('status'),
                     'status'     => $newStatus,
+                ]);
+            }
+        }
+    }
+
+    public function onContractCreated(Contract $contract): void
+    {
+        $this->dispatch('contract.created', [
+            'contract_id' => $contract->id,
+            'client_id'   => $contract->client_id,
+            'status'      => $contract->status,
+        ]);
+    }
+
+    public function onContractUpdated(Contract $contract): void
+    {
+        if ($contract->wasChanged('status')) {
+            $newStatus = $contract->status;
+
+            if ($newStatus === 'sent') {
+                $this->dispatch('contract.sent', [
+                    'contract_id' => $contract->id,
+                    'client_id'   => $contract->client_id,
+                    'old_status'  => $contract->getOriginal('status'),
+                    'status'      => $newStatus,
+                ]);
+            } elseif ($newStatus === 'signed') {
+                $this->dispatch('contract.signed', [
+                    'contract_id' => $contract->id,
+                    'client_id'   => $contract->client_id,
+                    'old_status'  => $contract->getOriginal('status'),
+                    'status'      => $newStatus,
+                ]);
+            } elseif ($newStatus === 'expired') {
+                $this->dispatch('contract.expired', [
+                    'contract_id' => $contract->id,
+                    'client_id'   => $contract->client_id,
+                    'old_status'  => $contract->getOriginal('status'),
+                    'status'      => $newStatus,
                 ]);
             }
         }

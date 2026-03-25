@@ -1,4 +1,5 @@
 import PortalLayout from '@/Layouts/PortalLayout';
+import { Link } from '@inertiajs/react';
 
 const statusColors = {
     draft:    'bg-gray-100 text-gray-700',
@@ -15,6 +16,15 @@ function StatusBadge({ status }) {
             {status}
         </span>
     );
+}
+
+function fmt(amount, currency) {
+    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency ?? 'GBP' }).format(amount ?? 0);
+}
+
+function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export default function Quotes({ client, quotes }) {
@@ -38,6 +48,7 @@ export default function Quotes({ client, quotes }) {
                                     <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                                     <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valid Until</th>
                                     <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Accepted On</th>
+                                    <th className="px-5 py-3"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -45,14 +56,18 @@ export default function Quotes({ client, quotes }) {
                                     <tr key={q.id} className="hover:bg-gray-50">
                                         <td className="px-5 py-3 text-sm font-medium text-gray-900">{q.number}</td>
                                         <td className="px-5 py-3"><StatusBadge status={q.status} /></td>
-                                        <td className="px-5 py-3 text-sm text-gray-900">
-                                            {q.currency ?? '£'}{parseFloat(q.total).toFixed(2)}
-                                        </td>
-                                        <td className="px-5 py-3 text-sm text-gray-600">{q.valid_until ?? '—'}</td>
-                                        <td className="px-5 py-3 text-sm text-gray-600">
-                                            {q.accepted_at
-                                                ? new Date(q.accepted_at).toLocaleDateString()
-                                                : '—'}
+                                        <td className="px-5 py-3 text-sm text-gray-900">{fmt(q.total, q.currency)}</td>
+                                        <td className="px-5 py-3 text-sm text-gray-600">{fmtDate(q.valid_until)}</td>
+                                        <td className="px-5 py-3 text-sm text-gray-600">{fmtDate(q.accepted_at)}</td>
+                                        <td className="px-5 py-3 text-right">
+                                            {q.status !== 'draft' && (
+                                                <Link
+                                                    href={route('portal.quote', q.id)}
+                                                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800"
+                                                >
+                                                    View →
+                                                </Link>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
@@ -64,3 +79,4 @@ export default function Quotes({ client, quotes }) {
         </PortalLayout>
     );
 }
+

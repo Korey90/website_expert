@@ -239,7 +239,7 @@ class ProjectResource extends Resource
                     Forms\Components\TextInput::make('title')->required()->maxLength(255)->columnSpanFull(),
                     Forms\Components\Select::make('client_id')
                         ->label('Client')
-                        ->options(Client::pluck('company_name', 'id'))
+                        ->options(Client::withTrashed()->pluck('company_name', 'id'))
                         ->searchable()
                         ->required(),
                     Forms\Components\Select::make('assigned_to')

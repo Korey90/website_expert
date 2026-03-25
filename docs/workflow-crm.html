@@ -1,418 +1,116 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>workflow-crm.md</title>
-<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-
-<style>
-/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
-body {
-	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
-	font-size: var(--vscode-markdown-font-size, 14px);
-	padding: 0 26px;
-	line-height: var(--vscode-markdown-line-height, 22px);
-	word-wrap: break-word;
-}
-
-#code-csp-warning {
-	position: fixed;
-	top: 0;
-	right: 0;
-	color: white;
-	margin: 16px;
-	text-align: center;
-	font-size: 12px;
-	font-family: sans-serif;
-	background-color:#444444;
-	cursor: pointer;
-	padding: 6px;
-	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
-}
-
-#code-csp-warning:hover {
-	text-decoration: none;
-	background-color:#007acc;
-	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
-}
-
-body.scrollBeyondLastLine {
-	margin-bottom: calc(100vh - 22px);
-}
-
-body.showEditorSelection .code-line {
-	position: relative;
-}
-
-body.showEditorSelection .code-active-line:before,
-body.showEditorSelection .code-line:hover:before {
-	content: "";
-	display: block;
-	position: absolute;
-	top: 0;
-	left: -12px;
-	height: 100%;
-}
-
-body.showEditorSelection li.code-active-line:before,
-body.showEditorSelection li.code-line:hover:before {
-	left: -30px;
-}
-
-.vscode-light.showEditorSelection .code-active-line:before {
-	border-left: 3px solid rgba(0, 0, 0, 0.15);
-}
-
-.vscode-light.showEditorSelection .code-line:hover:before {
-	border-left: 3px solid rgba(0, 0, 0, 0.40);
-}
-
-.vscode-light.showEditorSelection .code-line .code-line:hover:before {
-	border-left: none;
-}
-
-.vscode-dark.showEditorSelection .code-active-line:before {
-	border-left: 3px solid rgba(255, 255, 255, 0.4);
-}
-
-.vscode-dark.showEditorSelection .code-line:hover:before {
-	border-left: 3px solid rgba(255, 255, 255, 0.60);
-}
-
-.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
-	border-left: none;
-}
-
-.vscode-high-contrast.showEditorSelection .code-active-line:before {
-	border-left: 3px solid rgba(255, 160, 0, 0.7);
-}
-
-.vscode-high-contrast.showEditorSelection .code-line:hover:before {
-	border-left: 3px solid rgba(255, 160, 0, 1);
-}
-
-.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
-	border-left: none;
-}
-
-img {
-	max-width: 100%;
-	max-height: 100%;
-}
-
-a {
-	text-decoration: none;
-}
-
-a:hover {
-	text-decoration: underline;
-}
-
-a:focus,
-input:focus,
-select:focus,
-textarea:focus {
-	outline: 1px solid -webkit-focus-ring-color;
-	outline-offset: -1px;
-}
-
-hr {
-	border: 0;
-	height: 2px;
-	border-bottom: 2px solid;
-}
-
-h1 {
-	padding-bottom: 0.3em;
-	line-height: 1.2;
-	border-bottom-width: 1px;
-	border-bottom-style: solid;
-}
-
-h1, h2, h3 {
-	font-weight: normal;
-}
-
-table {
-	border-collapse: collapse;
-}
-
-table > thead > tr > th {
-	text-align: left;
-	border-bottom: 1px solid;
-}
-
-table > thead > tr > th,
-table > thead > tr > td,
-table > tbody > tr > th,
-table > tbody > tr > td {
-	padding: 5px 10px;
-}
-
-table > tbody > tr + tr > td {
-	border-top: 1px solid;
-}
-
-blockquote {
-	margin: 0 7px 0 5px;
-	padding: 0 16px 0 10px;
-	border-left-width: 5px;
-	border-left-style: solid;
-}
-
-code {
-	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
-	font-size: 1em;
-	line-height: 1.357em;
-}
-
-body.wordWrap pre {
-	white-space: pre-wrap;
-}
-
-pre:not(.hljs),
-pre.hljs code > div {
-	padding: 16px;
-	border-radius: 3px;
-	overflow: auto;
-}
-
-pre code {
-	color: var(--vscode-editor-foreground);
-	tab-size: 4;
-}
-
-/** Theming */
-
-.vscode-light pre {
-	background-color: rgba(220, 220, 220, 0.4);
-}
-
-.vscode-dark pre {
-	background-color: rgba(10, 10, 10, 0.4);
-}
-
-.vscode-high-contrast pre {
-	background-color: rgb(0, 0, 0);
-}
-
-.vscode-high-contrast h1 {
-	border-color: rgb(0, 0, 0);
-}
-
-.vscode-light table > thead > tr > th {
-	border-color: rgba(0, 0, 0, 0.69);
-}
-
-.vscode-dark table > thead > tr > th {
-	border-color: rgba(255, 255, 255, 0.69);
-}
-
-.vscode-light h1,
-.vscode-light hr,
-.vscode-light table > tbody > tr + tr > td {
-	border-color: rgba(0, 0, 0, 0.18);
-}
-
-.vscode-dark h1,
-.vscode-dark hr,
-.vscode-dark table > tbody > tr + tr > td {
-	border-color: rgba(255, 255, 255, 0.18);
-}
-
-</style>
-
-<style>
-/* Tomorrow Theme */
-/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
-/* Original theme - https://github.com/chriskempson/tomorrow-theme */
-
-/* Tomorrow Comment */
-.hljs-comment,
-.hljs-quote {
-	color: #8e908c;
-}
-
-/* Tomorrow Red */
-.hljs-variable,
-.hljs-template-variable,
-.hljs-tag,
-.hljs-name,
-.hljs-selector-id,
-.hljs-selector-class,
-.hljs-regexp,
-.hljs-deletion {
-	color: #c82829;
-}
-
-/* Tomorrow Orange */
-.hljs-number,
-.hljs-built_in,
-.hljs-builtin-name,
-.hljs-literal,
-.hljs-type,
-.hljs-params,
-.hljs-meta,
-.hljs-link {
-	color: #f5871f;
-}
-
-/* Tomorrow Yellow */
-.hljs-attribute {
-	color: #eab700;
-}
-
-/* Tomorrow Green */
-.hljs-string,
-.hljs-symbol,
-.hljs-bullet,
-.hljs-addition {
-	color: #718c00;
-}
-
-/* Tomorrow Blue */
-.hljs-title,
-.hljs-section {
-	color: #4271ae;
-}
-
-/* Tomorrow Purple */
-.hljs-keyword,
-.hljs-selector-tag {
-	color: #8959a8;
-}
-
-.hljs {
-	display: block;
-	overflow-x: auto;
-	color: #4d4d4c;
-	padding: 0.5em;
-}
-
-.hljs-emphasis {
-	font-style: italic;
-}
-
-.hljs-strong {
-	font-weight: bold;
-}
-</style>
-
-<style>
-/*
- * Markdown PDF CSS
- */
-
- body {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
-	padding: 0 12px;
-}
-
-pre {
-	background-color: #f8f8f8;
-	border: 1px solid #cccccc;
-	border-radius: 3px;
-	overflow-x: auto;
-	white-space: pre-wrap;
-	overflow-wrap: break-word;
-}
-
-pre:not(.hljs) {
-	padding: 23px;
-	line-height: 19px;
-}
-
-blockquote {
-	background: rgba(127, 127, 127, 0.1);
-	border-color: rgba(0, 122, 204, 0.5);
-}
-
-.emoji {
-	height: 1.4em;
-}
-
-code {
-	font-size: 14px;
-	line-height: 19px;
-}
-
-/* for inline code */
-:not(pre):not(.hljs) > code {
-	color: #C9AE75; /* Change the old color so it seems less like an error */
-	font-size: inherit;
-}
-
-/* Page Break : use <div class="page"/> to insert page break
--------------------------------------------------------- */
-.page {
-	page-break-after: always;
-}
-
-</style>
-
-<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown转换文档</title>
+  <style>
+    body { 
+      font-family: 'Microsoft YaHei', 'SimSun', sans-serif; 
+      margin: 0 auto; 
+      max-width: 960px; 
+      padding: 20px; 
+      line-height: 1.6;
+    }
+    pre { 
+      background-color: #f8f8f8; 
+      border: 1px solid #ddd; 
+      padding: 10px; 
+      border-radius: 3px; 
+      overflow: auto; 
+    }
+    code { 
+      font-family: Consolas, Monaco, monospace; 
+      background-color: #f8f8f8; 
+      padding: 2px 5px; 
+      border-radius: 3px; 
+    }
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      margin-bottom: 20px;
+    }
+    th, td { 
+      border: 1px solid #ddd; 
+      padding: 8px; 
+    }
+    th { 
+      background-color: #f2f2f2; 
+      text-align: left; 
+    }
+    tr:nth-child(even) { 
+      background-color: #f9f9f9; 
+    }
+    img { 
+      max-width: 100%; 
+      height: auto; 
+    }
+    .toc-placeholder { 
+      margin: 20px 0; 
+      padding: 10px; 
+      background-color: #f0f0f0; 
+      border: 1px dashed #ccc; 
+      text-align: center; 
+      color: #666; 
+    }
+  </style>
 </head>
 <body>
-  <script>
-    mermaid.initialize({
-      startOnLoad: true,
-      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
-          ? 'dark'
-          : 'default'
-    });
-  </script>
-<h1 id="crm-workflow--websiteexpert">CRM Workflow — WebsiteExpert</h1>
-<h2 id="od-leada-do-odbioru-projektu-przez-klienta">Od leada do odbioru projektu przez klienta</h2>
+  <h1>CRM Workflow — WebsiteExpert</h1>
+<h2>Od leada do odbioru projektu przez klienta</h2>
+<h3>Wersja 2.0 — Marzec 2026</h3>
 <blockquote>
-<p>Dokument opisuje pełny przepływ pracy w systemie CRM — od momentu pojawienia się leada,
-przez wszystkie etapy lejka sprzedażowego, realizację projektu, fakturowanie, aż po
-finalne zamknięcie i odbiór przez klienta. Służy jako podstawa do testowania aplikacji.</p>
+<p>Dokument opisuje pełny przepływ pracy w systemie CRM — od momentu pojawienia się leada,<br />
+przez wszystkie etapy lejka sprzedażowego, wyceny, kontrakty, realizację projektu,<br />
+fakturowanie, aż po finalne zamknięcie i odbiór przez klienta.<br />
+Uwzględnia portal klienta, e-podpisy, automatyzacje i powiadomienia SMS/e-mail.</p>
 </blockquote>
-<hr>
-<h2 id="przegl%C4%85d-lejka-sprzeda%C5%BCowego">Przegląd lejka sprzedażowego</h2>
-<pre class="hljs"><code><div>[New Lead] → [Contacted] → [Proposal Sent] → [Negotiation] → [Won] ──→ PROJECT
+<hr />
+<h2>Przegląd lejka sprzedażowego</h2>
+<pre><code>[New Lead] → [Contacted] → [Proposal Sent] → [Negotiation] → [Won] ──→ PROJECT
                                                                 ↓
                                                              [Lost]
-</div></code></pre>
-<hr>
-<h2 id="etap-1--new-lead">ETAP 1 — New Lead</h2>
-<p><strong>Opis:</strong> Lead pojawia się w systemie — może to być formularz ze strony, telefon,<br>
-polecenie lub ręczne dodanie przez marketera/managera.</p>
-<h3 id="akcje-w-crm">Akcje w CRM</h3>
+</code></pre>
+<blockquote>
+<p><strong>Pipeline jest konfigurowalny</strong> — etapy zarządzane są w <code>Settings → Pipeline Stages</code>.<br />
+System nie ma stałego enum statusów leada — każdy etap to rekord w tabeli <code>pipeline_stages</code>.<br />
+Wynik leada (won/lost) zapisywany jest przez pola <code>won_at</code> / <code>lost_at</code> + <code>lost_reason</code>.</p>
+</blockquote>
+<hr />
+<h2>ETAP 1 — New Lead</h2>
+<p><strong>Opis:</strong> Lead pojawia się w systemie — formularz ze strony, telefon, polecenie lub<br />
+ręczne dodanie przez managera.</p>
+<h3>Akcje w CRM</h3>
 <ol>
 <li><strong>Dodaj leada</strong> (<code>Leads → New Lead</code>)
 <ul>
 <li>Uzupełnij: tytuł leada, klient (istniejący lub nowy), typ usługi, szacowana wartość</li>
-<li>Przypisz właściciela (assigned to)</li>
+<li>Przypisz właściciela (<code>Assigned To</code>)</li>
 <li>Ustaw oczekiwaną datę zamknięcia (<code>Expected Close</code>)</li>
 </ul>
 </li>
 <li><strong>Uzupełnij profil klienta</strong> (<code>Clients → Client record</code>)
 <ul>
-<li>Imię i nazwisko osoby kontaktowej</li>
-<li>Telefon (wymagany do SMS), e-mail</li>
-<li>Nazwa firmy</li>
+<li>Kontakty: imię, e-mail (wymagany do emaili), telefon (wymagany do SMS)</li>
+<li>Nazwa firmy, adres</li>
 </ul>
 </li>
-<li><strong>Ustaw stage:</strong> <code>New Lead</code></li>
+<li><strong>Ustaw stage:</strong> pierwszy etap w pipeline (domyślnie <code>New Lead</code>)</li>
 </ol>
-<h3 id="checklist-system-automatycznie-sprawdza">Checklist (system automatycznie sprawdza)</h3>
+<h3>Checklist</h3>
 <ul>
-<li><input type="checkbox" id="checkbox0"><label for="checkbox0">Zapisane dane kontaktowe (</label><code>has_client</code>)</li>
-<li><input type="checkbox" id="checkbox1"><label for="checkbox1">Potwierdzony budżet / wartość leada (</label><code>has_value</code>)</li>
-<li><input type="checkbox" id="checkbox2"><label for="checkbox2">Zidentyfikowany typ projektu (</label><code>has_calculator_data</code>)</li>
-<li><input type="checkbox" id="checkbox3"><label for="checkbox3">Lead przypisany do właściciela (</label><code>has_assignee</code>)</li>
+<li>[ ] Zapisane dane kontaktowe klienta (e-mail + telefon)</li>
+<li>[ ] Potwierdzony szacowany budżet / wartość leada</li>
+<li>[ ] Zidentyfikowany typ projektu</li>
+<li>[ ] Lead przypisany do właściciela</li>
 </ul>
-<h3 id="automatyzacje-do-skonfigurowania-w-marketing-%E2%86%92-automation-rules">Automatyzacje (do skonfigurowania w Marketing → Automation Rules)</h3>
+<h3>Automatyzacje — <code>lead.created</code></h3>
 <table>
 <thead>
 <tr>
 <th>Trigger</th>
 <th>Akcja</th>
+<th>Odbiornik</th>
 <th>Przykład</th>
 </tr>
 </thead>
@@ -420,473 +118,1048 @@ polecenie lub ręczne dodanie przez marketera/managera.</p>
 <tr>
 <td><code>lead.created</code></td>
 <td><code>send_sms</code></td>
-<td>SMS do klienta: &quot;Dziękujemy za kontakt, odezwiemy się wkrótce&quot;</td>
+<td><code>client</code></td>
+<td>“Dziękujemy za kontakt, odezwiemy się wkrótce”</td>
 </tr>
 <tr>
 <td><code>lead.created</code></td>
 <td><code>notify_admin</code></td>
-<td>E-mail do managera: &quot;Nowy lead: {{lead_title}}&quot;</td>
+<td><code>mail.admin_address</code></td>
+<td>“Nowy lead: {{lead_title}} od {{client_name}}”</td>
+</tr>
+<tr>
+<td><code>lead.created</code></td>
+<td><code>send_email</code></td>
+<td><code>assigned_user</code></td>
+<td>“Przypisano Ci nowego leada: {{lead_title}}”</td>
 </tr>
 </tbody>
 </table>
-<h3 id="cel-etapu">Cel etapu</h3>
+<blockquote>
+<p><strong>SMS:</strong> wymaga skonfigurowanego Twilio w <code>Settings → Integrations</code> (<code>twilio_enabled = true</code>).<br />
+Numer klienta musi być w formacie UK (<code>07xxx</code>) lub E.164. System automatycznie normalizuje <code>07</code> → <code>+447</code>.</p>
+</blockquote>
+<h3>Cel etapu</h3>
 <p>Kwalifikacja leada — upewnij się, że warto poświęcić czas na dalszy kontakt.</p>
-<hr>
-<h2 id="etap-2--contacted">ETAP 2 — Contacted</h2>
+<hr />
+<h2>ETAP 2 — Contacted</h2>
 <p><strong>Opis:</strong> Nawiązano pierwszy kontakt z klientem. Cel: poznać wymagania i umówić rozmowę.</p>
-<h3 id="akcje-w-crm">Akcje w CRM</h3>
+<h3>Akcje w CRM</h3>
 <ol>
-<li><strong>Zmień stage</strong> na <code>Contacted</code></li>
+<li><strong>Zmień stage</strong> na <code>Contacted</code> (lub odpowiedni etap w pipeline)</li>
 <li><strong>Wyślij e-mail powitalny</strong> (<code>Send Email</code> na stronie leada)
 <ul>
-<li>Przedstaw firmę</li>
-<li>Zaproponuj termin rozmowy odkrywczej</li>
+<li>Szablon z CRM, zmienne: <code>{{client_name}}</code>, <code>{{lead_title}}</code>, <code>{{assigned_name}}</code></li>
 </ul>
 </li>
-<li><strong>Zanotuj ustalenia</strong> (Notes / Activity log na stronie leada)</li>
-<li><strong>Zaktualizuj dane leada</strong> — wpisz szczegóły wymagań w opisie / notes</li>
+<li><strong>Zanotuj ustalenia</strong> w sekcji Notes / Activity na stronie leada</li>
+<li><strong>Zaktualizuj dane leada</strong> — wpisz szczegóły wymagań w opisie</li>
 </ol>
-<h3 id="checklist">Checklist</h3>
+<h3>Checklist</h3>
 <ul>
-<li><input type="checkbox" id="checkbox4"><label for="checkbox4">Wysłany e-mail powitalny (</label><code>email_sent</code>)</li>
-<li><input type="checkbox" id="checkbox5"><label for="checkbox5">Umówiona rozmowa discovery</label></li>
-<li><input type="checkbox" id="checkbox6"><label for="checkbox6">Zakwalifikowane wymagania i cele projektu</label></li>
-<li><input type="checkbox" id="checkbox7"><label for="checkbox7">Potwierdzony kontakt z osobą decyzyjną (</label><code>has_contact</code>)</li>
+<li>[ ] Wysłany e-mail powitalny</li>
+<li>[ ] Zaplanowana rozmowa discovery</li>
+<li>[ ] Zakwalifikowane wymagania i cele projektu</li>
+<li>[ ] Potwierdzony kontakt z osobą decyzyjną</li>
 </ul>
-<h3 id="automatyzacje">Automatyzacje</h3>
+<h3>Automatyzacje — <code>lead.stage_changed</code> → Contacted</h3>
 <table>
 <thead>
 <tr>
 <th>Trigger</th>
 <th>Akcja</th>
+<th>Odbiornik</th>
 <th>Przykład</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>lead.stage_changed</code> (→ Contacted)</td>
+<td><code>lead.stage_changed</code></td>
 <td><code>send_email</code></td>
-<td>E-mail: &quot;Dzień dobry, skontaktujemy się w ciągu 24h&quot;</td>
+<td><code>client</code></td>
+<td>“Dzień dobry {{client_name}}, skontaktujemy się w ciągu 24h”</td>
 </tr>
 <tr>
-<td><code>lead.stage_changed</code> (→ Contacted)</td>
+<td><code>lead.stage_changed</code></td>
 <td><code>send_sms</code></td>
-<td>SMS: &quot;Cześć {{client_name}}, oddzwonimy dziś!&quot;</td>
+<td><code>client</code></td>
+<td>“Cześć {{client_name}}, oddzwonimy dziś!”</td>
 </tr>
 </tbody>
 </table>
-<h3 id="cel-etapu">Cel etapu</h3>
-<p>Przeprowadzenie rozmowy kwalifikacyjnej i zebranie brief'u do wyceny.</p>
-<hr>
-<h2 id="etap-3--proposal-sent">ETAP 3 — Proposal Sent</h2>
-<p><strong>Opis:</strong> Przygotowanie i wysłanie oferty/wyceny do klienta.</p>
-<h3 id="akcje-w-crm">Akcje w CRM</h3>
+<blockquote>
+<p><strong>Opóźnienie:</strong> ustaw <code>delay_minutes</code> w regule automatyzacji na np. <code>0</code> (natychmiast)<br />
+lub <code>60</code> (po godzinie). Automatyzacje wykonują się przez kolejkę (<code>ProcessAutomationJob</code>).</p>
+</blockquote>
+<h3>Cel etapu</h3>
+<p>Przeprowadzenie rozmowy kwalifikacyjnej i zebranie brief’u do wyceny.</p>
+<hr />
+<h2>ETAP 3 — Proposal Sent</h2>
+<p><strong>Opis:</strong> Przygotowanie i wysłanie wyceny (Quote) do klienta.</p>
+<h3>Akcje w CRM</h3>
 <ol>
 <li><strong>Zmień stage</strong> na <code>Proposal Sent</code></li>
-<li><strong>Skorzystaj z Proposal Builder</strong> (przycisk na stronie leada)
+<li><strong>Utwórz wycenę Quote</strong> (<code>Quotes → New Quote</code> lub <code>Create Quote</code> na stronie leada)
 <ul>
-<li>Wybierz typ projektu, dodaj pozycje wyceny</li>
-<li>Ustaw wartość leada (<code>value</code>) na kwotę z wyceny</li>
+<li>Dodaj pozycje (Line Items): opis, szczegóły, ilość, cena jednostkowa</li>
+<li>System automatycznie liczy <code>subtotal</code>, <code>VAT ({{vat_rate}}%)</code>, <code>total</code></li>
+<li>Ustaw walutę, termin ważności (<code>valid_until</code>, domyślnie +30 dni)</li>
 </ul>
 </li>
-<li><strong>Wyślij propozycję e-mailem</strong> (<code>Send Email</code> → dołącz PDF lub link)</li>
-<li><strong>Ustaw follow-up reminder</strong> w <code>Expected Close</code> lub jako notatkę</li>
-</ol>
-<h3 id="checklist">Checklist</h3>
+<li><strong>Wyślij wycenę do klienta</strong> (<code>Quotes → View → Send Quote</code>)
 <ul>
-<li><input type="checkbox" id="checkbox8"><label for="checkbox8">Przygotowana spersonalizowana oferta</label></li>
-<li><input type="checkbox" id="checkbox9"><label for="checkbox9">Oferta zweryfikowana z zespołem</label></li>
-<li><input type="checkbox" id="checkbox10"><label for="checkbox10">Oferta wysłana do klienta (</label><code>email_sent</code>)</li>
-<li><input type="checkbox" id="checkbox11"><label for="checkbox11">Follow-up zaplanowany na +3 dni</label></li>
+<li>Przycisk <strong>Send Quote</strong> (widoczny gdy status = <code>draft</code>) → status zmienia się na <code>sent</code>, ustawia <code>sent_at</code></li>
+<li>Klient widzi wycenę w <strong>Portalu Klienta</strong> (<code>/portal/quotes</code>)</li>
 </ul>
-<h3 id="automatyzacje">Automatyzacje</h3>
+</li>
+<li><strong>Klient w Portalu</strong> może:
+<ul>
+<li>Wyświetlić szczegóły wyceny (pozycje, totale, warunki)</li>
+<li>Kliknąć <strong>Accept Quote</strong> → status = <code>accepted</code>, <code>accepted_at = now()</code></li>
+<li>Kliknąć <strong>Reject Quote</strong> → status = <code>rejected</code>, <code>rejected_at = now()</code></li>
+</ul>
+</li>
+<li><strong>Po akceptacji</strong> — w widoku Quote pojawia się przycisk <strong>Create Contract</strong></li>
+</ol>
+<h3>Checklist</h3>
+<ul>
+<li>[ ] Przygotowana spersonalizowana wycena z poprawnymi totami</li>
+<li>[ ] Wycena wysłana do klienta (<code>status = sent</code>)</li>
+<li>[ ] Klient zaakceptował w portalu (<code>status = accepted</code>)</li>
+<li>[ ] Follow-up zaplanowany (+3 dni) jeśli brak odpowiedzi</li>
+</ul>
+<h3>Quote — statusy</h3>
 <table>
 <thead>
 <tr>
-<th>Trigger</th>
-<th>Akcja</th>
-<th>Przykład</th>
+<th>Status</th>
+<th>Kolor</th>
+<th>Opis</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>lead.stage_changed</code> (→ Proposal Sent)</td>
-<td><code>send_email</code></td>
-<td>&quot;Przesyłam Państwu ofertę na {{lead_title}}&quot;</td>
+<td><code>draft</code></td>
+<td>szary</td>
+<td>Wycena w przygotowaniu, niewidoczna w portalu</td>
 </tr>
 <tr>
-<td><code>lead.stage_changed</code> (→ Proposal Sent)</td>
-<td><code>delay_minutes</code> + <code>send_sms</code></td>
-<td>Po 3 dniach: SMS &quot;Czy dotarła Pani/Pana nasza oferta?&quot;</td>
+<td><code>sent</code></td>
+<td>niebieski</td>
+<td>Wysłana, klient może zaakceptować/odrzucić</td>
+</tr>
+<tr>
+<td><code>accepted</code></td>
+<td>zielony</td>
+<td>Klient zaakceptował</td>
+</tr>
+<tr>
+<td><code>rejected</code></td>
+<td>czerwony</td>
+<td>Klient odrzucił</td>
+</tr>
+<tr>
+<td><code>expired</code></td>
+<td>pomarańczowy</td>
+<td>Minął termin ważności</td>
 </tr>
 </tbody>
 </table>
-<h3 id="cel-etapu">Cel etapu</h3>
-<p>Klient zapoznaje się z ofertą. Oczekuj odpowiedzi lub inicjuj follow-up.</p>
-<hr>
-<h2 id="etap-4--negotiation">ETAP 4 — Negotiation</h2>
-<p><strong>Opis:</strong> Klient wyraził zainteresowanie. Negocjacje warunków, zakresu i płatności.</p>
-<h3 id="akcje-w-crm">Akcje w CRM</h3>
-<ol>
-<li><strong>Zmień stage</strong> na <code>Negotiation</code></li>
-<li><strong>Zaktualizuj notes</strong> na podstawie rozmów — co klient chce zmienić</li>
-<li><strong>Zaktualizuj wartość leada</strong> jeśli zakres się zmienił</li>
-<li><strong>Ustaw <code>Expected Close</code></strong> na realną datę podpisania umowy</li>
-<li><strong>Odnotuj uzgodnione warunki płatności</strong> (np. 50% zaliczka, 50% po odbiorze)</li>
-</ol>
-<h3 id="checklist">Checklist</h3>
-<ul>
-<li><input type="checkbox" id="checkbox12"><label for="checkbox12">Omówione zmiany i rewizje oferty</label></li>
-<li><input type="checkbox" id="checkbox13"><label for="checkbox13">Potwierdzony harmonogram projektu (</label><code>has_expected_close</code>)</li>
-<li><input type="checkbox" id="checkbox14"><label for="checkbox14">Uzgodnione warunki płatności</label></li>
-<li><input type="checkbox" id="checkbox15"><label for="checkbox15">Podpisana umowa lub wpłacona zaliczka</label></li>
-</ul>
-<h3 id="cel-etapu">Cel etapu</h3>
-<p>Zamknięcie leada jako <code>Won</code> po podpisaniu umowy i/lub wpłacie zaliczki.</p>
-<hr>
-<h2 id="etap-5a--won-wygrany-lead">ETAP 5A — Won (Wygrany Lead)</h2>
-<p><strong>Opis:</strong> Klient zaakceptował ofertę. Czas uruchomić projekt.</p>
-<h3 id="akcje-w-crm">Akcje w CRM</h3>
-<ol>
-<li><strong>Zmień stage</strong> na <code>Won</code> (lub użyj przycisku <code>Mark as Won</code> → status = <code>won</code>)</li>
-<li><strong>Utwórz projekt</strong> (<code>Convert to Project</code> na stronie leada)
-<ul>
-<li>Wybierz szablon projektu (Business Card / E-Commerce / Web Application)</li>
-<li>Ustaw datę startu i deadline</li>
-<li>Przypisz team (developer, designer)</li>
-</ul>
-</li>
-<li><strong>Wystaw fakturę zaliczkową</strong> (np. 50%)
-<ul>
-<li><code>Projects → Invoices → New Invoice</code></li>
-<li>Pozycja: &quot;Zaliczka — {{lead_title}}&quot;</li>
-</ul>
-</li>
-<li><strong>Wyślij fakturę</strong> (<code>Send Invoice</code> — e-mailem)</li>
-<li><strong>Przeprowadź Kickoff Call</strong> i zanotuj ustalenia</li>
-</ol>
-<h3 id="checklist">Checklist</h3>
-<ul>
-<li><input type="checkbox" id="checkbox16"><label for="checkbox16">Lead przekształcony w projekt (</label><code>has_project</code>)</li>
-<li><input type="checkbox" id="checkbox17"><label for="checkbox17">Umówiony kickoff call</label></li>
-<li><input type="checkbox" id="checkbox18"><label for="checkbox18">Wysłane materiały onboardingowe / dostępy (</label><code>email_sent</code>)</li>
-</ul>
-<h3 id="automatyzacje">Automatyzacje</h3>
+<h3>Automatyzacje — <code>quote.sent</code> / <code>quote.accepted</code></h3>
 <table>
 <thead>
 <tr>
 <th>Trigger</th>
 <th>Akcja</th>
+<th>Odbiornik</th>
 <th>Przykład</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>lead.stage_changed</code> (→ Won)</td>
+<td><code>quote.sent</code></td>
 <td><code>send_email</code></td>
-<td>&quot;Gratulacje! Zaczynamy projekt 🎉 — kickoff w piątek o 10:00&quot;</td>
+<td><code>client</code></td>
+<td>Automatyczny email z linkiem do portalu</td>
 </tr>
+<tr>
+<td><code>quote.accepted</code></td>
+<td><code>notify_admin</code></td>
+<td><code>mail.admin_address</code></td>
+<td>“{{client_name}} zaakceptował wycenę {{lead_title}}”</td>
+</tr>
+<tr>
+<td><code>quote.accepted</code></td>
+<td><code>send_email</code></td>
+<td><code>assigned_user</code></td>
+<td>“Wycena zaakceptowana — czas na kontrakt!”</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Mail przy wysyłce:</strong> <code>QuoteSentMail</code> — wysyła email z numerem wyceny i wartością.<br />
+Zmienne dostępne w szablonie: <code>{{client_name}}</code>, <code>{{company_name}}</code>, <code>{{lead_title}}</code>.</p>
+</blockquote>
+<hr />
+<h2>ETAP 4 — Negotiation</h2>
+<p><strong>Opis:</strong> Klient wyraził zainteresowanie. Negocjacje warunków, zakresu i płatności.</p>
+<h3>Akcje w CRM</h3>
+<ol>
+<li><strong>Zmień stage</strong> na <code>Negotiation</code></li>
+<li><strong>Zaktualizuj wycenę</strong> jeśli zakres się zmienił — edytuj Quote, system przeliczy totale</li>
+<li><strong>Zaktualizuj notes</strong> na podstawie rozmów</li>
+<li><strong>Ustaw <code>Expected Close</code></strong> na realną datę podpisania umowy</li>
+</ol>
+<h3>Checklist</h3>
+<ul>
+<li>[ ] Omówione zmiany i rewizje oferty</li>
+<li>[ ] Potwierdzony harmonogram projektu</li>
+<li>[ ] Uzgodnione warunki płatności (system zakłada <code>legal.deposit_percent</code>% zaliczki, domyślnie 50%)</li>
+<li>[ ] Klient gotowy do podpisania kontraktu</li>
+</ul>
+<hr />
+<h2>ETAP 4.5 — Kontrakt (Contract)</h2>
+<p><strong>Opis:</strong> Gdy wycena jest zaakceptowana, przed uruchomieniem projektu należy podpisać kontrakt.<br />
+Jest to etap między Negotiation a Won.</p>
+<h3>Akcje w CRM — tworzenie kontraktu</h3>
+<ol>
+<li><strong>W widoku Quote</strong> kliknij <strong>Create Contract</strong> (widoczny gdy <code>status</code> = <code>accepted</code> lub <code>sent</code>)
+<ul>
+<li>System prefilluje: <code>client_id</code>, <code>quote_id</code>, <code>value</code>, <code>currency</code></li>
+</ul>
+</li>
+<li><strong>W formularzu kontraktu:</strong>
+<ul>
+<li>Wybierz <strong>szablon kontraktu</strong> (<code>Contract Templates</code>) — system wstawi placeholdery <code>{{client.company_name}}</code> itp.</li>
+<li>Dostępne placeholdery:
+<ul>
+<li><code>{{legal.*}}</code> — dane firmy (15 kluczy z <code>Settings → Legal</code>)</li>
+<li><code>{{client.*}}</code> — dane klienta (company_name, address, primary_contact_name, email, phone, vat_number)</li>
+<li><code>{{project.*}}</code> — tytuł, budżet, deadline, service_type, currency</li>
+<li><code>{{contract.*}}</code> — number, title, date, value, currency</li>
+</ul>
+</li>
+<li>Uzupełnij: tytuł, daty (<code>starts_at</code>, <code>expires_at</code>), wartość, <code>Terms &amp; Conditions</code> (RichEditor)</li>
+<li>Opcjonalnie: dołącz PDF (<code>file_path</code>)</li>
+</ul>
+</li>
+<li><strong>Wyślij kontrakt do klienta</strong> — <code>Contracts → View → Send to Portal</code>
+<ul>
+<li>Przycisk <strong>Send to Portal</strong> (widoczny gdy status = <code>draft</code>) → status = <code>sent</code>, <code>sent_at = now()</code></li>
+<li>Kontrakt pojawia się w Portalu Klienta (<code>/portal/contracts</code>)</li>
+</ul>
+</li>
+</ol>
+<h3>Akcje klienta w Portalu — podpisanie kontraktu</h3>
+<p>Klient wchodzi w <code>/portal/contracts</code>, widzi kontrakt ze statusem “Awaiting Signature”,<br />
+klika “Sign →”:</p>
+<ol>
+<li><strong>Wpisuje pełne imię i nazwisko</strong> (wymagane)</li>
+<li><strong>Wybiera metodę podpisu:</strong>
+<ul>
+<li>✏️ <strong>Draw Signature</strong> — rysowanie podpisu na canvas (base64 PNG zapisywany w <code>signature_data</code>)</li>
+<li>☑️ <strong>Electronic Acceptance</strong> — zaznaczenie checkboxa jako prawnie wiążący podpis elektroniczny</li>
+</ul>
+</li>
+<li><strong>Zaznacza checkbox</strong> akceptacji warunków</li>
+<li><strong>Klika “Sign &amp; Accept Contract”</strong> → system zapisuje:
+<ul>
+<li><code>status = signed</code>, <code>signed_at = now()</code></li>
+<li><code>signer_name</code> — imię i nazwisko</li>
+<li><code>signer_ip</code> — adres IP klienta (dowód elektroniczny)</li>
+<li><code>signature_data</code> — obraz podpisu (jeśli metoda pad)</li>
+</ul>
+</li>
+<li><strong>Widok po podpisaniu</strong> — zielony baner z imieniem sygnatariusza, datą i IP</li>
+</ol>
+<blockquote>
+<p><strong>Admin może też podpisać ręcznie</strong> (<code>Contracts → View → Mark Signed</code>) np. po podpisaniu<br />
+papierowym i skanie. W takim przypadku pola <code>signer_*</code> nie są wypełniane.</p>
+</blockquote>
+<h3>Kontrakt — statusy</h3>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Kolor</th>
+<th>Widoczny w portalu</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>draft</code></td>
+<td>szary</td>
+<td>NIE</td>
+<td>W przygotowaniu</td>
+</tr>
+<tr>
+<td><code>sent</code></td>
+<td>niebieski</td>
+<td>TAK</td>
+<td>Wysłany, oczekuje na podpis</td>
+</tr>
+<tr>
+<td><code>signed</code></td>
+<td>zielony</td>
+<td>TAK</td>
+<td>Podpisany przez klienta</td>
+</tr>
+<tr>
+<td><code>expired</code></td>
+<td>pomarańczowy</td>
+<td>TAK</td>
+<td>Minął termin ważności</td>
+</tr>
+<tr>
+<td><code>cancelled</code></td>
+<td>czerwony</td>
+<td>TAK</td>
+<td>Anulowany</td>
+</tr>
+</tbody>
+</table>
+<h3>Automatyzacje — <code>contract.sent</code> / <code>contract.signed</code></h3>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Akcja</th>
+<th>Odbiornik</th>
+<th>Przykład</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>contract.sent</code></td>
+<td><code>send_email</code></td>
+<td><code>client</code></td>
+<td>“Kontrakt {{contract.number}} czeka na Twój podpis w portalu”</td>
+</tr>
+<tr>
+<td><code>contract.sent</code></td>
+<td><code>send_sms</code></td>
+<td><code>client</code></td>
+<td>“Nowy kontrakt do podpisania w Twoim portalu klienta”</td>
+</tr>
+<tr>
+<td><code>contract.signed</code></td>
+<td><code>notify_admin</code></td>
+<td><code>mail.admin_address</code></td>
+<td>“{{client_name}} podpisał kontrakt — można uruchomić projekt”</td>
+</tr>
+<tr>
+<td><code>contract.signed</code></td>
+<td><code>send_email</code></td>
+<td><code>assigned_user</code></td>
+<td>“Kontrakt podpisany — czas na projekt!”</td>
+</tr>
+<tr>
+<td><code>contract.created</code></td>
+<td><code>create_portal_access</code></td>
+<td><code>client</code></td>
+<td>Automatycznie tworzy konto w portalu jeśli klient go nie ma</td>
+</tr>
+</tbody>
+</table>
+<h3>Checklist</h3>
+<ul>
+<li>[ ] Kontrakt utworzony z odpowiedniego szablonu</li>
+<li>[ ] Placeholdery poprawnie interpolowane</li>
+<li>[ ] Kontrakt wysłany do portalu (<code>status = sent</code>)</li>
+<li>[ ] Klient podpisał kontrakt (<code>status = signed</code>)</li>
+</ul>
+<hr />
+<h2>ETAP 5A — Won (Wygrany Lead)</h2>
+<p><strong>Opis:</strong> Kontrakt podpisany. Czas uruchomić projekt.</p>
+<h3>Akcje w CRM</h3>
+<ol>
+<li><strong>Zmień stage</strong> na <code>Won</code> (lub użyj przycisku <code>Mark as Won</code> → ustawia <code>won_at = now()</code>)</li>
+<li><strong>Utwórz projekt</strong> (<code>Convert to Project</code> na stronie leada)
+<ul>
+<li>Wybierz <strong>szablon projektu</strong> (<code>Project Templates</code>) — system automatycznie tworzy fazy</li>
+<li>Dostępne typy projektów: <code>wizytowka</code> (Business Card), <code>landing</code> (Landing Page), <code>ecommerce</code> (E-Commerce), <code>aplikacja</code> (Web Application), <code>seo</code> (SEO), <code>other</code></li>
+<li>Ustaw datę startu i deadline</li>
+<li><code>portal_token</code> generowany automatycznie (64 znaki) — używany do bezpośredniego dostępu do projektu</li>
+</ul>
+</li>
+<li><strong>Skonfiguruj dostęp do portalu</strong> (jeśli nie zrobiono wcześniej)
+<ul>
+<li><code>Clients → [Klient] → Create Portal Access</code> lub automatyzacja <code>create_portal_access</code></li>
+<li>System tworzy konto użytkownika, przypisuje rolę <code>client</code>, wysyła <code>PortalInviteMail</code></li>
+<li><strong><code>PortalInviteMail</code></strong> zawiera: login email, tymczasowe hasło, link do portalu</li>
+<li>Szablon emaila pobierany z <code>EmailTemplates</code> (slug: <code>portal_invite</code>, język <code>pl</code>)</li>
+</ul>
+</li>
+<li><strong>Wystaw fakturę zaliczkową</strong> (50% wartości — <code>legal.deposit_percent</code>)
+<ul>
+<li><code>Projects → [Projekt] → Invoices → New Invoice</code> lub <code>Invoices → New Invoice</code></li>
+<li>Pozycja: “Zaliczka — {{lead_title}}”</li>
+</ul>
+</li>
+<li><strong>Wyślij fakturę</strong> — zmień status na <code>sent</code> → system wysyła <code>InvoiceSentMail</code></li>
+<li><strong>Przeprowadź Kickoff Call</strong> i zanotuj w notes projektu</li>
+</ol>
+<h3>Checklist</h3>
+<ul>
+<li>[ ] Lead oznaczony jako Won (<code>won_at</code> ustawiony)</li>
+<li>[ ] Projekt utworzony z odpowiedniego szablonu</li>
+<li>[ ] Portal klienta aktywny (konto + zaproszenie wysłane)</li>
+<li>[ ] Faktura zaliczkowa wystawiona i wysłana</li>
+<li>[ ] Kickoff call przeprowadzony i zanotowany</li>
+</ul>
+<h3>Automatyzacje — <code>project.created</code> / <code>invoice.sent</code></h3>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Akcja</th>
+<th>Odbiornik</th>
+<th>Przykład</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td><code>project.created</code></td>
 <td><code>notify_admin</code></td>
-<td>&quot;Nowy projekt: {{project_name}} przypisany do {{assigned_name}}&quot;</td>
+<td><code>mail.admin_address</code></td>
+<td>“Nowy projekt: {{project_name}} przypisany do {{assigned_name}}”</td>
+</tr>
+<tr>
+<td><code>project.created</code></td>
+<td><code>send_email</code></td>
+<td><code>client</code></td>
+<td>“Gratulacje! Zaczynamy projekt 🎉”</td>
 </tr>
 <tr>
 <td><code>invoice.sent</code></td>
 <td><code>send_email</code></td>
-<td>Automatyczne powiadomienie o fakturze do klienta</td>
+<td><code>client</code></td>
+<td>Automatyczna wiadomość z fakturą (<code>InvoiceSentMail</code>)</td>
 </tr>
 </tbody>
 </table>
-<hr>
-<h2 id="etap-5b--lost-przegrany-lead">ETAP 5B — Lost (Przegrany Lead)</h2>
-<p><strong>Opis:</strong> Klient odmówił lub nie odpowiedział po wielu follow-upach.</p>
-<h3 id="akcje-w-crm">Akcje w CRM</h3>
+<hr />
+<h2>ETAP 5B — Lost (Przegrany Lead)</h2>
+<h3>Akcje w CRM</h3>
 <ol>
-<li><strong>Zmień status</strong> na <code>Lost</code> (przycisk <code>Mark as Lost</code>)</li>
-<li><strong>Wpisz powód</strong> w notes (cena, czas, konkurencja, brak budżetu)</li>
-<li><strong>Wyślij grzeczną wiadomość zamykającą</strong> (<code>Send Email</code>)</li>
-<li><strong>Opcjonalnie:</strong> oznacz klienta tagiem &quot;re-engagement&quot; do przyszłych kampanii</li>
+<li><strong>Zmień status</strong> na <code>Lost</code> (<code>lost_at = now()</code>, wpisz <code>lost_reason</code>)</li>
+<li><strong>Zanotuj powód</strong> (cena, czas, konkurencja, brak budżetu)</li>
+<li><strong>Wyślij grzeczną wiadomość zamykającą</strong> (<code>Send Email</code> z szablonu)</li>
+<li><strong>Opcjonalnie:</strong> tag klienta do re-engagement (<code>add_tag</code> w automatyzacji)</li>
 </ol>
-<h3 id="checklist">Checklist</h3>
-<ul>
-<li><input type="checkbox" id="checkbox19"><label for="checkbox19">Odnotowany powód przegranej</label></li>
-<li><input type="checkbox" id="checkbox20"><label for="checkbox20">Wysłany e-mail zamykający (</label><code>email_sent</code>)</li>
-<li><input type="checkbox" id="checkbox21"><label for="checkbox21">Klient dodany do listy re-engagement</label></li>
-</ul>
-<hr>
-<h2 id="etap-6--realizacja-projektu">ETAP 6 — Realizacja Projektu</h2>
-<p>Po konwersji leada do projektu, praca odbywa się w zakładce <code>Projects</code>.</p>
-<h3 id="6a--wizyt%C3%B3wka-business-card-website">6A — Wizytówka (Business Card Website)</h3>
+<h3>Automatyzacje (opcjonalne)</h3>
 <table>
 <thead>
 <tr>
-<th>#</th>
-<th>Faza</th>
-<th>Opis</th>
+<th>Trigger</th>
+<th>Akcja</th>
+<th>Przykład</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1</td>
-<td><strong>Discovery &amp; Brief</strong></td>
-<td>Zebranie treści, logotypu, kolorów, referencji od klienta</td>
+<td><code>lead.stage_changed</code> → Lost</td>
+<td><code>send_email</code></td>
+<td>“Dziękujemy za zainteresowanie — zapraszamy w przyszłości”</td>
 </tr>
 <tr>
-<td>2</td>
-<td><strong>Design Mockups</strong></td>
-<td>Projektowanie makiet w Figma — 2 propozycje layoutu</td>
-</tr>
-<tr>
-<td>3</td>
-<td><strong>Development</strong></td>
-<td>Kodowanie strony (HTML/CSS/Laravel/WordPress)</td>
-</tr>
-<tr>
-<td>4</td>
-<td><strong>Content Integration</strong></td>
-<td>Wgranie tekstów, zdjęć, optymalizacja</td>
-</tr>
-<tr>
-<td>5</td>
-<td><strong>Testing &amp; QA</strong></td>
-<td>Testy na urządzeniach mobilnych, przeglądarkach, GTMetrix</td>
-</tr>
-<tr>
-<td>6</td>
-<td><strong>Launch &amp; Handover</strong></td>
-<td>Deploy na produkcję, przekazanie dostępów, szkolenie</td>
+<td><code>lead.stage_changed</code> → Lost</td>
+<td><code>add_tag</code></td>
+<td><code>re-engagement</code> — do kampanii follow-up</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Akcje CRM per faza:</strong></p>
-<ul>
-<li>Zmień fazę projektu gdy praca jest ukończona</li>
-<li>Wyślij klientowi aktualizację statusu e-mailem / SMS</li>
-<li>Zbierz feedback po Design Mockups przed przejściem do Development</li>
-</ul>
-<hr>
-<h3 id="6b--e-commerce-store">6B — E-Commerce Store</h3>
+<hr />
+<h2>ETAP 6 — Realizacja Projektu</h2>
+<p>Po konwersji leada do projektu, praca odbywa się w zakładce <code>Projects</code>.<br />
+Klient śledzi postęp przez <strong>Portal Klienta</strong> (<code>/portal/projects</code>).</p>
+<h3>Fazy projektu (ProjectPhase)</h3>
+<p>Status fazy: <code>pending</code> → <code>in_progress</code> → <code>completed</code> (lub <code>cancelled</code>)</p>
+<p>Szablony faz (<code>Project Templates</code> w Settings) definiują domyślne fazy per typ.</p>
+<h3>6A — Wizytówka / Landing Page</h3>
 <table>
 <thead>
 <tr>
 <th>#</th>
 <th>Faza</th>
-<th>Opis</th>
+<th>Akcje CRM</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>1</td>
-<td><strong>Discovery &amp; Strategy</strong></td>
-<td>Analiza konkurencji, strategia UX, dobór platformy</td>
+<td>Discovery &amp; Brief</td>
+<td>Zebranie treści, logotypów, referencji — zanotuj w projekcie</td>
 </tr>
 <tr>
 <td>2</td>
-<td><strong>UX / Wireframes</strong></td>
-<td>Szkice ścieżki zakupowej, layout kategorii i produktu</td>
+<td>Design Mockups</td>
+<td>2 propozycje layoutu — prześlij klientowi link/plik, poczekaj na feedback przez portal</td>
 </tr>
 <tr>
 <td>3</td>
-<td><strong>Design</strong></td>
-<td>Projekt graficzny w Figma, identyfikacja wizualna sklepu</td>
+<td>Development</td>
+<td>Kodowanie — zaktualizuj fazę na <code>in_progress</code></td>
 </tr>
 <tr>
 <td>4</td>
-<td><strong>Development</strong></td>
-<td>Wdrożenie szablonu, konfiguracja CMS / WooCommerce</td>
+<td>Content Integration</td>
+<td>Wgranie tekstów, zdjęć, SEO</td>
 </tr>
 <tr>
 <td>5</td>
-<td><strong>Product Import</strong></td>
-<td>Import produktów, zdjęć, opisów, kategorii</td>
+<td>Testing &amp; QA</td>
+<td>Testy mobilne, przeglądarki, performance</td>
 </tr>
 <tr>
 <td>6</td>
-<td><strong>Payment Integration</strong></td>
-<td>Konfiguracja bramek płatności (Przelewy24, Stripe, PayU)</td>
+<td>Launch &amp; Handover</td>
+<td>Deploy, przekazanie dostępów, e-mail z instrukcjami</td>
+</tr>
+</tbody>
+</table>
+<h3>6B — E-Commerce</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Faza</th>
+<th>Akcje CRM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Discovery &amp; Strategy</td>
+<td>Analiza, platforma, UX strategy</td>
+</tr>
+<tr>
+<td>2</td>
+<td>UX / Wireframes</td>
+<td>Ścieżka zakupowa, layout</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Design</td>
+<td>Figma, identyfikacja wizualna</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Development</td>
+<td>CMS / WooCommerce / Laravel</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Product Import</td>
+<td>Produkty, zdjęcia, kategorie</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Payment Integration</td>
+<td>Przelewy24, Stripe, PayU</td>
 </tr>
 <tr>
 <td>7</td>
-<td><strong>Testing &amp; QA</strong></td>
-<td>Testy całej ścieżki zakupowej, bezpieczeństwo</td>
+<td>Testing &amp; QA</td>
+<td>Testy zakupowe, bezpieczeństwo</td>
 </tr>
 <tr>
 <td>8</td>
-<td><strong>SEO &amp; Analytics Setup</strong></td>
-<td>Google Analytics, Search Console, sitemap, meta tagi</td>
+<td>SEO &amp; Analytics</td>
+<td>GA4, Search Console, sitemap</td>
 </tr>
 <tr>
 <td>9</td>
-<td><strong>Launch</strong></td>
-<td>Deploy, DNS, monitoring, brief szkoleniowy</td>
+<td>Launch</td>
+<td>Deploy, DNS, brief szkoleniowy</td>
 </tr>
 </tbody>
 </table>
-<hr>
-<h3 id="6c--web-application">6C — Web Application</h3>
+<h3>6C — Web Application</h3>
 <table>
 <thead>
 <tr>
 <th>#</th>
 <th>Faza</th>
-<th>Opis</th>
+<th>Akcje CRM</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>1</td>
-<td><strong>Discovery &amp; Requirements</strong></td>
-<td>Spisanie wymagań funkcjonalnych i niefunkcjonalnych</td>
+<td>Discovery &amp; Requirements</td>
+<td>Wymagania funkcjonalne i niefunkcjonalne</td>
 </tr>
 <tr>
 <td>2</td>
-<td><strong>System Architecture</strong></td>
-<td>Projekt bazy danych, API design, schemat architektury</td>
+<td>System Architecture</td>
+<td>DB schema, API design</td>
 </tr>
 <tr>
 <td>3</td>
-<td><strong>UI/UX Design</strong></td>
+<td>UI/UX Design</td>
 <td>Prototypy Figma, design system</td>
 </tr>
 <tr>
 <td>4</td>
-<td><strong>Backend Development</strong></td>
-<td>Laravel API, modele, logika biznesowa</td>
+<td>Backend Development</td>
+<td>Laravel API, modele, logika</td>
 </tr>
 <tr>
 <td>5</td>
-<td><strong>Frontend Development</strong></td>
-<td>React / Inertia / Blade, komponenty</td>
+<td>Frontend Development</td>
+<td>React / Inertia / Blade</td>
 </tr>
 <tr>
 <td>6</td>
-<td><strong>Integration &amp; API</strong></td>
-<td>Integracje zewnętrzne (płatności, SMS, e-mail, itp.)</td>
+<td>Integration &amp; API</td>
+<td>Płatności, SMS, email, zewnętrzne API</td>
 </tr>
 <tr>
 <td>7</td>
-<td><strong>Testing &amp; QA</strong></td>
-<td>Testy jednostkowe, E2E, penetracyjne</td>
+<td>Testing &amp; QA</td>
+<td>Jednostkowe, E2E, penetracyjne</td>
 </tr>
 <tr>
 <td>8</td>
-<td><strong>Deployment</strong></td>
-<td>CI/CD, serwer produkcyjny, SSL, backup</td>
+<td>Deployment</td>
+<td>CI/CD, SSL, backup</td>
 </tr>
 <tr>
 <td>9</td>
-<td><strong>Documentation</strong></td>
-<td>Dokumentacja techniczna i użytkownika</td>
+<td>Documentation</td>
+<td>Techniczna i użytkownika</td>
 </tr>
 </tbody>
 </table>
-<hr>
-<h2 id="etap-7--fakturowanie">ETAP 7 — Fakturowanie</h2>
-<h3 id="schemat-faktur-przyk%C5%82adowy-projekt-standard">Schemat faktur przykładowy (projekt standard)</h3>
-<pre class="hljs"><code><div>Faktura 1 — Zaliczka (50%)    →  Wystawiana przy starcie projektu (Won)
-Faktura 2 — Płatność końcowa (50%)  →  Wystawiana przy odbiorze
-</div></code></pre>
-<h3 id="akcje-w-crm">Akcje w CRM</h3>
-<ol>
-<li><strong>Utwórz fakturę:</strong> <code>Projects → [Projekt] → Invoices → New Invoice</code></li>
-<li><strong>Dodaj pozycje</strong> (usługa, godziny lub ryczałt)</li>
-<li><strong>Wyślij fakturę</strong> klientowi (<code>Send Invoice</code>) — system wyśle e-mail z PDF</li>
-<li><strong>Odznacz jako &quot;Paid&quot;</strong> gdy wpłata przychodzi</li>
-<li><strong>Śledź zaległości</strong> — faktury po terminie widoczne w dashboardzie</li>
-</ol>
-<h3 id="automatyzacje-fakturowania">Automatyzacje fakturowania</h3>
+<h3>Komunikacja z klientem przez portal</h3>
+<ul>
+<li>Klient widzi listę faz projektu z procentem ukończenia</li>
+<li>Możliwość wysyłania wiadomości (<code>ProjectMessage</code>) — zarówno klient jak i admin</li>
+<li>Wiadomości czytane przez admina oznaczane <code>read_at</code></li>
+<li>Automatyzacje <code>project.status_changed</code> → wysyłają <code>ProjectStatusMail</code> do klienta</li>
+</ul>
+<h3>Automatyzacje projektu</h3>
 <table>
 <thead>
 <tr>
 <th>Trigger</th>
 <th>Akcja</th>
+<th>Odbiornik</th>
+<th>Przykład</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>project.status_changed</code></td>
+<td><code>send_email</code></td>
+<td><code>client</code></td>
+<td><code>ProjectStatusMail</code> — “Status projektu zmieniony na: {{status}}”</td>
+</tr>
+<tr>
+<td><code>project.status_changed</code></td>
+<td><code>send_sms</code></td>
+<td><code>client</code></td>
+<td>“Aktualizacja projektu {{project_name}}: etap zakończony”</td>
+</tr>
+<tr>
+<td><code>project.status_changed</code></td>
+<td><code>notify_admin</code></td>
+<td>admin</td>
+<td>Wewnętrzne powiadomienie o zmianie</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>ETAP 7 — Fakturowanie</h2>
+<h3>Schemat faktur (standard)</h3>
+<pre><code>Faktura 1 — Zaliczka (50%)          →  Po podpisaniu kontraktu / Won
+Faktura 2 — Płatność końcowa (50%)  →  Po odbiorze projektu
+</code></pre>
+<blockquote>
+<p>Procent zaliczki definiowany w <code>Settings → Legal → Deposit Percent</code> (domyślnie 50%).<br />
+Termin płatności: <code>Settings → Legal → Payment Terms Days</code> (domyślnie 30 dni).</p>
+</blockquote>
+<h3>Statusy faktur</h3>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>draft</code></td>
+<td>Wersja robocza — niewidoczna dla klienta w portalu</td>
+</tr>
+<tr>
+<td><code>sent</code></td>
+<td>Wysłana — klient widzi w <code>/portal/invoices</code></td>
+</tr>
+<tr>
+<td><code>partially_paid</code></td>
+<td>Częściowa płatność odnotowana</td>
+</tr>
+<tr>
+<td><code>paid</code></td>
+<td>Opłacona w całości</td>
+</tr>
+<tr>
+<td><code>overdue</code></td>
+<td>Po terminie (sprawdzane przez <code>isOverdue()</code>)</td>
+</tr>
+<tr>
+<td><code>cancelled</code></td>
+<td>Anulowana</td>
+</tr>
+</tbody>
+</table>
+<h3>Akcje w CRM</h3>
+<ol>
+<li><strong>Utwórz fakturę</strong> → dodaj pozycje (Line Items) → system liczy <code>subtotal + VAT = total</code></li>
+<li><strong>Zmień status na <code>sent</code></strong> → system wysyła <code>InvoiceSentMail</code> do klienta</li>
+<li><strong>Klient widzi fakturę w portalu</strong> (<code>/portal/invoices</code>) — numer, status, kwota, termin</li>
+<li><strong>Stripe:</strong> jeśli ustawione <code>stripe_payment_link</code>, klient może zapłacić online</li>
+<li><strong>Odznacz jako <code>paid</code></strong> gdy wpłata przychodzi → system loguje <code>paid_at</code></li>
+<li><strong>Faktury po terminie</strong> widoczne w dashboardzie (badge <code>overdue</code>)</li>
+</ol>
+<h3>Automatyzacje fakturowania</h3>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Akcja</th>
+<th>Odbiornik</th>
+<th>Przykład</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>invoice.sent</code></td>
-<td>E-mail do klienta z informacją o fakturze</td>
+<td><code>send_email</code></td>
+<td><code>client</code></td>
+<td><code>InvoiceSentMail</code> — “Przesyłamy fakturę nr {{invoice_number}}”</td>
 </tr>
 <tr>
 <td><code>invoice.overdue</code></td>
-<td>SMS/e-mail przypomnienie o zaległej fakturze</td>
+<td><code>send_email</code></td>
+<td><code>client</code></td>
+<td>“Przypomnienie: faktura {{invoice_number}} jest zaległa”</td>
+</tr>
+<tr>
+<td><code>invoice.overdue</code></td>
+<td><code>send_sms</code></td>
+<td><code>client</code></td>
+<td>SMS: “Mamy niezapłaconą fakturę — prosimy o kontakt”</td>
 </tr>
 <tr>
 <td><code>invoice.paid</code></td>
-<td>E-mail potwierdzenie / notify_admin</td>
+<td><code>notify_admin</code></td>
+<td>admin</td>
+<td>“Faktura {{invoice_number}} opłacona przez {{client_name}}”</td>
+</tr>
+<tr>
+<td><code>invoice.paid</code></td>
+<td><code>send_email</code></td>
+<td><code>client</code></td>
+<td>Potwierdzenie wpłaty</td>
 </tr>
 </tbody>
 </table>
-<hr>
-<h2 id="etap-8--finalizacja-i-odbi%C3%B3r">ETAP 8 — Finalizacja i Odbiór</h2>
-<p><strong>Opis:</strong> Projekt gotowy do prezentacji klientowi.</p>
-<h3 id="akcje-w-crm">Akcje w CRM</h3>
+<blockquote>
+<p><strong>Uwaga:</strong> <code>invoice.overdue</code> wymaga skonfigurowania schedulera / cron — trigger jest<br />
+zadeklarowany w systemie, ale nie jest jeszcze dispatched automatycznie przez listener.<br />
+Należy uruchomić <code>php artisan schedule:run</code> i dodać komendę sprawdzającą zaległe faktury.</p>
+</blockquote>
+<hr />
+<h2>ETAP 8 — Finalizacja i Odbiór</h2>
+<h3>Akcje w CRM</h3>
 <ol>
-<li><strong>Przesuń projekt do ostatniej fazy</strong> (np. <code>Launch &amp; Handover</code> / <code>Deployment</code>)</li>
-<li><strong>Przeprowadź sesję odbioru</strong> z klientem (screen share lub spotkanie)</li>
-<li><strong>Zbierz podpis odbioru</strong> (PDF lub e-mail potwierdzający acceptance)</li>
+<li><strong>Przesuń projekt do ostatniej fazy</strong> (np. <code>Launch &amp; Handover</code>)</li>
+<li><strong>Zmień status projektu</strong> na <code>completed</code></li>
 <li><strong>Wystaw fakturę końcową</strong> (pozostałe 50%)</li>
-<li><strong>Zmień status projektu</strong> na <code>Completed</code></li>
-<li><strong>Wyślij e-mail podsumowujący</strong> z:
-<ul>
-<li>Danymi dostępowymi (hosting, CMS, etc.)</li>
-<li>Instrukcją obsługi</li>
-<li>Informacją o gwarancji / support package</li>
-</ul>
-</li>
-<li><strong>Poproś o referencje</strong> (review Google, LinkedIn recommendation)</li>
+<li><strong>Wyślij e-mail podsumowujący</strong> z danymi dostępowymi, instrukcją obsługi, informacją o gwarancji</li>
+<li><strong>Poproś o referencje</strong> (review Google / LinkedIn)</li>
 </ol>
-<h3 id="opcjonalnie--po-zamkni%C4%99ciu">Opcjonalnie — po zamknięciu</h3>
+<h3>Automatyzacje zamknięcia</h3>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Akcja</th>
+<th>Odbiornik</th>
+<th>Przykład</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>project.status_changed</code> → <code>completed</code></td>
+<td><code>send_email</code></td>
+<td><code>client</code></td>
+<td><code>ProjectStatusMail</code> — “Projekt ukończony! Oto Twoje dane dostępowe…”</td>
+</tr>
+<tr>
+<td><code>project.status_changed</code> → <code>completed</code></td>
+<td><code>notify_admin</code></td>
+<td>admin</td>
+<td>“Projekt {{project_name}} zamknięty — czas na fakturę końcową”</td>
+</tr>
+</tbody>
+</table>
+<h3>Opcjonalne po zamknięciu</h3>
 <ul>
-<li>Dodaj klienta do segmentu &quot;Aktywni klienci&quot; (tagi w CRM)</li>
-<li>Utwórz nowego leada dla kolejnego projektu (upsell)</li>
-<li>Zaplanuj check-in po 30/60 dniach</li>
+<li>Utwórz nowego leada dla upsell / kolejnego projektu</li>
+<li>Zaplanuj check-in po 30/60 dniach (<code>delay_minutes</code>)</li>
 </ul>
-<hr>
-<h2 id="podsumowanie--mapa-akcji-crm">Podsumowanie — mapa akcji CRM</h2>
-<pre class="hljs"><code><div>LEAD CREATED
-  ├─ Auto SMS: &quot;Dziękujemy za kontakt&quot;
-  ├─ Auto Email: notify admin
+<hr />
+<h2>Portal Klienta — pełna mapa funkcji</h2>
+<table>
+<thead>
+<tr>
+<th>URL</th>
+<th>Strona</th>
+<th>Co widzi klient</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/portal</code></td>
+<td>Dashboard</td>
+<td>Projekty (5 ostatnich), faktury (5), wyceny (5)</td>
+</tr>
+<tr>
+<td><code>/portal/projects</code></td>
+<td>Lista projektów</td>
+<td>Tytuł, status, deadline, typ usługi</td>
+</tr>
+<tr>
+<td><code>/portal/projects/{id}</code></td>
+<td>Szczegół projektu</td>
+<td>Fazy, tasks, wiadomości, możliwość wysłania wiadomości</td>
+</tr>
+<tr>
+<td><code>/portal/invoices</code></td>
+<td>Faktury</td>
+<td>Numer, status, kwota, termin, link Stripe</td>
+</tr>
+<tr>
+<td><code>/portal/quotes</code></td>
+<td>Wyceny</td>
+<td>Numer, status, total, termin ważności; <code>View →</code> (ukryty dla draft)</td>
+</tr>
+<tr>
+<td><code>/portal/quotes/{id}</code></td>
+<td>Szczegół wyceny</td>
+<td>Pozycje, totale, notes, terms; przyciski Accept/Reject (gdy sent)</td>
+</tr>
+<tr>
+<td><code>/portal/contracts</code></td>
+<td>Kontrakty</td>
+<td>Numer, tytuł, status, wartość; <code>Sign →</code> lub <code>View →</code></td>
+</tr>
+<tr>
+<td><code>/portal/contracts/{id}</code></td>
+<td>Szczegół kontraktu</td>
+<td>Treść terms, summary; formularz podpisu (gdy sent)</td>
+</tr>
+</tbody>
+</table>
+<h3>Dostęp do portalu</h3>
+<ul>
+<li>Konto tworzone przez: <code>create_portal_access</code> (automatyzacja) lub ręcznie przez admina</li>
+<li>Rola użytkownika: <code>client</code></li>
+<li>Zaproszenie: <code>PortalInviteMail</code> z loginem, hasłem i linkiem</li>
+</ul>
+<hr />
+<h2>Powiadomienia — pełna tabela</h2>
+<h3>E-maile (klasy Mail)</h3>
+<table>
+<thead>
+<tr>
+<th>Klasa</th>
+<th>Kiedy wysyłana</th>
+<th>Odbiornik</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QuoteSentMail</code></td>
+<td>Wycena oznaczona jako <code>sent</code></td>
+<td>Klient</td>
+</tr>
+<tr>
+<td><code>InvoiceSentMail</code></td>
+<td>Faktura oznaczona jako <code>sent</code></td>
+<td>Klient</td>
+</tr>
+<tr>
+<td><code>PortalInviteMail</code></td>
+<td>Tworzone konto w portalu</td>
+<td>Klient</td>
+</tr>
+<tr>
+<td><code>ProjectStatusMail</code></td>
+<td>Zmiana statusu projektu</td>
+<td>Klient</td>
+</tr>
+<tr>
+<td><code>ClientEmailMail</code></td>
+<td>Ręczny e-mail z szablonu (z leada)</td>
+<td>Klient (dowolny adresat)</td>
+</tr>
+<tr>
+<td><code>NewLeadMail</code></td>
+<td>Nowy lead (automatyzacja)</td>
+<td>Admin</td>
+</tr>
+</tbody>
+</table>
+<h3>SMS (Twilio)</h3>
+<ul>
+<li>Szablony w <code>Settings → SMS Templates</code></li>
+<li>Zmienne: <code>{{client_name}}</code>, <code>{{company_name}}</code>, <code>{{lead_title}}</code>, <code>{{project_name}}</code>, <code>{{assigned_name}}</code>, <code>{{stage_name}}</code> itp.</li>
+<li>Wymagana konfiguracja: <code>Settings → Integrations → Twilio (SID, Token, From)</code></li>
+<li>Numery UK: <code>07xxx</code> → auto-normalizacja do <code>+447xxx</code></li>
+</ul>
+<h3>Automatyzacje — dostępne akcje</h3>
+<table>
+<thead>
+<tr>
+<th>Akcja (<code>type</code>)</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>send_email</code></td>
+<td>Wysyła email przez skonfigurowany Mail → klient / admin / assigned_user</td>
+</tr>
+<tr>
+<td><code>send_sms</code></td>
+<td>Wysyła SMS przez Twilio → klient / assigned_user</td>
+</tr>
+<tr>
+<td><code>notify_admin</code></td>
+<td>Wysyła surowy email na adres admina (<code>mail.admin_address</code>)</td>
+</tr>
+<tr>
+<td><code>create_portal_access</code></td>
+<td>Tworzy konto portalu dla klienta, wysyła <code>PortalInviteMail</code></td>
+</tr>
+<tr>
+<td><code>add_tag</code></td>
+<td>Dodaje tag do leada (<code>leads.tags</code>)</td>
+</tr>
+<tr>
+<td><code>change_status</code></td>
+<td>Zmienia status encji (Lead / Project / Invoice)</td>
+</tr>
+</tbody>
+</table>
+<h3>Opóźnienia automatyzacji</h3>
+<ul>
+<li>Pole <code>delay_minutes</code> w regule automatyzacji (0 = natychmiast)</li>
+<li>Zadanie wykonywane przez kolejkę Laravel (<code>ProcessAutomationJob</code>)</li>
+<li>Warunki (<code>conditions</code>): operatory <code>=</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>contains</code></li>
+</ul>
+<hr />
+<h2>Zmienne szablonowe (e-mail / SMS)</h2>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Źródło</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{{today}}</code></td>
+<td>Aktualna data</td>
+</tr>
+<tr>
+<td><code>{{client_name}}</code></td>
+<td><code>clients.primary_contact_name</code></td>
+</tr>
+<tr>
+<td><code>{{company_name}}</code></td>
+<td><code>clients.company_name</code></td>
+</tr>
+<tr>
+<td><code>{{lead_title}}</code></td>
+<td><code>leads.title</code></td>
+</tr>
+<tr>
+<td><code>{{stage_name}}</code></td>
+<td><code>pipeline_stages.name</code></td>
+</tr>
+<tr>
+<td><code>{{assigned_name}}</code></td>
+<td><code>users.name</code> (właściciel leada/projektu)</td>
+</tr>
+<tr>
+<td><code>{{project_name}}</code></td>
+<td><code>projects.title</code></td>
+</tr>
+<tr>
+<td><code>{{invoice_number}}</code></td>
+<td><code>invoices.number</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Podsumowanie — mapa akcji CRM v2</h2>
+<pre><code>LEAD CREATED
+  ├─ Auto SMS → klient: &quot;Dziękujemy za kontakt&quot;
+  ├─ Auto Email → admin: &quot;Nowy lead: {{lead_title}}&quot;
   └─ Checklist: dane, budżet, typ, owner
 
 CONTACTED
-  ├─ Email powitalny (ręcznie lub auto)
-  └─ Checklist: discovery call, kwalifikacja
+  ├─ Email powitalny → klient (ręcznie lub auto)
+  ├─ SMS → klient: &quot;Oddzwonimy dziś!&quot;
+  └─ Discovery call + kwalifikacja
 
 PROPOSAL SENT
-  ├─ Proposal Builder → PDF
-  ├─ Email z ofertą
-  └─ Follow-up: SMS po 3 dniach
+  ├─ Utwórz Quote → pozycje → totale auto
+  ├─ Send Quote (admin) → status: draft → sent
+  ├─ QuoteSentMail → klient
+  ├─ Klient w portalu: Accept / Reject
+  └─ Po akceptacji: Create Contract
 
-NEGOTIATION
-  ├─ Notes z ustaleniami
-  └─ Podpisana umowa + zaliczka
+KONTRAKT
+  ├─ Utwórz z szablonu (placeholdery auto)
+  ├─ Send to Portal (admin) → status: draft → sent
+  ├─ Auto Email/SMS → klient: &quot;Kontrakt czeka na podpis&quot;
+  ├─ Klient w portalu: Draw Signature lub E-Acceptance
+  ├─ Po podpisaniu: signer_name + signer_ip + signed_at
+  └─ Auto notify → admin: &quot;Kontrakt podpisany&quot;
 
 WON
-  ├─ Convert → Project (wybierz template)
-  ├─ Faktura zaliczkowa 50%
-  ├─ Auto Email: kickoff info
-  └─ Projekt → fazy → tasks
+  ├─ Mark as Won → won_at
+  ├─ Convert → Project (szablon → auto-fazy)
+  ├─ create_portal_access → PortalInviteMail
+  ├─ Faktura zaliczkowa (50%) → sent → InvoiceSentMail
+  └─ Kickoff call
 
-  PROJECT PHASES
-    ├─ Discovery → Design → Development
-    ├─ QA → Launch
-    └─ Per faza: update status, email do klienta
+PROJECT PHASES
+  ├─ pending → in_progress → completed
+  ├─ Wiadomości przez portal (ProjectMessage)
+  └─ project.status_changed → ProjectStatusMail → klient
 
 INVOICE
-  ├─ send: auto email
-  ├─ overdue: auto SMS/email reminder
-  └─ paid: auto notify + confirmation
+  ├─ sent → InvoiceSentMail → klient
+  ├─ overdue → reminder (wymaga schedulera)
+  └─ paid → confirmation + notify admin
 
 DONE
-  ├─ Faktura końcowa 50%
-  ├─ Project status = Completed
-  ├─ Email: dostępy + instrukcje
+  ├─ Projekt → status: completed
+  ├─ Faktura końcowa (50%)
+  ├─ ProjectStatusMail z danymi dostępowymi
   └─ Prośba o referencje
-</div></code></pre>
-<hr>
-<h2 id="scenariusze-do-przetestowania">Scenariusze do przetestowania</h2>
+</code></pre>
+<hr />
+<h2>Scenariusze do przetestowania — v2</h2>
 <table>
 <thead>
 <tr>
@@ -903,53 +1176,80 @@ DONE
 </tr>
 <tr>
 <td>T2</td>
-<td>Przesuń lead przez wszystkie etapy</td>
-<td>Zmiana stage, checklisty, automaty</td>
+<td>Przesuń lead przez wszystkie etapy pipeline</td>
+<td>Zmiana stage, trigger <code>lead.stage_changed</code>, automatyzacje</td>
 </tr>
 <tr>
 <td>T3</td>
 <td>Wyślij e-mail z szablonu z leada</td>
-<td>Modal email, zmienne, log aktywności</td>
+<td>Modal email, zmienne, <code>ClientEmailMail</code></td>
 </tr>
 <tr>
 <td>T4</td>
 <td>Wyślij SMS z leada</td>
-<td>Modal SMS, template, char counter, log</td>
+<td>Twilio, <code>SmsTemplate</code>, char counter</td>
 </tr>
 <tr>
 <td>T5</td>
-<td>Ustaw leada jako Won → utwórz projekt</td>
-<td>Konwersja, template projektu, fazy</td>
+<td>Utwórz i wyślij Quote → klient akceptuje</td>
+<td><code>quote.sent</code>, <code>quote.accepted</code>, portal Accept/Reject</td>
 </tr>
 <tr>
 <td>T6</td>
-<td>Wystaw i wyślij fakturę</td>
-<td>PDF, e-mail, status paid/overdue</td>
+<td>Utwórz kontrakt z szablonu</td>
+<td>Interpolacja placeholderów <code>{{client.xxx}}</code>, <code>{{legal.xxx}}</code></td>
 </tr>
 <tr>
 <td>T7</td>
-<td>Stwórz regułę automation</td>
-<td>Trigger + akcja, delay, warunek stage</td>
+<td>Wyślij kontrakt do portalu → klient podpisuje (pad)</td>
+<td><code>contract.sent</code>, <code>contract.signed</code>, <code>signature_data</code>, <code>signer_ip</code></td>
 </tr>
 <tr>
 <td>T8</td>
-<td>Automation: SMS przy zmianie stage</td>
-<td>ProcessAutomationJob, kolejka, log</td>
+<td>Klient podpisuje kontrakt (checkbox e-acceptance)</td>
+<td>Brak <code>signature_data</code>, tylko <code>signer_name</code> + <code>signer_ip</code></td>
 </tr>
 <tr>
 <td>T9</td>
-<td>Lead → Lost → re-engagement</td>
-<td>Status, notes, email zamykający</td>
+<td>Ustaw leada jako Won → stwórz projekt z szablonu</td>
+<td>Konwersja, <code>ProjectTemplate</code>, auto-fazy</td>
 </tr>
 <tr>
 <td>T10</td>
-<td>Przejście przez wszystkie fazy projektu</td>
-<td>Update fazy, notes, finalna faktura</td>
+<td><code>create_portal_access</code> → <code>PortalInviteMail</code></td>
+<td>Konto klienta, rola <code>client</code>, email z hasłem</td>
+</tr>
+<tr>
+<td>T11</td>
+<td>Wystaw fakturę zaliczkową → wyślij</td>
+<td><code>InvoiceSentMail</code>, portal <code>/invoices</code></td>
+</tr>
+<tr>
+<td>T12</td>
+<td>Faktura zaległa — test <code>isOverdue()</code></td>
+<td><code>due_date</code> w przeszłości, badge <code>overdue</code></td>
+</tr>
+<tr>
+<td>T13</td>
+<td>Stwórz regułę automation z delay</td>
+<td><code>ProcessAutomationJob</code>, kolejka, log</td>
+</tr>
+<tr>
+<td>T14</td>
+<td>Lead → Lost → tag re-engagement</td>
+<td><code>lost_reason</code>, <code>add_tag</code>, email zamykający</td>
+</tr>
+<tr>
+<td>T15</td>
+<td>Przesuń projekt przez wszystkie fazy → ukończ</td>
+<td>Fazy, <code>project.status_changed</code>, <code>ProjectStatusMail</code></td>
+</tr>
+<tr>
+<td>T16</td>
+<td>Wiadomości w portalu projektu</td>
+<td><code>ProjectMessage</code>, <code>read_at</code>, widok admin + klient</td>
 </tr>
 </tbody>
 </table>
-<hr>
-<p><em>Dokument wygenerowany: 22 marca 2026 — wersja 1.0</em></p>
-
-</body>
-</html>
+<hr />
+<p><em>Dokument zaktualizowany: 24 marca 2026 — wersja 2.0</em></p>

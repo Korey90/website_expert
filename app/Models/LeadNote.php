@@ -13,7 +13,7 @@ class LeadNote extends Model
 
     public function lead(): BelongsTo
     {
-        return $this->belongsTo(Lead::class);
+        return $this->belongsTo(Lead::class)->withTrashed();
     }
 
     public function user(): BelongsTo

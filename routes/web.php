@@ -56,7 +56,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/projects/{project}', [PortalController::class, 'project'])->name('project');
         Route::post('/projects/{project}/messages', [PortalController::class, 'postMessage'])->name('messages.store');
         Route::get('/invoices', [PortalController::class, 'invoices'])->name('invoices');
+        Route::get('/invoices/{invoice}', [PortalController::class, 'invoice'])->name('invoice');
         Route::get('/quotes', [PortalController::class, 'quotes'])->name('quotes');
+        Route::get('/quotes/{quote}', [PortalController::class, 'quote'])->name('quote');
+        Route::post('/quotes/{quote}/accept', [PortalController::class, 'acceptQuote'])->name('quotes.accept');
+        Route::post('/quotes/{quote}/reject', [PortalController::class, 'rejectQuote'])->name('quotes.reject');
+        Route::get('/contracts', [PortalController::class, 'contracts'])->name('contracts');
+        Route::get('/contracts/{contract}', [PortalController::class, 'contract'])->name('contract');
+        Route::post('/contracts/{contract}/sign', [PortalController::class, 'signContract'])->name('contracts.sign');
     });
 
     // Email template preview (admin only)

@@ -8,6 +8,7 @@ use App\Models\Contract;
 use App\Models\ContractTemplate;
 use App\Models\Project;
 use App\Models\Quote;
+use App\Services\ContractInterpolationService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -49,12 +50,18 @@ class ContractResource extends Resource
                                 ->mapWithKeys(fn ($t) => [$t->id => "[{$t->language}] {$t->name}"])
                         )
                         ->live()
-                        ->afterStateUpdated(function ($state, callable $set) {
-                            if ($state) {
-                                $template = ContractTemplate::find($state);
-                                if ($template) {
-                                    $set('terms', $template->content);
-                                }
+                        ->afterStateUpdated(function ($state, callable $set, \Filament\Schemas\Components\Utilities\Get $get) {
+                            if (!$state) return;
+                            $template = ContractTemplate::find($state);
+                            if (!$template) return;
+                            $client  = Client::find($get('client_id'));
+                            $project = Project::find($get('project_id'));
+                            $content = app(ContractInterpolationService::class)
+                                ->interpolate($template->content, $client, $project);
+                            $set('terms', $content);
+                            $set('contract_template_id', $state);
+                            if (!$get('title')) {
+                                $set('title', $template->name);
                             }
                         })
                         ->dehydrated(false)
@@ -76,28 +83,39 @@ class ContractResource extends Resource
                         ->columnSpan(2),
                     Forms\Components\Select::make('client_id')
                         ->label('Client')
-                        ->options(Client::orderBy('company_name')->pluck('company_name', 'id'))
+                        ->options(Client::withTrashed()->orderBy('company_name')->pluck('company_name', 'id'))
                         ->searchable()
                         ->required()
+                        ->default(fn () => request('client_id'))
                         ->live(),
                     Forms\Components\Select::make('project_id')
                         ->label('Project')
                         ->options(fn (\Filament\Schemas\Components\Utilities\Get $get) =>
-                            Project::when($get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
+                            Project::withTrashed()->when($get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
                                 ->orderBy('title')
                                 ->pluck('title', 'id')
                         )
                         ->searchable()
-                        ->nullable(),
+                        ->nullable()
+                        ->default(fn () => request('project_id'))
+                        ->live()
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            if (!$state) return;
+                            $project = Project::withTrashed()->find($state);
+                            if (!$project) return;
+                            $set('value', $project->budget);
+                            $set('currency', $project->currency);
+                        }),
                     Forms\Components\Select::make('quote_id')
                         ->label('Quote')
                         ->options(fn (\Filament\Schemas\Components\Utilities\Get $get) =>
-                            Quote::when($get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
+                            Quote::withTrashed()->when($get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
                                 ->orderBy('number')
                                 ->pluck('number', 'id')
                         )
                         ->searchable()
-                        ->nullable(),
+                        ->nullable()
+                        ->default(fn () => request('quote_id')),
                     Forms\Components\Select::make('status')
                         ->options([
                             'draft'     => 'Draft',
@@ -110,13 +128,13 @@ class ContractResource extends Resource
                         ->required(),
                     Forms\Components\Select::make('currency')
                         ->options(['GBP' => '£ GBP', 'EUR' => '€ EUR', 'USD' => '$ USD', 'PLN' => 'zł PLN'])
-                        ->default('GBP')
+                        ->default(fn () => request('currency', 'GBP'))
                         ->required(),
                     Forms\Components\TextInput::make('value')
                         ->label('Contract Value')
                         ->numeric()
                         ->prefix('£')
-                        ->default(0),
+                        ->default(fn () => request('value', 0)),
                 ]),
 
             Section::make('Dates')
@@ -204,7 +222,7 @@ class ContractResource extends Resource
                     ]),
                 Tables\Filters\SelectFilter::make('client_id')
                     ->label('Client')
-                    ->options(Client::orderBy('company_name')->pluck('company_name', 'id'))
+                    ->options(Client::withTrashed()->orderBy('company_name')->pluck('company_name', 'id'))
                     ->searchable(),
                 Tables\Filters\TrashedFilter::make(),
             ])

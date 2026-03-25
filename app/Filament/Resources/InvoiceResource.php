@@ -39,12 +39,12 @@ class InvoiceResource extends Resource
                         ->required(),
                     Forms\Components\Select::make('client_id')
                         ->label('Client')
-                        ->options(Client::pluck('company_name', 'id'))
+                        ->options(Client::withTrashed()->pluck('company_name', 'id'))
                         ->searchable()
                         ->required(),
                     Forms\Components\Select::make('project_id')
                         ->label('Project')
-                        ->options(Project::pluck('title', 'id'))
+                        ->options(Project::withTrashed()->pluck('title', 'id'))
                         ->searchable(),
                     Forms\Components\Select::make('status')
                         ->options(['draft' => 'Draft', 'sent' => 'Sent', 'partially_paid' => 'Partially Paid', 'paid' => 'Paid', 'overdue' => 'Overdue', 'cancelled' => 'Cancelled'])

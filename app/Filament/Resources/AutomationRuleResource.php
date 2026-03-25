@@ -35,6 +35,10 @@ class AutomationRuleResource extends Resource
         'invoice.paid'            => 'Invoice Paid',
         'quote.sent'              => 'Quote Sent',
         'quote.accepted'          => 'Quote Accepted',
+        'contract.created'        => 'Contract Created',
+        'contract.sent'           => 'Contract Sent',
+        'contract.signed'         => 'Contract Signed',
+        'contract.expired'        => 'Contract Expired',
     ];
 
     public static function form(Schema $form): Schema

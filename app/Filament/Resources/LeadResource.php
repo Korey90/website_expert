@@ -35,8 +35,9 @@ class LeadResource extends Resource
                     Forms\Components\TextInput::make('title')->required()->maxLength(255)->columnSpanFull(),
                     Forms\Components\Select::make('client_id')
                         ->label('Client')
-                        ->options(Client::pluck('company_name', 'id'))
+                        ->options(Client::withTrashed()->pluck('company_name', 'id'))
                         ->searchable()
+                        ->default(fn () => request('client_id') ? (int) request('client_id') : null)
                         ->createOptionForm([
                             Forms\Components\TextInput::make('company_name')->required(),
                             Forms\Components\TextInput::make('primary_contact_email')->email(),

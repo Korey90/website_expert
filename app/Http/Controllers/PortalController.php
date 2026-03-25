@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Contract;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Models\ProjectMessage;
@@ -119,6 +120,26 @@ class PortalController extends Controller
         ]);
     }
 
+    public function invoice(Invoice $invoice): Response|RedirectResponse
+    {
+        $client = $this->clientForUser();
+
+        if (! $client || $invoice->client_id !== $client->id) {
+            abort(403);
+        }
+
+        if ($invoice->status === 'draft') {
+            abort(403);
+        }
+
+        $invoice->load('items');
+
+        return Inertia::render('Portal/Invoice', [
+            'client'  => $client->only('id', 'company_name'),
+            'invoice' => $invoice,
+        ]);
+    }
+
     public function quotes(): Response|RedirectResponse
     {
         $client = $this->clientForUser();
@@ -135,6 +156,134 @@ class PortalController extends Controller
             'client' => $client->only('id', 'company_name'),
             'quotes' => $quotes,
         ]);
+    }
+
+    public function quote(Quote $quote): Response|RedirectResponse
+    {
+        $client = $this->clientForUser();
+
+        if (! $client || $quote->client_id !== $client->id) {
+            abort(403);
+        }
+
+        $quote->load('items');
+
+        return Inertia::render('Portal/Quote', [
+            'client' => $client->only('id', 'company_name'),
+            'quote'  => $quote,
+        ]);
+    }
+
+    public function acceptQuote(Quote $quote): RedirectResponse
+    {
+        $client = $this->clientForUser();
+
+        if (! $client || $quote->client_id !== $client->id) {
+            abort(403);
+        }
+
+        if ($quote->status !== 'sent') {
+            return redirect()->route('portal.quote', $quote)->with('error', 'This quote can no longer be accepted.');
+        }
+
+        $quote->update([
+            'status'      => 'accepted',
+            'accepted_at' => now(),
+        ]);
+
+        return redirect()->route('portal.quote', $quote)->with('success', 'Quote accepted! We will be in touch shortly.');
+    }
+
+    public function rejectQuote(Quote $quote): RedirectResponse
+    {
+        $client = $this->clientForUser();
+
+        if (! $client || $quote->client_id !== $client->id) {
+            abort(403);
+        }
+
+        if ($quote->status !== 'sent') {
+            return redirect()->route('portal.quote', $quote)->with('error', 'This quote can no longer be rejected.');
+        }
+
+        $quote->update([
+            'status'      => 'rejected',
+            'rejected_at' => now(),
+        ]);
+
+        return redirect()->route('portal.quote', $quote)->with('success', 'Quote rejected.');
+    }
+
+    public function contracts(): Response|RedirectResponse
+    {
+        $client = $this->clientForUser();
+
+        if (! $client) {
+            return redirect()->route('dashboard');
+        }
+
+        $contracts = Contract::where('client_id', $client->id)
+            ->whereIn('status', ['sent', 'signed', 'expired', 'cancelled'])
+            ->latest()
+            ->get(['id', 'number', 'title', 'status', 'value', 'currency', 'starts_at', 'expires_at', 'signed_at']);
+
+        return Inertia::render('Portal/Contracts', [
+            'client'    => $client->only('id', 'company_name'),
+            'contracts' => $contracts,
+        ]);
+    }
+
+    public function contract(Contract $contract): Response|RedirectResponse
+    {
+        $client = $this->clientForUser();
+
+        if (! $client || $contract->client_id !== $client->id) {
+            abort(403);
+        }
+
+        if (! in_array($contract->status, ['sent', 'signed', 'expired', 'cancelled'])) {
+            abort(403);
+        }
+
+        return Inertia::render('Portal/Contract', [
+            'client'   => $client->only('id', 'company_name'),
+            'contract' => $contract->only(
+                'id', 'number', 'title', 'status', 'value', 'currency',
+                'terms', 'notes', 'starts_at', 'expires_at', 'sent_at', 'signed_at',
+                'signer_name', 'signer_ip'
+            ),
+        ]);
+    }
+
+    public function signContract(Request $request, Contract $contract): RedirectResponse
+    {
+        $client = $this->clientForUser();
+
+        if (! $client || $contract->client_id !== $client->id) {
+            abort(403);
+        }
+
+        if ($contract->status !== 'sent') {
+            return redirect()->route('portal.contract', $contract)
+                ->with('error', 'This contract can no longer be signed.');
+        }
+
+        $validated = $request->validate([
+            'signer_name'    => ['required', 'string', 'max:200'],
+            'signature_data' => ['nullable', 'string'],
+            'confirmed'      => ['required', 'accepted'],
+        ]);
+
+        $contract->update([
+            'status'         => 'signed',
+            'signed_at'      => now(),
+            'signer_name'    => $validated['signer_name'],
+            'signer_ip'      => $request->ip(),
+            'signature_data' => $validated['signature_data'] ?? null,
+        ]);
+
+        return redirect()->route('portal.contract', $contract)
+            ->with('success', 'Contract signed successfully. Thank you!');
     }
 
     public function postMessage(Request $request, Project $project): RedirectResponse
