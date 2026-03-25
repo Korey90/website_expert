@@ -18,10 +18,17 @@ class Client extends Model
         'address_line1', 'address_line2', 'city', 'county', 'postcode', 'country',
         'primary_contact_name', 'primary_contact_email', 'primary_contact_phone',
         'assigned_to', 'lifetime_value', 'currency', 'notes', 'portal_user_id',
+        'notify_email_transactional', 'notify_email_projects', 'notify_email_marketing',
+        'notify_sms', 'communication_prefs_updated_at',
     ];
 
     protected $casts = [
-        'lifetime_value' => 'decimal:2',
+        'lifetime_value'                => 'decimal:2',
+        'notify_email_transactional'    => 'boolean',
+        'notify_email_projects'         => 'boolean',
+        'notify_email_marketing'        => 'boolean',
+        'notify_sms'                    => 'boolean',
+        'communication_prefs_updated_at'=> 'datetime',
     ];
 
     public function assignedTo(): BelongsTo

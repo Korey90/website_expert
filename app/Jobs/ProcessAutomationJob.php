@@ -16,6 +16,7 @@ use App\Models\Quote;
 use App\Models\SmsTemplate;
 use App\Models\User;
 use App\Services\SmsService;
+use App\Services\ClientNotificationGate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -131,6 +132,11 @@ class ProcessAutomationJob implements ShouldQueue
 
     private function sendEmail(array $action): void
     {
+        $client = $this->resolveClient();
+        if ($client && ! ClientNotificationGate::canSendEmail($client, 'marketing')) {
+            return;
+        }
+
         $to = $this->resolveRecipientEmail($action['recipient'] ?? 'client');
         if (! $to) {
             return;
@@ -154,6 +160,11 @@ class ProcessAutomationJob implements ShouldQueue
 
     private function sendSms(array $action): void
     {
+        $client = $this->resolveClient();
+        if ($client && ! ClientNotificationGate::canSendSms($client)) {
+            return;
+        }
+
         $phone = $this->resolveRecipientPhone($action['recipient'] ?? $action['to'] ?? 'client');
         if (! $phone) {
             return;
@@ -325,6 +336,26 @@ class ProcessAutomationJob implements ShouldQueue
             'client' => $this->resolveClientPhone(),
             default  => preg_match('/^\+?[\d\s\-()]{7,}$/', $recipient) ? $recipient : null,
         };
+    }
+
+    private function resolveClient(): ?Client
+    {
+        if (isset($this->context['client_id'])) {
+            return Client::find($this->context['client_id']);
+        }
+        if (isset($this->context['lead_id'])) {
+            return Lead::find($this->context['lead_id'])?->client;
+        }
+        if (isset($this->context['project_id'])) {
+            return Project::find($this->context['project_id'])?->client;
+        }
+        if (isset($this->context['invoice_id'])) {
+            return Invoice::find($this->context['invoice_id'])?->client;
+        }
+        if (isset($this->context['quote_id'])) {
+            return Quote::find($this->context['quote_id'])?->client;
+        }
+        return null;
     }
 
     private function resolveClientPhone(): ?string

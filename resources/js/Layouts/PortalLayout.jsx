@@ -53,8 +53,17 @@ export default function PortalLayout({ client, children }) {
 
                     <div className="px-4 py-4 border-t border-gray-200">
                         <Link
+                            href={route('portal.settings.notifications')}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
+                                ${isActive(route('portal.settings.notifications'))
+                                    ? 'bg-red-50 text-red-700 font-medium'
+                                    : 'text-gray-600 hover:bg-gray-100'}`}
+                        >
+                            <span>🔔</span> Notifications
+                        </Link>
+                        <Link
                             href={route('profile.edit')}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 mt-1"
                         >
                             <span>⚙️</span> Account Settings
                         </Link>

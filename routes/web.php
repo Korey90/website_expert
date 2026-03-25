@@ -71,6 +71,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/contracts', [PortalController::class, 'contracts'])->name('contracts');
         Route::get('/contracts/{contract}', [PortalController::class, 'contract'])->name('contract');
         Route::post('/contracts/{contract}/sign', [PortalController::class, 'signContract'])->name('contracts.sign');
+
+        // Communication preferences
+        Route::get('/settings/notifications', [PortalController::class, 'notificationSettings'])->name('settings.notifications');
+        Route::post('/settings/notifications', [PortalController::class, 'updateNotificationSettings'])->name('settings.notifications.update');
     });
 
     // Email template preview (admin only)

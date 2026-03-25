@@ -6,6 +6,7 @@ use App\Mail\PaymentReceivedMail;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Setting;
+use App\Services\ClientNotificationGate;
 use App\Services\PayuService;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
@@ -83,17 +84,20 @@ class PayuWebhookController extends Controller
             }
 
             // Send confirmation email + SMS
+            $payuClient = $invoice->client;
             try {
-                $clientEmail = $invoice->client?->primary_contact_email;
-                if ($clientEmail) {
-                    Mail::to($clientEmail)->send(new PaymentReceivedMail($payment));
+                if ($payuClient && ClientNotificationGate::canSendEmail($payuClient, 'transactional')) {
+                    $clientEmail = $payuClient->primary_contact_email;
+                    if ($clientEmail) {
+                        Mail::to($clientEmail)->send(new PaymentReceivedMail($payment));
+                    }
                 }
 
-                $phone = $invoice->client?->primary_contact_phone;
-                if ($phone && Setting::get('twilio_enabled')) {
+                $phone = $payuClient?->primary_contact_phone;
+                if ($phone && Setting::get('twilio_enabled') && $payuClient && ClientNotificationGate::canSendSms($payuClient)) {
                     $sms = new SmsService();
-                    $amount   = strtoupper($payment->currency) . ' ' . number_format($payment->amount, 2);
-                    $sms->send($phone, "WebsiteExpert: Payment of {$amount} received for invoice {$invoice->number}. Thank you!");
+                    $amountStr = strtoupper($payment->currency) . ' ' . number_format($payment->amount, 2);
+                    $sms->send($phone, "WebsiteExpert: Payment of {$amountStr} received for invoice {$invoice->number}. Thank you!");
                 }
             } catch (\Throwable $e) {
                 Log::error('PayU: Failed to send payment notification: ' . $e->getMessage());

@@ -6,6 +6,7 @@ use App\Mail\PaymentReceivedMail;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Setting;
+use App\Services\ClientNotificationGate;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -160,7 +161,7 @@ class StripeWebhookController extends Controller
         // Email confirmation
         try {
             $email = $client->primary_contact_email;
-            if ($email) {
+            if ($email && ClientNotificationGate::canSendEmail($client, 'transactional')) {
                 Mail::to($email)->send(new PaymentReceivedMail($payment));
             }
         } catch (\Throwable $e) {
@@ -170,7 +171,7 @@ class StripeWebhookController extends Controller
         // SMS confirmation (if Twilio is enabled)
         try {
             $phone = $client->primary_contact_phone;
-            if ($phone && Setting::get('twilio_enabled')) {
+            if ($phone && Setting::get('twilio_enabled') && ClientNotificationGate::canSendSms($client)) {
                 $sms = new SmsService();
                 $amount    = strtoupper($payment->currency ?? 'GBP') . ' ' . number_format($payment->amount, 2);
                 $invoiceNo = $invoice?->number ?? '';

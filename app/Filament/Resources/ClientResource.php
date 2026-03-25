@@ -165,6 +165,29 @@ class ClientResource extends Resource
                         ->columnSpanFull()
                         ->placeholder('Brak notatek.'),
                 ]),
+
+            Section::make('Communication Preferences')
+                ->collapsed()
+                ->columns(2)
+                ->schema([
+                    IconEntry::make('notify_email_transactional')
+                        ->label('Transactional Emails')
+                        ->boolean(),
+                    IconEntry::make('notify_email_projects')
+                        ->label('Project Update Emails')
+                        ->boolean(),
+                    IconEntry::make('notify_email_marketing')
+                        ->label('Marketing / Automation Emails')
+                        ->boolean(),
+                    IconEntry::make('notify_sms')
+                        ->label('SMS Notifications')
+                        ->boolean(),
+                    TextEntry::make('communication_prefs_updated_at')
+                        ->label('Preferences Last Updated')
+                        ->since()
+                        ->placeholder('Never')
+                        ->columnSpanFull(),
+                ]),
         ]);
     }
 
@@ -224,6 +247,33 @@ class ClientResource extends Resource
                 ]),
 
             Forms\Components\Textarea::make('notes')->columnSpanFull()->rows(3),
+
+            Section::make('Communication Preferences')
+                ->description('Manage client consent for emails and SMS notifications.')
+                ->collapsed()
+                ->columns(2)
+                ->schema([
+                    Forms\Components\Toggle::make('notify_email_transactional')
+                        ->label('Transactional Emails')
+                        ->helperText('Invoices, payment receipts, quotes, contracts.')
+                        ->default(true),
+                    Forms\Components\Toggle::make('notify_email_projects')
+                        ->label('Project Update Emails')
+                        ->helperText('Project status changes, messages.')
+                        ->default(true),
+                    Forms\Components\Toggle::make('notify_email_marketing')
+                        ->label('Marketing / Automation Emails')
+                        ->helperText('Automated campaign and marketing emails.')
+                        ->default(true),
+                    Forms\Components\Toggle::make('notify_sms')
+                        ->label('SMS Notifications')
+                        ->helperText('All SMS messages (payment receipts, reminders).')
+                        ->default(true),
+                    Forms\Components\Placeholder::make('communication_prefs_updated_at')
+                        ->label('Preferences Last Updated')
+                        ->content(fn ($record) => $record?->communication_prefs_updated_at?->diffForHumans() ?? 'Never')
+                        ->columnSpanFull(),
+                ]),
         ]);
     }
 
