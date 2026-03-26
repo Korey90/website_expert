@@ -25,7 +25,7 @@ class WelcomeController extends Controller
 
         App::setLocale($locale);
 
-        $sections = SiteSection::whereIn('key', ['hero', 'about', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'portfolio', 'cost_calculator_v2', 'navbar', 'contact', 'footer'])
+        $sections = SiteSection::whereIn('key', ['hero', 'about', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator_v2', 'navbar', 'contact', 'footer'])
             ->where('is_active', true)
             ->get()
             ->keyBy('key');
@@ -65,6 +65,20 @@ class WelcomeController extends Controller
         ] : null;
 
         $portfolio = ($s = $sections->get('portfolio')) ? [
+            'title'       => $s->title,
+            'subtitle'    => $s->subtitle,
+            'button_text' => $s->button_text,
+            'button_url'  => $s->button_url,
+            'extra'       => $s->extra,
+        ] : null;
+
+        $process = ($s = $sections->get('process')) ? [
+            'title'    => $s->title,
+            'subtitle' => $s->subtitle,
+            'extra'    => $s->extra,
+        ] : null;
+
+        $faq = ($s = $sections->get('faq')) ? [
             'title'       => $s->title,
             'subtitle'    => $s->subtitle,
             'button_text' => $s->button_text,
@@ -157,6 +171,6 @@ class WelcomeController extends Controller
             ->values()
             ->all();
 
-        return Inertia::render('Welcome', compact('hero', 'about', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'portfolio', 'cost_calculator_v2', 'navbar', 'contact', 'footer', 'pricing', 'strings', 'steps'));
+        return Inertia::render('Welcome', compact('hero', 'about', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator_v2', 'navbar', 'contact', 'footer', 'pricing', 'strings', 'steps'));
     }
 }

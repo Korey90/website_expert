@@ -77,7 +77,7 @@ export default function TrustStrip({ data, testimonials }) {
     }, [current, isPaused, goTo, total]);
 
     return (
-        <section id="zaufali" className="py-20 flex items-center h-screen md:py-28 bg-neutral-50 dark:bg-neutral-900">
+        <section id="zaufali" className="py-20 flex items-center h-screen md:py-28 bg-neutral-50 dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-14 reveal">
                     <span className="section-label">{sectionLabel}</span>

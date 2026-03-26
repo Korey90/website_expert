@@ -190,8 +190,7 @@ class SiteSectionResource extends Resource
                 ->schema([
                     Forms\Components\TextInput::make('button_url')
                         ->label('Button URL (shared)')
-                        ->maxLength(500)
-                        ->url(),
+                        ->maxLength(500),
                 ]),
 
             Section::make('Media')
@@ -665,9 +664,8 @@ class SiteSectionResource extends Resource
                     ->label('Heading')
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', 'en'))
                     ->limit(40),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label('Active')
-                    ->boolean(),
+                Tables\Columns\ToggleColumn::make('is_active')
+                    ->label('Active'),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Updated')
                     ->date()
