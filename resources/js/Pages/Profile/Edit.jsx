@@ -9,10 +9,13 @@ export default function Edit({ mustVerifyEmail, status, client }) {
         <PortalLayout client={client}>
             <Head title="Profile" />
 
-            <div className="max-w-3xl space-y-6">
-                <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
+            <div className="max-w-3xl mx-auto space-y-6">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
+                    <p className="mt-1 text-sm text-gray-500">Manage your login email, password and account preferences.</p>
+                </div>
 
-                <div className="bg-white p-6 shadow-sm rounded-xl border border-gray-100">
+                <div className="bg-white p-6 shadow-sm rounded-xl border border-gray-200">
                     <UpdateProfileInformationForm
                         mustVerifyEmail={mustVerifyEmail}
                         status={status}
@@ -20,11 +23,11 @@ export default function Edit({ mustVerifyEmail, status, client }) {
                     />
                 </div>
 
-                <div className="bg-white p-6 shadow-sm rounded-xl border border-gray-100">
+                <div className="bg-white p-6 shadow-sm rounded-xl border border-gray-200">
                     <UpdatePasswordForm className="max-w-xl" />
                 </div>
 
-                <div className="bg-white p-6 shadow-sm rounded-xl border border-gray-100">
+                <div className="bg-white p-6 shadow-sm rounded-xl border border-gray-200">
                     <DeleteUserForm className="max-w-xl" />
                 </div>
             </div>

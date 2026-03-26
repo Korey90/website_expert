@@ -16,11 +16,12 @@ export default function PortalLayout({ client, children }) {
     const isActive = (href) => url.startsWith(new URL(href).pathname);
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="h-screen bg-gray-50 flex overflow-hidden">
             {/* Sidebar */}
-            <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out
-                ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:inset-0`}>
-                <div className="flex flex-col h-full">
+            <aside className={`flex-shrink-0 w-64 bg-white shadow-lg flex flex-col
+                fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out
+                ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:inset-auto`}>
+                <div className="flex flex-col h-full overflow-hidden">
                     <div className="flex items-center px-6 py-5 border-b border-gray-200">
                         <div>
                             <div className="text-lg font-bold text-red-600">WebsiteExpert</div>
@@ -63,7 +64,10 @@ export default function PortalLayout({ client, children }) {
                         </Link>
                         <Link
                             href={route('profile.edit')}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 mt-1"
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mt-1
+                                ${isActive(route('profile.edit'))
+                                    ? 'bg-red-50 text-red-700 font-medium'
+                                    : 'text-gray-600 hover:bg-gray-100'}`}
                         >
                             <span>⚙️</span> Account Settings
                         </Link>
@@ -88,7 +92,7 @@ export default function PortalLayout({ client, children }) {
             )}
 
             {/* Main content */}
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 {/* Mobile top bar */}
                 <header className="lg:hidden flex items-center px-4 py-3 bg-white border-b border-gray-200 shadow-sm">
                     <button

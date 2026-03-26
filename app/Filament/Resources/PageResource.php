@@ -6,6 +6,8 @@ use App\Forms\Components\TinyEditor;
 use App\Filament\Resources\PageResource\Pages;
 use App\Models\Page;
 use Filament\Forms;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -24,6 +26,119 @@ class PageResource extends Resource
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
     protected static ?string $navigationLabel = 'CMS Pages';
     protected static ?int $navigationSort = 3;
+
+    public static function infolist(Schema $schema): Schema
+    {
+        $locales = config('languages', ['en' => 'English', 'pl' => 'Polski']);
+
+        return $schema->columns(1)->schema([
+
+            Section::make('Page Settings')
+                ->columns(2)
+                ->schema([
+                    TextEntry::make('title')
+                        ->label('Title')
+                        ->weight('bold')
+                        ->size('lg')
+                        ->columnSpanFull()
+                        ->getStateUsing(fn ($record) => $record->getTranslation('title', 'en') ?: '—'),
+
+                    TextEntry::make('status')
+                        ->label('Status')
+                        ->badge()
+                        ->color(fn ($state) => match ($state) {
+                            'published' => 'success',
+                            default     => 'gray',
+                        }),
+
+                    TextEntry::make('slug')
+                        ->label('URL slug')
+                        ->copyable()
+                        ->icon('heroicon-o-link')
+                        ->getStateUsing(fn ($record) => '/p/' . $record->slug),
+
+                    TextEntry::make('type')
+                        ->label('Type')
+                        ->badge()
+                        ->color('info'),
+
+                    TextEntry::make('sort_order')
+                        ->label('Sort order')
+                        ->placeholder('0'),
+
+                    IconEntry::make('show_in_footer')
+                        ->label('Show in footer')
+                        ->boolean(),
+
+                    TextEntry::make('published_at')
+                        ->label('Published')
+                        ->dateTime('d M Y, H:i')
+                        ->placeholder('Not yet published'),
+
+                    TextEntry::make('createdBy.name')
+                        ->label('Created by')
+                        ->placeholder('—')
+                        ->icon('heroicon-o-user'),
+                ]),
+
+            Section::make('Document Metadata')
+                ->description('Effective date and version for legal/policy documents.')
+                ->columns(2)
+                ->collapsed()
+                ->schema([
+                    TextEntry::make('effective_date')
+                        ->label('Effective date')
+                        ->date('d M Y')
+                        ->placeholder('—'),
+
+                    TextEntry::make('version')
+                        ->label('Version')
+                        ->badge()
+                        ->color('gray')
+                        ->placeholder('—'),
+
+                    TextEntry::make('updated_at')
+                        ->label('Last updated')
+                        ->dateTime('d M Y, H:i')
+                        ->since(),
+                ]),
+
+            Section::make('Content')
+                ->collapsed()
+                ->schema([
+                    Tabs::make('Translations')
+                        ->tabs(
+                            array_map(
+                                fn (string $locale, string $label) => Tab::make($label)
+                                    ->schema([
+                                        TextEntry::make("title.{$locale}")
+                                            ->label("Title ({$locale})")
+                                            ->getStateUsing(fn ($record) => $record->getTranslation('title', $locale) ?: '—'),
+
+                                        TextEntry::make("content.{$locale}")
+                                            ->label("Content ({$locale})")
+                                            ->html()
+                                            ->columnSpanFull()
+                                            ->getStateUsing(fn ($record) => $record->getTranslation('content', $locale) ?: '<em class="text-gray-400">No content</em>'),
+
+                                        TextEntry::make("meta_title.{$locale}")
+                                            ->label("Meta title ({$locale})")
+                                            ->placeholder('—')
+                                            ->getStateUsing(fn ($record) => $record->getTranslation('meta_title', $locale) ?: null),
+
+                                        TextEntry::make("meta_description.{$locale}")
+                                            ->label("Meta description ({$locale})")
+                                            ->placeholder('—')
+                                            ->getStateUsing(fn ($record) => $record->getTranslation('meta_description', $locale) ?: null),
+                                    ]),
+                                array_keys($locales),
+                                array_values($locales),
+                            )
+                        )
+                        ->columnSpanFull(),
+                ]),
+        ]);
+    }
 
     public static function form(Schema $form): Schema
     {

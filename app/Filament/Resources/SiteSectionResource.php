@@ -9,6 +9,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -24,6 +26,108 @@ class SiteSectionResource extends Resource
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
     protected static ?string $navigationLabel = 'Front-end Sections';
     protected static ?int $navigationSort = 2;
+
+    public static function infolist(Schema $schema): Schema
+    {
+        $locales = config('languages', ['en' => 'English', 'pl' => 'Polski']);
+
+        return $schema->columns(1)->schema([
+
+            Section::make('Section Identity')
+                ->columns(2)
+                ->schema([
+                    TextEntry::make('label')
+                        ->label('Display Name')
+                        ->weight('bold')
+                        ->size('lg')
+                        ->columnSpanFull(),
+
+                    TextEntry::make('key')
+                        ->label('Section Key')
+                        ->badge()
+                        ->color('gray')
+                        ->copyable()
+                        ->icon('heroicon-o-code-bracket'),
+
+                    TextEntry::make('sort_order')
+                        ->label('Order'),
+
+                    IconEntry::make('is_active')
+                        ->label('Visible on site')
+                        ->boolean()
+                        ->trueColor('success')
+                        ->falseColor('danger'),
+
+                    TextEntry::make('button_url')
+                        ->label('Button URL (shared)')
+                        ->icon('heroicon-o-link')
+                        ->placeholder('—')
+                        ->url(fn ($state) => $state ?: null)
+                        ->openUrlInNewTab(),
+
+                    TextEntry::make('image_path')
+                        ->label('Section Image')
+                        ->placeholder('No image')
+                        ->icon('heroicon-o-photo')
+                        ->columnSpanFull(),
+
+                    TextEntry::make('updated_at')
+                        ->label('Last updated')
+                        ->dateTime('d M Y, H:i')
+                        ->since(),
+                ]),
+
+            Section::make('Content')
+                ->collapsed()
+                ->schema([
+                    Tabs::make('Translations')
+                        ->tabs(
+                            array_map(
+                                fn (string $locale, string $label) => Tab::make($label)
+                                    ->schema([
+                                        TextEntry::make("title.{$locale}")
+                                            ->label("Title ({$locale})")
+                                            ->placeholder('—')
+                                            ->getStateUsing(fn ($record) => $record->getTranslation('title', $locale) ?: null),
+
+                                        TextEntry::make("subtitle.{$locale}")
+                                            ->label("Subtitle ({$locale})")
+                                            ->placeholder('—')
+                                            ->getStateUsing(fn ($record) => $record->getTranslation('subtitle', $locale) ?: null),
+
+                                        TextEntry::make("button_text.{$locale}")
+                                            ->label("Button Text ({$locale})")
+                                            ->placeholder('—')
+                                            ->getStateUsing(fn ($record) => $record->getTranslation('button_text', $locale) ?: null),
+
+                                        TextEntry::make("body.{$locale}")
+                                            ->label("Body ({$locale})")
+                                            ->html()
+                                            ->columnSpanFull()
+                                            ->placeholder('No content')
+                                            ->getStateUsing(fn ($record) => $record->getTranslation('body', $locale) ?: null),
+                                    ]),
+                                array_keys($locales),
+                                array_values($locales),
+                            )
+                        )
+                        ->columnSpanFull(),
+                ]),
+
+            Section::make('Extra Data (JSON)')
+                ->description('Raw structured data passed to the React component.')
+                ->collapsed()
+                ->schema([
+                    TextEntry::make('extra')
+                        ->label('')
+                        ->columnSpanFull()
+                        ->fontFamily('mono')
+                        ->getStateUsing(fn ($record) => $record->extra
+                            ? json_encode($record->extra, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+                            : '—'),
+                ]),
+        ]);
+    }
 
     public static function form(Schema $form): Schema
     {
