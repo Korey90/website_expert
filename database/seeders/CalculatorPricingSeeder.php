@@ -9,260 +9,52 @@ class CalculatorPricingSeeder extends Seeder
 {
     public function run(): void
     {
+        // Truncate and re-seed so DB always matches the frontend structure exactly
+        CalculatorPricing::truncate();
+
         $items = [
-            // -------------------------------------------------------
-            // Project Types
-            // -------------------------------------------------------
-            [
-                'category'     => 'project_type',
-                'key'          => 'business_card',
-                'label'        => 'Business Card Website',
-                'description'  => 'Up to 5 pages. Perfect for sole traders and small businesses.',
-                'base_cost'    => 799.00,
-                'monthly_cost' => 0.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 1,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'project_type',
-                'key'          => 'brochure',
-                'label'        => 'Brochure Website',
-                'description'  => '6–15 pages. Ideal for established businesses wanting a professional presence.',
-                'base_cost'    => 1499.00,
-                'monthly_cost' => 0.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 2,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'project_type',
-                'key'          => 'landing_page',
-                'label'        => 'Landing Page / Campaign Page',
-                'description'  => 'Single high-conversion page for ads or launches.',
-                'base_cost'    => 599.00,
-                'monthly_cost' => 0.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 3,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'project_type',
-                'key'          => 'ecommerce',
-                'label'        => 'E-Commerce Store',
-                'description'  => 'Full online shop. WooCommerce or headless. Includes up to 500 products.',
-                'base_cost'    => 2999.00,
-                'monthly_cost' => 0.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 4,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'project_type',
-                'key'          => 'web_app',
-                'label'        => 'Custom Web Application',
-                'description'  => 'Bespoke Laravel / React application. Custom quote — contact us.',
-                'base_cost'    => 5999.00,
-                'monthly_cost' => 0.00,
-                'cost_formula' => 'base + (features_count * 800)',
-                'currency'     => 'GBP',
-                'sort_order'   => 5,
-                'is_active'    => true,
-            ],
-            // -------------------------------------------------------
-            // Hosting Plans
-            // -------------------------------------------------------
-            [
-                'category'     => 'hosting',
-                'key'          => 'shared_hosting',
-                'label'        => 'Shared Hosting',
-                'description'  => 'Standard shared hosting. Suitable for brochure sites with low traffic.',
-                'base_cost'    => 0.00,
-                'monthly_cost' => 9.99,
-                'currency'     => 'GBP',
-                'sort_order'   => 1,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'hosting',
-                'key'          => 'managed_wp',
-                'label'        => 'Managed WordPress Hosting',
-                'description'  => 'Optimised WP hosting with daily backups, staging, and CDN.',
-                'base_cost'    => 0.00,
-                'monthly_cost' => 29.99,
-                'currency'     => 'GBP',
-                'sort_order'   => 2,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'hosting',
-                'key'          => 'vps',
-                'label'        => 'VPS / Cloud Server',
-                'description'  => 'Dedicated VPS with root access. Ideal for web apps and large e-commerce.',
-                'base_cost'    => 0.00,
-                'monthly_cost' => 79.99,
-                'currency'     => 'GBP',
-                'sort_order'   => 3,
-                'is_active'    => true,
-            ],
-            // -------------------------------------------------------
-            // CMS Options
-            // -------------------------------------------------------
-            [
-                'category'     => 'cms',
-                'key'          => 'no_cms',
-                'label'        => 'No CMS (Static)',
-                'description'  => 'Plain HTML/CSS/JS. No ongoing content editing capability.',
-                'base_cost'    => 0.00,
-                'monthly_cost' => 0.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 1,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'cms',
-                'key'          => 'wordpress',
-                'label'        => 'WordPress CMS',
-                'description'  => 'Full WordPress CMS. Easily manage pages, blog, and media.',
-                'base_cost'    => 299.00,
-                'monthly_cost' => 0.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 2,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'cms',
-                'key'          => 'laravel_filament',
-                'label'        => 'Custom Laravel + Filament CMS',
-                'description'  => 'Bespoke admin panel built with Laravel & Filament. More powerful than WordPress.',
-                'base_cost'    => 799.00,
-                'monthly_cost' => 0.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 3,
-                'is_active'    => true,
-            ],
-            // -------------------------------------------------------
-            // Add-ons
-            // -------------------------------------------------------
-            [
-                'category'     => 'addon',
-                'key'          => 'seo_foundation',
-                'label'        => 'SEO Foundation Package',
-                'description'  => 'On-page SEO, meta tags, schema markup, XML sitemap, and GSC setup.',
-                'base_cost'    => 499.00,
-                'monthly_cost' => 0.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 1,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'addon',
-                'key'          => 'seo_retainer',
-                'label'        => 'Monthly SEO Retainer',
-                'description'  => 'Ongoing keyword research, content, link building, and monthly reporting.',
-                'base_cost'    => 0.00,
-                'monthly_cost' => 599.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 2,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'addon',
-                'key'          => 'google_ads',
-                'label'        => 'Google Ads Management',
-                'description'  => 'PPC campaign setup and monthly management. Ad spend billed separately.',
-                'base_cost'    => 299.00,
-                'monthly_cost' => 399.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 3,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'addon',
-                'key'          => 'maintenance',
-                'label'        => 'Website Maintenance Retainer',
-                'description'  => 'Monthly updates, security patches, content edits (up to 2 hours), and uptime monitoring.',
-                'base_cost'    => 0.00,
-                'monthly_cost' => 149.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 4,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'addon',
-                'key'          => 'live_chat',
-                'label'        => 'Live Chat Integration',
-                'description'  => 'Tawk.to or Crisp live chat installation and configuration.',
-                'base_cost'    => 149.00,
-                'monthly_cost' => 0.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 5,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'addon',
-                'key'          => 'booking_system',
-                'label'        => 'Appointment Booking System',
-                'description'  => 'Online booking with calendar sync (Calendly / custom). Ideal for clinics, salons, trades.',
-                'base_cost'    => 399.00,
-                'monthly_cost' => 0.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 6,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'addon',
-                'key'          => 'multilingual',
-                'label'        => 'Multilingual Website',
-                'description'  => 'WPML or custom i18n setup. Price per additional language.',
-                'base_cost'    => 350.00,
-                'monthly_cost' => 0.00,
-                'cost_formula' => 'base * language_count',
-                'currency'     => 'GBP',
-                'sort_order'   => 7,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'addon',
-                'key'          => 'copywriting',
-                'label'        => 'Professional Copywriting',
-                'description'  => 'SEO-optimised website copy written by our UK copywriter. Per page.',
-                'base_cost'    => 120.00,
-                'monthly_cost' => 0.00,
-                'cost_formula' => 'base * page_count',
-                'currency'     => 'GBP',
-                'sort_order'   => 8,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'addon',
-                'key'          => 'photography',
-                'label'        => 'Professional Photography',
-                'description'  => 'Half-day shoot at your premises. Approx 30–50 edited images.',
-                'base_cost'    => 599.00,
-                'monthly_cost' => 0.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 9,
-                'is_active'    => true,
-            ],
-            [
-                'category'     => 'addon',
-                'key'          => 'logo_design',
-                'label'        => 'Logo & Brand Identity',
-                'description'  => '3 initial concepts, 2 rounds of revisions. Final files in all formats.',
-                'base_cost'    => 449.00,
-                'monthly_cost' => 0.00,
-                'currency'     => 'GBP',
-                'sort_order'   => 10,
-                'is_active'    => true,
-            ],
+            // project_type
+            ['category' => 'project_type', 'key' => 'wizytowka', 'icon' => '🌐', 'label' => 'Brochure Website',   'label_pl' => 'Strona wizytówkowa',       'label_pt' => 'Site Institucional',   'description' => '5–10 pages, ideal for small businesses and freelancers',                 'desc_pl' => '5–10 podstron, idealna dla małych firm i freelancerów',                    'desc_pt' => '5–10 páginas, ideal para pequenas empresas e freelancers',                  'base_cost' => 800.00,  'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 1, 'is_active' => true],
+            ['category' => 'project_type', 'key' => 'landing',   'icon' => '🎯', 'label' => 'Landing Page',        'label_pl' => 'Landing page',             'label_pt' => 'Landing Page',         'description' => 'Single page focused on one goal — lead capture or sales',                'desc_pl' => 'Jedna strona skupiona na jednym celu – pozyskanie leadu lub sprzedaż',     'desc_pt' => 'Página única focada num objetivo — captação de leads ou vendas',            'base_cost' => 400.00,  'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 2, 'is_active' => true],
+            ['category' => 'project_type', 'key' => 'ecommerce', 'icon' => '🛒', 'label' => 'E-Commerce Store',    'label_pl' => 'Sklep e-commerce',         'label_pt' => 'Loja E-Commerce',      'description' => 'Products, cart, online payments and order management panel',             'desc_pl' => 'Produkty, koszyk, płatności online i panel zarządzania zamówieniami',      'desc_pt' => 'Produtos, carrinho, pagamentos online e painel de gestão de pedidos',      'base_cost' => 3000.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 3, 'is_active' => true],
+            ['category' => 'project_type', 'key' => 'aplikacja', 'icon' => '⚙️', 'label' => 'Web Application',     'label_pl' => 'Aplikacja webowa',         'label_pt' => 'Aplicação Web',        'description' => 'Complex platform with business logic, user roles and API',               'desc_pl' => 'Złożona platforma z logiką biznesową, rolami użytkowników i API',          'desc_pt' => 'Plataforma complexa com lógica de negócio, funções de utilizador e API',   'base_cost' => 7500.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 4, 'is_active' => true],
+            ['category' => 'project_type', 'key' => 'blog',      'icon' => '📰', 'label' => 'Blog / Portal',       'label_pl' => 'Blog / Portal',            'label_pt' => 'Blog / Portal',        'description' => 'Articles, categories, comments and SEO-friendly URLs',                   'desc_pl' => 'Artykuły, kategorie, komentarze i SEO-friendly URL-e',                    'desc_pt' => 'Artigos, categorias, comentários e URLs amigáveis para SEO',               'base_cost' => 2500.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 5, 'is_active' => true],
+
+            // design
+            ['category' => 'design', 'key' => 'template', 'icon' => '📋', 'label' => 'Ready-made Template', 'label_pl' => 'Gotowy szablon',       'label_pt' => 'Template Pronto',       'description' => 'A proven layout — faster delivery at a lower price',              'desc_pl' => 'Sprawdzony układ graficzny – szybka realizacja w niższej cenie',   'desc_pt' => 'Layout comprovado — entrega mais rápida a preço mais baixo',        'base_cost' => 0.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 1, 'is_active' => true],
+            ['category' => 'design', 'key' => 'custom',   'icon' => '🎨', 'label' => 'Custom Design',        'label_pl' => 'Design custom',        'label_pt' => 'Design Personalizado', 'description' => 'Graphic design created from scratch, tailored to your brand',     'desc_pl' => 'Projekt graficzny stworzony od zera, dopasowany do Twojej marki',  'desc_pt' => 'Design gráfico criado de raiz, adaptado à sua marca',              'base_cost' => 0.00, 'multiplier' => 1.500, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 2, 'is_active' => true],
+            ['category' => 'design', 'key' => 'premium',  'icon' => '✨', 'label' => 'Premium UI/UX Design', 'label_pl' => 'Design premium UI/UX', 'label_pt' => 'Design Premium UI/UX', 'description' => 'Bespoke design with full UX research, wireframes and prototyping', 'desc_pl' => 'Autorski design z pełnym procesem badań UX, wireframes i prototypowaniem', 'desc_pt' => 'Design exclusivo com investigação UX completa, wireframes e prototipagem', 'base_cost' => 0.00, 'multiplier' => 2.100, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 3, 'is_active' => true],
+
+            // cms
+            ['category' => 'cms', 'key' => 'none',     'icon' => '❌',  'label' => 'No CMS',       'label_pl' => 'Brak CMS',        'label_pt' => 'Sem CMS',      'description' => 'Static site — content changes require a developer',                          'desc_pl' => 'Strona statyczna – zmiany treści wymagają ingerencji programisty',          'desc_pt' => 'Site estático — alterações de conteúdo requerem um programador',             'base_cost' => 0.00,    'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 1, 'is_active' => true],
+            ['category' => 'cms', 'key' => 'basic',    'icon' => '🗂️', 'label' => 'Basic CMS',     'label_pl' => 'Prosty CMS',       'label_pt' => 'CMS Básico',   'description' => 'WordPress or similar — edit text and images without coding',                 'desc_pl' => 'WordPress lub podobny – edycja tekstów i zdjęć bez kodowania',              'desc_pt' => 'WordPress ou similar — edite textos e imagens sem programar',                'base_cost' => 300.00,  'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 2, 'is_active' => true],
+            ['category' => 'cms', 'key' => 'advanced', 'icon' => '💡',  'label' => 'Advanced CMS', 'label_pl' => 'Zaawansowany CMS', 'label_pt' => 'CMS Avançado', 'description' => 'Custom CMS with visual editor, user roles and publishing workflow',          'desc_pl' => 'Własny CMS z edytorem wizualnym, rolami użytkowników i workflow publikacji', 'desc_pt' => 'CMS personalizado com editor visual, funções de utilizador e fluxo de publicação', 'base_cost' => 1200.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 3, 'is_active' => true],
+
+            // integrations
+            ['category' => 'integrations', 'key' => 'payment',   'icon' => '💳', 'label' => 'Online Payments',       'label_pl' => 'Płatności online',      'label_pt' => 'Pagamentos Online',     'description' => 'Stripe, PayPal, Przelewy24 — secure transactions on your site',       'desc_pl' => 'Stripe, PayPal, Przelewy24 – bezpieczne transakcje bezpośrednio na stronie', 'desc_pt' => 'Stripe, PayPal, Multibanco — transações seguras no seu site',              'base_cost' => 900.00,  'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 1, 'is_active' => true],
+            ['category' => 'integrations', 'key' => 'api',        'icon' => '🔗', 'label' => 'API Integrations',       'label_pl' => 'Integracje API',        'label_pt' => 'Integrações API',       'description' => 'Connect with external services and systems via REST or GraphQL',       'desc_pl' => 'Połączenie z zewnętrznymi serwisami i systemami przez REST lub GraphQL',    'desc_pt' => 'Ligação a serviços e sistemas externos via REST ou GraphQL',               'base_cost' => 1200.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 2, 'is_active' => true],
+            ['category' => 'integrations', 'key' => 'crm',        'icon' => '📊', 'label' => 'CRM / ERP',              'label_pl' => 'CRM / ERP',             'label_pt' => 'CRM / ERP',             'description' => 'Sync leads and data with HubSpot, Salesforce or your own system',      'desc_pl' => 'Synchronizacja leadów i danych z HubSpot, Salesforce lub własnym systemem', 'desc_pt' => 'Sincronize leads e dados com HubSpot, Salesforce ou o seu próprio sistema', 'base_cost' => 1500.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 3, 'is_active' => true],
+            ['category' => 'integrations', 'key' => 'newsletter', 'icon' => '📧', 'label' => 'Newsletter / Mailing',   'label_pl' => 'Newsletter / Mailing',  'label_pt' => 'Newsletter / Mailing', 'description' => 'Mailchimp, ConvertKit or your own email campaign automation',          'desc_pl' => 'Mailchimp, ConvertKit lub własny system automatyzacji kampanii e-mail',     'desc_pt' => 'Mailchimp, ConvertKit ou automação de campanhas de e-mail própria',        'base_cost' => 500.00,  'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 4, 'is_active' => true],
+            ['category' => 'integrations', 'key' => 'analytics',  'icon' => '📈', 'label' => 'Analytics (GA4/Pixel)',  'label_pl' => 'Analytics (GA4/Pixel)', 'label_pt' => 'Analytics (GA4/Pixel)', 'description' => 'Google Analytics 4 and Meta Pixel — track traffic and campaign results', 'desc_pl' => 'Google Analytics 4 i Meta Pixel – śledzenie ruchu i efektywności kampanii', 'desc_pt' => 'Google Analytics 4 e Meta Pixel — acompanhe o tráfego e resultados de campanhas', 'base_cost' => 300.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 5, 'is_active' => true],
+
+            // seo_package
+            ['category' => 'seo_package', 'key' => 'none',     'icon' => '—',  'label' => 'No SEO',       'label_pl' => 'Bez SEO',          'label_pt' => 'Sem SEO',      'description' => 'No optimisation — suitable for internal projects or intranets',       'desc_pl' => 'Bez optymalizacji – odpowiednie dla projektów wewnętrznych lub intranetów', 'desc_pt' => 'Sem otimização — adequado para projetos internos ou intranets',              'base_cost' => 0.00,    'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 1, 'is_active' => true],
+            ['category' => 'seo_package', 'key' => 'basic',    'icon' => '🔍', 'label' => 'Basic SEO',    'label_pl' => 'SEO podstawowe',   'label_pt' => 'SEO Básico',   'description' => 'Meta tags, XML sitemap, schema.org and page speed optimisation',      'desc_pl' => 'Tagi meta, sitemap XML, schema.org i optymalizacja prędkości ładowania',   'desc_pt' => 'Meta tags, sitemap XML, schema.org e otimização de velocidade de página',   'base_cost' => 600.00,  'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 2, 'is_active' => true],
+            ['category' => 'seo_package', 'key' => 'advanced', 'icon' => '🚀', 'label' => 'Advanced SEO', 'label_pl' => 'SEO zaawansowane', 'label_pt' => 'SEO Avançado', 'description' => 'Keyword audit, internal linking and content marketing strategy',       'desc_pl' => 'Audyt słów kluczowych, linkowanie wewnętrzne i strategia content marketingowa', 'desc_pt' => 'Auditoria de palavras-chave, linkagem interna e estratégia de marketing de conteúdo', 'base_cost' => 1800.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 3, 'is_active' => true],
+
+            // deadline
+            ['category' => 'deadline', 'key' => 'standard', 'icon' => '📅', 'label' => 'Standard (6–8 wks)',     'label_pl' => 'Standardowy (6–8 tyg.)',   'label_pt' => 'Standard (6–8 sem.)',  'description' => 'Optimal project flow with time for testing and your feedback',    'desc_pl' => 'Optymalny przebieg projektu z czasem na testy i Twój feedback',          'desc_pt' => 'Fluxo de projeto otimizado com tempo para testes e o seu feedback',      'base_cost' => 0.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 1, 'is_active' => true],
+            ['category' => 'deadline', 'key' => 'fast',     'icon' => '⚡', 'label' => 'Accelerated (3–4 wks)', 'label_pl' => 'Przyspieszony (3–4 tyg.)', 'label_pt' => 'Acelerado (3–4 sem.)', 'description' => 'Higher priority and intensive work mode — quick feedback required', 'desc_pl' => 'Wyższy priorytet i praca w intensywnym trybie – wymaga szybkiego feedbacku', 'desc_pt' => 'Maior prioridade e modo de trabalho intensivo — feedback rápido necessário', 'base_cost' => 0.00, 'multiplier' => 1.300, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 2, 'is_active' => true],
+            ['category' => 'deadline', 'key' => 'urgent',   'icon' => '🔥', 'label' => 'Urgent (1–2 wks)',      'label_pl' => 'Pilny (1–2 tyg.)',         'label_pt' => 'Urgente (1–2 sem.)',   'description' => 'Full team mobilisation — decisions must be made immediately',       'desc_pl' => 'Pełna mobilizacja zespołu 24/7 – decyzje muszą być podejmowane na bieżąco', 'desc_pt' => 'Mobilização total da equipa 24/7 — decisões têm de ser tomadas de imediato', 'base_cost' => 0.00, 'multiplier' => 1.600, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 3, 'is_active' => true],
+
+            // hosting
+            ['category' => 'hosting', 'key' => 'none',  'icon' => '🏠',  'label' => 'Own Hosting',           'label_pl' => 'Własny hosting',         'label_pt' => 'Alojamento Próprio',    'description' => 'You already have a server or use a cloud provider (AWS, GCP, etc.)', 'desc_pl' => 'Masz już własny serwer lub korzystasz z dostawcy chmury (AWS, GCP itp.)', 'desc_pt' => 'Já tem servidor ou usa fornecedor de cloud (AWS, GCP, etc.)',             'base_cost' => 0.00,  'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 1, 'is_active' => true],
+            ['category' => 'hosting', 'key' => 'basic', 'icon' => '💾',  'label' => 'Hosting Basic (£4/mo)', 'label_pl' => 'Hosting Basic (£4/mo.)', 'label_pt' => 'Hosting Basic (£4/mês)', 'description' => 'SSD, PHP 8.x, SSL certificate, 10 GB space — for small/medium sites',  'desc_pl' => 'SSD, PHP 8.x, certyfikat SSL, 10 GB przestrzeni – dla małych i średnich stron', 'desc_pt' => 'SSD, PHP 8.x, certificado SSL, 10 GB de espaço — para sites pequenos e médios', 'base_cost' => 48.00, 'multiplier' => 1.000, 'monthly_cost' => 4.00, 'currency' => 'GBP', 'sort_order' => 2, 'is_active' => true],
+            ['category' => 'hosting', 'key' => 'pro',   'icon' => '🖥️', 'label' => 'Hosting Pro (£8/mo)',   'label_pl' => 'Hosting Pro (£8/mo.)',   'label_pt' => 'Hosting Pro (£8/mês)',  'description' => 'Powerful VPS with daily backup, uptime monitoring and dedicated IP',    'desc_pl' => 'Wydajny VPS z codziennym backupem, monitoringiem uptime i dedykowanym IP', 'desc_pt' => 'VPS potente com backup diário, monitorização de uptime e IP dedicado',    'base_cost' => 96.00, 'multiplier' => 1.000, 'monthly_cost' => 8.00, 'currency' => 'GBP', 'sort_order' => 3, 'is_active' => true],
         ];
 
         foreach ($items as $data) {
-            CalculatorPricing::firstOrCreate(
-                ['category' => $data['category'], 'key' => $data['key']],
-                $data
-            );
+            CalculatorPricing::create($data);
         }
     }
 }

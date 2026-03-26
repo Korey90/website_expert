@@ -50,21 +50,33 @@ const PRICING = {
 const TOTAL_STEPS = 8;
 
 const DEFAULTS = {
-    title:         { en: 'How Much Will Your Project Cost?',                                                  pl: 'Ile będzie kosztował Twój projekt?' },
-    subtitle:      { en: 'Answer a few questions and get an instant quote estimate. No registration required.', pl: 'Odpowiedz na kilka pytań i otrzymaj wstępną wycenę. Szybko, bez rejestracji.' },
-    section_label: { en: 'Cost Calculator',                                                                    pl: 'Kalkulator kosztów' },
+    title: { 
+        en: 'How Much Will Your Project Cost?',
+        pl: 'Ile będzie kosztował Twój projekt?',
+        pt: 'Quanto Custará o Seu Projeto?'
+    },
+    subtitle: { 
+        en: 'Answer a few questions and get an instant quote estimate. No registration required.', 
+        pl: 'Odpowiedz na kilka pytań i otrzymaj wstępną wycenę. Szybko, bez rejestracji.',
+        pt: 'Responda a algumas perguntas e obtenha uma estimativa de orçamento instantânea. Sem necessidade de registro.'
+    },
+    section_label: { 
+        en: 'Cost Calculator',
+        pl: 'Kalkulator kosztów',
+        pt: 'Calculadora de Custos' 
+    },
 };
 
-function calcEstimate(a) {
-    const pt  = PRICING.projectType[a.projectType];
-    const des = PRICING.design[a.design];
-    const cms = PRICING.cms[a.cms];
-    const seo = PRICING.seoPackage[a.seoPackage];
-    const dl  = PRICING.deadline[a.deadline];
-    const ho  = PRICING.hosting[a.hosting];
+function calcEstimate(a, P) {
+    const pt  = P.projectType[a.projectType];
+    const des = P.design[a.design];
+    const cms = P.cms[a.cms];
+    const seo = P.seoPackage[a.seoPackage];
+    const dl  = P.deadline[a.deadline];
+    const ho  = P.hosting[a.hosting];
     if (!pt || !des || !cms || !seo || !dl || !ho) return null;
     const pagesAddon = Math.max(0, (a.pages - 5)) * 80;
-    const intTotal   = (a.integrations || []).reduce((s, k) => s + (PRICING.integrations[k]?.cost || 0), 0);
+    const intTotal   = (a.integrations || []).reduce((s, k) => s + (P.integrations[k]?.cost || 0), 0);
     const base  = (pt.base + pagesAddon) * des.multiplier + cms.cost + intTotal + seo.cost;
     const total = base * dl.multiplier + ho.cost;
     return { low: Math.round(total * 0.9 / 100) * 100, high: Math.round(total * 1.15 / 100) * 100 };
@@ -131,8 +143,9 @@ function NavBtns({ onBack, onNext, canNext, nextLabel, backLabel }) {
     );
 }
 
-export default function CostCalculator({ data = null }) {
+export default function CostCalculator({ data = null, pricing: pricingProp = null }) {
     const { locale = 'en' } = usePage().props;
+    const PRICING_DATA = pricingProp ?? PRICING;
 
     const t  = (obj, key) => obj?.[`${key}_${locale}`] ?? obj?.[`${key}_en`] ?? obj?.[key] ?? '';
     const tx = useCallback((key, fallback = '') =>
@@ -153,7 +166,7 @@ export default function CostCalculator({ data = null }) {
     const next = () => setStep(s => s + 1);
     const back = () => setStep(s => s - 1);
     const reset = () => { setStep(1); setA({ projectType: '', pages: 5, design: '', cms: '', integrations: [], seoPackage: '', deadline: '', hosting: '', companyName: '', contactEmail: '' }); setSubmitted(false); };
-    const estimate = calcEstimate(a);
+    const estimate = calcEstimate(a, PRICING_DATA);
 
     const handleCalcSubmit = useCallback(async () => {
         if (!a.contactEmail || submitting) return;
@@ -201,11 +214,11 @@ export default function CostCalculator({ data = null }) {
     const sq = (i) => stepsData[i]?.[`question_${locale}`] || stepsData[i]?.question_en || '';
     const sh = (i) => stepsData[i]?.[`hint_${locale}`]     || stepsData[i]?.hint_en     || '';
 
-    const baseMultiplierLabel = locale === 'pl' ? 'ceny bazowej'      : 'of base price';
-    const noExtraLabel        = locale === 'pl' ? 'bez dopłaty'       : 'no extra charge';
-    const toQuoteLabel        = locale === 'pl' ? 'do wyceny'         : 'to quote';
-    const standardPricingLabel = locale === 'pl' ? 'standardowa wycena' : 'standard pricing';
-    const fromLabel           = locale === 'pl' ? 'od'                : 'from';
+    const baseMultiplierLabel = locale === 'pl' ? 'ceny bazowej'       : locale === 'pt' ? 'do preço base'    : 'of base price';
+    const noExtraLabel        = locale === 'pl' ? 'bez dopłaty'        : locale === 'pt' ? 'sem custo extra'  : 'no extra charge';
+    const toQuoteLabel        = locale === 'pl' ? 'do wyceny'          : locale === 'pt' ? 'do orçamento'     : 'to quote';
+    const standardPricingLabel = locale === 'pl' ? 'standardowa wycena' : locale === 'pt' ? 'preço padrão'   : 'standard pricing';
+    const fromLabel           = locale === 'pl' ? 'od'                 : locale === 'pt' ? 'a partir de'      : 'from';
 
     // Result screen
     if (step > TOTAL_STEPS && estimate) {
@@ -228,7 +241,7 @@ export default function CostCalculator({ data = null }) {
                     <p className="font-display text-4xl font-extrabold text-brand-500">{fmt(estimate.low)} – {fmt(estimate.high)}</p>
                     {a.hosting !== 'none' && (
                         <p className="text-xs text-neutral-400 mt-2">
-                            {tx('hosting_addon_label', '+ hosting')} {fmt(PRICING.hosting[a.hosting].cost)}{tx('per_year', '/year')}
+                            {tx('hosting_addon_label', '+ hosting')} {fmt(PRICING_DATA.hosting[a.hosting]?.cost)}{tx('per_year', '/year')}
                         </p>
                     )}
                 </div>
@@ -236,7 +249,7 @@ export default function CostCalculator({ data = null }) {
                 <div className="flex flex-wrap gap-2 justify-center mb-6">
                     {a.projectType && (
                         <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-brand-500/10 text-brand-500">
-                            {t(PRICING.projectType[a.projectType], 'label')}
+                            {t(PRICING_DATA.projectType[a.projectType], 'label')}
                         </span>
                     )}
                     <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
@@ -249,7 +262,7 @@ export default function CostCalculator({ data = null }) {
                     )}
                     {a.deadline && (
                         <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
-                            {t(PRICING.deadline[a.deadline], 'label')}
+                            {t(PRICING_DATA.deadline[a.deadline], 'label')}
                         </span>
                     )}
                 </div>
@@ -313,7 +326,7 @@ export default function CostCalculator({ data = null }) {
                 <h3 className="font-display text-xl font-bold text-neutral-900 dark:text-white mb-1">{sq(0) || 'What type of project do you need?'}</h3>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-5">{sh(0)}</p>
                 <div className="grid sm:grid-cols-2 gap-2">
-                    {Object.entries(PRICING.projectType).map(([k, v]) => (
+                    {Object.entries(PRICING_DATA.projectType).map(([k, v]) => (
                         <OptionBtn key={k} value={k} selected={a.projectType === k} onClick={val => set('projectType', val)}
                             icon={v.icon} label={t(v, 'label')} desc={t(v, 'desc')}
                             sublabel={`${fromLabel} ${fmt(v.base)}`} />
@@ -345,7 +358,7 @@ export default function CostCalculator({ data = null }) {
                 <h3 className="font-display text-xl font-bold text-neutral-900 dark:text-white mb-1">{sq(2) || 'What level of design do you need?'}</h3>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-5">{sh(2)}</p>
                 <div className="grid gap-2">
-                    {Object.entries(PRICING.design).map(([k, v]) => (
+                    {Object.entries(PRICING_DATA.design).map(([k, v]) => (
                         <OptionBtn key={k} value={k} selected={a.design === k} onClick={val => set('design', val)}
                             icon={v.icon} label={t(v, 'label')} desc={t(v, 'desc')}
                             sublabel={v.multiplier > 1.0 ? `×${v.multiplier.toFixed(1)} ${baseMultiplierLabel}` : undefined} />
@@ -360,7 +373,7 @@ export default function CostCalculator({ data = null }) {
                 <h3 className="font-display text-xl font-bold text-neutral-900 dark:text-white mb-1">{sq(3) || 'Do you need a content management system?'}</h3>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-5">{sh(3)}</p>
                 <div className="grid gap-2">
-                    {Object.entries(PRICING.cms).map(([k, v]) => (
+                    {Object.entries(PRICING_DATA.cms).map(([k, v]) => (
                         <OptionBtn key={k} value={k} selected={a.cms === k} onClick={val => set('cms', val)}
                             icon={v.icon} label={t(v, 'label')} desc={t(v, 'desc')}
                             sublabel={v.cost > 0 ? `+${fmt(v.cost)}` : noExtraLabel} />
@@ -375,7 +388,7 @@ export default function CostCalculator({ data = null }) {
                 <h3 className="font-display text-xl font-bold text-neutral-900 dark:text-white mb-1">{sq(4) || 'Which integrations do you need?'}</h3>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-5">{sh(4)}</p>
                 <div className="grid sm:grid-cols-2 gap-2">
-                    {Object.entries(PRICING.integrations).map(([k, v]) => (
+                    {Object.entries(PRICING_DATA.integrations).map(([k, v]) => (
                         <OptionBtn key={k} value={k} selected={a.integrations.includes(k)} onClick={() => toggleInt(k)}
                             icon={v.icon} label={t(v, 'label')} desc={t(v, 'desc')}
                             sublabel={`+${fmt(v.cost)}`} />
@@ -390,7 +403,7 @@ export default function CostCalculator({ data = null }) {
                 <h3 className="font-display text-xl font-bold text-neutral-900 dark:text-white mb-1">{sq(5) || 'Do you want an SEO package?'}</h3>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-5">{sh(5)}</p>
                 <div className="grid gap-2">
-                    {Object.entries(PRICING.seoPackage).map(([k, v]) => (
+                    {Object.entries(PRICING_DATA.seoPackage).map(([k, v]) => (
                         <OptionBtn key={k} value={k} selected={a.seoPackage === k} onClick={val => set('seoPackage', val)}
                             icon={v.icon} label={t(v, 'label')} desc={t(v, 'desc')}
                             sublabel={v.cost > 0 ? `+${fmt(v.cost)}` : noExtraLabel} />
@@ -405,7 +418,7 @@ export default function CostCalculator({ data = null }) {
                 <h3 className="font-display text-xl font-bold text-neutral-900 dark:text-white mb-1">{sq(6) || 'When do you need the project?'}</h3>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-5">{sh(6)}</p>
                 <div className="grid gap-2">
-                    {Object.entries(PRICING.deadline).map(([k, v]) => (
+                    {Object.entries(PRICING_DATA.deadline).map(([k, v]) => (
                         <OptionBtn key={k} value={k} selected={a.deadline === k} onClick={val => set('deadline', val)}
                             icon={v.icon} label={t(v, 'label')} desc={t(v, 'desc')}
                             sublabel={v.multiplier > 1 ? `+${Math.round((v.multiplier - 1) * 100)}% ${toQuoteLabel}` : standardPricingLabel} />
@@ -420,7 +433,7 @@ export default function CostCalculator({ data = null }) {
                 <h3 className="font-display text-xl font-bold text-neutral-900 dark:text-white mb-1">{sq(7) || 'Hosting & maintenance?'}</h3>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-5">{sh(7)}</p>
                 <div className="grid gap-2">
-                    {Object.entries(PRICING.hosting).map(([k, v]) => (
+                    {Object.entries(PRICING_DATA.hosting).map(([k, v]) => (
                         <OptionBtn key={k} value={k} selected={a.hosting === k} onClick={val => set('hosting', val)}
                             icon={v.icon} label={t(v, 'label')} desc={t(v, 'desc')}
                             sublabel={v.cost > 0 ? `${fmt(v.cost)}${tx('per_year', '/year')}` : 'self-managed'} />

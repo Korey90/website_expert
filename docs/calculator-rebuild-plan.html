@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>calculator-rebuild-plan.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="plan-przebudowy-modu%C5%82u-kalkulatora">Plan przebudowy modułu kalkulatora</h1>
+<p><strong>Data:</strong> 2026-03-26<br>
+<strong>Cel:</strong> Wszystkie teksty kalkulatora (pytania kroków, etykiety, przyciski, ekran wyników) muszą być edytowalne z panelu admin Filament — zero hardkodowanych stringów w JSX.</p>
+<hr>
+<h2 id="problem-stan-wyj%C5%9Bciowy">Problem (stan wyjściowy)</h2>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Gdzie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DEFAULTS</code> obiekt w JSX – tytuł/podtytuł hardkodowany</td>
+<td><code>CostCalculator.jsx</code> linia ~52</td>
+</tr>
+<tr>
+<td>Kroki mają tylko EN/PL – brak <code>question_pt</code> / <code>hint_pt</code></td>
+<td><code>SiteSectionSeeder</code> <code>extra.steps</code></td>
+</tr>
+<tr>
+<td>4 etykiety inline (<code>baseMultiplierLabel</code>, <code>noExtraLabel</code>, …) hardkodowane</td>
+<td><code>CostCalculator.jsx</code> linia ~218</td>
+</tr>
+<tr>
+<td>Brak dedykowanego UI admina do edycji pytań kroków</td>
+<td>–</td>
+</tr>
+<tr>
+<td>Brak dedykowanego UI admina do edycji wszystkich stringów</td>
+<td>–</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="architektura-docelowa">Architektura docelowa</h2>
+<pre class="hljs"><code><div>DB
+├── calculator_pricing      (istniejąca — ceny opcji EN/PL/PT)
+├── calculator_strings      (NOWA — wszystkie etykiety UI per locale)
+└── calculator_steps        (NOWA — 8 pytań + hinty per locale)
+
+Filament Admin
+├── Calculator Pricing      (istniejący zasób)
+├── Calculator Strings      (NOWY — zarządzanie etykietami)
+└── Calculator Steps        (NOWY — zarządzanie pytaniami/krokami)
+
+Controller (KalkulatorController)
+└── Ładuje pricing + strings + steps z DB
+    └── Rozwiązuje locale, wysyła gotowe stringi do frontendu
+
+Frontend
+├── CostCalculator.jsx      (istniejący — zachowany bez zmian)
+└── CostCalculatorV2.jsx    (NOWY — zero hardkodowanych stringów)
+    └── Wszystkie teksty z props: strings{} + steps[] + pricing{}
+</div></code></pre>
+<hr>
+<h2 id="tabela-calculatorstrings">Tabela <code>calculator_strings</code></h2>
+<table>
+<thead>
+<tr>
+<th>kolumna</th>
+<th>typ</th>
+<th>opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>bigint PK</td>
+<td></td>
+</tr>
+<tr>
+<td>key</td>
+<td>varchar(100) UNIQUE</td>
+<td>identyfikator stringu</td>
+</tr>
+<tr>
+<td>group</td>
+<td>varchar(50)</td>
+<td>grupowanie w adminie</td>
+</tr>
+<tr>
+<td>value_en</td>
+<td>text</td>
+<td>wartość angielska</td>
+</tr>
+<tr>
+<td>value_pl</td>
+<td>text</td>
+<td>wartość polska</td>
+</tr>
+<tr>
+<td>value_pt</td>
+<td>text</td>
+<td>wartość portugalska</td>
+</tr>
+<tr>
+<td>note</td>
+<td>varchar(255) NULL</td>
+<td>wskazówka dla admina</td>
+</tr>
+<tr>
+<td>sort_order</td>
+<td>smallint</td>
+<td>kolejność w adminie</td>
+</tr>
+</tbody>
+</table>
+<h3 id="grupy-i-klucze">Grupy i klucze</h3>
+<p><strong>header</strong></p>
+<ul>
+<li><code>section_label</code> — &quot;Cost Calculator&quot;</li>
+<li><code>title</code> — &quot;How Much Will Your Project Cost?&quot;</li>
+<li><code>subtitle</code> — &quot;Answer a few questions…&quot;</li>
+</ul>
+<p><strong>navigation</strong></p>
+<ul>
+<li><code>step_label</code> — &quot;Step&quot;</li>
+<li><code>step_of</code> — &quot;of&quot;</li>
+<li><code>nav_next</code> — &quot;Next →&quot;</li>
+<li><code>nav_back</code> — &quot;← Back&quot;</li>
+<li><code>nav_skip</code> — &quot;Skip →&quot;</li>
+<li><code>nav_calc</code> — &quot;Calculate Quote 🚀&quot;</li>
+</ul>
+<p><strong>misc_labels</strong></p>
+<ul>
+<li><code>from_label</code> — &quot;from&quot;</li>
+<li><code>base_multiplier_label</code> — &quot;of base price&quot;</li>
+<li><code>no_extra_label</code> — &quot;no extra charge&quot;</li>
+<li><code>to_quote_label</code> — &quot;to quote&quot;</li>
+<li><code>standard_pricing_label</code> — &quot;standard pricing&quot;</li>
+<li><code>per_year</code> — &quot;/year&quot;</li>
+<li><code>self_managed</code> — &quot;self-managed&quot;</li>
+<li><code>pages_addon</code> — &quot;Each page above 5: +£80&quot;</li>
+<li><code>pages_chip</code> — &quot;pages&quot;</li>
+<li><code>integrations_chip</code> — &quot;integrations&quot;</li>
+</ul>
+<p><strong>result_page</strong></p>
+<ul>
+<li><code>result_title</code> — &quot;Your Estimated Quote&quot;</li>
+<li><code>result_subtitle</code> — &quot;Estimate based on the information you provided.&quot;</li>
+<li><code>result_cost_label</code> — &quot;Estimated project cost&quot;</li>
+<li><code>hosting_addon_label</code> — &quot;+ hosting&quot;</li>
+<li><code>restart</code> — &quot;Start over&quot;</li>
+</ul>
+<p><strong>contact_form</strong></p>
+<ul>
+<li><code>contact_title</code> — &quot;Enter your details and we'll send you a detailed quote.&quot;</li>
+<li><code>name_placeholder</code> — &quot;Your name / company&quot;</li>
+<li><code>email_placeholder</code> — &quot;Your email&quot;</li>
+<li><code>submit_btn</code> — &quot;Send enquiry 🚀&quot;</li>
+<li><code>submitting_btn</code> — &quot;Sending…&quot;</li>
+<li><code>success_msg</code> — &quot;✓ Done! We'll get back to you within 1 business day.&quot;</li>
+<li><code>sent_to</code> — &quot;Sent to:&quot;</li>
+</ul>
+<hr>
+<h2 id="tabela-calculatorsteps">Tabela <code>calculator_steps</code></h2>
+<table>
+<thead>
+<tr>
+<th>kolumna</th>
+<th>typ</th>
+<th>opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>bigint PK</td>
+<td></td>
+</tr>
+<tr>
+<td>step_number</td>
+<td>tinyint</td>
+<td>1–8</td>
+</tr>
+<tr>
+<td>question_en/pl/pt</td>
+<td>text</td>
+<td>pytanie</td>
+</tr>
+<tr>
+<td>hint_en/pl/pt</td>
+<td>text NULL</td>
+<td>podpowiedź</td>
+</tr>
+<tr>
+<td>is_active</td>
+<td>boolean default true</td>
+<td></td>
+</tr>
+<tr>
+<td>sort_order</td>
+<td>smallint</td>
+<td>kolejność</td>
+</tr>
+</tbody>
+</table>
+<h3 id="8-krok%C3%B3w">8 kroków</h3>
+<ol>
+<li>Typ projektu</li>
+<li>Liczba podstron</li>
+<li>Poziom designu</li>
+<li>CMS</li>
+<li>Integracje (multi-select)</li>
+<li>Pakiet SEO</li>
+<li>Termin wykonania</li>
+<li>Hosting</li>
+</ol>
+<hr>
+<h2 id="filament-admin-resources">Filament Admin Resources</h2>
+<h3 id="calculatorstringsresource">CalculatorStringsResource</h3>
+<ul>
+<li>Tabela: kolumny Key, Group, EN (truncated), PL, PT, Sort</li>
+<li>Filtr po grupie</li>
+<li>Formularz: <code>key</code>, <code>group</code>, <code>note</code> | <code>value_en</code> | <code>value_pl</code> | <code>value_pt</code> | <code>sort_order</code></li>
+<li>Navigationgroup: &quot;Settings&quot;, icon: <code>heroicon-o-language</code></li>
+</ul>
+<h3 id="calculatorstepsresource">CalculatorStepsResource</h3>
+<ul>
+<li>Tabela: Step #, Question EN, active, sort_order</li>
+<li>Formularz: step_number, is_active | EN question+hint | PL question+hint | PT question+hint</li>
+<li>Reorderable (drag &amp; drop)</li>
+<li>Navigationgroup: &quot;Settings&quot;, icon: <code>heroicon-o-queue-list</code></li>
+</ul>
+<hr>
+<h2 id="controller--kalkulatorcontroller">Controller — KalkulatorController</h2>
+<pre class="hljs"><code><div><span class="hljs-comment">// Resolve locale (istniejąca logika)</span>
+$locale = ...;
+
+<span class="hljs-comment">// 1. Strings: mapuj key → wartość w bieżącym locale (fallback EN)</span>
+$strings = \App\Models\CalculatorString::orderBy(<span class="hljs-string">'sort_order'</span>)
+    -&gt;get()
+    -&gt;mapWithKeys(fn($s) =&gt; [
+        $s-&gt;key =&gt; $s-&gt;{<span class="hljs-string">"value_$locale"</span>} ?: $s-&gt;value_en
+    ])
+    -&gt;all();
+
+<span class="hljs-comment">// 2. Steps: pytania + hinty w bieżącym locale</span>
+$steps = \App\Models\CalculatorStep::where(<span class="hljs-string">'is_active'</span>, <span class="hljs-keyword">true</span>)
+    -&gt;orderBy(<span class="hljs-string">'sort_order'</span>)
+    -&gt;get()
+    -&gt;map(fn($s) =&gt; [
+        <span class="hljs-string">'question'</span> =&gt; $s-&gt;{<span class="hljs-string">"question_$locale"</span>} ?: $s-&gt;question_en,
+        <span class="hljs-string">'hint'</span>     =&gt; $s-&gt;{<span class="hljs-string">"hint_$locale"</span>}     ?: $s-&gt;hint_en,
+    ])
+    -&gt;values()
+    -&gt;all();
+
+<span class="hljs-comment">// 3. Pricing (istniejąca logika — bez zmian)</span>
+$pricing = ...;
+
+<span class="hljs-keyword">return</span> Inertia::render(<span class="hljs-string">'Kalkulator'</span>, compact(
+    <span class="hljs-string">'cost_calculator'</span>, <span class="hljs-string">'navbar'</span>, <span class="hljs-string">'footer'</span>,
+    <span class="hljs-string">'pricing'</span>, <span class="hljs-string">'strings'</span>, <span class="hljs-string">'steps'</span>
+));
+</div></code></pre>
+<hr>
+<h2 id="frontend--costcalculatorv2jsx">Frontend — CostCalculatorV2.jsx</h2>
+<h3 id="props">Props</h3>
+<pre class="hljs"><code><div><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">CostCalculatorV2</span>(<span class="hljs-params">{ strings = {}, steps = [], pricing = null }</span>)
+</span></div></code></pre>
+<h3 id="zasada">Zasada</h3>
+<ul>
+<li><code>strings</code> to obiekt <code>{ key: 'wartość w locale' }</code> — pre-resolved przez controller</li>
+<li><code>steps</code> to tablica <code>[{ question: '...', hint: '...' }, ...]</code></li>
+<li><code>pricing</code> — ten sam format co w v1 (z DB przez controller)</li>
+<li><code>s(key, fallback)</code> helper: <code>strings[key] ?? fallback</code> — jedyna funkcja lokalizacji</li>
+<li>Zero <code>locale</code> importów, zero <code>usePage()</code> dla tekstów, zero hardkodowanych stringów</li>
+</ul>
+<h3 id="sekcja-na-stronie">Sekcja na stronie</h3>
+<p>ID: <code>#kalkulator-v2</code><br>
+Umieszczona w <code>Kalkulator.jsx</code> bezpośrednio pod istniejącym <code>&lt;CostCalculator&gt;</code></p>
+<hr>
+<h2 id="kolejno%C5%9B%C4%87-implementacji">Kolejność implementacji</h2>
+<ol>
+<li>✅ Plan (ten plik)</li>
+<li><input type="checkbox" id="checkbox0"><label for="checkbox0">Migracje: </label><code>calculator_strings</code> + <code>calculator_steps</code></li>
+<li><input type="checkbox" id="checkbox1"><label for="checkbox1">Modele: </label><code>CalculatorString</code>, <code>CalculatorStep</code></li>
+<li><input type="checkbox" id="checkbox2"><label for="checkbox2">Seeder: </label><code>CalculatorStringsSeeder</code> (28 stringów × 3 locale)</li>
+<li><input type="checkbox" id="checkbox3"><label for="checkbox3">Seeder: </label><code>CalculatorStepsSeeder</code> (8 kroków × 3 locale)</li>
+<li><input type="checkbox" id="checkbox4"><label for="checkbox4">Rejestracja w </label><code>DatabaseSeeder</code></li>
+<li><input type="checkbox" id="checkbox5"><label for="checkbox5">Filament: </label><code>CalculatorStringsResource</code></li>
+<li><input type="checkbox" id="checkbox6"><label for="checkbox6">Filament: </label><code>CalculatorStepsResource</code></li>
+<li><input type="checkbox" id="checkbox7"><label for="checkbox7">Controller: </label><code>KalkulatorController</code> — dodaj <code>$strings</code>, <code>$steps</code></li>
+<li><input type="checkbox" id="checkbox8"><label for="checkbox8">JSX: </label><code>CostCalculatorV2.jsx</code> — nowy komponent bez hardkodów</li>
+<li><input type="checkbox" id="checkbox9"><label for="checkbox9">JSX: </label><code>Kalkulator.jsx</code> — dodaj <code>&lt;CostCalculatorV2&gt;</code> poniżej <code>&lt;CostCalculator&gt;</code></li>
+<li><input type="checkbox" id="checkbox10"><label for="checkbox10"></label><code>php artisan migrate</code></li>
+<li><input type="checkbox" id="checkbox11"><label for="checkbox11"></label><code>php artisan db:seed --class=CalculatorStringsSeeder</code></li>
+<li><input type="checkbox" id="checkbox12"><label for="checkbox12"></label><code>php artisan db:seed --class=CalculatorStepsSeeder</code></li>
+<li><input type="checkbox" id="checkbox13"><label for="checkbox13"></label><code>npm run build</code></li>
+</ol>
+<hr>
+<h2 id="pliki-do-utworzenia">Pliki do utworzenia</h2>
+<table>
+<thead>
+<tr>
+<th>Plik</th>
+<th>Typ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>database/migrations/2026_03_26_140000_create_calculator_strings_table.php</code></td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><code>database/migrations/2026_03_26_140001_create_calculator_steps_table.php</code></td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><code>app/Models/CalculatorString.php</code></td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><code>app/Models/CalculatorStep.php</code></td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><code>database/seeders/CalculatorStringsSeeder.php</code></td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><code>database/seeders/CalculatorStepsSeeder.php</code></td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><code>app/Filament/Resources/CalculatorStringsResource.php</code></td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><code>app/Filament/Resources/CalculatorStringsResource/Pages/*.php</code></td>
+<td>NEW (3 pliki)</td>
+</tr>
+<tr>
+<td><code>app/Filament/Resources/CalculatorStepsResource.php</code></td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><code>app/Filament/Resources/CalculatorStepsResource/Pages/*.php</code></td>
+<td>NEW (3 pliki)</td>
+</tr>
+<tr>
+<td><code>resources/js/Components/Marketing/CostCalculatorV2.jsx</code></td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><code>app/Http/Controllers/KalkulatorController.php</code></td>
+<td>MODIFY</td>
+</tr>
+<tr>
+<td><code>resources/js/Pages/Kalkulator.jsx</code></td>
+<td>MODIFY</td>
+</tr>
+<tr>
+<td><code>database/seeders/DatabaseSeeder.php</code></td>
+<td>MODIFY</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>

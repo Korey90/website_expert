@@ -93,7 +93,7 @@ class AdminSeeder extends Seeder
             ['email' => 'admin@websiteexpert.co.uk'],
             [
                 'name'      => 'Admin WebsiteExpert',
-                'password'  => bcrypt('Admin@WebsiteExpert2026!'),
+                'password'  => bcrypt('password'), // Change this to a secure password in production!
                 'is_active' => true,
                 'locale'    => 'en',
             ]

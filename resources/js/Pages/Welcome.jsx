@@ -6,11 +6,11 @@ import CtaBanner      from '@/Components/Marketing/CtaBanner';
 import TrustStrip     from '@/Components/Marketing/TrustStrip';
 import Services       from '@/Components/Marketing/Services';
 import Portfolio      from '@/Components/Marketing/Portfolio';
-import CostCalculator from '@/Components/Marketing/CostCalculator';
-import Contact        from '@/Components/Marketing/Contact';
+import CostCalculatorV2 from '@/Components/Marketing/CostCalculatorV2';
+import Contact          from '@/Components/Marketing/Contact';
 import useScrollReveal from '@/Hooks/useScrollReveal';
 
-export default function Welcome({ auth, hero, about, cta_banner, trust_strip, testimonials, services, portfolio, cost_calculator, navbar, contact, footer }) {
+export default function Welcome({ auth, hero, about, cta_banner, trust_strip, testimonials, services, portfolio, cost_calculator_v2, navbar, contact, footer, pricing, strings, steps }) {
     useScrollReveal('.reveal');
 
     return (
@@ -20,14 +20,14 @@ export default function Welcome({ auth, hero, about, cta_banner, trust_strip, te
                 <meta name="description" content="Bespoke web design and development for UK businesses." />
             </Head>
 
-            <Hero data={hero} />
-            <About data={about} />
-            <CtaBanner data={cta_banner} />
-            <TrustStrip data={trust_strip} testimonials={testimonials} />
-            <Services data={services} />
-            <Portfolio data={portfolio} />
-            <CostCalculator data={cost_calculator} />
-            <Contact data={contact} />
+            {hero           && <Hero data={hero} />}
+            {about          && <About data={about} />}
+            {cta_banner     && <CtaBanner data={cta_banner} />}
+            {trust_strip    && <TrustStrip data={trust_strip} testimonials={testimonials} />}
+            {services       && <Services data={services} />}
+            {portfolio      && <Portfolio data={portfolio} />}
+            {cost_calculator_v2 && <CostCalculatorV2 strings={strings} steps={steps} pricing={pricing} />}
+            {contact        && <Contact data={contact} />}
         </MarketingLayout>
     );
 }

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CalculatorPricing;
+use App\Models\CalculatorStep;
+use App\Models\CalculatorString;
 use App\Models\SiteSection;
 use Illuminate\Support\Facades\App;
 use Inertia\Inertia;
@@ -22,7 +25,7 @@ class WelcomeController extends Controller
 
         App::setLocale($locale);
 
-        $sections = SiteSection::whereIn('key', ['hero', 'about', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'portfolio', 'cost_calculator', 'navbar', 'contact', 'footer'])
+        $sections = SiteSection::whereIn('key', ['hero', 'about', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'portfolio', 'cost_calculator_v2', 'navbar', 'contact', 'footer'])
             ->where('is_active', true)
             ->get()
             ->keyBy('key');
@@ -79,11 +82,7 @@ class WelcomeController extends Controller
             'extra' => $s->extra,
         ] : null;
 
-        $cost_calculator = ($s = $sections->get('cost_calculator')) ? [
-            'title'    => $s->title,
-            'subtitle' => $s->subtitle,
-            'extra'    => $s->extra,
-        ] : null;
+        $cost_calculator_v2 = $sections->has('cost_calculator_v2') ? true : null;
 
         $navbar = ($s = $sections->get('navbar')) ? [
             'extra' => $s->extra,
@@ -99,6 +98,65 @@ class WelcomeController extends Controller
             'extra' => $s->extra,
         ] : null;
 
-        return Inertia::render('Welcome', compact('hero', 'about', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'portfolio', 'cost_calculator', 'navbar', 'contact', 'footer'));
+        // Pricing, strings and steps for CostCalculatorV2
+        $categoryMap = [
+            'project_type' => 'projectType',
+            'design'       => 'design',
+            'cms'          => 'cms',
+            'integrations' => 'integrations',
+            'seo_package'  => 'seoPackage',
+            'deadline'     => 'deadline',
+            'hosting'      => 'hosting',
+        ];
+        $multiplierCategories = ['design', 'deadline'];
+
+        $pricing = [];
+        CalculatorPricing::where('is_active', true)
+            ->orderBy('sort_order')
+            ->each(function ($row) use (&$pricing, $categoryMap, $multiplierCategories, $locale) {
+                $frontendKey = $categoryMap[$row->category] ?? null;
+                if (!$frontendKey) return;
+
+                $entry = [
+                    'label_en'  => $row->label,
+                    'label_pl'  => $row->label_pl ?? $row->label,
+                    'label_pt'  => $row->label_pt ?? $row->label,
+                    'label_loc' => $row->{"label_$locale"} ?? $row->label,
+                    'icon'      => $row->icon ?? '',
+                    'desc_en'   => $row->description ?? '',
+                    'desc_pl'   => $row->desc_pl ?? $row->description ?? '',
+                    'desc_pt'   => $row->desc_pt ?? $row->description ?? '',
+                    'desc_loc'  => $row->{"desc_$locale"} ?? $row->description ?? '',
+                ];
+
+                if ($row->category === 'project_type') {
+                    $entry['base'] = (float) $row->base_cost;
+                } elseif (in_array($row->category, $multiplierCategories)) {
+                    $entry['multiplier'] = (float) $row->multiplier;
+                } else {
+                    $entry['cost'] = (float) $row->base_cost;
+                }
+
+                $pricing[$frontendKey][$row->key] = $entry;
+            });
+
+        $strings = CalculatorString::orderBy('sort_order')
+            ->get()
+            ->mapWithKeys(fn($s) => [
+                $s->key => ($s->{"value_$locale"} ?: $s->value_en) ?? $s->value_en,
+            ])
+            ->all();
+
+        $steps = CalculatorStep::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn($s) => [
+                'question' => ($s->{"question_$locale"} ?: $s->question_en) ?? $s->question_en,
+                'hint'     => ($s->{"hint_$locale"}     ?: $s->hint_en)     ?? '',
+            ])
+            ->values()
+            ->all();
+
+        return Inertia::render('Welcome', compact('hero', 'about', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'portfolio', 'cost_calculator_v2', 'navbar', 'contact', 'footer', 'pricing', 'strings', 'steps'));
     }
 }

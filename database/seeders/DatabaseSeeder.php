@@ -14,26 +14,31 @@ class DatabaseSeeder extends Seeder
         // Core: roles, permissions, admin user, pipeline stages, project templates
         $this->call(AdminSeeder::class);
 
-        // Users: manager and developers
-        $this->call(UserSeeder::class);
+        // System settings (tracking, integrations)
+        $this->call(SettingSeeder::class);
 
-        // CRM data (order matters — clients before leads/projects)
-        $this->call(ClientSeeder::class);
-        $this->call(LeadSeeder::class);
-        $this->call(ProjectSeeder::class);
+        // Legal & compliance content
+        $this->call(LegalSettingsSeeder::class);
+        $this->call(PageSeeder::class);
 
-        // Finance
-        $this->call(QuoteSeeder::class);
-        $this->call(InvoiceSeeder::class);
-        $this->call(ContractTemplateSeeder::class);
+        // Website front-end content
+        $this->call(SiteSectionSeeder::class);
+        $this->call(CalculatorPricingSeeder::class);
+        $this->call(CalculatorStringsSeeder::class);
+        $this->call(CalculatorStepsSeeder::class);
 
-        // Content & settings
+        // Templates required by automations, contracts, and notifications
         $this->call(EmailTemplateSeeder::class);
         $this->call(SmsTemplateSeeder::class);
-        $this->call(AutomationRuleSeeder::class);
-        $this->call(CalculatorPricingSeeder::class);
-        $this->call(PageSeeder::class);
-        $this->call(SiteSectionSeeder::class);
-        $this->call(LegalSettingsSeeder::class);
+        $this->call(ContractTemplateSeeder::class);
+
+        // ── Demo / sample data (comment out for production) ──────────────────
+        // $this->call(UserSeeder::class);
+        // $this->call(ClientSeeder::class);
+        // $this->call(LeadSeeder::class);
+        // $this->call(ProjectSeeder::class);
+        // $this->call(QuoteSeeder::class);
+        // $this->call(InvoiceSeeder::class);
+        // $this->call(AutomationRuleSeeder::class);
     }
 }

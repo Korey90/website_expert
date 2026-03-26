@@ -1,9 +1,9 @@
 import { Head } from '@inertiajs/react';
 import MarketingLayout from '@/Layouts/MarketingLayout';
-import CostCalculator from '@/Components/Marketing/CostCalculator';
+import CostCalculatorV2 from '@/Components/Marketing/CostCalculatorV2';
 import useScrollReveal from '@/Hooks/useScrollReveal';
 
-export default function Kalkulator({ auth, cost_calculator, navbar, footer }) {
+export default function Kalkulator({ auth, navbar, footer, pricing, strings, steps }) {
     useScrollReveal('.reveal');
 
     return (
@@ -14,7 +14,7 @@ export default function Kalkulator({ auth, cost_calculator, navbar, footer }) {
             </Head>
 
             <main className="flex-1">
-                <CostCalculator data={cost_calculator} />
+                <CostCalculatorV2 strings={strings} steps={steps} pricing={pricing} />
             </main>
         </MarketingLayout>
     );
