@@ -12,8 +12,18 @@ class Client extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'company_name', 'trading_name', 'companies_house_number', 'vat_number',
+    protected static function booted(): void
+    {
+        static::forceDeleting(function (Client $client): void {
+            $client->contacts()->withTrashed()->forceDelete();
+            $client->leads()->withTrashed()->forceDelete();
+            $client->projects()->withTrashed()->forceDelete();
+            $client->quotes()->withTrashed()->forceDelete();
+            $client->invoices()->withTrashed()->forceDelete();
+        });
+    }
+
+    protected $fillable = [ 'company_name', 'trading_name', 'companies_house_number', 'vat_number',
         'website', 'status', 'source', 'industry',
         'address_line1', 'address_line2', 'city', 'county', 'postcode', 'country',
         'primary_contact_name', 'primary_contact_email', 'primary_contact_phone',

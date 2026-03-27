@@ -25,7 +25,198 @@ Powiadomienie pojawia się w dzwoneczku Filament bez przeładowania strony, gdy 
 
 ---
 
-## 2. Wybór technologii: Laravel Reverb (self-hosted WebSocket)
+## 2. Kontrola z panelu admina — UI zarządzania powiadomieniami
+
+### Krótka odpowiedź: TAK — i już masz do tego fundament
+
+Projekt posiada gotowy system `AutomationRules` z modelem, jobem i UI w Filament.  
+`ProcessAutomationJob` **już ma zdefiniowany typ akcji `notify_admin`** — aktualnie wysyła tylko email.  
+Wystarczy go rozszerzyć, żeby zamiast (lub obok) emaila wysyłał powiadomienie real-time do panelu.
+
+Dzięki temu **nie tworzysz osobnego systemu** — zarządzasz powiadomieniami dokładnie tak samo jak innymi regułami automatyzacji.
+
+---
+
+### 2.1 Co będziesz mógł zrobić z UI
+
+#### Tworzenie reguły (Admin → Automations → New Rule):
+
+```
+Trigger event:  [lead.created ▼]
+Conditions:     [source] [=] [calculator]      ← opcjonalne filtry
+Delay (min):    0
+Actions:
+  + [notify_admin ▼]
+      Title:   "Nowy lead z kalkulatora: {lead.name}"
+      Body:    "Email: {lead.email} | Budżet: {context.budget}"
+      Icon:    [heroicon-o-user-plus ▼]
+      Color:   [success ▼]
+      URL:     "/admin/leads/{lead.id}"
+      Target:  [admin, manager ☑]  [developer ☐]
+```
+
+#### Efekt:
+Gdy klient wypełni kalkulator → powiadomienie w panelu pojawi się natychmiast,  
+z customowym tytułem, treścią i linkiem do rekordu.
+
+---
+
+### 2.2 Dostępne zmienne (placeholdery) w szablonach tytułu/treści
+
+System zastępuje `{klucz}` wartością z kontekstu zdarzenia.
+
+| Placeholder | Opis | Dostępny dla |
+|-------------|------|-------------|
+| `{lead.name}` | Imię i nazwisko leada | lead.* |
+| `{lead.email}` | Email leada | lead.* |
+| `{lead.source}` | Źródło (formularz/kalkulator) | lead.* |
+| `{project.name}` | Nazwa projektu | project.* |
+| `{project.status}` | Status projektu | project.* |
+| `{invoice.number}` | Numer faktury | invoice.* |
+| `{invoice.amount}` | Kwota faktury | invoice.* |
+| `{invoice.client}` | Nazwa klienta | invoice.* |
+| `{quote.number}` | Numer oferty | quote.* |
+| `{quote.amount}` | Kwota oferty | quote.* |
+| `{client.name}` | Nazwa firmy klienta | client.* |
+| `{client.email}` | Email klienta | client.* |
+| `{automation.rule_name}` | Nazwa reguły | wszystkie |
+| `{trigger_event}` | Nazwa zdarzenia | wszystkie |
+
+Placeholder `{lead.name}` mapuje się na `$context['lead_name']` w `buildTemplateVars()` — metoda już istnieje w JobProcessAutomationJob.
+
+---
+
+### 2.3 Dostępne zdarzenia (trigger events) — lista gotowa do wyboru w UI
+
+Już obsługiwane przez `AutomationEventListener`:
+
+| Klucz zdarzenia | Kiedy |
+|----------------|-------|
+| `lead.created` | Nowy lead z formularza |
+| `lead.created_from_calculator` | Nowy lead z kalkulatora |
+| `project.created` | Projekt utworzony |
+| `project.phase_changed` | Projekt zmienił fazę |
+| `project.message_received` | Klient wysłał wiadomość |
+| `project.completed` | Projekt ukończony |
+| `invoice.sent` | Faktura wysłana |
+| `invoice.paid` | Faktura opłacona |
+| `invoice.overdue` | Faktura przeterminowana |
+| `quote.sent` | Oferta wysłana |
+| `quote.accepted` | Oferta zaakceptowana |
+| `quote.rejected` | Oferta odrzucona |
+| `client.portal_accessed` | Klient zalogował się do portalu |
+
+Nowe zdarzenia można dodać przez dispatch `event(new XxxEvent(...))` w odpowiednim miejscu kodu.
+
+---
+
+### 2.4 Przykładowe reguły gotowe do wgrania (seeder)
+
+```php
+// Reguła 1 — Nowy lead z formularza → alert dla admina
+[
+  'name'          => 'Alert: nowy lead',
+  'trigger_event' => 'lead.created',
+  'conditions'    => [],
+  'actions'       => [[
+    'type'   => 'notify_admin',
+    'title'  => 'Nowy lead: {lead.name}',
+    'body'   => '{lead.email} — {lead.source}',
+    'icon'   => 'heroicon-o-user-plus',
+    'color'  => 'success',
+    'url'    => '/admin/leads/{lead.id}',
+    'roles'  => ['admin', 'manager'],
+  ]],
+  'is_active' => true,
+]
+
+// Reguła 2 — Faktura opłacona (tylko jeśli > £500)
+[
+  'name'          => 'Alert: faktura opłacona',
+  'trigger_event' => 'invoice.paid',
+  'conditions'    => [['field' => 'amount', 'operator' => '>', 'value' => 500]],
+  'actions'       => [[
+    'type'   => 'notify_admin',
+    'title'  => '💰 Faktura opłacona: {invoice.number}',
+    'body'   => '{invoice.client} — £{invoice.amount}',
+    'icon'   => 'heroicon-o-banknotes',
+    'color'  => 'success',
+    'url'    => '/admin/invoices/{invoice.id}',
+    'roles'  => ['admin'],
+  ]],
+  'is_active' => true,
+]
+```
+
+---
+
+### 2.5 Co trzeba zmienić w istniejącym kodzie
+
+**`ProcessAutomationJob::notifyAdmin()`** — aktualnie wysyła tylko email.  
+Zmiana: zamiast emaila → `User::notify(new AdminRealtimeNotification(...))` z broadcastem.
+
+```php
+// PRZED (obecny kod):
+private function notifyAdmin(array $action): void
+{
+    Mail::raw($body, fn($msg) => $msg->to($to)->subject($subject));
+}
+
+// PO (po implementacji):
+private function notifyAdmin(array $action): void
+{
+    $title  = $this->interpolate($action['title'] ?? 'Powiadomienie', $this->buildTemplateVars());
+    $body   = $this->interpolate($action['body']  ?? $this->triggerEvent, $this->buildTemplateVars());
+    $roles  = $action['roles'] ?? ['admin', 'manager'];
+
+    User::whereHas('roles', fn($q) => $q->whereIn('name', $roles))
+        ->get()
+        ->each->notify(new AdminRealtimeNotification(
+            title: $title,
+            body:  $body,
+            url:   $this->interpolate($action['url'] ?? '', $this->buildTemplateVars()),
+            icon:  $action['icon']  ?? 'heroicon-o-bell',
+            color: $action['color'] ?? 'primary',
+        ));
+}
+
+// helper do interpolacji placeholderów {klucz}:
+private function interpolate(string $template, array $vars): string
+{
+    foreach ($vars as $key => $value) {
+        $template = str_replace('{' . $key . '}', $value ?? '', $template);
+    }
+    return $template;
+}
+```
+
+**`AutomationRuleResource` form** — dodanie pól dla `notify_admin` action:  
+Repeater z `type` selector i polami warunkowymi (pokazują się gdy type = notify_admin).
+
+---
+
+### 2.6 Opcja: ręczne powiadomienie z rekordu
+
+W `LeadResource`, `InvoiceResource`, `ProjectResource` — akcja "Wyślij powiadomienie do admina":
+
+```php
+Tables\Actions\Action::make('notify')
+    ->icon('heroicon-o-bell')
+    ->form([
+        TextInput::make('title')->required(),
+        Textarea::make('body'),
+        Select::make('color')->options(['success','warning','danger','info']),
+    ])
+    ->action(function (array $data, Lead $record) {
+        User::role(['admin','manager'])->get()->each->notify(
+            new AdminRealtimeNotification(...$data, url: '/admin/leads/' . $record->id)
+        );
+    });
+```
+
+---
+
+## 3. Wybór technologii: Laravel Reverb (self-hosted WebSocket)
 
 ### Dlaczego Reverb, nie Pusher?
 

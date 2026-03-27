@@ -22,6 +22,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Filament\Actions\Action as FilamentAction;
+use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -183,13 +185,62 @@ class ProcessAutomationJob implements ShouldQueue
 
     private function notifyAdmin(array $action): void
     {
-        $to      = config('mail.admin_address', 'admin@websiteexpert.co.uk');
-        $subject = $action['subject'] ?? 'Admin Notification — ' . $this->triggerEvent;
-        $body    = $action['body']    ?? 'Automation rule triggered: ' . $this->triggerEvent . "\n\nContext: " . json_encode($this->context);
+        $vars  = array_merge($this->context, $this->buildTemplateVars());
+        $title = $this->interpolate($action['title'] ?? 'Admin Notification', $vars);
+        $body  = $this->interpolate($action['body']  ?? 'Event: ' . $this->triggerEvent, $vars);
+        $url   = $this->interpolate($action['url']   ?? '', $vars);
+        $icon  = $action['icon']  ?? 'heroicon-o-bell';
+        $color = $action['color'] ?? 'primary';
+        $roles = $action['roles'] ?? ['admin'];
 
-        Mail::raw($body, function ($msg) use ($to, $subject) {
-            $msg->to($to)->subject($subject);
-        });
+        $users = User::whereHas('roles', fn ($q) => $q->whereIn('name', (array) $roles))->get();
+
+        if ($users->isEmpty()) {
+            return;
+        }
+
+        foreach ($users as $user) {
+            // Pre-generate UUID so the follow URL can be built atomically in one DB insert.
+            $notifId   = (string) Str::orderedUuid();
+            $followUrl = $url ? route('notification.follow', ['to' => $url, 'id' => $notifId]) : null;
+
+            $notification = FilamentNotification::make()
+                ->title($title)
+                ->body($body)
+                ->icon($icon)
+                ->iconColor($color);
+
+            if ($followUrl) {
+                $notification->actions([
+                    FilamentAction::make('view')
+                        ->label('View')
+                        ->url($followUrl),
+                ]);
+            }
+
+            $data = $notification->toArray();
+            $data['format'] = 'filament'; // required for Filament's query: where('data->format', 'filament')
+            $data['duration'] = 'persistent'; // prevent Alpine auto-close (default is 6000ms which triggers notificationClosed → delete)
+            unset($data['id']);
+
+            $user->notifications()->create([
+                'id'      => $notifId,
+                'type'    => \Filament\Notifications\DatabaseNotification::class,
+                'data'    => $data,
+                'read_at' => null,
+            ]);
+
+            \Filament\Notifications\Events\DatabaseNotificationsSent::dispatch($user);
+        }
+    }
+
+    private function interpolate(string $template, array $vars): string
+    {
+        foreach ($vars as $key => $value) {
+            $template = str_replace('{' . $key . '}', (string) ($value ?? ''), $template);
+        }
+
+        return $template;
     }
 
     private function addTag(array $action): void

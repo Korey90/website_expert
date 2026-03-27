@@ -59,14 +59,15 @@ class AutomationRuleResource extends Resource
                                 ->options([
                                     'send_email'           => 'Send Email',
                                     'send_sms'             => 'Send SMS',
-                                    'notify_admin'         => 'Notify Admin',
+                                    'notify_admin'         => 'Notify Admin (Bell)',
                                     'create_portal_access' => 'Create Portal Access',
                                 ])
                                 ->required()
                                 ->reactive(),
                             Forms\Components\Select::make('to')
                                 ->options(['client' => 'Client', 'admin' => 'Admin', 'assigned_user' => 'Assigned User'])
-                                ->default('client'),
+                                ->default('client')
+                                ->visible(fn (Get $get) => $get('type') !== 'notify_admin'),
                             Forms\Components\TextInput::make('template_slug')
                                 ->label('Email Template Slug')
                                 ->visible(fn (Get $get) => $get('type') === 'send_email'),
@@ -75,6 +76,55 @@ class AutomationRuleResource extends Resource
                                 ->options(fn () => SmsTemplate::where('is_active', true)->orderBy('name')->pluck('name', 'id'))
                                 ->searchable()
                                 ->visible(fn (Get $get) => $get('type') === 'send_sms'),
+                            Forms\Components\TextInput::make('title')
+                                ->label('Notification Title')
+                                ->placeholder('New lead: {lead_title}')
+                                ->helperText('Placeholders: {lead_title}, {client_name}, {project_name}, {invoice_number}, {lead_id}, {project_id}, {invoice_id}')
+                                ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
+                            Forms\Components\Textarea::make('body')
+                                ->label('Notification Body')
+                                ->placeholder('{client_name} — {company_name}')
+                                ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
+                            Forms\Components\TextInput::make('url')
+                                ->label('Action URL')
+                                ->placeholder('/admin/leads/{lead_id}')
+                                ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
+                            Forms\Components\Select::make('icon')
+                                ->label('Icon')
+                                ->options([
+                                    'heroicon-o-bell'              => 'Bell',
+                                    'heroicon-o-user-plus'         => 'User Plus',
+                                    'heroicon-o-banknotes'         => 'Banknotes',
+                                    'heroicon-o-document-text'     => 'Document',
+                                    'heroicon-o-chat-bubble-left'  => 'Chat Bubble',
+                                    'heroicon-o-exclamation-triangle' => 'Warning',
+                                    'heroicon-o-check-circle'      => 'Check Circle',
+                                    'heroicon-o-arrow-path'        => 'Refresh / Automation',
+                                ])
+                                ->default('heroicon-o-bell')
+                                ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
+                            Forms\Components\Select::make('color')
+                                ->label('Color')
+                                ->options([
+                                    'primary' => 'Primary',
+                                    'success' => 'Success',
+                                    'warning' => 'Warning',
+                                    'danger'  => 'Danger',
+                                    'info'    => 'Info',
+                                    'gray'    => 'Gray',
+                                ])
+                                ->default('primary')
+                                ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
+                            Forms\Components\CheckboxList::make('roles')
+                                ->label('Notify Roles')
+                                ->options([
+                                    'admin'     => 'Admin',
+                                    'manager'   => 'Manager',
+                                    'developer' => 'Developer',
+                                ])
+                                ->default(['admin'])
+                                ->columns(3)
+                                ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
                         ])
                         ->columns(2)
                         ->defaultItems(1),

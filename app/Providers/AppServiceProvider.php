@@ -3,11 +3,13 @@
 namespace App\Providers;
 
 use App\Listeners\AutomationEventListener;
+use App\Livewire\CustomDatabaseNotifications;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Override Filament's DatabaseNotifications so X/close only marks as read, not deletes
+        Livewire::component('database-notifications', CustomDatabaseNotifications::class);
 
         Event::subscribe(AutomationEventListener::class);
 

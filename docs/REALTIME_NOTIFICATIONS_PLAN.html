@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown转换文档</title>
+  <style>
+    body { 
+      font-family: 'Microsoft YaHei', 'SimSun', sans-serif; 
+      margin: 0 auto; 
+      max-width: 960px; 
+      padding: 20px; 
+      line-height: 1.6;
+    }
+    pre { 
+      background-color: #f8f8f8; 
+      border: 1px solid #ddd; 
+      padding: 10px; 
+      border-radius: 3px; 
+      overflow: auto; 
+    }
+    code { 
+      font-family: Consolas, Monaco, monospace; 
+      background-color: #f8f8f8; 
+      padding: 2px 5px; 
+      border-radius: 3px; 
+    }
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      margin-bottom: 20px;
+    }
+    th, td { 
+      border: 1px solid #ddd; 
+      padding: 8px; 
+    }
+    th { 
+      background-color: #f2f2f2; 
+      text-align: left; 
+    }
+    tr:nth-child(even) { 
+      background-color: #f9f9f9; 
+    }
+    img { 
+      max-width: 100%; 
+      height: auto; 
+    }
+    .toc-placeholder { 
+      margin: 20px 0; 
+      padding: 10px; 
+      background-color: #f0f0f0; 
+      border: 1px dashed #ccc; 
+      text-align: center; 
+      color: #666; 
+    }
+  </style>
+</head>
+<body>
+  <h1>Plan implementacji: Real-Time System Powiadomień (Admin Panel)</h1>
+<p><strong>Stack:</strong> Laravel 13 · Filament v5 · Laravel Reverb (WebSocket) · Laravel Echo · Filament Notifications<br />
+<strong>Data powstania planu:</strong> 2026-03-26</p>
+<hr />
+<h2>1. Cel i zakres</h2>
+<p>System powiadomień w czasie rzeczywistym dla użytkowników panelu admina (<code>/admin</code>).<br />
+Powiadomienie pojawia się w dzwoneczku Filament bez przeładowania strony, gdy w systemie zajdzie ważne zdarzenie.</p>
+<h3>Co będzie powiadamiać:</h3>
+<table>
+<thead>
+<tr>
+<th>Zdarzenie</th>
+<th>Komunikat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nowy lead z formularza kontaktowego</td>
+<td>„Nowy lead: Jan Kowalski (<a href="mailto:jan@firma.pl">jan@firma.pl</a>)&quot;</td>
+</tr>
+<tr>
+<td>Nowy lead z kalkulatora wyceny</td>
+<td>„Nowy lead z kalkulatora: budżet £1200&quot;</td>
+</tr>
+<tr>
+<td>Fake Nowa wiadomość w projekcie (od klienta)</td>
+<td>„Nowa wiadomość: Projekt XYZ → <a href="mailto:client@email.com">client@email.com</a>&quot;</td>
+</tr>
+<tr>
+<td>Projekt zmienił fazę</td>
+<td>„Projekt XYZ przeszedł do fazy: Testing&quot;</td>
+</tr>
+<tr>
+<td>Faktura opłacona</td>
+<td>„Faktura #INV-042 opłacona przez Firma Sp. z o.o. (£999)&quot;</td>
+</tr>
+<tr>
+<td>Faktura przeterminowana</td>
+<td>„Faktura #INV-038 jest przeterminowana — 5 dni po terminie&quot;</td>
+</tr>
+<tr>
+<td>Oferta zaakceptowana przez klienta</td>
+<td>„Oferta #QUO-011 zaakceptowana przez Jan Kowalski&quot;</td>
+</tr>
+<tr>
+<td>Wyzwolona reguła automatyzacji</td>
+<td>„Automatyzacja: wysłano email powitalny dla Projekt XYZ&quot;</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Kontrola z panelu admina — UI zarządzania powiadomieniami</h2>
+<h3>Krótka odpowiedź: TAK — i już masz do tego fundament</h3>
+<p>Projekt posiada gotowy system <code>AutomationRules</code> z modelem, jobem i UI w Filament.<br />
+<code>ProcessAutomationJob</code> <strong>już ma zdefiniowany typ akcji <code>notify_admin</code></strong> — aktualnie wysyła tylko email.<br />
+Wystarczy go rozszerzyć, żeby zamiast (lub obok) emaila wysyłał powiadomienie real-time do panelu.</p>
+<p>Dzięki temu <strong>nie tworzysz osobnego systemu</strong> — zarządzasz powiadomieniami dokładnie tak samo jak innymi regułami automatyzacji.</p>
+<hr />
+<h3>2.1 Co będziesz mógł zrobić z UI</h3>
+<h4>Tworzenie reguły (Admin → Automations → New Rule):</h4>
+<pre><code>Trigger event:  [lead.created ▼]
+Conditions:     [source] [=] [calculator]      ← opcjonalne filtry
+Delay (min):    0
+Actions:
+  + [notify_admin ▼]
+      Title:   &quot;Nowy lead z kalkulatora: {lead.name}&quot;
+      Body:    &quot;Email: {lead.email} | Budżet: {context.budget}&quot;
+      Icon:    [heroicon-o-user-plus ▼]
+      Color:   [success ▼]
+      URL:     &quot;/admin/leads/{lead.id}&quot;
+      Target:  [admin, manager ☑]  [developer ☐]
+</code></pre>
+<h4>Efekt:</h4>
+<p>Gdy klient wypełni kalkulator → powiadomienie w panelu pojawi się natychmiast,<br />
+z customowym tytułem, treścią i linkiem do rekordu.</p>
+<hr />
+<h3>2.2 Dostępne zmienne (placeholdery) w szablonach tytułu/treści</h3>
+<p>System zastępuje <code>{klucz}</code> wartością z kontekstu zdarzenia.</p>
+<table>
+<thead>
+<tr>
+<th>Placeholder</th>
+<th>Opis</th>
+<th>Dostępny dla</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{lead.name}</code></td>
+<td>Imię i nazwisko leada</td>
+<td>lead.*</td>
+</tr>
+<tr>
+<td><code>{lead.email}</code></td>
+<td>Email leada</td>
+<td>lead.*</td>
+</tr>
+<tr>
+<td><code>{lead.source}</code></td>
+<td>Źródło (formularz/kalkulator)</td>
+<td>lead.*</td>
+</tr>
+<tr>
+<td><code>{project.name}</code></td>
+<td>Nazwa projektu</td>
+<td>project.*</td>
+</tr>
+<tr>
+<td><code>{project.status}</code></td>
+<td>Status projektu</td>
+<td>project.*</td>
+</tr>
+<tr>
+<td><code>{invoice.number}</code></td>
+<td>Numer faktury</td>
+<td>invoice.*</td>
+</tr>
+<tr>
+<td><code>{invoice.amount}</code></td>
+<td>Kwota faktury</td>
+<td>invoice.*</td>
+</tr>
+<tr>
+<td><code>{invoice.client}</code></td>
+<td>Nazwa klienta</td>
+<td>invoice.*</td>
+</tr>
+<tr>
+<td><code>{quote.number}</code></td>
+<td>Numer oferty</td>
+<td>quote.*</td>
+</tr>
+<tr>
+<td><code>{quote.amount}</code></td>
+<td>Kwota oferty</td>
+<td>quote.*</td>
+</tr>
+<tr>
+<td><code>{client.name}</code></td>
+<td>Nazwa firmy klienta</td>
+<td>client.*</td>
+</tr>
+<tr>
+<td><code>{client.email}</code></td>
+<td>Email klienta</td>
+<td>client.*</td>
+</tr>
+<tr>
+<td><code>{automation.rule_name}</code></td>
+<td>Nazwa reguły</td>
+<td>wszystkie</td>
+</tr>
+<tr>
+<td><code>{trigger_event}</code></td>
+<td>Nazwa zdarzenia</td>
+<td>wszystkie</td>
+</tr>
+</tbody>
+</table>
+<p>Placeholder <code>{lead.name}</code> mapuje się na <code>$context['lead_name']</code> w <code>buildTemplateVars()</code> — metoda już istnieje w JobProcessAutomationJob.</p>
+<hr />
+<h3>2.3 Dostępne zdarzenia (trigger events) — lista gotowa do wyboru w UI</h3>
+<p>Już obsługiwane przez <code>AutomationEventListener</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Klucz zdarzenia</th>
+<th>Kiedy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lead.created</code></td>
+<td>Nowy lead z formularza</td>
+</tr>
+<tr>
+<td><code>lead.created_from_calculator</code></td>
+<td>Nowy lead z kalkulatora</td>
+</tr>
+<tr>
+<td><code>project.created</code></td>
+<td>Projekt utworzony</td>
+</tr>
+<tr>
+<td><code>project.phase_changed</code></td>
+<td>Projekt zmienił fazę</td>
+</tr>
+<tr>
+<td><code>project.message_received</code></td>
+<td>Klient wysłał wiadomość</td>
+</tr>
+<tr>
+<td><code>project.completed</code></td>
+<td>Projekt ukończony</td>
+</tr>
+<tr>
+<td><code>invoice.sent</code></td>
+<td>Faktura wysłana</td>
+</tr>
+<tr>
+<td><code>invoice.paid</code></td>
+<td>Faktura opłacona</td>
+</tr>
+<tr>
+<td><code>invoice.overdue</code></td>
+<td>Faktura przeterminowana</td>
+</tr>
+<tr>
+<td><code>quote.sent</code></td>
+<td>Oferta wysłana</td>
+</tr>
+<tr>
+<td><code>quote.accepted</code></td>
+<td>Oferta zaakceptowana</td>
+</tr>
+<tr>
+<td><code>quote.rejected</code></td>
+<td>Oferta odrzucona</td>
+</tr>
+<tr>
+<td><code>client.portal_accessed</code></td>
+<td>Klient zalogował się do portalu</td>
+</tr>
+</tbody>
+</table>
+<p>Nowe zdarzenia można dodać przez dispatch <code>event(new XxxEvent(...))</code> w odpowiednim miejscu kodu.</p>
+<hr />
+<h3>2.4 Przykładowe reguły gotowe do wgrania (seeder)</h3>
+<pre><code class="language-php">// Reguła 1 — Nowy lead z formularza → alert dla admina
+[
+  'name'          =&gt; 'Alert: nowy lead',
+  'trigger_event' =&gt; 'lead.created',
+  'conditions'    =&gt; [],
+  'actions'       =&gt; [[
+    'type'   =&gt; 'notify_admin',
+    'title'  =&gt; 'Nowy lead: {lead.name}',
+    'body'   =&gt; '{lead.email} — {lead.source}',
+    'icon'   =&gt; 'heroicon-o-user-plus',
+    'color'  =&gt; 'success',
+    'url'    =&gt; '/admin/leads/{lead.id}',
+    'roles'  =&gt; ['admin', 'manager'],
+  ]],
+  'is_active' =&gt; true,
+]
+
+// Reguła 2 — Faktura opłacona (tylko jeśli &gt; £500)
+[
+  'name'          =&gt; 'Alert: faktura opłacona',
+  'trigger_event' =&gt; 'invoice.paid',
+  'conditions'    =&gt; [['field' =&gt; 'amount', 'operator' =&gt; '&gt;', 'value' =&gt; 500]],
+  'actions'       =&gt; [[
+    'type'   =&gt; 'notify_admin',
+    'title'  =&gt; '💰 Faktura opłacona: {invoice.number}',
+    'body'   =&gt; '{invoice.client} — £{invoice.amount}',
+    'icon'   =&gt; 'heroicon-o-banknotes',
+    'color'  =&gt; 'success',
+    'url'    =&gt; '/admin/invoices/{invoice.id}',
+    'roles'  =&gt; ['admin'],
+  ]],
+  'is_active' =&gt; true,
+]
+</code></pre>
+<hr />
+<h3>2.5 Co trzeba zmienić w istniejącym kodzie</h3>
+<p><strong><code>ProcessAutomationJob::notifyAdmin()</code></strong> — aktualnie wysyła tylko email.<br />
+Zmiana: zamiast emaila → <code>User::notify(new AdminRealtimeNotification(...))</code> z broadcastem.</p>
+<pre><code class="language-php">// PRZED (obecny kod):
+private function notifyAdmin(array $action): void
+{
+    Mail::raw($body, fn($msg) =&gt; $msg-&gt;to($to)-&gt;subject($subject));
+}
+
+// PO (po implementacji):
+private function notifyAdmin(array $action): void
+{
+    $title  = $this-&gt;interpolate($action['title'] ?? 'Powiadomienie', $this-&gt;buildTemplateVars());
+    $body   = $this-&gt;interpolate($action['body']  ?? $this-&gt;triggerEvent, $this-&gt;buildTemplateVars());
+    $roles  = $action['roles'] ?? ['admin', 'manager'];
+
+    User::whereHas('roles', fn($q) =&gt; $q-&gt;whereIn('name', $roles))
+        -&gt;get()
+        -&gt;each-&gt;notify(new AdminRealtimeNotification(
+            title: $title,
+            body:  $body,
+            url:   $this-&gt;interpolate($action['url'] ?? '', $this-&gt;buildTemplateVars()),
+            icon:  $action['icon']  ?? 'heroicon-o-bell',
+            color: $action['color'] ?? 'primary',
+        ));
+}
+
+// helper do interpolacji placeholderów {klucz}:
+private function interpolate(string $template, array $vars): string
+{
+    foreach ($vars as $key =&gt; $value) {
+        $template = str_replace('{' . $key . '}', $value ?? '', $template);
+    }
+    return $template;
+}
+</code></pre>
+<p><strong><code>AutomationRuleResource</code> form</strong> — dodanie pól dla <code>notify_admin</code> action:<br />
+Repeater z <code>type</code> selector i polami warunkowymi (pokazują się gdy type = notify_admin).</p>
+<hr />
+<h3>2.6 Opcja: ręczne powiadomienie z rekordu</h3>
+<p>W <code>LeadResource</code>, <code>InvoiceResource</code>, <code>ProjectResource</code> — akcja “Wyślij powiadomienie do admina”:</p>
+<pre><code class="language-php">Tables\Actions\Action::make('notify')
+    -&gt;icon('heroicon-o-bell')
+    -&gt;form([
+        TextInput::make('title')-&gt;required(),
+        Textarea::make('body'),
+        Select::make('color')-&gt;options(['success','warning','danger','info']),
+    ])
+    -&gt;action(function (array $data, Lead $record) {
+        User::role(['admin','manager'])-&gt;get()-&gt;each-&gt;notify(
+            new AdminRealtimeNotification(...$data, url: '/admin/leads/' . $record-&gt;id)
+        );
+    });
+</code></pre>
+<hr />
+<h2>3. Wybór technologii: Laravel Reverb (self-hosted WebSocket)</h2>
+<h3>Dlaczego Reverb, nie Pusher?</h3>
+<table>
+<thead>
+<tr>
+<th>Kryterium</th>
+<th>Laravel Reverb</th>
+<th>Pusher</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Koszt</td>
+<td>Darmowy (self-hosted)</td>
+<td>Płatny po 200 połączeń</td>
+</tr>
+<tr>
+<td>Kontrola</td>
+<td>Pełna, własny serwer</td>
+<td>Zewnętrzny SaaS</td>
+</tr>
+<tr>
+<td>Opóźnienia</td>
+<td>~0ms (lokalnie)</td>
+<td>~50–100ms (external)</td>
+</tr>
+<tr>
+<td>Konfiguracja</td>
+<td><code>composer require laravel/reverb</code></td>
+<td>Klucze API, rejestracja</td>
+</tr>
+<tr>
+<td>Protokół</td>
+<td>Kompatybilny Pusher (drop-in)</td>
+<td>Pusher</td>
+</tr>
+<tr>
+<td>Laravel 13</td>
+<td>Oficjalny pakiet 1st-party</td>
+<td>Obsługiwany</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reverb</strong> to oficjalny WebSocket server Laravel, kompatybilny z protokołem Pusher — <code>laravel-echo</code> działa bez zmian.</p>
+<h3>Alternatywy (odrzucone):</h3>
+<ul>
+<li><strong>Polling</strong> — prosto w implementacji, ale obciąża serwer (~co 5s zapytania od każdego admina)</li>
+<li><strong>SSE (Server-Sent Events)</strong> — jednostronne, brak wsparcia Filament</li>
+<li><strong>Soketi</strong> — dobry, ale Reverb ma lepsze wsparcie ekosystemu Laravel</li>
+</ul>
+<hr />
+<h2>3. Architektura systemu</h2>
+<pre><code>[Zdarzenie w systemie]
+        │
+        ▼
+[Event dispatched]  ──────────────────────────────────────────────┐
+(NewLeadReceived, InvoicePaid, ProjectMessageSent, itd.)          │
+        │                                                          │
+        ▼                                                          ▼
+[Listener: SendAdminNotification]               [DB: notifications table]
+        │                                       (Laravel built-in, 
+        ▼                                        morph do User)
+[Laravel Reverb WS Server :8080]
+        │
+        ▼ WebSocket broadcast
+[Laravel Echo (przeglądarka)]
+        │
+        ▼
+[Filament Notifications.send()]  ───→ 🔔 Toast + Dzwoneczek w /admin
+</code></pre>
+<h3>Kanały:</h3>
+<ul>
+<li><strong>Private channel:</strong> <code>admins</code> — tylko zalogowani User z rolą admin/manager/developer</li>
+<li><strong>Autoryzacja:</strong> <code>routes/channels.php</code> + <code>BroadcastServiceProvider</code></li>
+</ul>
+<hr />
+<h2>4. Struktura plików do stworzenia</h2>
+<pre><code>app/
+├── Events/
+│   ├── NewLeadReceived.php              ← nowy lead (formularz/kalkulator)
+│   ├── ProjectMessageSent.php           ← nowa wiadomość klienta
+│   ├── ProjectPhasChanged.php           ← zmiana fazy projektu
+│   ├── InvoicePaid.php                  ← faktura opłacona
+│   ├── InvoiceOverdue.php               ← faktura przeterminowana
+│   ├── QuoteAccepted.php                ← oferta zaakceptowana
+│   └── AutomationTriggered.php         ← reguła automatyzacji wykonana
+│
+├── Listeners/
+│   └── SendAdminNotification.php        ← jeden listener obsługuje wszystkie
+│
+├── Notifications/
+│   └── AdminRealtimeNotification.php    ← Laravel Notification (database + broadcast)
+│
+database/
+└── migrations/
+    └── 2026_xx_xx_create_notifications_table.php  ← standard Laravel
+</code></pre>
+<hr />
+<h2>5. Plan krok po kroku</h2>
+<h3>Krok 1 — Instalacja Laravel Reverb</h3>
+<pre><code class="language-bash">composer require laravel/reverb
+php artisan reverb:install
+</code></pre>
+<p>Generuje:</p>
+<ul>
+<li><code>config/reverb.php</code></li>
+<li>Aktualizuje <code>.env</code> z kluczami Reverb</li>
+<li>Rejestruje <code>BroadcastServiceProvider</code></li>
+</ul>
+<pre><code class="language-env">BROADCAST_CONNECTION=reverb
+REVERB_APP_ID=your-app-id
+REVERB_APP_KEY=your-app-key
+REVERB_APP_SECRET=your-app-secret
+REVERB_HOST=localhost
+REVERB_PORT=8080
+REVERB_SCHEME=http
+
+VITE_REVERB_APP_KEY=&quot;${REVERB_APP_KEY}&quot;
+VITE_REVERB_HOST=&quot;${REVERB_HOST}&quot;
+VITE_REVERB_PORT=&quot;${REVERB_PORT}&quot;
+VITE_REVERB_SCHEME=&quot;${REVERB_SCHEME}&quot;
+</code></pre>
+<hr />
+<h3>Krok 2 — Instalacja Laravel Echo (frontend)</h3>
+<pre><code class="language-bash">npm install laravel-echo pusher-js
+</code></pre>
+<p>Konfiguracja w <code>resources/js/bootstrap.js</code> (lub dedykowany plik ładowany tylko w panelu admin):</p>
+<pre><code class="language-js">import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
+
+window.Pusher = Pusher;
+window.Echo = new Echo({
+    broadcaster: 'reverb',
+    key: import.meta.env.VITE_REVERB_APP_KEY,
+    wsHost: import.meta.env.VITE_REVERB_HOST,
+    wsPort: import.meta.env.VITE_REVERB_PORT,
+    wssPort: import.meta.env.VITE_REVERB_PORT,
+    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+    enabledTransports: ['ws', 'wss'],
+});
+</code></pre>
+<blockquote>
+<p><strong>Uwaga:</strong> Filament ma już bundlowany <code>echo.js</code> z Pusher v7.6. Możemy to wykorzystać zamiast nowego install — wystarczy skonfigurować broadcasting w Filament Panel Provider.</p>
+</blockquote>
+<hr />
+<h3>Krok 3 — Migracja tabeli notifications</h3>
+<p>Laravel ma wbudowany mechanizm:</p>
+<pre><code class="language-bash">php artisan notifications:table
+php artisan migrate
+</code></pre>
+<p>Schemat tabeli <code>notifications</code>:</p>
+<pre><code>id (uuid)
+type (string)          ← klasa notification
+notifiable_type        ← 'App\Models\User'
+notifiable_id          ← user.id
+data (json)            ← tytuł, treść, URL, ikona, kolor
+read_at (timestamp)    ← null = nieprzeczytane
+created_at
+</code></pre>
+<hr />
+<h3>Krok 4 — Model User: HasDatabaseNotifications</h3>
+<pre><code class="language-php">// app/Models/User.php
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable
+{
+    use Notifiable; // już powinno być w standardowym Laravel
+}
+</code></pre>
+<hr />
+<h3>Krok 5 — Eventy</h3>
+<p>Przykład <code>NewLeadReceived</code>:</p>
+<pre><code class="language-php">// app/Events/NewLeadReceived.php
+class NewLeadReceived implements ShouldBroadcast
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public function __construct(public Lead $lead) {}
+
+    public function broadcastOn(): array
+    {
+        return [new PrivateChannel('admins')];
+    }
+
+    public function broadcastAs(): string
+    {
+        return 'new-lead';
+    }
+
+    public function broadcastWith(): array
+    {
+        return [
+            'title'   =&gt; 'Nowy lead: ' . $this-&gt;lead-&gt;name,
+            'body'    =&gt; $this-&gt;lead-&gt;email . ' — ' . ($this-&gt;lead-&gt;source ?? 'formularz'),
+            'url'     =&gt; '/admin/leads/' . $this-&gt;lead-&gt;id,
+            'icon'    =&gt; 'heroicon-o-user-plus',
+            'color'   =&gt; 'success',
+        ];
+    }
+}
+</code></pre>
+<hr />
+<h3>Krok 6 — Listener: zapis do DB + wysyłka do zalogowanych adminów</h3>
+<pre><code class="language-php">// app/Listeners/SendAdminNotification.php
+class SendAdminNotification
+{
+    public function handle(object $event): void
+    {
+        $admins = User::whereHas('roles', fn($q) =&gt; $q-&gt;whereIn('name', ['admin', 'manager', 'developer']))-&gt;get();
+        
+        $admins-&gt;each-&gt;notify(new AdminRealtimeNotification(
+            title:  $event-&gt;broadcastWith()['title'],
+            body:   $event-&gt;broadcastWith()['body'],
+            url:    $event-&gt;broadcastWith()['url'],
+            icon:   $event-&gt;broadcastWith()['icon'] ?? 'heroicon-o-bell',
+            color:  $event-&gt;broadcastWith()['color'] ?? 'primary',
+        ));
+    }
+}
+</code></pre>
+<hr />
+<h3>Krok 7 — Laravel Notification (DB + Broadcast)</h3>
+<pre><code class="language-php">// app/Notifications/AdminRealtimeNotification.php
+class AdminRealtimeNotification extends Notification implements ShouldBroadcast
+{
+    public function __construct(
+        public string $title,
+        public string $body,
+        public string $url,
+        public string $icon = 'heroicon-o-bell',
+        public string $color = 'primary',
+    ) {}
+
+    public function via(object $notifiable): array
+    {
+        return ['database', 'broadcast'];
+    }
+
+    public function toDatabase(object $notifiable): array
+    {
+        return [
+            'title' =&gt; $this-&gt;title,
+            'body'  =&gt; $this-&gt;body,
+            'url'   =&gt; $this-&gt;url,
+            'icon'  =&gt; $this-&gt;icon,
+            'color' =&gt; $this-&gt;color,
+        ];
+    }
+
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage($this-&gt;toDatabase($notifiable));
+    }
+
+    public function broadcastOn(): PrivateChannel
+    {
+        return new PrivateChannel('App.Models.User.' . $this-&gt;notifiable-&gt;id);
+    }
+}
+</code></pre>
+<hr />
+<h3>Krok 8 — Autoryzacja kanału</h3>
+<pre><code class="language-php">// routes/channels.php
+Broadcast::channel('App.Models.User.{id}', function (User $user, int $id) {
+    return (int) $user-&gt;id === $id;
+});
+
+Broadcast::channel('admins', function (User $user) {
+    return $user-&gt;hasAnyRole(['admin', 'manager', 'developer']);
+});
+</code></pre>
+<hr />
+<h3>Krok 9 — Rejestracja w EventServiceProvider</h3>
+<pre><code class="language-php">// app/Providers/EventServiceProvider.php
+protected $listen = [
+    NewLeadReceived::class     =&gt; [SendAdminNotification::class],
+    ProjectMessageSent::class  =&gt; [SendAdminNotification::class],
+    ProjectPhaseChanged::class =&gt; [SendAdminNotification::class],
+    InvoicePaid::class         =&gt; [SendAdminNotification::class],
+    InvoiceOverdue::class      =&gt; [SendAdminNotification::class],
+    QuoteAccepted::class       =&gt; [SendAdminNotification::class],
+    AutomationTriggered::class =&gt; [SendAdminNotification::class],
+];
+</code></pre>
+<hr />
+<h3>Krok 10 — Dispatch eventów w istniejącym kodzie</h3>
+<p>Dodajemy <code>event(new XxxEvent(...))</code> w miejscach gdzie już dzieje się logika:</p>
+<table>
+<thead>
+<tr>
+<th>Gdzie</th>
+<th>Event</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ContactController@store</code></td>
+<td><code>NewLeadReceived</code></td>
+</tr>
+<tr>
+<td><code>CalculatorLeadController@store</code></td>
+<td><code>NewLeadReceived</code></td>
+</tr>
+<tr>
+<td><code>ProjectMessage::created</code> (observer)</td>
+<td><code>ProjectMessageSent</code></td>
+</tr>
+<tr>
+<td><code>Project::updated</code> (faza zmieniona)</td>
+<td><code>ProjectPhaseChanged</code></td>
+</tr>
+<tr>
+<td>Webhook płatności IPN / PayU</td>
+<td><code>InvoicePaid</code></td>
+</tr>
+<tr>
+<td>Scheduled job sprawdzający faktury</td>
+<td><code>InvoiceOverdue</code></td>
+</tr>
+<tr>
+<td><code>Quote::updated</code> (status → accepted)</td>
+<td><code>QuoteAccepted</code></td>
+</tr>
+<tr>
+<td><code>ProcessAutomationJob::handle()</code></td>
+<td><code>AutomationTriggered</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Krok 11 — Filament Panel: DatabaseNotifications widget</h3>
+<p>Filament v5 ma wbudowane wsparcie dla powiadomień bazodanowych.<br />
+W <code>app/Providers/Filament/AdminPanelProvider.php</code>:</p>
+<pre><code class="language-php">use Filament\Notifications\Livewire\DatabaseNotifications;
+
+-&gt;plugins([...])
+-&gt;databaseNotifications()           // włącza dzwoneczek w topbarze
+-&gt;databaseNotificationsPolling('30s') // fallback polling co 30s
+</code></pre>
+<p>Filament automatycznie:</p>
+<ul>
+<li>Wyświetla dzwoneczek 🔔 z licznikiem nieprzeczytanych</li>
+<li>Otwiera panel z historią powiadomień</li>
+<li>Oznacza jako przeczytane po kliknięciu</li>
+<li>Linkuje do URL z powiadomienia</li>
+</ul>
+<hr />
+<h3>Krok 12 — Real-time push z Reverb do Filament</h3>
+<p>Filament v5 obsługuje broadcasting przez Livewire. Dodajemy do Panel Provider:</p>
+<pre><code class="language-php">-&gt;broadcastDriver('reverb')
+</code></pre>
+<p>Lub konfigurujemy Echo bezpośrednio w Filament — nasłuchuje na kanale <code>App.Models.User.{id}</code> i wywołuje <code>FilamentNotification.send()</code> po stronie klienta gdy przyjdzie event.</p>
+<hr />
+<h3>Krok 13 — Uruchomienie serwera Reverb</h3>
+<p><strong>Lokalnie (development):</strong></p>
+<pre><code class="language-bash">php artisan reverb:start
+</code></pre>
+<p><strong>Produkcja (supervisor lub systemd):</strong></p>
+<pre><code class="language-ini">[program:reverb]
+command=php /var/www/app/artisan reverb:start --host=0.0.0.0 --port=8080
+autostart=true
+autorestart=true
+user=www-data
+redirect_stderr=true
+</code></pre>
+<hr />
+<h2>6. Przepływ danych — przykład “Nowy lead”</h2>
+<pre><code>1. Wizytant wypełnia formularz kontaktowy
+2. ContactController::store() → Lead::create() → event(new NewLeadReceived($lead))
+3. Laravel Queue Worker odbiera event
+4. SendAdminNotification::handle() → User::notify(new AdminRealtimeNotification(...))
+5. AdminRealtimeNotification::via() → ['database', 'broadcast']
+6. → zapis do tabeli notifications
+7. → BroadcastMessage wysyłana przez Reverb WebSocket
+8. Przeglądarka admina odbiera wiadomość przez Echo
+9. Filament (Livewire) odbiera broadcast → wyświetla toast + +1 na dzwoneczku
+</code></pre>
+<p>Czas od wysłania formularza do pojawienia się powiadomienia: <strong>&lt; 500ms</strong></p>
+<hr />
+<h2>7. Opcje konfiguracyjne (ustawienia admina)</h2>
+<p>Opcjonalnie — strona <code>NotificationSettingsPage</code> w Filament:</p>
+<table>
+<thead>
+<tr>
+<th>Ustawienie</th>
+<th>Domyślnie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Powiadamiaj o nowych leadach</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Powiadamiaj o wiadomościach w projektach</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Powiadamiaj o opłaconych fakturach</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Powiadamiaj o przeterminowanych fakturach</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Powiadamiaj o zaakceptowanych ofertach</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Powiadamiaj o automatyzacjach</td>
+<td>❌ (zbyt częste)</td>
+</tr>
+<tr>
+<td>Dźwięk powiadomienia</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<p>Preferencje per-user, przechowywane w tabeli <code>user_notification_preferences</code>.</p>
+<hr />
+<h2>8. Kolejka (Queue)</h2>
+<p>Notification powinna być dispatchowana przez queue (nie synchronicznie), żeby nie blokować response:</p>
+<pre><code class="language-php">class AdminRealtimeNotification extends Notification implements ShouldQueue, ShouldBroadcast
+</code></pre>
+<p>Wymagane uruchomienie queue workera:</p>
+<pre><code class="language-bash">php artisan queue:work --queue=notifications,default
+</code></pre>
+<p>Na produkcji: supervisor process dla queue worker.</p>
+<hr />
+<h2>9. Bezpieczeństwo</h2>
+<ul>
+<li>Kanały prywatne — tylko autoryzowani użytkownicy</li>
+<li>Autoryzacja przez <code>routes/channels.php</code> (sprawdza rolę)</li>
+<li>Reverb uruchamiany na osobnym porcie (8080), za nginx reverse proxy</li>
+<li>Brak wrażliwych danych w payload broadcastu (tylko ID + opis)</li>
+<li>CSRF-free WebSocket — połączenie autoryzowane przez Laravel session</li>
+</ul>
+<hr />
+<h2>10. Checklist implementacji</h2>
+<pre><code>[ ] 1. composer require laravel/reverb
+[ ] 2. php artisan reverb:install
+[ ] 3. npm install laravel-echo pusher-js
+[ ] 4. php artisan notifications:table &amp;&amp; php artisan migrate
+[ ] 5. User::Notifiable — sprawdzić czy już jest
+[ ] 6. Stworzyć app/Events/*.php (7 eventów)
+[ ] 7. Stworzyć app/Notifications/AdminRealtimeNotification.php
+[ ] 8. Stworzyć app/Listeners/SendAdminNotification.php
+[ ] 9. Zaktualizować EventServiceProvider
+[ ] 10. Dodać event() w ContactController, CalculatorLeadController
+[ ] 11. Dodać Observer na ProjectMessage (wiadomości)
+[ ] 12. Dodać Observer na Project (zmiana fazy)
+[ ] 13. Dodać event() w webhook IPN (InvoicePaid)
+[ ] 14. Dodać event() w ProcessAutomationJob
+[ ] 15. routes/channels.php — autoryzacja kanałów
+[ ] 16. AdminPanelProvider — -&gt;databaseNotifications()
+[ ] 17. Skonfigurować Echo w Filament (Reverb)
+[ ] 18. Uruchomić reverb:start + queue:work
+[ ] 19. Test end-to-end: formularz → powiadomienie w panelu
+[ ] 20. Supervisor config na produkcji
+</code></pre>
+<hr />
+<h2>11. Szacowany czas implementacji</h2>
+<table>
+<thead>
+<tr>
+<th>Etap</th>
+<th>Czas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Instalacja + konfiguracja (Reverb, Echo, migrations)</td>
+<td>~1h</td>
+</tr>
+<tr>
+<td>Eventy + Listener + Notification</td>
+<td>~2h</td>
+</tr>
+<tr>
+<td>Dispatch w istniejącym kodzie (8 miejsc)</td>
+<td>~1.5h</td>
+</tr>
+<tr>
+<td>Filament panel + DatabaseNotifications</td>
+<td>~0.5h</td>
+</tr>
+<tr>
+<td>Testy + poprawki</td>
+<td>~1h</td>
+</tr>
+<tr>
+<td><strong>Łącznie</strong></td>
+<td><strong>~6h</strong></td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>

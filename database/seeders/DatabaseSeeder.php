@@ -32,6 +32,9 @@ class DatabaseSeeder extends Seeder
         $this->call(SmsTemplateSeeder::class);
         $this->call(ContractTemplateSeeder::class);
 
+        //pipeline stages todo checklists
+        $this->call(PipelineStageChecklistSeeder::class);
+
         // ── Demo / sample data (comment out for production) ──────────────────
         // $this->call(UserSeeder::class);
         // $this->call(ClientSeeder::class);
