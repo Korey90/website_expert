@@ -1,371 +1,554 @@
-# Analiza projektu web-dev-app na podstawie kodu źródłowego
+# Analiza projektu — Digital Growth OS (web-dev-app)
+
+> Data analizy: 31.03.2026
+> Podstawa: kod źródłowy repozytorium (routes/, app/, database/, resources/js/, lang/, tests/)
+> Cel: ocena stanu obecnego pod kątem transformacji w skalowalny SaaS
+
+---
+
+## 1. Feature Inventory
+
+### 1.1 Autentykacja i autoryzacja
+
+| Funkcja | Opis | Kluczowe pliki | Status |
+|---------|------|----------------|--------|
+| Rejestracja / logowanie | Standard Laravel Breeze, sesja + cookie | `app/Http/Controllers/Auth/`, `routes/auth.php` | zaimplementowane |
+| Reset hasła | Email token flow | `Auth/PasswordResetLinkController.php`, `Auth/NewPasswordController.php` | zaimplementowane |
+| Weryfikacja emaila | Link z podpisem | `Auth/VerifyEmailController.php` | zaimplementowane |
+| Role i uprawnienia | Spatie Permission v7, 4 role, 40+ uprawnień | `AdminSeeder.php`, `User.php` (HasRoles) | zaimplementowane |
+| Dostęp do panelu | `canAccessPanel()` — tylko admin/manager/developer | `User.php` | zaimplementowane |
+| Portal klienta | Dostęp przez `portal_user_id` na kliencie | `Portal/BasePortalController.php` | zaimplementowane |
+| Zmiana profilu | Imię, email, hasło | `ProfileController.php`, `Pages/Profile/` | zaimplementowane |
+
+### 1.2 CRM — Klienci i Leady
+
+| Funkcja | Opis | Kluczowe pliki | Status |
+|---------|------|----------------|--------|
+| Zarządzanie klientami | Firma, VAT, Companies House, adres, notatki, SoftDeletes | `ClientResource.php`, `Client.php` | zaimplementowane |
+| Kontakty klientów | Powiązane z klientem, SoftDeletes | `Contact.php`, sekcja w `ClientResource` | zaimplementowane |
+| Zarządzanie leadami | Tytuł, wartość, źródło, budżet, etap, przypisany | `LeadResource.php`, `Lead.php` | zaimplementowane |
+| Pipeline Kanban | Widok kolumnowy, drag etapów | `PipelinePage.php`, `filament/pages/pipeline.blade.php` | zaimplementowane |
+| Etapy pipeline | CRUD etapów z kolejnością, checklistami | `PipelineStageResource.php`, `PipelineStage.php` | zaimplementowane |
+| Notatki do leadów | Pinowalne wpisy, historia | `LeadNote.php`, `PipelinePage.php` (modal) | zaimplementowane |
+| Aktywności leadów | Log zdarzeń (zmiana etapu, email, SMS) | `LeadActivity.php`, `ClientActivityListener.php` | zaimplementowane |
+| Checklista etapu | Elementy do wykonania per etap | `LeadChecklistItem.php`, `PipelineStageChecklistSeeder.php` | zaimplementowane |
+| Konwersja leada w projekt | Lead → Project jedną akcją | `LeadResource` (action), relacja `lead.project` | zaimplementowane |
+| Raport konwersji | Współczynnik konwersji per źródło leada | `ConversionReportPage.php` | zaimplementowane |
+
+### 1.3 Projekty
+
+| Funkcja | Opis | Kluczowe pliki | Status |
+|---------|------|----------------|--------|
+| Zarządzanie projektami | Status, deadline, budżet, typ usługi | `ProjectResource.php`, `Project.php` | zaimplementowane |
+| Fazy projektu | Kolejność, status, daty | `ProjectPhase.php`, RelationManager | zaimplementowane |
+| Zadania (tasks) | Powiązane z fazą | `ProjectTask.php` | częściowe (model + RelationManager, brak Kanban board) |
+| Załączniki | Pliki per projekt | `ProjectFile.php` | zaimplementowane |
+| Czat projektu | Wiadomości klient ↔ agencja | `ProjectMessage.php`, `Portal/ProjectController.php` | zaimplementowane |
+| Szablony projektów | Reużywalne szablony z fazami | `ProjectTemplate.php`, `ProjectTemplateResource.php` | zaimplementowane |
+| Portal tok projektu | Klient widzi fazy, taski, pliki, czat | `Portal/ProjectController.php`, `Pages/Portal/Project.jsx` | zaimplementowane |
+
+### 1.4 Finanse
+
+| Funkcja | Opis | Kluczowe pliki | Status |
+|---------|------|----------------|--------|
+| Kosztorysy (Quotes) | Wieloliniowe, VAT, discount, status workflow | `QuoteResource.php`, `Quote.php`, `QuoteItem.php` | zaimplementowane |
+| Faktury (Invoices) | Numeracja, VAT, PDF export, statusy | `InvoiceResource.php`, `Invoice.php`, `InvoiceItem.php`, `InvoicePdfController.php` | zaimplementowane |
+| Płatności | Śledzenie wpłat, powiązanie z fakturą | `Payment.php`, `PaymentResource.php` | zaimplementowane |
+| Stripe Checkout | Płatność przez Checkout Session | `Portal/PaymentController.php`, `StripeWebhookController.php` | zaimplementowane |
+| PayU | Bramka płatności (sandbox + produkcja) | `PayuService.php`, `Portal/PaymentController.php`, `PayuWebhookController.php` | zaimplementowane |
+| Eksport faktur PDF | DomPDF, szablon Blade | `InvoicePdfController.php` | zaimplementowane |
+| Kontrakty | Podpis elektroniczny, interpolacja danych | `ContractResource.php`, `Contract.php`, `ContractInterpolationService.php` | zaimplementowane |
+| Szablony kontraktów | Wielorazowe szablony z placeholderami | `ContractTemplate.php`, `ContractTemplateResource.php` | zaimplementowane |
+
+### 1.5 Powiadomienia i komunikacja
+
+| Funkcja | Opis | Kluczowe pliki | Status |
+|---------|------|----------------|--------|
+| Powiadomienia in-app | Panel Filament, custom DatabaseNotification | `DatabaseNotification.php`, `NotificationResource.php`, `CustomDatabaseNotifications.php` (Livewire) | zaimplementowane |
+| Szablony emaili | Edytowalne przez panel, podgląd live | `EmailTemplate.php`, `EmailTemplateResource.php`, `EmailTemplatePreviewController.php` | zaimplementowane |
+| Maile transakcyjne | Lead, Invoice, Quote, Project, Payment, Portal invite | `app/Mail/` (7 klas) | zaimplementowane |
+| SMS przez Twilio | Szablony SMS, bramka przez SmsService | `SmsTemplate.php`, `SmsService.php`, `SmsTemplateResource.php` | zaimplementowane |
+| Preferencje komunikacji | Klient ustawia zgody: email transakcyjny/projektowy/marketing + SMS | `Client.php` (4 flagi), `Portal/NotificationController.php` | zaimplementowane |
+| Client notification gate | Walidacja preferencji przed wysyłką | `ClientNotificationGate.php` | zaimplementowane |
+
+### 1.6 Automatyzacje
+
+| Funkcja | Opis | Kluczowe pliki | Status |
+|---------|------|----------------|--------|
+| Reguły automatyzacji | CRUD z triggerem, warunkami, akcjami, delay | `AutomationRule.php`, `AutomationRuleResource.php` | zaimplementowane |
+| Eventy trigger | lead.created, lead.stage_changed, project.created/status_changed, invoice.sent/paid/overdue, quote.accepted, contract.created/signed | `AutomationEventListener.php` | zaimplementowane |
+| Ewaluacja warunków | Operator =, !=, >, <, contains | `ConditionEvaluator.php` | zaimplementowane |
+| Akcje automatyzacji | send_email, send_internal_email, send_sms, notify_admin, add_tag, change_status, create_portal_access | `Automation/Actions/` (7 klas) | zaimplementowane |
+| Opóźnienie (delay) | Re-dispatch job z delay_minutes | `ProcessAutomationJob.php` | zaimplementowane |
+
+### 1.7 Panel administracyjny (Filament)
+
+| Funkcja | Opis | Kluczowe pliki | Status |
+|---------|------|----------------|--------|
+| Dashboard z widgetami | Stats, Revenue Chart, Leads by Source, Active Projects, Deadlines, Overdue Invoices, Stale Leads, Quick Actions | `app/Filament/Widgets/` (13 widgetów) | zaimplementowane |
+| Zarządzanie użytkownikami | CRUD, role assignment | `UserResource.php` | zaimplementowane |
+| Zarządzanie rolami i uprawnieniami | CRUD Filament | `RoleResource.php`, `PermissionResource.php` | zaimplementowane |
+| Ustawienia integracji | SMTP, Twilio | `IntegrationSettingsPage.php` | zaimplementowane |
+| Ustawienia płatności | Stripe + PayU, waluta | `PaymentSettingsPage.php` | zaimplementowane |
+| Ustawienia trackingu | GTM, GA4, Meta Pixel, Google Ads, Cookie Consent | `TrackingSettingsPage.php` | zaimplementowane |
+| Ustawienia prawne | Dane firmy, RODO, polityki | `LegalSettingsPage.php` | zaimplementowane |
+| Kalkulator admin | Edycja kroków, cen, stringów | `CalculatorAdminPage.php`, 3 zasoby | zaimplementowane |
+| Sesje użytkowników | Podgląd aktywnych sesji | `SessionResource.php` | zaimplementowane |
+
+### 1.8 Strona marketingowa i CMS
+
+| Funkcja | Opis | Kluczowe pliki | Status |
+|---------|------|----------------|--------|
+| Strona główna DB-driven | Sekcje z bazy (SiteSection), trilingual | `WelcomeController.php`, `Welcome.jsx` | zaimplementowane |
+| Sekcje CMS (13) | Hero, About, Services, Process, Portfolio, FAQ, Contact, Footer, Navbar, CTA, TrustStrip, Testimonials, CostCalculator | `SiteSectionResource.php`, `Components/Marketing/` | zaimplementowane |
+| Kalkulator wyceny V2 | Multi-step, DB-driven pricing/strings/steps | `KalkulatorController.php`, `CostCalculatorV2.jsx` | zaimplementowane |
+| CMS stron statycznych | Privacy policy, Terms, Cookies, Accessibility — translatable | `PageResource.php`, `Page.php`, `CmsPage.jsx` | zaimplementowane |
+| Przełącznik języka | Session-based, EN/PL/PT | `routes/web.php` (lang switch route) | zaimplementowane |
+| Śledzenie (tracking) | GTM/GA4/Pixel/Google Ads z cookie consent | `HandleInertiaRequests.php`, `useMetaPixel.js`, `useConsent.js` | zaimplementowane |
+| Formularz kontaktowy | Zapis nowego leada do CRM | `ContactController.php` | zaimplementowane |
+| Lead z kalkulatora | Zapis danych wyceny jako lead | `CalculatorLeadController.php`, `CreateLeadAction.php` | zaimplementowane |
+
+### 1.9 Raportowanie
+
+| Funkcja | Opis | Kluczowe pliki | Status |
+|---------|------|----------------|--------|
+| Raporty leadów | HTML, PDF (DomPDF), XLSX, CSV | `ReportController.php` | zaimplementowane |
+| Raporty faktur | HTML, PDF, XLSX, CSV | `ReportController.php` | zaimplementowane |
+| Raporty projektów | HTML, PDF, XLSX, CSV | `ReportController.php` | zaimplementowane |
+| Raport konwersji | Konwersja per źródło, wskaźnik, wartość | `ConversionReportPage.php` | zaimplementowane |
+
+### 1.10 Wielojęzyczność (i18n)
+
+| Funkcja | Status |
+|---------|--------|
+| Języki: EN, PL, PT | zaimplementowane |
+| Portal translations przez Inertia share | zaimplementowane |
+| SiteSection — Spatie Translatable (title, subtitle, body, button_text) | zaimplementowane |
+| Page (CMS) — Spatie Translatable (title, content, meta_title, meta_description) | zaimplementowane |
+| Kalkulator — multilingual strings/steps z bazy | częściowe |
+| Komponenty React Marketing/ — hardcoded strings | BRAK (do poprawy) |
+
+---
+
+## 2. Architektura backendu
+
+### 2.1 Modele i relacje
+
+```
+User (HasRoles — spatie)
+  └── Role: admin | manager | developer | client
+
+Client (SoftDeletes)
+  ├── portal_user_id → User
+  ├── assigned_to → User
+  ├── hasMany Contacts
+  ├── hasMany Leads
+  ├── hasMany Projects
+  ├── hasMany Quotes
+  ├── hasMany Invoices
+  └── hasMany Contracts
+
+Lead (SoftDeletes)
+  ├── client_id → Client
+  ├── contact_id → Contact
+  ├── pipeline_stage_id → PipelineStage
+  ├── assigned_to → User
+  ├── hasOne Project
+  ├── hasMany LeadActivities
+  ├── hasMany LeadNotes
+  └── hasMany LeadChecklistItems
+
+Project (SoftDeletes)
+  ├── client_id → Client
+  ├── lead_id → Lead
+  ├── template_id → ProjectTemplate
+  ├── assigned_to → User
+  ├── portal_token (auto-generated)
+  ├── hasMany ProjectPhases → hasMany ProjectTasks
+  ├── hasMany ProjectFiles
+  ├── hasMany ProjectMessages
+  └── hasMany Contracts
+
+Quote (SoftDeletes) → hasMany QuoteItems
+Invoice (SoftDeletes) → hasMany InvoiceItems, hasMany Payments
+Contract (SoftDeletes) → belongsTo ContractTemplate
+
+AutomationRule (trigger_event, conditions[], actions[], delay_minutes)
+Setting (key-value store, TTL cache 1 dzień)
+SiteSection (HasTranslations — spatie)
+Page (HasTranslations — spatie, SoftDeletes)
+CalculatorPricing | CalculatorStep | CalculatorString
+EmailTemplate | SmsTemplate | ContractTemplate
+DatabaseNotification (custom, soft delete zamiast hard delete)
+```
+
+**Kluczowe wzorce:**
+- `SoftDeletes` powszechnie stosowane; `forceDeleting` cascade w `Client`
+- `Model::booted()` — logika inicjalizacji (Project: generowanie portal_token)
+- `Setting` jako cache-backed key-value store z 1-dniowym TTL
+- Brak globalnych scope'ów na modelach (konieczne do multi-tenancy)
+
+### 2.2 Service Layer
+
+`app/Services/` — tylko **4 serwisy**:
+
+| Serwis | Odpowiedzialność |
+|--------|-----------------|
+| `ClientNotificationGate` | Sprawdzenie preferencji komunikacyjnych klienta (email typy + SMS) |
+| `ContractInterpolationService` | Podmiana placeholderów w treści kontraktu (legal, client, project, contract) |
+| `PayuService` | Integracja PayU: OAuth2 token, tworzenie zamówień, weryfikacja IPN |
+| `SmsService` | Twilio SMS: konfiguracja z DB, normalizacja E.164, wysyłka |
+
+**Luka krytyczna:** Brak serwisów dla Lead, Invoice, Quote, Project, Automation. Logika biznesowa tych modułów jest rozproszona po kontrolerach i zasobach Filament.
+
+### 2.3 Kontrolery
+
+| Typ | Ocena grubości |
+|-----|----------------|
+| Publiczne (Welcome, Kalkulator, Contact, CalculatorLead) | CIENKIE |
+| Webhooks (Stripe, PayU) | UMIARKOWANE — logika płatności inline |
+| Portal (8 kontrolerów) | UMIARKOWANE — `BasePortalController` jako helper |
+| ReportController | GRUBY — cała logika eksportu wieloformatowego |
+| DashboardController | CIENKI |
+| Brak Form Requests poza Auth i ContactRequest | |
+
+### 2.4 Kolejki i eventy
+
+| Komponent | Opis |
+|-----------|------|
+| `AutomationEventListener` | Subscriber Eloquent (created/updated) dla Lead, Project, Invoice, Quote, Contract |
+| `ClientActivityListener` | Logi aktywności klienta w `client_activity_log` |
+| `ProcessAutomationJob` | ShouldQueue, tries=3 — pobiera reguły, ewaluuje warunki, wykonuje akcje lub re-dispatches z delay |
+| `Automation/Actions/` | 7 klas akcji realizujących konkretne typy działań |
+| Scheduler | **NIE używany** — `routes/console.php` tylko `inspire` |
+
+### 2.5 Wzorce architektoniczne
+
+| Wzorzec | Obecność |
+|---------|---------|
+| MVC | TAK |
+| Service Layer | CZĘŚCIOWE (4 serwisy) |
+| Repository Pattern | NIE |
+| Actions Pattern | CZĘŚCIOWE (`CreateLeadAction`, `Automation/Actions/`) |
+| DTO / Value Objects | NIE |
+| Form Requests | OGRANICZONE |
+| Policies | NIE (brak `app/Policies/`) |
+| Events/Listeners | TAK |
+| Jobs/Queue | TAK |
+| Observer | NIE (używane `booted()` hooks) |
+
+---
+
+## 3. Architektura frontendu
+
+### 3.1 Stack — diagnoza jednoznaczna
+
+**Inertia.js + React (JSX) + Tailwind CSS v4**
+
+- `@inertiajs/react ^2.0.0` — potwierdzony w `package.json`
+- `react ^18.2.0`, `react-dom ^18.2.0`
+- `tailwindcss ^4.2.2` (Tailwind v4 — CSS-first config)
+- **BRAK TypeScript** — wszystkie pliki to `.jsx`; brak `typescript` w devDependencies
+- **Livewire** zainstalowane, ale używane wyłącznie do nadpisania komponentu Filament (`CustomDatabaseNotifications.php`)
+
+### 3.2 Struktura katalogu `resources/js/`
+
+```
+resources/js/
+├── app.jsx                        # Entry point Inertia
+├── bootstrap.js                   # Axios setup
+├── admin/                         # Custom assety panelu Filament
+├── Components/
+│   ├── Marketing/  (14 komponentów)  # Hero, About, Services, CostCalculatorV2, Contact, ...
+│   ├── Shared/     (1 komponent)     # EmptyState.jsx
+│   └── [UI prymitywy]                # Button, Input, Modal, Dropdown, Checkbox, ...
+├── Contexts/
+│   └── ConsentContext.js              # Cookie consent global state
+├── Hooks/
+│   ├── useConsent.js                  # Odczyt zgód GDPR
+│   ├── useMetaPixel.js                # Meta Pixel tracking
+│   ├── usePortalTrans.js              # Portal i18n translations
+│   └── useScrollReveal.js             # Scroll animation
+├── Layouts/
+│   ├── AuthenticatedLayout.jsx
+│   ├── GuestLayout.jsx
+│   ├── MarketingLayout.jsx
+│   └── PortalLayout.jsx
+├── Pages/
+│   ├── Auth/         (6 stron)        # Login, Register, ForgotPassword, ...
+│   ├── Portal/       (12 stron)       # Dashboard, Project[s], Invoice[s], Quote[s], Contract[s], PayInvoice, ...
+│   ├── Profile/      (1 strona)       # Edit
+│   ├── CmsPage.jsx
+│   ├── Dashboard.jsx                  # PLACEHOLDER Breeze — wymaga rozbudowy
+│   ├── Kalkulator.jsx
+│   └── Welcome.jsx
+└── utils/
+```
+
+### 3.3 State management
+
+| Aspekt | Stan |
+|--------|------|
+| Globalny state | BRAK Zustand/Redux; tylko `ConsentContext` |
+| Formularze | `useForm` z `@inertiajs/react` |
+| Translations | `usePortalTrans.js` — odczytuje `portal_translations` z Inertia props |
+| Lokalne state | `useState`/`useReducer` per komponent |
+
+### 3.4 TypeScript — brak (krytyczna luka)
+
+Żaden plik `.tsx` ani `.ts` nie istnieje. Brak `typescript`, `@types/react` w `package.json`. Istnieje tylko `jsconfig.json` dla aliasów ścieżek. To jest **najważniejsza luka techniczna** blokująca skalowanie zespołowe.
+
+---
+
+## 4. Filament — Resources, Pages, Widgets
+
+### 4.1 Resources (22)
+
+| Resource | Moduł | RelationManagers |
+|----------|-------|-----------------|
+| `ClientResource` | CRM | Contacts, Leads, Projects, Quotes, Invoices, Contracts |
+| `LeadResource` | CRM | Activities, Notes, Checklist |
+| `PipelineStageResource` | CRM | Checklist items |
+| `ProjectResource` | Projects | Phases, Tasks, Files, Messages |
+| `ProjectTemplateResource` | Projects | Phases |
+| `QuoteResource` | Finance | Items |
+| `InvoiceResource` | Finance | Items, Payments |
+| `ContractResource` | Finance | — |
+| `ContractTemplateResource` | Finance | — |
+| `EmailTemplateResource` | Comm. | — |
+| `SmsTemplateResource` | Comm. | — |
+| `AutomationRuleResource` | Automation | — |
+| `PageResource` | CMS | — |
+| `SiteSectionResource` | CMS | — |
+| `UserResource` | System | — |
+| `RoleResource` | System | Permissions |
+| `PermissionResource` | System | — |
+| `NotificationResource` | System | — |
+| `SessionResource` | System | — |
+| `PaymentResource` | Finance | — |
+| `CalculatorPricingResource`, `CalculatorStepsResource`, `CalculatorStringsResource` | Calculator | — |
+
+### 4.2 Custom Pages (7)
+
+`PipelinePage` (Kanban), `ConversionReportPage`, `IntegrationSettingsPage`, `PaymentSettingsPage`, `TrackingSettingsPage`, `LegalSettingsPage`, `CalculatorAdminPage`
+
+### 4.3 Widgets (13)
+
+`StatsOverviewWidget`, `RevenueChartWidget`, `LeadsBySourceWidget`, `RecentLeadsWidget`, `ActiveProjectsWidget`, `ProjectStatusWidget`, `ProjectDeadlinesWidget`, `OverdueInvoicesWidget`, `StaleLeadsWidget`, `QuickActionsWidget`, `CalculatorPricingTableWidget`, `CalculatorStepsTableWidget`, `CalculatorStringsTableWidget`
+
+---
+
+## 5. Integracje zewnętrzne
+
+| Integracja | Cel | Pakiet | Kluczowe pliki | Status |
+|-----------|-----|--------|----------------|--------|
+| **Stripe** | Płatności Checkout Session, webhook | `stripe/stripe-php ^19.4` | `StripeWebhookController.php`, `Portal/PaymentController.php` | działa |
+| **PayU** | Bramka PL (sandbox + prod) | HTTP (brak SDK) | `PayuService.php`, `PayuWebhookController.php` | działa |
+| **Twilio** | SMS | `twilio/sdk ^8.11` | `SmsService.php` | działa |
+| **SMTP / Mail** | Email transakcyjny | Laravel Mail | `app/Mail/` (7 klas) | działa |
+| **DomPDF** | PDF (faktury, raporty) | `barryvdh/laravel-dompdf ^3.1` | `InvoicePdfController.php`, `ReportController.php` | działa |
+| **PhpSpreadsheet** | XLSX/CSV export | `phpoffice/phpspreadsheet ^5.5` | `ReportController.php` | działa |
+| **Spatie Permission** | Role + Uprawnienia | `spatie/laravel-permission ^7.2` | `AdminSeeder.php`, `User.php` | działa |
+| **Spatie Translatable** | Wielojęzyczne kolumny | `spatie/laravel-translatable ^6.13` | `SiteSection.php`, `Page.php` | działa |
+| **Filament** | Panel administracyjny | `filament/filament ^5.4` | `app/Filament/` | działa |
+| **GTM / GA4 / Meta Pixel / Google Ads** | Tracking i reklama | JS snippety | `TrackingSettingsPage.php`, `HandleInertiaRequests.php` | działa |
+| **OpenAI** | AI generation | **BRAK** | — | nie zaimplementowane |
+| **Reverb / WebSockets** | Real-time | config istnieje | — | nieużywane |
+
+---
+
+## 6. Role i uprawnienia (Spatie)
+
+### 6.1 Role
+
+| Rola | Dostęp do panelu | Zakres uprawnień |
+|------|-----------------|-----------------|
+| **admin** | TAK | Wszystkie 40+ uprawnień |
+| **manager** | TAK | Wszystkie minus: `manage_roles`, `delete_users`, `manage_pipeline`, `manage_project_templates` |
+| **developer** | TAK | `view_clients`, `view_leads`, `view_quotes`, `view_invoices`, `view_contracts`, `view_projects`, `edit_projects` |
+| **client** | NIE (portal only) | Brak uprawnień panelowych |
 
-> Data analizy: 27.03.2026
-> Srodowisko pracy: Visual Studio Code + AI Chat
-> Podstawa analizy: kod aplikacji, struktura modułów, testy uruchomione lokalnie
-> Zakres: backend Laravel, panel Filament, frontend React/Inertia, portal klienta, finanse, automatyzacje, jakość techniczna
+### 6.2 Grupy uprawnień (40+ definicji)
 
-## Streszczenie
+CRM (klienci, leady, kontrakty), Finance (quotes, invoices), Projects, Templates (contract/email/sms), Automations, CMS (pages, site_sections), Users, Reports, Settings, Roles, Pipeline, Calculator, Project Templates.
 
-`web-dev-app` jest rozbudowanym systemem dla agencji web development, a nie tylko klasyczna strona firmowa. Z samego kodu wynika, ze aplikacja laczy kilka rol w jednym produkcie: pozyskanie leada, obsluge CRM, realizacje projektu, dokumenty finansowe, portal klienta, platnosci online, automatyzacje oraz raportowanie.
+### 6.3 Polityki (Policies)
 
-Najmocniejsza cecha projektu to spojny model procesu biznesowego. Klient trafia przez marketing lub kalkulator do CRM, dalej przechodzi przez lead, quote, contract, project i invoice, a czesc interakcji domyka w portalu klienta. To jest realnie widoczne w trasach, modelach, kontrolerach i zasobach Filament.
+**Katalog `app/Policies/` nie istnieje.** Autoryzacja opiera się wyłącznie na uprawnieniach Spatie w widokach Filament. Brak Policy na poziomie modeli — krytyczna luka dla multi-tenancy.
 
-Jednoczesnie analiza kodu pokazuje wyrazne nierownosci jakosciowe. Czesci produktu sa juz dojrzale i przemyslane, ale obok nich istnieja obszary tymczasowe, niedokonczone albo ryzykowne utrzymaniowo. Najwazniejsze problemy nie dotycza wyboru stacku, tylko rosnacej zlozonosci logiki, duzych klas, niespojnosci UX oraz slabej niezawodnosci srodowiska testowego.
+### 6.4 Seeder
 
-## Obecny stan
+`database/seeders/AdminSeeder.php` — tworzy role, uprawnienia i domyślnego użytkownika admin.
 
-### Co aplikacja faktycznie oferuje
+---
 
-Na podstawie kodu projekt dostarcza nastepujace obszary funkcjonalne:
+## 7. Ocena jakości kodu
 
-- publiczna warstwa marketingowa oparta o Inertia i React
-- kalkulator wyceny zasilany danymi z bazy
-- CRM i panel administracyjny w Filament
-- obsluge leadow, klientow, projektow, quotes, contracts, invoices i payments
-- portal klienta z samoobslugowymi ekranami
-- integracje platnosci Stripe i PayU
-- automatyzacje oparte o eventy Eloquent i kolejke
-- raporty eksportowane do HTML, PDF, XLSX i CSV
+| Aspekt | Ocena | Uzasadnienie |
+|--------|-------|--------------|
+| Separacja warstw | **ŚREDNI** | MVC dobrze zorganizowany; service layer zbyt mały — logika Invoice/Quote/Lead rozproszona |
+| Pokrycie testami | **ŚREDNI** | Feature testy: Auth, Portal (5), Automation, Reports, FullLeadWorkflow; brak Unit testów serwisów; środowisko testowe problematyczne (SQLite + ENUM migration) |
+| Typizacja JavaScript | **WYMAGA POPRAWY** | Brak TypeScript — wyłącznie `.jsx`; brak `@types/*` |
+| Konwencje nazewnicze | **DOBRY** | Spójne w warstwach; modele/kontrolery/zasoby Filament konsekwentne |
+| Wielojęzyczność | **ŚREDNI** | EN/PL/PT gotowe dla portalu i CMS; hardcoded strings w komponentach React Marketing/ |
+| Dokumentacja kodu | **ŚREDNI** | Komentarze w kluczowych klasach (SmsService, PayuService, ProcessAutomationJob); brak PHPDoc na modelach |
+| Obsługa błędów | **ŚREDNI** | `Log::error/warning` w integracjach; global try-catch w AppServiceProvider; bug: `CostCalculatorV2.jsx` ustawia sukces w `finally` |
+| Bezpieczeństwo | **DOBRY** | CSRF exempt przez bootstrap (nie skip), webhook signature validation, PayU MD5 hmac, walidacja ID notyfikacji regex, brak Open Redirect |
+| Form Requests | **WYMAGA POPRAWY** | Tylko `ContactRequest.php` + Auth requests; brak Form Requests dla Portal endpoints |
 
-To nie wynika z dokumentacji, tylko z realnej implementacji w:
+---
 
-- `routes/web.php`
-- `app/Http/Controllers/`
-- `app/Filament/Resources/`
-- `app/Jobs/ProcessAutomationJob.php`
-- `resources/js/Pages/Portal/`
-- `resources/js/Components/Marketing/`
+## 8. Ryzyka skalowania
 
-### Główny model produktu widoczny w kodzie
+### 8.1 BRAK MULTI-TENANCY — priorytet HIGH
 
-Przeplyw systemu jest zaszyty bezposrednio w modelach, kontrolerach i trasach:
+Projekt jest single-tenant. Nie ma `tenant_id`, `organization_id` ani izolacji danych między klientami SaaS. Wszystkie modele (`Client`, `Lead`, `Project`, `Invoice`, etc.) są globalnie dostępne dla wszystkich użytkowników panelu.
 
-1. Lead powstaje przez `ContactController` lub `CalculatorLeadController`.
-2. Lead jest prowadzony przez `PipelineStage` i `LeadResource`.
-3. Po stronie operacyjnej pojawiaja sie `Quote`, `Contract`, `Project` i `Invoice`.
-4. Portal klienta daje klientowi dostep do projektow, dokumentow, komunikacji i platnosci.
-5. Zmiany statusow uruchamiaja automatyzacje przez `AutomationEventListener` i `ProcessAutomationJob`.
+**Lokalizacja:** każdy model i migracja.
+**Propozycja:** Model `Workspace`/`Tenant`, `tenant_id` na modelach, middleware izolacji (Scoped Queries lub package `stancl/tenancy`).
 
-To jest mocny sygnal, ze architektura byla projektowana wokol calego workflow agencji, a nie wokol pojedynczych CRUD-ow.
+---
 
-## Analiza modułów
+### 8.2 Minimalny service layer — priorytet HIGH
 
-### 1. Backend i warstwa aplikacyjna Laravel
+Tylko 4 serwisy przy 30+ modelach biznesowych. Logika tworzenia leadów, faktur, projektów, konwersji quote → invoice jest wbudowana bezpośrednio w kontrolery portalu i zasoby Filament.
 
-Kod backendu jest oparty na klasycznym Laravelowym podziale: modele, kontrolery, middleware, joby, listenery, serwisy i maile. To daje przewidywalna strukture i dobra baze do rozwoju.
+**Lokalizacja:** `app/Http/Controllers/Portal/`, `app/Filament/Resources/`, `app/Filament/Pages/PipelinePage.php`
+**Propozycja:** `LeadService`, `InvoiceService`, `ProjectService`, `QuoteService`.
 
-Widoczne mocne strony:
+---
 
-- `AppServiceProvider` dynamicznie podmienia konfiguracje integracji z ustawien zapisanych w bazie
-- `HandleInertiaRequests` centralnie dostarcza propsy wspolne dla frontendu
-- modele takie jak `Client`, `Lead`, `Quote`, `Project`, `Invoice`, `Contract` odzwierciedlaja realne byty biznesowe
-- warstwa kontrolerow nie jest cienkim API do pustych widokow, tylko faktycznie orkiestruje proces
+### 8.3 Brak TypeScript — priorytet HIGH
 
-Wniosek:
+Cały frontend w `.jsx` bez typizacji. Przy rozbudowie SaaS (landing pages, AI generator) brak typów prowadzi do trudnych do wykrycia błędów.
 
-Backend jest dobrze osadzony w domenie biznesowej i ma sensowna strukture bazowa. Problemem nie jest brak architektury, tylko rosnaca liczba odpowiedzialnosci skupionych w kilku miejscach.
+**Lokalizacja:** `resources/js/**/*.jsx`
+**Propozycja:** Migracja do TypeScript (`.tsx`) — stopniowo moduł po module.
 
-### 2. Panel administracyjny Filament
+---
 
-Panel w Filament jest jednym z najmocniejszych elementow aplikacji. Z kodu w `AdminPanelProvider` i zasobach Filament wynika, ze to nie jest tylko panel CRUD, ale operacyjne centrum pracy zespolu.
+### 8.4 Hardcoded single-instance config — priorytet HIGH
 
-Mocne strony:
+Ustawienia firmy, Stripe keys, Twilio, SMTP są globalne (tabela `settings`). W SaaS każdy tenant musi mieć osobną konfigurację.
 
-- logiczny podzial na grupy: CRM, Projects, Finance, Marketing, Settings
-- duza liczba zasobow biznesowych i dedykowanych stron administracyjnych
-- dashboard z widgetami operacyjnymi
-- rozbudowane formularze i akcje w zasobach takich jak `ProjectResource`, `ContractResource`, `InvoiceResource`, `AutomationRuleResource`
-- notyfikacje bazodanowe i quick actions
+**Lokalizacja:** `app/Models/Setting.php`, `app/Filament/Pages/*SettingsPage.php`
 
-Slabsze strony:
+---
 
-- `AdminPanelProvider` zawiera duzy blok inline JavaScript odpowiedzialny za dzwieki i obsluge notyfikacji
-- czesc logiki UI jest wstrzykiwana bezposrednio w provider, co pogarsza czytelnosc i utrzymanie
-- niektore komponenty Filament generuja bardzo bogate widoki, ale robia to poprzez duze fragmenty HTML budowane w PHP, co z czasem bedzie trudniejsze w utrzymaniu
+### 8.5 ProcessAutomationJob jako God Object — priorytet MEDIUM
 
-Wniosek:
+Jeden job odpowiada za: pobieranie reguł, ewaluację warunków, re-dispatch z delay'em, wykonanie 7 typów akcji.
 
-Filament realnie przyspiesza development i daje duza wartosc biznesowa, ale warstwa panelowa zaczyna zbierac dlug techniczny w obszarach customowego UI i zachowan klientowych.
+**Lokalizacja:** `app/Jobs/ProcessAutomationJob.php`
+**Propozycja:** Wydzielenie `AutomationDispatcher` (orkiestrator) od dedykowanych job'ów per akcja.
 
-### 3. Portal klienta
+---
 
-Portal klienta jest jednym z najbardziej konkretnych modulow projektu. `PortalController` oraz strony w `resources/js/Pages/Portal/` pokazuja, ze klient moze nie tylko przegladac dane, ale rzeczywiscie pracowac z systemem.
+### 8.6 Bug: eksport faktur — pole `tax_amount` vs `vat_amount` — priorytet HIGH (bugfix)
 
-Co dziala:
+`ReportController` eksportuje faktury używając pola `tax_amount`, a model `Invoice` operuje na `vat_amount`. To potencjalny błąd danych finansowych w eksportach.
 
-- dashboard klienta z projektami, fakturami i quotes
-- widok projektu z postepem faz, taskow i komunikacja z zespolem
-- widoki invoices, quotes, contracts i ekran wyboru platnosci
-- podpis kontraktu przez signature pad lub elektroniczna akceptacje
-- ustawienia notyfikacji
+**Lokalizacja:** `app/Http/Controllers/ReportController.php`
 
-Co widac w kodzie:
+---
 
-- portal jest oparty o osobny layout i wyraznie wydzielona nawigacje
-- autoryzacja opiera sie na relacji `portal_user_id` po stronie klienta
-- poszczegolne ekrany sa rozpisane czytelnie, z sensownymi komponentami i prostymi przeplywami akcji
+### 8.7 Bug: CostCalculatorV2 — fałszywy sukces — priorytet HIGH (bugfix)
 
-Ograniczenia:
+`CostCalculatorV2.jsx` ustawia stan sukcesu w bloku `finally`, więc użytkownik zobaczy potwierdzenie wysłania nawet gdy request skończył się błędem.
 
-- `PortalController` obsluguje bardzo szeroki zakres scenariuszy, od dashboardu przez kontrakty po platnosci i ustawienia
-- w UI portalu widac sporo angielskiego copy i lokalnych decyzji tekstowych osadzonych bezposrednio w komponentach
-- system jest funkcjonalny, ale nie wszedzie widac jeszcze pelne dopracowanie stanów przejsciowych, pustych ekranow i scenariuszy bledu
+**Lokalizacja:** `resources/js/Components/Marketing/CostCalculatorV2.jsx`
 
-Wniosek:
+---
 
-Portal klienta jest realna funkcja produktu, nie tylko dodatkiem. To jeden z obszarow o najwiekszym potencjale wartosci biznesowej, ale wymaga dalszego szlifowania UX i lepszej separacji logiki po stronie backendu.
+### 8.8 Brak Policies — priorytet MEDIUM
 
-### 4. Marketing frontend i lead generation
+Brak `app/Policies/`. Bez Policies niemożliwa jest prawidłowa izolacja danych między tenantami w przyszłości.
+**Propozycja:** Policies dla Lead, Client, Project, Invoice, Quote, Contract.
 
-Strona marketingowa nie jest statycznym frontem. `WelcomeController` sklada dynamiczne sekcje z bazy, a `CostCalculatorV2` opiera sie na danych pricing, strings i steps pobranych z modeli. To oznacza, ze marketing jest w duzej mierze DB-driven.
+---
 
-Mocne strony:
+### 8.9 Środowisko testowe niestabilne — priorytet MEDIUM
 
-- dynamiczne sekcje strony zarzadzane przez `SiteSection`
-- kalkulator wyceny zasilany rekordami `CalculatorPricing`, `CalculatorString`, `CalculatorStep`
-- locale i tresci sa przekazywane przez backend, bez hardcodowania calego flow po stronie React
-- zgody trackingowe i dane integracyjne sa wspoldzielone przez middleware
+Migracja ENUM (`ALTER TABLE ... MODIFY COLUMN`) nie wspierana przez SQLite in-memory. `HandleInertiaRequests` odpytuje tabelę `settings` przed seedowaniem.
 
-Problemy widoczne w kodzie:
+**Lokalizacja:** `database/migrations/2026_03_22_194527_update_project_phases_status_enum.php`, `HandleInertiaRequests.php`
 
-- `Welcome.jsx` i czesc komponentow frontendowych zawieraja sporo angielskiego copy, mimo istnienia mechanizmow locale
-- w `CostCalculatorV2.jsx` formularz po fetchu ustawia sukces w bloku `finally`, czyli rowniez wtedy, gdy request zakonczy sie bledem
-- w `package.json` nie ma skryptow typu `lint`, `test` ani `typecheck`, co oslabia workflow frontendowy
+---
 
-Wniosek:
+### 8.10 Brak OpenAI / AI Layer — priorytet MEDIUM (kluczowe dla SaaS)
 
-Marketing frontend ma dobra baze architektoniczna, ale krytyczne elementy konwersyjne nadal wymagaja lepszej niezawodnosci i procesu jakosciowego.
+Brak integracji OpenAI — kluczowej funkcji Digital Growth OS (AI Landing Page Generator). Brak pakietu `openai-php/client`.
 
-### 5. Finanse, dokumenty i raportowanie
+---
 
-Warstwa finansowa jest szeroka i dobrze zintegrowana z reszta systemu. Z kodu wynika, ze aplikacja obsluguje invoices, payments, PDF-y, Stripe, PayU oraz raporty eksportowane do kilku formatow.
+### 8.11 Brak Schedulera — priorytet LOW
 
-Mocne strony:
+`routes/console.php` zawiera tylko `inspire`. Brak automatycznych przypomnień (np. overdue invoices, stale leads).
 
-- `StripeWebhookController` obsluguje kluczowe zdarzenia platnicze i potwierdzenia
-- `PayuService` korzysta z ustawien z bazy, co ulatwia konfiguracje runtime
-- `ContractResource` zawiera interpolacje szablonow kontraktow i wygodny workflow pracy w panelu
-- `ReportController` umozliwia szybkie raporty operacyjne w HTML, PDF, XLSX i CSV
+---
 
-Problemy wykryte w kodzie:
+## 9. Gotowość projektu pod SaaS
 
-- `ReportController` filtruje leady po `status`, mimo ze logika leadow w projekcie jest oparta glownie o `pipeline_stage_id` i `PipelineStage`
-- w eksporcie faktur uzywane jest pole `tax_amount`, podczas gdy model faktury operuje na `vat_amount`; to wyglada jak realny blad danych eksportowych
-- raporty sa praktyczne, ale nadal mocno proceduralne i nie maja oddzielonej warstwy przygotowania danych
+### 9.1 Co jest gotowe (przenosi się do SaaS)
 
-Wniosek:
+| Element | Poziom gotowości |
+|---------|----------------|
+| CRM (Lead, Client, Contact, Pipeline) | ✅ wysoka |
+| Portal klienta (pełny workflow) | ✅ wysoka |
+| Finanse (Quote, Invoice, Contract, Payment) | ✅ wysoka |
+| Automatyzacje event-driven | ✅ wysoka |
+| Integracje płatności (Stripe, PayU) | ✅ wysoka |
+| Twilio SMS | ✅ wysoka |
+| Panel Filament | ✅ wysoka |
+| Marketing frontend DB-driven | ✅ średnia |
+| Wielojęzyczność (EN/PL/PT) | ✅ średnia |
+| Tracking (GTM, GA4, Pixel, Google Ads) | ✅ wysoka |
+| Raportowanie (4 formaty) | ✅ średnia |
 
-Modul finansowy jest jednym z najmocniejszych skladnikow systemu, ale zawiera juz sygnaly, ze bez dodatkowego porzadkowania bedzie generowal subtelne regresje biznesowe.
+### 9.2 Co wymaga budowy przed SaaS MVP
 
-### 6. Automatyzacje i komunikacja
+| Element | Priorytet | Nakład szacunkowy |
+|---------|-----------|-----------------|
+| Multi-tenancy (Workspace model + izolacja danych) | 🔴 HIGH | Duży |
+| TypeScript migracja frontendu | 🔴 HIGH | Średni–Duży |
+| Service Layer (Lead, Invoice, Project, Quote) | 🔴 HIGH | Średni |
+| Bugfix: vat_amount w eksporcie faktur | 🔴 HIGH | Mały |
+| Bugfix: fałszywy sukces kalkulatora | 🔴 HIGH | Mały |
+| Policies (autoryzacja na poziomie modeli) | 🟠 MEDIUM | Średni |
+| OpenAI / AI Landing Page Generator | 🟠 MEDIUM | Duży |
+| Business Profile (per tenant) | 🟠 MEDIUM | Średni |
+| Landing Pages Builder | 🟠 MEDIUM | Duży |
+| Subskrypcje / plany SaaS (Stripe Billing) | 🟠 MEDIUM | Średni |
+| Onboarding flow (rejestracja tenanta) | 🟠 MEDIUM | Średni |
+| Scheduler / przypomnienia automatyczne | 🟡 LOW | Mały |
+| Feature flags / per-tenant config | 🟡 LOW | Mały |
 
-Automatyzacje sa faktycznie wdrozone, a nie tylko zaplanowane. `AutomationEventListener` nasluchuje zdarzen modelowych, a `ProcessAutomationJob` wykonuje reguly w tle.
+---
 
-Mocne strony:
+## 10. Rekomendacje i priorytety
 
-- eventy `lead.created`, `lead.stage_changed`, `project.status_changed`, `invoice.sent`, `quote.accepted`, `contract.signed` i inne sa podlaczone do workflow
-- mechanizm delay per regula jest juz gotowy
-- `ClientNotificationGate` pilnuje preferencji klienta dla e-maili i SMS
-- system tworzy powiadomienia panelowe i obsluguje dostep portalowy
+### Faza 1 — Stabilizacja (przed rozwojem)
 
-Ograniczenia:
+1. Naprawić bug: `vat_amount` zamiast `tax_amount` w `ReportController`
+2. Naprawić bug: przenieść `setSuccess(true)` z `finally` do `then` w `CostCalculatorV2.jsx`
+3. Naprawić środowisko testowe — zmiana migracji ENUM na kompatybilną z SQLite, dodać guard Settings w `HandleInertiaRequests`
+4. Dodać Form Requests dla Portal endpoints
 
-- `ProcessAutomationJob` laczy dobieranie regul, walidacje warunkow i wykonanie wielu typow akcji w jednej klasie
-- przy rosnacej liczbie akcji ten wzorzec bedzie coraz trudniejszy do testowania i debugowania
+### Faza 2 — Fundament SaaS
 
-Wniosek:
+1. Model `Workspace`/`Tenant` + middleware izolacji + global scope na modelach
+2. Service Layer: `LeadService`, `InvoiceService`, `ProjectService`, `QuoteService`
+3. Policies dla kluczowych modeli
+4. Migracja do TypeScript — stopniowo zacznij od typów Inertia props
 
-Automatyzacje sa realna przewaga systemu, ale wymagaja dalszej modularyzacji, jesli maja pozostac stabilne wraz ze wzrostem zlozonosci.
+### Faza 3 — Nowe moduły SaaS
 
-## Ocena jakosci
+1. Business Profile (dane firmy per tenant, logo, kolory, tone of voice)
+2. AI Landing Page Generator (OpenAI integration)
+3. Landing Pages Management (edycja, publikacja, custom domains)
+4. Stripe Billing / subskrypcje
+5. Onboarding flow dla nowych tenantów
 
-### UX
+---
 
-#### Mocne strony UX
-
-- portal klienta jest konkretny i uzyteczny
-- projekt pokazuje postep, fazy, zadania i komunikacje w czytelny sposob
-- ekran kontraktu zawiera dobrze przemyslany mechanizm podpisu
-- ekran platnosci jest prosty i zrozumialy
-- dashboard klienta grupuje informacje w logiczny sposob
-
-#### Problemy UX wykryte w kodzie
-
-- kalkulator wyceny pokazuje sukces nawet przy nieudanej wysylce formularza
-- spora czesc copy w marketingu i portalu jest twardo wpisana po angielsku, mimo istnienia mechanizmow lokalizacji
-- glowny `resources/js/Pages/Dashboard.jsx` dla zalogowanego uzytkownika poza portalem nadal jest praktycznie szablonowym placeholderem Breeze
-- czesc pustych stanów i bledow jest obsluzona tylko podstawowo
-
-Ocena:
-
-UX jest dobry tam, gdzie produkt dostal juz rzeczywisty przeplyw biznesowy, szczegolnie w portalu klienta. Najslabsze miejsca to nie tyle layout, co wiarygodnosc interakcji i niespojnosc komunikatow.
-
-### DX
-
-#### Mocne strony DX
-
-- przewidywalna struktura Laravel
-- dobre wykorzystanie Filament do szybkiej budowy panelu
-- sensowny podzial na modele, kontrolery, joby, serwisy i zasoby
-- istnieja testy feature, w tym dosc szeroki `FullLeadWorkflowTest`
-
-#### Problemy DX wykryte w kodzie i testach
-
-- brak nowoczesnego workflow frontendowego: w `package.json` sa tylko `build` i `dev`
-- duze klasy o szerokiej odpowiedzialnosci, zwlaszcza `PortalController` i `ProcessAutomationJob`
-- duplikacja w procesie tworzenia leadow przez formularz i kalkulator
-- inline skrypty w providerze panelu utrudniaja utrzymanie
-- srodowisko testowe nie przechodzi nawet podstawowego zestawu testow bez poprawek migracji i zaleznosci od settings
-
-Ocena:
-
-DX jest mocny w szybkości developmentu, ale slabszy w utrzymaniu i przewidywalnosci zmian. Projekt jest wygodny do rozbudowy funkcjonalnej, ale coraz mniej wygodny do bezpiecznej refaktoryzacji.
-
-### Skalowalnosc i utrzymanie
-
-#### Co wspiera skalowanie
-
-- kolejki i webhooki
-- DB-driven konfiguracja sekcji, cennika, ustawien i automatyzacji
-- duza czesc systemu jest oparta o relacje biznesowe zamiast ad hoc struktur
-- panel i portal sa wydzielone warstwami funkcjonalnymi
-
-#### Co ogranicza skalowanie
-
-- szerokie klasy orkiestrujace wiele scenariuszy
-- brak wystarczajaco mocnej sieci testow regresyjnych dla zlozonych flow
-- zaleznosc niektorych komponentow od runtime DB bez bezpiecznych fallbackow w testach
-- proceduralny styl w czesci raportowania i automatyzacji
-
-Ocena:
-
-Projekt ma dobra baze do skalowania funkcjonalnego, ale wymaga dalszej modularyzacji, jesli ma dobrze skalowac sie zespolowo i utrzymaniowo.
-
-## Faktyczne problemy wykryte podczas analizy
-
-### 1. Testy nie przechodza
-
-Uruchomienie `php artisan test` wykazalo realne problemy srodowiska testowego:
-
-- migracja `2026_03_22_194527_update_project_phases_status_enum.php` wykonuje `ALTER TABLE ... MODIFY COLUMN ...`, co nie dziala na SQLite in-memory
-- przez to pada wiele testow auth i feature jeszcze na etapie migracji
-- dodatkowo `ExampleTest` konczy sie bledem 500, bo `HandleInertiaRequests` odwoluje sie do tabeli `settings`, ktora nie istnieje w tym scenariuszu testowym
-
-To jest istotna obserwacja, bo pokazuje, ze projekt ma aktywny problem z niezawodnoscia pipeline'u testowego.
-
-### 2. Niespojnosc w raportowaniu leadow i faktur
-
-W `ReportController` widac dwa sygnaly ryzyka:
-
-- raport leadow operuje na `status`, podczas gdy reszta systemu prowadzi lead przez `pipeline_stage_id`
-- eksport faktur korzysta z `tax_amount`, mimo ze model faktury posluguje sie `vat_amount`
-
-To wyglada jak potencjalny blad raportowania biznesowego.
-
-### 3. Niewiarygodny sukces w kalkulatorze
-
-`CostCalculatorV2.jsx` ustawia stan sukcesu w `finally`, czyli niezaleznie od wyniku requestu. To jest problem produktowy, bo uzytkownik moze dostac falszywe potwierdzenie wyslania zapytania.
-
-### 4. Nierowny poziom dopracowania ekranow
-
-Portal klienta jest relatywnie rozbudowany, ale ogolny dashboard zalogowanego uzytkownika poza portalem nadal pozostaje domyslnym placeholderem. To sygnal, ze produkt jest rozwijany mocno domenowo, ale nie wszedzie rownomiernie.
-
-## Rekomendacje
-
-### Uproszczenie pracy deweloperskiej
-
-- wydzielic akcje domenowe dla tworzenia leada z formularza i kalkulatora
-- rozbic `PortalController` na mniejsze kontrolery lub klasy akcji per modul
-- rozbic `ProcessAutomationJob` na warstwe orkiestracji i wykonawcow konkretnych akcji
-- wyniesc klientowy kod notyfikacji z `AdminPanelProvider` do osobnych assetow
-- dodac do frontendu `lint`, `format` i docelowo `typecheck`
-- uporzadkowac kontrakt dla danych raportowych, aby eksporty nie opieraly sie na polach nieuzywanych gdzie indziej
-
-### Poprawa UX
-
-- naprawic logike sukcesu i bledu w kalkulatorze wyceny
-- ujednolicic jezyk i copy w marketingu, portalu i panelu
-- rozbudowac widoki pustych stanow, bledow i scenariuszy przejsciowych
-- dopracowac podstawowy dashboard zalogowanego uzytkownika, aby nie odstawal od reszty systemu
-- mocniej eksponowac nastepne kroki klienta przy quotes, contracts i invoices
-
-### Potencjalne nowe funkcjonalnosci
-
-- centrum aktywnosci klienta z osi czasu zdarzen
-- raporty konwersji i skutecznosci zrodel leadow oparte o dane CRM
-- bardziej rozbudowany customer health view dla projektow i opoznien
-- automatyczne przypomnienia o braku odpowiedzi klienta lub zaleglosciach
-- dashboard operacyjny zespolu z priorytetami i SLA
-
-### Optymalizacje techniczne
-
-- poprawic kompatybilnosc migracji z SQLite lub oddzielic test database strategy od SQL specyficznego dla MySQL
-- dodac fallbacki albo guardy przy odczytach `Setting::get()` w testowych scenariuszach bootstrappingu
-- rozszerzyc testy na portal, webhooki, raporty i kontrakty
-- oddzielic przygotowanie danych raportowych od kontrolera HTTP
-
-## Priorytety
-
-### Priorytet 1
-
-- naprawa srodowiska testowego
-- naprawa falszywego sukcesu kalkulatora
-- korekta niespojnosci w raportowaniu leadow i faktur
-
-### Priorytet 2
-
-- refaktoryzacja `PortalController` i `ProcessAutomationJob`
-- uporzadkowanie frontendowego workflow jakosciowego
-
-### Priorytet 3
-
-- ujednolicenie copy i lokalizacji
-- rozwój dashboardow i raportow operacyjnych
-
-## Wniosek koncowy
-
-Analiza kodu pokazuje, ze `web-dev-app` jest realnym systemem operacyjnym dla agencji, a nie zlepkiem ekranow. Najwieksza wartoscia projektu jest jego procesowa spojność: marketing, CRM, portal, finanse i automatyzacje pracuja na wspolnym modelu danych.
-
-Najwieksze ryzyka nie leza w stacku technologicznym. Leza w utrzymaniu: w szerokich klasach, niedomknietych standardach jakosci frontendowej, niespojnosciach raportowych i niestabilnym srodowisku testowym. To sa problemy naprawialne bez zmiany architektury bazowej. Projekt ma bardzo dobra baze, ale powinien wejsc w etap porzadkowania i utwardzania.
-
-## Zrodla analizy
-
-- `app/Providers/AppServiceProvider.php`
-- `app/Providers/Filament/AdminPanelProvider.php`
-- `app/Http/Middleware/HandleInertiaRequests.php`
-- `app/Http/Controllers/WelcomeController.php`
-- `app/Http/Controllers/ContactController.php`
-- `app/Http/Controllers/CalculatorLeadController.php`
-- `app/Http/Controllers/PortalController.php`
-- `app/Http/Controllers/ReportController.php`
-- `app/Http/Controllers/StripeWebhookController.php`
-- `app/Jobs/ProcessAutomationJob.php`
-- `app/Listeners/AutomationEventListener.php`
-- `app/Models/Client.php`
-- `app/Models/Lead.php`
-- `app/Models/Project.php`
-- `app/Models/Quote.php`
-- `app/Models/Invoice.php`
-- `app/Models/Contract.php`
-- `app/Models/Setting.php`
-- `app/Services/PayuService.php`
-- `app/Services/SmsService.php`
-- `app/Services/ClientNotificationGate.php`
-- `app/Filament/Resources/LeadResource.php`
-- `app/Filament/Resources/ProjectResource.php`
-- `app/Filament/Resources/InvoiceResource.php`
-- `app/Filament/Resources/ContractResource.php`
-- `app/Filament/Resources/AutomationRuleResource.php`
-- `resources/js/Pages/Welcome.jsx`
-- `resources/js/Pages/Dashboard.jsx`
-- `resources/js/Pages/Portal/Dashboard.jsx`
-- `resources/js/Pages/Portal/Project.jsx`
-- `resources/js/Pages/Portal/Contract.jsx`
-- `resources/js/Pages/Portal/PayInvoice.jsx`
-- `resources/js/Layouts/PortalLayout.jsx`
-- `resources/js/Components/Marketing/CostCalculatorV2.jsx`
-- `routes/web.php`
-- `database/migrations/2026_03_22_194527_update_project_phases_status_enum.php`
-- `tests/Feature/FullLeadWorkflowTest.php`
-- wynik `php artisan test`
+*Analiza oparta na pełnym przeglądzie kodu źródłowego: routes/, app/, database/, resources/js/, lang/, tests/. Data: 31.03.2026.*
