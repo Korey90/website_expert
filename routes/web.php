@@ -1,11 +1,20 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CalculatorLeadController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\InvoicePdfController;
 use App\Http\Controllers\KalkulatorController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PayuWebhookController;
+use App\Http\Controllers\Portal\ContractController as PortalContractController;
+use App\Http\Controllers\Portal\DashboardController as PortalDashboardController;
+use App\Http\Controllers\Portal\InvoiceController as PortalInvoiceController;
+use App\Http\Controllers\Portal\NotificationController as PortalNotificationController;
+use App\Http\Controllers\Portal\PaymentController as PortalPaymentController;
+use App\Http\Controllers\Portal\PaymentResultController as PortalPaymentResultController;
+use App\Http\Controllers\Portal\ProjectController as PortalProjectController;
+use App\Http\Controllers\Portal\QuoteController as PortalQuoteController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EmailTemplatePreviewController;
@@ -63,9 +72,7 @@ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])->name
 // PayU IPN — CSRF exempt (see bootstrap/app.php)
 Route::post('/payu/notify', [PayuWebhookController::class, 'notify'])->name('payu.notify');
 
-Route::get('/dashboard', function () {
-    return inertia('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -81,26 +88,31 @@ Route::middleware('auth')->group(function () {
 
     // Client Portal
     Route::prefix('portal')->name('portal.')->group(function () {
-        Route::get('/', [PortalController::class, 'dashboard'])->name('dashboard');
-        Route::get('/projects', [PortalController::class, 'projects'])->name('projects');
-        Route::get('/projects/{project}', [PortalController::class, 'project'])->name('project');
-        Route::post('/projects/{project}/messages', [PortalController::class, 'postMessage'])->name('messages.store');
-        Route::get('/invoices', [PortalController::class, 'invoices'])->name('invoices');
-        Route::get('/invoices/{invoice}', [PortalController::class, 'invoice'])->name('invoice');
-        Route::get('/invoices/{invoice}/pay', [PortalController::class, 'selectPaymentMethod'])->name('invoices.pay');
-        Route::post('/invoices/{invoice}/pay/stripe', [PortalController::class, 'stripeCheckout'])->name('invoices.pay.stripe');
-        Route::post('/invoices/{invoice}/pay/payu', [PortalController::class, 'payuInitiate'])->name('invoices.pay.payu');
-        Route::get('/quotes', [PortalController::class, 'quotes'])->name('quotes');
-        Route::get('/quotes/{quote}', [PortalController::class, 'quote'])->name('quote');
-        Route::post('/quotes/{quote}/accept', [PortalController::class, 'acceptQuote'])->name('quotes.accept');
-        Route::post('/quotes/{quote}/reject', [PortalController::class, 'rejectQuote'])->name('quotes.reject');
-        Route::get('/contracts', [PortalController::class, 'contracts'])->name('contracts');
-        Route::get('/contracts/{contract}', [PortalController::class, 'contract'])->name('contract');
-        Route::post('/contracts/{contract}/sign', [PortalController::class, 'signContract'])->name('contracts.sign');
+        Route::get('/', [PortalDashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('/projects', [PortalProjectController::class, 'index'])->name('projects');
+        Route::get('/projects/{project}', [PortalProjectController::class, 'show'])->name('projects.show');
+        Route::post('/projects/{project}/messages', [PortalProjectController::class, 'storeMessage'])->name('messages.store');
+
+        Route::get('/invoices', [PortalInvoiceController::class, 'index'])->name('invoices');
+        Route::get('/invoices/{invoice}', [PortalInvoiceController::class, 'show'])->name('invoices.show');
+        Route::get('/invoices/{invoice}/pay', [PortalPaymentController::class, 'selectMethod'])->name('invoices.pay');
+        Route::post('/invoices/{invoice}/pay/stripe', [PortalPaymentController::class, 'stripeCheckout'])->name('invoices.pay.stripe');
+        Route::post('/invoices/{invoice}/pay/payu', [PortalPaymentController::class, 'payuInitiate'])->name('invoices.pay.payu');
+        Route::get('/invoices/{invoice}/payment-result', [PortalPaymentResultController::class, 'show'])->name('invoices.payment-result');
+
+        Route::get('/quotes', [PortalQuoteController::class, 'index'])->name('quotes');
+        Route::get('/quotes/{quote}', [PortalQuoteController::class, 'show'])->name('quotes.show');
+        Route::post('/quotes/{quote}/accept', [PortalQuoteController::class, 'accept'])->name('quotes.accept');
+        Route::post('/quotes/{quote}/reject', [PortalQuoteController::class, 'reject'])->name('quotes.reject');
+
+        Route::get('/contracts', [PortalContractController::class, 'index'])->name('contracts');
+        Route::get('/contracts/{contract}', [PortalContractController::class, 'show'])->name('contracts.show');
+        Route::post('/contracts/{contract}/sign', [PortalContractController::class, 'sign'])->name('contracts.sign');
 
         // Communication preferences
-        Route::get('/settings/notifications', [PortalController::class, 'notificationSettings'])->name('settings.notifications');
-        Route::post('/settings/notifications', [PortalController::class, 'updateNotificationSettings'])->name('settings.notifications.update');
+        Route::get('/settings/notifications', [PortalNotificationController::class, 'settings'])->name('settings.notifications');
+        Route::post('/settings/notifications', [PortalNotificationController::class, 'updateSettings'])->name('settings.notifications.update');
     });
 
     // Email template preview (admin only)

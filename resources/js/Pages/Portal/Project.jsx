@@ -132,9 +132,11 @@ export default function Project({ client, project }) {
                 </div>
 
                 {/* Phases */}
-                {phases.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Project Phases</h2>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Project Phases</h2>
+                    {phases.length === 0 ? (
+                        <p className="text-sm text-gray-400 text-center py-4">No project phases have been set up yet.</p>
+                    ) : (
                         <div className="space-y-3">
                             {phases.map(phase => {
                                 const cfg      = phaseStatusConfig[phase.status] ?? phaseStatusConfig['pending'];
@@ -168,8 +170,8 @@ export default function Project({ client, project }) {
                                 );
                             })}
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
 
                 {/* Messages */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden" style={{ minHeight: '400px' }}>

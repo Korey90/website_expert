@@ -132,8 +132,9 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
         integrations: [], seoPackage: '', deadline: '', hosting: '',
         companyName: '', contactEmail: '',
     });
-    const [submitted,  setSubmitted]  = useState(false);
-    const [submitting, setSubmitting] = useState(false);
+    const [submitted,   setSubmitted]  = useState(false);
+    const [submitting,  setSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState(false);
 
     const set       = useCallback((k, v) => setA(prev => ({ ...prev, [k]: v })), []);
     const toggleInt = useCallback((k)    => setA(prev => {
@@ -149,6 +150,7 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
         setStep(1);
         setA({ projectType: '', pages: 5, design: '', cms: '', integrations: [], seoPackage: '', deadline: '', hosting: '', companyName: '', contactEmail: '' });
         setSubmitted(false);
+        setSubmitError(false);
     };
 
     const estimate = calcEstimate(a, pricing);
@@ -156,9 +158,10 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
     const handleSubmit = useCallback(async () => {
         if (!a.contactEmail || submitting) return;
         setSubmitting(true);
+        setSubmitError(false);
         try {
             const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-            await fetch(route('calculator.lead'), {
+            const res = await fetch(route('calculator.lead'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
                 body: JSON.stringify({
@@ -167,10 +170,7 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
                     estimateHigh: estimate?.high,
                 }),
             });
-        } catch (_) {
-            // non-blocking
-        } finally {
-            setSubmitting(false);
+            if (!res.ok) throw new Error('server_error');
             pushEvent('generate_lead', {
                 lead_source:  'calculator_v2',
                 project_type: a.projectType,
@@ -179,6 +179,10 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
             });
             if (typeof window.fbq === 'function') window.fbq('track', 'Lead');
             setSubmitted(true);
+        } catch (_) {
+            setSubmitError(true);
+        } finally {
+            setSubmitting(false);
         }
     }, [a, estimate, submitting]);
 
@@ -275,6 +279,11 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
                                 className="flex-1 px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-950 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                             />
                         </div>
+                        {submitError && (
+                            <p className="text-red-600 dark:text-red-400 text-sm mb-3">
+                                {s('submit_error', 'Something went wrong. Please try again or contact us directly.')}
+                            </p>
+                        )}
                         <button
                             type="button"
                             disabled={!a.contactEmail || submitting}

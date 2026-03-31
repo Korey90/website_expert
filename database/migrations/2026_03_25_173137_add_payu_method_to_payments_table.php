@@ -12,6 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return; // SQLite does not enforce enums; existing TEXT column is sufficient
+        }
+
         // MySQL / MariaDB: modify enum to add 'payu'
         DB::statement("ALTER TABLE payments MODIFY COLUMN method ENUM('stripe','bank_transfer','cash','cheque','other','payu') NOT NULL DEFAULT 'stripe'");
     }
@@ -21,6 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement("ALTER TABLE payments MODIFY COLUMN method ENUM('stripe','bank_transfer','cash','cheque','other') NOT NULL DEFAULT 'stripe'");
     }
 };

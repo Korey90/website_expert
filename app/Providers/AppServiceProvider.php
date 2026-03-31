@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Listeners\AutomationEventListener;
+use App\Listeners\ClientActivityListener;
 use App\Livewire\CustomDatabaseNotifications;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Config;
@@ -26,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('database-notifications', CustomDatabaseNotifications::class);
 
         Event::subscribe(AutomationEventListener::class);
+        Event::subscribe(ClientActivityListener::class);
 
         $this->applyIntegrationSettings();
     }

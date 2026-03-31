@@ -1,3 +1,4 @@
+import EmptyState from '@/Components/Shared/EmptyState';
 import PortalLayout from '@/Layouts/PortalLayout';
 import { Link } from '@inertiajs/react';
 
@@ -33,10 +34,11 @@ export default function Contracts({ client, contracts }) {
                 <h1 className="text-2xl font-bold text-gray-900">Contracts</h1>
 
                 {contracts.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                        <div className="text-4xl mb-4">📝</div>
-                        <p className="text-gray-500">No contracts found.</p>
-                    </div>
+                    <EmptyState
+                        icon="📝"
+                        title="No contracts yet"
+                        description="Contracts sent for your signature will appear here."
+                    />
                 ) : (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <table className="min-w-full divide-y divide-gray-100">
@@ -62,7 +64,7 @@ export default function Contracts({ client, contracts }) {
                                         <td className="px-5 py-3 text-sm text-gray-600">{fmtDate(c.signed_at)}</td>
                                         <td className="px-5 py-3 text-right">
                                             <Link
-                                                href={route('portal.contract', c.id)}
+                                                href={route('portal.contracts.show', c.id)}
                                                 className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800"
                                             >
                                                 {c.status === 'sent' ? 'Sign →' : 'View →'}

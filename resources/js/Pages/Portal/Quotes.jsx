@@ -1,3 +1,4 @@
+import EmptyState from '@/Components/Shared/EmptyState';
 import PortalLayout from '@/Layouts/PortalLayout';
 import { Link } from '@inertiajs/react';
 
@@ -34,10 +35,11 @@ export default function Quotes({ client, quotes }) {
                 <h1 className="text-2xl font-bold text-gray-900">Quotes</h1>
 
                 {quotes.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                        <div className="text-4xl mb-4">📋</div>
-                        <p className="text-gray-500">No quotes found.</p>
-                    </div>
+                    <EmptyState
+                        icon="📋"
+                        title="No quotes yet"
+                        description="Quotes sent to you will appear here."
+                    />
                 ) : (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <table className="min-w-full divide-y divide-gray-100">
@@ -62,7 +64,7 @@ export default function Quotes({ client, quotes }) {
                                         <td className="px-5 py-3 text-right">
                                             {q.status !== 'draft' && (
                                                 <Link
-                                                    href={route('portal.quote', q.id)}
+                                                    href={route('portal.quotes.show', q.id)}
                                                     className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800"
                                                 >
                                                     View →

@@ -8,20 +8,23 @@ function fmt(amount, currency) {
 
 export default function PayInvoice({ client, invoice, stripeEnabled, payuEnabled }) {
     const [loading, setLoading] = useState(null);
+    const [error, setError]     = useState(false);
 
     const amountDue = parseFloat(invoice.amount_due ?? invoice.total ?? 0);
 
     function payWithStripe() {
         setLoading('stripe');
+        setError(false);
         router.post(route('portal.invoices.pay.stripe', invoice.id), {}, {
-            onError: () => setLoading(null),
+            onError: () => { setLoading(null); setError(true); },
         });
     }
 
     function payWithPayu() {
         setLoading('payu');
+        setError(false);
         router.post(route('portal.invoices.pay.payu', invoice.id), {}, {
-            onError: () => setLoading(null),
+            onError: () => { setLoading(null); setError(true); },
         });
     }
 
@@ -33,7 +36,7 @@ export default function PayInvoice({ client, invoice, stripeEnabled, payuEnabled
 
                 {/* Back */}
                 <Link
-                    href={route('portal.invoice', invoice.id)}
+                    href={route('portal.invoices.show', invoice.id)}
                     className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
                 >
                     ← Back to Invoice
@@ -49,6 +52,13 @@ export default function PayInvoice({ client, invoice, stripeEnabled, payuEnabled
                         </span>
                     </p>
                 </div>
+
+                {/* Error notice */}
+                {error && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-800">
+                        Payment could not be initiated. Please try again or contact us if the problem persists.
+                    </div>
+                )}
 
                 {/* Payment methods */}
                 {hasMethods ? (

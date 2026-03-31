@@ -1,4 +1,5 @@
 import PortalLayout from '@/Layouts/PortalLayout';
+import usePortalTrans from '@/hooks/usePortalTrans';
 import { Link } from '@inertiajs/react';
 
 const statusColors = {
@@ -42,46 +43,80 @@ function SummaryCard({ title, value, icon, colorClass }) {
     );
 }
 
-export default function Dashboard({ client, projects, invoices, quotes }) {
+const eventIcons = {
+    'lead.created':            { icon: '📥', color: 'bg-blue-100 text-blue-600' },
+    'project.created':         { icon: '📁', color: 'bg-green-100 text-green-600' },
+    'project.status_changed':  { icon: '🔄', color: 'bg-yellow-100 text-yellow-600' },
+    'invoice.sent':            { icon: '🧾', color: 'bg-blue-100 text-blue-600' },
+    'invoice.paid':            { icon: '✅', color: 'bg-green-100 text-green-600' },
+    'quote.sent':              { icon: '📋', color: 'bg-yellow-100 text-yellow-600' },
+    'quote.accepted':          { icon: '🤝', color: 'bg-green-100 text-green-600' },
+    'contract.signed':         { icon: '✍️', color: 'bg-purple-100 text-purple-600' },
+};
+
+function TimelineItem({ item }) {
+    const meta = eventIcons[item.event_type] ?? { icon: '📌', color: 'bg-gray-100 text-gray-600' };
+    const date = new Date(item.created_at);
+    const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    return (
+        <div className="flex items-start gap-3">
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0 ${meta.color}`}>
+                {meta.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
+                {item.description && (
+                    <p className="text-xs text-gray-500 truncate">{item.description}</p>
+                )}
+            </div>
+            <span className="text-xs text-gray-400 flex-shrink-0 pt-0.5">{dateStr}</span>
+        </div>
+    );
+}
+
+export default function Dashboard({ client, projects, invoices, quotes, timeline = [] }) {
+    const t = usePortalTrans();
+
     const pendingInvoices = invoices.filter(i => ['sent', 'overdue'].includes(i.status));
-    const activeProjects = projects.filter(p => p.status === 'active');
-    const pendingQuotes  = quotes.filter(q => q.status === 'sent');
+    const activeProjects  = projects.filter(p => p.status === 'active');
+    const pendingQuotes   = quotes.filter(q => q.status === 'sent');
 
     return (
         <PortalLayout client={client}>
             <div className="max-w-6xl mx-auto space-y-8">
+
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">
-                        Welcome back, {client?.primary_contact_name || client?.company_name}
+                        {t('welcome_back', { name: client?.primary_contact_name || client?.company_name })}
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">Here's a summary of your account.</p>
+                    <p className="text-sm text-gray-500 mt-1">{t('account_summary')}</p>
                 </div>
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <SummaryCard title="Active Projects"   value={activeProjects.length}  icon="📁" colorClass="bg-blue-50 text-blue-600" />
-                    <SummaryCard title="Open Invoices"     value={pendingInvoices.length}  icon="🧾" colorClass="bg-red-50 text-red-600" />
-                    <SummaryCard title="Pending Quotes"    value={pendingQuotes.length}    icon="📋" colorClass="bg-yellow-50 text-yellow-600" />
-                    <SummaryCard title="Total Projects"    value={projects.length}          icon="✅" colorClass="bg-green-50 text-green-600" />
+                    <SummaryCard title={t('active_projects')} value={activeProjects.length}  icon="📁" colorClass="bg-blue-50 text-blue-600" />
+                    <SummaryCard title={t('open_invoices')}   value={pendingInvoices.length}  icon="🧾" colorClass="bg-red-50 text-red-600" />
+                    <SummaryCard title={t('pending_quotes')}  value={pendingQuotes.length}    icon="📋" colorClass="bg-yellow-50 text-yellow-600" />
+                    <SummaryCard title={t('total_projects')}  value={projects.length}          icon="✅" colorClass="bg-green-50 text-green-600" />
                 </div>
 
                 {/* Recent Projects */}
                 <section>
                     <div className="flex justify-between items-center mb-3">
-                        <h2 className="text-lg font-semibold text-gray-800">Recent Projects</h2>
-                        <Link href={route('portal.projects')} className="text-sm text-red-600 hover:underline">View all →</Link>
+                        <h2 className="text-lg font-semibold text-gray-800">{t('recent_projects')}</h2>
+                        <Link href={route('portal.projects')} className="text-sm text-red-600 hover:underline">{t('view_all')}</Link>
                     </div>
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         {projects.length === 0 ? (
-                            <div className="p-6 text-sm text-gray-500 text-center">No projects yet.</div>
+                            <div className="p-6 text-sm text-gray-500 text-center">{t('no_projects')}</div>
                         ) : (
                             <table className="min-w-full divide-y divide-gray-100">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Project</th>
-                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Progress</th>
-                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Deadline</th>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('col_project')}</th>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('col_status')}</th>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">{t('col_progress')}</th>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">{t('col_deadline')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -90,7 +125,7 @@ export default function Dashboard({ client, projects, invoices, quotes }) {
                                         return (
                                             <tr key={p.id} className="hover:bg-gray-50">
                                                 <td className="px-5 py-3">
-                                                    <Link href={route('portal.project', p.id)} className="text-sm font-medium text-red-600 hover:underline">
+                                                    <Link href={route('portal.projects.show', p.id)} className="text-sm font-medium text-red-600 hover:underline">
                                                         {p.title}
                                                     </Link>
                                                 </td>
@@ -120,20 +155,20 @@ export default function Dashboard({ client, projects, invoices, quotes }) {
                 {/* Recent Invoices */}
                 <section>
                     <div className="flex justify-between items-center mb-3">
-                        <h2 className="text-lg font-semibold text-gray-800">Recent Invoices</h2>
-                        <Link href={route('portal.invoices')} className="text-sm text-red-600 hover:underline">View all →</Link>
+                        <h2 className="text-lg font-semibold text-gray-800">{t('recent_invoices')}</h2>
+                        <Link href={route('portal.invoices')} className="text-sm text-red-600 hover:underline">{t('view_all')}</Link>
                     </div>
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         {invoices.length === 0 ? (
-                            <div className="p-6 text-sm text-gray-500 text-center">No invoices yet.</div>
+                            <div className="p-6 text-sm text-gray-500 text-center">{t('no_invoices')}</div>
                         ) : (
                             <table className="min-w-full divide-y divide-gray-100">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Number</th>
-                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount Due</th>
-                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('col_number')}</th>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('col_status')}</th>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('col_amount_due')}</th>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('col_due_date')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -152,6 +187,23 @@ export default function Dashboard({ client, projects, invoices, quotes }) {
                         )}
                     </div>
                 </section>
+
+                {/* Activity Timeline */}
+                <section>
+                    <h2 className="text-lg font-semibold text-gray-800 mb-3">{t('recent_activity')}</h2>
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                        {timeline.length === 0 ? (
+                            <p className="text-sm text-gray-500 text-center py-4">{t('no_activity')}</p>
+                        ) : (
+                            <div className="space-y-4">
+                                {timeline.map(item => (
+                                    <TimelineItem key={item.id} item={item} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </section>
+
             </div>
         </PortalLayout>
     );

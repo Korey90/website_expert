@@ -41,9 +41,27 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'locale'            => $locale,
-            'available_locales' => config('languages'),
-            'tracking'          => [
+            'locale'              => $locale,
+            'available_locales'   => config('languages'),
+            'tracking'            => $this->resolveTrackingSettings(),
+            'portal_translations' => $this->resolvePortalTranslations($locale),
+        ];
+    }
+
+    private function resolvePortalTranslations(string $locale): array
+    {
+        $path = lang_path("{$locale}/portal.php");
+        if (file_exists($path)) {
+            return require $path;
+        }
+        $fallback = lang_path('en/portal.php');
+        return file_exists($fallback) ? require $fallback : [];
+    }
+
+    private function resolveTrackingSettings(): array
+    {
+        try {
+            return [
                 'gtm_enabled'            => (bool) Setting::get('gtm_enabled', false),
                 'gtm_id'                 => Setting::get('gtm_id', ''),
                 'ga4_enabled'            => (bool) Setting::get('ga4_enabled', false),
@@ -53,7 +71,19 @@ class HandleInertiaRequests extends Middleware
                 'gads_enabled'           => (bool) Setting::get('gads_enabled', false),
                 'gads_id'                => Setting::get('gads_id', ''),
                 'cookie_consent_enabled' => (bool) Setting::get('cookie_consent_enabled', true),
-            ],
-        ];
+            ];
+        } catch (\Throwable) {
+            return [
+                'gtm_enabled'            => false,
+                'gtm_id'                 => '',
+                'ga4_enabled'            => false,
+                'ga4_id'                 => '',
+                'pixel_enabled'          => false,
+                'pixel_id'               => '',
+                'gads_enabled'           => false,
+                'gads_id'                => '',
+                'cookie_consent_enabled' => true,
+            ];
+        }
     }
 }

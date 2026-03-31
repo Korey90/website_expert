@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -24,4 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })->create();
+    })
+    ->withSchedule(function (Schedule $schedule): void {
+        // Daily: flag leads with no activity in 7+ days → triggers lead.inactive automation
+        $schedule->command('leads:check-stale')->dailyAt('08:00')->onOneServer();
+
+        // Daily: remind clients about invoices due within 3 days → triggers invoice.due_soon automation
+        $schedule->command('invoices:check-due-soon')->dailyAt('09:00')->onOneServer();
+    })
+    ->create();

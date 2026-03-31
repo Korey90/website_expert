@@ -1,3 +1,4 @@
+import EmptyState from '@/Components/Shared/EmptyState';
 import PortalLayout from '@/Layouts/PortalLayout';
 import { Link } from '@inertiajs/react';
 
@@ -25,16 +26,17 @@ export default function Projects({ client, projects }) {
                 <h1 className="text-2xl font-bold text-gray-900">Your Projects</h1>
 
                 {projects.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                        <div className="text-4xl mb-4">📁</div>
-                        <p className="text-gray-500">No projects found.</p>
-                    </div>
+                    <EmptyState
+                        icon="📁"
+                        title="No projects yet"
+                        description="Your projects will appear here once work begins."
+                    />
                 ) : (
                     <div className="grid gap-4">
                         {projects.map(project => (
                             <Link
                                 key={project.id}
-                                href={route('portal.project', project.id)}
+                                href={route('portal.projects.show', project.id)}
                                 className="block bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:border-red-300 hover:shadow transition-all"
                             >
                                 <div className="flex items-start justify-between gap-4">

@@ -9,10 +9,19 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/js/app.jsx',
+                'resources/js/admin/notifications.js',
                 'resources/css/filament/admin/theme.css',
             ],
             refresh: true,
         }),
         react(),
     ],
+    test: {
+        environment: 'jsdom',
+        globals: true,
+        setupFiles: ['resources/js/tests/setup.js'],
+        alias: {
+            '@': '/resources/js',
+        },
+    },
 });

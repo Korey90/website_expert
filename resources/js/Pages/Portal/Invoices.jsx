@@ -1,3 +1,4 @@
+import EmptyState from '@/Components/Shared/EmptyState';
 import PortalLayout from '@/Layouts/PortalLayout';
 import { Link } from '@inertiajs/react';
 
@@ -36,10 +37,11 @@ export default function Invoices({ client, invoices }) {
                 </div>
 
                 {invoices.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                        <div className="text-4xl mb-4">🧾</div>
-                        <p className="text-gray-500">No invoices found.</p>
-                    </div>
+                    <EmptyState
+                        icon="🧾"
+                        title="No invoices yet"
+                        description="Your invoices will appear here when issued."
+                    />
                 ) : (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <table className="min-w-full divide-y divide-gray-100">
@@ -70,7 +72,7 @@ export default function Invoices({ client, invoices }) {
                                         <td className="px-5 py-3">
                                             <div className="flex items-center gap-2">
                                                 <Link
-                                                    href={route('portal.invoice', inv.id)}
+                                                    href={route('portal.invoices.show', inv.id)}
                                                     className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors"
                                                 >
                                                     View →

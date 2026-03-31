@@ -1,0 +1,28 @@
+43cae7b poprawki i refaktorywacja plan
+a5a2a66 poprawki i refaktorywacja plan
+3d4eb6c UI plus CRUD dla Permissions
+9ecb5ba system powiadomien, widget oraz CRUD
+1ee4353 poprawki sekcji frontowych od strony admina. przygotowanie do wdrazania systemu powiadomien
+bb6bd70 przebudowałem kalkulator od strony frontu i admina. poprawione tlumaczenia oraz logika
+4d26b84 popwawki w widokach show
+da0b642 Zarządzanie zgodami na komunikację — Portal Klienta
+054f7df integracja bramek platnosci i historia platnosci.
+b0c6e80 popprawki UI
+b07acb9 dodano/usprawniono legal module, zredagowalem kontrakt production ready. przygotowania do poprawek lejka z pliku poprawki.md
+05251e0 dodano moduł kontraktow razem z szablonami
+eefad8f Legal Zone Module — Plan Działania
+52faaa8 poprawki resignu i logiki dzialu projects, aktualizacje w portalu
+c0a044e poprawki usprawnienie w module project, dodano tablonyprojektów, automatyczne taski na podstawie szablonu projektu. re design project show view.
+c1f45e0 dodanie szablonów wiadomosci sms, ukonczono integracje z sms twilio o z wysylaniem emaili
+c655a70 dodano rizwijanie/zwijanie panelu bocznego, dodano triger do belki pokazujacy przypiete notatki, drobne poprawki
+69f7cd8 dodano widoki index do wszystkiego. rozdudowa widoku lead.show, drobne poprawki
+afc3fe5 dodano widoki index do wszystkiego. rozdudowa widoku lead.show, drobne poprawki
+f05e1eb poprawki flow po wyslaniu kalkulatora i formularza kontaktowego
+71cf38a przed rozpoczeciem wdrazania planu
+ebd30b6 Plan integracji narzędzi śledzących
+25f1072 integracja logowania z frontem, poprawki w wyswietlaniu CMS Pages
+64bfba8 zakonczenie pracy nad planem v1
+8502446 przed rozpoczeciem wdrazania planu
+a04305c werja core
+58ac577 feat: connect hero section to backend via Inertia; fix Tailwind v4 build config
+adfafae firs commint

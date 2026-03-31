@@ -2,62 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\CreateLeadAction;
 use App\Http\Requests\ContactRequest;
-use App\Mail\NewLeadMail;
-use App\Models\Client;
-use App\Models\Lead;
-use App\Models\LeadActivity;
-use App\Models\PipelineStage;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Mail;
 
 class ContactController extends Controller
 {
-    public function store(ContactRequest $request): JsonResponse
+    public function store(ContactRequest $request, CreateLeadAction $action): JsonResponse
     {
         $data = $request->validated();
 
-        // Find or create a Client record keyed by email
-        $client = Client::firstOrCreate(
-            ['primary_contact_email' => $data['email']],
-            [
-                'company_name'          => $data['company'] ?? $data['name'],
-                'primary_contact_name'  => $data['name'],
-                'primary_contact_phone' => $data['phone'] ?? null,
-                'vat_number'            => $data['nip'] ?? null,
-                'status'                => 'prospect',
-                'source'                => 'website',
-                'country'               => 'GB',
-                'currency'              => 'GBP',
-            ]
-        );
-
-        // First pipeline stage (new-lead)
-        $stage = PipelineStage::orderBy('order')->first();
-
-        $title = trim(
-            ($data['name'] ?? 'Unknown') . ' — ' . ($data['project_type'] ?? 'Enquiry')
-        );
-
-        $lead = Lead::create([
-            'title'              => $title,
-            'client_id'          => $client->id,
-            'pipeline_stage_id'  => $stage?->id,
-            'source'             => 'contact_form',
-            'notes'              => $data['message'],
-            'calculator_data'    => $data,
+        $action->execute([
+            'email'           => $data['email'],
+            'name'            => $data['name'] ?? null,
+            'company'         => $data['company'] ?? null,
+            'phone'           => $data['phone'] ?? null,
+            'nip'             => $data['nip'] ?? null,
+            'project_type'    => $data['project_type'] ?? null,
+            'source'          => 'contact_form',
+            'notes'           => $data['message'] ?? null,
+            'calculator_data' => $data,
         ]);
-
-        LeadActivity::log($lead->id, 'created', 'Lead created via contact form', [
-            'name'         => $data['name'],
-            'email'        => $data['email'],
-            'project_type' => $data['project_type'] ?? null,
-            'source'       => 'contact_form',
-        ], null);
-
-        // Notify admin
-        $adminEmail = config('mail.admin_address', 'admin@websiteexpert.co.uk');
-        Mail::to($adminEmail)->queue(new NewLeadMail($data, $lead->id));
 
         return response()->json(['message' => 'ok'], 201);
     }

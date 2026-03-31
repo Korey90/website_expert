@@ -23,7 +23,7 @@ class ReportController extends Controller
         $leads = Lead::with('client', 'stage')
             ->when($request->date_from, fn ($q) => $q->whereDate('created_at', '>=', $request->date_from))
             ->when($request->date_to,   fn ($q) => $q->whereDate('created_at', '<=', $request->date_to))
-            ->when($request->status,    fn ($q) => $q->where('status', $request->status))
+            ->when($request->stage_id,  fn ($q) => $q->where('pipeline_stage_id', $request->stage_id))
             ->orderByDesc('created_at')
             ->get();
 
@@ -125,22 +125,25 @@ class ReportController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet()->setTitle('Leads');
 
-        $headers = ['ID', 'Name', 'Email', 'Phone', 'Company', 'Source', 'Status', 'Stage', 'Value', 'Created'];
-        foreach ($headers as $i => $header) {
-            $sheet->setCellValueByColumnAndRow($i + 1, 1, $header);
-        }
+        $sheet->fromArray(
+            ['ID', 'Name', 'Email', 'Phone', 'Company', 'Source', 'Stage ID', 'Stage', 'Value', 'Created'],
+            null,
+            'A1'
+        );
 
-        foreach ($leads as $row => $lead) {
-            $sheet->setCellValueByColumnAndRow(1, $row + 2, $lead->id);
-            $sheet->setCellValueByColumnAndRow(2, $row + 2, $lead->name ?? ($lead->client?->primary_contact_name ?? ''));
-            $sheet->setCellValueByColumnAndRow(3, $row + 2, $lead->email ?? ($lead->client?->primary_contact_email ?? ''));
-            $sheet->setCellValueByColumnAndRow(4, $row + 2, $lead->phone ?? '');
-            $sheet->setCellValueByColumnAndRow(5, $row + 2, $lead->company ?? ($lead->client?->company_name ?? ''));
-            $sheet->setCellValueByColumnAndRow(6, $row + 2, $lead->source ?? '');
-            $sheet->setCellValueByColumnAndRow(7, $row + 2, $lead->status ?? '');
-            $sheet->setCellValueByColumnAndRow(8, $row + 2, $lead->stage?->name ?? '');
-            $sheet->setCellValueByColumnAndRow(9, $row + 2, $lead->value ?? '');
-            $sheet->setCellValueByColumnAndRow(10, $row + 2, $lead->created_at?->format('Y-m-d') ?? '');
+        foreach ($leads as $index => $lead) {
+            $sheet->fromArray([
+                $lead->id,
+                $lead->name ?? ($lead->client?->primary_contact_name ?? ''),
+                $lead->email ?? ($lead->client?->primary_contact_email ?? ''),
+                $lead->phone ?? '',
+                $lead->company ?? ($lead->client?->company_name ?? ''),
+                $lead->source ?? '',
+                $lead->pipeline_stage_id ?? '',
+                $lead->stage?->name ?? '',
+                $lead->value ?? '',
+                $lead->created_at?->format('Y-m-d') ?? '',
+            ], null, 'A' . ($index + 2));
         }
 
         return $spreadsheet;
@@ -151,23 +154,26 @@ class ReportController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet()->setTitle('Invoices');
 
-        $headers = ['ID', 'Invoice #', 'Client', 'Project', 'Status', 'Currency', 'Subtotal', 'VAT', 'Total', 'Due Date', 'Created'];
-        foreach ($headers as $i => $header) {
-            $sheet->setCellValueByColumnAndRow($i + 1, 1, $header);
-        }
+        $sheet->fromArray(
+            ['ID', 'Invoice #', 'Client', 'Project', 'Status', 'Currency', 'Subtotal', 'VAT', 'Total', 'Due Date', 'Created'],
+            null,
+            'A1'
+        );
 
-        foreach ($invoices as $row => $invoice) {
-            $sheet->setCellValueByColumnAndRow(1,  $row + 2, $invoice->id);
-            $sheet->setCellValueByColumnAndRow(2,  $row + 2, $invoice->number);
-            $sheet->setCellValueByColumnAndRow(3,  $row + 2, $invoice->client?->company_name ?? $invoice->client?->primary_contact_name ?? '');
-            $sheet->setCellValueByColumnAndRow(4,  $row + 2, $invoice->project?->title ?? '');
-            $sheet->setCellValueByColumnAndRow(5,  $row + 2, $invoice->status);
-            $sheet->setCellValueByColumnAndRow(6,  $row + 2, $invoice->currency ?? 'GBP');
-            $sheet->setCellValueByColumnAndRow(7,  $row + 2, $invoice->subtotal ?? 0);
-            $sheet->setCellValueByColumnAndRow(8,  $row + 2, $invoice->tax_amount ?? 0);
-            $sheet->setCellValueByColumnAndRow(9,  $row + 2, $invoice->total ?? 0);
-            $sheet->setCellValueByColumnAndRow(10, $row + 2, $invoice->due_date?->format('Y-m-d') ?? '');
-            $sheet->setCellValueByColumnAndRow(11, $row + 2, $invoice->created_at?->format('Y-m-d') ?? '');
+        foreach ($invoices as $index => $invoice) {
+            $sheet->fromArray([
+                $invoice->id,
+                $invoice->number,
+                $invoice->client?->company_name ?? $invoice->client?->primary_contact_name ?? '',
+                $invoice->project?->title ?? '',
+                $invoice->status,
+                $invoice->currency ?? 'GBP',
+                $invoice->subtotal ?? 0,
+                $invoice->vat_amount ?? 0,
+                $invoice->total ?? 0,
+                $invoice->due_date?->format('Y-m-d') ?? '',
+                $invoice->created_at?->format('Y-m-d') ?? '',
+            ], null, 'A' . ($index + 2));
         }
 
         return $spreadsheet;
@@ -178,22 +184,25 @@ class ReportController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet()->setTitle('Projects');
 
-        $headers = ['ID', 'Title', 'Client', 'Service Type', 'Status', 'Budget', 'Currency', 'Start Date', 'Due Date', 'Created'];
-        foreach ($headers as $i => $header) {
-            $sheet->setCellValueByColumnAndRow($i + 1, 1, $header);
-        }
+        $sheet->fromArray(
+            ['ID', 'Title', 'Client', 'Service Type', 'Status', 'Budget', 'Currency', 'Start Date', 'Due Date', 'Created'],
+            null,
+            'A1'
+        );
 
-        foreach ($projects as $row => $project) {
-            $sheet->setCellValueByColumnAndRow(1,  $row + 2, $project->id);
-            $sheet->setCellValueByColumnAndRow(2,  $row + 2, $project->title);
-            $sheet->setCellValueByColumnAndRow(3,  $row + 2, $project->client?->company_name ?? $project->client?->primary_contact_name ?? '');
-            $sheet->setCellValueByColumnAndRow(4,  $row + 2, $project->service_type ?? '');
-            $sheet->setCellValueByColumnAndRow(5,  $row + 2, $project->status);
-            $sheet->setCellValueByColumnAndRow(6,  $row + 2, $project->budget ?? 0);
-            $sheet->setCellValueByColumnAndRow(7,  $row + 2, $project->currency ?? 'GBP');
-            $sheet->setCellValueByColumnAndRow(8,  $row + 2, $project->start_date?->format('Y-m-d') ?? '');
-            $sheet->setCellValueByColumnAndRow(9,  $row + 2, $project->due_date?->format('Y-m-d') ?? '');
-            $sheet->setCellValueByColumnAndRow(10, $row + 2, $project->created_at?->format('Y-m-d') ?? '');
+        foreach ($projects as $index => $project) {
+            $sheet->fromArray([
+                $project->id,
+                $project->title,
+                $project->client?->company_name ?? $project->client?->primary_contact_name ?? '',
+                $project->service_type ?? '',
+                $project->status,
+                $project->budget ?? 0,
+                $project->currency ?? 'GBP',
+                $project->start_date?->format('Y-m-d') ?? '',
+                $project->due_date?->format('Y-m-d') ?? '',
+                $project->created_at?->format('Y-m-d') ?? '',
+            ], null, 'A' . ($index + 2));
         }
 
         return $spreadsheet;

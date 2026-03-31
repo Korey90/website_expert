@@ -12,14 +12,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Step 1: widen ENUM to accept both old and new values simultaneously
-        DB::statement("ALTER TABLE project_phases MODIFY COLUMN status ENUM('pending','active','in_progress','completed','cancelled') NOT NULL DEFAULT 'pending'");
+        $driver = DB::getDriverName();
 
-        // Step 2: migrate existing 'active' rows to 'in_progress'
-        DB::table('project_phases')->where('status', 'active')->update(['status' => 'in_progress']);
+        if ($driver === 'mysql' || $driver === 'mariadb') {
+            // Step 1: widen ENUM to accept both old and new values simultaneously
+            DB::statement("ALTER TABLE project_phases MODIFY COLUMN status ENUM('pending','active','in_progress','completed','cancelled') NOT NULL DEFAULT 'pending'");
 
-        // Step 3: remove obsolete 'active' value
-        DB::statement("ALTER TABLE project_phases MODIFY COLUMN status ENUM('pending','in_progress','completed','cancelled') NOT NULL DEFAULT 'pending'");
+            // Step 2: migrate existing 'active' rows to 'in_progress'
+            DB::table('project_phases')->where('status', 'active')->update(['status' => 'in_progress']);
+
+            // Step 3: remove obsolete 'active' value
+            DB::statement("ALTER TABLE project_phases MODIFY COLUMN status ENUM('pending','in_progress','completed','cancelled') NOT NULL DEFAULT 'pending'");
+        } else {
+            // SQLite does not support MODIFY COLUMN — migrate data only, column type stays as string
+            DB::table('project_phases')->where('status', 'active')->update(['status' => 'in_progress']);
+        }
     }
 
     /**
@@ -27,11 +34,17 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE project_phases MODIFY COLUMN status ENUM('pending','active','in_progress','completed','cancelled') NOT NULL DEFAULT 'pending'");
+        $driver = DB::getDriverName();
 
-        DB::table('project_phases')->where('status', 'in_progress')->update(['status' => 'active']);
-        DB::table('project_phases')->where('status', 'cancelled')->update(['status' => 'pending']);
+        if ($driver === 'mysql' || $driver === 'mariadb') {
+            DB::statement("ALTER TABLE project_phases MODIFY COLUMN status ENUM('pending','active','in_progress','completed','cancelled') NOT NULL DEFAULT 'pending'");
 
-        DB::statement("ALTER TABLE project_phases MODIFY COLUMN status ENUM('pending','active','completed') NOT NULL DEFAULT 'pending'");
+            DB::table('project_phases')->where('status', 'in_progress')->update(['status' => 'active']);
+            DB::table('project_phases')->where('status', 'cancelled')->update(['status' => 'pending']);
+
+            DB::statement("ALTER TABLE project_phases MODIFY COLUMN status ENUM('pending','active','completed') NOT NULL DEFAULT 'pending'");
+        } else {
+            DB::table('project_phases')->where('status', 'in_progress')->update(['status' => 'active']);
+        }
     }
 };
