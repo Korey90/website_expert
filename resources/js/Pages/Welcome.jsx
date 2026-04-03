@@ -3,6 +3,7 @@ import MarketingLayout from '@/Layouts/MarketingLayout';
 import Hero           from '@/Components/Marketing/Hero';
 import About          from '@/Components/Marketing/About';
 import CtaBanner      from '@/Components/Marketing/CtaBanner';
+import SaasLandingSection from '@/Components/Marketing/SaasLandingSection';
 import TrustStrip     from '@/Components/Marketing/TrustStrip';
 import Services       from '@/Components/Marketing/Services';import Process         from '@/Components/Marketing/Process';import Portfolio      from '@/Components/Marketing/Portfolio';
 import CostCalculatorV2 from '@/Components/Marketing/CostCalculatorV2';
@@ -22,6 +23,7 @@ export default function Welcome({ auth, hero, about, cta_banner, trust_strip, te
 
             {hero           && <Hero data={hero} />}
             {about          && <About data={about} />}
+            <SaasLandingSection />
             {cta_banner     && <CtaBanner data={cta_banner} />}
             {trust_strip    && <TrustStrip data={trust_strip} testimonials={testimonials} />}
             {services       && <Services data={services} />}

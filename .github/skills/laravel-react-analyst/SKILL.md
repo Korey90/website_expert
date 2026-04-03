@@ -1,5 +1,5 @@
 ---
-description: "Dokladna analiza projektu Laravel 11 + FilamentPHP 3 + Inertia.js + React + TypeScript. Wykrywa istniejace funkcje, architekture, integracje, role/uprawnienia Spatie, ocenia jakosc kodu i ryzyka skalowania. Zapisuje raport do docs/project-analysis.md."
+description: "Dokladna analiza projektu Laravel 13 + FilamentPHP 3 + Inertia.js + React + TypeScript. Wykrywa istniejace funkcje, architekture, integracje, role/uprawnienia Spatie, ocenia jakosc kodu i ryzyka skalowania. Zapisuje raport do docs/project-analysis.md."
 ---
 
 # Skill: Laravel + React Project Analyst

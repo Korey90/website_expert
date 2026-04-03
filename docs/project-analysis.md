@@ -1,132 +1,135 @@
-# Analiza projektu — Digital Growth OS (web-dev-app)
-
-> Data analizy: 31.03.2026
-> Podstawa: kod źródłowy repozytorium (routes/, app/, database/, resources/js/, lang/, tests/)
-> Cel: ocena stanu obecnego pod kątem transformacji w skalowalny SaaS
+# Analiza projektu — Digital Growth OS (WebsiteExpert)
+> Data: 2026-03-31
 
 ---
 
 ## 1. Feature Inventory
 
 ### 1.1 Autentykacja i autoryzacja
+| Funkcjonalność | Kluczowe pliki | Status |
+|---|---|---|
+| Login / Logout | `app/Http/Controllers/Auth/AuthenticatedSessionController.php` | zaimplementowane |
+| Rejestracja użytkownika | `app/Http/Controllers/Auth/RegisteredUserController.php` | zaimplementowane |
+| Reset hasła (e-mail) | `app/Http/Controllers/Auth/PasswordResetLinkController.php` | zaimplementowane |
+| Weryfikacja e-mail | `app/Http/Controllers/Auth/VerifyEmailController.php` | zaimplementowane |
+| Role i uprawnienia (Spatie) | `database/seeders/AdminSeeder.php`, `app/Models/User.php` | zaimplementowane |
+| Dostęp panelu Filament | `User::canAccessPanel()` — role: admin/manager/developer | zaimplementowane |
+| Klient — portal dostęp | `Client::portal_user_id` → `User` | zaimplementowane |
 
-| Funkcja | Opis | Kluczowe pliki | Status |
-|---------|------|----------------|--------|
-| Rejestracja / logowanie | Standard Laravel Breeze, sesja + cookie | `app/Http/Controllers/Auth/`, `routes/auth.php` | zaimplementowane |
-| Reset hasła | Email token flow | `Auth/PasswordResetLinkController.php`, `Auth/NewPasswordController.php` | zaimplementowane |
-| Weryfikacja emaila | Link z podpisem | `Auth/VerifyEmailController.php` | zaimplementowane |
-| Role i uprawnienia | Spatie Permission v7, 4 role, 40+ uprawnień | `AdminSeeder.php`, `User.php` (HasRoles) | zaimplementowane |
-| Dostęp do panelu | `canAccessPanel()` — tylko admin/manager/developer | `User.php` | zaimplementowane |
-| Portal klienta | Dostęp przez `portal_user_id` na kliencie | `Portal/BasePortalController.php` | zaimplementowane |
-| Zmiana profilu | Imię, email, hasło | `ProfileController.php`, `Pages/Profile/` | zaimplementowane |
-
-### 1.2 CRM — Klienci i Leady
-
-| Funkcja | Opis | Kluczowe pliki | Status |
-|---------|------|----------------|--------|
-| Zarządzanie klientami | Firma, VAT, Companies House, adres, notatki, SoftDeletes | `ClientResource.php`, `Client.php` | zaimplementowane |
-| Kontakty klientów | Powiązane z klientem, SoftDeletes | `Contact.php`, sekcja w `ClientResource` | zaimplementowane |
-| Zarządzanie leadami | Tytuł, wartość, źródło, budżet, etap, przypisany | `LeadResource.php`, `Lead.php` | zaimplementowane |
-| Pipeline Kanban | Widok kolumnowy, drag etapów | `PipelinePage.php`, `filament/pages/pipeline.blade.php` | zaimplementowane |
-| Etapy pipeline | CRUD etapów z kolejnością, checklistami | `PipelineStageResource.php`, `PipelineStage.php` | zaimplementowane |
-| Notatki do leadów | Pinowalne wpisy, historia | `LeadNote.php`, `PipelinePage.php` (modal) | zaimplementowane |
-| Aktywności leadów | Log zdarzeń (zmiana etapu, email, SMS) | `LeadActivity.php`, `ClientActivityListener.php` | zaimplementowane |
-| Checklista etapu | Elementy do wykonania per etap | `LeadChecklistItem.php`, `PipelineStageChecklistSeeder.php` | zaimplementowane |
-| Konwersja leada w projekt | Lead → Project jedną akcją | `LeadResource` (action), relacja `lead.project` | zaimplementowane |
-| Raport konwersji | Współczynnik konwersji per źródło leada | `ConversionReportPage.php` | zaimplementowane |
+### 1.2 CRM
+| Funkcjonalność | Kluczowe pliki | Status |
+|---|---|---|
+| Zarządzanie klientami | `app/Filament/Resources/ClientResource.php`, `app/Models/Client.php` | zaimplementowane |
+| Kontakty klientów | `app/Models/Contact.php` | zaimplementowane |
+| Zarządzanie leadami | `app/Filament/Resources/LeadResource.php`, `app/Models/Lead.php` | zaimplementowane |
+| Notatki leadów (z pinowaniem) | `app/Models/LeadNote.php` | zaimplementowane |
+| Aktywność leadów (historia) | `app/Models/LeadActivity.php` | zaimplementowane |
+| Checklista etapów pipeline | `app/Models/LeadChecklistItem.php` | zaimplementowane |
+| Pipeline Kanban | `app/Filament/Pages/PipelinePage.php` | zaimplementowane |
+| Budget range leadów | `budget_min`, `budget_max` w `leads` table | zaimplementowane |
 
 ### 1.3 Projekty
-
-| Funkcja | Opis | Kluczowe pliki | Status |
-|---------|------|----------------|--------|
-| Zarządzanie projektami | Status, deadline, budżet, typ usługi | `ProjectResource.php`, `Project.php` | zaimplementowane |
-| Fazy projektu | Kolejność, status, daty | `ProjectPhase.php`, RelationManager | zaimplementowane |
-| Zadania (tasks) | Powiązane z fazą | `ProjectTask.php` | częściowe (model + RelationManager, brak Kanban board) |
-| Załączniki | Pliki per projekt | `ProjectFile.php` | zaimplementowane |
-| Czat projektu | Wiadomości klient ↔ agencja | `ProjectMessage.php`, `Portal/ProjectController.php` | zaimplementowane |
-| Szablony projektów | Reużywalne szablony z fazami | `ProjectTemplate.php`, `ProjectTemplateResource.php` | zaimplementowane |
-| Portal tok projektu | Klient widzi fazy, taski, pliki, czat | `Portal/ProjectController.php`, `Pages/Portal/Project.jsx` | zaimplementowane |
+| Funkcjonalność | Kluczowe pliki | Status |
+|---|---|---|
+| Zarządzanie projektami | `app/Filament/Resources/ProjectResource.php`, `app/Models/Project.php` | zaimplementowane |
+| Fazy projektu | `app/Models/ProjectPhase.php` | zaimplementowane |
+| Zadania projektu | `app/Models/ProjectTask.php` | zaimplementowane |
+| Pliki projektu | `app/Models/ProjectFile.php` | zaimplementowane |
+| Wiadomości projektu (messaging) | `app/Models/ProjectMessage.php` | zaimplementowane |
+| Szablony projektów | `app/Models/ProjectTemplate.php`, `app/Filament/Resources/ProjectTemplateResource.php` | zaimplementowane |
 
 ### 1.4 Finanse
+| Funkcjonalność | Kluczowe pliki | Status |
+|---|---|---|
+| Faktury + pozycje | `app/Models/Invoice.php`, `app/Models/InvoiceItem.php` | zaimplementowane |
+| PDF faktur | `app/Http/Controllers/InvoicePdfController.php` | zaimplementowane |
+| Oferty (Quotes) | `app/Models/Quote.php`, `app/Models/QuoteItem.php` | zaimplementowane |
+| Umowy z podpisem elektronicznym | `app/Models/Contract.php`, `app/Filament/Resources/ContractResource.php` | zaimplementowane |
+| Szablony umów z interpolacją | `app/Models/ContractTemplate.php`, `app/Services/ContractInterpolationService.php` | zaimplementowane |
+| Płatności Stripe | `app/Http/Controllers/StripeWebhookController.php` | zaimplementowane |
+| Płatności PayU | `app/Services/PayuService.php`, `app/Http/Controllers/PayuWebhookController.php` | zaimplementowane |
+| Raporty (HTML/PDF/XLSX/CSV) | `app/Http/Controllers/ReportController.php` | zaimplementowane |
+| Raport konwersji | `app/Filament/Pages/ConversionReportPage.php` | zaimplementowane |
 
-| Funkcja | Opis | Kluczowe pliki | Status |
-|---------|------|----------------|--------|
-| Kosztorysy (Quotes) | Wieloliniowe, VAT, discount, status workflow | `QuoteResource.php`, `Quote.php`, `QuoteItem.php` | zaimplementowane |
-| Faktury (Invoices) | Numeracja, VAT, PDF export, statusy | `InvoiceResource.php`, `Invoice.php`, `InvoiceItem.php`, `InvoicePdfController.php` | zaimplementowane |
-| Płatności | Śledzenie wpłat, powiązanie z fakturą | `Payment.php`, `PaymentResource.php` | zaimplementowane |
-| Stripe Checkout | Płatność przez Checkout Session | `Portal/PaymentController.php`, `StripeWebhookController.php` | zaimplementowane |
-| PayU | Bramka płatności (sandbox + produkcja) | `PayuService.php`, `Portal/PaymentController.php`, `PayuWebhookController.php` | zaimplementowane |
-| Eksport faktur PDF | DomPDF, szablon Blade | `InvoicePdfController.php` | zaimplementowane |
-| Kontrakty | Podpis elektroniczny, interpolacja danych | `ContractResource.php`, `Contract.php`, `ContractInterpolationService.php` | zaimplementowane |
-| Szablony kontraktów | Wielorazowe szablony z placeholderami | `ContractTemplate.php`, `ContractTemplateResource.php` | zaimplementowane |
+### 1.5 Portal klienta
+| Funkcjonalność | Kluczowe pliki | Status |
+|---|---|---|
+| Dashboard portalu | `app/Http/Controllers/Portal/DashboardController.php`, `resources/js/Pages/Portal/Dashboard.jsx` | zaimplementowane |
+| Projekty klienta | `app/Http/Controllers/Portal/ProjectController.php`, `resources/js/Pages/Portal/Projects.jsx` | zaimplementowane |
+| Faktury klienta | `app/Http/Controllers/Portal/InvoiceController.php`, `resources/js/Pages/Portal/Invoices.jsx` | zaimplementowane |
+| Oferty klienta (akceptacja/odrzucenie) | `app/Http/Controllers/Portal/QuoteController.php`, `resources/js/Pages/Portal/Quote.jsx` | zaimplementowane |
+| Umowy klienta (podpis) | `app/Http/Controllers/Portal/ContractController.php`, `resources/js/Pages/Portal/Contract.jsx` | zaimplementowane |
+| Płatność faktury (Stripe + PayU) | `app/Http/Controllers/Portal/PaymentController.php`, `resources/js/Pages/Portal/PayInvoice.jsx` | zaimplementowane |
+| Preferencje powiadomień klienta | `app/Http/Controllers/Portal/NotificationController.php`, `resources/js/Pages/Portal/NotificationSettings.jsx` | zaimplementowane |
 
-### 1.5 Powiadomienia i komunikacja
+### 1.6 Powiadomienia
+| Funkcjonalność | Kluczowe pliki | Status |
+|---|---|---|
+| In-app DB notifications (Filament) | `app/Livewire/CustomDatabaseNotifications.php`, `app/Models/DatabaseNotification.php` | zaimplementowane |
+| Notification follow-link (mark as read) | `routes/web.php` — `/notification-follow` | zaimplementowane |
+| Polling JS (keepalive) | `resources/js/admin/notifications.js` (oddzielny entrypoint Vite) | zaimplementowane |
+| Preferencje komunikacji klienta | `ClientNotificationGate`, pola `notify_*` w `Client` | zaimplementowane |
 
-| Funkcja | Opis | Kluczowe pliki | Status |
-|---------|------|----------------|--------|
-| Powiadomienia in-app | Panel Filament, custom DatabaseNotification | `DatabaseNotification.php`, `NotificationResource.php`, `CustomDatabaseNotifications.php` (Livewire) | zaimplementowane |
-| Szablony emaili | Edytowalne przez panel, podgląd live | `EmailTemplate.php`, `EmailTemplateResource.php`, `EmailTemplatePreviewController.php` | zaimplementowane |
-| Maile transakcyjne | Lead, Invoice, Quote, Project, Payment, Portal invite | `app/Mail/` (7 klas) | zaimplementowane |
-| SMS przez Twilio | Szablony SMS, bramka przez SmsService | `SmsTemplate.php`, `SmsService.php`, `SmsTemplateResource.php` | zaimplementowane |
-| Preferencje komunikacji | Klient ustawia zgody: email transakcyjny/projektowy/marketing + SMS | `Client.php` (4 flagi), `Portal/NotificationController.php` | zaimplementowane |
-| Client notification gate | Walidacja preferencji przed wysyłką | `ClientNotificationGate.php` | zaimplementowane |
+### 1.7 Integracje zewnętrzne
+| Integracja | Paczka | Kluczowe pliki | Status |
+|---|---|---|---|
+| Stripe | `stripe/stripe-php ^19.4` | `StripeWebhookController.php`, `Portal/PaymentController.php` | działa |
+| PayU | własna implementacja HTTP | `PayuService.php`, `PayuWebhookController.php` | działa |
+| Twilio SMS | `twilio/sdk ^8.11` | `SmsService.php` | działa |
+| SMTP / Mail | Laravel Mail | `app/Mail/*`, `IntegrationSettingsPage.php` | działa |
+| Google Tag Manager | — | `TrackingSettingsPage.php`, widoki Blade | działa |
+| Google Analytics 4 | — | `TrackingSettingsPage.php` | działa |
+| Meta Pixel (Facebook) | — | `useMetaPixel.js`, `ConsentContext.js` | działa |
+| Google Ads | — | `TrackingSettingsPage.php`, `dataLayer.js` | działa |
+| DomPDF | `barryvdh/laravel-dompdf ^3.1` | `InvoicePdfController.php`, `ReportController.php` | działa |
+| PhpSpreadsheet | `phpoffice/phpspreadsheet ^5.5` | `ReportController.php` | działa |
+| OpenAI | **brak** | brak | **nieużywane** |
 
-### 1.6 Automatyzacje
+### 1.8 Panel administracyjny (Filament)
+| Obszar | Resources / Pages | Status |
+|---|---|---|
+| CRM | ClientResource, LeadResource, ContractResource, PipelinePage | zaimplementowane |
+| Projekty | ProjectResource, ProjectTemplateResource | zaimplementowane |
+| Finanse | InvoiceResource, QuoteResource, PaymentResource | zaimplementowane |
+| Szablony | EmailTemplateResource, SmsTemplateResource, ContractTemplateResource | zaimplementowane |
+| Automatyzacje | AutomationRuleResource | zaimplementowane |
+| CMS Stron | PageResource, SiteSectionResource | zaimplementowane |
+| Kalkulator | CalculatorPricingResource, CalculatorStepsResource, CalculatorStringsResource, CalculatorAdminPage | zaimplementowane |
+| Użytkownicy/Role | UserResource, RoleResource, PermissionResource | zaimplementowane |
+| Ustawienia | IntegrationSettingsPage, LegalSettingsPage, PaymentSettingsPage, TrackingSettingsPage | zaimplementowane |
+| Raporty | ConversionReportPage, SessionResource | zaimplementowane |
+| Dashboard widgets | StatsOverviewWidget, RecentLeadsWidget, OverdueInvoicesWidget, ActiveProjectsWidget, RevenueChartWidget, LeadsBySourceWidget, ProjectStatusWidget, QuickActionsWidget, ProjectDeadlinesWidget, StaleLeadsWidget | zaimplementowane |
+| Pinowane notatki lead | `AdminPanelProvider` — renderHook topbar | zaimplementowane |
 
-| Funkcja | Opis | Kluczowe pliki | Status |
-|---------|------|----------------|--------|
-| Reguły automatyzacji | CRUD z triggerem, warunkami, akcjami, delay | `AutomationRule.php`, `AutomationRuleResource.php` | zaimplementowane |
-| Eventy trigger | lead.created, lead.stage_changed, project.created/status_changed, invoice.sent/paid/overdue, quote.accepted, contract.created/signed | `AutomationEventListener.php` | zaimplementowane |
-| Ewaluacja warunków | Operator =, !=, >, <, contains | `ConditionEvaluator.php` | zaimplementowane |
-| Akcje automatyzacji | send_email, send_internal_email, send_sms, notify_admin, add_tag, change_status, create_portal_access | `Automation/Actions/` (7 klas) | zaimplementowane |
-| Opóźnienie (delay) | Re-dispatch job z delay_minutes | `ProcessAutomationJob.php` | zaimplementowane |
+### 1.9 Frontend publiczny
+| Funkcjonalność | Kluczowe pliki | Status |
+|---|---|---|
+| Strona główna (sekcje z DB) | `resources/js/Pages/Welcome.jsx`, `app/Http/Controllers/WelcomeController.php` | zaimplementowane |
+| Kalkulator kosztów V2 (DB-driven) | `resources/js/Components/Marketing/CostCalculatorV2.jsx`, `KalkulatorController.php` | zaimplementowane |
+| Strony CMS (/p/{slug}) | `resources/js/Pages/CmsPage.jsx`, `PageController.php` | zaimplementowane |
+| Formularz kontaktowy | `app/Http/Controllers/ContactController.php`, `ContactRequest.php` | zaimplementowane |
+| Formularz do leadów z kalkulatora | `app/Http/Controllers/CalculatorLeadController.php` | zaimplementowane |
+| Cookie banner + consent | `resources/js/Components/Marketing/CookieBanner.jsx`, `ConsentContext.js` | zaimplementowane |
+| Przełącznik języka (/lang/{locale}) | `routes/web.php` | zaimplementowane |
 
-### 1.7 Panel administracyjny (Filament)
+### 1.10 Automatyzacje i kolejki
+| Funkcjonalność | Kluczowe pliki | Status |
+|---|---|---|
+| Engine automatyzacji (trigger → conditions → actions) | `app/Automation/`, `app/Jobs/ProcessAutomationJob.php` | zaimplementowane |
+| Triggery: lead, project, invoice, quote, contract | `app/Listeners/AutomationEventListener.php` | zaimplementowane |
+| Akcje: email, SMS, internal email, notify_admin, change_status, create_portal_access, add_tag | `app/Automation/Actions/` | zaimplementowane |
+| Log aktywności klientów | `app/Listeners/ClientActivityListener.php`, `app/Models/ClientActivity.php` | zaimplementowane |
+| Kolejki (database driver) | `bootstrap/app.php`, `ProcessAutomationJob implements ShouldQueue` | zaimplementowane |
 
-| Funkcja | Opis | Kluczowe pliki | Status |
-|---------|------|----------------|--------|
-| Dashboard z widgetami | Stats, Revenue Chart, Leads by Source, Active Projects, Deadlines, Overdue Invoices, Stale Leads, Quick Actions | `app/Filament/Widgets/` (13 widgetów) | zaimplementowane |
-| Zarządzanie użytkownikami | CRUD, role assignment | `UserResource.php` | zaimplementowane |
-| Zarządzanie rolami i uprawnieniami | CRUD Filament | `RoleResource.php`, `PermissionResource.php` | zaimplementowane |
-| Ustawienia integracji | SMTP, Twilio | `IntegrationSettingsPage.php` | zaimplementowane |
-| Ustawienia płatności | Stripe + PayU, waluta | `PaymentSettingsPage.php` | zaimplementowane |
-| Ustawienia trackingu | GTM, GA4, Meta Pixel, Google Ads, Cookie Consent | `TrackingSettingsPage.php` | zaimplementowane |
-| Ustawienia prawne | Dane firmy, RODO, polityki | `LegalSettingsPage.php` | zaimplementowane |
-| Kalkulator admin | Edycja kroków, cen, stringów | `CalculatorAdminPage.php`, 3 zasoby | zaimplementowane |
-| Sesje użytkowników | Podgląd aktywnych sesji | `SessionResource.php` | zaimplementowane |
-
-### 1.8 Strona marketingowa i CMS
-
-| Funkcja | Opis | Kluczowe pliki | Status |
-|---------|------|----------------|--------|
-| Strona główna DB-driven | Sekcje z bazy (SiteSection), trilingual | `WelcomeController.php`, `Welcome.jsx` | zaimplementowane |
-| Sekcje CMS (13) | Hero, About, Services, Process, Portfolio, FAQ, Contact, Footer, Navbar, CTA, TrustStrip, Testimonials, CostCalculator | `SiteSectionResource.php`, `Components/Marketing/` | zaimplementowane |
-| Kalkulator wyceny V2 | Multi-step, DB-driven pricing/strings/steps | `KalkulatorController.php`, `CostCalculatorV2.jsx` | zaimplementowane |
-| CMS stron statycznych | Privacy policy, Terms, Cookies, Accessibility — translatable | `PageResource.php`, `Page.php`, `CmsPage.jsx` | zaimplementowane |
-| Przełącznik języka | Session-based, EN/PL/PT | `routes/web.php` (lang switch route) | zaimplementowane |
-| Śledzenie (tracking) | GTM/GA4/Pixel/Google Ads z cookie consent | `HandleInertiaRequests.php`, `useMetaPixel.js`, `useConsent.js` | zaimplementowane |
-| Formularz kontaktowy | Zapis nowego leada do CRM | `ContactController.php` | zaimplementowane |
-| Lead z kalkulatora | Zapis danych wyceny jako lead | `CalculatorLeadController.php`, `CreateLeadAction.php` | zaimplementowane |
-
-### 1.9 Raportowanie
-
-| Funkcja | Opis | Kluczowe pliki | Status |
-|---------|------|----------------|--------|
-| Raporty leadów | HTML, PDF (DomPDF), XLSX, CSV | `ReportController.php` | zaimplementowane |
-| Raporty faktur | HTML, PDF, XLSX, CSV | `ReportController.php` | zaimplementowane |
-| Raporty projektów | HTML, PDF, XLSX, CSV | `ReportController.php` | zaimplementowane |
-| Raport konwersji | Konwersja per źródło, wskaźnik, wartość | `ConversionReportPage.php` | zaimplementowane |
-
-### 1.10 Wielojęzyczność (i18n)
-
-| Funkcja | Status |
-|---------|--------|
-| Języki: EN, PL, PT | zaimplementowane |
-| Portal translations przez Inertia share | zaimplementowane |
-| SiteSection — Spatie Translatable (title, subtitle, body, button_text) | zaimplementowane |
-| Page (CMS) — Spatie Translatable (title, content, meta_title, meta_description) | zaimplementowane |
-| Kalkulator — multilingual strings/steps z bazy | częściowe |
-| Komponenty React Marketing/ — hardcoded strings | BRAK (do poprawy) |
+### 1.11 Wielojęzyczność (i18n)
+| Obszar | Pliki/metoda | Status |
+|---|---|---|
+| Portal klienta (en/pl/pt) | `lang/en/portal.php`, `lang/pl/portal.php`, `lang/pt/portal.php` | zaimplementowane |
+| Modele Page, SiteSection | `spatie/laravel-translatable` — JSON columns | zaimplementowane |
+| Kalkulator (en/pl/pt) | DB: kolumny `label_en`, `label_pl`, `label_pt` w `calculator_pricing` | zaimplementowane |
+| Przełącznik języka | `/lang/{locale}` z session | zaimplementowane |
+| React `usePortalTrans` hook | `resources/js/Hooks/usePortalTrans.js` | zaimplementowane |
+| Backend `__()` i `trans()` | brak systematycznego użycia poza portalem | częściowe |
 
 ---
 
@@ -135,420 +138,335 @@
 ### 2.1 Modele i relacje
 
 ```
-User (HasRoles — spatie)
-  └── Role: admin | manager | developer | client
-
-Client (SoftDeletes)
-  ├── portal_user_id → User
-  ├── assigned_to → User
-  ├── hasMany Contacts
-  ├── hasMany Leads
-  ├── hasMany Projects
-  ├── hasMany Quotes
-  ├── hasMany Invoices
-  └── hasMany Contracts
-
-Lead (SoftDeletes)
-  ├── client_id → Client
-  ├── contact_id → Contact
-  ├── pipeline_stage_id → PipelineStage
-  ├── assigned_to → User
-  ├── hasOne Project
-  ├── hasMany LeadActivities
-  ├── hasMany LeadNotes
-  └── hasMany LeadChecklistItems
-
-Project (SoftDeletes)
-  ├── client_id → Client
-  ├── lead_id → Lead
-  ├── template_id → ProjectTemplate
-  ├── assigned_to → User
-  ├── portal_token (auto-generated)
-  ├── hasMany ProjectPhases → hasMany ProjectTasks
-  ├── hasMany ProjectFiles
-  ├── hasMany ProjectMessages
-  └── hasMany Contracts
-
-Quote (SoftDeletes) → hasMany QuoteItems
-Invoice (SoftDeletes) → hasMany InvoiceItems, hasMany Payments
-Contract (SoftDeletes) → belongsTo ContractTemplate
-
-AutomationRule (trigger_event, conditions[], actions[], delay_minutes)
-Setting (key-value store, TTL cache 1 dzień)
-SiteSection (HasTranslations — spatie)
-Page (HasTranslations — spatie, SoftDeletes)
-CalculatorPricing | CalculatorStep | CalculatorString
-EmailTemplate | SmsTemplate | ContractTemplate
-DatabaseNotification (custom, soft delete zamiast hard delete)
+User ──────────────────── HasRoles (Spatie)
+  │
+  └─ Client ─────────────── contacts: HasMany(Contact)
+       │                 ── leads: HasMany(Lead)
+       │                 ── projects: HasMany(Project)
+       │                 ── quotes: HasMany(Quote)
+       │                 ── invoices: HasMany(Invoice)
+       │                 ── portal_user: BelongsTo(User)
+       │
+  Lead ──────────────────── stage: BelongsTo(PipelineStage)
+       |                 ── assignedTo: BelongsTo(User)
+       │                 ── project: HasOne(Project)
+       │                 ── activities: HasMany(LeadActivity)
+       │                 ── notes: HasMany(LeadNote)
+       │
+  Project ───────────────── phases: HasMany(ProjectPhase) → tasks: HasMany(ProjectTask)
+       │                 ── files: HasMany(ProjectFile)
+       │                 ── messages: HasMany(ProjectMessage)
+       │                 ── invoices: HasMany(Invoice)
+       │
+  Invoice ───────────────── items: HasMany(InvoiceItem)
+       │                 ── payments: HasMany(Payment)
+       │
+  Contract ──────────────── contractTemplate: BelongsTo(ContractTemplate)
+  Quote ─────────────────── items: HasMany(QuoteItem)
+  AutomationRule ─────────── trigger_event, conditions (JSON), actions (JSON)
+  Setting ────────────────── key/value store z cachem 1-dniowym
+  Page ───────────────────── HasTranslations (spatie/laravel-translatable)
+  SiteSection ────────────── HasTranslations (spatie/laravel-translatable)
+  CalculatorPricing/Steps/Strings ── kolumny *_en, *_pl, *_pt
 ```
 
-**Kluczowe wzorce:**
-- `SoftDeletes` powszechnie stosowane; `forceDeleting` cascade w `Client`
-- `Model::booted()` — logika inicjalizacji (Project: generowanie portal_token)
-- `Setting` jako cache-backed key-value store z 1-dniowym TTL
-- Brak globalnych scope'ów na modelach (konieczne do multi-tenancy)
+**SoftDeletes** używane na: `Client`, `Lead`, `Project`, `Invoice`, `Quote`, `Contract`, `Page`, `Contact`
 
-### 2.2 Service Layer
+**Cascade delete** zaimplementowany ręcznie w `Client::booted()` — force-delete usuwa zagnieżdżone rekordy.
 
-`app/Services/` — tylko **4 serwisy**:
+### 2.2 Service layer
+
+`app/Services/` zawiera tylko 4 serwisy:
 
 | Serwis | Odpowiedzialność |
-|--------|-----------------|
-| `ClientNotificationGate` | Sprawdzenie preferencji komunikacyjnych klienta (email typy + SMS) |
-| `ContractInterpolationService` | Podmiana placeholderów w treści kontraktu (legal, client, project, contract) |
-| `PayuService` | Integracja PayU: OAuth2 token, tworzenie zamówień, weryfikacja IPN |
-| `SmsService` | Twilio SMS: konfiguracja z DB, normalizacja E.164, wysyłka |
+|---|---|
+| `SmsService` | Wysyłanie SMS przez Twilio, normalizacja numerów, flaga enabled z DB |
+| `PayuService` | OAuth2 token, tworzenie zamówień PayU |
+| `ClientNotificationGate` | Sprawdzenie preferencji komunikacji klienta przed wysyłką |
+| `ContractInterpolationService` | Podmiana placeholder'ów w treści umów |
 
-**Luka krytyczna:** Brak serwisów dla Lead, Invoice, Quote, Project, Automation. Logika biznesowa tych modułów jest rozproszona po kontrolerach i zasobach Filament.
+**Brakuje** serwisów dla: Stripe, Invoice, Lead, Project, Automation, Mail.
 
 ### 2.3 Kontrolery
 
-| Typ | Ocena grubości |
-|-----|----------------|
-| Publiczne (Welcome, Kalkulator, Contact, CalculatorLead) | CIENKIE |
-| Webhooks (Stripe, PayU) | UMIARKOWANE — logika płatności inline |
-| Portal (8 kontrolerów) | UMIARKOWANE — `BasePortalController` jako helper |
-| ReportController | GRUBY — cała logika eksportu wieloformatowego |
-| DashboardController | CIENKI |
-| Brak Form Requests poza Auth i ContactRequest | |
+Kontrolery są częściowo grube:
+- `StripeWebhookController` — zawiera logikę biznesową (update Payment, Invoice.recalculate(), wysyłanie maili). **HIGH risk** — brak serwisu.
+- `ReportController` — zawiera zapytania Eloquent bezpośrednio. **MEDIUM risk**.
+- `DashboardController` — proste zliczenia, akceptowalne.
+- Kontrolery portalu (`Portal/`) — umiarkowanie grube, ale logika dobrze odizolowana per moduł.
+- `CreateLeadAction` — poprawna warstwa Action dla tworzenia leadów.
 
-### 2.4 Kolejki i eventy
+### 2.4 Filament — zasoby i strony
+
+**Filament 5.4** (nie 3.x jak w nazwie projektu SaaS — wersja nowsza niż zakładano).
+
+Nawigacja pogrupowana na: CRM, Projects, Finance, Marketing, Settings.
+
+26 Resources + 7 custom Pages + 13 Widgets. Panel `/admin` z kolorystyką brand (`#ff2b17`).
+
+Unikalne mechanizmy:
+- `PipelinePage` — własna Kanban z modalami email/notatki/historia (Livewire-style w Filament page)
+- `CustomDatabaseNotifications` — nadpisanie Filament DatabaseNotifications (X = mark as read, nie delete)
+- Pinowane notatki leadów w topbarze (renderHook)
+- Polling JS dla powiadomień (`resources/js/admin/notifications.js`)
+
+### 2.5 Kolejki i zdarzenia
 
 | Komponent | Opis |
-|-----------|------|
-| `AutomationEventListener` | Subscriber Eloquent (created/updated) dla Lead, Project, Invoice, Quote, Contract |
-| `ClientActivityListener` | Logi aktywności klienta w `client_activity_log` |
-| `ProcessAutomationJob` | ShouldQueue, tries=3 — pobiera reguły, ewaluuje warunki, wykonuje akcje lub re-dispatches z delay |
-| `Automation/Actions/` | 7 klas akcji realizujących konkretne typy działań |
-| Scheduler | **NIE używany** — `routes/console.php` tylko `inspire` |
+|---|---|
+| `ProcessAutomationJob` | `ShouldQueue`, 3 retries, obsługuje 7 typów akcji |
+| `AutomationEventListener` | Subscribe na Eloquent events (lead, project, invoice, quote, contract) |
+| `ClientActivityListener` | Log osi czasu aktywności klienta w portalu |
+| `AppServiceProvider` | Rejestruje oba Listeners + override config mail z DB |
 
-### 2.5 Wzorce architektoniczne
+Driver kolejek: domyślnie `database` (tabela `jobs` z migracji).
 
-| Wzorzec | Obecność |
-|---------|---------|
-| MVC | TAK |
-| Service Layer | CZĘŚCIOWE (4 serwisy) |
-| Repository Pattern | NIE |
-| Actions Pattern | CZĘŚCIOWE (`CreateLeadAction`, `Automation/Actions/`) |
-| DTO / Value Objects | NIE |
-| Form Requests | OGRANICZONE |
-| Policies | NIE (brak `app/Policies/`) |
-| Events/Listeners | TAK |
-| Jobs/Queue | TAK |
-| Observer | NIE (używane `booted()` hooks) |
+### 2.6 Wzorce
+
+| Wzorzec | Użycie |
+|---|---|
+| Service Layer | Częściowe (4 serwisy) — brakuje dla Stripe, Mail, Lead, Invoice |
+| Action Pattern | `app/Actions/CreateLeadAction.php` — jeden Action |
+| Repository Pattern | **Brak** |
+| DTO | **Brak** |
+| Observer | **Brak** — używa Eloquent event listeners przez Dispatcher |
 
 ---
 
 ## 3. Architektura frontendu
 
-### 3.1 Stack — diagnoza jednoznaczna
+### 3.1 Stack frontendu — **Inertia.js 2.0 + React 18 (JSX) + Tailwind CSS 4.x**
 
-**Inertia.js + React (JSX) + Tailwind CSS v4**
+**Brak TypeScript** — projekt używa czystego JSX (`.jsx`). Livewire jest obecne w vendor (zależność FilamentPhp), ale używane tylko do `CustomDatabaseNotifications`.
 
-- `@inertiajs/react ^2.0.0` — potwierdzony w `package.json`
-- `react ^18.2.0`, `react-dom ^18.2.0`
-- `tailwindcss ^4.2.2` (Tailwind v4 — CSS-first config)
-- **BRAK TypeScript** — wszystkie pliki to `.jsx`; brak `typescript` w devDependencies
-- **Livewire** zainstalowane, ale używane wyłącznie do nadpisania komponentu Filament (`CustomDatabaseNotifications.php`)
-
-### 3.2 Struktura katalogu `resources/js/`
+### 3.2 Struktura komponentów
 
 ```
 resources/js/
-├── app.jsx                        # Entry point Inertia
-├── bootstrap.js                   # Axios setup
-├── admin/                         # Custom assety panelu Filament
+├── app.jsx                    # Inertia bootstrap (createInertiaApp)
+├── Pages/
+│   ├── Welcome.jsx            # Strona główna (sekcje z DB)
+│   ├── Dashboard.jsx          # Dashboard agencji (Inertia)
+│   ├── Kalkulator.jsx         # Standalone kalkulator
+│   ├── CmsPage.jsx            # Renderowanie stron CMS
+│   ├── Auth/                  # Login, register, reset password (Breeze style)
+│   ├── Profile/               # Edycja profilu użytkownika
+│   └── Portal/                # 12 stron portalu klienta
+│       ├── Dashboard.jsx
+│       ├── Projects.jsx / Project.jsx
+│       ├── Invoices.jsx / Invoice.jsx / PayInvoice.jsx / PaymentResult.jsx
+│       ├── Quotes.jsx / Quote.jsx
+│       ├── Contracts.jsx / Contract.jsx
+│       └── NotificationSettings.jsx
 ├── Components/
-│   ├── Marketing/  (14 komponentów)  # Hero, About, Services, CostCalculatorV2, Contact, ...
-│   ├── Shared/     (1 komponent)     # EmptyState.jsx
-│   └── [UI prymitywy]                # Button, Input, Modal, Dropdown, Checkbox, ...
-├── Contexts/
-│   └── ConsentContext.js              # Cookie consent global state
-├── Hooks/
-│   ├── useConsent.js                  # Odczyt zgód GDPR
-│   ├── useMetaPixel.js                # Meta Pixel tracking
-│   ├── usePortalTrans.js              # Portal i18n translations
-│   └── useScrollReveal.js             # Scroll animation
+│   ├── Marketing/             # 13 komponentów strony publicznej
+│   │   ├── Hero.jsx, About.jsx, Services.jsx, Process.jsx, Portfolio.jsx
+│   │   ├── CostCalculatorV2.jsx  # Kalkulator DB-driven (EN/PL/PT)
+│   │   ├── Contact.jsx, Faq.jsx, Footer.jsx, Navbar.jsx
+│   │   └── CookieBanner.jsx, TrustStrip.jsx, CtaBanner.jsx
+│   └── Shared/                # wspólne komponenty UI
 ├── Layouts/
 │   ├── AuthenticatedLayout.jsx
 │   ├── GuestLayout.jsx
 │   ├── MarketingLayout.jsx
-│   └── PortalLayout.jsx
-├── Pages/
-│   ├── Auth/         (6 stron)        # Login, Register, ForgotPassword, ...
-│   ├── Portal/       (12 stron)       # Dashboard, Project[s], Invoice[s], Quote[s], Contract[s], PayInvoice, ...
-│   ├── Profile/      (1 strona)       # Edit
-│   ├── CmsPage.jsx
-│   ├── Dashboard.jsx                  # PLACEHOLDER Breeze — wymaga rozbudowy
-│   ├── Kalkulator.jsx
-│   └── Welcome.jsx
+│   └── PortalLayout.jsx       # Sidebar, mobile-responsive
+├── Hooks/
+│   ├── useConsent.js          # Cookie consent
+│   ├── useMetaPixel.js        # Meta Pixel z consent-gate
+│   ├── usePortalTrans.js      # i18n hook dla portalu
+│   └── useScrollReveal.js     # Scroll animations
+├── Contexts/
+│   └── ConsentContext.js      # React context dla cookie consent
 └── utils/
+    └── dataLayer.js           # GTM dataLayer helper
 ```
 
-### 3.3 State management
+### 3.3 Zarządzanie stanem
 
-| Aspekt | Stan |
-|--------|------|
-| Globalny state | BRAK Zustand/Redux; tylko `ConsentContext` |
-| Formularze | `useForm` z `@inertiajs/react` |
-| Translations | `usePortalTrans.js` — odczytuje `portal_translations` z Inertia props |
-| Lokalne state | `useState`/`useReducer` per komponent |
+- **React `useState`** — lokalny stan komponentów
+- **`ConsentContext`** — React Context dla preferencji cookies
+- **`usePage().props`** — Inertia shared props (auth, tracking, portal_translations)
+- **Brak Zustand / Redux** — stan globalny przez Inertia props sharing
 
-### 3.4 TypeScript — brak (krytyczna luka)
+### 3.4 TypeScript
 
-Żaden plik `.tsx` ani `.ts` nie istnieje. Brak `typescript`, `@types/react` w `package.json`. Istnieje tylko `jsconfig.json` dla aliasów ścieżek. To jest **najważniejsza luka techniczna** blokująca skalowanie zespołowe.
+**Projektu nie używa TypeScript.** Wszystkie pliki to `.jsx` (JSX bez typów). Brak `tsconfig.json`. Brak typów dla API responses.
 
----
+### 3.5 Tailwind CSS 4.x
 
-## 4. Filament — Resources, Pages, Widgets
+- `darkMode: 'class'` skonfigurowany, ale **dark mode niezaimplementowany** w komponentach
+- Niestandardowa paleta `brand` (czerwień `#ff2b17`)
+- Fonty: Inter (sans) + Syne (display)
+- Mobile-first z `sm:`, `lg:` breakpoints
+- Plugin `@tailwindcss/forms` + `@tailwindcss/typography`
 
-### 4.1 Resources (22)
+### 3.6 Testy frontendowe
 
-| Resource | Moduł | RelationManagers |
-|----------|-------|-----------------|
-| `ClientResource` | CRM | Contacts, Leads, Projects, Quotes, Invoices, Contracts |
-| `LeadResource` | CRM | Activities, Notes, Checklist |
-| `PipelineStageResource` | CRM | Checklist items |
-| `ProjectResource` | Projects | Phases, Tasks, Files, Messages |
-| `ProjectTemplateResource` | Projects | Phases |
-| `QuoteResource` | Finance | Items |
-| `InvoiceResource` | Finance | Items, Payments |
-| `ContractResource` | Finance | — |
-| `ContractTemplateResource` | Finance | — |
-| `EmailTemplateResource` | Comm. | — |
-| `SmsTemplateResource` | Comm. | — |
-| `AutomationRuleResource` | Automation | — |
-| `PageResource` | CMS | — |
-| `SiteSectionResource` | CMS | — |
-| `UserResource` | System | — |
-| `RoleResource` | System | Permissions |
-| `PermissionResource` | System | — |
-| `NotificationResource` | System | — |
-| `SessionResource` | System | — |
-| `PaymentResource` | Finance | — |
-| `CalculatorPricingResource`, `CalculatorStepsResource`, `CalculatorStringsResource` | Calculator | — |
-
-### 4.2 Custom Pages (7)
-
-`PipelinePage` (Kanban), `ConversionReportPage`, `IntegrationSettingsPage`, `PaymentSettingsPage`, `TrackingSettingsPage`, `LegalSettingsPage`, `CalculatorAdminPage`
-
-### 4.3 Widgets (13)
-
-`StatsOverviewWidget`, `RevenueChartWidget`, `LeadsBySourceWidget`, `RecentLeadsWidget`, `ActiveProjectsWidget`, `ProjectStatusWidget`, `ProjectDeadlinesWidget`, `OverdueInvoicesWidget`, `StaleLeadsWidget`, `QuickActionsWidget`, `CalculatorPricingTableWidget`, `CalculatorStepsTableWidget`, `CalculatorStringsTableWidget`
+- Vitest + testing-library skonfigurowane w `package.json` i `vite.config.js`
+- Katalog `resources/js/tests/` (setup.js)
+- **Brak faktycznych testów komponentów** (tylko setup)
 
 ---
 
-## 5. Integracje zewnętrzne
+## 4. Integracje zewnętrzne
 
-| Integracja | Cel | Pakiet | Kluczowe pliki | Status |
-|-----------|-----|--------|----------------|--------|
-| **Stripe** | Płatności Checkout Session, webhook | `stripe/stripe-php ^19.4` | `StripeWebhookController.php`, `Portal/PaymentController.php` | działa |
-| **PayU** | Bramka PL (sandbox + prod) | HTTP (brak SDK) | `PayuService.php`, `PayuWebhookController.php` | działa |
-| **Twilio** | SMS | `twilio/sdk ^8.11` | `SmsService.php` | działa |
-| **SMTP / Mail** | Email transakcyjny | Laravel Mail | `app/Mail/` (7 klas) | działa |
-| **DomPDF** | PDF (faktury, raporty) | `barryvdh/laravel-dompdf ^3.1` | `InvoicePdfController.php`, `ReportController.php` | działa |
-| **PhpSpreadsheet** | XLSX/CSV export | `phpoffice/phpspreadsheet ^5.5` | `ReportController.php` | działa |
-| **Spatie Permission** | Role + Uprawnienia | `spatie/laravel-permission ^7.2` | `AdminSeeder.php`, `User.php` | działa |
-| **Spatie Translatable** | Wielojęzyczne kolumny | `spatie/laravel-translatable ^6.13` | `SiteSection.php`, `Page.php` | działa |
-| **Filament** | Panel administracyjny | `filament/filament ^5.4` | `app/Filament/` | działa |
-| **GTM / GA4 / Meta Pixel / Google Ads** | Tracking i reklama | JS snippety | `TrackingSettingsPage.php`, `HandleInertiaRequests.php` | działa |
-| **OpenAI** | AI generation | **BRAK** | — | nie zaimplementowane |
-| **Reverb / WebSockets** | Real-time | config istnieje | — | nieużywane |
-
----
-
-## 6. Role i uprawnienia (Spatie)
-
-### 6.1 Role
-
-| Rola | Dostęp do panelu | Zakres uprawnień |
-|------|-----------------|-----------------|
-| **admin** | TAK | Wszystkie 40+ uprawnień |
-| **manager** | TAK | Wszystkie minus: `manage_roles`, `delete_users`, `manage_pipeline`, `manage_project_templates` |
-| **developer** | TAK | `view_clients`, `view_leads`, `view_quotes`, `view_invoices`, `view_contracts`, `view_projects`, `edit_projects` |
-| **client** | NIE (portal only) | Brak uprawnień panelowych |
-
-### 6.2 Grupy uprawnień (40+ definicji)
-
-CRM (klienci, leady, kontrakty), Finance (quotes, invoices), Projects, Templates (contract/email/sms), Automations, CMS (pages, site_sections), Users, Reports, Settings, Roles, Pipeline, Calculator, Project Templates.
-
-### 6.3 Polityki (Policies)
-
-**Katalog `app/Policies/` nie istnieje.** Autoryzacja opiera się wyłącznie na uprawnieniach Spatie w widokach Filament. Brak Policy na poziomie modeli — krytyczna luka dla multi-tenancy.
-
-### 6.4 Seeder
-
-`database/seeders/AdminSeeder.php` — tworzy role, uprawnienia i domyślnego użytkownika admin.
+| Integracja | Pakiet | Status | Uwagi |
+|---|---|---|---|
+| **Stripe** | `stripe/stripe-php ^19.4` | działa | Webhook, checkout, payment intents; brak Laravel Cashier |
+| **PayU** | własna implementacja (HTTP) | działa | OAuth2, sandbox/prod przełącznik w DB |
+| **Twilio** | `twilio/sdk ^8.11` | działa | SMS, config z DB; normalizer E.164 UK |
+| **SMTP / Mail** | Laravel Mail | działa | W pełni konfigurowalny z panelu admin (DB override) |
+| **Google Tag Manager** | — | działa | DB toggle + tracking props przez Inertia |
+| **Google Analytics 4** | — | działa | Direct snippet lub przez GTM |
+| **Meta Pixel** | — | działa | `useMetaPixel` hook z consent-gate |
+| **Google Ads** | — | działa | Tracking ID w DB, przez GTM |
+| **DomPDF** | `barryvdh/laravel-dompdf ^3.1` | działa | PDF faktury, raporty |
+| **PhpSpreadsheet** | `phpoffice/phpspreadsheet ^5.5` | działa | XLSX + CSV eksport raportów |
+| **Spatie Translatable** | `spatie/laravel-translatable ^6.13` | działa | Page, SiteSection — JSON columns |
+| **Spatie Permission** | `spatie/laravel-permission ^7.2` | działa | Role + 50 uprawnień granularnych |
+| **OpenAI** | **brak** | nieużywane | Brak pakietu, brak implementacji |
+| **Reverb / Pusher** | `laravel/reverb` w config | częściowe | Config `reverb.php` istnieje, brak aktywnego real-time |
+| **Mailgun / Postmark / SES** | — | częściowe | Obsługiwane przez IntegrationSettingsPage, niezweryfikowane |
 
 ---
 
-## 7. Ocena jakości kodu
+## 5. Role i uprawnienia (Spatie)
+
+### 5.1 Struktura ról
+
+| Rola | Opis | Dostęp do panelu |
+|---|---|---|
+| `admin` | Pełna kontrola | TAK |
+| `manager` | CRM + Finance + Projects (bez zarządzania rolami/pipeline) | TAK |
+| `developer` | Read-only CRM/Finance + edit projects/contracts | TAK |
+| `client` | Portal klienta (bez Filament) | NIE |
+
+### 5.2 Uprawnienia (50 granularnych)
+
+Grupowane według obszarów:
+
+| Obszar | Uprawnienia |
+|---|---|
+| CRM — Clients | `view_clients`, `create_clients`, `edit_clients`, `delete_clients` |
+| CRM — Leads | `view_leads`, `create_leads`, `edit_leads`, `delete_leads` |
+| CRM — Contracts | `view_contracts`, `create_contracts`, `edit_contracts`, `delete_contracts` |
+| Finance — Quotes | `view_quotes`, `create_quotes`, `edit_quotes`, `delete_quotes` |
+| Finance — Invoices | `view_invoices`, `create_invoices`, `edit_invoices`, `delete_invoices` |
+| Projects | `view_projects`, `create_projects`, `edit_projects`, `delete_projects` |
+| Templates (Contract/Email/SMS) | `view_*`, `create_*`, `edit_*`, `delete_*` (12 uprawnień) |
+| Automations | `view_automations`, `create_automations`, `edit_automations`, `delete_automations` |
+| Website CMS | `view_pages/site_sections`, `create_*`, `edit_*`, `delete_*` (8 uprawnień) |
+| Users | `view_users`, `create_users`, `edit_users`, `delete_users` |
+| Reports | `view_reports`, `export_reports` |
+| System Settings | `manage_settings`, `manage_roles`, `manage_pipeline`, `manage_calculator`, `manage_project_templates` |
+
+### 5.3 Macierz ról
+
+| Uprawnienie | admin | manager | developer | client |
+|---|---|---|---|---|
+| Wszystkie CRUD | ✅ | większość | tylko widok / edit_projects | ❌ |
+| manage_roles | ✅ | ❌ | ❌ | ❌ |
+| manage_settings | ✅ | ✅ | ❌ | ❌ |
+| manage_pipeline | ✅ | ❌ | ❌ | ❌ |
+| Portal klienta | ❌ | ❌ | ❌ | ✅ |
+
+### 5.4 Obowiązujące polityki
+
+`app/Policies/` — **brak pliku**. Autoryzacja oparta wyłącznie na `hasPermissionTo()` w Filament Resources. Brak PolicyClass dla modeli.
+
+---
+
+## 6. Ocena jakości kodu
 
 | Aspekt | Ocena | Uzasadnienie |
-|--------|-------|--------------|
-| Separacja warstw | **ŚREDNI** | MVC dobrze zorganizowany; service layer zbyt mały — logika Invoice/Quote/Lead rozproszona |
-| Pokrycie testami | **ŚREDNI** | Feature testy: Auth, Portal (5), Automation, Reports, FullLeadWorkflow; brak Unit testów serwisów; środowisko testowe problematyczne (SQLite + ENUM migration) |
-| Typizacja JavaScript | **WYMAGA POPRAWY** | Brak TypeScript — wyłącznie `.jsx`; brak `@types/*` |
-| Konwencje nazewnicze | **DOBRY** | Spójne w warstwach; modele/kontrolery/zasoby Filament konsekwentne |
-| Wielojęzyczność | **ŚREDNI** | EN/PL/PT gotowe dla portalu i CMS; hardcoded strings w komponentach React Marketing/ |
-| Dokumentacja kodu | **ŚREDNI** | Komentarze w kluczowych klasach (SmsService, PayuService, ProcessAutomationJob); brak PHPDoc na modelach |
-| Obsługa błędów | **ŚREDNI** | `Log::error/warning` w integracjach; global try-catch w AppServiceProvider; bug: `CostCalculatorV2.jsx` ustawia sukces w `finally` |
-| Bezpieczeństwo | **DOBRY** | CSRF exempt przez bootstrap (nie skip), webhook signature validation, PayU MD5 hmac, walidacja ID notyfikacji regex, brak Open Redirect |
-| Form Requests | **WYMAGA POPRAWY** | Tylko `ContactRequest.php` + Auth requests; brak Form Requests dla Portal endpoints |
+|---|---|---|
+| Separacja warstw (MVC + service layer) | **ŚREDNI** | 4 serwisy, 1 Action — StripeWebhookController i ReportController zawierają logikę biznesową |
+| Pokrycie testami (Feature/Unit) | **ŚREDNI** | 15 testów Feature (Auth, Portal ×5, Raporty ×3, Automation ×2, LeadWorkflow) — brak testów Unit, brak testów dla Filament Resources |
+| TypeScript | **WYMAGA POPRAWY** | Projekt używa czystego JSX — brak typowania API responses, propsów komponentów, hooków |
+| Konwencja nazewnicza | **DOBRY** | Spójna konwencja camelCase/PascalCase; Route names prefix-owane (`portal.`, `reports.*`) |
+| Wielojęzyczność (i18n) | **ŚREDNI** | Portal przetłumaczony (EN/PL/PT), kalkulator przetłumaczony; backend nie używa konsekwentnie `__()` |
+| Dokumentacja kodu | **ŚREDNI** | PHPDoc w kluczowych serwisach (ContractInterpolationService, CreateLeadAction, SmsService); brak dokumentacji komponentów React |
+| Obsługa błędów i logowanie | **DOBRY** | Log::error/warning/info w krytycznych miejscach (SmsService, PayuService, StripeWebhook); fallback dla brakujących konfiguracji |
+| Bezpieczeństwo | **DOBRY** | CSRF na webhookach wyłączony świadomie; open-redirect protection w notification-follow; UUID validation w mark-as-read |
 
 ---
 
-## 8. Ryzyka skalowania
+## 7. Ryzyka skalowania
 
-### 8.1 BRAK MULTI-TENANCY — priorytet HIGH
+### RYZYKO HIGH
 
-Projekt jest single-tenant. Nie ma `tenant_id`, `organization_id` ani izolacji danych między klientami SaaS. Wszystkie modele (`Client`, `Lead`, `Project`, `Invoice`, etc.) są globalnie dostępne dla wszystkich użytkowników panelu.
+| Ryzyko | Lokalizacja | Propozycja rozwiązania |
+|---|---|---|
+| **Brak multi-tenancy** — wszystkie dane dzielą jeden tenant | Cała baza danych, brak `tenant_id` w żadnej tabeli | Dodać `tenant_id` do wszystkich tabel biznesowych; middleware izolacji; model `Tenant` / `Organization` |
+| **Brak Service dla Stripe** — logika biznesowa w kontrolerze | `app/Http/Controllers/StripeWebhookController.php` | Stworzyć `StripePaymentService` + `InvoicePaymentService` |
+| **Settings w DB z cache 1-dziennym** — ryzyko stale cache przy skalowaniu | `app/Models/Setting.php` | Centralny cache-tag invalidation lub Redis z krótszym TTL |
+| **Brak TypeScript** — brak bezpieczeństwa typów przy rozbudowie frontandu | Cały `resources/js/` | Migracja do `.tsx` z typami dla Inertia props i API responses |
 
-**Lokalizacja:** każdy model i migracja.
-**Propozycja:** Model `Workspace`/`Tenant`, `tenant_id` na modelach, middleware izolacji (Scoped Queries lub package `stancl/tenancy`).
+### RYZYKO MEDIUM
 
----
+| Ryzyko | Lokalizacja | Propozycja rozwiązania |
+|---|---|---|
+| **Brak Policies** — autoryzacja tylko przez Filament | Brak `app/Policies/` | Stworzyć Policy dla: Lead, Client, Invoice, Contract, Project |
+| **Fat controllery** — ReportController z zapytaniami | `app/Http/Controllers/ReportController.php` | Przenieść do `ReportService` / dedykowanych Query classes |
+| **Brak Form Requests dla Filament** — walidacja w Resource | Filament Resources | Dodać dedykowane Form Requests / walidację per action |
+| **PipelinePage** — logika Eloquent bezpośrednio w Page | `app/Filament/Pages/PipelinePage.php` | Wydzielić LeadPipelineService |
+| **Brak OpenAI** — core featura SaaS niezaimplementowany | Brak | Dodać `openai-php/client` lub `openai/openai-php` |
+| **N+1 queries potencjalne** — brak eager loading w kilku miejscach | `Portal/DashboardController`, `PipelinePage` | Audyt with() loading, Laravel Debugbar |
+| **Kalkulator** — V1 i V2 jednocześnie w komponentach | `CostCalculator.jsx`, `CostCalculatorV2.jsx` | Usunąć V1, zostawić tylko V2 DB-driven |
 
-### 8.2 Minimalny service layer — priorytet HIGH
+### RYZYKO LOW
 
-Tylko 4 serwisy przy 30+ modelach biznesowych. Logika tworzenia leadów, faktur, projektów, konwersji quote → invoice jest wbudowana bezpośrednio w kontrolery portalu i zasoby Filament.
-
-**Lokalizacja:** `app/Http/Controllers/Portal/`, `app/Filament/Resources/`, `app/Filament/Pages/PipelinePage.php`
-**Propozycja:** `LeadService`, `InvoiceService`, `ProjectService`, `QuoteService`.
-
----
-
-### 8.3 Brak TypeScript — priorytet HIGH
-
-Cały frontend w `.jsx` bez typizacji. Przy rozbudowie SaaS (landing pages, AI generator) brak typów prowadzi do trudnych do wykrycia błędów.
-
-**Lokalizacja:** `resources/js/**/*.jsx`
-**Propozycja:** Migracja do TypeScript (`.tsx`) — stopniowo moduł po module.
-
----
-
-### 8.4 Hardcoded single-instance config — priorytet HIGH
-
-Ustawienia firmy, Stripe keys, Twilio, SMTP są globalne (tabela `settings`). W SaaS każdy tenant musi mieć osobną konfigurację.
-
-**Lokalizacja:** `app/Models/Setting.php`, `app/Filament/Pages/*SettingsPage.php`
+| Ryzyko | Lokalizacja | Propozycja rozwiązania |
+|---|---|---|
+| **Brak repository pattern** — Eloquent bezpośrednio wszędzie | Ogólnie | Opcjonalny — nie priorytet, ale warto przy skalowaniu |
+| **Notifikacje przez polling** zamiast WebSocket | `resources/js/admin/notifications.js` | Reverb skonfigurowany — uruchomić real-time broadcasting |
+| **Brak API (JSON)** — tylko Inertia + Filament | Brak `routes/api.php` | Przy SaaS konieczne API v1 dla zewnętrznych integracji |
+| **Blade + Inertia mixed** — raporty w Blade, portal w Inertia | `resources/views/reports/` | Spójność — raporty mogą zostać w Blade (server-side) |
+| **Brak dark mode** mimo konfiguracji | `tailwind.config.js` — `darkMode: 'class'` | Implementacja klas `dark:` w komponentach |
 
 ---
 
-### 8.5 ProcessAutomationJob jako God Object — priorytet MEDIUM
+## 8. Rekomendacje i priorytety
 
-Jeden job odpowiada za: pobieranie reguł, ewaluację warunków, re-dispatch z delay'em, wykonanie 7 typów akcji.
+### Faza 1 — Fundament SaaS (przed każdą nową funkcją)
 
-**Lokalizacja:** `app/Jobs/ProcessAutomationJob.php`
-**Propozycja:** Wydzielenie `AutomationDispatcher` (orkiestrator) od dedykowanych job'ów per akcja.
+1. **[HIGH] Multi-tenancy** — model `Organization`/`Tenant`, `tenant_id` na tabelach, middleware izolacji
+2. **[HIGH] API layer** — `routes/api.php` + Laravel Sanctum (już zainstalowany)
+3. **[HIGH] TypeScript migracja** — rename `.jsx` → `.tsx`, typy Inertia, typy API
+4. **[HIGH] StripeService** — wydzielenie logiki z StripeWebhookController
 
----
+### Faza 2 — Kluczowe moduły SaaS
 
-### 8.6 Bug: eksport faktur — pole `tax_amount` vs `vat_amount` — priorytet HIGH (bugfix)
+5. **[HIGH] OpenAI integracja** — landing page generator (core value prop SaaS)
+6. **[HIGH] Landing Pages moduł** — nowe tabele: `landing_pages`, `landing_page_blocks`
+7. **[MEDIUM] Business Profile** — kontekst firmy dla AI generacji content
+8. **[MEDIUM] Billing / Subscriptions** — Laravel Cashier (Stripe) dla planów SaaS
 
-`ReportController` eksportuje faktury używając pola `tax_amount`, a model `Invoice` operuje na `vat_amount`. To potencjalny błąd danych finansowych w eksportach.
+### Faza 3 — Jakość kodu
 
-**Lokalizacja:** `app/Http/Controllers/ReportController.php`
+9. **[MEDIUM] Policy classes** — dla Lead, Client, Invoice, Contract, Project
+10. **[MEDIUM] Więcej Form Requests** — dla kontrolerów portalu
+11. **[MEDIUM] LeadPipelineService** — wydzielenie z PipelinePage
+12. **[LOW] Repository pattern** — opcjonalne, przy dużej skali
+13. **[LOW] Dark mode** — implementacja klas `dark:`
 
----
+### Gotowość projektu pod SaaS: **2/10 (fundament istnieje, brak izolacji danych)**
 
-### 8.7 Bug: CostCalculatorV2 — fałszywy sukces — priorytet HIGH (bugfix)
+Projekt jest solidnym, dobrze zbudowanym narzędziem dla **jednej agencji** (WebsiteExpert Ltd). Podstawy do budowania SaaS są mocne:
+- Silnik automatyzacji rozbudowany i rozszerzalny
+- Portal klienta kompletny i funkcjonalny
+- Integracje płatności (Stripe + PayU) działające
+- Kalkulator DB-driven wielojęzyczny
+- 50 granularnych uprawnień Spatie
 
-`CostCalculatorV2.jsx` ustawia stan sukcesu w bloku `finally`, więc użytkownik zobaczy potwierdzenie wysłania nawet gdy request skończył się błędem.
-
-**Lokalizacja:** `resources/js/Components/Marketing/CostCalculatorV2.jsx`
-
----
-
-### 8.8 Brak Policies — priorytet MEDIUM
-
-Brak `app/Policies/`. Bez Policies niemożliwa jest prawidłowa izolacja danych między tenantami w przyszłości.
-**Propozycja:** Policies dla Lead, Client, Project, Invoice, Quote, Contract.
-
----
-
-### 8.9 Środowisko testowe niestabilne — priorytet MEDIUM
-
-Migracja ENUM (`ALTER TABLE ... MODIFY COLUMN`) nie wspierana przez SQLite in-memory. `HandleInertiaRequests` odpytuje tabelę `settings` przed seedowaniem.
-
-**Lokalizacja:** `database/migrations/2026_03_22_194527_update_project_phases_status_enum.php`, `HandleInertiaRequests.php`
-
----
-
-### 8.10 Brak OpenAI / AI Layer — priorytet MEDIUM (kluczowe dla SaaS)
-
-Brak integracji OpenAI — kluczowej funkcji Digital Growth OS (AI Landing Page Generator). Brak pakietu `openai-php/client`.
+**Czego brakuje** do SaaS:
+- Multi-tenancy (izolacja danych między organizacjami)
+- Billing/subscriptions (plany cenowe, limity funkcji)
+- OpenAI / AI generacja contentu
+- API publiczne
+- Landing pages jako moduł
+- TypeScript (bezpieczeństwo typów przy rozbudowie)
 
 ---
 
-### 8.11 Brak Schedulera — priorytet LOW
-
-`routes/console.php` zawiera tylko `inspire`. Brak automatycznych przypomnień (np. overdue invoices, stale leads).
-
----
-
-## 9. Gotowość projektu pod SaaS
-
-### 9.1 Co jest gotowe (przenosi się do SaaS)
-
-| Element | Poziom gotowości |
-|---------|----------------|
-| CRM (Lead, Client, Contact, Pipeline) | ✅ wysoka |
-| Portal klienta (pełny workflow) | ✅ wysoka |
-| Finanse (Quote, Invoice, Contract, Payment) | ✅ wysoka |
-| Automatyzacje event-driven | ✅ wysoka |
-| Integracje płatności (Stripe, PayU) | ✅ wysoka |
-| Twilio SMS | ✅ wysoka |
-| Panel Filament | ✅ wysoka |
-| Marketing frontend DB-driven | ✅ średnia |
-| Wielojęzyczność (EN/PL/PT) | ✅ średnia |
-| Tracking (GTM, GA4, Pixel, Google Ads) | ✅ wysoka |
-| Raportowanie (4 formaty) | ✅ średnia |
-
-### 9.2 Co wymaga budowy przed SaaS MVP
-
-| Element | Priorytet | Nakład szacunkowy |
-|---------|-----------|-----------------|
-| Multi-tenancy (Workspace model + izolacja danych) | 🔴 HIGH | Duży |
-| TypeScript migracja frontendu | 🔴 HIGH | Średni–Duży |
-| Service Layer (Lead, Invoice, Project, Quote) | 🔴 HIGH | Średni |
-| Bugfix: vat_amount w eksporcie faktur | 🔴 HIGH | Mały |
-| Bugfix: fałszywy sukces kalkulatora | 🔴 HIGH | Mały |
-| Policies (autoryzacja na poziomie modeli) | 🟠 MEDIUM | Średni |
-| OpenAI / AI Landing Page Generator | 🟠 MEDIUM | Duży |
-| Business Profile (per tenant) | 🟠 MEDIUM | Średni |
-| Landing Pages Builder | 🟠 MEDIUM | Duży |
-| Subskrypcje / plany SaaS (Stripe Billing) | 🟠 MEDIUM | Średni |
-| Onboarding flow (rejestracja tenanta) | 🟠 MEDIUM | Średni |
-| Scheduler / przypomnienia automatyczne | 🟡 LOW | Mały |
-| Feature flags / per-tenant config | 🟡 LOW | Mały |
-
----
-
-## 10. Rekomendacje i priorytety
-
-### Faza 1 — Stabilizacja (przed rozwojem)
-
-1. Naprawić bug: `vat_amount` zamiast `tax_amount` w `ReportController`
-2. Naprawić bug: przenieść `setSuccess(true)` z `finally` do `then` w `CostCalculatorV2.jsx`
-3. Naprawić środowisko testowe — zmiana migracji ENUM na kompatybilną z SQLite, dodać guard Settings w `HandleInertiaRequests`
-4. Dodać Form Requests dla Portal endpoints
-
-### Faza 2 — Fundament SaaS
-
-1. Model `Workspace`/`Tenant` + middleware izolacji + global scope na modelach
-2. Service Layer: `LeadService`, `InvoiceService`, `ProjectService`, `QuoteService`
-3. Policies dla kluczowych modeli
-4. Migracja do TypeScript — stopniowo zacznij od typów Inertia props
-
-### Faza 3 — Nowe moduły SaaS
-
-1. Business Profile (dane firmy per tenant, logo, kolory, tone of voice)
-2. AI Landing Page Generator (OpenAI integration)
-3. Landing Pages Management (edycja, publikacja, custom domains)
-4. Stripe Billing / subskrypcje
-5. Onboarding flow dla nowych tenantów
-
----
-
-*Analiza oparta na pełnym przeglądzie kodu źródłowego: routes/, app/, database/, resources/js/, lang/, tests/. Data: 31.03.2026.*
+*Raport wygenerowany automatycznie przez skill `laravel-react-analyst` — Digital Growth OS v1, 2026-03-31*

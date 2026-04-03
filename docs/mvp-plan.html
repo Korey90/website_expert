@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>mvp-plan.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="mvp-plan--digital-growth-os">MVP Plan — Digital Growth OS</h1>
+<h2 id="status-awaiting-approval">Status: AWAITING APPROVAL</h2>
+<p><strong>Data:</strong> 2026-03-31<br>
+<strong>Rola:</strong> CTO<br>
+<strong>Bazuje na:</strong> <code>docs/project-analysis.md</code>, <code>docs/architecture-plan.md</code>, <code>docs/refactor-plan.md</code><br>
+<strong>Cel MVP (zlecony):</strong> profil firmy → generowanie landing page → publikacja → przechwytywanie leadów → CRM/pipeline</p>
+<hr>
+<h2 id="0-kontekst-decyzji">0. Kontekst decyzji</h2>
+<p>Projekt jest <strong>działającym, produkcyjnym CRM agencji</strong> (WebsiteExpert) z 33 modelami, 26 Filament Resources, portalu klienta i integracji Stripe/PayU/Twilio. Transformujemy go w SaaS.</p>
+<p><strong>Kluczowa decyzja architektoniczna dla MVP:</strong><br>
+Nie wdrażamy pełnego multi-tenancy (GlobalScope + IdentifyBusiness Middleware) w MVP. Budujemy model <code>Business</code> jako encję, dodajemy <code>business_id</code> na nowych tabelach, ale <strong>wymuszanie izolacji</strong> (GlobalScope) wchodzi w Sprint 2 razem z wielodostępem. Pozwala to uruchomić MVP szybciej bez ryzyka zepsucia istniejącego CRM.</p>
+<p><strong>Ważna zasada MVP:</strong> istniejące moduły (CRM, faktury, projekty, portal klienta, automatyzacje) <strong>zamrażamy</strong> — nie dotykamy ich w trakcie budowy MVP. Lead pipeline istnieje i działa — podłączamy do niego nowy przepływ leadów z landing pages.</p>
+<hr>
+<h2 id="1-cel-i-metryki-sukcesu-mvp">1. Cel i metryki sukcesu MVP</h2>
+<h3 id="cel-mvp">Cel MVP</h3>
+<blockquote>
+<p>Umożliwić właścicielowi firmy (agencji, freelancerowi) <strong>stworzenie landing page, opublikowanie jej i przechwytywanie leadów</strong> — bez pomocy dewelopera, w czasie poniżej 15 minut.</p>
+</blockquote>
+<h3 id="persony">Persony</h3>
+<table>
+<thead>
+<tr>
+<th>Persona</th>
+<th>Rola</th>
+<th>Co chce osiągnąć</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Admin agencji</strong></td>
+<td>Właściciel konta SaaS</td>
+<td>Stworzyć LP dla swojej agencji, opublikować, zbierać leady</td>
+</tr>
+<tr>
+<td><strong>Sprzedawca agencji</strong></td>
+<td>Przeglądanie leadów</td>
+<td>Widzieć nowe kontakty z LP w pipeline CRM</td>
+</tr>
+<tr>
+<td><strong>Klient agencji</strong> <em>(w MVP poza zakresem)</em></td>
+<td>Portal klienta</td>
+<td>Już działa — zamrażamy, nie psujemy</td>
+</tr>
+</tbody>
+</table>
+<h3 id="metryki-sukcesu-mvp">Metryki sukcesu MVP</h3>
+<table>
+<thead>
+<tr>
+<th>Metryka</th>
+<th>Cel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Czas od rejestracji do pierwszej opublikowanej landing page</td>
+<td>&lt; 15 minut</td>
+</tr>
+<tr>
+<td>Liczba leadów przechwyconych przez LP (test z 1 użytkownikiem)</td>
+<td>≥ 1 lead per sesja</td>
+</tr>
+<tr>
+<td>Landing page osiągalna publicznie pod URL <code>/lp/{slug}</code></td>
+<td>TAK, bez autentykacji</td>
+</tr>
+<tr>
+<td>Lead widoczny w panelu Filament (Lead Inbox) po ≤ 30 sek</td>
+<td>TAK</td>
+</tr>
+<tr>
+<td>Lead widoczny w Pipeline Kanban</td>
+<td>TAK (istniejąca kolumna „New&quot;)</td>
+</tr>
+<tr>
+<td>Żadna istniejąca funkcja CRM nie przestaje działać po wdrożeniu</td>
+<td>TAK (regresja zero)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="2-pe%C5%82na-inwentaryzacja-funkcji-z-perspektywy-mvp">2. Pełna inwentaryzacja funkcji z perspektywy MVP</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Funkcja</th>
+<th>Istnieje?</th>
+<th>Wartość dla użytkownika</th>
+<th>Złożoność budowy</th>
+<th>Kategoria MVP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Rejestracja / Logowanie / Reset hasła</td>
+<td>✅ TAK</td>
+<td>Krytyczna</td>
+<td>Gotowe</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Weryfikacja email</td>
+<td>✅ TAK</td>
+<td>Wysoka</td>
+<td>Gotowe</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Tworzenie konta biznesowego (Business entity)</td>
+<td>❌ NIE</td>
+<td>Krytyczna</td>
+<td>Mała</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Profil firmy — brand, logo, branża, ton komunikacji</td>
+<td>❌ NIE</td>
+<td>Krytyczna</td>
+<td>Mała–Średnia</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Tworzenie Landing Page (szablon, tytuł, sekcje)</td>
+<td>❌ NIE</td>
+<td>Krytyczna</td>
+<td>Średnia</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Edycja sekcji LP (hero, treść, CTA)</td>
+<td>❌ NIE</td>
+<td>Krytyczna</td>
+<td>Średnia</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Formularz lead capture na LP</td>
+<td>❌ NIE</td>
+<td>Krytyczna</td>
+<td>Mała</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td>Publikacja LP pod <code>/lp/{slug}</code></td>
+<td>❌ NIE</td>
+<td>Krytyczna</td>
+<td>Mała</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Publiczny widok landing page (bez autentykacji)</td>
+<td>❌ NIE</td>
+<td>Krytyczna</td>
+<td>Mała</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>10</td>
+<td>Zapis leada z formularza LP</td>
+<td>❌ NIE</td>
+<td>Krytyczna</td>
+<td>Mała (reuse <code>CreateLeadAction</code>)</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>11</td>
+<td>Lead Inbox w panelu Filament</td>
+<td>✅ CZĘŚCIOWE (<code>LeadResource</code> istnieje)</td>
+<td>Krytyczna</td>
+<td>Mała (konfiguracja)</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>12</td>
+<td>Lead trafia do Pipeline Kanban</td>
+<td>✅ TAK (PipelinePage istnieje)</td>
+<td>Krytyczna</td>
+<td>Minimalna</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>13</td>
+<td>Dashboard z licznikiem leadów i listą LP</td>
+<td>✅ CZĘŚCIOWE (Filament Widgets)</td>
+<td>Wysoka</td>
+<td>Mała</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>14</td>
+<td>Email powiadomienie o nowym leadzie</td>
+<td>✅ CZĘŚCIOWE (AutomationEngine)</td>
+<td>Wysoka</td>
+<td>Mała (reguła automatyzacji)</td>
+<td><strong>MUST HAVE</strong></td>
+</tr>
+<tr>
+<td>15</td>
+<td>AI generator treści LP na podstawie profilu firmy (OpenAI)</td>
+<td>❌ NIE</td>
+<td>Wysoka</td>
+<td>Duża</td>
+<td><strong>NICE TO HAVE</strong></td>
+</tr>
+<tr>
+<td>16</td>
+<td>Edytor drag-and-drop LP (WYSIWYG)</td>
+<td>❌ NIE</td>
+<td>Wysoka</td>
+<td>Duża</td>
+<td><strong>NICE TO HAVE</strong></td>
+</tr>
+<tr>
+<td>17</td>
+<td>Podstawowe statystyki LP (wyświetlenia, konwersja %)</td>
+<td>❌ NIE</td>
+<td>Wysoka</td>
+<td>Średnia</td>
+<td><strong>NICE TO HAVE</strong></td>
+</tr>
+<tr>
+<td>18</td>
+<td>Integracja UTM tracking (utm_source, utm_medium, utm_campaign)</td>
+<td>❌ NIE</td>
+<td>Wysoka</td>
+<td>Mała–Średnia</td>
+<td><strong>NICE TO HAVE</strong></td>
+</tr>
+<tr>
+<td>19</td>
+<td>SMS powiadomienie o nowym leadzie</td>
+<td>✅ TAK (SmsService + automation)</td>
+<td>Średnia</td>
+<td>Minimalna</td>
+<td><strong>NICE TO HAVE</strong></td>
+</tr>
+<tr>
+<td>20</td>
+<td>Multi-tenancy enforcement (GlobalScope + IdentifyBusiness)</td>
+<td>❌ NIE</td>
+<td>Krytyczna (v1.1)</td>
+<td>Duża</td>
+<td><strong>NICE TO HAVE</strong></td>
+</tr>
+<tr>
+<td>21</td>
+<td>Rejestracja SaaS (kilka firm na platformie)</td>
+<td>❌ NIE</td>
+<td>Krytyczna (v1.1)</td>
+<td>Średnia</td>
+<td><strong>NICE TO HAVE</strong></td>
+</tr>
+<tr>
+<td>22</td>
+<td>Custom domain dla LP</td>
+<td>❌ NIE</td>
+<td>Wysoka</td>
+<td>Duża</td>
+<td><strong>PÓŹNIEJ</strong></td>
+</tr>
+<tr>
+<td>23</td>
+<td>A/B testing LP</td>
+<td>❌ NIE</td>
+<td>Średnia</td>
+<td>Duża</td>
+<td><strong>PÓŹNIEJ</strong></td>
+</tr>
+<tr>
+<td>24</td>
+<td>Wielojęzyczne LP (EN/PL/PT osobne wersje)</td>
+<td>❌ NIE</td>
+<td>Średnia</td>
+<td>Średnia</td>
+<td><strong>PÓŹNIEJ</strong></td>
+</tr>
+<tr>
+<td>25</td>
+<td>Kampanie email/SMS do leadów</td>
+<td>❌ NIE</td>
+<td>Wysoka</td>
+<td>Duża</td>
+<td><strong>PÓŹNIEJ</strong></td>
+</tr>
+<tr>
+<td>26</td>
+<td>Lead scoring AI</td>
+<td>❌ NIE</td>
+<td>Średnia</td>
+<td>Duża</td>
+<td><strong>PÓŹNIEJ</strong></td>
+</tr>
+<tr>
+<td>27</td>
+<td>Plany subskrypcyjne + Stripe Cashier (SaaS billing)</td>
+<td>❌ NIE</td>
+<td>Wysoka</td>
+<td>Duża</td>
+<td><strong>PÓŹNIEJ</strong></td>
+</tr>
+<tr>
+<td>28</td>
+<td>Panel Super-Admin <code>/superadmin</code></td>
+<td>❌ NIE</td>
+<td>Niska (wewnętrzne)</td>
+<td>Średnia</td>
+<td><strong>PÓŹNIEJ</strong></td>
+</tr>
+<tr>
+<td>29</td>
+<td>Integracje reklamowe (Meta Ads, Google Ads)</td>
+<td>brak</td>
+<td>Średnia</td>
+<td>Duża</td>
+<td><strong>PÓŹNIEJ</strong></td>
+</tr>
+<tr>
+<td>30</td>
+<td>White-label / własna nazwa platformy per tenant</td>
+<td>brak</td>
+<td>Niska</td>
+<td>Duża</td>
+<td><strong>PÓŹNIEJ</strong></td>
+</tr>
+<tr>
+<td>31</td>
+<td>API publiczne (webhooks outbound, REST API)</td>
+<td>brak</td>
+<td>Niska</td>
+<td>Duża</td>
+<td><strong>PÓŹNIEJ</strong></td>
+</tr>
+<tr>
+<td>32</td>
+<td>Kalkulator kosztów V2 (istniejący)</td>
+<td>✅ TAK</td>
+<td>Średnia (marketing)</td>
+<td>Gotowe</td>
+<td><strong>ZAMROZIĆ</strong></td>
+</tr>
+<tr>
+<td>33</td>
+<td>Portal klienta (istniejący)</td>
+<td>✅ TAK</td>
+<td>Wysoka (dla agencji)</td>
+<td>Gotowe</td>
+<td><strong>ZAMROZIĆ</strong></td>
+</tr>
+<tr>
+<td>34</td>
+<td>Finanse (Faktury, Oferty, Umowy)</td>
+<td>✅ TAK</td>
+<td>Wysoka (dla agencji)</td>
+<td>Gotowe</td>
+<td><strong>ZAMROZIĆ</strong></td>
+</tr>
+<tr>
+<td>35</td>
+<td>Automatyzacje (istniejące)</td>
+<td>✅ TAK</td>
+<td>Wysoka</td>
+<td>Gotowe</td>
+<td><strong>ZAMROZIĆ</strong></td>
+</tr>
+<tr>
+<td>36</td>
+<td>Projekty (istniejące)</td>
+<td>✅ TAK</td>
+<td>Wysoka</td>
+<td>Gotowe</td>
+<td><strong>ZAMROZIĆ</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="3-must-have--zakres-mvp">3. MUST HAVE — Zakres MVP</h2>
+<blockquote>
+<p>Zasada: bez tej funkcji produkt nie realizuje celu „landing page → lead → CRM&quot;.</p>
+</blockquote>
+<hr>
+<h3 id="31-rejestracja-i-logowanie">3.1 Rejestracja i logowanie</h3>
+<p><strong>Opis:</strong> Standardowy flow auth — rejestracja, login, reset hasła, weryfikacja email.<br>
+<strong>Wartość:</strong> Wejście do produktu.<br>
+<strong>Stan obecny:</strong> ✅ Istnieje (Laravel Breeze + Spatie).<br>
+<strong>Co trzeba zrobić:</strong> Po udanej rejestracji → automatycznie tworzyć rekord <code>Business</code> powiązany z użytkownikiem (onboarding krok 1). Dodać krok wyboru nazwy firmy w rejestracji.<br>
+<strong>Estymata:</strong> Mała (½ dnia)<br>
+<strong>Bounded Context:</strong> IdentityAccess</p>
+<hr>
+<h3 id="32-business-account-konto-biznesowe">3.2 Business Account (Konto biznesowe)</h3>
+<p><strong>Opis:</strong> Encja <code>Business</code> jako korzeń danych firmy w systemie. Przy pierwszej rejestracji tworzone automatycznie. W MVP: jedno konto = jeden tenant (bez pełnego multi-tenancy enforcement).<br>
+<strong>Wartość:</strong> Fundament dla profilu, LP i leadów — bez tego nic nie działa.<br>
+<strong>Stan obecny:</strong> ❌ Brak tabeli <code>businesses</code>, brak modelu.<br>
+<strong>Co trzeba zrobić:</strong></p>
+<ul>
+<li>Migracja <code>businesses</code> (id, name, slug, locale, logo_path, created_at)</li>
+<li>Migracja <code>business_users</code> (business_id, user_id, role: owner|admin|member)</li>
+<li>Model <code>Business</code> + relacje</li>
+<li>Helper <code>currentBusiness()</code> (z session/auth — bez subdomeny w MVP)</li>
+<li>Middleware <code>EnsureHasBusiness</code> — redirect do onboardingu jeśli brak biznesu</li>
+<li>Filament: wyświetlać <code>business.name</code> w topbarze</li>
+</ul>
+<p><strong>Estymata:</strong> Średnia (2 dni)<br>
+<strong>Bounded Context:</strong> IdentityAccess + BusinessProfile<br>
+<strong>Uwaga:</strong> W MVP NIE wdrażamy GlobalScope / <code>BelongsToTenant</code> na istniejących modelach — to wchodzi w NICE TO HAVE jako „Multi-tenancy enforcement&quot;.</p>
+<hr>
+<h3 id="33-profil-firmy-business-profile">3.3 Profil firmy (Business Profile)</h3>
+<p><strong>Opis:</strong> Formularz danych firmy: nazwa, logo, branża, strona www, tagline, ton komunikacji (professional/friendly/bold/minimalist), grupa docelowa, lista usług, kolory brand. Dane te będą kontekstem dla AI generatora w v1.1.<br>
+<strong>Wartość:</strong> Personalizacja landing pages i AI context — bez profilu LP jest generyczne.<br>
+<strong>Stan obecny:</strong> ❌ Brak tabeli <code>business_profiles</code>, brak formularza.<br>
+<strong>Co trzeba zrobić:</strong></p>
+<ul>
+<li>Migracja <code>business_profiles</code> (business_id FK, tagline, industry, tone_of_voice, target_audience JSON, services JSON, brand_colors JSON, website_url, description)</li>
+<li>Model <code>BusinessProfile</code> + relacja <code>Business hasOne BusinessProfile</code></li>
+<li>Strona Filament lub Inertia React: formularz edycji profilu (wieloetapowy onboarding wizard)</li>
+<li>Upload logo (Laravel Storage)</li>
+<li>Uzupełnianie profilu jako krok 2 onboardingu</li>
+</ul>
+<p><strong>Estymata:</strong> Średnia (2–3 dni)<br>
+<strong>Bounded Context:</strong> BusinessProfile</p>
+<hr>
+<h3 id="34-landing-page-builder--tworzenie-i-edycja">3.4 Landing Page Builder — tworzenie i edycja</h3>
+<p><strong>Opis:</strong> Prosty edytor landing page oparty na predefiniowanych sekcjach (blokach). W MVP: wybierz szablon → wypełnij treść sekcji (tytuł, podtytuł, CTA, obraz) → zapisz.<br>
+<strong>Wartość:</strong> Core feature — klient tworzy LP.<br>
+<strong>Stan obecny:</strong> ❌ Brak. Brak tabel <code>landing_pages</code> i <code>landing_page_sections</code>.<br>
+<strong>Co trzeba zrobić:</strong></p>
+<ul>
+<li>Migracje: <code>landing_pages</code> (business_id, title, slug, status: draft|published|archived, language, meta_title, meta_description, published_at), <code>landing_page_sections</code> (landing_page_id, type: hero|features|cta|form|faq, order, content JSON, settings JSON)</li>
+<li>Model <code>LandingPage</code> + <code>LandingPageSection</code></li>
+<li>Filament Resource: <code>LandingPageResource</code> z edytorem sekcji (Repeater + JSON fields)</li>
+<li><strong>Alternatywnie:</strong> Inertia + React editor (bardziej intuicyjny dla użytkownika końcowego) — <strong>zalecane</strong> dla UX</li>
+<li>Typy sekcji w MVP: <code>hero</code> (tytuł + podtytuł + CTA + obraz), <code>features</code> (lista punków), <code>cta</code> (button + tekst), <code>form</code> (lead capture — patrz 3.5)</li>
+<li>Walidacja: unikalny slug per business</li>
+<li>Podgląd LP przed publikacją</li>
+</ul>
+<p><strong>Estymata:</strong> Duża (5–7 dni — złożona UI)<br>
+<strong>Bounded Context:</strong> LandingPages<br>
+<strong>Uwaga dotycząca skrótu:</strong> W Sprincie 1 można zacząć od Filament Repeater jako edytora (szybciej), a Inertia/React editor zbudować w v1.1.</p>
+<hr>
+<h3 id="35-formularz-lead-capture-na-landing-page">3.5 Formularz Lead Capture na Landing Page</h3>
+<p><strong>Opis:</strong> Każda LP posiada co najmniej jedną sekcję <code>form</code> — formularz zbierający dane kontaktowe (imię, email, telefon, opcjonalna wiadomość). Wysłanie formularza → zapis leada.<br>
+<strong>Wartość:</strong> Core cell value — bez formularza nie ma leadów.<br>
+<strong>Stan obecny:</strong> ❌ Brak na LP. Formularz kontaktowy (<code>ContactController</code>) i formularz kalkulatora (<code>CalculatorLeadController</code>) istnieją — wzorzec do reużycia.<br>
+<strong>Co trzeba zrobić:</strong></p>
+<ul>
+<li>Publiczny endpoint <code>POST /lp/{slug}/submit</code> — bez autentykacji, z CSRF tokenem</li>
+<li>Reużyć/rozszerzyć <code>CreateLeadAction</code> — dodać <code>landing_page_id</code>, <code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code> jako source tracking</li>
+<li>Dodać kolumny do <code>leads</code>: <code>landing_page_id</code> (FK, nullable), <code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code></li>
+<li>Walidacja Form Request: email required, name required, phone optional</li>
+<li>Rate limiting: max 3 submisje/IP/godzinę (bezpieczeństwo przed spamem)</li>
+<li>Po wysyłce: response JSON <code>{success: true, redirect_url?: string}</code> + React state „Dziękujemy&quot;</li>
+<li>Honeypot field (ochrona przed botami)</li>
+</ul>
+<p><strong>Estymata:</strong> Mała–Średnia (2–3 dni)<br>
+<strong>Bounded Context:</strong> Leads<br>
+<strong>Zależności:</strong> Wymaga LP (3.4) i Business Account (3.2)</p>
+<hr>
+<h3 id="36-publikacja-landing-page">3.6 Publikacja Landing Page</h3>
+<p><strong>Opis:</strong> Zmiana statusu LP z <code>draft</code> na <code>published</code> → LP dostępna pod publicznym URL <code>/lp/{slug}</code> bez logowania. Cofnięcie publikacji → status <code>archived</code>.<br>
+<strong>Wartość:</strong> Bez publikacji LP nie generuje leadów.<br>
+<strong>Stan obecny:</strong> ❌ Brak.<br>
+<strong>Co trzeba zrobić:</strong></p>
+<ul>
+<li>Publiczna trasa: <code>GET /lp/{slug}</code> → <code>LandingPageController::show()</code> — bez middleware auth</li>
+<li>Render LP: Inertia + React lub Blade — <strong>zalecana dedykowana strona React</strong> (<code>Pages/LandingPage/Show.jsx</code>) z renderowaniem sekcji per <code>type</code></li>
+<li>Logika publish/unpublish w Filament Resource (Action z potwierdzeniem)</li>
+<li>Walidacja: LP musi mieć min. 1 sekcję i min. 1 sekcję <code>form</code> przed publikacją</li>
+<li>SEO: <code>&lt;title&gt;</code> i <code>&lt;meta description&gt;</code> z LP settings</li>
+<li>Tracking: zapis <code>page_view</code> do tabeli / licznik <code>views</code> (opcjonalne w MVP — można pominąć)</li>
+</ul>
+<p><strong>Estymata:</strong> Mała–Średnia (2 dni)<br>
+<strong>Bounded Context:</strong> LandingPages</p>
+<hr>
+<h3 id="37-lead-inbox--widok-przechwyconych-lead%C3%B3w">3.7 Lead Inbox — widok przechwyconych leadów</h3>
+<p><strong>Opis:</strong> Lista leadów z LP w panelu Filament — kolumny: imię, email, telefon, źródło (LP title), data, status pipeline.<br>
+<strong>Wartość:</strong> Sprzedawca widzi nowe kontakty i może je obsługiwać.<br>
+<strong>Stan obecny:</strong> ✅ <code>LeadResource</code> w Filament istnieje i działa. Zawiera wszystkie potrzebne pola.<br>
+<strong>Co trzeba zrobić:</strong></p>
+<ul>
+<li>Dodać filtr <code>source = landing_page</code> w <code>LeadResource</code></li>
+<li>Dodać kolumnę „Źródło LP&quot; (relacja <code>landing_page.title</code>) w tabeli leadów</li>
+<li>Dodać <code>landing_page_id</code> do Filament table columns oraz filter</li>
+<li>Upewnić się, że lead z LP trafia domyślnie na pierwszą kolumnę Pipeline (PipelineStage <code>order = 1</code>)</li>
+</ul>
+<p><strong>Estymata:</strong> Mała (½ dnia — konfiguracja istniejącego zasobu)<br>
+<strong>Bounded Context:</strong> Leads + CRM</p>
+<hr>
+<h3 id="38-lead-%E2%86%92-pipeline-crm">3.8 Lead → Pipeline CRM</h3>
+<p><strong>Opis:</strong> Lead z formularza LP automatycznie pojawia się w Pipeline Kanban na pierwszej kolumnie. Sprzedawca może go przeciągać, dodawać notatki, zmieniać status.<br>
+<strong>Wartość:</strong> Zamknięcie pętli: LP → lead → sprzedaż.<br>
+<strong>Stan obecny:</strong> ✅ <code>PipelinePage</code> (Kanban) istnieje i działa. <code>PipelineStage</code> model istnieje.<br>
+<strong>Co trzeba zrobić:</strong></p>
+<ul>
+<li>W <code>CreateLeadAction</code> upewnić się, że nowy lead dostaje <code>pipeline_stage_id</code> pierwszego aktywnego stage'u (order = 1)</li>
+<li>Sprawdzić czy <code>LeadActivity::log('lead_created', ...)</code> jest wywoływane przy tworzeniu leada z LP</li>
+<li>Opcjonalnie: dodać badge „📋 Z Landing Page&quot; w PipelinePage dla leadów z <code>landing_page_id IS NOT NULL</code></li>
+</ul>
+<p><strong>Estymata:</strong> Minimalna (1–2 godziny)<br>
+<strong>Bounded Context:</strong> CRM<br>
+<strong>Zależności:</strong> Wymaga 3.5</p>
+<hr>
+<h3 id="39-email-powiadomienie-o-nowym-leadzie">3.9 Email powiadomienie o nowym leadzie</h3>
+<p><strong>Opis:</strong> Automatyczne powiadomienie email do admina/managera gdy nowy lead trafi do systemu z LP.<br>
+<strong>Wartość:</strong> Szybka reakcja sprzedawcy = wyższa konwersja.<br>
+<strong>Stan obecny:</strong> ✅ <code>AutomationEngine</code> istnieje, <code>SendEmailAction</code> istnieje. Wystarczy skonfigurować regułę.<br>
+<strong>Co trzeba zrobić:</strong></p>
+<ul>
+<li>W <code>AdminSeeder</code> lub onboardingu: dodać domyślną regułę automatyzacji <code>trigger: lead_created</code> → <code>action: send_internal_email</code> do assignedTo/admin</li>
+<li>Alternatywnie: Stworzyć <code>LeadCreatedMail</code> i wywołać w <code>CreateLeadAction</code> bezpośrednio (prostsze)</li>
+<li><strong>Rekomendacja:</strong> użyć istniejącego Automation Engine — bo jest już przetestowane</li>
+</ul>
+<p><strong>Estymata:</strong> Mała (1 dzień — konfiguracja + szablon email)<br>
+<strong>Bounded Context:</strong> Automations (istniejące)</p>
+<hr>
+<h3 id="310-dashboard-mvp">3.10 Dashboard MVP</h3>
+<p><strong>Opis:</strong> Strona startowa po logowaniu — podsumowanie KPI: liczba LP (draft/published), liczba leadów (ostatnie 7 dni), przychód z pipeline (opcjonalnie).<br>
+<strong>Wartość:</strong> Orientacja w sytuacji na pierwszy rzut oka.<br>
+<strong>Stan obecny:</strong> ✅ Filament Widgets istnieją (StatsOverviewWidget, RecentLeadsWidget i inne 11 widgetów).<br>
+<strong>Co trzeba zrobić:</strong></p>
+<ul>
+<li>Dodać <code>LandingPageStatsWidget</code> — liczba LP draft/published/archived</li>
+<li>Dodać filtr <code>source = landing_page</code> do <code>RecentLeadsWidget</code></li>
+<li>Upewnić się że dashboard renderuje się poprawnie po dodaniu Business entity</li>
+</ul>
+<p><strong>Estymata:</strong> Mała (1 dzień)<br>
+<strong>Bounded Context:</strong> BusinessProfile</p>
+<hr>
+<h2 id="4-nice-to-have--wersja-v11">4. NICE TO HAVE — wersja v1.1</h2>
+<blockquote>
+<p>Działa bez nich, ale znacząco zwiększą wartość, konwersję lub efektywność.</p>
+</blockquote>
+<hr>
+<h3 id="41-ai-generator-tre%C5%9Bci-lp-openai">4.1 AI Generator treści LP (OpenAI)</h3>
+<p><strong>Opis:</strong> Na podstawie Business Profile (tone_of_voice, industry, services, target_audience) generuje propozycję treści dla każdej sekcji LP: nagłówek, podtytuł, CTA text, lista punktów.<br>
+<strong>Wartość:</strong> Redukcja czasu tworzenia LP z 15 min do 2 min.<br>
+<strong>Zależy od:</strong> Business Profile (3.3) musi być wypełniony. LP Builder (3.4) musi działać.<br>
+<strong>Estymata:</strong> Duża (5–8 dni — OpenAI integration + <code>GenerateLandingPageJob</code> + UI)</p>
+<hr>
+<h3 id="42-statystyki-lp-wy%C5%9Bwietlenia--konwersja">4.2 Statystyki LP (wyświetlenia + konwersja)</h3>
+<p><strong>Opis:</strong> Licznik unikalnych wyświetleń LP i licznik submisji formularza → obliczenie conversion rate (submisje / wyświetlenia).<br>
+<strong>Wartość:</strong> Klient wie która LP działa najlepiej.<br>
+<strong>Zależy od:</strong> LP musi być opublikowana i aktywna.<br>
+<strong>Estymata:</strong> Średnia (3 dni — kolumny <code>views</code> + <code>conversions</code> na <code>landing_pages</code>, JS beacon lub server-side tracking)</p>
+<hr>
+<h3 id="43-utm-tracking-lead%C3%B3w">4.3 UTM Tracking leadów</h3>
+<p><strong>Opis:</strong> Zapis <code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code> z URL przy submisji formularza LP.<br>
+<strong>Wartość:</strong> Klient wie z jakiej kampanii reklamowej przyszedł lead.<br>
+<strong>Zależy od:</strong> Lead Capture (3.5) musi działać.<br>
+<strong>Estymata:</strong> Mała (1 dzień — kolumny już zaplanowane w architekturze, odczyt z URL query string w React)</p>
+<hr>
+<h3 id="44-multi-tenancy-enforcement-globalscope--middleware">4.4 Multi-tenancy enforcement (GlobalScope + Middleware)</h3>
+<p><strong>Opis:</strong> Pełna izolacja danych między firmami: <code>BelongsToTenant</code> trait na modelach, <code>BusinessScope</code> GlobalScope, <code>IdentifyBusiness</code> Middleware (subdomena lub session).<br>
+<strong>Wartość:</strong> Krytyczne przy &gt; 1 firmie na platformie.<br>
+<strong>Zależy od:</strong> Business Account (3.2) musi działać, refaktor service layer (z refactor-plan.md Faza 3) powinien być gotowy.<br>
+<strong>Estymata:</strong> Duża (5–7 dni, wysoki risk)<br>
+<strong>Uwaga:</strong> Bez tego funkcji MVP <strong>NIE można bezpiecznie udostępnić wielu firmom</strong>. Jeden tenant = brak problemu. W chwili onboardingu drugiej firmy — blokujące.</p>
+<hr>
+<h3 id="45-saas-registration-flow-wiele-firm-na-platformie">4.5 SaaS Registration flow (wiele firm na platformie)</h3>
+<p><strong>Opis:</strong> Publiczna strona rejestracji SaaS — dowolna firma może się zarejestrować i zacząć używać systemu (bez zaproszenia administratora).<br>
+<strong>Wartość:</strong> Skalowalność produktu.<br>
+<strong>Zależy od:</strong> Multi-tenancy (4.4) MUSI być gotowe wcześniej.<br>
+<strong>Estymata:</strong> Średnia (3 dni)</p>
+<hr>
+<h3 id="46-inertiareact-editor-lp-zamiast-filament-repeater">4.6 Inertia/React editor LP (zamiast Filament Repeater)</h3>
+<p><strong>Opis:</strong> Dedykowany, intuicyjny edytor LP w React z podglądem na żywo, zamiast formularza Filament.<br>
+<strong>Wartość:</strong> Lepsze UX dla klientów SaaS — Filament Repeater jest funkcjonalny ale nie przyjazny.<br>
+<strong>Zależy od:</strong> LP Builder (3.4) musi działać (Filament wersja jako fundament).<br>
+<strong>Estymata:</strong> Duża (7–10 dni)</p>
+<hr>
+<h3 id="47-sms-powiadomienie-o-nowym-leadzie">4.7 SMS powiadomienie o nowym leadzie</h3>
+<p><strong>Opis:</strong> Powiadomienie SMS do admina/managera gdy nowy lead trafi z LP (przez Twilio).<br>
+<strong>Wartość:</strong> Szybsza reakcja niż email.<br>
+<strong>Zależy od:</strong> <code>SmsService</code> już działa — wystarczy reguła Automation lub bezpośrednie wywołanie.<br>
+<strong>Estymata:</strong> Mała (½ dnia)</p>
+<hr>
+<h3 id="48-wyb%C3%B3r-szablonu-lp-template-picker">4.8 Wybór szablonu LP (template picker)</h3>
+<p><strong>Opis:</strong> Galeria gotowych szablonów LP (4–6 wariantów: lead magnet, usługi, portfolio, sprzedaż, webinar, coming soon) — klient wybiera i dostosowuje.<br>
+<strong>Wartość:</strong> Przyspiesza tworzenie LP, redukuje „blank page problem&quot;.<br>
+<strong>Zależy od:</strong> LP Builder (3.4).<br>
+<strong>Estymata:</strong> Średnia (3–4 dni per szablon)</p>
+<hr>
+<h2 id="5-p%C3%B3%C5%BAniej--v2">5. PÓŹNIEJ — v2+</h2>
+<blockquote>
+<p>Za duże, za niszowe, lub wymagają walidacji rynkowej przed budową.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Funkcja</th>
+<th>Powód przesunięcia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A/B testing LP</strong></td>
+<td>Wymaga traffic-splitting middleware, statystyk, selectora wariantów — duża złożoność przy niepewnej potrzebie w MVP</td>
+</tr>
+<tr>
+<td><strong>Custom domains dla LP</strong> (<code>lp.moja-agencja.pl</code>)</td>
+<td>Wymaga DNS wildcard, SSL automation (Let's Encrypt), subdomain routing — infrastruktura DevOps</td>
+</tr>
+<tr>
+<td><strong>Kampanie email/SMS</strong></td>
+<td>Nowy bounded context, wymaga multi-tenancy, listy odbiorców, unsubscribe flow — GDPR complexity</td>
+</tr>
+<tr>
+<td><strong>Lead scoring AI</strong></td>
+<td>Wymaga danych historycznych do treningu/promptu; bez historii wynik będzie bezwartościowy</td>
+</tr>
+<tr>
+<td><strong>Plany subskrypcyjne + Stripe Cashier</strong></td>
+<td>Wymaga: multi-tenancy, BusinessModel Billable, plany + limity, upgrade/downgrade flow — blokujące inne nie-MVP</td>
+</tr>
+<tr>
+<td><strong>Panel Super-Admin <code>/superadmin</code></strong></td>
+<td>Wewnętrzne narzędzie; nie dotyczy klienta SaaS</td>
+</tr>
+<tr>
+<td><strong>Wielojęzyczne LP</strong> (EN/PL/PT per strona)</td>
+<td>Wymaga per-section translations, switcher na LP, i18n w edytorze</td>
+</tr>
+<tr>
+<td><strong>Integracje reklamowe</strong> (Meta Ads API, Google Ads API)</td>
+<td>Wymaga OAuth per konto reklamowe, API quota management — wysoka złożoność</td>
+</tr>
+<tr>
+<td><strong>White-label</strong></td>
+<td>Wymaga własnych domen per tenant + konfiguracji brandingu per tenant</td>
+</tr>
+<tr>
+<td><strong>API publiczne</strong></td>
+<td>Wymaga auth tokenów per tenant, dokumentacji, wersjonowania</td>
+</tr>
+<tr>
+<td><strong>Reverb WebSocket</strong> (real-time notyfikacje)</td>
+<td>Infrastruktura już skonfigurowana (<code>reverb.php</code>); aktualny polling jest wystarczający dla MVP</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="6-do-zamro%C5%BCenia-lub-usuni%C4%99cia">6. DO ZAMROŻENIA lub USUNIĘCIA</h2>
+<hr>
+<p><strong>Element:</strong> <code>app/Http/Controllers/PortalController.php</code> (447 linii)<br>
+<strong>Dlaczego:</strong> Duplikat <code>Portal/*</code> kontrolerów; martwy lub duplikowany kod<br>
+<strong>Rekomendacja:</strong> USUŃ przed wdrożeniem MVP (Refactor Faza 0)</p>
+<hr>
+<p><strong>Element:</strong> <code>resources/js/Components/Marketing/CostCalculator.jsx</code> (V1, 467 linii)<br>
+<strong>Dlaczego:</strong> Legacy kalkulator; aktywna jest V2<br>
+<strong>Rekomendacja:</strong> USUŃ (Refactor Faza 0)</p>
+<hr>
+<p><strong>Element:</strong> Kalkulator kosztów V2 — nowe funkcje<br>
+<strong>Dlaczego:</strong> Działa produkcyjnie; brak wartości w rozwijaniu w kontekście transformacji SaaS<br>
+<strong>Rekomendacja:</strong> ZAMROŹ — nie rozwijaj w trakcie MVP; zachowaj istniejące działanie</p>
+<hr>
+<p><strong>Element:</strong> Portal klienta (<code>Portal/</code> — 12 stron Inertia + 9 kontrolerów)<br>
+<strong>Dlaczego:</strong> Działa dla istniejących klientów agencji; nie jest celem SaaS MVP<br>
+<strong>Rekomendacja:</strong> ZAMROŹ — nie dotykaj; upewnij się że MUST HAVE nie psuje żadnej trasy <code>/portal/*</code></p>
+<hr>
+<p><strong>Element:</strong> Moduł finansowy (Faktury, Oferty, Umowy, Płatności Stripe/PayU)<br>
+<strong>Dlaczego:</strong> Działa produkcyjnie; nie jest w zakresie MVP SaaS<br>
+<strong>Rekomendacja:</strong> ZAMROŹ — service layer (refactor-plan.md Faza 1) można odrożyć po MVP</p>
+<hr>
+<p><strong>Element:</strong> Szablony CMS (PageResource, SiteSectionResource) — nowe treści<br>
+<strong>Dlaczego:</strong> CMS strony marketingowej (<code>/p/{slug}</code>) działa; nie jest priorytetem<br>
+<strong>Rekomendacja:</strong> ZAMROŹ</p>
+<hr>
+<p><strong>Element:</strong> Moduł Kampanii (brak implementacji)<br>
+<strong>Dlaczego:</strong> Nowy bounded context; nie blokuje MVP; wymaga multi-tenancy najpierw<br>
+<strong>Rekomendacja:</strong> START dopiero po v1.1 (multi-tenancy)</p>
+<hr>
+<h2 id="7-mapa-drogowa-mvp-roadmap">7. Mapa drogowa MVP (Roadmap)</h2>
+<pre class="hljs"><code><div>Tydzień 0 (Przygotowanie — 1-2 dni)
+  ============================================================
+  [x] Refactor Faza 0: usuń PortalController.php
+  [x] Refactor Faza 0: usuń CostCalculator.jsx V1
+  [x] Weryfikacja: uruchomić pełny zestaw testów Feature (15 testów) — zero regresji
+  [ ] Weryfikacja: upewnić się że dev environment działa (artisan dev)
+
+
+Sprint 1 (Tydzień 1–2): Fundamenty SaaS
+  ============================================================
+  [ ] Migracja + Model Business + BusinessUser (pivot)
+  [ ] Helper currentBusiness() + Middleware EnsureHasBusiness
+  [ ] Modyfikacja rejestracji: po signup → tworzenie Business entity
+  [ ] Migracja + Model BusinessProfile
+  [ ] Filament: formularz Business Profile (onboarding wizard krok 1 i 2)
+  [ ] Upload logo (Laravel Storage + public URL)
+  [ ] Migracja: dodać business_id do landing_pages (nowa tabela)
+  [ ] Migracja: dodać landing_page_id + utm_* do leads (istniejąca tabela)
+  [ ] Model LandingPage + LandingPageSection
+  ---- Deliverable: użytkownik może się zarejestrować i uzupełnić profil firmy
+  ---- Test regresji: portal klienta, faktury, CRM nadal działają
+
+
+Sprint 2 (Tydzień 3–4): Landing Page Builder
+  ============================================================
+  [ ] Filament: LandingPageResource (CRUD LP)
+  [ ] Filament: sekcje LP jako Repeater (typy: hero, features, cta, form)
+  [ ] LP Builder — formularze sekcji per type (JSON content editor)
+  [ ] Walidacja: unikalny slug, wymagane pola przed publikacją
+  [ ] Podgląd LP (link otwierający /lp/{slug} w nowej karcie)
+  [ ] Actions Filament: Publish / Unpublish z potwierdzeniem
+  ---- Deliverable: użytkownik tworzy i edytuje LP w panelu
+
+
+Sprint 3 (Tydzień 5–6): Publikacja + Lead Capture
+  ============================================================
+  [ ] Publiczna trasa GET /lp/{slug} (bez middleware auth)
+  [ ] Strona React LP: Pages/LandingPage/Show.jsx — renderowanie sekcji
+  [ ] Render sekcji Hero, Features, CTA, FAQtext, Form
+  [ ] Formularz lead capture: POST /lp/{slug}/submit
+  [ ] Endpoint: walidacja, rate limiting (3/IP/h), honeypot
+  [ ] Reużycie CreateLeadAction: zapisz lead z landing_page_id + utm_*
+  [ ] Lead → pierwsza kolumna Pipeline (pipeline_stage order=1)
+  [ ] Strona podziękowania (success state komponentu formularza)
+  ---- Deliverable: LP jest publiczna, formularz działa, lead trafia do CRM
+
+
+Sprint 4 (Tydzień 7–8): Zamknięcie MVP
+  ============================================================
+  [ ] Email powiadomienie o nowym leadzie (automation rule lub LeadCreatedMail)
+  [ ] LeadResource: kolumna „Źródło LP&quot; + filtr po landing_page_id
+  [ ] Dashboard Widget: LandingPageStatsWidget (LP draft/published/leads count)
+  [ ] Pipeline: badge „Z Landing Page&quot; dla leads z landing_page_id IS NOT NULL
+  [ ] Testy E2E: zarejestruj → utwórz profil → utwórz LP → opublikuj → wyślij formularz → sprawdź lead w CRM
+  [ ] Testy regresji: uruchom pełny zestaw 15 Feature Tests + nowe testy LP (min. 5)
+  [ ] Bug fixing
+  [ ] Deploy na staging
+  [ ] Test z prawdziwym użytkownikiem (klient beta)
+  ---- Deliverable: MVP gotowe do beta testów
+</div></code></pre>
+<hr>
+<h2 id="8-decyzje-techniczne-mvp">8. Decyzje techniczne MVP</h2>
+<h3 id="81-edytor-lp-filament-repeater-vs-inertia-react">8.1 Edytor LP: Filament Repeater vs Inertia React</h3>
+<table>
+<thead>
+<tr>
+<th>Kryterium</th>
+<th>Filament Repeater</th>
+<th>Inertia/React Editor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Czas budowy</td>
+<td><strong>2–3 dni</strong></td>
+<td>7–10 dni</td>
+</tr>
+<tr>
+<td>UX dla użytkownika końcowego</td>
+<td>Akceptowalny</td>
+<td>Doskonały</td>
+</tr>
+<tr>
+<td>Możliwość podglądu na żywo</td>
+<td>Ograniczona</td>
+<td>TAK</td>
+</tr>
+<tr>
+<td>Drag &amp; drop</td>
+<td>NIE</td>
+<td>TAK (v1.1)</td>
+</tr>
+<tr>
+<td>Zgodność z istniejącym stackiem</td>
+<td>✅ Natywny</td>
+<td>✅ (już używany)</td>
+</tr>
+<tr>
+<td><strong>Rekomendacja MVP</strong></td>
+<td>✅ <strong>FILAMENT</strong></td>
+<td>W v1.1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decyzja:</strong> Sprint 2 buduje edytor w Filament Repeater. Inertia/React editor to v1.1 (Nice to Have 4.6).</p>
+<h3 id="82-render-landing-page-inertia-vs-blade">8.2 Render Landing Page: Inertia vs Blade</h3>
+<table>
+<thead>
+<tr>
+<th>Kryterium</th>
+<th>Inertia + React</th>
+<th>Blade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Spójność ze stackiem</td>
+<td>✅ Inertia to główny stack</td>
+<td>Mieszanie frameworków</td>
+</tr>
+<tr>
+<td>Czas budowy pierwszej strony</td>
+<td>2 dni</td>
+<td>1 dzień</td>
+</tr>
+<tr>
+<td>SEO (SSR)</td>
+<td>⚠️ Wymaga Inertia SSR (opcjonalnie)</td>
+<td>✅ Natywne</td>
+</tr>
+<tr>
+<td>Reużycie komponentów</td>
+<td>✅ Marketing components gotowe</td>
+<td>Nie</td>
+</tr>
+<tr>
+<td><strong>Rekomendacja MVP</strong></td>
+<td>✅ <strong>INERTIA + REACT</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decyzja:</strong> <code>/lp/{slug}</code> renderuje przez Inertia → <code>Pages/LandingPage/Show.jsx</code>. SEO met-tagi przez Laravel View helper <code>&lt;head&gt;</code> (server-side Inertia partial).</p>
+<h3 id="83-multi-tenancy-w-mvp-not-enforced">8.3 Multi-tenancy w MVP: NOT enforced</h3>
+<p><strong>Decyzja:</strong> <code>businesses</code> tabela jest od razu tworzona, <code>business_id</code> jest na nowych tabelach (<code>landing_pages</code>, <code>leads</code> rozszerzony), ale <code>BelongsToTenant</code> GlobalScope NIE jest aktywowany. System działa jako single-tenant dla pierwszego użytkownika. Ta decyzja MUSI być odwrócona przed onboardingiem drugiego tenanta (NICE TO HAVE 4.4).</p>
+<p><strong>Ryzyko:</strong> Jeżeli dwa konta zarejestrują się przed wdrożeniem GlobalScope — dane będą widoczne cross-tenant. <strong>Mitygacja:</strong> Kontrolowany beta (zaproszenie do pierwszego konta), lub feature flag blokujący rejestrację.</p>
+<hr>
+<h2 id="9-ryzyka-mvp">9. Ryzyka MVP</h2>
+<table>
+<thead>
+<tr>
+<th>Ryzyko</th>
+<th>Prawdopodobieństwo</th>
+<th>Wpływ</th>
+<th>Mitygacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LP Builder (Filament Repeater) okaże się zbyt trudny do wypełnienia przez użytkownika</td>
+<td>MEDIUM</td>
+<td>WYSOKI</td>
+<td>Dodać preset content dla każdej sekcji per industry; Inertia/React editor w v1.1</td>
+</tr>
+<tr>
+<td>Multi-tenancy pominięte w MVP — wyciek danych jeśli 2+ firm</td>
+<td>HIGH (przy otwartej rejestracji)</td>
+<td>KRYTYCZNY</td>
+<td>Zablokować rejestrację (<code>REGISTRATION_CLOSED=true</code> w .env) — beta tylko przez zaproszenie</td>
+</tr>
+<tr>
+<td>Istniejące Feature Tests padną po dodaniu <code>business_id</code> do <code>leads</code></td>
+<td>MEDIUM</td>
+<td>ŚREDNI</td>
+<td>Uruchamiać testy po każdej migracji; fixtures w testach muszą mieć <code>business_id</code></td>
+</tr>
+<tr>
+<td>SEO LP nie będzie działać (Inertia SPA bez SSR)</td>
+<td>LOW-MEDIUM</td>
+<td>ŚREDNI</td>
+<td>Dla MVP akceptowalne; dodać <code>&lt;og:*&gt;</code> meta przez Inertia partial; SSR opcjonalnie w v1.1</td>
+</tr>
+<tr>
+<td>Istniejący <code>CreateLeadAction</code> wymaga zmian w schemacie — może zepsuć <code>CalculatorLeadController</code></td>
+<td>MEDIUM</td>
+<td>ŚREDNI</td>
+<td><code>landing_page_id</code> i <code>utm_*</code> jako nullable — nie zepsują istniejących wywołań</td>
+</tr>
+<tr>
+<td>Rate limiting na <code>/lp/{slug}/submit</code> może blokować testy</td>
+<td>LOW</td>
+<td>NISKI</td>
+<td>Wyłączyć rate limiting w <code>APP_ENV=testing</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="10-zale%C5%BCno%C5%9Bci-mi%C4%99dzy-sprintami-critical-path">10. Zależności między sprintami (Critical Path)</h2>
+<pre class="hljs"><code><div>[S1] Business Account + Business Profile
+         ↓
+[S2] Landing Page Builder (wymaga Business entity)
+         ↓
+[S3] LP Publication + Lead Capture (wymaga LP + sekcja form)
+         ↓              ↓
+    Pipeline CRM    Lead Inbox
+    (już istnieje)  (konfiguracja LeadResource)
+         ↓
+[S4] MVP complete (email notify + dashboard widget + testy)
+</div></code></pre>
+<p><strong>Nie ma możliwości równoległej pracy</strong> na Sprint 2 i 3 — LP Builder musi istnieć zanim Lead Capture ma sens. Sprint 1 (Business Account) jest prereqiem dla wszystkiego.</p>
+<hr>
+<h2 id="11-szacowanie-ca%C5%82o%C5%9Bciowe">11. Szacowanie całościowe</h2>
+<table>
+<thead>
+<tr>
+<th>Sprint</th>
+<th>Zakres</th>
+<th>Estymata</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tydzień 0</td>
+<td>Refactor Faza 0 + testy regresji</td>
+<td>1–2 dni</td>
+</tr>
+<tr>
+<td>Sprint 1</td>
+<td>Business Account + Business Profile</td>
+<td>5–7 dni</td>
+</tr>
+<tr>
+<td>Sprint 2</td>
+<td>Landing Page Builder (Filament)</td>
+<td>5–7 dni</td>
+</tr>
+<tr>
+<td>Sprint 3</td>
+<td>LP Publication + Lead Capture + CRM connect</td>
+<td>4–6 dni</td>
+</tr>
+<tr>
+<td>Sprint 4</td>
+<td>Dashboard + notyfikacje + testy + deploy</td>
+<td>3–5 dni</td>
+</tr>
+<tr>
+<td><strong>SUMA</strong></td>
+<td><strong>MVP kompletny</strong></td>
+<td><strong>~4–5 tygodni (1 developer)</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>Plan zatwierdza CTO/Product Owner. Po zatwierdzeniu → uruchamiamy <code>saas-feature-design</code> dla Sprint 1 (Business Account + Business Profile) jako następny krok.</em></p>
+
+</body>
+</html>

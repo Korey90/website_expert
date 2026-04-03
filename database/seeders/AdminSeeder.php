@@ -5,6 +5,9 @@ namespace Database\Seeders;
 use App\Models\PipelineStage;
 use App\Models\ProjectTemplate;
 use App\Models\User;
+use App\Models\Business;
+use App\Models\BusinessUser;
+use App\Models\BusinessProfile;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -63,6 +66,21 @@ class AdminSeeder extends Seeder
             'manage_calculator',
             // System Config — ProjectTemplateResource
             'manage_project_templates',
+            // Business Profile
+            'manage_business_profile',
+            'view_business_settings',
+            'manage_business_settings',
+            // Landing Pages
+            'view_landing_pages',
+            'manage_landing_pages',
+            'publish_landing_pages',
+            'generate_landing_pages_ai',
+            // Lead Capture
+            'manage_leads',
+            'delete_leads',
+            'export_leads',
+            'manage_api_tokens',
+            'view_lead_sources',
         ];
 
         foreach ($permissions as $perm) {
@@ -73,7 +91,7 @@ class AdminSeeder extends Seeder
         $admin->syncPermissions($permissions);
 
         // Manager: full CRM/Finance/Projects access; no role/user admin
-        $managerExclude = ['manage_roles', 'delete_users', 'manage_pipeline', 'manage_project_templates'];
+        $managerExclude = ['manage_roles', 'delete_users', 'manage_pipeline', 'manage_project_templates', 'export_leads'];
         $manager->syncPermissions(array_values(array_filter($permissions, fn ($p) => ! in_array($p, $managerExclude))));
 
         // Developer: read-only on CRM/Finance + edit projects/contracts
@@ -84,6 +102,9 @@ class AdminSeeder extends Seeder
             'view_invoices',
             'view_contracts',
             'view_projects', 'edit_projects',
+            'view_business_settings',
+            'view_landing_pages',
+            'view_lead_sources',
         ]);
 
         // ---------------------------------------------------
@@ -99,6 +120,27 @@ class AdminSeeder extends Seeder
             ]
         );
         $adminUser->assignRole('admin');
+
+        // ---------------------------------------------------
+        // Default Business (tenant root for WebsiteExpert agency)
+        // ---------------------------------------------------
+        $business = Business::firstOrCreate(
+            ['slug' => 'website-expert'],
+            [
+                'name'      => 'WebsiteExpert Ltd',
+                'locale'    => 'en',
+                'timezone'  => 'Europe/London',
+                'plan'      => 'pro',
+                'is_active' => true,
+            ]
+        );
+
+        BusinessUser::firstOrCreate(
+            ['business_id' => $business->id, 'user_id' => $adminUser->id],
+            ['role' => 'owner', 'is_active' => true, 'joined_at' => now()]
+        );
+
+        BusinessProfile::firstOrCreate(['business_id' => $business->id]);
 
         // ---------------------------------------------------
         // Default pipeline stages

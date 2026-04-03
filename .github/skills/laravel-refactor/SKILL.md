@@ -1,5 +1,5 @@
 ---
-description: "Refaktoryzacja projektu Laravel 11 + React. Wykrywa fat controllers, brak service layer, tight coupling i duplikacje. Proponuje service layer, repository pattern i nowa strukture folderow z priorytetami HIGH/MEDIUM/LOW. Zapisuje plan do docs/refactor-plan.md."
+description: "Refaktoryzacja projektu Laravel 13 + React. Wykrywa fat controllers, brak service layer, tight coupling i duplikacje. Proponuje service layer, repository pattern i nowa strukture folderow z priorytetami HIGH/MEDIUM/LOW. Zapisuje plan do docs/refactor-plan.md."
 ---
 
 # Skill: Laravel + React Refactor Planner

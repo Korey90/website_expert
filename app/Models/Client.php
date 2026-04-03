@@ -23,7 +23,7 @@ class Client extends Model
         });
     }
 
-    protected $fillable = [ 'company_name', 'trading_name', 'companies_house_number', 'vat_number',
+    protected $fillable = [ 'business_id', 'company_name', 'trading_name', 'companies_house_number', 'vat_number',
         'website', 'status', 'source', 'industry',
         'address_line1', 'address_line2', 'city', 'county', 'postcode', 'country',
         'primary_contact_name', 'primary_contact_email', 'primary_contact_phone',

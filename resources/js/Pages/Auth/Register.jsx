@@ -11,6 +11,7 @@ export default function Register() {
         email: '',
         password: '',
         password_confirmation: '',
+        company_name: '',
     });
 
     const submit = (e) => {
@@ -100,6 +101,22 @@ export default function Register() {
                         message={errors.password_confirmation}
                         className="mt-2"
                     />
+                </div>
+
+                <div className="mt-4">
+                    <InputLabel htmlFor="company_name" value="Company name (optional)" />
+
+                    <TextInput
+                        id="company_name"
+                        name="company_name"
+                        value={data.company_name}
+                        className="mt-1 block w-full"
+                        autoComplete="organization"
+                        onChange={(e) => setData('company_name', e.target.value)}
+                        placeholder="Your agency or business name"
+                    />
+
+                    <InputError message={errors.company_name} className="mt-2" />
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">

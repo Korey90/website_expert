@@ -2,6 +2,8 @@
 
 namespace App\Listeners;
 
+use App\Events\LeadAssigned;
+use App\Events\LeadCaptured;
 use App\Jobs\ProcessAutomationJob;
 use App\Models\Contract;
 use App\Models\Invoice;
@@ -12,58 +14,120 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Observes Eloquent model events (created / updated) and dispatches
+ * Observes Eloquent model events and custom app events, then dispatches
  * ProcessAutomationJob for each matching trigger event.
  *
- * Register in AppServiceProvider::boot() or EventServiceProvider::subscribe().
+ * Registered as event subscriber in AppServiceProvider::boot().
  */
 class AutomationEventListener
 {
     public function subscribe(Dispatcher $events): void
     {
-        // Lead created
+        // ── Lead Eloquent events ────────────────────────────────────────────
         $events->listen('eloquent.created: ' . Lead::class, [self::class, 'onLeadCreated']);
-
-        // Lead status / stage changed
         $events->listen('eloquent.updated: ' . Lead::class, [self::class, 'onLeadUpdated']);
 
-        // Project created
-        $events->listen('eloquent.created: ' . Project::class, [self::class, 'onProjectCreated']);
+        // ── Lead app events (dispatched by LeadService) ────────────────────
+        // NOTE: LP leads skip onLeadCreated → automation dispatched here with richer context
+        $events->listen(LeadCaptured::class, [self::class, 'onLeadCaptured']);
+        $events->listen(LeadAssigned::class, [self::class, 'onLeadAssigned']);
 
-        // Project status changed
+        // ── Project events ─────────────────────────────────────────────────
+        $events->listen('eloquent.created: ' . Project::class, [self::class, 'onProjectCreated']);
         $events->listen('eloquent.updated: ' . Project::class, [self::class, 'onProjectUpdated']);
 
-        // Invoice status changed
+        // ── Invoice events ─────────────────────────────────────────────────
         $events->listen('eloquent.updated: ' . Invoice::class, [self::class, 'onInvoiceUpdated']);
 
-        // Quote status changed
+        // ── Quote events ───────────────────────────────────────────────────
         $events->listen('eloquent.updated: ' . Quote::class, [self::class, 'onQuoteUpdated']);
 
-        // Contract created / status changed
+        // ── Contract events ────────────────────────────────────────────────
         $events->listen('eloquent.created: ' . Contract::class, [self::class, 'onContractCreated']);
         $events->listen('eloquent.updated: ' . Contract::class, [self::class, 'onContractUpdated']);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Lead handlers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Eloquent lead.created — fires for ALL leads.
+     * LP leads are handled by onLeadCaptured() which carries LP context.
+     * Skip them here to prevent double automation dispatch.
+     */
     public function onLeadCreated(Lead $lead): void
     {
+        // LP leads: richer event (LeadCaptured) handles automation dispatch
+        if ($lead->source === 'landing_page') {
+            return;
+        }
+
         $this->dispatch('lead.created', [
-            'lead_id'   => $lead->id,
-            'client_id' => $lead->client_id,
-            'source'    => $lead->source,
+            'lead_id'     => $lead->id,
+            'client_id'   => $lead->client_id,
+            'business_id' => $lead->business_id,
+            'source'      => $lead->source,
         ]);
     }
 
+    /**
+     * App event fired by LeadService::createFromLandingPage().
+     * Carries full LP + UTM context — dispatches lead.created with extra attribution.
+     */
+    public function onLeadCaptured(LeadCaptured $event): void
+    {
+        $lead = $event->lead;
+        $lp   = $event->landingPage;
+
+        $this->dispatch('lead.created', [
+            'lead_id'         => $lead->id,
+            'client_id'       => $lead->client_id,
+            'business_id'     => $lead->business_id,
+            'source'          => 'landing_page',
+            'landing_page_id' => $lp->id,
+            'assigned_to'     => $lead->assigned_to,
+            'utm_source'      => $lead->utm_source,
+            'utm_medium'      => $lead->utm_medium,
+            'utm_campaign'    => $lead->utm_campaign,
+        ]);
+    }
+
+    /**
+     * App event fired by LeadService::assign().
+     */
+    public function onLeadAssigned(LeadAssigned $event): void
+    {
+        $this->dispatch('lead.assigned', [
+            'lead_id'     => $event->lead->id,
+            'client_id'   => $event->lead->client_id,
+            'business_id' => $event->lead->business_id,
+            'assignee_id' => $event->assignee->id,
+        ]);
+    }
+
+    /**
+     * Eloquent lead.updated — handles stage change, won, lost.
+     */
     public function onLeadUpdated(Lead $lead): void
     {
         if ($lead->wasChanged('pipeline_stage_id')) {
             $this->dispatch('lead.stage_changed', [
                 'lead_id'      => $lead->id,
                 'client_id'    => $lead->client_id,
+                'business_id'  => $lead->business_id,
                 'stage_id'     => $lead->pipeline_stage_id,
                 'old_stage_id' => $lead->getOriginal('pipeline_stage_id'),
             ]);
         }
+
+        // won_at / lost_at dispatched directly by LeadService::markWon/markLost
+        // via ProcessAutomationJob to avoid re-dispatch from updateQuietly stage moves
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Project handlers
+    // ─────────────────────────────────────────────────────────────────────────
 
     public function onProjectCreated(Project $project): void
     {
@@ -86,6 +150,10 @@ class AutomationEventListener
             ]);
         }
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Invoice handlers
+    // ─────────────────────────────────────────────────────────────────────────
 
     public function onInvoiceUpdated(Invoice $invoice): void
     {
@@ -110,6 +178,10 @@ class AutomationEventListener
         }
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Quote handlers
+    // ─────────────────────────────────────────────────────────────────────────
+
     public function onQuoteUpdated(Quote $quote): void
     {
         if ($quote->wasChanged('status')) {
@@ -132,6 +204,10 @@ class AutomationEventListener
             }
         }
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Contract handlers
+    // ─────────────────────────────────────────────────────────────────────────
 
     public function onContractCreated(Contract $contract): void
     {
@@ -172,8 +248,11 @@ class AutomationEventListener
         }
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+
     private function dispatch(string $triggerEvent, array $context): void
     {
         ProcessAutomationJob::dispatch($triggerEvent, $context);
     }
 }
+

@@ -123,6 +123,15 @@ return [
             'handler' => NullHandler::class,
         ],
 
+        // Dedicated channel for lead capture events: duplicates, rate limits, creation
+        'leads' => [
+            'driver'              => 'daily',
+            'path'                => storage_path('logs/leads.log'),
+            'level'               => 'info',
+            'days'                => 30,
+            'replace_placeholders'=> true,
+        ],
+
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],

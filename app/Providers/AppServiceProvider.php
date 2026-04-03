@@ -4,10 +4,19 @@ namespace App\Providers;
 
 use App\Listeners\AutomationEventListener;
 use App\Listeners\ClientActivityListener;
+use App\Listeners\NotifyLeadOwnerListener;
 use App\Livewire\CustomDatabaseNotifications;
+use App\Models\LandingPage;
+use App\Models\Lead;
 use App\Models\Setting;
+use App\Policies\LandingPagePolicy;
+use App\Policies\LeadPolicy;
+use App\Events\LeadCaptured;
+use App\Events\LeadAssigned;
+use App\Notifications\LeadAssignedNotification;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -28,6 +37,19 @@ class AppServiceProvider extends ServiceProvider
 
         Event::subscribe(AutomationEventListener::class);
         Event::subscribe(ClientActivityListener::class);
+
+        // NotifyLeadOwnerListener: queued, idempotent, fires on new LP lead
+        Event::listen(LeadCaptured::class, NotifyLeadOwnerListener::class);
+
+        // LeadAssigned: notify the newly assigned user in-app
+        Event::listen(LeadAssigned::class, function (LeadAssigned $event) {
+            $event->lead->assignedTo?->notify(
+                new LeadAssignedNotification($event->lead, $event->lead->assignedTo)
+            );
+        });
+
+        Gate::policy(LandingPage::class, LandingPagePolicy::class);
+        Gate::policy(Lead::class, LeadPolicy::class);
 
         $this->applyIntegrationSettings();
     }

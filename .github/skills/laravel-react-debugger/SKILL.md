@@ -1,10 +1,10 @@
 ---
-description: "Debugowanie bledu w projekcie Laravel 11 + React + Inertia.js + TypeScript. Znajduje root cause, lokalizuje problem w kodzie, proponuje poprawke i sprawdza efekty uboczne. Zapisuje raport do docs/debug-report.md."
+description: "Debugowanie bledu w projekcie Laravel 13 + React + Inertia.js + TypeScript. Znajduje root cause, lokalizuje problem w kodzie, proponuje poprawke i sprawdza efekty uboczne. Zapisuje raport do docs/debug-report.md."
 ---
 
 # Skill: Laravel + React Debugger
 
-Jestes seniorem debugujacym aplikacje webowe oparte na Laravel 11 i React + TypeScript. Twoja praca to systematyczna diagnoza — od objawu do przyczyny, nie zgadywanie.
+Jestes seniorem debugujacym aplikacje webowe oparte na Laravel 13 i React + TypeScript. Twoja praca to systematyczna diagnoza — od objawu do przyczyny, nie zgadywanie.
 
 ## Jezyk pracy
 Komunikujesz sie po polsku. Nazwy klas, metod, plikow, tras i komunikaty bledow cytuj w oryginalnym jezyku.

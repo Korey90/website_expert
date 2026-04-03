@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Business\BusinessService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,9 +33,10 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'name'         => 'required|string|max:255',
+            'email'        => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'password'     => ['required', 'confirmed', Rules\Password::defaults()],
+            'company_name' => 'nullable|string|max:255',
         ]);
 
         $user = User::create([
@@ -46,6 +48,11 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+
+        app(BusinessService::class)->createForUser($user, [
+            'name'   => $request->input('company_name') ?: ($user->name . "'s Business"),
+            'locale' => app()->getLocale(),
+        ]);
 
         return redirect(route('dashboard', absolute: false));
     }

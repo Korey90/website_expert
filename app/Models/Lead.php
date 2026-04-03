@@ -16,13 +16,17 @@ class Lead extends Model
     protected $fillable = [
         'title', 'client_id', 'contact_id', 'pipeline_stage_id',
         'assigned_to', 'value', 'currency', 'source',
-        'calculator_data', 'notes', 'expected_close_date',
+        'calculator_data', 'form_data', 'notes', 'expected_close_date',
         'won_at', 'lost_at', 'lost_reason',
         'budget_min', 'budget_max',
+        'business_id',
+        'landing_page_id',
+        'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
     ];
 
     protected $casts = [
         'calculator_data'      => 'array',
+        'form_data'            => 'array',
         'value'                => 'decimal:2',
         'budget_min'           => 'decimal:2',
         'budget_max'           => 'decimal:2',
@@ -64,5 +68,25 @@ class Lead extends Model
     public function notes(): HasMany
     {
         return $this->hasMany(LeadNote::class)->latest();
+    }
+
+    public function landingPage(): BelongsTo
+    {
+        return $this->belongsTo(LandingPage::class);
+    }
+
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
+
+    public function leadSource(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(LeadSource::class);
+    }
+
+    public function consent(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(LeadConsent::class);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\LeadResource\Pages;
 use App\Models\Client;
 use App\Models\Lead;
+use App\Models\LeadSource;
 use App\Models\PipelineStage;
 use App\Models\User;
 use Filament\Forms;
@@ -79,6 +80,22 @@ class LeadResource extends Resource
                 Tables\Columns\TextColumn::make('stage.name')->label('Stage')->badge(),
                 Tables\Columns\TextColumn::make('value')->money('GBP')->sortable(),
                 Tables\Columns\TextColumn::make('source')->badge(),
+                Tables\Columns\TextColumn::make('leadSource.type')
+                    ->label('Source Type')
+                    ->badge()
+                    ->color(fn (string $state = ''): string => match ($state) {
+                        'landing_page' => 'success',
+                        'contact_form' => 'primary',
+                        'calculator'   => 'warning',
+                        'api'          => 'purple',
+                        default        => 'gray',
+                    })
+                    ->placeholder('—'),
+                Tables\Columns\TextColumn::make('leadSource.landingPage.title')
+                    ->label('Landing Page')
+                    ->placeholder('—')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('assignedTo.name')->label('Assigned'),
                 Tables\Columns\TextColumn::make('expected_close_date')->date()->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->date()->sortable(),
@@ -88,7 +105,17 @@ class LeadResource extends Resource
                     ->label('Stage')
                     ->options(PipelineStage::orderBy('order')->pluck('name', 'id')),
                 Tables\Filters\SelectFilter::make('source')
-                    ->options(['calculator' => 'Calculator', 'contact_form' => 'Contact Form', 'referral' => 'Referral']),
+                    ->options(['calculator' => 'Calculator', 'contact_form' => 'Contact Form', 'referral' => 'Referral', 'landing_page' => 'Landing Page']),
+                Tables\Filters\SelectFilter::make('lead_source_type')
+                    ->label('Source Type')
+                    ->options(array_combine(LeadSource::TYPES, array_map(
+                        fn ($t) => ucfirst(str_replace('_', ' ', $t)),
+                        LeadSource::TYPES,
+                    )))
+                    ->query(fn ($query, $data) => $data['value']
+                        ? $query->whereHas('leadSource', fn ($q) => $q->where('type', $data['value']))
+                        : $query
+                    ),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([

@@ -25,6 +25,8 @@ return new class extends Migration
                 'restored',
                 'updated',
                 'sms_sent',
+                'lp_captured',
+                'notification_sent',
                 'other',
             ]);
             $table->string('description');

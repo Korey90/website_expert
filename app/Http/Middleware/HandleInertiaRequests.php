@@ -45,17 +45,25 @@ class HandleInertiaRequests extends Middleware
             'available_locales'   => config('languages'),
             'tracking'            => $this->resolveTrackingSettings(),
             'portal_translations' => $this->resolvePortalTranslations($locale),
+            'landing_page_translations' => $this->resolveTranslations('landing_pages', $locale),
         ];
+    }
+
+    private function resolveTranslations(string $group, string $locale): array
+    {
+        $path = lang_path("{$locale}/{$group}.php");
+        if (file_exists($path)) {
+            return require $path;
+        }
+
+        $fallback = lang_path("en/{$group}.php");
+
+        return file_exists($fallback) ? require $fallback : [];
     }
 
     private function resolvePortalTranslations(string $locale): array
     {
-        $path = lang_path("{$locale}/portal.php");
-        if (file_exists($path)) {
-            return require $path;
-        }
-        $fallback = lang_path('en/portal.php');
-        return file_exists($fallback) ? require $fallback : [];
+        return $this->resolveTranslations('portal', $locale);
     }
 
     private function resolveTrackingSettings(): array

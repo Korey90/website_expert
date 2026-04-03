@@ -1,5 +1,5 @@
 ---
-description: "Implementacja backendu Laravel 11: migracje, modele, serwisy, kontrolery, eventy i kolejki. Stosuje service layer, cienkie kontrolery, Form Requests, Resource responses i clean code. Kod w chacie, bez plikow .md."
+description: "Implementacja backendu Laravel 13: migracje, modele, serwisy, kontrolery, eventy i kolejki. Stosuje service layer, cienkie kontrolery, Form Requests, Resource responses i clean code. Kod w chacie, bez plikow .md."
 ---
 
 # Skill: Laravel Backend Implementer

@@ -1,5 +1,15 @@
 <?php
 
+use App\Http\Controllers\Business\ApiTokenController;
+use App\Http\Controllers\Business\BusinessController;
+use App\Http\Controllers\Leads\LeadCaptureController;
+use App\Http\Controllers\Leads\LeadWebController;
+use App\Http\Controllers\LandingPage\AiLandingGeneratorController;
+use App\Http\Controllers\Business\BusinessProfileController;
+use App\Http\Controllers\LandingPage\LandingPageController;
+use App\Http\Controllers\LandingPage\LandingPageSectionController;
+use App\Http\Controllers\LandingPage\PublicLandingPageController;
+use App\Http\Controllers\Onboarding\OnboardingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CalculatorLeadController;
 use App\Http\Controllers\ContactController;
@@ -65,6 +75,9 @@ Route::get('/lang/{locale}', function (string $locale) {
 
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 Route::post('/calculator-lead', [CalculatorLeadController::class, 'store'])->name('calculator.lead');
+Route::post('/leads', [LeadCaptureController::class, 'store'])
+    ->name('leads.capture')
+    ->middleware('throttle:3,60');
 
 // Stripe webhook — CSRF exempt (see bootstrap/app.php)
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
@@ -127,6 +140,94 @@ Route::middleware('auth')->group(function () {
             Route::get("projects/{$format}", [ReportController::class, 'projects'])->defaults('format', $format)->name("projects.{$format}");
         }
     });
+});
+
+// -----------------------------------------------------------------------
+// Onboarding — no has.business middleware (would cause redirect loop)
+// -----------------------------------------------------------------------
+Route::middleware(['auth', 'verified'])
+    ->prefix('onboarding')
+    ->name('onboarding.')
+    ->group(function () {
+        Route::get('/', [OnboardingController::class, 'index'])->name('index');
+        Route::get('/profile', [OnboardingController::class, 'profile'])->name('profile');
+        Route::post('/profile', [OnboardingController::class, 'saveProfile'])->name('profile.save');
+        Route::get('/complete', [OnboardingController::class, 'complete'])->name('complete');
+    });
+
+// -----------------------------------------------------------------------
+// Business settings & profile
+// -----------------------------------------------------------------------
+Route::middleware(['auth', 'verified', 'has.business'])->group(function () {
+    Route::get('/business/settings', [BusinessController::class, 'edit'])->name('business.edit');
+    Route::patch('/business/settings', [BusinessController::class, 'update'])->name('business.update');
+    Route::post('/business/logo', [BusinessController::class, 'uploadLogo'])->name('business.logo.upload');
+    Route::delete('/business/logo', [BusinessController::class, 'deleteLogo'])->name('business.logo.delete');
+
+    Route::get('/business/profile', [BusinessProfileController::class, 'edit'])->name('business.profile.edit');
+    Route::patch('/business/profile', [BusinessProfileController::class, 'update'])->name('business.profile.update');
+    Route::get('/business/profile/completion', [BusinessProfileController::class, 'completion'])->name('business.profile.completion');
+
+    // -----------------------------------------------------------------------
+    // Leads — Inertia views + lead actions
+    // -----------------------------------------------------------------------
+    Route::prefix('leads')->name('leads.')->group(function () {
+        Route::get('/{lead}',          [LeadWebController::class, 'show'])->name('show');
+        Route::put('/{lead}/assign',   [LeadWebController::class, 'assign'])->name('assign');
+        Route::put('/{lead}/stage',    [LeadWebController::class, 'stage'])->name('stage');
+        Route::post('/{lead}/won',     [LeadWebController::class, 'won'])->name('won');
+        Route::post('/{lead}/lost',    [LeadWebController::class, 'lost'])->name('lost');
+    });
+
+    // -----------------------------------------------------------------------
+    // API Tokens (for external integrations — Zapier, Make.com)
+    // -----------------------------------------------------------------------
+    Route::prefix('business/api-tokens')->name('business.api-tokens.')->group(function () {
+        Route::get('/',           [ApiTokenController::class, 'index'])->name('index');
+        Route::post('/',          [ApiTokenController::class, 'store'])->name('store');
+        Route::delete('/{token}', [ApiTokenController::class, 'destroy'])->name('destroy');
+    });
+
+    // -----------------------------------------------------------------------
+    // Landing Pages (authenticated, has.business)
+    // -----------------------------------------------------------------------
+    Route::middleware('landing-page.tenant')->prefix('landing-pages')->name('landing-pages.')->group(function () {
+        Route::get('/',                                 [LandingPageController::class, 'index'])->name('index');
+        Route::get('/create',                           [LandingPageController::class, 'create'])->name('create');
+        Route::get('/ai/create',                        [LandingPageController::class, 'createWithAi'])->name('ai.create');
+        Route::post('/',                                [LandingPageController::class, 'store'])->name('store');
+        Route::get('/{landingPage}',                    [LandingPageController::class, 'show'])->name('show');
+        Route::get('/{landingPage}/edit',               [LandingPageController::class, 'edit'])->name('edit');
+        Route::patch('/{landingPage}',                  [LandingPageController::class, 'update'])->name('update');
+        Route::delete('/{landingPage}',                 [LandingPageController::class, 'destroy'])->name('destroy');
+        Route::post('/{landingPage}/publish',           [LandingPageController::class, 'publish'])->name('publish');
+        Route::post('/{landingPage}/unpublish',         [LandingPageController::class, 'unpublish'])->name('unpublish');
+
+        Route::prefix('ai')->name('ai.')->group(function () {
+            Route::post('/generate', [AiLandingGeneratorController::class, 'generate'])->name('generate');
+            Route::post('/variants/{variant}/regenerate-section', [AiLandingGeneratorController::class, 'regenerateSection'])
+                ->name('regenerate-section');
+            Route::post('/variants/{variant}/save', [AiLandingGeneratorController::class, 'save'])->name('save');
+        });
+
+        // Sections
+        Route::prefix('/{landingPage}/sections')->name('sections.')->group(function () {
+            Route::post('/',                            [LandingPageSectionController::class, 'store'])->name('store');
+            Route::patch('/{section}',                  [LandingPageSectionController::class, 'update'])->name('update');
+            Route::delete('/{section}',                 [LandingPageSectionController::class, 'destroy'])->name('destroy');
+            Route::post('/reorder',                     [LandingPageSectionController::class, 'reorder'])->name('reorder');
+        });
+    });
+});
+
+// -----------------------------------------------------------------------
+// Public Landing Pages — no auth required
+// -----------------------------------------------------------------------
+Route::prefix('lp')->name('lp.')->group(function () {
+    Route::get('/{slug}',       [PublicLandingPageController::class, 'show'])->name('show');
+    Route::post('/{slug}/submit',[PublicLandingPageController::class, 'submit'])
+        ->name('submit')
+        ->middleware('throttle:3,60');
 });
 
 require __DIR__.'/auth.php';
