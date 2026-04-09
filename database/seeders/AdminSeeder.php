@@ -107,6 +107,14 @@ class AdminSeeder extends Seeder
             'view_lead_sources',
         ]);
 
+        // Client (SaaS subscriber): full access to their own landing pages
+        $client->syncPermissions([
+            'view_landing_pages',
+            'manage_landing_pages',
+            'publish_landing_pages',
+            'generate_landing_pages_ai',
+        ]);
+
         // ---------------------------------------------------
         // Default admin user
         // ---------------------------------------------------

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, useForm, usePage, router, Link } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PortalLayout from '@/Layouts/PortalLayout';
 import StatusBadge from '@/Components/LandingPage/StatusBadge';
 import SectionsList from '@/Components/LandingPage/SectionsList';
 import InputLabel from '@/Components/InputLabel';
@@ -11,7 +11,7 @@ import SecondaryButton from '@/Components/SecondaryButton';
 
 const TABS = { settings: 'settings', sections: 'sections' };
 
-export default function Edit({ page, sectionTypes = [], conversionGoals = [], languages = ['en', 'pl', 'pt'] }) {
+export default function Edit({ client, page, sectionTypes = [], conversionGoals = [], languages = ['en', 'pl', 'pt'] }) {
     const { flash } = usePage().props;
     const [activeTab, setActiveTab] = useState(TABS.sections);
     const [publishing, setPublishing] = useState(false);
@@ -47,61 +47,65 @@ export default function Edit({ page, sectionTypes = [], conversionGoals = [], la
     const hasFormSection = (page.sections ?? []).some((s) => s.type === 'form');
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center gap-3 flex-wrap">
-                    <Link
-                        href={route('landing-pages.index')}
-                        className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
-                        aria-label="Back"
-                    >
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                        </svg>
-                    </Link>
-                    <h2 className="font-display text-xl font-semibold text-gray-900 dark:text-white truncate max-w-xs sm:max-w-sm">
-                        {page.title}
-                    </h2>
-                    <StatusBadge status={page.status} />
-                    <div className="ml-auto flex items-center gap-2">
-                        {page.status === 'published' ? (
-                            <>
-                                <a
-                                    href={page.public_url ?? route('lp.show', page.slug)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="hidden sm:inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 transition"
-                                >
-                                    Live ↗
-                                </a>
-                                <button
-                                    type="button"
-                                    onClick={handleUnpublish}
-                                    disabled={publishing}
-                                    className="rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 font-semibold text-sm px-4 py-2 transition disabled:opacity-50"
-                                >
-                                    Unpublish
-                                </button>
-                            </>
-                        ) : (
-                            <button
-                                type="button"
-                                onClick={handlePublish}
-                                disabled={publishing || !hasFormSection}
-                                title={!hasFormSection ? 'Add a Form section first' : undefined}
-                                className="rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-semibold text-sm px-4 py-2 transition"
-                            >
-                                {publishing ? 'Publishing…' : 'Publish'}
-                            </button>
-                        )}
-                    </div>
-                </div>
-            }
-        >
+        <PortalLayout client={client}>
             <Head title={`Edit — ${page.title}`} />
 
             <div className="py-6">
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-4">
+
+                    {/* Page header */}
+                    <div className="flex items-center gap-3 flex-wrap">
+                        <Link
+                            href={route('landing-pages.index')}
+                            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
+                            aria-label="Back"
+                        >
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                            </svg>
+                        </Link>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h2 className="font-display text-xl font-semibold text-gray-900 dark:text-white truncate max-w-xs sm:max-w-sm">
+                                    {page.title}
+                                </h2>
+                                <StatusBadge status={page.status} />
+                            </div>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">/lp/{page.slug}</p>
+                        </div>
+                        <div className="ml-auto flex items-center gap-2">
+                            {page.status === 'published' ? (
+                                <>
+                                    <a
+                                        href={page.public_url ?? route('lp.show', page.slug)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="hidden sm:inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 transition"
+                                    >
+                                        Live ↗
+                                    </a>
+                                    <button
+                                        type="button"
+                                        onClick={handleUnpublish}
+                                        disabled={publishing}
+                                        className="rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 font-semibold text-sm px-4 py-2 transition disabled:opacity-50"
+                                    >
+                                        Unpublish
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={handlePublish}
+                                    disabled={publishing || !hasFormSection}
+                                    title={!hasFormSection ? 'Add a Form section first' : undefined}
+                                    className="rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-semibold text-sm px-4 py-2 transition"
+                                >
+                                    {publishing ? 'Publishing…' : 'Publish'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
 
                     {/* Flash */}
                     {flash?.success && (
@@ -256,6 +260,6 @@ export default function Edit({ page, sectionTypes = [], conversionGoals = [], la
 
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </PortalLayout>
     );
 }

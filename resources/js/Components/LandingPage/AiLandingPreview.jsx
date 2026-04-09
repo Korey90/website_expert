@@ -79,6 +79,7 @@ export default function AiLandingPreview({ variant, t }) {
                             content={section.content}
                             settings={section.settings}
                             slug={variant.slug_suggestion ?? 'ai-draft'}
+                            isPreview={true}
                         />
                     );
                 })}

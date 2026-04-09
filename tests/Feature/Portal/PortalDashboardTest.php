@@ -32,13 +32,17 @@ class PortalDashboardTest extends TestCase
             );
     }
 
-    public function test_user_without_client_profile_is_redirected(): void
+    public function test_user_without_client_profile_sees_pending_screen(): void
     {
         $user = User::factory()->create();
 
         $this->actingAs($user)
             ->get(route('portal.dashboard'))
-            ->assertRedirect(route('dashboard'));
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Portal/Dashboard')
+                ->where('client', null)
+            );
     }
 
     public function test_unauthenticated_user_is_redirected_to_login(): void

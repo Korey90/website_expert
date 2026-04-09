@@ -47,13 +47,13 @@ export default function Process({ data }) {
             <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 
                 {/* Header */}
-                <div className="text-center mb-16 reveal">
+                <div className="text-center mb-10 sm:mb-16 reveal">
                     <span className="section-label">{badge}</span>
-                    <h2 className="font-display text-3xl sm:text-4xl font-bold mt-3 text-neutral-900 dark:text-white">
+                    <h2 className="font-display text-2xl sm:text-4xl font-bold mt-3 text-neutral-900 dark:text-white">
                         {title}
                     </h2>
                     {subtitle && (
-                        <p className="mt-4 text-neutral-500 dark:text-neutral-400 max-w-2xl mx-auto">
+                        <p className="mt-3 sm:mt-4 text-sm sm:text-base text-neutral-500 dark:text-neutral-400 max-w-2xl mx-auto">
                             {subtitle}
                         </p>
                     )}
@@ -62,53 +62,67 @@ export default function Process({ data }) {
                 {/* Timeline */}
                 <div className="relative">
                     {/* Central vertical line — desktop only */}
-                    <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-gradient-to-b from-brand-500/40 via-brand-500/20 to-transparent" />
+                    <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-linear-to-b from-brand-500/40 via-brand-500/20 to-transparent" />
 
-                    <div className="space-y-10 lg:space-y-0">
+                    {/* ── MOBILE timeline ── */}
+                    <div className="lg:hidden relative pl-10">
+                        {/* Left accent line */}
+                        <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-linear-to-b from-brand-500/60 via-brand-500/20 to-transparent" aria-hidden="true" />
+
+                        <div className="space-y-6">
+                            {steps.map((step, i) => {
+                                const stepTitle = t(step, 'title')       || '';
+                                const stepDesc  = t(step, 'description') || '';
+                                const number    = step.number ?? String(i + 1).padStart(2, '0');
+
+                                return (
+                                    <div key={i} className="reveal relative">
+                                        {/* Number badge pinned to the left line */}
+                                        <div className="absolute -left-10 top-0 flex items-center justify-center w-8 h-8 rounded-full bg-brand-500 text-white font-display font-bold text-xs shadow-md shadow-brand-500/30 z-10">
+                                            {number}
+                                        </div>
+                                        {/* Card */}
+                                        <div className="rounded-2xl bg-white dark:bg-neutral-950 border border-neutral-100 dark:border-neutral-800 p-4 shadow-sm">
+                                            <h3 className="font-semibold text-neutral-900 dark:text-white mb-1 text-sm">{stepTitle}</h3>
+                                            <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">{stepDesc}</p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* ── DESKTOP timeline (unchanged) ── */}
+                    <div className="hidden lg:block space-y-0">
                         {steps.map((step, i) => {
                             const stepTitle = t(step, 'title')       || '';
                             const stepDesc  = t(step, 'description') || '';
                             const number    = step.number ?? String(i + 1).padStart(2, '0');
-                            const isRight   = i % 2 === 0; // even → content right, label left
+                            const isRight   = i % 2 === 0;
 
                             return (
-                                <div key={i} className="reveal lg:grid lg:grid-cols-2 lg:gap-0 lg:items-center lg:min-h-[120px]">
-
+                                <div key={i} className="reveal relative grid grid-cols-2 gap-0 items-center min-h-30">
                                     {/* Left slot */}
-                                    <div className={`lg:pr-12 ${isRight ? 'lg:text-right' : 'hidden lg:block'}`}>
+                                    <div className="pr-12">
                                         {isRight ? (
                                             <StepCard number={number} title={stepTitle} desc={stepDesc} />
                                         ) : (
-                                            /* spacer on left when content is right */
                                             <span />
                                         )}
                                     </div>
 
-                                    {/* Centre node — desktop */}
-                                    <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center justify-center w-10 h-10 rounded-full bg-brand-500 text-white font-display font-bold text-sm shadow-lg shadow-brand-500/30 z-10 pointer-events-none">
+                                    {/* Centre node */}
+                                    <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center w-10 h-10 rounded-full bg-brand-500 text-white font-display font-bold text-sm shadow-lg shadow-brand-500/30 z-10 pointer-events-none">
                                         {number}
                                     </div>
 
                                     {/* Right slot */}
-                                    <div className={`lg:pl-12 ${!isRight ? '' : 'hidden lg:block'}`}>
+                                    <div className="pl-12">
                                         {!isRight ? (
                                             <StepCard number={number} title={stepTitle} desc={stepDesc} />
                                         ) : (
                                             <span />
                                         )}
-                                    </div>
-
-                                    {/* Mobile — always show full card with number badge */}
-                                    <div className="lg:hidden flex gap-4">
-                                        <div className="flex-none flex items-start pt-1">
-                                            <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-brand-500 text-white font-display font-bold text-sm shadow-md shadow-brand-500/30">
-                                                {number}
-                                            </span>
-                                        </div>
-                                        <div className="flex-1 pb-10 border-l-2 border-brand-500/20 pl-4 ml-[-2.25rem] pl-10">
-                                            <h3 className="font-semibold text-neutral-900 dark:text-white mb-1">{stepTitle}</h3>
-                                            <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">{stepDesc}</p>
-                                        </div>
                                     </div>
                                 </div>
                             );

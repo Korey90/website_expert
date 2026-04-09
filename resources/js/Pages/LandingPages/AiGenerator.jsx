@@ -1,6 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PortalLayout from '@/Layouts/PortalLayout';
 import AiGeneratorForm from '@/Components/LandingPage/AiGeneratorForm';
 import AiLandingPreview from '@/Components/LandingPage/AiLandingPreview';
 import AiProfileSnapshot from '@/Components/LandingPage/AiProfileSnapshot';
@@ -36,7 +36,7 @@ function buildSaveForm(variant) {
     };
 }
 
-export default function AiGenerator({ business, profile, profileCompletion, templates, conversionGoals, sectionTypes }) {
+export default function AiGenerator({ business, profile, profileCompletion, templates, conversionGoals, sectionTypes, client }) {
     const { flash } = usePage().props;
     const t = useLandingPageTrans();
     const [generateForm, setGenerateForm] = useState(() => buildInitialGenerateForm(conversionGoals, business, sectionTypes));
@@ -101,42 +101,39 @@ export default function AiGenerator({ business, profile, profileCompletion, temp
     } : null;
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex flex-wrap items-center gap-4 justify-between">
-                    <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-neutral-400">
-                            {t('ai.ui.eyebrow')}
-                        </p>
-                        <h1 className="mt-2 font-display text-3xl font-semibold text-neutral-900 dark:text-white">
-                            {t('ai.ui.title')}
-                        </h1>
-                        <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500 dark:text-neutral-400">
-                            {t('ai.ui.description')}
-                        </p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <Link
-                            href={route('landing-pages.create')}
-                            className="inline-flex items-center gap-2 rounded-2xl border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-700 transition hover:border-neutral-400 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                        >
-                            {t('ai.ui.manual_builder')}
-                        </Link>
-                        <Link
-                            href={route('landing-pages.index')}
-                            className="inline-flex items-center gap-2 rounded-2xl bg-neutral-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-black dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
-                        >
-                            {t('back_to_pages')}
-                        </Link>
-                    </div>
-                </div>
-            }
-        >
+        <PortalLayout client={client}>
             <Head title={t('ai.ui.eyebrow')} />
 
-            <div className="relative overflow-hidden py-10">
-                <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-96 bg-[radial-gradient(circle_at_top_left,rgba(255,43,23,0.12),transparent_45%),radial-gradient(circle_at_top_right,rgba(17,24,39,0.12),transparent_35%)]" />
+            <div className="mb-8 flex flex-wrap items-center gap-4 justify-between">
+                <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-neutral-400">
+                        {t('ai.ui.eyebrow')}
+                    </p>
+                    <h1 className="mt-2 font-display text-3xl font-semibold text-neutral-900 dark:text-white">
+                        {t('ai.ui.title')}
+                    </h1>
+                    <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500 dark:text-neutral-400">
+                        {t('ai.ui.description')}
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <Link
+                        href={route('landing-pages.create')}
+                        className="inline-flex items-center gap-2 rounded-2xl border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-700 transition hover:border-neutral-400 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    >
+                        {t('ai.ui.manual_builder')}
+                    </Link>
+                    <Link
+                        href={route('landing-pages.index')}
+                        className="inline-flex items-center gap-2 rounded-2xl bg-neutral-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-black dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+                    >
+                        {t('back_to_pages')}
+                    </Link>
+                </div>
+            </div>
+
+            <div className="py-6">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     {(flash?.success || notice) && (
                         <div className={[
@@ -199,6 +196,6 @@ export default function AiGenerator({ business, profile, profileCompletion, temp
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </PortalLayout>
     );
 }

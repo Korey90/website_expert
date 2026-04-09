@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Client;
+use App\Services\Account\AccountDeletionService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,13 +20,21 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        $client = Client::where('portal_user_id', $request->user()->id)
+        $user   = $request->user();
+        $client = Client::where('portal_user_id', $user->id)
             ->first(['id', 'company_name', 'primary_contact_name']);
 
+        $socialAccounts = $user->socialAccounts()
+            ->get(['id', 'provider'])
+            ->map(fn ($sa) => ['id' => $sa->id, 'provider' => $sa->provider])
+            ->values();
+
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status'          => session('status'),
             'client'          => $client,
+            'socialAccounts'  => $socialAccounts,
+            'hasPassword'     => ! is_null($user->password),
         ]);
     }
 
@@ -46,19 +55,28 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Delete the user's account (GDPR-compliant).
+     *
+     * - Users WITH a password must confirm it via current_password.
+     * - Social-only users (no password) must check an explicit confirmation checkbox.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, AccountDeletionService $deletionService): RedirectResponse
     {
-        $request->validate([
-            'password' => ['required', 'current_password'],
-        ]);
-
         $user = $request->user();
+
+        if (! is_null($user->password)) {
+            $request->validate([
+                'password' => ['required', 'current_password'],
+            ]);
+        } else {
+            $request->validate([
+                'confirmed' => ['required', 'accepted'],
+            ]);
+        }
 
         Auth::logout();
 
-        $user->delete();
+        $deletionService->delete($user);
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

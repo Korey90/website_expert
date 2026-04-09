@@ -42,6 +42,7 @@ class GenerateLandingService
         ]);
 
         $startedAt = microtime(true);
+        $normalized = null;
 
         try {
             $result = $this->openAiClient->generateStructuredLanding([
@@ -71,7 +72,7 @@ class GenerateLandingService
 
             return $variant->refresh();
         } catch (LandingPageGenerationException $exception) {
-            $this->markGenerationFailed($generation, $exception, $startedAt);
+            $this->markGenerationFailed($generation, $exception, $startedAt, $normalized);
             throw $exception;
         } catch (\Throwable $exception) {
             report($exception);
@@ -81,7 +82,7 @@ class GenerateLandingService
                 500,
                 $exception,
             );
-            $this->markGenerationFailed($generation, $wrapped, $startedAt);
+            $this->markGenerationFailed($generation, $wrapped, $startedAt, $normalized);
             throw $wrapped;
         }
     }
@@ -292,12 +293,14 @@ class GenerateLandingService
         LandingPageAiGeneration $generation,
         LandingPageGenerationException $exception,
         float $startedAt,
+        ?array $normalized = null,
     ): void {
         $generation->update([
             'status' => LandingPageAiGeneration::STATUS_FAILED,
             'error_code' => $exception->errorCode(),
             'error_message' => $exception->getMessage(),
             'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+            'normalized_payload' => $normalized,
         ]);
     }
 }

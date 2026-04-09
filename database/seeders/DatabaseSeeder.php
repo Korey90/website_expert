@@ -14,6 +14,9 @@ class DatabaseSeeder extends Seeder
         // Core: roles, permissions, admin user, pipeline stages, project templates
         $this->call(AdminSeeder::class);
 
+        // SaaS plan definitions
+        $this->call(PlanSeeder::class);
+
         // System settings (tracking, integrations)
         $this->call(SettingSeeder::class);
 

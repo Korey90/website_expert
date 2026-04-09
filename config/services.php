@@ -36,9 +36,14 @@ return [
     ],
 
     'stripe' => [
-        'key'            => env('STRIPE_KEY'),
-        'secret'         => env('STRIPE_SECRET'),
-        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'key'                         => env('STRIPE_KEY'),
+        'secret'                      => env('STRIPE_SECRET'),
+        'webhook_secret'              => env('STRIPE_WEBHOOK_SECRET'),
+        // SaaS subscription webhooks (separate endpoint)
+        'subscription_webhook_secret' => env('STRIPE_SUBSCRIPTION_WEBHOOK_SECRET'),
+        // Stripe Price IDs for SaaS plans (set in Stripe Dashboard)
+        'price_pro_monthly'           => env('STRIPE_PRICE_PRO_MONTHLY'),
+        'price_agency_monthly'        => env('STRIPE_PRICE_AGENCY_MONTHLY'),
     ],
 
     'tinymce' => [
@@ -49,6 +54,18 @@ return [
         'sid'   => env('TWILIO_ACCOUNT_SID'),
         'token' => env('TWILIO_AUTH_TOKEN'),
         'from'  => env('TWILIO_FROM_NUMBER'),
+    ],
+
+    'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
+    ],
+
+    'facebook' => [
+        'client_id'     => env('FACEBOOK_APP_ID'),
+        'client_secret' => env('FACEBOOK_APP_SECRET'),
+        'redirect'      => env('FACEBOOK_REDIRECT_URI', '/auth/facebook/callback'),
     ],
 
     'openai' => [

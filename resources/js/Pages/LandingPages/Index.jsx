@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PortalLayout from '@/Layouts/PortalLayout';
 import StatusBadge from '@/Components/LandingPage/StatusBadge';
 
 function StatsCard({ label, value, colorCls = 'text-gray-900 dark:text-white' }) {
@@ -12,7 +12,7 @@ function StatsCard({ label, value, colorCls = 'text-gray-900 dark:text-white' })
     );
 }
 
-export default function Index({ landingPages, stats = {} }) {
+export default function Index({ landingPages, stats = {}, client }) {
     const { flash } = usePage().props;
     const [deleting, setDeleting] = useState(null);
 
@@ -36,28 +36,25 @@ export default function Index({ landingPages, stats = {} }) {
     };
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center justify-between">
-                    <h2 className="font-display text-xl font-semibold text-gray-900 dark:text-white">
-                        Landing Pages
-                    </h2>
-                    <Link
-                        href={route('landing-pages.create')}
-                        className="inline-flex items-center gap-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm px-4 py-2.5 transition focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
-                    >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        New Landing Page
-                    </Link>
-                </div>
-            }
-        >
+        <PortalLayout client={client}>
             <Head title="Landing Pages" />
 
             <div className="py-8">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+
+                    {/* Page header */}
+                    <div className="flex items-center justify-between">
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Landing Pages</h1>
+                        <Link
+                            href={route('landing-pages.create')}
+                            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm px-4 py-2.5 transition focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+                        >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            New Landing Page
+                        </Link>
+                    </div>
 
                     {/* Flash messages */}
                     {flash?.success && (
@@ -219,6 +216,6 @@ export default function Index({ landingPages, stats = {} }) {
 
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </PortalLayout>
     );
 }

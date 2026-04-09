@@ -165,12 +165,16 @@ class LpLeadPermissionsTest extends TestCase
     // Client role
     // ─────────────────────────────────────────────────────────────────────────
 
-    public function test_client_cannot_view_landing_pages(): void
+    public function test_client_can_view_and_manage_landing_pages(): void
     {
         $client = User::factory()->create();
         $client->assignRole('client');
 
-        $this->assertFalse($client->can('view_landing_pages'));
+        // SaaS clients are the landing page owners — they have full LP access
+        $this->assertTrue($client->can('view_landing_pages'));
+        $this->assertTrue($client->can('manage_landing_pages'));
+        $this->assertTrue($client->can('publish_landing_pages'));
+        $this->assertTrue($client->can('generate_landing_pages_ai'));
     }
 
     public function test_client_cannot_manage_leads(): void

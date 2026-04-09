@@ -77,9 +77,9 @@ export default function TrustStrip({ data, testimonials }) {
     }, [current, isPaused, goTo, total]);
 
     return (
-        <section id="zaufali" className="py-20 flex items-center h-screen md:py-28 bg-neutral-50 dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700">
+        <section id="zaufali" className="py-16 sm:py-20 md:py-28 bg-neutral-50 dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-14 reveal">
+                <div className="text-center mb-10 sm:mb-14 reveal">
                     <span className="section-label">{sectionLabel}</span>
                     <h2 className="font-display text-3xl sm:text-4xl font-bold mt-3 text-neutral-900 dark:text-white">
                         {title}
@@ -88,9 +88,9 @@ export default function TrustStrip({ data, testimonials }) {
 
                 {/* Client logo strip */}
                 {clients.length > 0 && (
-                    <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 mb-16 reveal">
+                    <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-6 md:gap-10 mb-10 sm:mb-16 reveal">
                         {clients.map((name, i) => (
-                            <div key={i} className="h-10 w-32 rounded-lg bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center text-xs text-neutral-500 dark:text-neutral-400 font-medium px-2 text-center">
+                            <div key={i} className="h-9 w-28 sm:h-10 sm:w-32 rounded-lg bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center text-xs text-neutral-500 dark:text-neutral-400 font-medium px-2 text-center">
                                 {name}
                             </div>
                         ))}
@@ -119,17 +119,17 @@ export default function TrustStrip({ data, testimonials }) {
                                 {reviews.map((item, idx) => (
                                     <div
                                         key={idx}
-                                        className="w-full flex-shrink-0 px-2"
+                                        className="w-full shrink-0 px-2"
                                         aria-hidden={idx !== current ? 'true' : undefined}
                                     >
                                         <article
-                                            className="bg-white dark:bg-neutral-950 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-8 md:p-10 shadow-sm"
+                                            className="bg-white dark:bg-neutral-950 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5 sm:p-8 md:p-10 shadow-sm"
                                             aria-label={`Review from ${item.name}`}
                                         >
                                             <div className="mb-3">
                                                 <Stars count={item.rating ?? 5} />
                                             </div>
-                                            <blockquote className="text-neutral-700 dark:text-neutral-300 text-lg leading-relaxed mb-6">
+                                            <blockquote className="text-neutral-700 dark:text-neutral-300 text-sm sm:text-base md:text-lg leading-relaxed mb-5 sm:mb-6">
                                                 <p>"{t(item, 'text') || item.text_en || ''}"</p>
                                             </blockquote>
                                             <div className="flex items-center gap-3">

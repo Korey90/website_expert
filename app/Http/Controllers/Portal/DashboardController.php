@@ -17,8 +17,13 @@ class DashboardController extends BasePortalController
         $client = $this->clientForUser();
 
         if (! $client) {
-            return redirect()->route('dashboard')
-                ->with('error', 'No client profile linked to your account.');
+            return Inertia::render('Portal/Dashboard', [
+                'client'   => null,
+                'projects' => [],
+                'invoices' => [],
+                'quotes'   => [],
+                'timeline' => [],
+            ]);
         }
 
         $projects = Project::where('client_id', $client->id)

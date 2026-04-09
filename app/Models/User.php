@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\SocialAccount;
 
 #[Fillable(['name', 'email', 'password', 'phone', 'locale', 'is_active', 'avatar_url'])]
 #[Hidden(['password', 'remember_token'])]
@@ -47,6 +48,11 @@ class User extends Authenticatable implements FilamentUser
     public function notifications(): MorphMany
     {
         return $this->morphMany(DatabaseNotification::class, 'notifiable')->latest();
+    }
+
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
     }
 
     public function canAccessPanel(Panel $panel): bool

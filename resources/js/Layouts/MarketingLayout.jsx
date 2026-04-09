@@ -15,9 +15,9 @@ export default function MarketingLayout({ children, auth, navbar, footer }) {
 
     return (
         <ConsentContext.Provider value={consent}>
-            <div className="min-h-screen bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white">
+            <div className="min-h-screen w-full overflow-x-hidden bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white">
                 <Navbar auth={auth} data={navbar} />
-                <main>{children}</main>
+                <main className="overflow-x-hidden">{children}</main>
                 <Footer data={footer} />
                 <CookieBanner />
                 <TrackingInit />

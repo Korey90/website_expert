@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Client;
 use App\Models\User;
 use App\Services\Business\BusinessService;
 use Illuminate\Auth\Events\Registered;
@@ -17,6 +18,10 @@ use Inertia\Response;
 
 class RegisteredUserController extends Controller
 {
+    public function __construct(
+        private readonly BusinessService $businessService,
+    ) {}
+
     /**
      * Display the registration view.
      */
@@ -45,15 +50,25 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $user->assignRole('client');
+
         event(new Registered($user));
 
         Auth::login($user);
 
-        app(BusinessService::class)->createForUser($user, [
-            'name'   => $request->input('company_name') ?: ($user->name . "'s Business"),
-            'locale' => app()->getLocale(),
+        Client::create([
+            'company_name'          => $request->input('company_name') ?: $user->name,
+            'primary_contact_name'  => $user->name,
+            'primary_contact_email' => $user->email,
+            'portal_user_id'        => $user->id,
+            'status'                => 'prospect',
+            'source'                => 'website',
         ]);
 
-        return redirect(route('dashboard', absolute: false));
+        $this->businessService->createForUser($user, [
+            'name' => $request->input('company_name') ?: $user->name,
+        ]);
+
+        return redirect(route('portal.dashboard', absolute: false));
     }
 }

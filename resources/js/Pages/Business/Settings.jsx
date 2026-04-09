@@ -1,5 +1,5 @@
 import { useForm, usePage, Head, Link } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PortalLayout from '@/Layouts/PortalLayout';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
 import TextInput from '@/Components/TextInput';
@@ -32,7 +32,7 @@ const COMMON_TIMEZONES = [
  * Business/Settings — name, locale, timezone, logo, primary colour.
  * Props: business: { id, name, locale, timezone, logo_url, primary_color, plan }
  */
-export default function BusinessSettings({ business }) {
+export default function BusinessSettings({ business, client }) {
     const { flash } = usePage().props;
 
     const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
@@ -48,25 +48,20 @@ export default function BusinessSettings({ business }) {
     };
 
     return (
-        <AuthenticatedLayout
-            header={
+        <PortalLayout client={client}>
+            <Head title="Business Settings" />
+
+            <div className="max-w-2xl mx-auto space-y-6">
+
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                        Business Settings
-                    </h2>
+                    <h1 className="text-2xl font-bold text-gray-900">Business Settings</h1>
                     <Link
                         href={route('business.profile.edit')}
-                        className="text-sm text-brand-600 dark:text-brand-400 hover:underline"
+                        className="text-sm text-red-600 hover:underline"
                     >
                         Edit brand profile →
                     </Link>
                 </div>
-            }
-        >
-            <Head title="Business Settings" />
-
-            <div className="py-10">
-                <div className="mx-auto max-w-2xl space-y-6 px-4 sm:px-6 lg:px-8">
 
                     {/* Flash success */}
                     {(flash?.success || recentlySuccessful) && (
@@ -168,8 +163,7 @@ export default function BusinessSettings({ business }) {
                             </PrimaryButton>
                         </div>
                     </form>
-                </div>
             </div>
-        </AuthenticatedLayout>
+        </PortalLayout>
     );
 }

@@ -21,7 +21,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  *   content.redirect_url    – optional post-submit redirect
  *   slug                    – landing page slug (for route)
  */
-export default function FormSection({ content = {}, settings = {}, slug }) {
+export default function FormSection({ content = {}, settings = {}, slug, isPreview = false }) {
     const t = useLandingPageTrans();
     const fields = content.fields ?? DEFAULT_FIELDS;
     const required = content.required ?? ['email'];
@@ -56,6 +56,13 @@ export default function FormSection({ content = {}, settings = {}, slug }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Preview mode — don't submit real data
+        if (isPreview) {
+            setSubmitMessage(content.success_message ?? t('form_success_default'));
+            setState(STATES.success);
+            return;
+        }
+
         // Honeypot check — if website field has a value, silently ignore
         const honeypot = e.target.elements['website']?.value;
         if (honeypot) {
@@ -83,6 +90,13 @@ export default function FormSection({ content = {}, settings = {}, slug }) {
         setSubmitMessage('');
         try {
             const payload = { landing_page_slug: slug };
+
+            // Forward UTM params from the current page URL to the POST body
+            const search = new URLSearchParams(window.location.search);
+            ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((key) => {
+                if (search.has(key)) payload[key] = search.get(key);
+            });
+
             for (const field of fields) {
                 payload[field] = formData[field] ?? '';
             }

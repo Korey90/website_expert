@@ -52,7 +52,7 @@ class LeadService
         }
 
         // ── Wrap creation in a DB transaction ─────────────────────────────────
-        $lead = DB::transaction(function () use ($validated, $lp, $business) {
+        $lead = DB::transaction(function () use ($validated, $sourceData, $lp, $business) {
             $leadData = array_merge($validated, [
                 'source'                  => 'landing_page',
                 'business_id'             => $business?->id,
@@ -60,6 +60,14 @@ class LeadService
                 'landing_page_title'      => $lp->title,
                 'lp_default_assignee_id'  => $lp->default_assignee_id,
                 'notes'                   => $validated['message'] ?? $validated['notes'] ?? null,
+                // Store all captured form fields for CRM display
+                'form_data'               => array_filter($validated, fn ($v) => $v !== null && $v !== ''),
+                // UTM from source attribution context, not from form body
+                'utm_source'              => $sourceData['utm_source'] ?? null,
+                'utm_medium'              => $sourceData['utm_medium'] ?? null,
+                'utm_campaign'            => $sourceData['utm_campaign'] ?? null,
+                'utm_content'             => $sourceData['utm_content'] ?? null,
+                'utm_term'                => $sourceData['utm_term'] ?? null,
             ]);
 
             return app(CreateLeadAction::class)->execute($leadData);
@@ -89,9 +97,11 @@ class LeadService
                 'lp_title'  => $lp->title,
                 'lp_slug'   => $lp->slug,
                 'utm'       => array_filter([
-                    'source'   => $validated['utm_source'] ?? null,
-                    'medium'   => $validated['utm_medium'] ?? null,
-                    'campaign' => $validated['utm_campaign'] ?? null,
+                    'source'   => $sourceData['utm_source'] ?? null,
+                    'medium'   => $sourceData['utm_medium'] ?? null,
+                    'campaign' => $sourceData['utm_campaign'] ?? null,
+                    'content'  => $sourceData['utm_content'] ?? null,
+                    'term'     => $sourceData['utm_term'] ?? null,
                 ]),
             ],
             null,
@@ -129,7 +139,7 @@ class LeadService
         /** @var Lead $lead */
         $lead = app(CreateLeadAction::class)->execute($leadData);
 
-        if ($business || ! empty($sourceData['type'])) {
+        if ($business) {
             $this->sourceService->record($lead, $business, $sourceData);
         }
 

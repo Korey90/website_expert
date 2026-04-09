@@ -1,5 +1,6 @@
 # Plan architektury SaaS — Digital Growth OS
-> Data: 2026-03-31 | Bazuje na: `docs/project-analysis.md`
+> Data: 2026-04-03 (aktualizacja) | Bazuje na: `docs/project-analysis.md`
+> **Status implementacji**: BusinessProfile ✅ | LandingPages ✅ | Leads ~80% | CRM ✅ | Billing ❌ | Automations ✅
 
 ---
 

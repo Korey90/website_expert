@@ -52,7 +52,7 @@ export default function About({ data }) {
     const body     = d.body     || DEFAULTS.body[locale]     || DEFAULTS.body.en;
 
     return (
-        <section id="o-nas" className="py-20 flex items-center min-h-screen md:py-28 bg-white dark:bg-neutral-950">
+        <section id="o-nas" className="py-16 sm:py-20 md:py-28 bg-white dark:bg-neutral-950">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
@@ -71,11 +71,11 @@ export default function About({ data }) {
                         />
 
                         {/* Stats */}
-                        <div className="grid grid-cols-3 gap-4 mt-10">
+                        <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-10">
                             {stats.map((s, i) => (
-                                <div key={i} className="text-center p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900">
-                                    <p className="font-display text-3xl font-extrabold text-brand-500">{s.value}</p>
-                                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">{t(s, 'label')}</p>
+                                <div key={i} className="text-center p-2 sm:p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900 overflow-hidden min-w-0">
+                                    <p className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold text-brand-500 truncate">{s.value}</p>
+                                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-tight">{t(s, 'label')}</p>
                                 </div>
                             ))}
                         </div>
@@ -96,11 +96,15 @@ export default function About({ data }) {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 reveal">
                         {highlights.map((v, i) => (
                             <div key={i} className="p-5 rounded-2xl border border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 hover:border-brand-500/50 transition-colors group">
-                                <div className="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center mb-3 group-hover:bg-brand-500/20 transition-colors">
-                                    {ICONS[i % ICONS.length]}
+                                <div className="flex items-start gap-3 sm:block">
+                                    <div className="shrink-0 w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center sm:mb-3 group-hover:bg-brand-500/20 transition-colors">
+                                        {ICONS[i % ICONS.length]}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-neutral-900 dark:text-white mb-1">{t(v, 'title')}</h3>
+                                        <p className="text-sm text-neutral-500 dark:text-neutral-400">{t(v, 'body')}</p>
+                                    </div>
                                 </div>
-                                <h3 className="font-semibold text-neutral-900 dark:text-white mb-1">{t(v, 'title')}</h3>
-                                <p className="text-sm text-neutral-500 dark:text-neutral-400">{t(v, 'body')}</p>
                             </div>
                         ))}
                     </div>

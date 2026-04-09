@@ -10,7 +10,6 @@ use App\Http\Controllers\LandingPage\LandingPageController;
 use App\Http\Controllers\LandingPage\LandingPageSectionController;
 use App\Http\Controllers\LandingPage\PublicLandingPageController;
 use App\Http\Controllers\Onboarding\OnboardingController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CalculatorLeadController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\InvoicePdfController;
@@ -19,6 +18,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\PayuWebhookController;
 use App\Http\Controllers\Portal\ContractController as PortalContractController;
 use App\Http\Controllers\Portal\DashboardController as PortalDashboardController;
+use App\Http\Controllers\Portal\LeadController as PortalLeadController;
 use App\Http\Controllers\Portal\InvoiceController as PortalInvoiceController;
 use App\Http\Controllers\Portal\NotificationController as PortalNotificationController;
 use App\Http\Controllers\Portal\PaymentController as PortalPaymentController;
@@ -27,6 +27,7 @@ use App\Http\Controllers\Portal\ProjectController as PortalProjectController;
 use App\Http\Controllers\Portal\QuoteController as PortalQuoteController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SocialAccountController;
 use App\Http\Controllers\EmailTemplatePreviewController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StripeWebhookController;
@@ -82,15 +83,20 @@ Route::post('/leads', [LeadCaptureController::class, 'store'])
 // Stripe webhook — CSRF exempt (see bootstrap/app.php)
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
+// Stripe subscription webhook (SaaS plan lifecycle) — CSRF exempt
+Route::post('/stripe/subscription/webhook', [\App\Http\Controllers\Billing\SubscriptionWebhookController::class, 'handle'])->name('stripe.subscription.webhook');
+
 // PayU IPN — CSRF exempt (see bootstrap/app.php)
 Route::post('/payu/notify', [PayuWebhookController::class, 'notify'])->name('payu.notify');
-
-Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::delete('/profile/social/{provider}', [SocialAccountController::class, 'destroy'])->name('profile.social.unlink');
+    Route::get('/profile/social/{provider}/connect', [\App\Http\Controllers\Auth\SocialAuthController::class, 'connect'])
+        ->name('profile.social.connect')
+        ->where('provider', 'google|facebook');
 
     Route::get('/invoices/{invoice}/pdf', InvoicePdfController::class)->name('invoice.pdf');
 
@@ -119,6 +125,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/quotes/{quote}/accept', [PortalQuoteController::class, 'accept'])->name('quotes.accept');
         Route::post('/quotes/{quote}/reject', [PortalQuoteController::class, 'reject'])->name('quotes.reject');
 
+        Route::get('/leads/{lead}', [PortalLeadController::class, 'show'])->name('leads.show');
+
         Route::get('/contracts', [PortalContractController::class, 'index'])->name('contracts');
         Route::get('/contracts/{contract}', [PortalContractController::class, 'show'])->name('contracts.show');
         Route::post('/contracts/{contract}/sign', [PortalContractController::class, 'sign'])->name('contracts.sign');
@@ -126,6 +134,12 @@ Route::middleware('auth')->group(function () {
         // Communication preferences
         Route::get('/settings/notifications', [PortalNotificationController::class, 'settings'])->name('settings.notifications');
         Route::post('/settings/notifications', [PortalNotificationController::class, 'updateSettings'])->name('settings.notifications.update');
+
+        // Billing (SaaS plan management)
+        Route::get('/billing', [\App\Http\Controllers\Portal\BillingController::class, 'index'])->name('billing');
+        Route::post('/billing/checkout/{plan}', [\App\Http\Controllers\Portal\BillingController::class, 'checkout'])->name('billing.checkout');
+        Route::get('/billing/success', [\App\Http\Controllers\Portal\BillingController::class, 'success'])->name('billing.success');
+        Route::post('/billing/portal', [\App\Http\Controllers\Portal\BillingController::class, 'portal'])->name('billing.portal');
     });
 
     // Email template preview (admin only)
@@ -189,9 +203,9 @@ Route::middleware(['auth', 'verified', 'has.business'])->group(function () {
     });
 
     // -----------------------------------------------------------------------
-    // Landing Pages (authenticated, has.business)
+    // Landing Pages (authenticated, has.business) — live under /portal
     // -----------------------------------------------------------------------
-    Route::middleware('landing-page.tenant')->prefix('landing-pages')->name('landing-pages.')->group(function () {
+    Route::middleware('landing-page.tenant')->prefix('portal/landing-pages')->name('landing-pages.')->group(function () {
         Route::get('/',                                 [LandingPageController::class, 'index'])->name('index');
         Route::get('/create',                           [LandingPageController::class, 'create'])->name('create');
         Route::get('/ai/create',                        [LandingPageController::class, 'createWithAi'])->name('ai.create');

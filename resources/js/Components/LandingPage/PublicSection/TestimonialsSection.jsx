@@ -29,14 +29,14 @@ export default function TestimonialsSection({ content = {}, settings = {} }) {
             <SectionHeading title={content.headline} align="center" />
 
                 {items.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
                         {items.map((item, i) => (
                             <blockquote
                                 key={i}
-                                className="flex h-full flex-col gap-4 rounded-[1.75rem] border border-gray-100 bg-gray-50 p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900/80"
+                                className="flex h-full flex-col gap-3 sm:gap-4 rounded-2xl sm:rounded-[1.75rem] border border-gray-100 bg-gray-50 p-4 sm:p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900/80"
                             >
                                 <StarRating rating={item.rating ?? 5} />
-                                <p className="flex-1 text-gray-600 dark:text-gray-300 text-sm leading-relaxed italic">
+                                <p className="flex-1 text-gray-600 dark:text-gray-300 text-sm leading-relaxed sm:leading-7 italic">
                                     &ldquo;{item.text}&rdquo;
                                 </p>
                                 <footer className="flex items-center gap-3">

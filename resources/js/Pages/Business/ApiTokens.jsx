@@ -1,6 +1,6 @@
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useRef } from 'react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PortalLayout from '@/Layouts/PortalLayout';
 import ApiTokenCard from '@/Components/Lead/ApiTokenCard';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
@@ -79,7 +79,7 @@ function NewTokenAlert({ token, onCopy, copied }) {
  *   tokens    — ApiToken[] (bez token_hash)
  *   newToken  — string|null (jednorazowy flash)
  */
-export default function ApiTokens({ tokens = [], newToken = null }) {
+export default function ApiTokens({ tokens = [], newToken = null, client }) {
     const { flash } = usePage().props;
     const { form, create, copied, copyToClipboard } = useApiTokens();
 
@@ -87,22 +87,17 @@ export default function ApiTokens({ tokens = [], newToken = null }) {
     const successMsg = flash?.success;
 
     return (
-        <AuthenticatedLayout
-            header={
+        <PortalLayout client={client}>
+            <Head title="API Tokens" />
+
+            <div className="max-w-3xl mx-auto space-y-6">
+
                 <div>
-                    <h2 className="font-display text-xl font-semibold text-gray-900 dark:text-white">
-                        API Tokens
-                    </h2>
-                    <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+                    <h1 className="text-2xl font-bold text-gray-900">API Tokens</h1>
+                    <p className="mt-1 text-sm text-gray-500">
                         Allow external forms and tools to capture leads into your account.
                     </p>
                 </div>
-            }
-        >
-            <Head title="API Tokens" />
-
-            <div className="py-6">
-                <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 space-y-6">
 
                     {/* Flash success (token revoked etc.) */}
                     {successMsg && !displayToken && (
@@ -195,8 +190,7 @@ export default function ApiTokens({ tokens = [], newToken = null }) {
                             The token will be shown once after creation. Store it securely.
                         </p>
                     </section>
-                </div>
             </div>
-        </AuthenticatedLayout>
+        </PortalLayout>
     );
 }

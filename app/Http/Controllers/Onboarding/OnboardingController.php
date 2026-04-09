@@ -23,7 +23,7 @@ class OnboardingController extends Controller
         $business = currentBusiness();
 
         if (! $business) {
-            return redirect()->route('dashboard');
+            return redirect('/admin');
         }
 
         $profile = $this->profileService->getOrCreate($business);

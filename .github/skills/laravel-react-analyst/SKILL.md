@@ -4,7 +4,7 @@ description: "Dokladna analiza projektu Laravel 13 + FilamentPHP 3 + Inertia.js 
 
 # Skill: Laravel + React Project Analyst
 
-Jestes ekspertem analizy kodu aplikacji webowych opartych na Laravel 11, FilamentPHP 3, Inertia.js i React + TypeScript.
+Jestes ekspertem analizy kodu aplikacji webowych opartych na Laravel 13, FilamentPHP 3, Inertia.js i React + TypeScript.
 
 ## Jezyk pracy
 Komunikujesz sie wylacznie po polsku. Nazwy klas, metod, plikow, tras i bibliotek pisz w oryginalnym jezyku.
@@ -23,7 +23,6 @@ Przeprowadz dokladna analize projektu i zapisz raport do `docs/project-analysis.
 
 Przeczytaj w tej kolejnosci:
 
-1. `README.md`
 2. `composer.json` — zainstalowane pakiety PHP, wersje
 3. `package.json` — zainstalowane pakiety JS/TS
 4. `docs/` — wszystkie pliki (plany, notatki, poprzednia analiza)

@@ -101,6 +101,13 @@ class LandingPageResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('business.name')
+                    ->label('Business')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable()
+                    ->visible(fn () => auth()->user()?->hasAnyRole(['admin', 'manager', 'developer']) ?? false),
+
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
                     ->sortable(),
@@ -140,6 +147,11 @@ class LandingPageResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('business_id')
+                    ->label('Business')
+                    ->relationship('business', 'name')
+                    ->visible(fn () => auth()->user()?->hasAnyRole(['admin', 'manager', 'developer']) ?? false),
+
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         LandingPage::STATUS_DRAFT     => 'Draft',
@@ -161,11 +173,20 @@ class LandingPageResource extends Resource
     }
 
     // -------------------------------------------------------------------------
-    // Query scope — limit to current tenant
+    // Query scope — admins see all, clients scoped to their tenant
     // -------------------------------------------------------------------------
 
     public static function getEloquentQuery(): Builder
     {
+        $user = auth()->user();
+
+        if ($user && $user->hasAnyRole(['admin', 'manager', 'developer'])) {
+            // Staff see all tenants — bypass BusinessScope GlobalScope
+            return parent::getEloquentQuery()
+                ->withoutGlobalScope(\App\Scopes\BusinessScope::class)
+                ->with('business');
+        }
+
         return parent::getEloquentQuery()
             ->when(currentBusiness(), fn ($q, $b) => $q->where('business_id', $b->id));
     }

@@ -1,5 +1,5 @@
 import PortalLayout from '@/Layouts/PortalLayout';
-import usePortalTrans from '@/hooks/usePortalTrans';
+import usePortalTrans from '@/Hooks/usePortalTrans';
 import { Link } from '@inertiajs/react';
 
 const statusColors = {
@@ -80,6 +80,24 @@ export default function Dashboard({ client, projects, invoices, quotes, timeline
     const pendingInvoices = invoices.filter(i => ['sent', 'overdue'].includes(i.status));
     const activeProjects  = projects.filter(p => p.status === 'active');
     const pendingQuotes   = quotes.filter(q => q.status === 'sent');
+
+    if (!client) {
+        return (
+            <PortalLayout client={null}>
+                <div className="max-w-2xl mx-auto mt-16 text-center space-y-6">
+                    <div className="w-16 h-16 rounded-full bg-yellow-50 flex items-center justify-center text-3xl mx-auto">⏳</div>
+                    <h1 className="text-2xl font-bold text-gray-900">Account activation pending</h1>
+                    <p className="text-gray-500">
+                        Your account has been created. Our team will link your client profile shortly.
+                        You will receive an email confirmation once your portal is fully activated.
+                    </p>
+                    <p className="text-sm text-gray-400">
+                        Questions? Contact us at <a href="mailto:hello@websiteexpert.co.uk" className="text-red-600 hover:underline">hello@websiteexpert.co.uk</a>
+                    </p>
+                </div>
+            </PortalLayout>
+        );
+    }
 
     return (
         <PortalLayout client={client}>

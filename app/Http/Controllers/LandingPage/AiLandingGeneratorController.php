@@ -11,6 +11,7 @@ use App\Http\Requests\LandingPage\GenerateLandingRequest;
 use App\Http\Requests\LandingPage\RegenerateLandingSectionRequest;
 use App\Http\Requests\LandingPage\SaveGeneratedLandingRequest;
 use App\Models\LandingPageGenerationVariant;
+use App\Services\Billing\PlanService;
 use App\Services\LandingPage\GenerateLandingService;
 use Illuminate\Http\JsonResponse;
 
@@ -18,13 +19,28 @@ class AiLandingGeneratorController extends Controller
 {
     public function __construct(
         private readonly GenerateLandingService $generateLandingService,
+        private readonly PlanService $planService,
     ) {}
 
     public function generate(GenerateLandingRequest $request): JsonResponse
     {
+        $business = currentBusiness();
+
+        if (! $this->planService->canUseAiGenerator($business)) {
+            return response()->json([
+                'success'   => false,
+                'error'     => 'plan_limit_reached',
+                'message'   => __('landing_pages.ai.errors.plan_limit_reached', [
+                    'limit'     => $this->planService->getAiGenerationLimit($business),
+                    'upgrade'   => '/portal/billing',
+                ]),
+                'remaining' => 0,
+            ], 429);
+        }
+
         try {
             $variant = $this->generateLandingService->generate(
-                currentBusiness(),
+                $business,
                 $request->user(),
                 GenerateLandingData::fromArray($request->validated()),
             );
@@ -32,10 +48,14 @@ class AiLandingGeneratorController extends Controller
             return $this->errorResponse($exception);
         }
 
+        // Increment AI usage only on success
+        $this->planService->incrementAiCount($business);
+
         return response()->json([
-            'success' => true,
-            'message' => __('landing_pages.ai.messages.generated'),
-            'variant' => $variant,
+            'success'   => true,
+            'message'   => __('landing_pages.ai.messages.generated'),
+            'variant'   => $variant,
+            'remaining' => $this->planService->getRemainingAiGenerations($business),
         ]);
     }
 

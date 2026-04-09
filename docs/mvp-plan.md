@@ -1,9 +1,30 @@
 # MVP Plan — Digital Growth OS
-## Status: AWAITING APPROVAL
-**Data:** 2026-03-31  
+## Status: MVP V1 ZREALIZOWANY — Pracujemy nad MVP V1.1
+**Data:** 2026-04-03 (aktualizacja)  
 **Rola:** CTO  
 **Bazuje na:** `docs/project-analysis.md`, `docs/architecture-plan.md`, `docs/refactor-plan.md`  
 **Cel MVP (zlecony):** profil firmy → generowanie landing page → publikacja → przechwytywanie leadów → CRM/pipeline
+
+### STATUS WDROŻENIA MVPv1 (2026-04-03):
+| Cel MVP | Status |
+|---|---|
+| Rejestracja → rola `client` → Business autotworzony | ✅ DONE |
+| Business Profile (brand, tone_of_voice, AI context) | ✅ DONE |
+| LP CRUD + sekcje + publikacja | ✅ DONE |
+| AI Generator (OpenAI gpt-4o-mini) | ✅ DONE |
+| Publiczny widok `/lp/{slug}` + formularz lead capture | ✅ DONE |
+| Lead trafia do CRM pipeline | ✅ DONE |
+| Portal klienta z LP module | ✅ DONE |
+| Google OAuth | ✅ DONE |
+| Filament LP Resource (widok all-tenant dla admina) | ✅ DONE |
+
+### POZOSTAŁE DO MVPv1.1 (aktualny sprint):
+1. 🔧 **Fix 4 bugów LP→CRM** — UTM, form_data, lp_captured, AI preview submit
+2. 🔧 **GlobalScope BusinessScope** — aktywacja tenant isolation
+3. 🔧 **LP Analytics** — views_count / conversions_count tracking
+4. 🔧 **Stripe Billing** — plany SaaS (free/pro/agency), trial, limity LP
+5. 🔧 **Plan gates** — `PlanService::canCreateLandingPage()` etc.
+6. 🔧 **AI rate-limit** per business per miesiąc
 
 ---
 

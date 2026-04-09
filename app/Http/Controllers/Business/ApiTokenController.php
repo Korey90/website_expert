@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Portal\BasePortalController;
 use App\Models\ApiToken;
 use App\Services\Leads\ApiTokenService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class ApiTokenController extends Controller
+class ApiTokenController extends BasePortalController
 {
     public function __construct(private readonly ApiTokenService $tokenService) {}
 
@@ -30,6 +30,7 @@ class ApiTokenController extends Controller
 
         return Inertia::render('Business/ApiTokens', [
             'tokens' => $tokens,
+            'client' => $this->clientForUser()?->only('id', 'company_name'),
         ]);
     }
 

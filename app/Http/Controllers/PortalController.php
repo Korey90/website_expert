@@ -28,7 +28,7 @@ class PortalController extends Controller
         $client = $this->clientForUser();
 
         if (! $client) {
-            return redirect()->route('dashboard')
+            return redirect()->route('portal.dashboard')
                 ->with('error', 'No client profile linked to your account.');
         }
 
@@ -66,7 +66,7 @@ class PortalController extends Controller
         $client = $this->clientForUser();
 
         if (! $client) {
-            return redirect()->route('dashboard');
+            return redirect()->route('portal.dashboard');
         }
 
         $projects = Project::where('client_id', $client->id)
@@ -109,7 +109,7 @@ class PortalController extends Controller
         $client = $this->clientForUser();
 
         if (! $client) {
-            return redirect()->route('dashboard');
+            return redirect()->route('portal.dashboard');
         }
 
         $invoices = Invoice::where('client_id', $client->id)
@@ -147,7 +147,7 @@ class PortalController extends Controller
         $client = $this->clientForUser();
 
         if (! $client) {
-            return redirect()->route('dashboard');
+            return redirect()->route('portal.dashboard');
         }
 
         $quotes = Quote::where('client_id', $client->id)
@@ -221,7 +221,7 @@ class PortalController extends Controller
         $client = $this->clientForUser();
 
         if (! $client) {
-            return redirect()->route('dashboard');
+            return redirect()->route('portal.dashboard');
         }
 
         $contracts = Contract::where('client_id', $client->id)

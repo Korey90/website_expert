@@ -39,7 +39,11 @@ export default function Navbar({ auth, data = null }) {
     const [scrolled, setScrolled]     = useState(false);
     const [dark, setDark]             = useState(() => (localStorage.getItem('theme') || 'dark') === 'dark');
     const [langOpen, setLangOpen]     = useState(false);
-    const langRef = useRef(null);
+    const langRef    = useRef(null);
+    const headerRef  = useRef(null);
+    const mobileOpenRef = useRef(false);
+
+    useEffect(() => { mobileOpenRef.current = mobileOpen; }, [mobileOpen]);
 
     const switchLang = (code) => {
         setLangOpen(false);
@@ -52,20 +56,28 @@ export default function Navbar({ auth, data = null }) {
         localStorage.setItem('theme', dark ? 'dark' : 'light');
     }, [dark]);
 
-    // Navbar shadow on scroll
+    // Navbar shadow on scroll + close mobile menu on scroll
     useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > 20);
+        const onScroll = () => {
+            setScrolled(window.scrollY > 20);
+            if (mobileOpenRef.current) setMobileOpen(false);
+        };
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
-    // Close lang dropdown on outside click
+    // Close lang dropdown + mobile menu on outside click
     useEffect(() => {
         const handler = (e) => {
             if (langRef.current && !langRef.current.contains(e.target)) setLangOpen(false);
+            if (headerRef.current && !headerRef.current.contains(e.target)) setMobileOpen(false);
         };
         document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
+        document.addEventListener('touchstart', handler);
+        return () => {
+            document.removeEventListener('mousedown', handler);
+            document.removeEventListener('touchstart', handler);
+        };
     }, []);
 
     const currentLang = langOptions.find(l => l.code === locale) ?? langOptions[0];
@@ -73,8 +85,9 @@ export default function Navbar({ auth, data = null }) {
     return (
         <header
             id="navbar"
+            ref={headerRef}
             className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-                scrolled
+                scrolled || mobileOpen
                     ? 'bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm shadow-sm'
                     : 'bg-transparent'
             }`}
@@ -82,7 +95,7 @@ export default function Navbar({ auth, data = null }) {
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 md:h-20">
 
                 {/* Logo */}
-                <a href={resolveHref('#hero')} className="flex items-center gap-2 group" aria-label="Website Expert – strona główna">
+                <a href={resolveHref('#hero')} className="flex items-center gap-2 shrink-0 group" aria-label="Website Expert – strona główna">
                     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="shrink-0" aria-hidden="true">
                         <rect width="36" height="36" rx="8" className="fill-brand-500" />
                         <path d="M9 12L18 8L27 12V18C27 23.1 22.8 27.7 18 29C13.2 27.7 9 23.1 9 18V12Z" fill="white" opacity="0.2" />
@@ -103,7 +116,7 @@ export default function Navbar({ auth, data = null }) {
                 </ul>
 
                 {/* Right controls */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
 
                     {/* Language switcher */}
                     <div className="relative" ref={langRef}>
@@ -112,10 +125,10 @@ export default function Navbar({ auth, data = null }) {
                             aria-haspopup="listbox"
                             aria-expanded={langOpen}
                             aria-label="Zmień język"
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-semibold text-neutral-600 dark:text-neutral-300 hover:text-brand-500 dark:hover:text-brand-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                            className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-sm font-semibold text-neutral-600 dark:text-neutral-300 hover:text-brand-500 dark:hover:text-brand-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                         >
                             <span aria-hidden="true">{currentLang.flag}</span>
-                            <span>{currentLang.code.toUpperCase()}</span>
+                            <span className="hidden sm:inline">{currentLang.code.toUpperCase()}</span>
                             <svg className="w-3.5 h-3.5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -206,8 +219,14 @@ export default function Navbar({ auth, data = null }) {
             </nav>
 
             {/* Mobile menu */}
-            {mobileOpen && (
-                <div id="mobile-menu" className="md:hidden bg-white dark:bg-neutral-950 border-t border-neutral-100 dark:border-neutral-800 px-4 pb-4">
+            <div
+                id="mobile-menu"
+                aria-hidden={!mobileOpen}
+                className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out border-neutral-100 dark:border-neutral-800 ${
+                    mobileOpen ? 'max-h-150 opacity-100 border-t' : 'max-h-0 opacity-0'
+                }`}
+            >
+                <div className="px-4 pb-5">
                     <ul className="flex flex-col gap-1 pt-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                         {navLinks.map(l => (
                             <li key={l.href}>
@@ -257,7 +276,7 @@ export default function Navbar({ auth, data = null }) {
                         </li>
                     </ul>
                 </div>
-            )}
+            </div>
         </header>
     );
 }

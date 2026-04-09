@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PortalLayout from '@/Layouts/PortalLayout';
 import TemplateCard from '@/Components/LandingPage/TemplateCard';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
@@ -18,7 +18,7 @@ function slugify(str) {
         .replace(/^-+|-+$/g, '');
 }
 
-export default function Create({ templates = [], languages = ['en', 'pl', 'pt'] }) {
+export default function Create({ client, templates = [], languages = ['en', 'pl', 'pt'] }) {
     const { flash } = usePage().props;
     const [step, setStep] = useState(STEPS.template);
 
@@ -55,32 +55,30 @@ export default function Create({ templates = [], languages = ['en', 'pl', 'pt'] 
     const selectedTemplate = templates.find((t) => t.key === data.template_key);
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center gap-3">
-                    <button
-                        type="button"
-                        onClick={() => step === STEPS.details ? setStep(STEPS.template) : router.visit(route('landing-pages.index'))}
-                        className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
-                        aria-label="Back"
-                    >
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                        </svg>
-                    </button>
-                    <h2 className="font-display text-xl font-semibold text-gray-900 dark:text-white">
-                        {step === STEPS.template ? 'Choose a template' : 'Page details'}
-                    </h2>
-                    <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
-                        Step {step} of 2
-                    </span>
-                </div>
-            }
-        >
+        <PortalLayout client={client}>
             <Head title="New Landing Page" />
 
             <div className="py-8">
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-6">
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => step === STEPS.details ? setStep(STEPS.template) : router.visit(route('landing-pages.index'))}
+                            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
+                            aria-label="Back"
+                        >
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                            </svg>
+                        </button>
+                        <h2 className="font-display text-xl font-semibold text-gray-900 dark:text-white">
+                            {step === STEPS.template ? 'Choose a template' : 'Page details'}
+                        </h2>
+                        <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
+                            Step {step} of 2
+                        </span>
+                    </div>
 
                     <div className="overflow-hidden rounded-3xl border border-brand-200/70 bg-gradient-to-br from-brand-50 via-white to-amber-50 shadow-sm dark:border-brand-900/60 dark:from-neutral-900 dark:via-neutral-900 dark:to-brand-950/40">
                         <div className="grid gap-6 px-6 py-6 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
@@ -260,6 +258,6 @@ export default function Create({ templates = [], languages = ['en', 'pl', 'pt'] 
 
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </PortalLayout>
     );
 }

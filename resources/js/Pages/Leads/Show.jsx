@@ -89,7 +89,7 @@ export default function Show({ lead, stages = [], users = [] }) {
             header={
                 <div className="flex items-center gap-3 flex-wrap">
                     <Link
-                        href={route('dashboard')}
+                        href="/admin"
                         className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
                     >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

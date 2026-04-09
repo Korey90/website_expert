@@ -2,23 +2,29 @@
 
 namespace App\Traits;
 
+use App\Scopes\BusinessScope;
+
 /**
- * BelongsToTenant — skeleton for future multi-tenancy GlobalScope enforcement.
+ * BelongsToTenant — multi-tenancy GlobalScope enforcement.
  *
- * MVP behaviour: auto-fill business_id on model creation from currentBusiness().
- * v1.1 behaviour: uncomment addGlobalScope line to enforce per-tenant isolation.
+ * Behaviour:
+ *  - Auto-fill business_id on model creation from currentBusiness().
+ *  - Applies BusinessScope GlobalScope to all queries (tenant isolation).
+ *  - Admin/Filament resources must use withoutGlobalScope(BusinessScope::class)
+ *    where cross-tenant visibility is required.
  */
 trait BelongsToTenant
 {
     public static function bootBelongsToTenant(): void
     {
+        // Auto-fill business_id on creation
         static::creating(function (self $model): void {
             if (empty($model->business_id)) {
                 $model->business_id = currentBusiness()?->id;
             }
         });
 
-        // v1.1: uncomment to activate GlobalScope tenant isolation
-        // static::addGlobalScope(new \App\Scopes\BusinessScope());
+        // Activate GlobalScope tenant isolation (v1.1)
+        static::addGlobalScope(new BusinessScope());
     }
 }

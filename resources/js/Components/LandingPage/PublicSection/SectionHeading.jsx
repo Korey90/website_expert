@@ -8,9 +8,9 @@ export default function SectionHeading({ title, subtitle, align = 'center', inve
     const subtitleClass = invert ? 'text-white/75' : 'text-gray-500 dark:text-gray-400';
 
     return (
-        <header className={['mb-10 flex flex-col gap-4', alignClass, className].join(' ')}>
+        <header className={['mb-6 sm:mb-10 flex flex-col gap-3 sm:gap-4', alignClass, className].join(' ')}>
             {title && (
-                <h2 className={['font-display text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl', titleClass].join(' ')}>
+                <h2 className={['font-display text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-5xl', titleClass].join(' ')}>
                     {title}
                 </h2>
             )}

@@ -14,6 +14,7 @@ use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use App\Filament\Widgets\QuickActionsWidget;
+use App\Filament\Widgets\SaasMetricsWidget;
 use App\Filament\Widgets\StatsOverviewWidget;
 use App\Filament\Widgets\RecentLeadsWidget;
 use App\Filament\Widgets\OverdueInvoicesWidget;
@@ -62,6 +63,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Projects'),
                 NavigationGroup::make('Finance'),
                 NavigationGroup::make('Marketing'),
+                NavigationGroup::make('SaaS Billing')->collapsed(),
                 NavigationGroup::make('Settings')->collapsed(),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
@@ -90,6 +92,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 QuickActionsWidget::class,
+                SaasMetricsWidget::class,
                 StatsOverviewWidget::class,
                 RecentLeadsWidget::class,
                 OverdueInvoicesWidget::class,

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Portal\BasePortalController;
 use App\Http\Requests\Business\UpdateProfileRequest;
 use App\Services\Business\BusinessProfileService;
 use Illuminate\Http\JsonResponse;
@@ -10,7 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class BusinessProfileController extends Controller
+class BusinessProfileController extends BasePortalController
 {
     public function __construct(
         private readonly BusinessProfileService $profileService,
@@ -30,6 +30,7 @@ class BusinessProfileController extends Controller
             'isComplete'   => $this->profileService->isComplete($profile),
             'industries'   => config('business.industries'),
             'tonesOfVoice' => config('business.tones_of_voice'),
+            'client'       => $this->clientForUser()?->only('id', 'company_name'),
         ]);
     }
 

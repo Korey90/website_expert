@@ -76,6 +76,7 @@ class LeadResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('business.name')->label('Business')->searchable()->sortable()->placeholder('—'),
                 Tables\Columns\TextColumn::make('client.company_name')->label('Client')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('stage.name')->label('Stage')->badge(),
                 Tables\Columns\TextColumn::make('value')->money('GBP')->sortable(),
@@ -143,7 +144,9 @@ class LeadResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->withTrashed();
+        return parent::getEloquentQuery()
+            ->withTrashed()
+            ->when(currentBusiness(), fn ($q, $b) => $q->where('business_id', $b->id));
     }
 }
 

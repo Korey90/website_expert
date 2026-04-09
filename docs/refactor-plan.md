@@ -1,8 +1,23 @@
 # Refactor Plan — Digital Growth OS
-## Status: AWAITING APPROVAL
-**Data:** 2025-01  
-**Kontekst:** Pre-SaaS refaktoryzacja przed implementacją multi-tenancy i nowych modułów  
+## Status: APPROVED — W REALIZACJI
+**Data:** 2026-04-03 (aktualizacja)  
+**Kontekst:** Pre-SaaS refaktoryzacja — service layer + GlobalScope + Stripe Billing  
 **Powiązane dokumenty:** `docs/project-analysis.md`, `docs/architecture-plan.md`
+
+### ZREALIZOWANE (od ostatniej aktualizacji):
+- ✅ `app/Services/Business/BusinessProfileService.php` — istnieje
+- ✅ `app/Services/Business/BusinessService.php` — istnieje
+- ✅ `app/Services/LandingPage/*` (5 serwisów) — zaimplementowane
+- ✅ `app/Services/Account/AccountDeletionService.php` — zaimplementowany
+- ✅ `LandingPageResource.php` — poprawiony scope dla ról admin/manager/developer
+- ✅ Portal LP pages (`PortalLayout`) — zmigrated
+
+### TODO W SPRINCIE (kolejność wdrożenia):
+1. `app/Scopes/BusinessScope.php` — aktywacja GlobalScope tenant isolation
+2. Fix 4 bugów LP→CRM (UTM, form_data, lp_captured, preview)
+3. LP Analytics (views_count / conversions_count increment)
+4. `PaymentNotificationService` — usunąć duplikat Mail+SMS z Stripe+PayU
+5. Stripe Billing (Laravel Cashier) — plany SaaS
 
 ---
 

@@ -91,17 +91,33 @@ class LandingPageJsonNormalizer
             ],
             'features' => [
                 'headline' => $this->cleanText((string) ($content['headline'] ?? 'Why choose us?'), 140),
-                'items' => array_values(array_slice(array_map(function ($item) {
-                    return [
-                        'icon' => $this->cleanText((string) ($item['icon'] ?? 'check'), 30),
-                        'title' => $this->cleanText((string) ($item['title'] ?? 'Benefit'), 80),
-                        'description' => $this->cleanText((string) ($item['description'] ?? ''), 220),
+                'items' => (function () use ($content): array {
+                    $items = array_values(array_slice(array_map(function ($item) {
+                        if (! is_array($item)) {
+                            return ['icon' => 'check', 'title' => (string) $item, 'description' => ''];
+                        }
+
+                        return [
+                            'icon' => $this->cleanText((string) ($item['icon'] ?? 'check'), 30),
+                            'title' => $this->cleanText((string) ($item['title'] ?? 'Benefit'), 80),
+                            'description' => $this->cleanText((string) ($item['description'] ?? ''), 220),
+                        ];
+                    }, is_array($content['items'] ?? null) ? $content['items'] : []), 0, 6));
+
+                    return $items !== [] ? $items : [
+                        ['icon' => 'check', 'title' => 'Quality', 'description' => ''],
+                        ['icon' => 'star', 'title' => 'Value', 'description' => ''],
+                        ['icon' => 'bolt', 'title' => 'Speed', 'description' => ''],
                     ];
-                }, is_array($content['items'] ?? null) ? $content['items'] : []), 0, 6)),
+                })(),
             ],
             'testimonials' => [
                 'headline' => $this->cleanText((string) ($content['headline'] ?? 'Trusted by clients'), 140),
                 'items' => array_values(array_slice(array_map(function ($item) {
+                    if (! is_array($item)) {
+                        return ['author' => '', 'company' => '', 'text' => (string) $item, 'rating' => 5, 'avatar_path' => null];
+                    }
+
                     return [
                         'author' => $this->cleanText((string) ($item['author'] ?? ''), 80),
                         'company' => $this->cleanText((string) ($item['company'] ?? ''), 120),
@@ -117,23 +133,37 @@ class LandingPageJsonNormalizer
                 'cta_text' => $this->cleanText((string) ($content['cta_text'] ?? 'Contact us'), 60),
                 'cta_url' => (string) ($content['cta_url'] ?? '#form'),
             ],
-            'form' => [
-                'headline' => $this->cleanText((string) ($content['headline'] ?? 'Get in touch'), 140),
-                'subheadline' => $this->cleanText((string) ($content['subheadline'] ?? 'We will get back to you shortly.'), 220),
-                'fields' => $this->normalizeFormFields($content['fields'] ?? ['name', 'email', 'phone', 'message']),
-                'required' => $this->normalizeFormRequired($content['required'] ?? ['name', 'email']),
-                'cta_text' => $this->cleanText((string) ($content['cta_text'] ?? 'Send'), 60),
-                'success_message' => $this->cleanText((string) ($content['success_message'] ?? 'Thank you, we will contact you shortly.'), 220),
-                'redirect_url' => $content['redirect_url'] ?? null,
-            ],
+            'form' => (function () use ($content): array {
+                $fields = $this->normalizeFormFields($content['fields'] ?? ['name', 'email', 'phone', 'message']);
+                return [
+                    'headline' => $this->cleanText((string) ($content['headline'] ?? 'Get in touch'), 140),
+                    'subheadline' => $this->cleanText((string) ($content['subheadline'] ?? 'We will get back to you shortly.'), 220),
+                    'fields' => $fields,
+                    'required' => $this->normalizeFormRequired($content['required'] ?? ['name', 'email'], $fields),
+                    'cta_text' => $this->cleanText((string) ($content['cta_text'] ?? 'Send'), 60),
+                    'success_message' => $this->cleanText((string) ($content['success_message'] ?? 'Thank you, we will contact you shortly.'), 220),
+                    'redirect_url' => $content['redirect_url'] ?? null,
+                ];
+            })(),
             'faq' => [
                 'headline' => $this->cleanText((string) ($content['headline'] ?? 'Frequently asked questions'), 140),
-                'items' => array_values(array_slice(array_map(function ($item) {
-                    return [
-                        'question' => $this->cleanText((string) ($item['question'] ?? ''), 180),
-                        'answer' => $this->cleanText((string) ($item['answer'] ?? ''), 400),
+                'items' => (function () use ($content): array {
+                    $items = array_values(array_slice(array_map(function ($item) {
+                        if (! is_array($item)) {
+                            return ['question' => (string) $item, 'answer' => ''];
+                        }
+
+                        return [
+                            'question' => $this->cleanText((string) ($item['question'] ?? ''), 180),
+                            'answer' => $this->cleanText((string) ($item['answer'] ?? ''), 400),
+                        ];
+                    }, is_array($content['items'] ?? null) ? $content['items'] : []), 0, 8));
+
+                    return $items !== [] ? $items : [
+                        ['question' => 'How does it work?', 'answer' => ''],
+                        ['question' => 'What is included?', 'answer' => ''],
                     ];
-                }, is_array($content['items'] ?? null) ? $content['items'] : []), 0, 8)),
+                })(),
             ],
             'text' => [
                 'headline' => $this->cleanText((string) ($content['headline'] ?? ''), 140),
@@ -252,6 +282,16 @@ class LandingPageJsonNormalizer
     {
         $allowed = ['name', 'email', 'phone', 'message'];
         $fields = is_array($fields) ? $fields : ['name', 'email', 'phone', 'message'];
+        $fields = array_values(array_filter(array_map(function (mixed $field): string {
+            if (is_string($field)) {
+                return $field;
+            }
+            if (is_array($field)) {
+                return (string) ($field['type'] ?? $field['name'] ?? $field['id'] ?? '');
+            }
+
+            return '';
+        }, $fields)));
         $fields = array_values(array_intersect($fields, $allowed));
 
         return $fields !== [] ? $fields : ['name', 'email', 'phone', 'message'];
@@ -260,18 +300,26 @@ class LandingPageJsonNormalizer
     /**
      * @return list<string>
      */
-    private function normalizeFormRequired(mixed $required): array
+    private function normalizeFormRequired(mixed $required, array $fields = ['name', 'email', 'phone', 'message']): array
     {
-        $allowed = ['name', 'email', 'phone', 'message'];
         $required = is_array($required) ? $required : ['name', 'email'];
-        $required = array_values(array_intersect($required, $allowed));
+        $required = array_values(array_filter(array_map(function (mixed $field): string {
+            if (is_string($field)) {
+                return $field;
+            }
+            if (is_array($field)) {
+                return (string) ($field['type'] ?? $field['name'] ?? $field['id'] ?? '');
+            }
 
-        if (! in_array('name', $required, true)) {
-            $required[] = 'name';
-        }
+            return '';
+        }, $required)));
 
-        if (! in_array('email', $required, true)) {
-            $required[] = 'email';
+        // Required must be a subset of the actual fields present
+        $required = array_values(array_intersect($required, $fields));
+
+        // Guarantee at least one field is required
+        if ($required === []) {
+            $required = in_array('email', $fields, true) ? ['email'] : [$fields[0]];
         }
 
         return array_values(array_unique($required));

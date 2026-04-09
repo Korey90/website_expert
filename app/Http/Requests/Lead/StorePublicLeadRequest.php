@@ -11,6 +11,12 @@ class StorePublicLeadRequest extends LeadCaptureRequest
         return array_merge(parent::rules(), [
             'landing_page_slug' => ['required', 'string', 'max:255'],
             'consent'           => ['nullable', 'boolean'],
+            // UTM parameters from FormSection.jsx POST body
+            'utm_source'        => ['nullable', 'string', 'max:255'],
+            'utm_medium'        => ['nullable', 'string', 'max:255'],
+            'utm_campaign'      => ['nullable', 'string', 'max:255'],
+            'utm_content'       => ['nullable', 'string', 'max:255'],
+            'utm_term'          => ['nullable', 'string', 'max:255'],
         ]);
     }
 

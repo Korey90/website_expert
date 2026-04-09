@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Portal\BasePortalController;
 use App\Http\Requests\Business\UpdateBusinessRequest;
 use App\Services\Business\BusinessService;
 use Illuminate\Http\JsonResponse;
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class BusinessController extends Controller
+class BusinessController extends BasePortalController
 {
     public function __construct(
         private readonly BusinessService $businessService,
@@ -28,6 +28,7 @@ class BusinessController extends Controller
                 ['logo_url' => $business->logo_url]
             ),
             'profile' => $business->profile,
+            'client'  => $this->clientForUser()?->only('id', 'company_name'),
         ]);
     }
 

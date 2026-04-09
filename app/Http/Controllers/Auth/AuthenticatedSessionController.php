@@ -33,7 +33,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = $request->user();
+        $fallback = $user->hasRole('client')
+            ? route('portal.dashboard', absolute: false)
+            : '/admin';
+
+        return redirect()->intended($fallback);
     }
 
     /**

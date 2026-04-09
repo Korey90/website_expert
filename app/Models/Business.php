@@ -25,6 +25,8 @@ class Business extends Model
         'is_active',
         'trial_ends_at',
         'stripe_customer_id',
+        'stripe_subscription_id',
+        'stripe_subscription_status',
         'settings',
     ];
 

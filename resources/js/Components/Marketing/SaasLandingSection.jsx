@@ -112,23 +112,24 @@ export default function SaasLandingSection() {
     const primaryHref = isAuthenticated ? route('landing-pages.ai.create') : route('register');
 
     return (
-        <section id="saas-landing" className="relative overflow-hidden bg-neutral-950 py-20 text-white md:py-28">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,43,23,0.18),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_28%)]" aria-hidden="true" />
-            <div className="absolute left-1/2 top-8 h-72 w-72 -translate-x-1/2 rounded-full bg-brand-500/15 blur-3xl" aria-hidden="true" />
+        <section id="saas-landing" className="relative overflow-hidden bg-white py-20 text-neutral-900 dark:bg-neutral-950 dark:text-white md:py-28">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,43,23,0.12),transparent_34%)]" aria-hidden="true" />
+            <div className="absolute inset-0 hidden dark:block bg-[radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_28%)]" aria-hidden="true" />
+            <div className="absolute left-1/2 top-8 h-72 w-72 -translate-x-1/2 rounded-full bg-brand-500/10 blur-3xl dark:bg-brand-500/15" aria-hidden="true" />
 
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1.15fr)_420px]">
                     <div className="reveal">
-                        <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] text-white/72">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-neutral-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] text-neutral-600 dark:border-white/15 dark:bg-white/5 dark:text-white/72">
                             <span className="h-2 w-2 rounded-full bg-brand-500" />
                             {t(DEFAULTS.badge)}
                         </span>
 
-                        <h2 className="mt-6 max-w-4xl font-display text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-5xl lg:text-6xl">
+                        <h2 className="mt-6 max-w-4xl font-display text-4xl font-black leading-[1.02] tracking-tight text-neutral-900 dark:text-white sm:text-5xl lg:text-6xl">
                             {t(DEFAULTS.title)}
                         </h2>
 
-                        <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
+                        <p className="mt-6 max-w-3xl text-lg leading-8 text-neutral-600 dark:text-white/72">
                             {t(DEFAULTS.subtitle)}
                         </p>
 
@@ -145,7 +146,7 @@ export default function SaasLandingSection() {
 
                             <a
                                 href="#kontakt"
-                                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-7 py-4 text-sm font-bold text-white/86 transition-all hover:border-brand-500/60 hover:bg-white/8"
+                                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-300 bg-neutral-100 px-7 py-4 text-sm font-bold text-neutral-700 transition-all hover:border-brand-500/60 hover:bg-neutral-200 dark:border-white/15 dark:bg-white/5 dark:text-white/86 dark:hover:bg-white/8"
                             >
                                 {t(DEFAULTS.secondaryCta)}
                             </a>
@@ -153,25 +154,25 @@ export default function SaasLandingSection() {
 
                         <div className="mt-10 grid gap-3 sm:grid-cols-3">
                             {DEFAULTS.points.map((point) => (
-                                <div key={point.en} className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-                                    <div className="mb-3 h-10 w-10 rounded-2xl bg-brand-500/15 p-2 text-brand-300">
+                                <div key={point.en} className="flex items-start gap-3 rounded-3xl border border-neutral-200 bg-neutral-50 p-4 dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-sm">
+                                    <div className="shrink-0 h-9 w-9 rounded-2xl bg-brand-500/10 p-2 text-brand-600 dark:bg-brand-500/15 dark:text-brand-300">
                                         <svg className="h-full w-full" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                                         </svg>
                                     </div>
-                                    <p className="text-sm leading-6 text-white/72">{t(point)}</p>
+                                    <p className="text-sm leading-6 text-neutral-600 dark:text-white/72">{t(point)}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
 
                     <div className="reveal lg:sticky lg:top-24">
-                        <div className="overflow-hidden rounded-4xl border border-white/10 bg-white/6 shadow-2xl shadow-black/20 backdrop-blur">
-                            <div className="border-b border-white/10 px-5 py-4">
-                                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/45">{t(DEFAULTS.flowLabel)}</p>
+                        <div className="overflow-hidden rounded-4xl border border-neutral-200 bg-white shadow-2xl shadow-neutral-300/40 dark:border-white/10 dark:bg-white/6 dark:shadow-black/20 dark:backdrop-blur">
+                            <div className="border-b border-neutral-200 px-5 py-4 dark:border-white/10">
+                                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500 dark:text-white/45">{t(DEFAULTS.flowLabel)}</p>
                                 <div className="mt-3 flex flex-wrap gap-2">
                                     {DEFAULTS.flowSteps.map((step) => (
-                                        <span key={step.en} className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium text-white/72">
+                                        <span key={step.en} className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600 dark:border-white/10 dark:bg-black/20 dark:text-white/72">
                                             {t(step)}
                                         </span>
                                     ))}
@@ -185,20 +186,20 @@ export default function SaasLandingSection() {
                                         className={[
                                             'rounded-3xl border p-5 transition-colors',
                                             index === 1
-                                                ? 'border-brand-500/35 bg-brand-500/12'
-                                                : 'border-white/10 bg-black/20',
+                                                ? 'border-brand-500/50 bg-brand-50 dark:border-brand-500/35 dark:bg-brand-500/12'
+                                                : 'border-neutral-200 bg-neutral-50 dark:border-white/10 dark:bg-black/20',
                                         ].join(' ')}
                                     >
                                         <div className="flex items-start justify-between gap-4">
                                             <div>
-                                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-300/90">{pillar.eyebrow}</p>
-                                                <h3 className="mt-2 text-xl font-semibold text-white">{t(pillar.title)}</h3>
+                                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-600 dark:text-brand-300/90">{pillar.eyebrow}</p>
+                                                <h3 className="mt-2 text-xl font-semibold text-neutral-900 dark:text-white">{t(pillar.title)}</h3>
                                             </div>
-                                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-white/55">
+                                            <span className="rounded-full border border-neutral-200 bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-500 dark:border-white/10 dark:bg-white/5 dark:text-white/55">
                                                 SaaS
                                             </span>
                                         </div>
-                                        <p className="mt-4 text-sm leading-6 text-white/68">{t(pillar.body)}</p>
+                                        <p className="mt-4 text-sm leading-6 text-neutral-600 dark:text-white/68">{t(pillar.body)}</p>
                                     </article>
                                 ))}
                             </div>

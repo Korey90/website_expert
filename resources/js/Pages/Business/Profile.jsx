@@ -1,5 +1,5 @@
 import { useForm, usePage, Head, Link } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PortalLayout from '@/Layouts/PortalLayout';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
 import TextInput from '@/Components/TextInput';
@@ -19,7 +19,7 @@ import ProfileCompletionBar from '@/Components/Business/ProfileCompletionBar';
  *   tonesOfVoice   — Record<string, string>
  *   completion     — { complete: bool, percentage: number, missing: string[] }
  */
-export default function BusinessProfile({ profile, business, isComplete, industries, tonesOfVoice, completion }) {
+export default function BusinessProfile({ profile, business, isComplete, industries, tonesOfVoice, completion, client }) {
     const { flash } = usePage().props;
 
     const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
@@ -63,30 +63,27 @@ export default function BusinessProfile({ profile, business, isComplete, industr
     );
 
     return (
-        <AuthenticatedLayout
-            header={
+        <PortalLayout client={client}>
+            <Head title="Brand Profile" />
+
+            <div className="max-w-3xl mx-auto space-y-6">
+
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+                    <h1 className="text-2xl font-bold text-gray-900">
                         Brand Profile
                         {business?.name && (
-                            <span className="ml-2 text-base font-normal text-gray-400 dark:text-gray-500">
-                                {business.name}
+                            <span className="ml-2 text-lg font-normal text-gray-400">
+                                — {business.name}
                             </span>
                         )}
-                    </h2>
+                    </h1>
                     <Link
                         href={route('business.edit')}
-                        className="text-sm text-brand-600 dark:text-brand-400 hover:underline"
+                        className="text-sm text-red-600 hover:underline"
                     >
                         ← Business settings
                     </Link>
                 </div>
-            }
-        >
-            <Head title="Brand Profile" />
-
-            <div className="py-10">
-                <div className="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
 
                     {/* Completion bar */}
                     {completion && (
@@ -316,8 +313,7 @@ export default function BusinessProfile({ profile, business, isComplete, industr
                             </PrimaryButton>
                         </div>
                     </form>
-                </div>
             </div>
-        </AuthenticatedLayout>
+        </PortalLayout>
     );
 }

@@ -58,14 +58,14 @@ export default function Portfolio({ data }) {
     const items        = extra.items ?? DEFAULTS.items;
 
     return (
-        <section id="portfolio" className="py-20 flex items-center h-screen md:py-28 bg-neutral-50 dark:bg-neutral-900">
+        <section id="portfolio" className="py-16 sm:py-20 md:py-28 bg-neutral-50 dark:bg-neutral-900">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-14 reveal">
+                <div className="text-center mb-10 sm:mb-14 reveal">
                     <span className="section-label">{sectionLabel}</span>
-                    <h2 className="font-display text-3xl sm:text-4xl font-bold mt-3 text-neutral-900 dark:text-white">
+                    <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold mt-3 text-neutral-900 dark:text-white">
                         {title}
                     </h2>
-                    <p className="mt-4 text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto">
+                    <p className="mt-3 sm:mt-4 text-sm sm:text-base text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto">
                         {subtitle}
                     </p>
                 </div>
@@ -83,7 +83,7 @@ export default function Portfolio({ data }) {
                         return (
                             <article key={i} className="group rounded-2xl overflow-hidden border border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-950 hover:shadow-xl dark:hover:shadow-neutral-900 transition-all">
                                 {/* Thumbnail */}
-                                <div className={`aspect-video relative overflow-hidden ${!p.image ? `bg-gradient-to-br ${GRADIENTS[i % GRADIENTS.length]}` : 'bg-neutral-200 dark:bg-neutral-800'}`}>
+                                <div className={`aspect-video relative overflow-hidden ${!p.image ? `bg-linear-to-br ${GRADIENTS[i % GRADIENTS.length]}` : 'bg-neutral-200 dark:bg-neutral-800'}`}>
                                     {p.image ? (
                                         <img
                                             src={p.image}
@@ -93,7 +93,7 @@ export default function Portfolio({ data }) {
                                         />
                                     ) : null}
                                     {/* Tag overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                                    <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent" />
                                     <div className="absolute bottom-0 left-0 p-4">
                                         <span className="inline-block px-2.5 py-1 rounded-md text-xs font-semibold bg-black/40 backdrop-blur-sm text-white ring-1 ring-white/20">
                                             {itemTag}

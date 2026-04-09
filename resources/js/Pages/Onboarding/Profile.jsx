@@ -183,7 +183,7 @@ export default function OnboardingProfile({ business, profile, step, totalSteps,
                         {/* Actions */}
                         <div className="flex items-center justify-between pt-2">
                             <Link
-                                href={route('dashboard')}
+                                href={route('portal.dashboard')}
                                 className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline-offset-2 hover:underline"
                             >
                                 Skip for now
