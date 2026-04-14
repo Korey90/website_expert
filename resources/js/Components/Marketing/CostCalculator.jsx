@@ -445,7 +445,7 @@ export default function CostCalculator({ data = null, pricing: pricingProp = nul
     };
 
     return (
-        <section id="kalkulator" className="py-20 md:py-28 bg-white dark:bg-neutral-950">
+        <section id="calculate" className="py-20 md:py-28 bg-white dark:bg-neutral-950">
             <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12 reveal">
                     <span className="section-label">{sectionLabel}</span>

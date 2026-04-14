@@ -25,7 +25,7 @@ class WelcomeController extends Controller
 
         App::setLocale($locale);
 
-        $sections = SiteSection::whereIn('key', ['hero', 'about', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator_v2', 'navbar', 'contact', 'footer'])
+        $sections = SiteSection::whereIn('key', ['hero', 'about', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator', 'navbar', 'contact', 'footer'])
             ->where('is_active', true)
             ->get()
             ->keyBy('key');
@@ -96,7 +96,7 @@ class WelcomeController extends Controller
             'extra' => $s->extra,
         ] : null;
 
-        $cost_calculator_v2 = $sections->has('cost_calculator_v2') ? true : null;
+        $cost_calculator_v2 = $sections->has('cost_calculator') ? true : null;
 
         $navbar = ($s = $sections->get('navbar')) ? [
             'extra' => $s->extra,

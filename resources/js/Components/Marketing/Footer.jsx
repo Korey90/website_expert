@@ -23,20 +23,20 @@ const NAV_DEFAULTS = [
     {
         title_en: 'Services', title_pl: 'Usługi',
         links: [
-            { label_en: 'Brochure Websites', label_pl: 'Strony wizytówkowe', href: '#oferta' },
-            { label_en: 'E-Commerce Stores', label_pl: 'Sklepy e-commerce',  href: '#oferta' },
-            { label_en: 'SEO',               label_pl: 'SEO',                href: '#oferta' },
-            { label_en: 'Google Ads',        label_pl: 'Google Ads',         href: '#oferta' },
-            { label_en: 'Web Hosting',       label_pl: 'Hosting WWW',        href: '#oferta' },
+            { label_en: 'Brochure Websites', label_pl: 'Strony wizytówkowe', href: '#services' },
+            { label_en: 'E-Commerce Stores', label_pl: 'Sklepy e-commerce',  href: '#services' },
+            { label_en: 'SEO',               label_pl: 'SEO',                href: '#services' },
+            { label_en: 'Google Ads',        label_pl: 'Google Ads',         href: '#services' },
+            { label_en: 'Web Hosting',       label_pl: 'Hosting WWW',        href: '#services' },
         ],
     },
     {
         title_en: 'Company', title_pl: 'Firma',
         links: [
-            { label_en: 'About Us',        label_pl: 'O nas',              href: '#o-nas' },
+            { label_en: 'About Us',        label_pl: 'O nas',              href: '#about' },
             { label_en: 'Portfolio',       label_pl: 'Portfolio',          href: '#portfolio' },
-            { label_en: 'Cost Calculator', label_pl: 'Kalkulator kosztów', href: '#kalkulator' },
-            { label_en: 'Contact',         label_pl: 'Kontakt',            href: '#kontakt' },
+            { label_en: 'Cost Calculator', label_pl: 'Kalkulator kosztów', href: '#calculate' },
+            { label_en: 'Contact',         label_pl: 'Kontakt',            href: '#contact' },
             { label_en: 'Client Portal',   label_pl: 'Portal Klienta',     href: '/portal' },
         ],
     },

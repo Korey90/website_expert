@@ -81,7 +81,7 @@ export default function Contact({ data = null }) {
     };
 
     return (
-        <section id="kontakt" className="py-20 md:py-28 bg-neutral-50 dark:bg-neutral-900">
+        <section id="contact" className="py-20 md:py-28 bg-neutral-50 dark:bg-neutral-900">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 lg:gap-20">
 
                 {/* Info panel */}

@@ -5,11 +5,11 @@ import { usePage, router } from '@inertiajs/react';
 const FLAG = { en: '🇬🇧', pl: '🇵🇱', de: '🇩🇪', fr: '🇫🇷', es: '🇪🇸', pt: '🇵🇹', uk: '🇺🇦' };
 
 const LINK_DEFAULTS = [
-    { href: '#o-nas',      label_en: 'About Us',        label_pl: 'O nas' },
-    { href: '#oferta',     label_en: 'Services',        label_pl: 'Oferta' },
+    { href: '#about',      label_en: 'About Us',        label_pl: 'O nas' },
+    { href: '#services',   label_en: 'Services',        label_pl: 'Oferta' },
     { href: '#portfolio',  label_en: 'Portfolio',       label_pl: 'Portfolio' },
-    { href: '#kalkulator', label_en: 'Cost Calculator', label_pl: 'Kalkulator' },
-    { href: '#kontakt',    label_en: 'Contact',         label_pl: 'Kontakt' },
+    { href: '#calculate',  label_en: 'Cost Calculator', label_pl: 'Kalkulator' },
+    { href: '#contact',    label_en: 'Contact',         label_pl: 'Kontakt' },
 ];
 
 export default function Navbar({ auth, data = null }) {
@@ -21,13 +21,13 @@ export default function Navbar({ auth, data = null }) {
     const extra = data?.extra ?? {};
     const nt    = (key, fb = '') => extra[`${key}_${locale}`] ?? extra[`${key}_en`] ?? fb;
 
-    const rawLinks = Array.isArray(extra.links) ? extra.links : LINK_DEFAULTS;
+    const rawLinks = Array.isArray(extra.links) && extra.links.length > 0 ? extra.links : LINK_DEFAULTS;
     const navLinks = rawLinks.map(l => ({
         href:  resolveHref(l.href),
         label: l[`label_${locale}`] ?? l.label_en ?? l.href,
     }));
     const ctaText = nt('cta_text', locale === 'pl' ? 'Bezpłatna wycena' : 'Free Quote');
-    const ctaHref = resolveHref(extra.cta_href || '#kontakt');
+    const ctaHref = resolveHref(extra.cta_href || '#contact');
 
     const langOptions = Object.entries(available_locales ?? {}).map(([code, label]) => ({
         code,
@@ -95,7 +95,7 @@ export default function Navbar({ auth, data = null }) {
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 md:h-20">
 
                 {/* Logo */}
-                <a href={resolveHref('#hero')} className="flex items-center gap-2 shrink-0 group" aria-label="Website Expert – strona główna">
+                <a href={resolveHref('/#hero')} className="flex items-center gap-2 shrink-0 group" aria-label="Website Expert – strona główna">
                     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="shrink-0" aria-hidden="true">
                         <rect width="36" height="36" rx="8" className="fill-brand-500" />
                         <path d="M9 12L18 8L27 12V18C27 23.1 22.8 27.7 18 29C13.2 27.7 9 23.1 9 18V12Z" fill="white" opacity="0.2" />

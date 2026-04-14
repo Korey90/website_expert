@@ -45,7 +45,7 @@ export default function Services({ data }) {
     const items        = extra.services ?? DEFAULTS.services;
 
     return (
-        <section id="oferta" className="py-20 md:py-28 bg-white dark:bg-neutral-950">
+        <section id="services" className="py-20 md:py-28 bg-white dark:bg-neutral-950">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-14 reveal">
                     <span className="section-label">{sectionLabel}</span>

@@ -52,7 +52,7 @@ export default function About({ data }) {
     const body     = d.body     || DEFAULTS.body[locale]     || DEFAULTS.body.en;
 
     return (
-        <section id="o-nas" className="py-16 sm:py-20 md:py-28 bg-white dark:bg-neutral-950">
+        <section id="about" className="py-16 sm:py-20 md:py-28 bg-white dark:bg-neutral-950">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 

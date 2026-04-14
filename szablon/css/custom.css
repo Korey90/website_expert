@@ -209,6 +209,6 @@ input[type="checkbox"] {
 
 /* ── Print ──────────────────────────────────────────── */
 @media print {
-  header, footer, #kalkulator, #cta-main { display: none; }
+  header, footer, #calculate, #cta-main { display: none; }
   section { page-break-inside: avoid; }
 }

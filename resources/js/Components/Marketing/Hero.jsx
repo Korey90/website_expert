@@ -4,7 +4,7 @@ const DEFAULTS = {
     title:       'Twoja strona.\nTwoj wzrost.\nNasz kod.',
     subtitle:    'Tworzymy strony i aplikacje internetowe dla malych i srednich firm. Od wizytowki po zaawansowany sklep.',
     button_text: 'Sprawdz koszt projektu',
-    button_url:  '#kalkulator',
+    button_url:  '#calculate',
     extra: {
         badge_text_en:             '5-star rated on Google',
         badge_text_pl:             'Oceny 5 gwiazdek w Google',
@@ -79,7 +79,7 @@ export default function Hero({ data }) {
 
                     <div className="mt-8 flex flex-col sm:flex-row gap-3">
                         <a
-                            href={d.button_url ?? '#kalkulator'}
+                            href={d.button_url ?? '#calculate'}
                             className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-500 text-white font-semibold text-base hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/25"
                         >
                             {d.button_text ?? DEFAULTS.button_text}
@@ -150,7 +150,7 @@ export default function Hero({ data }) {
 
             {/* Scroll indicator */}
             <a
-                href="#o-nas"
+                href="#about"
                 className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce text-neutral-400 hover:text-brand-500 transition-colors"
                 aria-label={scrollLabel}
             >

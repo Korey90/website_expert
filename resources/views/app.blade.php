@@ -4,7 +4,46 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'Website Expert') }}</title>
+
+        @php
+            $noIndexPrefixes = ['portal.', 'onboarding.', 'reports.', 'admin.'];
+            $noIndexNames    = [
+                'login', 'register', 'password.request', 'password.reset',
+                'verification.notice', 'profile.edit', 'profile.update', 'profile.destroy',
+                'profile.social.unlink', 'profile.social.connect',
+                'invoice.pdf', 'lead-notes.unpin',
+                'business.edit', 'business.update', 'business.logo.upload', 'business.logo.delete',
+                'business.profile.edit', 'business.profile.update', 'business.profile.completion',
+                'business.api-tokens.index', 'business.api-tokens.store', 'business.api-tokens.destroy',
+                'leads.show', 'leads.assign', 'leads.stage', 'leads.won', 'leads.lost',
+                'notification.follow', 'notification.mark-read',
+                'social.redirect', 'social.callback',
+                'dashboard',
+            ];
+            $currentName = Route::currentRouteName() ?? '';
+            $isNoIndex   = collect($noIndexNames)->contains($currentName)
+                        || collect($noIndexPrefixes)->contains(fn($p) => str_starts_with($currentName, $p));
+        @endphp
+        @if($isNoIndex)
+            <meta name="robots" content="noindex, nofollow">
+        @endif
+        <link rel="canonical" href="{{ url()->current() }}">
+
+        @php
+            $locale = app()->getLocale();
+            $hreflangs = [
+                'en' => 'https://website-expert.uk/',
+                'pl' => 'https://website-expert.uk/',
+                'pt' => 'https://website-expert.uk/',
+            ];
+        @endphp
+        @if(in_array($currentName, ['home']))
+            <link rel="alternate" hreflang="en" href="{{ $hreflangs['en'] }}">
+            <link rel="alternate" hreflang="pl" href="{{ $hreflangs['pl'] }}">
+            <link rel="alternate" hreflang="pt" href="{{ $hreflangs['pt'] }}">
+            <link rel="alternate" hreflang="x-default" href="{{ $hreflangs['en'] }}">
+        @endif
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

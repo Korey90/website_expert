@@ -61,7 +61,21 @@ Route::post('/notification-mark-read', function (Request $request) {
 })->middleware('auth')->name('notification.mark-read');
 
 Route::get('/', WelcomeController::class)->name('home');
-Route::get('/kalkulator', KalkulatorController::class)->name('kalkulator');
+Route::get('/calculate', KalkulatorController::class)->name('kalkulator');
+
+// Sitemap XML — public, no auth
+Route::get('/sitemap.xml', function () {
+    $pages = \App\Models\Page::select('slug', 'updated_at')->get();
+    $content = view('sitemap', [
+        'staticUrls' => [
+            ['loc' => url('/'),            'priority' => '1.0',  'changefreq' => 'weekly'],
+            ['loc' => url('/calculate'),  'priority' => '0.8',  'changefreq' => 'monthly'],
+        ],
+        'pages' => $pages,
+    ])->render();
+    return response($content, 200)->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
 Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');
 Route::get('/{slug}', [PageController::class, 'show'])->name('page.show.clean')
     ->where('slug', 'privacy-policy|terms-and-conditions|cookies|accessibility');

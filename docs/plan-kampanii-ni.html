@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>plan-kampanii-ni.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="plan-kampanii-google-search--northern-ireland-ni">Plan kampanii Google Search — Northern Ireland (NI)</h1>
+<blockquote>
+<p>Data: 2026-04-09<br>
+Domena: https://website-expert.uk/<br>
+Rynek: Northern Ireland (BT postcodes) — język angielski<br>
+Model: Usługi agencji cyfrowej — web design, e-commerce, SEO, Google Ads, Meta Ads<br>
+Bazuje na: <code>docs/project-analysis.md</code>, <code>docs/plan-kampanii.md</code>, analiza kodu źródłowego</p>
+</blockquote>
+<hr>
+<h2 id="audit-seo--stan-obecny-website-expertuk">AUDIT SEO — stan obecny (website-expert.uk)</h2>
+<h3 id="%E2%9C%85-co-dzia%C5%82a-poprawnie">✅ Co działa poprawnie</h3>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Stan</th>
+<th>Szczegóły</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;title&gt;</code> na stronie głównej</td>
+<td>✅ Istnieje</td>
+<td><code>WebsiteExpert – Professional Web Development UK</code></td>
+</tr>
+<tr>
+<td><code>&lt;meta name=&quot;description&quot;&gt;</code> na stronie głównej</td>
+<td>✅ Istnieje</td>
+<td><code>Bespoke web design and development for UK businesses.</code></td>
+</tr>
+<tr>
+<td>GTM (Google Tag Manager)</td>
+<td>✅ Skonfigurowany</td>
+<td>Integracja z GA4 + Meta Pixel — gotowy do kampanii</td>
+</tr>
+<tr>
+<td>Consent Mode v2 (GDPR)</td>
+<td>✅ Zaimplementowany</td>
+<td><code>analytics_storage: denied</code> domyślnie do zgody — zgodny z UK GDPR</td>
+</tr>
+<tr>
+<td>Meta Pixel</td>
+<td>✅ Gotowy</td>
+<td><code>useMetaPixel</code> hook w <code>MarketingLayout</code></td>
+</tr>
+<tr>
+<td><code>dataLayer.js</code></td>
+<td>✅ Gotowy</td>
+<td>Zdarzenia: <code>contact_form_submit</code>, <code>calculator_lead</code> — śledzenie konwersji możliwe</td>
+</tr>
+<tr>
+<td>Wielojęzyczność</td>
+<td>✅ EN/PL/PT</td>
+<td><code>lang={{ str_replace('_', '-', app()-&gt;getLocale()) }}</code> w <code>&lt;html&gt;</code></td>
+</tr>
+<tr>
+<td>Formularz kontaktowy → DB</td>
+<td>✅ Działa</td>
+<td><code>POST /contact</code> → <code>ContactController@store</code> → zapis Lead + email</td>
+</tr>
+<tr>
+<td>Kalkulator → DB</td>
+<td>✅ Działa</td>
+<td><code>POST /calculator-lead</code> → <code>CalculatorLeadController@store</code></td>
+</tr>
+<tr>
+<td>Robots.txt</td>
+<td>✅ Istnieje</td>
+<td><code>public/robots.txt</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E2%9A%A0%EF%B8%8F-problemy-seo-do-naprawy-priorytet-przed-uruchomieniem-kampanii">⚠️ Problemy SEO do naprawy (priorytet przed uruchomieniem kampanii)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Problem</th>
+<th>Priorytet</th>
+<th>Plik do zmiany</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Brak meta description na stronie kalkulatora w języku angielskim</strong> — obecna treść jest po polsku: <code>&quot;Oblicz orientacyjny koszt...&quot;</code></td>
+<td>🔴 WYSOKI</td>
+<td><code>resources/js/Pages/Kalkulator.jsx</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Brak <code>&lt;meta name=&quot;robots&quot;&gt;</code> na stronach auth/portalu</strong> — indexowanie stron <code>/login</code>, <code>/register</code>, <code>/portal/*</code></td>
+<td>🔴 WYSOKI</td>
+<td><code>resources/views/app.blade.php</code> — dodać noindex dla tras auth/portal</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Brak OG tags (Open Graph)</strong> — brak <code>og:title</code>, <code>og:description</code>, <code>og:image</code> na stronie głównej i podstronach usług — wpływa na CTR z social media</td>
+<td>🟡 ŚREDNI</td>
+<td><code>resources/js/Pages/Welcome.jsx</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Brak canonical URL</strong> — żadna strona nie ma <code>&lt;link rel=&quot;canonical&quot;&gt;</code> — ryzyko duplicate content przy wielojęzyczności</td>
+<td>🔴 WYSOKI</td>
+<td><code>resources/views/app.blade.php</code> lub per-page w <code>&lt;Head&gt;</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Title strony głównej nie zawiera lokalizacji NI/Belfast</strong> — dla kampanii lokalnej to krytyczne dla Quality Score</td>
+<td>🔴 WYSOKI</td>
+<td><code>resources/js/Pages/Welcome.jsx</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Brak <code>hreflang</code></strong> — przy 3 językach (EN/PL/PT) Google nie wie którą wersję serwować dla UK/PL/BR</td>
+<td>🟡 ŚREDNI</td>
+<td><code>resources/views/app.blade.php</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Brak strony <code>/sitemap.xml</code></strong> — Google nie ma mapy witryny; route <code>/kalkulator</code> może nie być indeksowany</td>
+<td>🟡 ŚREDNI</td>
+<td>Dodać <code>laravel/sitemap</code> lub ręczną trasę</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong><code>app.blade.php</code> tytuł fallback to <code>'Laravel'</code></strong> — <code>config('app.name', 'Laravel')</code> — jeśli <code>APP_NAME</code> nie ustawione w <code>.env</code>, strona ma tytuł &quot;Laravel&quot;</td>
+<td>🔴 WYSOKI</td>
+<td><code>.env</code>: <code>APP_NAME=&quot;Website Expert&quot;</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Brak <code>&lt;meta name=&quot;geo.region&quot;&gt;</code> i <code>&lt;meta name=&quot;geo.placename&quot;&gt;</code></strong> — dla kampanii lokalnej NI warto dodać</td>
+<td>🟢 NISKI</td>
+<td><code>resources/js/Pages/Welcome.jsx</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Brak <code>&lt;link rel=&quot;icon&quot;&gt;</code> (favicon)</strong> — nie widać w <code>app.blade.php</code></td>
+<td>🟡 ŚREDNI</td>
+<td><code>resources/views/app.blade.php</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="szybkie-poprawki-seo--do-wprowadzenia-przed-kampani%C4%85">Szybkie poprawki SEO — do wprowadzenia przed kampanią</h3>
+<h4 id="1-welcomejsx--nag%C5%82%C3%B3wek-i-meta-pod-ni">1. Welcome.jsx — nagłówek i meta pod NI</h4>
+<pre class="hljs"><code><div><span class="hljs-comment">// resources/js/Pages/Welcome.jsx</span>
+&lt;Head&gt;
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Website Expert – Web Design &amp; SEO Belfast, Northern Ireland<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"description"</span>
+          <span class="hljs-attr">content</span>=<span class="hljs-string">"Professional web design, e-commerce and SEO services in Belfast and across Northern Ireland. Get a free quote today — website-expert.uk"</span> /&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"robots"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"index, follow"</span> /&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"canonical"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"https://website-expert.uk/"</span> /&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">property</span>=<span class="hljs-string">"og:title"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"Website Expert – Web Design Belfast, Northern Ireland"</span> /&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">property</span>=<span class="hljs-string">"og:description"</span>
+          <span class="hljs-attr">content</span>=<span class="hljs-string">"Bespoke websites, e-commerce, SEO and Google Ads for NI businesses. Fast delivery, fixed prices."</span> /&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">property</span>=<span class="hljs-string">"og:url"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"https://website-expert.uk/"</span> /&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">property</span>=<span class="hljs-string">"og:type"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"website"</span> /&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">property</span>=<span class="hljs-string">"og:locale"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"en_GB"</span> /&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"geo.region"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"GB-NIR"</span> /&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"geo.placename"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"Belfast, Northern Ireland"</span> /&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"twitter:card"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"summary_large_image"</span> /&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"twitter:title"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"Website Expert – Web Design Belfast"</span> /&gt;</span></span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"twitter:description"</span>
+          <span class="hljs-attr">content</span>=<span class="hljs-string">"Bespoke web design, SEO and digital marketing for Northern Ireland businesses."</span> /&gt;</span></span>
+&lt;<span class="hljs-regexp">/Head&gt;
+</span></div></code></pre>
+<h4 id="2-appbladephp--noindex-dla-tras-auth-i-portalu">2. app.blade.php — noindex dla tras auth i portalu</h4>
+<pre class="hljs"><code><div>{{-- resources/views/app.blade.php — w &lt;head&gt;, po &lt;meta viewport&gt; --}}
+@php
+    $noIndexRoutes = ['login', 'register', 'password.request', 'password.reset',
+                      'verification.notice', 'profile.edit', 'dashboard'];
+    $isNoIndex = Route::is(...array_merge($noIndexRoutes, ['portal.*', 'onboarding.*']));
+@endphp
+@if($isNoIndex)
+    &lt;meta name=&quot;robots&quot; content=&quot;noindex, nofollow&quot;&gt;
+@else
+    &lt;meta name=&quot;robots&quot; content=&quot;index, follow&quot;&gt;
+@endif
+&lt;link rel=&quot;canonical&quot; href=&quot;{{ url()-&gt;current() }}&quot;&gt;
+</div></code></pre>
+<h4 id="3-env--appname">3. .env — APP_NAME</h4>
+<pre class="hljs"><code><div>APP_NAME=&quot;Website Expert&quot;
+</div></code></pre>
+<hr>
+<h2 id="1-analiza-rynku--northern-ireland">1. Analiza rynku — Northern Ireland</h2>
+<h3 id="rynek-ni-w-liczbach-kontekst">Rynek NI w liczbach (kontekst)</h3>
+<ul>
+<li>Populacja: ~1,9 mln (Belfast: ~340 tys.)</li>
+<li>PKB per capita: ~£25 000/rok (poniżej średniej UK — wrażliwość cenowa wyższa)</li>
+<li>Dominujące sektory: gastronomia/hospitality, budownictwo, handel detaliczny, usługi profesjonalne, turystyka</li>
+<li>Penetracja internetu: ~94% (wysoka)</li>
+<li>Wyszukiwania lokalne: <strong>65% wyszukiwań biznesowych zawiera lokalizację</strong> (Belfast / Northern Ireland / NI)</li>
+<li>Główni konkurenci w Google Ads: małe lokalne agencje + freelancerzy z Dublin/Cork</li>
+</ul>
+<h3 id="specyfika-rynku-ni-vs-reszta-uk">Specyfika rynku NI vs reszta UK</h3>
+<table>
+<thead>
+<tr>
+<th>Cecha</th>
+<th>Implikacja dla kampanii</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sektor publiczny mocno obecny (NHS, rząd nordirlandzki)</td>
+<td>pomijamy — długi cykl sprzedaży, specjalne przetargi</td>
+</tr>
+<tr>
+<td>Dużo mikrofirm i sole traders</td>
+<td>CPC niższe, budżety klientów skromniejsze — komunikuj &quot;fixed price&quot;, &quot;no hidden costs&quot;</td>
+</tr>
+<tr>
+<td>Bliskość Irlandii — wiele firm obsługuje ROI + NI</td>
+<td>szansa: obsługa firm cross-border</td>
+</tr>
+<tr>
+<td>Mniejszy rynek = mniej konkurencji w Google Ads</td>
+<td>CPC niższe niż Londyn o ~30-40%; łatwiej osiągnąć top 3</td>
+</tr>
+<tr>
+<td>Duże znaczenie polecenia i zaufania lokalnego</td>
+<td>social proof: &quot;Belfast-based&quot;, &quot;local team&quot; w reklamach</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="2-persony--rynek-ni">2. Persony — rynek NI</h2>
+<h3 id="persona-ni-a--w%C5%82a%C5%9Bciciel-ma%C5%82ej-firmy-lokalnej-belfast--derry">Persona NI-A — Właściciel małej firmy lokalnej (Belfast / Derry)</h3>
+<ul>
+<li><strong>Kim jest:</strong> właściciel restauracji, salonu beauty, firmy budowlanej, sklepu, warsztatu samochodowego</li>
+<li><strong>Problem:</strong> Strona jest stara lub jej nie ma, pojawia się na stronie 3 Google, traci klientów na rzecz konkurencji</li>
+<li><strong>Szuka:</strong> &quot;web design Belfast&quot;, &quot;website for my business Belfast&quot;, &quot;cheap website Northern Ireland&quot;</li>
+<li><strong>Decyzja:</strong> szybka — wie że potrzebuje, nie wie jak i ile kosztuje</li>
+<li><strong>Wrażliwość cenowa:</strong> WYSOKA — porównuje, potrzebuje jasnej ceny</li>
+</ul>
+<h3 id="persona-ni-b--w%C5%82a%C5%9Bciciel-e-commerce--sklepu">Persona NI-B — Właściciel e-commerce / sklepu</h3>
+<ul>
+<li><strong>Kim jest:</strong> sprzedaje lokalnie + online, ma Shopify lub WooCommerce z lat i chce coś lepszego</li>
+<li><strong>Problem:</strong> Sklep nie konwertuje, wolny, przestarzały design, brak integracji</li>
+<li><strong>Szuka:</strong> &quot;e-commerce website Belfast&quot;, &quot;Shopify developer Northern Ireland&quot;, &quot;online shop redesign NI&quot;</li>
+<li><strong>Decyzja:</strong> przemyślana — chce portfolio, case study</li>
+<li><strong>Wrażliwość cenowa:</strong> ŚREDNIA</li>
+</ul>
+<h3 id="persona-ni-c--w%C5%82a%C5%9Bciciel-firmy-us%C5%82ugowej-sme-5%E2%80%9350-pracownik%C3%B3w">Persona NI-C — Właściciel firmy usługowej (SME, 5–50 pracowników)</h3>
+<ul>
+<li><strong>Kim jest:</strong> firma prawnicza, księgowa, budowlana, clinic/healthcare, agencja nieruchomości</li>
+<li><strong>Problem:</strong> Chce nowej strony z portfolio, formularzem kontaktowym, SEO — &quot;wyglądamy profesjonalnie&quot;</li>
+<li><strong>Szuka:</strong> &quot;professional website design Northern Ireland&quot;, &quot;web agency Belfast&quot;, &quot;SEO services Belfast&quot;</li>
+<li><strong>Decyzja:</strong> powolna, chce wyceny, rozmowy, portfolio</li>
+<li><strong>Wrażliwość cenowa:</strong> NISKA-ŚREDNIA</li>
+</ul>
+<h3 id="persona-ni-d--startup--nowa-firma">Persona NI-D — Startup / nowa firma</h3>
+<ul>
+<li><strong>Kim jest:</strong> zakłada biznes, potrzebuje szybko strony z branding</li>
+<li><strong>Szuka:</strong> &quot;new business website Belfast&quot;, &quot;startup website design NI&quot;, &quot;affordable web design&quot;</li>
+<li><strong>Decyzja:</strong> szybka — potrzebuje &quot;teraz&quot;</li>
+<li><strong>Wrażliwość cenowa:</strong> WYSOKA</li>
+</ul>
+<hr>
+<h2 id="3-s%C5%82owa-kluczowe--kampanie-ni">3. Słowa kluczowe — kampanie NI</h2>
+<h3 id="metodologia">Metodologia</h3>
+<ul>
+<li>Każde słowo z lokalizatorem (<code>Belfast</code> / <code>Northern Ireland</code> / <code>NI</code>) — lepszy QS, wyższy CTR</li>
+<li>Typy dopasowania: <code>[exact]</code> dla high-intent + <code>&quot;phrase&quot;</code> dla odkrywania</li>
+<li>Wykluczenia: kandydaci do pracy, DIY, darmowe narzędzia, inne kraje (Dublin → +Ireland ≠ Northern Ireland)</li>
+</ul>
+<hr>
+<h3 id="kampania-1--web-design-belfast-g%C5%82%C3%B3wna">Kampania 1 — Web Design Belfast (główna)</h3>
+<p><strong>Grupa reklam 1.1 — Web Design Belfast</strong></p>
+<pre class="hljs"><code><div>[web design belfast]
+[website design belfast]
+[web designer belfast]
+[website designer belfast]
+&quot;web design belfast&quot;
+&quot;website design northern ireland&quot;
+[web design northern ireland]
+[website designer northern ireland]
+[web design company belfast]
+[web design agency belfast]
+</div></code></pre>
+<p><strong>Grupa reklam 1.2 — Web Design NI (szersze NI)</strong></p>
+<pre class="hljs"><code><div>[web design northern ireland]
+[website design ni]
+[web designer derry]
+[web design londonderry]
+[web design lisburn]
+[web design newry]
+[web design antrim]
+</div></code></pre>
+<p><strong>Grupa reklam 1.3 — Nowa strona internetowa</strong></p>
+<pre class="hljs"><code><div>[new website belfast]
+[get a website belfast]
+[need a website belfast]
+&quot;website for my business belfast&quot;
+[small business website belfast]
+[business website design belfast]
+[affordable website belfast]
+[cheap website design belfast]
+</div></code></pre>
+<p><strong>Wykluczenia kampanii 1:</strong></p>
+<pre class="hljs"><code><div>-free website
+-free website builder
+-wix
+-squarespace
+-diy website
+-template
+-how to build
+-wordpress tutorial
+-job
+-jobs
+-employment
+-web design course
+-learn web design
+-web design salary
+-dublin
+-ireland (bez &quot;northern&quot;)
+-republic of ireland
+</div></code></pre>
+<hr>
+<h3 id="kampania-2--e-commerce-belfast">Kampania 2 — E-Commerce Belfast</h3>
+<p><strong>Grupa reklam 2.1 — Sklep online</strong></p>
+<pre class="hljs"><code><div>[ecommerce website belfast]
+[online shop design belfast]
+[ecommerce developer belfast]
+[shopify developer belfast]
+[woocommerce developer northern ireland]
+[online store design northern ireland]
+[ecommerce design ni]
+</div></code></pre>
+<p><strong>Grupa reklam 2.2 — Redesign sklepu</strong></p>
+<pre class="hljs"><code><div>[ecommerce redesign belfast]
+[shopify redesign northern ireland]
+[improve online shop belfast]
+[ecommerce agency northern ireland]
+[magento developer belfast]
+</div></code></pre>
+<p><strong>Wykluczenia kampanii 2:</strong></p>
+<pre class="hljs"><code><div>-free shop
+-etsy
+-ebay
+-amazon seller
+-dropshipping course
+-how to start
+-tutorial
+</div></code></pre>
+<hr>
+<h3 id="kampania-3--seo-belfast">Kampania 3 — SEO Belfast</h3>
+<p><strong>Grupa reklam 3.1 — SEO usługi</strong></p>
+<pre class="hljs"><code><div>[seo belfast]
+[seo services belfast]
+[seo agency belfast]
+[local seo belfast]
+[seo northern ireland]
+[search engine optimisation belfast]
+[google ranking belfast]
+[get found on google belfast]
+</div></code></pre>
+<p><strong>Grupa reklam 3.2 — SEO dla konkretnych branż</strong></p>
+<pre class="hljs"><code><div>[seo for restaurants belfast]
+[seo for builders belfast]
+[seo for solicitors belfast]
+[seo for dentists belfast]
+[seo for estate agents belfast]
+[seo for accountants northern ireland]
+</div></code></pre>
+<p><strong>Wykluczenia kampanii 3:</strong></p>
+<pre class="hljs"><code><div>-seo course
+-learn seo
+-seo tool
+-seo software
+-seo jobs
+-seo salary
+-free seo
+</div></code></pre>
+<hr>
+<h3 id="kampania-4--google-ads--digital-marketing-belfast">Kampania 4 — Google Ads &amp; Digital Marketing Belfast</h3>
+<p><strong>Grupa reklam 4.1 — Google Ads management</strong></p>
+<pre class="hljs"><code><div>[google ads management belfast]
+[ppc agency belfast]
+[google ads agency northern ireland]
+[ppc management northern ireland]
+[google ads consultant belfast]
+[adwords management belfast]
+</div></code></pre>
+<p><strong>Grupa reklam 4.2 — Meta / Social Ads</strong></p>
+<pre class="hljs"><code><div>[facebook ads belfast]
+[meta ads agency belfast]
+[social media advertising belfast]
+[facebook advertising northern ireland]
+[instagram ads belfast]
+</div></code></pre>
+<p><strong>Grupa reklam 4.3 — Digital marketing ogólne</strong></p>
+<pre class="hljs"><code><div>[digital marketing belfast]
+[digital marketing agency belfast]
+[online marketing belfast]
+[digital agency northern ireland]
+[marketing agency belfast]
+</div></code></pre>
+<p><strong>Wykluczenia kampanii 4:</strong></p>
+<pre class="hljs"><code><div>-free google ads
+-google ads course
+-learn ppc
+-tutorial
+-jobs
+-internship
+-salary
+</div></code></pre>
+<hr>
+<h3 id="kampania-5--bran%C5%BCowe--niche-long-tail-niskie-cpc">Kampania 5 — Branżowe / Niche (Long-tail, niskie CPC)</h3>
+<p><strong>Branże o wysokim LTV klienta w NI:</strong></p>
+<pre class="hljs"><code><div>[solicitor website design belfast]
+[accountant website belfast]
+[dental website design northern ireland]
+[healthcare website design ni]
+[restaurant website belfast]
+[hotel website design northern ireland]
+[construction company website belfast]
+[estate agent website northern ireland]
+[beauty salon website belfast]
+[gym website design northern ireland]
+[garage website design belfast]
+</div></code></pre>
+<blockquote>
+<p><strong>Uwaga:</strong> Long-tail branżowe mają CPC £0.50–1.80 (vs £3–6 dla „web design belfast&quot;). Konwertują lepiej bo intencja zakupowa jest wysoka i konkretna.</p>
+</blockquote>
+<hr>
+<h2 id="4-struktura-konta-google-ads--ni">4. Struktura konta Google Ads — NI</h2>
+<pre class="hljs"><code><div>Konto: Website Expert UK (website-expert.uk)
+Waluta: GBP
+Strefa czasowa: Europe/London
+│
+├── Kampania 1: [NI] Web Design Belfast
+│   ├── Grupa reklam: Web Design Belfast (brand/city)
+│   ├── Grupa reklam: Web Design Wider NI (Derry, Newry, Lisburn...)
+│   └── Grupa reklam: New / Small Business Website
+│
+├── Kampania 2: [NI] E-Commerce Belfast
+│   ├── Grupa reklam: Ecommerce Website Design
+│   └── Grupa reklam: Shopify / WooCommerce / Redesign
+│
+├── Kampania 3: [NI] SEO Services Belfast
+│   ├── Grupa reklam: SEO Belfast (general)
+│   └── Grupa reklam: SEO by Industry (niche)
+│
+├── Kampania 4: [NI] Digital Marketing Belfast
+│   ├── Grupa reklam: Google Ads Management
+│   ├── Grupa reklam: Meta / Facebook Ads
+│   └── Grupa reklam: Digital Agency (ogólne)
+│
+├── Kampania 5: [NI] Niche / Industry Verticals
+│   └── Grupo reklam: Brand Vertical (1 per industry max)
+│
+└── Kampania 6: [NI] Remarketing RLSA
+    ├── Homepage visitors (no conversion, 14 dni)
+    ├── Calculator abandoners (7 dni)
+    └── Contact page visitors (no submit, 7 dni)
+</div></code></pre>
+<hr>
+<h2 id="5-teksty-reklam-rsa--ni">5. Teksty reklam RSA — NI</h2>
+<blockquote>
+<p>RSA = Responsive Search Ads | 15 nagłówków (max 30 znaków) + 4 opisy (max 90 znaków)<br>
+Zasada: minimum 3 nagłówki zawierające lokalizator <code>Belfast</code> lub <code>Northern Ireland</code><br>
+Pinuj nagłówek 1 = główne słowo kluczowe; nagłówek 2 = lokalizacja; nagłówek 3 = USP</p>
+</blockquote>
+<hr>
+<h3 id="51-kampania-1--web-design-belfast">5.1 Kampania 1 — Web Design Belfast</h3>
+<p><strong>Nagłówki (15):</strong></p>
+<pre class="hljs"><code><div>1.  Web Design Belfast          [PIN 1 — exact match KW]
+2.  Northern Ireland Web Agency [PIN 2 — lokalizacja]
+3.  Fixed Price. No Surprises.  [PIN 3 — USP]
+4.  Professional Website Design
+5.  Websites from £{price:1500}
+6.  Delivered in 2–6 Weeks
+7.  Free Quote — Same Day
+8.  10+ Years Experience
+9.  Mobile-First &amp; Fast Loading
+10. Built for Lead Generation
+11. SEO Included as Standard
+12. Speak to a Real Developer
+13. Small Business Specialists
+14. Get More Customers Online
+15. 200+ Projects Delivered
+</div></code></pre>
+<p><strong>Opisy (4):</strong></p>
+<pre class="hljs"><code><div>1. Belfast-based web design agency. Bespoke websites built to generate leads and rank in Google. Free quote in 24 hours.
+2. We design and build fast, professional websites for Northern Ireland businesses. Fixed price, no hidden costs. Call us today.
+3. From small business sites to full e-commerce platforms — delivered in 2–6 weeks. SEO and mobile optimisation included.
+4. 10+ years building websites for NI companies. You work directly with the developer, not an account manager. Free consultation.
+</div></code></pre>
+<hr>
+<h3 id="52-kampania-2--e-commerce-belfast">5.2 Kampania 2 — E-Commerce Belfast</h3>
+<p><strong>Nagłówki (15):</strong></p>
+<pre class="hljs"><code><div>1.  Ecommerce Website Belfast   [PIN 1]
+2.  NI Online Shop Specialists  [PIN 2]
+3.  Sell More Online — NI       [PIN 3]
+4.  Shopify &amp; WooCommerce Experts
+5.  Ecommerce from £{price:2500}
+6.  Optimised for Conversions
+7.  Fast, Secure Online Stores
+8.  Stripe &amp; PayPal Integration
+9.  Free Performance Audit
+10. Launch in 4–8 Weeks
+11. Mobile Commerce Ready
+12. Inventory &amp; CMS Included
+13. Abandoned Cart &amp; Analytics
+14. Trusted by NI Retailers
+15. Same-Day Quote Available
+</div></code></pre>
+<p><strong>Opisy (4):</strong></p>
+<pre class="hljs"><code><div>1. Ecommerce websites for NI businesses. Shopify, WooCommerce and custom builds — fast, secure and built to sell. Free quote today.
+2. Turn your Belfast shop into an online business. We build conversion-optimised stores with payment integration, SEO and analytics.
+3. Slow or outdated online store? We redesign and rebuild e-commerce sites for Northern Ireland retailers. Fixed price, fast delivery.
+4. From product listings to checkout — we build ecommerce stores that work on every device. 200+ projects across the UK and NI.
+</div></code></pre>
+<hr>
+<h3 id="53-kampania-3--seo-belfast">5.3 Kampania 3 — SEO Belfast</h3>
+<p><strong>Nagłówki (15):</strong></p>
+<pre class="hljs"><code><div>1.  SEO Services Belfast        [PIN 1]
+2.  Rank Higher in Google NI    [PIN 2]
+3.  Free SEO Audit — Today      [PIN 3]
+4.  Local SEO Belfast Experts
+5.  First Page Google Results
+6.  From £{price:400}/Month
+7.  SEO + Content + Links
+8.  Transparent Monthly Reports
+9.  Technical &amp; On-Page SEO
+10. Google Business Profile
+11. Beat Your NI Competitors
+12. SEO for Small Businesses
+13. Results in 3–6 Months
+14. No Contract — Cancel Anytime
+15. Get More Calls &amp; Enquiries
+</div></code></pre>
+<p><strong>Opisy (4):</strong></p>
+<pre class="hljs"><code><div>1. SEO services for Belfast and Northern Ireland businesses. Get found on Google and drive more local customers. Free audit included.
+2. We increase your Google rankings with technical SEO, content strategy and local optimisation. Monthly reporting. No long contracts.
+3. Belfast SEO agency with 10+ years experience. From local cafés to professional services — we've ranked them all. Free consultation.
+4. Stop losing customers to your competitors on Google. Our NI SEO team gets you to page one. Free SEO audit — results in first 60 days.
+</div></code></pre>
+<hr>
+<h3 id="54-kampania-4--google-ads-management-belfast">5.4 Kampania 4 — Google Ads Management Belfast</h3>
+<p><strong>Nagłówki (15):</strong></p>
+<pre class="hljs"><code><div>1.  Google Ads Management NI    [PIN 1]
+2.  PPC Agency Belfast          [PIN 2]
+3.  Stop Wasting Ad Budget      [PIN 3]
+4.  Certified Google Ads Partner
+5.  Meta &amp; Google Ads Experts
+6.  From £{price:350}/Month
+7.  Free Ads Account Audit
+8.  ROI-Focused Campaigns
+9.  No Setup Fees — Start Now
+10. Facebook &amp; Instagram Ads
+11. Call Tracking Included
+12. Real-Time Dashboard Access
+13. Leads, Not Just Clicks
+14. NI &amp; UK Businesses Welcome
+15. 30-Day Free Trial Available
+</div></code></pre>
+<p><strong>Opisy (4):</strong></p>
+<pre class="hljs"><code><div>1. Google Ads and Meta Ads management for Northern Ireland businesses. Stop wasting budget — we optimise for real leads and sales.
+2. Belfast PPC specialists. We manage Google Search, Shopping and Meta campaigns with full reporting and ROI tracking. Free audit.
+3. Getting clicks but not conversions? We audit and fix your Google Ads campaigns. Real leads from real NI customers. No setup fee.
+4. From £350/month — our Belfast ad managers handle your Google and Facebook campaigns so you can focus on running your business.
+</div></code></pre>
+<hr>
+<h3 id="55-kampania-5--reklamy-bran%C5%BCowe-przyk%C5%82ady">5.5 Kampania 5 — Reklamy branżowe (przykłady)</h3>
+<p><strong>Nagłówki: Restaurant Website Belfast</strong></p>
+<pre class="hljs"><code><div>1.  Restaurant Website Belfast  [PIN 1]
+2.  Menus, Bookings &amp; Delivery  [PIN 2]
+3.  From £{price:1200} — Fast   [PIN 3]
+4.  Online Menu &amp; Table Booking
+5.  Hospitality Web Experts NI
+6.  OpenTable &amp; Resy Integration
+</div></code></pre>
+<p><strong>Opis:</strong></p>
+<pre class="hljs"><code><div>We build restaurant websites for Belfast cafés, bars and restaurants. Online menu, table booking and delivery integration. Free quote.
+</div></code></pre>
+<hr>
+<p><strong>Nagłówki: Estate Agent Website Belfast</strong></p>
+<pre class="hljs"><code><div>1.  Estate Agent Web Design NI  [PIN 1]
+2.  Property Search &amp; Listings  [PIN 2]
+3.  Rightmove / Zoopla Ready    [PIN 3]
+4.  GDPR-Compliant Lead Forms
+5.  Fast Load, Mobile-First
+6.  From £{price:2000}
+</div></code></pre>
+<p><strong>Opis:</strong></p>
+<pre class="hljs"><code><div>Estate agent websites for Belfast and NI. Integrated property search, lead capture forms and Rightmove/Zoopla feeds. Free quote today.
+</div></code></pre>
+<hr>
+<h2 id="6-rozszerzenia-reklam-ad-extensions--ni">6. Rozszerzenia reklam (Ad Extensions) — NI</h2>
+<h3 id="61-sitelinks-wszystkie-kampanie">6.1 Sitelinks (wszystkie kampanie)</h3>
+<table>
+<thead>
+<tr>
+<th>Tekst sitelinku</th>
+<th>Opis 1</th>
+<th>Opis 2</th>
+<th>URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Free Quote</td>
+<td>No obligation — same day</td>
+<td>Get your price in 24h</td>
+<td>/contact</td>
+</tr>
+<tr>
+<td>Our Services</td>
+<td>Web, SEO, Ads &amp; E-commerce</td>
+<td>Everything your business needs online</td>
+<td>/#services</td>
+</tr>
+<tr>
+<td>Portfolio</td>
+<td>See our latest Belfast projects</td>
+<td>200+ websites delivered</td>
+<td>/#portfolio</td>
+</tr>
+<tr>
+<td>Cost Calculator</td>
+<td>Estimate your project price</td>
+<td>Takes 2 minutes — no sign-up</td>
+<td>/kalkulator</td>
+</tr>
+<tr>
+<td>About Us</td>
+<td>Belfast-based, 10+ years</td>
+<td>Local team, global quality</td>
+<td>/#about</td>
+</tr>
+<tr>
+<td>SEO Services</td>
+<td>Get to page 1 on Google</td>
+<td>Free audit included</td>
+<td>/#services</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-callouts-wyr%C3%B3%C5%BCniki">6.2 Callouts (wyróżniki)</h3>
+<pre class="hljs"><code><div>✓ Belfast-Based Team
+✓ Fixed Price — No Hidden Costs
+✓ Free Quote in 24 Hours
+✓ SEO Included as Standard
+✓ Mobile-First Design
+✓ 10+ Years Experience
+✓ 200+ Websites Delivered
+✓ No Contract Tie-In
+✓ GDPR Compliant
+✓ UK-Based Support
+</div></code></pre>
+<h3 id="63-structured-snippets">6.3 Structured Snippets</h3>
+<pre class="hljs"><code><div>Headline: Services
+Values: Web Design, E-Commerce, SEO, Google Ads, Meta Ads, Website Audit, Hosting, Content
+
+Headline: Brands / Platforms
+Values: Shopify, WooCommerce, Laravel, React, WordPress, Figma, Google Analytics, GTM
+</div></code></pre>
+<h3 id="64-call-extension">6.4 Call Extension</h3>
+<pre class="hljs"><code><div>Phone: [numer telefonu — do uzupełnienia]
+Business name: Website Expert
+Call reporting: enabled
+Schedule: Mon–Fri 9:00–18:00, Sat 10:00–14:00
+</div></code></pre>
+<h3 id="65-location-extension">6.5 Location Extension</h3>
+<pre class="hljs"><code><div>Google Business Profile: [założyć i zweryfikować dla Belfast]
+Address: [po zakupie biura / virtualne biuro w Belfast]
+</div></code></pre>
+<blockquote>
+<p><strong>WAŻNE:</strong> Location Extension znacząco podnosi CTR w lokalnych kampaniach (+10–20%). Priorytet: założyć Google Business Profile z adresem Belfast natychmiast po uruchomieniu kampanii.</p>
+</blockquote>
+<h3 id="66-image-extensions">6.6 Image Extensions</h3>
+<pre class="hljs"><code><div>Zalecane: zrzuty ekranu projektów portfolio (3–5 zdjęć)
+Format: 1200×628px, jpg/png
+Tekst alt: &quot;Web design Belfast — [nazwa projektu]&quot;
+</div></code></pre>
+<h3 id="67-price-extension">6.7 Price Extension</h3>
+<table>
+<thead>
+<tr>
+<th>Usługa</th>
+<th>Od</th>
+<th>URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Business Website</td>
+<td>From £1,500</td>
+<td>/contact</td>
+</tr>
+<tr>
+<td>E-Commerce Store</td>
+<td>From £2,500</td>
+<td>/contact</td>
+</tr>
+<tr>
+<td>SEO Monthly</td>
+<td>From £400/mo</td>
+<td>/contact</td>
+</tr>
+<tr>
+<td>Google Ads Mgmt</td>
+<td>From £350/mo</td>
+<td>/contact</td>
+</tr>
+<tr>
+<td>Website Audit</td>
+<td>From £250</td>
+<td>/contact</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="7-strony-docelowe--ni-landing-pages">7. Strony docelowe — NI (Landing Pages)</h2>
+<h3 id="71-mapa-url-i-priorytety">7.1 Mapa URL i priorytety</h3>
+<table>
+<thead>
+<tr>
+<th>Kampania</th>
+<th>Strona docelowa</th>
+<th>Priorytet</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web Design Belfast</td>
+<td><code>website-expert.uk/</code> (homepage)</td>
+<td>🔴 Must have</td>
+<td>⚠️ Wymaga optymalizacji NI</td>
+</tr>
+<tr>
+<td>Kalkulator</td>
+<td><code>website-expert.uk/kalkulator</code></td>
+<td>🟡 Use it</td>
+<td>⚠️ Meta w PL — naprawić</td>
+</tr>
+<tr>
+<td>Kontakt / wycena</td>
+<td><code>website-expert.uk/#contact</code></td>
+<td>🔴 Must have</td>
+<td>✅ Formularz działa</td>
+</tr>
+<tr>
+<td>SEO Belfast</td>
+<td><code>website-expert.uk/#services</code></td>
+<td>🟡 OK na start</td>
+<td>➕ Docelowo osobna podstrona <code>/seo-belfast</code></td>
+</tr>
+<tr>
+<td>E-Commerce</td>
+<td><code>website-expert.uk/#services</code></td>
+<td>🟡 OK na start</td>
+<td>➕ Docelowo osobna podstrona <code>/ecommerce-belfast</code></td>
+</tr>
+<tr>
+<td>Google Ads Mgmt</td>
+<td><code>website-expert.uk/#services</code></td>
+<td>🟡 OK na start</td>
+<td>➕ Docelowo osobna podstrona <code>/google-ads-belfast</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-wymagania-homepage-jako-landing-page-ni">7.2 Wymagania homepage jako landing page NI</h3>
+<p><strong>Elementy krytyczne dla Quality Score i konwersji:</strong></p>
+<ul>
+<li><input type="checkbox" id="checkbox0"><label for="checkbox0"></label><strong>H1 z lokalizacją:</strong> <code>&quot;Professional Web Design in Belfast, Northern Ireland&quot;</code> (zamiast obecnego ogólnego)</li>
+<li><input type="checkbox" id="checkbox1"><label for="checkbox1"></label><strong>Podtytuł:</strong> <code>&quot;Bespoke websites, SEO and digital marketing for NI businesses — fixed price, delivered in weeks.&quot;</code></li>
+<li><input type="checkbox" id="checkbox2"><label for="checkbox2"></label><strong>CTA above the fold:</strong> &quot;Get a Free Quote&quot; → anchor do formularza kontaktowego (już istnieje)</li>
+<li><input type="checkbox" id="checkbox3"><label for="checkbox3"></label><strong>Trust signals widoczne bez scrollowania:</strong>
+<ul>
+<li><code>10+ Years Experience</code> | <code>200+ Projects</code> | <code>Belfast-Based Team</code> | <code>Free Quote in 24h</code></li>
+</ul>
+</li>
+<li><input type="checkbox" id="checkbox4"><label for="checkbox4"></label><strong>Sekcja About:</strong> zmienić <code>&quot;Based in Manchester&quot;</code> → <code>&quot;Based in Belfast, Northern Ireland&quot;</code> <em>(obecny tekst w <code>About.jsx</code> mówi Manchester — <strong>konieczna zmiana</strong>)</em></li>
+<li><input type="checkbox" id="checkbox5"><label for="checkbox5"></label><strong>Formularz kontaktowy</strong> widoczny i dostępny (istniejący <code>Contact</code> komponent — ✅)</li>
+<li><input type="checkbox" id="checkbox6"><label for="checkbox6"></label><strong>Kalkulator wyceny</strong> — istniejący <code>CostCalculatorV2</code> — zmienić meta title na EN</li>
+<li><input type="checkbox" id="checkbox7"><label for="checkbox7"></label><strong>Portfolio</strong> — 3 projekty (seeder istnieje, potrzebne prawdziwe screenshoty)</li>
+<li><input type="checkbox" id="checkbox8"><label for="checkbox8"></label><strong>Testimonials</strong> — 5–6 opinii (komponent istnieje) — warto dodać lokalizację klienta: &quot;John Smith, Belfast&quot;</li>
+</ul>
+<h3 id="73-podstrony-do-stworzenia-priorytet-po-uruchomieniu-kampanii">7.3 Podstrony do stworzenia (priorytet po uruchomieniu kampanii)</h3>
+<p>Każda podstrona = osobna grupa reklam = lepszy Quality Score = niższy CPC.</p>
+<pre class="hljs"><code><div>website-expert.uk/web-design-belfast
+website-expert.uk/ecommerce-belfast
+website-expert.uk/seo-belfast
+website-expert.uk/google-ads-belfast
+website-expert.uk/website-audit
+</div></code></pre>
+<p>Każda musi zawierać:</p>
+<ul>
+<li>H1 z słowem kluczowym i lokalizacją</li>
+<li>Opis usługi (min. 300 słów)</li>
+<li>Cennik (widełki lub &quot;from £X&quot;)</li>
+<li>CTA → formularz lub telefon</li>
+<li>Sekcja FAQ (schema FAQ — wpływa na jakość oceny strony przez Google)</li>
+<li>Testimonial z klientem NI (jeśli dostępny)</li>
+</ul>
+<hr>
+<h2 id="8-targeting-i-ustawienia-techniczne">8. Targeting i ustawienia techniczne</h2>
+<h3 id="81-targeting-geograficzny">8.1 Targeting geograficzny</h3>
+<table>
+<thead>
+<tr>
+<th>Ustawienie</th>
+<th>Wartość</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Kraj</strong></td>
+<td>United Kingdom</td>
+</tr>
+<tr>
+<td><strong>Region</strong></td>
+<td>Northern Ireland</td>
+</tr>
+<tr>
+<td><strong>Miasta (zwiększony bid +20%)</strong></td>
+<td>Belfast, Derry/Londonderry, Lisburn, Newry, Antrim, Ballymena, Newtownabbey</td>
+</tr>
+<tr>
+<td><strong>Metoda targetowania</strong></td>
+<td><code>People in or regularly in this location</code></td>
+</tr>
+<tr>
+<td><strong>Wykluczenie</strong></td>
+<td><code>Republic of Ireland</code> (Dublin, Cork, Galway — nie NI)</td>
+</tr>
+<tr>
+<td><strong>Bid adjustment — mobile</strong></td>
+<td>+25% (wyszukiwania lokalne dominująco mobile)</td>
+</tr>
+<tr>
+<td><strong>Bid adjustment — desktop</strong></td>
+<td>baseline</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-harmonogram-reklam">8.2 Harmonogram reklam</h3>
+<pre class="hljs"><code><div>Poniedziałek – Piątek:  08:00 – 19:00  (peak godziny pracy)
+Sobota:                 09:00 – 15:00  (właściciele firm aktywni rano)
+Niedziela:              10:00 – 13:00  (redukowane, niższy ruch B2B)
+
+Bid adjustments:
+- Wt–Czw 09:00–12:00: +15% (peak decyzyjny)
+- Pon 08:00–09:00: +10% (planowanie tygodnia)
+- Sob rano: +0% (bez zmian)
+- Wieczory po 20:00: -50%
+</div></code></pre>
+<h3 id="83-bud%C5%BCety-startowe--ni">8.3 Budżety startowe — NI</h3>
+<blockquote>
+<p>Rynek NI jest mniejszy niż Londyn — CPC niższe o ~35%. Budżety startowe odpowiednio mniejsze.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Kampania</th>
+<th>Dzienny budżet</th>
+<th>Szacowany CPC</th>
+<th>Szacowana liczba kliknięć/dzień</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web Design Belfast</td>
+<td>£15/dzień</td>
+<td>£1.80–3.50</td>
+<td>5–8 kliknięć</td>
+</tr>
+<tr>
+<td>E-Commerce Belfast</td>
+<td>£10/dzień</td>
+<td>£1.50–2.80</td>
+<td>4–7 kliknięć</td>
+</tr>
+<tr>
+<td>SEO Belfast</td>
+<td>£10/dzień</td>
+<td>£1.20–2.50</td>
+<td>4–8 kliknięć</td>
+</tr>
+<tr>
+<td>Digital Marketing Belfast</td>
+<td>£10/dzień</td>
+<td>£1.00–2.00</td>
+<td>5–10 kliknięć</td>
+</tr>
+<tr>
+<td>Niche / Branżowe</td>
+<td>£8/dzień</td>
+<td>£0.50–1.80</td>
+<td>5–15 kliknięć</td>
+</tr>
+<tr>
+<td><strong>RAZEM</strong></td>
+<td><strong>£53/dzień</strong></td>
+<td></td>
+<td>~23–48 kliknięć/dzień</td>
+</tr>
+<tr>
+<td><strong>Miesięcznie</strong></td>
+<td><strong>~£1 600/mies.</strong></td>
+<td></td>
+<td>~700–1 400 kliknięć</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Uwaga:</strong> Przy CTR formularza 3–5% → <strong>21–70 leadów/mies.</strong> przy budżecie £1 600/mies.<br>
+CAC (klient — nie lead) przy konwersji lead→klient 20% → 4–14 nowych klientów/mies.<br>
+Break-even: 1 projekt web design (min. £1 500) = zwrot z 1 miesiąca kampanii.</p>
+</blockquote>
+<h3 id="84-strategia-stawek">8.4 Strategia stawek</h3>
+<table>
+<thead>
+<tr>
+<th>Etap</th>
+<th>Czas</th>
+<th>Strategia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Faza nauki</td>
+<td>Tydzień 1–3</td>
+<td><strong>Manual CPC + Enhanced CPC</strong> — zbieranie danych, kontrola kosztów</td>
+</tr>
+<tr>
+<td>Optymalizacja</td>
+<td>Tydzień 4–8</td>
+<td><strong>Maximize Clicks</strong> z max CPC cap — budowanie historii Quality Score</td>
+</tr>
+<tr>
+<td>Skalowanie</td>
+<td>Mies. 3+</td>
+<td><strong>Target CPA</strong> gdy ≥30 konwersji/mies.; Target: £30–50/lead</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="9-%C5%9Bledzenie-konwersji--ni">9. Śledzenie konwersji — NI</h2>
+<h3 id="91-konwersje-do-konfiguracji-w-gtm--google-ads">9.1 Konwersje do konfiguracji w GTM + Google Ads</h3>
+<p>Projekt ma GTM zainstalowany (<code>app.blade.php</code>) i <code>dataLayer.js</code> z istniejącymi zdarzeniami.</p>
+<table>
+<thead>
+<tr>
+<th>Konwersja</th>
+<th>Priorytet</th>
+<th>Zdarzenie GTM</th>
+<th>Wartość</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wypełnienie formularza kontaktowego</td>
+<td>🔴 Główna</td>
+<td><code>contact_form_submit</code></td>
+<td>£150 (estymacja average lead value)</td>
+</tr>
+<tr>
+<td>Wysłanie kalkulatora</td>
+<td>🔴 Główna</td>
+<td><code>calculator_lead</code></td>
+<td>£100</td>
+</tr>
+<tr>
+<td>Kliknięcie telefonu (call extension)</td>
+<td>🔴 Główna</td>
+<td><code>phone_call_click</code></td>
+<td>£80</td>
+</tr>
+<tr>
+<td>Kliknięcie e-mail</td>
+<td>🟡 Pomocnicza</td>
+<td><code>email_click</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Czas na stronie &gt; 3 min</td>
+<td>🟢 Micro</td>
+<td><code>engaged_session</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Scroll &gt; 75% strony</td>
+<td>🟢 Micro</td>
+<td><code>scroll_depth_75</code></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-kod-gtm-do-dodania-zdalny-od-istniej%C4%85cego-datalayer">9.2 Kod GTM do dodania (zdalny od istniejącego dataLayer)</h3>
+<pre class="hljs"><code><div><span class="hljs-comment">// Kliknięcie numeru telefonu (do dodania w GTM — trigger: Click URL contains "tel:")</span>
+dataLayer.push({
+    <span class="hljs-attr">event</span>: <span class="hljs-string">'phone_call_click'</span>,
+    <span class="hljs-attr">event_category</span>: <span class="hljs-string">'Contact'</span>,
+    <span class="hljs-attr">event_label</span>: <span class="hljs-string">'Header phone number'</span>
+});
+
+<span class="hljs-comment">// Kliknięcie email (trigger: Click URL contains "mailto:")</span>
+dataLayer.push({
+    <span class="hljs-attr">event</span>: <span class="hljs-string">'email_click'</span>,
+    <span class="hljs-attr">event_category</span>: <span class="hljs-string">'Contact'</span>,
+    <span class="hljs-attr">event_label</span>: <span class="hljs-string">'Footer email'</span>
+});
+
+<span class="hljs-comment">// Scroll depth 75% (GTM wbudowany trigger: Scroll Depth ≥ 75%)</span>
+dataLayer.push({
+    <span class="hljs-attr">event</span>: <span class="hljs-string">'scroll_depth_75'</span>,
+    <span class="hljs-attr">page_path</span>: <span class="hljs-built_in">window</span>.location.pathname
+});
+</div></code></pre>
+<h3 id="93-import-konwersji-do-google-ads">9.3 Import konwersji do Google Ads</h3>
+<ol>
+<li>Google Ads Admin → Tools → Conversions → New Conversion</li>
+<li>Źródło: Google Analytics 4</li>
+<li>Import zdarzeń: <code>contact_form_submit</code>, <code>calculator_lead</code>, <code>phone_call_click</code></li>
+<li>Attribution model: <strong>Data-driven</strong> (po zebraniu danych) lub <strong>Last click</strong> na start</li>
+</ol>
+<hr>
+<h2 id="10-remarketing-rlsa--ni">10. Remarketing RLSA — NI</h2>
+<h3 id="101-listy-remarketingowe">10.1 Listy remarketingowe</h3>
+<table>
+<thead>
+<tr>
+<th>Nazwa listy</th>
+<th>Warunek GA4</th>
+<th>Czas</th>
+<th>Zastosowanie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ni_homepage_no_convert</code></td>
+<td>Odwiedzili <code>website-expert.uk</code>, brak <code>contact_form_submit</code></td>
+<td>14 dni</td>
+<td>+30% bid na kampanie NI</td>
+</tr>
+<tr>
+<td><code>ni_calculator_no_submit</code></td>
+<td>Odwiedzili <code>/kalkulator</code>, brak <code>calculator_lead</code></td>
+<td>7 dni</td>
+<td>+40% bid — bardzo wysokia intencja</td>
+</tr>
+<tr>
+<td><code>ni_contact_page_no_submit</code></td>
+<td>Odwiedzili <code>/#contact</code>, brak submit</td>
+<td>7 dni</td>
+<td>+50% bid</td>
+</tr>
+<tr>
+<td><code>ni_portfolio_visitors</code></td>
+<td>Scroll &gt;75% na stronie głównej (sekcja portfolio)</td>
+<td>30 dni</td>
+<td>+20% bid — research phase</td>
+</tr>
+</tbody>
+</table>
+<h3 id="102-teksty-reklam-remarketingowych-ni">10.2 Teksty reklam remarketingowych NI</h3>
+<p><strong>Lista: <code>ni_calculator_no_submit</code> (porzucili kalkulator):</strong></p>
+<pre class="hljs"><code><div>Nagłówek 1: You Started a Quote — Finish It
+Nagłówek 2: Your Website Price is Ready
+Nagłówek 3: Free Quote — No Obligation
+Opis: You used our cost calculator. Get your full quote in 24 hours — no obligation, no sign-up required.
+</div></code></pre>
+<p><strong>Lista: <code>ni_homepage_no_convert</code> (odwiedzili, nie zadzwonili):</strong></p>
+<pre class="hljs"><code><div>Nagłówek 1: Still Need a Website in Belfast?
+Nagłówek 2: Free Consultation This Week
+Nagłówek 3: Local Team. Fixed Price.
+Opis: We noticed you visited Website Expert. Book a free 20-minute consultation — no pressure, just expert advice for NI businesses.
+</div></code></pre>
+<hr>
+<h2 id="11-google-business-profile--northern-ireland">11. Google Business Profile — Northern Ireland</h2>
+<blockquote>
+<p><strong>Priorytet: KRYTYCZNY</strong> — GBP jest darmowym źródłem leadów i wpływa na Ad Rank reklam lokalnych.</p>
+</blockquote>
+<h3 id="checklisty-gbp">Checklisty GBP:</h3>
+<ul>
+<li><input type="checkbox" id="checkbox9"><label for="checkbox9">Założyć/zweryfikować konto GBP dla </label><code>Website Expert</code></li>
+<li><input type="checkbox" id="checkbox10"><label for="checkbox10">Kategoria główna: </label><code>Web Designer</code> + dodatkowe: <code>SEO Agency</code>, <code>Marketing Agency</code>, <code>E-commerce Service</code></li>
+<li><input type="checkbox" id="checkbox11"><label for="checkbox11">Adres: Belfast, Northern Ireland (BT postcode) — nawet wirtualne biuro wystarczy</label></li>
+<li><input type="checkbox" id="checkbox12"><label for="checkbox12">Telefon: +44 (lokalny NI numer — sugestia: numer 028...)</label></li>
+<li><input type="checkbox" id="checkbox13"><label for="checkbox13">Godziny otwarcia: Pon–Pt 9–18, Sob 10–14</label></li>
+<li><input type="checkbox" id="checkbox14"><label for="checkbox14">Opis (750 znaków): zawrzeć </label><code>Belfast</code>, <code>Northern Ireland</code>, kluczowe usługi, &quot;free quote&quot;</li>
+<li><input type="checkbox" id="checkbox15"><label for="checkbox15">Zdjęcia: logo, zrzuty ekranu projektów, &quot;team at work&quot;</label></li>
+<li><input type="checkbox" id="checkbox16"><label for="checkbox16">Pierwsze opinie: poprosić pierwszych 3–5 klientów o recenzje Google</label></li>
+</ul>
+<h3 id="szablon-opisu-gbp">Szablon opisu GBP:</h3>
+<pre class="hljs"><code><div>Website Expert is a Belfast-based web design and digital marketing agency serving businesses 
+across Northern Ireland. We specialise in bespoke website design, e-commerce development, 
+local SEO, Google Ads management and Meta advertising.
+
+With 10+ years of experience and 200+ projects delivered, we help NI businesses grow online 
+through fast, professional websites and data-driven digital marketing.
+
+Services: Web Design | E-Commerce | SEO | Google Ads | Meta Ads | Website Audit | Hosting
+
+Free quote in 24 hours — call us or use our online calculator at website-expert.uk
+</div></code></pre>
+<hr>
+<h2 id="12-harmonogram-wdro%C5%BCenia--ni">12. Harmonogram wdrożenia — NI</h2>
+<pre class="hljs"><code><div>TYDZIEŃ 1 (pilne — przed kampanią):
+□ Zmiana APP_NAME=&quot;Website Expert&quot; w .env
+□ Naprawa meta description strony Kalkulator (zmiana PL → EN)
+□ Dodanie OG tags i canonical do Welcome.jsx
+□ Zmiana &quot;Based in Manchester&quot; → &quot;Based in Belfast, Northern Ireland&quot; w About.jsx
+□ Dodanie noindex na trasy auth/portal w app.blade.php
+□ Założenie Google Business Profile Belfast
+□ Weryfikacja Google Search Console dla website-expert.uk
+□ Połączenie GSC z Google Ads
+
+TYDZIEŃ 2:
+□ Konfiguracja konta Google Ads (kampania 1: Web Design Belfast)
+□ Wgranie słów kluczowych, tekstów RSA, rozszerzeń
+□ Konfiguracja konwersji GTM (contact_form_submit, calculator_lead, phone_call_click)
+□ Import konwersji do Google Ads z GA4
+□ Uruchomienie kampanii 1 (Web Design Belfast) — only
+
+TYDZIEŃ 3:
+□ Analiza pierwszych danych: Quality Score, Impression Share, Search Terms Report
+□ Dodanie słów kluczowych negatywnych na podstawie Search Terms
+□ Uruchomienie kampanii 2 (E-Commerce Belfast)
+□ Uruchomienie kampanii 3 (SEO Belfast)
+
+TYDZIEŃ 4:
+□ Uruchomienie kampanii 4 (Digital Marketing Belfast)
+□ Uruchomienie kampanii 5 (Niche/Branżowe)
+□ Konfiguracja list remarketingowych w GA4
+□ Pierwszy raport 30-dniowy
+
+MIESIĄC 2:
+□ Uruchomienie kampanii 6 (Remarketing RLSA)
+□ Optymalizacja QS — dostosowanie tekstów reklam do wyników
+□ A/B test 2 wariantów RSA (rotacja równa przez 4 tygodnie)
+□ Sprawdzenie Impression Share — czy tracisz na budżet czy na ranking?
+□ Rozważenie podstron dedykowanych (/web-design-belfast, /seo-belfast)
+
+MIESIĄC 3:
+□ Przejście na Target CPA (gdy ≥ 30 konwersji/mies.)
+□ Pełny raport wyników: ROAS, CAC, leady per kampania
+□ Decyzja o skalowaniu budżetu lub realokacji
+□ Stworzenie podstron usługowych dla najlepiej konwertujących kampanii
+</div></code></pre>
+<hr>
+<h2 id="13-kpi--rynek-ni">13. KPI — rynek NI</h2>
+<table>
+<thead>
+<tr>
+<th>Metryka</th>
+<th>Benchmark branżowy (UK local)</th>
+<th>Cel po 3 mies. — NI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CTR (Search)</td>
+<td>3–6%</td>
+<td>≥5%</td>
+</tr>
+<tr>
+<td>Quality Score (główne KW)</td>
+<td>5–7</td>
+<td>≥7</td>
+</tr>
+<tr>
+<td>Avg. CPC — Web Design</td>
+<td>£2–4 (NI)</td>
+<td>≤£2.50</td>
+</tr>
+<tr>
+<td>Avg. CPC — SEO</td>
+<td>£1.50–3 (NI)</td>
+<td>≤£2.00</td>
+</tr>
+<tr>
+<td>Avg. CPC — Niche long-tail</td>
+<td>£0.50–1.80</td>
+<td>≤£1.20</td>
+</tr>
+<tr>
+<td>Impression Share (top 3)</td>
+<td>—</td>
+<td>≥40%</td>
+</tr>
+<tr>
+<td>Conversion Rate (click → lead)</td>
+<td>3–6%</td>
+<td>≥4%</td>
+</tr>
+<tr>
+<td>CAC (koszt leadu)</td>
+<td>—</td>
+<td>≤£45/lead</td>
+</tr>
+<tr>
+<td>Leads/mies. (przy £1 600 budżecie)</td>
+<td>—</td>
+<td>≥25</td>
+</tr>
+<tr>
+<td>Lead → Klient konwersja</td>
+<td>—</td>
+<td>≥20%</td>
+</tr>
+<tr>
+<td>Nowi klienci/mies.</td>
+<td>—</td>
+<td>≥5</td>
+</tr>
+<tr>
+<td>ROAS (revenue / ad spend)</td>
+<td>—</td>
+<td>≥500% (5:1)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="14-podsumowanie-priorytet%C3%B3w">14. Podsumowanie priorytetów</h2>
+<h3 id="%E2%9C%85-do-zrobienia-przed-uruchomieniem-kampanii-bez-tego--kampania-straci-efektywno%C5%9B%C4%87">✅ Do zrobienia PRZED uruchomieniem kampanii (bez tego — kampania straci efektywność):</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Akcja</th>
+<th>Gdzie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Zmienić <code>APP_NAME</code> w <code>.env</code></td>
+<td><code>.env</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Zmienić meta title/description na stronie głównej na NI-focused</td>
+<td><code>Welcome.jsx</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Dodać OG tags + canonical do <code>Welcome.jsx</code></td>
+<td><code>Welcome.jsx</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Zmienić &quot;Based in Manchester&quot; → Belfast w <code>About.jsx</code></td>
+<td><code>About.jsx</code> defaults</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Naprawić meta strony Kalkulator (PL → EN)</td>
+<td><code>Kalkulator.jsx</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Dodać noindex na trasy auth/portal</td>
+<td><code>app.blade.php</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Założyć Google Business Profile — Belfast</td>
+<td>Google Business</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Zweryfikować GSC dla website-expert.uk</td>
+<td>Search Console</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Skonfigurować konwersje GTM (telefon, formularz, kalkulator)</td>
+<td>GTM</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%F0%9F%9A%80-do-zrobienia-podczas-kampanii-optymalnie-tydzie%C5%84-2%E2%80%934">🚀 Do zrobienia PODCZAS kampanii (optymalnie tydzień 2–4):</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Akcja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>Uruchomić kampanie w kolejności: Web Design → E-Commerce → SEO → Ads → Niche</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Tygodniowo: Search Terms Report → negatywne słowa kluczowe</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Po 30 dniach: analiza Quality Score, dostosowanie landing pages</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Po 60 dniach: podstrony dedykowane <code>/web-design-belfast</code> itp.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>Plan opracowany na podstawie analizy kodu źródłowego projektu website-expert.uk.</em><br>
+<em>Aktualizacja: po 30 dniach od uruchomienia kampanii na podstawie danych rzeczywistych.</em></p>
+
+</body>
+</html>

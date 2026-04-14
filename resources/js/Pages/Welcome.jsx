@@ -17,8 +17,20 @@ export default function Welcome({ auth, hero, about, cta_banner, trust_strip, te
     return (
         <MarketingLayout auth={auth} navbar={navbar} footer={footer}>
             <Head>
-                <title>WebsiteExpert – Professional Web Development UK</title>
-                <meta name="description" content="Bespoke web design and development for UK businesses." />
+                <title>Website Expert – Web Design & SEO Belfast, Northern Ireland</title>
+                <meta name="description" content="Professional web design, e-commerce and SEO services in Belfast and across Northern Ireland. Fixed price, delivered in 2–6 weeks. Free quote in 24 hours — website-expert.uk" />
+                <meta name="robots" content="index, follow" />
+                <link rel="canonical" href="https://website-expert.uk/" />
+                <meta property="og:title" content="Website Expert – Web Design Belfast, Northern Ireland" />
+                <meta property="og:description" content="Bespoke websites, e-commerce, SEO and Google Ads for Northern Ireland businesses. Fast delivery, fixed prices. Free quote today." />
+                <meta property="og:url" content="https://website-expert.uk/" />
+                <meta property="og:type" content="website" />
+                <meta property="og:locale" content="en_GB" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Website Expert – Web Design Belfast" />
+                <meta name="twitter:description" content="Bespoke web design, SEO and digital marketing for Northern Ireland businesses. Free quote in 24 hours." />
+                <meta name="geo.region" content="GB-NIR" />
+                <meta name="geo.placename" content="Belfast, Northern Ireland" />
             </Head>
 
             {hero           && <Hero data={hero} />}

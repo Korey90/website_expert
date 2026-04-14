@@ -506,7 +506,7 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
     };
 
     return (
-        <section id="kalkulator-v2" className="py-20 md:py-28 bg-neutral-50 dark:bg-neutral-950">
+        <section id="calculate" className="py-20 md:py-28 bg-neutral-50 dark:bg-neutral-950">
             <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12 reveal">
                     <span className="section-label">{s('section_label', 'Cost Calculator')}</span>
