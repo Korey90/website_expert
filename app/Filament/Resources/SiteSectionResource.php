@@ -289,54 +289,9 @@ class SiteSectionResource extends Resource
                         ->label('Section Badge (PL)')
                         ->placeholder('Portfolio')
                         ->maxLength(40),
-                    Forms\Components\Repeater::make('extra.items')
-                        ->label('Projects')
-                        ->schema([
-                            Forms\Components\TextInput::make('client')
-                                ->label('Client Name')
-                                ->maxLength(100),
-                            Forms\Components\TextInput::make('image')
-                                ->label('Image path (e.g. /images/portfolio/file.svg)')
-                                ->maxLength(300)
-                                ->placeholder('/images/portfolio/project.svg'),
-                            Forms\Components\TextInput::make('link')
-                                ->label('Detail page URL')
-                                ->maxLength(200),
-                            Forms\Components\TextInput::make('title_en')
-                                ->label('Title (EN)')
-                                ->required()
-                                ->maxLength(120)
-                                ->columnSpanFull(),
-                            Forms\Components\TextInput::make('title_pl')
-                                ->label('Title (PL)')
-                                ->maxLength(120)
-                                ->columnSpanFull(),
-                            Forms\Components\TextInput::make('tag_en')
-                                ->label('Category tag (EN)')
-                                ->maxLength(60),
-                            Forms\Components\TextInput::make('tag_pl')
-                                ->label('Category tag (PL)')
-                                ->maxLength(60),
-                            Forms\Components\Textarea::make('desc_en')
-                                ->label('Description (EN)')
-                                ->rows(2)
-                                ->maxLength(300)
-                                ->columnSpanFull(),
-                            Forms\Components\Textarea::make('desc_pl')
-                                ->label('Description (PL)')
-                                ->rows(2)
-                                ->maxLength(300)
-                                ->columnSpanFull(),
-                            Forms\Components\TextInput::make('result_en')
-                                ->label('Result / metric (EN)')
-                                ->maxLength(100),
-                            Forms\Components\TextInput::make('result_pl')
-                                ->label('Result / metric (PL)')
-                                ->maxLength(100),
-                        ])
-                        ->columns(3)
-                        ->defaultItems(3)
-                        ->reorderable()
+                    Forms\Components\Placeholder::make('portfolio_items_notice')
+                        ->label('')
+                        ->content('Portfolio project cards are now managed in the dedicated Portfolio Projects resource (Marketing → Portfolio Projects). Changes made there will be reflected automatically on the homepage.')
                         ->columnSpanFull(),
                 ]),
 

@@ -6,7 +6,9 @@ use App\Models\CalculatorPricing;
 use App\Models\CalculatorStep;
 use App\Models\CalculatorString;
 use App\Models\SiteSection;
+use App\Services\Portfolio\PortfolioProjectService;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -64,12 +66,40 @@ class WelcomeController extends Controller
             'extra'       => $s->extra,
         ] : null;
 
+        $portfolioProjects = app(PortfolioProjectService::class)
+            ->getFeatured(limit: 3)
+            ->map(fn ($p) => [
+                'client'    => $p->client_name,
+                'slug'      => $p->slug,
+                'is_active' => (bool) $p->is_active,
+                'title_en'  => $p->getTranslation('title', 'en'),
+                'title_pl'  => $p->getTranslation('title', 'pl'),
+                'title_pt'  => $p->getTranslation('title', 'pt'),
+                'tag_en'    => $p->getTranslation('tag', 'en'),
+                'tag_pl'    => $p->getTranslation('tag', 'pl'),
+                'tag_pt'    => $p->getTranslation('tag', 'pt'),
+                'desc_en'   => $p->getTranslation('description', 'en'),
+                'desc_pl'   => $p->getTranslation('description', 'pl'),
+                'desc_pt'   => $p->getTranslation('description', 'pt'),
+                'result_en' => $p->getTranslation('result', 'en'),
+                'result_pl' => $p->getTranslation('result', 'pl'),
+                'result_pt' => $p->getTranslation('result', 'pt'),
+                'image'     => (function (?string $path): ?string {
+                    if (! $path) return null;
+                    if (str_starts_with($path, '/') || str_starts_with($path, 'http')) return $path;
+                    return Storage::disk('public')->url($path);
+                })($p->image_path),
+                'link'      => $p->link,
+                'tags'      => array_values((array) (is_array($p->tags) ? $p->tags : json_decode($p->tags ?? '[]', true))),
+            ])
+            ->toArray();
+
         $portfolio = ($s = $sections->get('portfolio')) ? [
             'title'       => $s->title,
             'subtitle'    => $s->subtitle,
             'button_text' => $s->button_text,
             'button_url'  => $s->button_url,
-            'extra'       => $s->extra,
+            'extra'       => array_merge($s->extra ?? [], ['items' => $portfolioProjects]),
         ] : null;
 
         $process = ($s = $sections->get('process')) ? [

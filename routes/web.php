@@ -25,6 +25,7 @@ use App\Http\Controllers\Portal\PaymentController as PortalPaymentController;
 use App\Http\Controllers\Portal\PaymentResultController as PortalPaymentResultController;
 use App\Http\Controllers\Portal\ProjectController as PortalProjectController;
 use App\Http\Controllers\Portal\QuoteController as PortalQuoteController;
+use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SocialAccountController;
@@ -62,6 +63,10 @@ Route::post('/notification-mark-read', function (Request $request) {
 
 Route::get('/', WelcomeController::class)->name('home');
 Route::get('/calculate', KalkulatorController::class)->name('kalkulator');
+
+Route::get('/portfolio',         [PortfolioController::class, 'index'])->name('portfolio.index');
+Route::get('/portfolio/{slug}',  [PortfolioController::class, 'show'])->name('portfolio.show')
+    ->where('slug', '[a-z0-9\-]+');
 
 // Sitemap XML — public, no auth
 Route::get('/sitemap.xml', function () {

@@ -76,8 +76,8 @@ export default function Portfolio({ data }) {
                         const itemTag    = t(p, 'tag')    || p.tag    || '';
                         const itemDesc   = t(p, 'desc')   || p.desc   || '';
                         const itemResult = t(p, 'result') || p.result || '';
-                        const href       = p.link ?? '#';
-                        const tags       = p.tags ?? [];
+                        const href       = p.is_active !== false ? (p.link ?? '#') : null;
+                        const tags       = Array.isArray(p.tags) ? p.tags : [];
                         const viewLabel  = locale === 'pl' ? 'Zobacz szczegóły' : 'View case study';
 
                         return (
@@ -126,15 +126,21 @@ export default function Portfolio({ data }) {
                                                 {itemResult}
                                             </span>
                                         )}
-                                        <a
-                                            href={href}
-                                            className="ml-auto text-sm font-semibold text-brand-500 hover:text-brand-600 inline-flex items-center gap-1 group/link"
-                                        >
-                                            {viewLabel}
-                                            <svg className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                            </svg>
-                                        </a>
+                                        {href ? (
+                                            <a
+                                                href={href}
+                                                className="ml-auto text-sm font-semibold text-brand-500 hover:text-brand-600 inline-flex items-center gap-1 group/link"
+                                            >
+                                                {viewLabel}
+                                                <svg className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                </svg>
+                                            </a>
+                                        ) : (
+                                            <span className="ml-auto text-sm text-neutral-400 dark:text-neutral-600 italic">
+                                                {locale === 'pl' ? 'Wkrótce' : 'Coming soon'}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </article>

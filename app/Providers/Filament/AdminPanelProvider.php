@@ -13,6 +13,7 @@ use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
+use Illuminate\Support\Facades\Vite;
 use App\Filament\Widgets\QuickActionsWidget;
 use App\Filament\Widgets\SaasMetricsWidget;
 use App\Filament\Widgets\StatsOverviewWidget;
@@ -78,7 +79,7 @@ class AdminPanelProvider extends PanelProvider
                     }
 
                     $config = json_encode(['userId' => $userId]);
-                    $src    = asset('build/admin/notifications.js');
+                    $src    = Vite::asset('resources/js/admin/notifications.js');
 
                     return new HtmlString(
                         "<script data-navigate-once>window.AdminPanelConfig = {$config};</script>" .

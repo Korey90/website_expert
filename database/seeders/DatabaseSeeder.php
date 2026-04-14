@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
 
         // Website front-end content
         $this->call(SiteSectionSeeder::class);
+        $this->call(PortfolioProjectSeeder::class);
         $this->call(CalculatorPricingSeeder::class);
         $this->call(CalculatorStringsSeeder::class);
         $this->call(CalculatorStepsSeeder::class);

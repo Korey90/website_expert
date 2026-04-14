@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>feature-portfolio-module.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="feature-portfolio-module">Feature: Portfolio Module</h1>
+<h2 id="definicja-modułu">Definicja modułu</h2>
+<p><strong>Cel</strong>: Wydzielenie danych projektów portfolio z <code>site_sections.extra</code> (JSON) do dedykowanej tabeli <code>portfolio_projects</code>, z pełnym zarządzaniem przez panel admina i wyświetlaniem na froncie z nowego źródła danych.</p>
+<p><strong>Bounded Context</strong>: Marketing / Content<br>
+<strong>Priorytet MVP</strong>: MUST HAVE (widoczne na stronie głównej, zastępuje hardcoded dane)<br>
+<strong>Zależności</strong>: <code>SiteSection</code> (sekcja <code>portfolio</code> pozostaje — przechowuje tytuł, opis, ustawienia sekcji), <code>WelcomeController</code><br>
+<strong>Użytkownik</strong>: Admin agencji</p>
+<hr>
+<h2 id="stan-aktualny-co-istnieje">Stan aktualny (co istnieje)</h2>
+<ul>
+<li><code>site_sections</code> tabela z rekordem <code>key = 'portfolio'</code> (ID 6 w seederze)</li>
+<li><code>site_sections.extra</code> przechowuje JSON z tablicą <code>items[]</code> — każdy item to: <code>title_en/pl/pt</code>, <code>tag_en/pl/pt</code>, <code>desc_en/pl/pt</code>, <code>result_en/pl/pt</code>, <code>image</code>, <code>link</code></li>
+<li><code>WelcomeController</code> przekazuje <code>$portfolio</code> do frontu z <code>extra</code> jako array</li>
+<li><code>Portfolio.jsx</code> czyta <code>extra.items</code> i renderuje karty</li>
+<li><code>SiteSectionResource</code> w Filament — edycja przez surowy JSON textarea</li>
+<li>Istnieje <code>ProjectResource</code> (CRM) — nie dotykamy, to osobny model</li>
+</ul>
+<hr>
+<h2 id="krok-1--model-danych">KROK 1 — Model danych</h2>
+<h3 id="tabela-portfolio_projects">TABELA: <code>portfolio_projects</code></h3>
+<p><strong>Cel</strong>: Przechowuje pojedynczy projekt w portfolio agencji — pracę którą chcemy pokazać potencjalnym klientom.</p>
+<pre class="hljs"><code><div>Kolumny:
+- id                    bigint unsigned, PK, auto-increment
+- title                 JSON (translatable)    [EN/PL/PT — tytuł projektu]
+- tag                   JSON (translatable)    [EN/PL/PT — kategoria, np. &quot;E-Commerce&quot;]
+- description           JSON (translatable)    [EN/PL/PT — opis projektu]
+- result                JSON (translatable)    [EN/PL/PT — osiągnięty wynik, np. &quot;+40% konwersji&quot;]
+- client_name           string, nullable       [nazwa klienta — nie FK, tylko string]
+- image_path            string, nullable       [ścieżka do miniatury, np. /images/portfolio/x.webp]
+- link                  string, nullable       [URL do case study lub zewnętrznej strony]
+- tags                  JSON, nullable         [dodatkowe tagi technologiczne, np. [&quot;Laravel&quot;,&quot;React&quot;]]
+- is_featured           boolean, default true  [czy pokazywać na stronie głównej]
+- sort_order            integer, default 0     [kolejność na stronie]
+- is_active             boolean, default true  [czy widoczny publicznie]
+- created_at            timestamp
+- updated_at            timestamp
+- deleted_at            timestamp              [soft deletes]
+
+Indeksy:
+- is_featured + is_active + sort_order  (zapytanie na stronie głównej)
+- is_active + sort_order               (pełna lista)
+</div></code></pre>
+<p><strong>Uwaga</strong>: Brak <code>business_id</code> — to MVP agencji jako single-tenant. Jeśli projekt ewoluuje w SaaS multi-tenant, dodamy <code>business_id</code> przez oddzielną migrację.</p>
+<hr>
+<h2 id="krok-2--backend-laravel">KROK 2 — Backend Laravel</h2>
+<h3 id="2a-model">2a. Model</h3>
+<pre class="hljs"><code><div>PLIK: app/Models/PortfolioProject.php
+
+Traits:
+- HasFactory
+- SoftDeletes
+- HasTranslations (Spatie Translatable)
+
+Translatable: ['title', 'tag', 'description', 'result']
+
+Fillable:
+- title, tag, description, result
+- client_name, image_path, link
+- tags, is_featured, sort_order, is_active
+
+Casts:
+- tags:       'array'
+- is_featured: 'boolean'
+- is_active:   'boolean'
+
+Scopes:
+- scopeActive($query)   → where('is_active', true)
+- scopeFeatured($query) → where('is_featured', true)-&gt;orderBy('sort_order')
+
+Accessory:
+- getLocalizedTitle(string $locale): string   → $this-&gt;getTranslation('title', $locale)
+</div></code></pre>
+<h3 id="2b-migracja">2b. Migracja</h3>
+<pre class="hljs"><code><div>PLIK: database/migrations/[timestamp]_create_portfolio_projects_table.php
+
+Schema::create('portfolio_projects', function (Blueprint $table) {
+    $table-&gt;id();
+    $table-&gt;json('title');
+    $table-&gt;json('tag')-&gt;nullable();
+    $table-&gt;json('description')-&gt;nullable();
+    $table-&gt;json('result')-&gt;nullable();
+    $table-&gt;string('client_name')-&gt;nullable();
+    $table-&gt;string('image_path')-&gt;nullable();
+    $table-&gt;string('link')-&gt;nullable();
+    $table-&gt;json('tags')-&gt;nullable();
+    $table-&gt;boolean('is_featured')-&gt;default(true);
+    $table-&gt;unsignedInteger('sort_order')-&gt;default(0);
+    $table-&gt;boolean('is_active')-&gt;default(true);
+    $table-&gt;timestamps();
+    $table-&gt;softDeletes();
+    $table-&gt;index(['is_active', 'sort_order']);
+    $table-&gt;index(['is_featured', 'is_active', 'sort_order']);
+});
+</div></code></pre>
+<h3 id="2c-seeder">2c. Seeder</h3>
+<pre class="hljs"><code><div>PLIK: database/seeders/PortfolioProjectSeeder.php
+
+Przepisuje 3 istniejące projekty z SiteSectionSeeder (hargreaves, nts-direct, oakfield-dental)
+do nowej tabeli. Każdy projekt: title[en/pl/pt], tag[en/pl/pt], description, result, image_path, link.
+
+Wywołanie w DatabaseSeeder: $this-&gt;call(PortfolioProjectSeeder::class);
+</div></code></pre>
+<h3 id="2d-serwis">2d. Serwis</h3>
+<pre class="hljs"><code><div>SERWIS: app/Services/Portfolio/PortfolioProjectService.php
+
+Metody publiczne:
+
+- getFeatured(int $limit = 3): Collection
+  Zwraca: aktywne, featured projekty posortowane wg sort_order, limit $limit
+  Używane przez: WelcomeController
+
+- getAll(): Collection
+  Zwraca: wszystkie aktywne posortowane wg sort_order
+  Używane przez: przyszła strona /portfolio
+
+- create(array $data): PortfolioProject
+  Parametry: zwalidowane dane z StorePortfolioProjectRequest
+  Zwraca: nowy model
+
+- update(PortfolioProject $project, array $data): PortfolioProject
+
+- delete(PortfolioProject $project): void
+  Soft delete
+
+- reorder(array $orderedIds): void
+  Parametry: [['id' =&gt; 1, 'sort_order' =&gt; 0], ...]
+  Aktualizuje sort_order masowo
+</div></code></pre>
+<h3 id="2e-form-requests">2e. Form Requests</h3>
+<pre class="hljs"><code><div>REQUEST: app/Http/Requests/Portfolio/StorePortfolioProjectRequest.php
+REQUEST: app/Http/Requests/Portfolio/UpdatePortfolioProjectRequest.php
+
+Reguły (obie klasy, Update ma sometimes na wymaganych):
+- title.en:       required|string|max:255
+- title.pl:       nullable|string|max:255
+- title.pt:       nullable|string|max:255
+- tag.en:         nullable|string|max:100
+- description.en: nullable|string|max:1000
+- result.en:      nullable|string|max:255
+- client_name:    nullable|string|max:255
+- image_path:     nullable|string|max:500
+- link:           nullable|url|max:500
+- tags:           nullable|array
+- tags.*:         string|max:50
+- is_featured:    boolean
+- is_active:      boolean
+- sort_order:     integer|min:0
+
+Autoryzacja: permission('portfolio-project.create' / 'portfolio-project.update')
+</div></code></pre>
+<h3 id="2f-kontroler">2f. Kontroler</h3>
+<pre class="hljs"><code><div>KONTROLER: app/Http/Controllers/Admin/PortfolioProjectController.php
+(Dostęp przez panel admina — Inertia, middleware auth + role:admin)
+
+Trasy (routes/web.php lub routes/admin.php):
+Route::prefix('admin/portfolio')-&gt;middleware(['auth', 'role:admin'])-&gt;group(function () {
+    Route::get('/',                [PortfolioProjectController::class, 'index'])  -&gt;name('admin.portfolio.index');
+    Route::get('/create',          [PortfolioProjectController::class, 'create']) -&gt;name('admin.portfolio.create');
+    Route::post('/',               [PortfolioProjectController::class, 'store'])  -&gt;name('admin.portfolio.store');
+    Route::get('/{project}/edit',  [PortfolioProjectController::class, 'edit'])   -&gt;name('admin.portfolio.edit');
+    Route::put('/{project}',       [PortfolioProjectController::class, 'update']) -&gt;name('admin.portfolio.update');
+    Route::delete('/{project}',    [PortfolioProjectController::class, 'destroy'])-&gt;name('admin.portfolio.destroy');
+    Route::post('/reorder',        [PortfolioProjectController::class, 'reorder'])-&gt;name('admin.portfolio.reorder');
+});
+
+Metody:
+- index():   Inertia::render('Admin/Portfolio/Index', ['projects' =&gt; PortfolioProject::active()-&gt;ordered()-&gt;get()])
+- create():  Inertia::render('Admin/Portfolio/Create')
+- store():   serwis-&gt;create(), redirect z flash
+- edit():    Inertia::render('Admin/Portfolio/Edit', ['project' =&gt; $project])
+- update():  serwis-&gt;update(), redirect z flash
+- destroy(): serwis-&gt;delete(), redirect z flash
+- reorder(): serwis-&gt;reorder(request('items')), response()-&gt;json(['ok' =&gt; true])
+</div></code></pre>
+<h3 id="2g-filament-resource-panel-admin">2g. Filament Resource (panel /admin)</h3>
+<pre class="hljs"><code><div>PLIK: app/Filament/Resources/PortfolioProjectResource.php
+
+Navigation:
+- Group: Marketing
+- Label: Portfolio Projects
+- Icon: heroicon-o-photo
+- Sort: 3 (po SiteSectionResource)
+
+Tabela (columns):
+- ImageColumn::make('image_path')       -&gt;label('Thumb') -&gt;disk('public') -&gt;circular(false)
+- TextColumn::make('title.en')          -&gt;label('Title') -&gt;searchable() -&gt;sortable()
+- TextColumn::make('client_name')       -&gt;label('Client') -&gt;placeholder('—')
+- TextColumn::make('tag.en')            -&gt;label('Category') -&gt;badge() -&gt;color('gray')
+- IconColumn::make('is_featured')       -&gt;boolean() -&gt;label('Featured')
+- IconColumn::make('is_active')         -&gt;boolean() -&gt;label('Active')
+- TextColumn::make('sort_order')        -&gt;label('Order') -&gt;sortable()
+- TextColumn::make('updated_at')        -&gt;dateTime('d M Y') -&gt;since()
+
+Formularz (form):
+Tabs:
+  Tab &quot;Content&quot;:
+    - TextInput::make('title.en') -&gt;required() -&gt;label('Title (EN)')
+    - TextInput::make('title.pl') -&gt;label('Title (PL)')
+    - TextInput::make('title.pt') -&gt;label('Title (PT)')
+    - TextInput::make('tag.en') -&gt;label('Category (EN)')
+    - TextInput::make('tag.pl') / tag.pt
+    - Textarea::make('description.en') -&gt;rows(3)
+    - Textarea::make('description.pl') / description.pt
+    - TextInput::make('result.en') -&gt;label('Result snippet (EN)')
+    - TextInput::make('result.pl') / result.pt
+
+  Tab &quot;Media &amp; Links&quot;:
+    - FileUpload::make('image_path') -&gt;image() -&gt;directory('portfolio') -&gt;disk('public')
+    - TextInput::make('link') -&gt;url() -&gt;label('Case Study URL')
+    - TextInput::make('client_name')
+    - TagsInput::make('tags') -&gt;label('Tech Tags')
+
+  Tab &quot;Settings&quot;:
+    - Toggle::make('is_featured') -&gt;label('Show on homepage')
+    - Toggle::make('is_active')
+    - TextInput::make('sort_order') -&gt;integer()
+
+Akcje: EditAction, DeleteAction (soft delete)
+Filtry: SelectFilter('is_featured'), SelectFilter('is_active')
+</div></code></pre>
+<h3 id="2h-aktualizacja-sitesectionresource-panel-admin-route-adminsite-sections6">2h. Aktualizacja SiteSectionResource (panel /admin route: /admin/site-sections/6)</h3>
+<p>Sekcja portfolio w <code>SiteSectionResource</code> zarządza <strong>ustawieniami sekcji</strong> (tytuł, opis, etykieta, CTA) — nie projektami.</p>
+<p>Zmiany w <code>SiteSectionResource.php</code>:</p>
+<ul>
+<li>W formularzu edycji sekcji <code>portfolio</code> dodać informację (Placeholder/Hint): <em>&quot;Projekty portfolio zarządzane są w osobnym module: Portfolio Projects&quot;</em></li>
+<li>Usunąć lub oznaczyć jako deprecated pole <code>extra.items</code> w JSON textarea dla klucza <code>portfolio</code></li>
+<li>Dodać link/button (<code>Action::make('manageProjects')-&gt;url(route('filament.admin.resources.portfolio-projects.index'))</code>) w sekcji <code>portfolio</code></li>
+</ul>
+<hr>
+<h2 id="krok-3--aktualizacja-welcomecontroller">KROK 3 — Aktualizacja WelcomeController</h2>
+<pre class="hljs"><code><div><span class="hljs-comment">// WelcomeController.php — zmiana w bloku $portfolio</span>
+
+<span class="hljs-comment">// PRZED:</span>
+<span class="hljs-variable">$portfolio</span> = (<span class="hljs-variable">$s</span> = <span class="hljs-variable">$sections</span>-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;portfolio&#x27;</span>)) ? [
+    <span class="hljs-string">&#x27;title&#x27;</span>  =&gt; <span class="hljs-variable">$s</span>-&gt;title,
+    ...
+    <span class="hljs-string">&#x27;extra&#x27;</span>  =&gt; <span class="hljs-variable">$s</span>-&gt;extra,   <span class="hljs-comment">// ← tu były items[]</span>
+] : <span class="hljs-literal">null</span>;
+
+<span class="hljs-comment">// PO:</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Services</span>\<span class="hljs-title">Portfolio</span>\<span class="hljs-title">PortfolioProjectService</span>;
+
+<span class="hljs-variable">$portfolioProjects</span> = <span class="hljs-title function_ invoke__">app</span>(<span class="hljs-title class_">PortfolioProjectService</span>::<span class="hljs-variable language_">class</span>)
+    -&gt;<span class="hljs-title function_ invoke__">getFeatured</span>(<span class="hljs-attr">limit</span>: <span class="hljs-number">3</span>)
+    -&gt;<span class="hljs-title function_ invoke__">map</span>(fn (<span class="hljs-variable">$p</span>) =&gt; [
+        <span class="hljs-string">&#x27;title_en&#x27;</span>  =&gt; <span class="hljs-variable">$p</span>-&gt;<span class="hljs-title function_ invoke__">getTranslation</span>(<span class="hljs-string">&#x27;title&#x27;</span>, <span class="hljs-string">&#x27;en&#x27;</span>),
+        <span class="hljs-string">&#x27;title_pl&#x27;</span>  =&gt; <span class="hljs-variable">$p</span>-&gt;<span class="hljs-title function_ invoke__">getTranslation</span>(<span class="hljs-string">&#x27;title&#x27;</span>, <span class="hljs-string">&#x27;pl&#x27;</span>),
+        <span class="hljs-string">&#x27;title_pt&#x27;</span>  =&gt; <span class="hljs-variable">$p</span>-&gt;<span class="hljs-title function_ invoke__">getTranslation</span>(<span class="hljs-string">&#x27;title&#x27;</span>, <span class="hljs-string">&#x27;pt&#x27;</span>),
+        <span class="hljs-string">&#x27;tag_en&#x27;</span>    =&gt; <span class="hljs-variable">$p</span>-&gt;<span class="hljs-title function_ invoke__">getTranslation</span>(<span class="hljs-string">&#x27;tag&#x27;</span>, <span class="hljs-string">&#x27;en&#x27;</span>),
+        <span class="hljs-string">&#x27;tag_pl&#x27;</span>    =&gt; <span class="hljs-variable">$p</span>-&gt;<span class="hljs-title function_ invoke__">getTranslation</span>(<span class="hljs-string">&#x27;tag&#x27;</span>, <span class="hljs-string">&#x27;pl&#x27;</span>),
+        <span class="hljs-string">&#x27;tag_pt&#x27;</span>    =&gt; <span class="hljs-variable">$p</span>-&gt;<span class="hljs-title function_ invoke__">getTranslation</span>(<span class="hljs-string">&#x27;tag&#x27;</span>, <span class="hljs-string">&#x27;pt&#x27;</span>),
+        <span class="hljs-string">&#x27;desc_en&#x27;</span>   =&gt; <span class="hljs-variable">$p</span>-&gt;<span class="hljs-title function_ invoke__">getTranslation</span>(<span class="hljs-string">&#x27;description&#x27;</span>, <span class="hljs-string">&#x27;en&#x27;</span>),
+        <span class="hljs-string">&#x27;desc_pl&#x27;</span>   =&gt; <span class="hljs-variable">$p</span>-&gt;<span class="hljs-title function_ invoke__">getTranslation</span>(<span class="hljs-string">&#x27;description&#x27;</span>, <span class="hljs-string">&#x27;pl&#x27;</span>),
+        <span class="hljs-string">&#x27;desc_pt&#x27;</span>   =&gt; <span class="hljs-variable">$p</span>-&gt;<span class="hljs-title function_ invoke__">getTranslation</span>(<span class="hljs-string">&#x27;description&#x27;</span>, <span class="hljs-string">&#x27;pt&#x27;</span>),
+        <span class="hljs-string">&#x27;result_en&#x27;</span> =&gt; <span class="hljs-variable">$p</span>-&gt;<span class="hljs-title function_ invoke__">getTranslation</span>(<span class="hljs-string">&#x27;result&#x27;</span>, <span class="hljs-string">&#x27;en&#x27;</span>),
+        <span class="hljs-string">&#x27;result_pl&#x27;</span> =&gt; <span class="hljs-variable">$p</span>-&gt;<span class="hljs-title function_ invoke__">getTranslation</span>(<span class="hljs-string">&#x27;result&#x27;</span>, <span class="hljs-string">&#x27;pl&#x27;</span>),
+        <span class="hljs-string">&#x27;result_pt&#x27;</span> =&gt; <span class="hljs-variable">$p</span>-&gt;<span class="hljs-title function_ invoke__">getTranslation</span>(<span class="hljs-string">&#x27;result&#x27;</span>, <span class="hljs-string">&#x27;pt&#x27;</span>),
+        <span class="hljs-string">&#x27;client&#x27;</span>    =&gt; <span class="hljs-variable">$p</span>-&gt;client_name,
+        <span class="hljs-string">&#x27;image&#x27;</span>     =&gt; <span class="hljs-variable">$p</span>-&gt;image_path,
+        <span class="hljs-string">&#x27;link&#x27;</span>      =&gt; <span class="hljs-variable">$p</span>-&gt;link,
+        <span class="hljs-string">&#x27;tags&#x27;</span>      =&gt; <span class="hljs-variable">$p</span>-&gt;tags ?? [],
+    ]);
+
+<span class="hljs-variable">$portfolio</span> = (<span class="hljs-variable">$s</span> = <span class="hljs-variable">$sections</span>-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;portfolio&#x27;</span>)) ? [
+    <span class="hljs-string">&#x27;title&#x27;</span>       =&gt; <span class="hljs-variable">$s</span>-&gt;title,
+    <span class="hljs-string">&#x27;subtitle&#x27;</span>    =&gt; <span class="hljs-variable">$s</span>-&gt;subtitle,
+    <span class="hljs-string">&#x27;button_text&#x27;</span> =&gt; <span class="hljs-variable">$s</span>-&gt;button_text,
+    <span class="hljs-string">&#x27;button_url&#x27;</span>  =&gt; <span class="hljs-variable">$s</span>-&gt;button_url,
+    <span class="hljs-string">&#x27;extra&#x27;</span>       =&gt; <span class="hljs-title function_ invoke__">array_merge</span>(<span class="hljs-variable">$s</span>-&gt;extra ?? [], [
+        <span class="hljs-string">&#x27;items&#x27;</span> =&gt; <span class="hljs-variable">$portfolioProjects</span>-&gt;<span class="hljs-title function_ invoke__">toArray</span>(),  // ← nowe źródło
+    ]),
+] : <span class="hljs-literal">null</span>;
+</div></code></pre>
+<p><strong>Ważne</strong>: <code>Portfolio.jsx</code> czyta <code>extra.items</code> — format odpowiedzi musi być identyczny. Dzięki temu frontend NIE wymaga zmian strukturalnych, tylko ewentualne uzupełnienie pola <code>client</code>.</p>
+<hr>
+<h2 id="krok-4--frontend-inertia--react--typescript">KROK 4 — Frontend (Inertia + React + TypeScript)</h2>
+<h3 id="4a-typy-typescript">4a. Typy TypeScript</h3>
+<pre class="hljs"><code><div><span class="hljs-comment">// resources/js/types/portfolio.ts</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">PortfolioProject</span> {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">title_en</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">title_pl</span>?: <span class="hljs-built_in">string</span>; <span class="hljs-attr">title_pt</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">tag_en</span>?: <span class="hljs-built_in">string</span>;  <span class="hljs-attr">tag_pl</span>?: <span class="hljs-built_in">string</span>;  <span class="hljs-attr">tag_pt</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">desc_en</span>?: <span class="hljs-built_in">string</span>; <span class="hljs-attr">desc_pl</span>?: <span class="hljs-built_in">string</span>; <span class="hljs-attr">desc_pt</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">result_en</span>?: <span class="hljs-built_in">string</span>; <span class="hljs-attr">result_pl</span>?: <span class="hljs-built_in">string</span>; <span class="hljs-attr">result_pt</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">client</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">image</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">link</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">tags</span>?: <span class="hljs-built_in">string</span>[];
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">PortfolioPageProps</span> {
+  <span class="hljs-attr">projects</span>: <span class="hljs-title class_">PortfolioProject</span>[];
+}
+</div></code></pre>
+<h3 id="4b-aktualizacja-portfoliojsx">4b. Aktualizacja Portfolio.jsx</h3>
+<p>Zmiany minimalne — komponent już działa poprawnie z <code>extra.items</code>. Jedyna zmiana: obsługa pola <code>client</code> (już jest w istniejącym komponencie). <strong>Brak wymaganych zmian jeśli format items jest zachowany.</strong></p>
+<h3 id="4c-strony-inertia--panel-admina-portfolio">4c. Strony Inertia — Panel admina portfolio</h3>
+<pre class="hljs"><code><div>PLIK: resources/js/Pages/Admin/Portfolio/Index.tsx
+
+Props: { projects: PortfolioProject[] }
+Widok: tabela z projektami, przyciski Dodaj/Edytuj/Usuń, drag-and-drop reorder (opcjonalnie)
+</div></code></pre>
+<pre class="hljs"><code><div>PLIK: resources/js/Pages/Admin/Portfolio/Create.tsx
+
+Props: {}
+Widok: formularz z tabami (Content / Media &amp; Links / Settings)
+Hook: useForm&lt;PortfolioProjectForm&gt;(defaultValues)
+Submit: router.post(route('admin.portfolio.store'), form.data)
+</div></code></pre>
+<pre class="hljs"><code><div>PLIK: resources/js/Pages/Admin/Portfolio/Edit.tsx
+
+Props: { project: PortfolioProject }
+Widok: jak Create, pre-filled danymi projektu
+Submit: router.put(route('admin.portfolio.update', project.id), form.data)
+</div></code></pre>
+<hr>
+<h2 id="krok-5--uprawnienia-spatie">KROK 5 — Uprawnienia Spatie</h2>
+<pre class="hljs"><code><div>Nowe permisje (dodać do seeder PermissionSeeder lub RoleSeeder):
+- portfolio-project.view-any
+- portfolio-project.create
+- portfolio-project.update
+- portfolio-project.delete
+
+Rola admin: wszystkie
+Rola manager: view-any, create, update
+</div></code></pre>
+<hr>
+<h2 id="kolejność-implementacji">Kolejność implementacji</h2>
+<ol>
+<li><strong>Migracja</strong> <code>create_portfolio_projects_table</code> — <code>php artisan make:migration</code></li>
+<li><strong>Model</strong> <code>PortfolioProject</code> z trait HasTranslations</li>
+<li><strong>Seeder</strong> <code>PortfolioProjectSeeder</code> — przepisz 3 projekty z SiteSectionSeeder</li>
+<li><strong>Serwis</strong> <code>PortfolioProjectService</code> — metody getFeatured, create, update, delete</li>
+<li><strong>Aktualizacja WelcomeController</strong> — podmień źródło danych</li>
+<li><strong>Filament Resource</strong> <code>PortfolioProjectResource</code> — panel admina</li>
+<li><strong>Aktualizacja SiteSectionResource</strong> — hint + link do nowego zasobu przy kluczu <code>portfolio</code></li>
+<li><strong>Form Requests</strong> + <strong>Kontroler</strong> (jeśli potrzebny poza Filament)</li>
+<li><strong>Strony Inertia</strong> (Admin/Portfolio/*) — opcjonalnie jeśli Filament nie wystarcza</li>
+<li><strong>Testy</strong> Feature: CRUD + getFeatured zwraca właściwe projekty</li>
+</ol>
+<hr>
+<h2 id="ryzyka-i-uwagi">Ryzyka i uwagi</h2>
+<table>
+<thead>
+<tr>
+<th>Ryzyko</th>
+<th>Mitygacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Istniejące dane w <code>site_sections.extra.items</code> znikną</td>
+<td>Seeder przepisuje dane do nowej tabeli PRZED usunięciem z extra</td>
+</tr>
+<tr>
+<td>Format items musi być identyczny z tym co czyta Portfolio.jsx</td>
+<td>WelcomeController mapuje nowe pola na stary format</td>
+</tr>
+<tr>
+<td><code>HasTranslations</code> wymaga JSON w kolumnach</td>
+<td>Wszystkie pola translatable jako <code>json</code> w migracji</td>
+</tr>
+<tr>
+<td>Obrazy — aktualnie ścieżki SVG w public/</td>
+<td>FileUpload w Filament zapisuje do storage/app/public/portfolio — trzeba <code>php artisan storage:link</code></td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>
