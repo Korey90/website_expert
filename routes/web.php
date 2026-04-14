@@ -75,14 +75,26 @@ Route::get('/services/{slug}',   [ServiceController::class, 'show'])->name('serv
 
 // Sitemap XML — public, no auth
 Route::get('/sitemap.xml', function () {
-    $pages = \App\Models\Page::select('slug', 'updated_at')->get();
-    $content = view('sitemap', [
-        'staticUrls' => [
-            ['loc' => url('/'),            'priority' => '1.0',  'changefreq' => 'weekly'],
-            ['loc' => url('/calculate'),  'priority' => '0.8',  'changefreq' => 'monthly'],
-        ],
-        'pages' => $pages,
-    ])->render();
+    $content = \Illuminate\Support\Facades\Cache::remember('sitemap.xml', 3600, function () {
+        $pages     = \App\Models\Page::select('slug', 'updated_at')->get();
+        $portfolio = \App\Models\PortfolioProject::select('slug', 'updated_at')
+            ->where('is_active', true)->where('is_featured', true)->orderBy('sort_order')->get();
+        $services  = \App\Models\ServiceItem::select('slug', 'updated_at')
+            ->where('is_active', true)->orderBy('sort_order')->get();
+
+        return view('sitemap', [
+            'staticUrls' => [
+                ['loc' => url('/'),           'priority' => '1.0', 'changefreq' => 'weekly'],
+                ['loc' => url('/calculate'),  'priority' => '0.8', 'changefreq' => 'monthly'],
+                ['loc' => url('/portfolio'),  'priority' => '0.8', 'changefreq' => 'weekly'],
+                ['loc' => url('/services'),   'priority' => '0.8', 'changefreq' => 'monthly'],
+            ],
+            'pages'     => $pages,
+            'portfolio' => $portfolio,
+            'services'  => $services,
+        ])->render();
+    });
+
     return response($content, 200)->header('Content-Type', 'application/xml');
 })->name('sitemap');
 

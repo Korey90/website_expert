@@ -1,1 +1,8 @@
 Na froncie jest sekcja 'portfolio' chciałbym dodac dedykowany model do tej sekcji ktory zawieralby informacje o projektach. mowiac projekt mam na mysli prace jakie chce pokazac w protfolio. aktualnie ta sekcja jest zdefiniowana w site-sections, dane projektów-portfolio zdefiniowane sa w kolimnie site-sections.extra jako json dla tych danych potrzebujemy model, kontroller, tabelke w bazie danych-migracje, seeder, trzeba poprawic fontend tak zeby wyswietlal projekty z nowego zrodła, aktualizowac panel admina front/backend '/admin/site-sections/6'. trzeba tez dodac nowe widoki do zazadzania tymi projektami w panelu admina. twoim zadaniem jest zaplanowanie tej zmiany z wykozystanie dostepnuch skilli. dokumentuj to jako portfolio-module
+
+dane do ustawien systemu po instalacji dla seedera
+
+Google Tag Manager : GTM-K749NJ7Q
+Google Analytics 4 : G-QSMTFCBCDQ
+Google Ads : AW-18030198393
+Meta Pixel : 
