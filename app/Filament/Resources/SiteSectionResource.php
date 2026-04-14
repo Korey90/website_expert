@@ -309,46 +309,9 @@ class SiteSectionResource extends Resource
                         ->label('Section Badge (PL)')
                         ->placeholder('Oferta')
                         ->maxLength(40),
-                    Forms\Components\Repeater::make('extra.services')
-                        ->label('Service Cards')
-                        ->schema([
-                            Forms\Components\TextInput::make('icon')
-                                ->label('Icon key')
-                                ->placeholder('monitor | shopping-cart | code | search | bar-chart | settings | shield | pencil')
-                                ->helperText('Identifier mapped to an SVG icon in the component.')
-                                ->maxLength(40),
-                            Forms\Components\TextInput::make('price_from')
-                                ->label('Price from')
-                                ->placeholder('£799')
-                                ->maxLength(20),
-                            Forms\Components\TextInput::make('link')
-                                ->label('Link URL')
-                                ->maxLength(200),
-                            Forms\Components\TextInput::make('title_en')
-                                ->label('Title (EN)')
-                                ->required()
-                                ->maxLength(80)
-                                ->columnSpanFull(),
-                            Forms\Components\TextInput::make('title_pl')
-                                ->label('Title (PL)')
-                                ->required()
-                                ->maxLength(80)
-                                ->columnSpanFull(),
-                            Forms\Components\Textarea::make('description_en')
-                                ->label('Description (EN)')
-                                ->required()
-                                ->rows(2)
-                                ->maxLength(250)
-                                ->columnSpanFull(),
-                            Forms\Components\Textarea::make('description_pl')
-                                ->label('Description (PL)')
-                                ->rows(2)
-                                ->maxLength(250)
-                                ->columnSpanFull(),
-                        ])
-                        ->columns(3)
-                        ->defaultItems(6)
-                        ->reorderable()
+                    Forms\Components\Placeholder::make('services_items_notice')
+                        ->label('')
+                        ->content('Service cards are now managed in the dedicated Services resource (Marketing → Services). Changes made there will be reflected automatically on the homepage.')
                         ->columnSpanFull(),
                 ]),
 

@@ -26,6 +26,7 @@ use App\Http\Controllers\Portal\PaymentResultController as PortalPaymentResultCo
 use App\Http\Controllers\Portal\ProjectController as PortalProjectController;
 use App\Http\Controllers\Portal\QuoteController as PortalQuoteController;
 use App\Http\Controllers\PortfolioController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SocialAccountController;
@@ -66,6 +67,10 @@ Route::get('/calculate', KalkulatorController::class)->name('kalkulator');
 
 Route::get('/portfolio',         [PortfolioController::class, 'index'])->name('portfolio.index');
 Route::get('/portfolio/{slug}',  [PortfolioController::class, 'show'])->name('portfolio.show')
+    ->where('slug', '[a-z0-9\-]+');
+
+Route::get('/services',          [ServiceController::class, 'index'])->name('services.index');
+Route::get('/services/{slug}',   [ServiceController::class, 'show'])->name('services.show')
     ->where('slug', '[a-z0-9\-]+');
 
 // Sitemap XML — public, no auth

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PortfolioProjectResource\Pages;
-use App\Models\PortfolioProject;
+use App\Filament\Resources\ServiceItemResource\Pages;
+use App\Models\ServiceItem;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -15,17 +15,16 @@ use Filament\Tables\Table;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Illuminate\Support\Facades\Storage;
 
-class PortfolioProjectResource extends Resource
+class ServiceItemResource extends Resource
 {
-    protected static ?string $model = PortfolioProject::class;
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-photo';
+    protected static ?string $model = ServiceItem::class;
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-wrench-screwdriver';
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
-    protected static ?string $navigationLabel = 'Portfolio Projects';
-    protected static ?string $label = 'Portfolio Project';
-    protected static ?string $pluralLabel = 'Portfolio Projects';
-    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationLabel = 'Services';
+    protected static ?string $label = 'Service';
+    protected static ?string $pluralLabel = 'Services';
+    protected static ?int $navigationSort = 4;
 
     // -------------------------------------------------------------------------
     // Form
@@ -41,28 +40,23 @@ class PortfolioProjectResource extends Resource
                 ->schema([
                     Forms\Components\TextInput::make("title.{$code}")
                         ->label('Title')
-                        ->maxLength(255)
-                        ->nullable(),
-
-                    Forms\Components\TextInput::make("tag.{$code}")
-                        ->label('Tag / Category')
-                        ->maxLength(100)
+                        ->maxLength(120)
                         ->nullable(),
 
                     Forms\Components\Textarea::make("description.{$code}")
                         ->label('Description')
-                        ->rows(4)
-                        ->nullable(),
-
-                    Forms\Components\Textarea::make("result.{$code}")
-                        ->label('Result / Outcome')
                         ->rows(3)
                         ->nullable(),
                 ]);
         }
 
+        $iconOptions = collect([
+            'bar-chart', 'code', 'file-text', 'monitor', 'pencil',
+            'search', 'settings', 'shield', 'shopping-cart', 'zap',
+        ])->mapWithKeys(fn ($v) => [$v => $v])->all();
+
         return $form->schema([
-            Tabs::make('Portfolio Project')
+            Tabs::make('Service Item')
                 ->columnSpanFull()
                 ->tabs([
                     Tab::make('Content')
@@ -73,49 +67,41 @@ class PortfolioProjectResource extends Resource
                                 ->tabs($tabSchemas),
                         ]),
 
-                    Tab::make('Media & Links')
-                        ->icon('heroicon-o-link')
-                        ->schema([
-                            Forms\Components\TextInput::make('client_name')
-                                ->label('Client Name')
-                                ->maxLength(255)
-                                ->nullable(),
-
-                            Forms\Components\TextInput::make('slug')
-                                ->label('Slug (URL key)')
-                                ->helperText('Auto-generated from client name. Used in /portfolio/{slug}.')
-                                ->maxLength(255)
-                                ->unique(ignoreRecord: true)
-                                ->nullable(),
-
-                            Forms\Components\FileUpload::make('image_path')
-                                ->label('Project Image')
-                                ->image()
-                                ->disk('public')
-                                ->directory('portfolio')
-                                ->nullable(),
-
-                            Forms\Components\TextInput::make('link')
-                                ->label('Project URL')
-                                ->type('text')
-                                ->rules(['nullable', 'string', 'max:512', 'regex:/^(https?:\/\/|\/)/'])
-                                ->maxLength(512)
-                                ->helperText('Relative path (e.g. /portfolio/slug) or full URL (https://…)')
-                                ->nullable(),
-
-                            Forms\Components\TagsInput::make('tags')
-                                ->label('Tags')
-                                ->separator(',')
-                                ->nullable(),
-                        ]),
-
                     Tab::make('Settings')
                         ->icon('heroicon-o-cog-6-tooth')
                         ->schema([
+                            Forms\Components\Select::make('icon')
+                                ->label('Icon')
+                                ->options($iconOptions)
+                                ->default('settings')
+                                ->searchable()
+                                ->required(),
+
+                            Forms\Components\TextInput::make('price_from')
+                                ->label('Price From')
+                                ->maxLength(30)
+                                ->nullable()
+                                ->helperText('e.g. £799 or £149/mo'),
+
+                            Forms\Components\TextInput::make('link')
+                                ->label('Link URL')
+                                ->type('text')
+                                ->rules(['nullable', 'string', 'max:255', 'regex:/^(https?:\/\/|\/)/'])
+                                ->maxLength(255)
+                                ->helperText('Relative path (e.g. /services/seo) or full URL.')
+                                ->nullable(),
+
+                            Forms\Components\TextInput::make('slug')
+                                ->label('Slug')
+                                ->helperText('Auto-generated from English title on creation.')
+                                ->maxLength(100)
+                                ->unique(ignoreRecord: true)
+                                ->nullable(),
+
                             Forms\Components\Toggle::make('is_featured')
                                 ->label('Featured (show on homepage)')
                                 ->inline(false)
-                                ->default(false),
+                                ->default(true),
 
                             Forms\Components\Toggle::make('is_active')
                                 ->label('Active')
@@ -141,37 +127,22 @@ class PortfolioProjectResource extends Resource
         return $table
             ->defaultSort('sort_order')
             ->columns([
-                Tables\Columns\TextColumn::make('image_path')
-                    ->label('Image')
-                    ->html()
-                    ->getStateUsing(function (PortfolioProject $record): string {
-                        $path = $record->image_path;
-                        if (! $path) {
-                            return '<div class="w-12 h-12 rounded bg-gray-100 dark:bg-gray-800"></div>';
-                        }
-                        $url = (str_starts_with($path, '/') || str_starts_with($path, 'http'))
-                            ? $path
-                            : Storage::disk('public')->url($path);
-                        return "<img src=\"{$url}\" class=\"w-12 h-12 object-cover rounded\" loading=\"lazy\" />";
-                    }),
+                Tables\Columns\TextColumn::make('icon')
+                    ->label('Icon')
+                    ->badge()
+                    ->color('gray'),
 
                 Tables\Columns\TextColumn::make('title_en_display')
                     ->label('Title (EN)')
-                    ->getStateUsing(fn (PortfolioProject $record): string => $record->getTranslation('title', 'en') ?? '')
+                    ->getStateUsing(fn (ServiceItem $item): string => $item->getTranslation('title', 'en') ?? '')
                     ->searchable(query: function ($query, string $value) {
                         $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(title, '$.en')) LIKE ?", ["%{$value}%"]);
                     })
-                    ->limit(40),
+                    ->limit(45),
 
-                Tables\Columns\TextColumn::make('client_name')
-                    ->label('Client')
-                    ->searchable()
+                Tables\Columns\TextColumn::make('price_from')
+                    ->label('Price From')
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('tag.en')
-                    ->label('Tag')
-                    ->badge()
-                    ->color('info'),
 
                 Tables\Columns\IconColumn::make('is_featured')
                     ->label('Featured')
@@ -212,9 +183,9 @@ class PortfolioProjectResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListPortfolioProjects::route('/'),
-            'create' => Pages\CreatePortfolioProject::route('/create'),
-            'edit'   => Pages\EditPortfolioProject::route('/{record}/edit'),
+            'index'  => Pages\ListServiceItems::route('/'),
+            'create' => Pages\CreateServiceItem::route('/create'),
+            'edit'   => Pages\EditServiceItem::route('/{record}/edit'),
         ];
     }
 }

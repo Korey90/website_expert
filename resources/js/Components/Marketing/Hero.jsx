@@ -44,7 +44,7 @@ export default function Hero({ data }) {
     const titleLines = (d.title ?? DEFAULTS.title).split('\n');
 
     return (
-        <section id="hero" className="relative min-h-screen flex items-center overflow-hidden pt-16 md:pt-20">
+        <section id="hero" className="relative min-h-screen flex items-center overflow-hidden pt-4 md:pt-10">
             {/* Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-neutral-50 via-white to-brand-50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950" aria-hidden="true" />
             <div className="absolute top-1/4 right-0 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />

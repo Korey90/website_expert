@@ -6,6 +6,7 @@ use App\Models\CalculatorPricing;
 use App\Models\CalculatorStep;
 use App\Models\CalculatorString;
 use App\Models\SiteSection;
+use App\Services\Marketing\ServiceItemService;
 use App\Services\Portfolio\PortfolioProjectService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
@@ -58,12 +59,15 @@ class WelcomeController extends Controller
             'extra'       => $s->extra,
         ] : null;
 
+        $serviceItems = app(ServiceItemService::class)->getFeatured();
+        $serviceItemsArray = app(ServiceItemService::class)->mapToArray($serviceItems);
+
         $services = ($s = $sections->get('services')) ? [
             'title'       => $s->title,
             'subtitle'    => $s->subtitle,
             'button_text' => $s->button_text,
             'button_url'  => $s->button_url,
-            'extra'       => $s->extra,
+            'extra'       => array_merge($s->extra ?? [], ['services' => $serviceItemsArray]),
         ] : null;
 
         $portfolioProjects = app(PortfolioProjectService::class)

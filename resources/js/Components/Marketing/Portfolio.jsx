@@ -58,7 +58,7 @@ export default function Portfolio({ data }) {
     const items        = extra.items ?? DEFAULTS.items;
 
     return (
-        <section id="portfolio" className="py-16 sm:py-20 md:py-28 bg-neutral-50 dark:bg-neutral-900">
+        <section id="portfolio" className="py-16 sm:py-20 md:py-28 bg-neutral-100 dark:bg-neutral-800">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-10 sm:mb-14 reveal">
                     <span className="section-label">{sectionLabel}</span>
