@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>server-instructions-apache.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="instrukcje-konfiguracji-serwera--ubuntu-24044-lts--apache--mysql">Instrukcje konfiguracji serwera — Ubuntu 24.04.4 LTS + Apache + MySQL</h1>
+<blockquote>
+<p>Wykonaj poniższe kroki po zalogowaniu się na serwer przez SSH.</p>
+</blockquote>
+<hr>
+<h2 id="1-włącz-wymagane-moduły-apache">1. Włącz wymagane moduły Apache</h2>
+<pre class="hljs"><code><div><span class="hljs-built_in">sudo</span> a2enmod rewrite deflate brotli expires headers
+<span class="hljs-built_in">sudo</span> systemctl restart apache2
+</div></code></pre>
+<p>Sprawdź czy moduły są aktywne:</p>
+<pre class="hljs"><code><div>apache2ctl -M | grep -E <span class="hljs-string">&quot;rewrite|deflate|brotli|expires|headers&quot;</span>
+</div></code></pre>
+<p>Oczekiwany wynik (każde <code>_module (shared)</code>):</p>
+<pre class="hljs"><code><div>brotli_module (shared)
+deflate_module (shared)
+expires_module (shared)
+headers_module (shared)
+rewrite_module (shared)
+</div></code></pre>
+<blockquote>
+<p><strong>Jeśli <code>mod_brotli</code> nie jest dostępne</strong> (starsze Ubuntu):</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">sudo</span> apt install libapache2-mod-brotli -y
+<span class="hljs-built_in">sudo</span> a2enmod brotli
+<span class="hljs-built_in">sudo</span> systemctl restart apache2
+</div></code></pre>
+</blockquote>
+<hr>
+<h2 id="2-konfiguracja-virtualhost-allowoverride-all">2. Konfiguracja VirtualHost (<code>AllowOverride All</code>)</h2>
+<p>Edytuj plik konfiguracyjny swojej domeny (przykład — nazwa pliku może się różnić):</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">sudo</span> nano /etc/apache2/sites-available/website-expert.conf
+</div></code></pre>
+<p>Upewnij się, że sekcja <code>&lt;Directory&gt;</code> dla <code>public/</code> wygląda tak:</p>
+<pre class="hljs"><code><div><span class="hljs-section">&lt;VirtualHost *<span class="hljs-number">:80</span>&gt;</span>
+    <span class="hljs-attribute">ServerName</span> website-expert.uk
+    <span class="hljs-attribute">ServerAlias</span> www.website-expert.uk
+    <span class="hljs-attribute">DocumentRoot</span> /var/www/website-expert/public
+
+    <span class="hljs-section">&lt;Directory /var/www/website-expert/public&gt;</span>
+        <span class="hljs-attribute">AllowOverride</span> <span class="hljs-literal">All</span>       # ← WYMAGANE, żeby .htaccess działał
+        <span class="hljs-attribute">Require</span> <span class="hljs-literal">all</span> granted
+        <span class="hljs-attribute">Options</span> -Indexes
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+
+    <span class="hljs-attribute">ErrorLog</span> <span class="hljs-variable">${APACHE_LOG_DIR}</span>/website-expert-error.log
+    <span class="hljs-attribute">CustomLog</span> <span class="hljs-variable">${APACHE_LOG_DIR}</span>/website-expert-access.log combined
+<span class="hljs-section">&lt;/VirtualHost&gt;</span>
+</div></code></pre>
+<p>Po edycji:</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">sudo</span> a2ensite website-expert.conf
+<span class="hljs-built_in">sudo</span> apache2ctl configtest       <span class="hljs-comment"># sprawdź czy brak błędów</span>
+<span class="hljs-built_in">sudo</span> systemctl reload apache2
+</div></code></pre>
+<hr>
+<h2 id="3-certbot-https--http2">3. Certbot (HTTPS + HTTP/2)</h2>
+<p>Jeśli SSL nie jest jeszcze skonfigurowany:</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">sudo</span> apt install certbot python3-certbot-apache -y
+<span class="hljs-built_in">sudo</span> certbot --apache -d website-expert.uk -d www.website-expert.uk
+</div></code></pre>
+<p>Po ustawieniu SSL włącz HTTP/2 (znacząca poprawa dla SPA):</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">sudo</span> a2enmod http2
+</div></code></pre>
+<p>W pliku VirtualHost HTTPS (automatycznie tworzonym przez Certbot) dodaj:</p>
+<pre class="hljs"><code><div><span class="hljs-section">&lt;VirtualHost *<span class="hljs-number">:443</span>&gt;</span>
+    <span class="hljs-attribute">Protocols</span> h2 http/<span class="hljs-number">1</span>.<span class="hljs-number">1</span>       # ← HTTP/<span class="hljs-number">2</span> priorytetowo
+    ...
+<span class="hljs-section">&lt;/VirtualHost&gt;</span>
+</div></code></pre>
+<pre class="hljs"><code><div><span class="hljs-built_in">sudo</span> systemctl reload apache2
+</div></code></pre>
+<hr>
+<h2 id="4-php--opcimalizacje-dla-laravel">4. PHP — opcimalizacje dla Laravel</h2>
+<p>Edytuj <code>php.ini</code> (znajdź właściwą wersję PHP):</p>
+<pre class="hljs"><code><div>php -r <span class="hljs-string">&quot;echo php_ini_loaded_file();&quot;</span>   <span class="hljs-comment"># wyświetla ścieżkę do aktywnego php.ini</span>
+<span class="hljs-built_in">sudo</span> nano /etc/php/8.x/apache2/php.ini  <span class="hljs-comment"># zastąp 8.x faktyczną wersją</span>
+</div></code></pre>
+<p>Zmień lub dodaj:</p>
+<pre class="hljs"><code><div><span class="hljs-attr">opcache.enable</span>=<span class="hljs-number">1</span>
+<span class="hljs-attr">opcache.memory_consumption</span>=<span class="hljs-number">256</span>
+<span class="hljs-attr">opcache.interned_strings_buffer</span>=<span class="hljs-number">16</span>
+<span class="hljs-attr">opcache.max_accelerated_files</span>=<span class="hljs-number">20000</span>
+<span class="hljs-attr">opcache.validate_timestamps</span>=<span class="hljs-number">0</span>      <span class="hljs-comment">; ustaw na 1 jeśli często edytujesz pliki</span>
+<span class="hljs-attr">opcache.revalidate_freq</span>=<span class="hljs-number">0</span>
+<span class="hljs-attr">opcache.fast_shutdown</span>=<span class="hljs-number">1</span>
+</div></code></pre>
+<pre class="hljs"><code><div><span class="hljs-built_in">sudo</span> systemctl restart apache2
+</div></code></pre>
+<hr>
+<h2 id="5-mysql--upewnij-się-że-connection-pooling-działa">5. MySQL — upewnij się że connection pooling działa</h2>
+<p>Sprawdź czy <code>persistent connections</code> są aktywne w Laravel (opcjonalne):</p>
+<pre class="hljs"><code><div><span class="hljs-comment"># w pliku config/database.php, sekcja mysql — upewnij się że:</span>
+<span class="hljs-comment"># &#x27;options&#x27; =&gt; [PDO::ATTR_PERSISTENT =&gt; true],</span>
+<span class="hljs-comment"># Uwaga: persistent connections mogą powodować problemy w środowisku wielowątkowym</span>
+</div></code></pre>
+<hr>
+<h2 id="6-deploy-aplikacji-laravel">6. Deploy aplikacji Laravel</h2>
+<p>Wykonuj po każdym wgraniu nowej wersji kodu:</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">cd</span> /var/www/website-expert
+
+<span class="hljs-comment"># 1. Pobierz kod z repo</span>
+git pull origin main
+
+<span class="hljs-comment"># 2. Zainstaluj zależności PHP (produkcja)</span>
+composer install --no-dev --optimize-autoloader
+
+<span class="hljs-comment"># 3. Zainstaluj zależności JS i zbuduj assety</span>
+npm ci --legacy-peer-deps
+npm run build
+
+<span class="hljs-comment"># 4. Migracje bazy danych</span>
+php artisan migrate --force
+
+<span class="hljs-comment"># 5. Wyczyść i zoptymalizuj cache Laravel</span>
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan event:cache
+php artisan icons:cache   <span class="hljs-comment"># tylko jeśli używasz Blade-icons (FilamentPHP)</span>
+
+<span class="hljs-comment"># 6. Restartuj kolejkę (jeśli używasz supervisor)</span>
+php artisan queue:restart
+</div></code></pre>
+<blockquote>
+<p><strong>Skrót</strong>: możesz zapisać powyższe jako skrypt <code>deploy.sh</code> w głównym katalogu projektu.</p>
+</blockquote>
+<hr>
+<h2 id="7-supervisor--worker-kolejki-jeśli-używasz-jobs">7. Supervisor — worker kolejki (jeśli używasz Jobs)</h2>
+<pre class="hljs"><code><div><span class="hljs-built_in">sudo</span> apt install supervisor -y
+<span class="hljs-built_in">sudo</span> nano /etc/supervisor/conf.d/website-expert-worker.conf
+</div></code></pre>
+<p>Zawartość:</p>
+<pre class="hljs"><code><div><span class="hljs-section">[program:website-expert-worker]</span>
+<span class="hljs-attr">process_name</span>=%(program_name)s_%(process_num)<span class="hljs-number">02</span>d
+<span class="hljs-attr">command</span>=php /var/www/website-expert/artisan queue:work --sleep=<span class="hljs-number">3</span> --tries=<span class="hljs-number">3</span> --max-time=<span class="hljs-number">3600</span>
+<span class="hljs-attr">autostart</span>=<span class="hljs-literal">true</span>
+<span class="hljs-attr">autorestart</span>=<span class="hljs-literal">true</span>
+<span class="hljs-attr">stopasgroup</span>=<span class="hljs-literal">true</span>
+<span class="hljs-attr">killasgroup</span>=<span class="hljs-literal">true</span>
+<span class="hljs-attr">user</span>=www-data
+<span class="hljs-attr">numprocs</span>=<span class="hljs-number">2</span>
+<span class="hljs-attr">redirect_stderr</span>=<span class="hljs-literal">true</span>
+<span class="hljs-attr">stdout_logfile</span>=/var/log/website-expert-worker.log
+<span class="hljs-attr">stopwaitsecs</span>=<span class="hljs-number">3600</span>
+</div></code></pre>
+<pre class="hljs"><code><div><span class="hljs-built_in">sudo</span> supervisorctl reread
+<span class="hljs-built_in">sudo</span> supervisorctl update
+<span class="hljs-built_in">sudo</span> supervisorctl start website-expert-worker:*
+</div></code></pre>
+<hr>
+<h2 id="8-crontab--laravel-scheduler">8. Crontab — Laravel Scheduler</h2>
+<pre class="hljs"><code><div><span class="hljs-built_in">sudo</span> crontab -e -u www-data
+</div></code></pre>
+<p>Dodaj linię:</p>
+<pre class="hljs"><code><div>* * * * * cd /var/www/website-expert &amp;&amp; php artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1
+</div></code></pre>
+<hr>
+<h2 id="9-uprawnienia-katalogów">9. Uprawnienia katalogów</h2>
+<pre class="hljs"><code><div><span class="hljs-built_in">cd</span> /var/www/website-expert
+<span class="hljs-built_in">sudo</span> <span class="hljs-built_in">chown</span> -R www-data:www-data storage bootstrap/cache
+<span class="hljs-built_in">sudo</span> <span class="hljs-built_in">chmod</span> -R 775 storage bootstrap/cache
+</div></code></pre>
+<hr>
+<h2 id="10-weryfikacja-po-wdrożeniu">10. Weryfikacja po wdrożeniu</h2>
+<pre class="hljs"><code><div><span class="hljs-comment"># Sprawdź czy kompresja działa (powinno być &quot;Content-Encoding: br&quot; lub &quot;gzip&quot;)</span>
+curl -I -H <span class="hljs-string">&quot;Accept-Encoding: br, gzip&quot;</span> https://website-expert.uk/build/assets/app.js 2&gt;/dev/null | grep -i <span class="hljs-string">&quot;content-encoding&quot;</span>
+
+<span class="hljs-comment"># Sprawdź Cache-Control (powinno być &quot;max-age=31536000, immutable&quot;)</span>
+curl -I https://website-expert.uk/build/assets/app.js 2&gt;/dev/null | grep -i <span class="hljs-string">&quot;cache-control&quot;</span>
+
+<span class="hljs-comment"># Sprawdź HTTP/2</span>
+curl --http2 -I https://website-expert.uk 2&gt;/dev/null | grep <span class="hljs-string">&quot;HTTP/&quot;</span>
+</div></code></pre>
+<hr>
+<h2 id="podsumowanie-oczekiwanego-wpływu-na-pagespeed">Podsumowanie oczekiwanego wpływu na PageSpeed</h2>
+<table>
+<thead>
+<tr>
+<th>Zmiana</th>
+<th>Oczekiwany zysk mobile</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Self-hosted fonts (brak bloku Google Fonts)</td>
+<td>+8–12 pkt</td>
+</tr>
+<tr>
+<td>Brotli/Gzip na Apache</td>
+<td>+3–5 pkt</td>
+</tr>
+<tr>
+<td>Cache-Control immutable (Vite assets)</td>
+<td>+3–4 pkt</td>
+</tr>
+<tr>
+<td>React.lazy dla below-fold</td>
+<td>+4–6 pkt</td>
+</tr>
+<tr>
+<td>Fix <code>.reveal</code> transition-all</td>
+<td>+3–5 pkt</td>
+</tr>
+<tr>
+<td>Ukrycie blur-3xl na mobile</td>
+<td>+2–4 pkt</td>
+</tr>
+<tr>
+<td>Defer GTM do <code>load</code> event</td>
+<td>+1–2 pkt</td>
+</tr>
+<tr>
+<td>HTTP/2 + OPcache</td>
+<td>+2–4 pkt</td>
+</tr>
+<tr>
+<td><strong>Razem</strong></td>
+<td><strong>+26–42 pkt</strong> → cel: ~95+ mobile</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>

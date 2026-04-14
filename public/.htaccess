@@ -23,3 +23,56 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# ── Kompresja Brotli (wyższy priorytet) ──────────────────────────────────────
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css
+    AddOutputFilterByType BROTLI_COMPRESS application/javascript application/json
+    AddOutputFilterByType BROTLI_COMPRESS image/svg+xml application/xml text/xml
+    AddOutputFilterByType BROTLI_COMPRESS font/woff font/woff2 application/font-woff2
+    BrotliCompressionQuality 5
+</IfModule>
+
+# ── Kompresja Gzip (fallback gdy brak Brotli) ────────────────────────────────
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE image/svg+xml application/xml text/xml
+    AddOutputFilterByType DEFLATE font/woff font/woff2 application/font-woff2
+</IfModule>
+
+# ── Cache-Control dla assetów Vite (skrót SHA w nazwie = immutable) ──────────
+<IfModule mod_headers.c>
+    # Zasoby Vite (build/) mają hash w nazwie — mogą być cachowane 1 rok
+    <FilesMatch "\.(js|css|woff2|woff|ttf)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Obrazy i czcionki bez hasha — 6 miesięcy
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|ico|svg)$">
+        Header set Cache-Control "public, max-age=15552000"
+    </FilesMatch>
+
+    # HTML/dane — wyłącz cache (SPA, treść zmienia się dynamicznie przez PHP)
+    <FilesMatch "\.html$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+    </FilesMatch>
+
+    # Nagłówki bezpieczeństwa
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ── Expires (backup gdy mod_headers niedostępny) ─────────────────────────────
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css             "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/jpeg           "access plus 6 months"
+    ExpiresByType image/png            "access plus 6 months"
+    ExpiresByType image/webp           "access plus 6 months"
+    ExpiresByType image/svg+xml        "access plus 6 months"
+    ExpiresByType font/woff2           "access plus 1 year"
+    ExpiresByType font/woff            "access plus 1 year"
+</IfModule>

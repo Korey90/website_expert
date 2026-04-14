@@ -6,3 +6,7 @@ Google Tag Manager : GTM-K749NJ7Q
 Google Analytics 4 : G-QSMTFCBCDQ
 Google Ads : AW-18030198393
 Meta Pixel : 
+
+
+robilem page speed w google https://pagespeed.web.dev/analysis/https-website-expert-uk/hqmyiv1k53?form_factor=mobile
+wersja mobilna sekcja 'wydajnosc'. osiagnieto 68 punktów. dlaczego. przygotuj plan poprawek aby osiagnac minimum 90pkt. zapisz wyszystko jako plan-poprawy-wydajnosci.model

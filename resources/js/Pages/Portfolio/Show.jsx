@@ -48,6 +48,9 @@ export default function PortfolioShow({ locale: localeProp, project, auth }) {
                                 src={project.image}
                                 alt={title}
                                 className="w-full h-full object-cover object-top"
+                                loading="eager"
+                                decoding="async"
+                                fetchpriority="high"
                             />
                         </div>
                     )}

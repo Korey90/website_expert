@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>plan-poprawy-wydajnosci.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="plan-poprawy-wydajności--pagespeed-mobile-68--90">Plan poprawy wydajności – PageSpeed Mobile 68 → 90+</h1>
+<p><strong>Data analizy</strong>: 14.04.2026<br>
+<strong>URL</strong>: https://website-expert.uk<br>
+<strong>Wynik wyjściowy</strong>: 68 / 100 (mobile)<br>
+<strong>Cel</strong>: ≥ 90 / 100 (mobile), ≥ 95 (desktop)</p>
+<hr>
+<h2 id="diagnoza--znalezione-problemy-w-kodzie">Diagnoza – znalezione problemy w kodzie</h2>
+<h3 id="-krytyczne-każdy-problem-to-512-pkt">🔴 KRYTYCZNE (każdy problem to ~5–12 pkt)</h3>
+<h4 id="1-podwójne-ładowanie-czcionek-render-blocking">1. Podwójne ładowanie czcionek (render-blocking)</h4>
+<p><strong>Plik</strong>: <code>resources/css/app.css</code> linia 1 + <code>resources/views/app.blade.php</code> linia ~50</p>
+<pre class="hljs"><code><div><span class="hljs-comment">/* app.css – blokuje renderowanie */</span>
+<span class="hljs-keyword">@import</span> url(<span class="hljs-string">&#x27;https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Syne:wght@600;700;800&amp;display=swap&#x27;</span>);
+</div></code></pre>
+<pre class="hljs"><code><div><span class="hljs-comment">&lt;!-- app.blade.php – zbędna, nieużywana czcionka Figtree z bunny.net --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://fonts.bunny.net/css?family=figtree:400,500,600&amp;display=swap&quot;</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> /&gt;</span>
+</div></code></pre>
+<p><strong>Wpływ</strong>: dwa zewnętrzne DNS lookups + dwie blokujące odpowiedzi CSS przed pierwszym renderem.<br>
+<strong>FCP penalty</strong>: ~400–800ms na mobile 4G.</p>
+<hr>
+<h4 id="2-brak-loadinglazy-na-obrazach-poniżej-foldu">2. Brak <code>loading=&quot;lazy&quot;</code> na obrazach poniżej foldu</h4>
+<p><strong>Pliki</strong>: wszystkie komponenty Marketing (<code>Portfolio.jsx</code>, <code>About.jsx</code> itd.)</p>
+<p>Żaden obraz poniżej hero nie ma atrybutu <code>loading=&quot;lazy&quot;</code>. Przeglądarka pobiera wszystkie obrazy przy starcie strony.</p>
+<hr>
+<h4 id="3-brak-fetchpriorityhigh-na-lcp">3. Brak <code>fetchpriority=&quot;high&quot;</code> na LCP</h4>
+<p><strong>Plik</strong>: <code>resources/js/Components/Marketing/Hero.jsx</code></p>
+<p>Element LCP (tytuł / mockup Hero) nie ma wyznaczonego priorytetu. Przeglądarka musi go odgadnąć.</p>
+<hr>
+<h4 id="4-transition-all-na-animacji-reveal--blokuje-gpu-compositing">4. <code>transition-all</code> na animacji reveal – blokuje GPU compositing</h4>
+<p><strong>Plik</strong>: <code>resources/css/app.css</code> linia ~62</p>
+<pre class="hljs"><code><div><span class="hljs-comment">/* PROBLEM */</span>
+<span class="hljs-selector-class">.reveal</span> { <span class="hljs-keyword">@apply</span> opacity-<span class="hljs-number">0</span> translate-y-<span class="hljs-number">6</span> transition-all duration-<span class="hljs-number">700</span>; }
+</div></code></pre>
+<p><code>transition-all</code> nasłuchuje na WSZYSTKIE właściwości CSS — wymusza pełny layout recalculation przy każdej klatce animacji. Na mobile = jank + obniżone FPS = niskie TBT.</p>
+<hr>
+<h3 id="-poważne-36-pkt-każdy">🟠 POWAŻNE (~3–6 pkt każdy)</h3>
+<h4 id="5-wszystkie-komponenty-welcomejsx-ładowane-eagerly--duży-bundle">5. Wszystkie komponenty Welcome.jsx ładowane eagerly – duży bundle</h4>
+<p><strong>Plik</strong>: <code>resources/js/Pages/Welcome.jsx</code> linie 1–12</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">import</span> <span class="hljs-title class_">CostCalculatorV2</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@/Components/Marketing/CostCalculatorV2&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Faq</span>              <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@/Components/Marketing/Faq&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Contact</span>          <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@/Components/Marketing/Contact&#x27;</span>;
+<span class="hljs-comment">// ... 9 statycznych importów</span>
+</div></code></pre>
+<p>Kalkulator, FAQ, kontakt – to komponenty off-screen. Wchodzą do głównego bundle zamiast się wczytywać gdy potrzebne.</p>
+<hr>
+<h4 id="6-preconnect-bez-preload-czcionek">6. Preconnect bez preload czcionek</h4>
+<p><strong>Plik</strong>: <code>resources/views/app.blade.php</code></p>
+<p>Brak <code>&lt;link rel=&quot;preload&quot; as=&quot;font&quot;&gt;</code> dla Inter i Syne. Przeglądarka zaczyna pobierać czcionki dopiero po sparsowaniu CSS.</p>
+<hr>
+<h4 id="7-dekoracyjne-blur-3xl-w-hero--ciężkie-dla-gpu-na-mobile">7. Dekoracyjne <code>blur-3xl</code> w Hero – ciężkie dla GPU na mobile</h4>
+<p><strong>Plik</strong>: <code>resources/js/Components/Marketing/Hero.jsx</code></p>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;absolute top-1/4 right-0 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl ...&quot;</span>/&gt;</span>
+</div></code></pre>
+<p><code>filter: blur(96px)</code> na mobile to jeden z najdroższych efektów CSS. Powoduje dropped frames przy scrollu.</p>
+<hr>
+<h3 id="-umiarkowane-13-pkt-każdy">🟡 UMIARKOWANE (~1–3 pkt każdy)</h3>
+<h4 id="8-brak-kompresji-brotligzip-na-poziomie-serwera">8. Brak kompresji Brotli/Gzip na poziomie serwera</h4>
+<p>Nginx/Apache musi mieć włączoną kompresję dla JS/CSS/HTML. Bez niej bundle ~150–300 KB zamiast ~50 KB.</p>
+<h4 id="9-brak-nagłówków-cache-dla-assetów-statycznych">9. Brak nagłówków cache dla assetów statycznych</h4>
+<p>Vite generuje hashe w nazwach plików (np. <code>app-Abc123.js</code>) ale bez <code>Cache-Control: max-age=31536000</code> przeglądarka może je ignorować.</p>
+<h4 id="10-brak-webp--srcset-dla-obrazów-portfolio">10. Brak WebP / srcset dla obrazów portfolio</h4>
+<p>Obrazy w <code>/public/images/portfolio/</code> to SVG – ok. Ale przyszłe obrazy uploadowane przez Filament nie mają WebP conversion.</p>
+<hr>
+<h2 id="plan-poprawek--priorytety">Plan poprawek – priorytety</h2>
+<h3 id="faza-1--quick-wins-est-1520-pkt-czas-23h">FAZA 1 – Quick wins (est. +15–20 pkt, czas: 2–3h)</h3>
+<hr>
+<h4 id="p1-a-usuń-zbędną-czcionkę-figtree--przenieś-google-fonts-na-self-hosted">P1-A: Usuń zbędną czcionkę Figtree + przenieś Google Fonts na self-hosted</h4>
+<p><strong>Krok 1</strong>: Usuń z <code>app.blade.php</code>:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">&lt;!-- USUNĄĆ --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;preconnect&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://fonts.bunny.net&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://fonts.bunny.net/css?family=figtree:400,500,600&amp;display=swap&quot;</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> /&gt;</span>
+</div></code></pre>
+<p><strong>Krok 2</strong>: Pobierz Inter i Syne jako pliki WOFF2.<br>
+Narzędzia: https://gwfh.mranftl.com/ (Google Webfonts Helper) lub <code>fontsource</code>:</p>
+<pre class="hljs"><code><div>npm install @fontsource-variable/inter @fontsource/syne
+</div></code></pre>
+<p><strong>Krok 3</strong>: W <code>app.css</code> zastąp <code>@import url(...)</code>:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">/* ZAMIAST */</span>
+<span class="hljs-keyword">@import</span> url(<span class="hljs-string">&#x27;https://fonts.googleapis.com/...&#x27;</span>);
+
+<span class="hljs-comment">/* DODAJ */</span>
+<span class="hljs-keyword">@import</span> <span class="hljs-string">&#x27;@fontsource-variable/inter/index.css&#x27;</span>;
+<span class="hljs-keyword">@import</span> <span class="hljs-string">&#x27;@fontsource/syne/600.css&#x27;</span>;
+<span class="hljs-keyword">@import</span> <span class="hljs-string">&#x27;@fontsource/syne/700.css&#x27;</span>;
+<span class="hljs-keyword">@import</span> <span class="hljs-string">&#x27;@fontsource/syne/800.css&#x27;</span>;
+</div></code></pre>
+<p><strong>Krok 4</strong>: Dodaj preload w <code>app.blade.php</code> dla krytycznych wariantów (Inter 400 i 600, Syne 700):</p>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;preload&quot;</span> <span class="hljs-attr">as</span>=<span class="hljs-string">&quot;font&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;font/woff2&quot;</span>
+      <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;{{ asset(&#x27;fonts/inter-latin-woff2.woff2&#x27;) }}&quot;</span> <span class="hljs-attr">crossorigin</span>&gt;</span>
+</div></code></pre>
+<p><strong>Szacowany zysk</strong>: +8–12 pkt (eliminacja render-blocking external CSS)</p>
+<hr>
+<h4 id="p1-b-napraw-transition-all-na-reveal">P1-B: Napraw <code>transition-all</code> na <code>.reveal</code></h4>
+<p><strong>Plik</strong>: <code>resources/css/app.css</code></p>
+<pre class="hljs"><code><div><span class="hljs-comment">/* PRZED */</span>
+<span class="hljs-selector-class">.reveal</span> { <span class="hljs-keyword">@apply</span> opacity-<span class="hljs-number">0</span> translate-y-<span class="hljs-number">6</span> transition-all duration-<span class="hljs-number">700</span>; }
+
+<span class="hljs-comment">/* PO */</span>
+<span class="hljs-selector-class">.reveal</span> {
+  <span class="hljs-attribute">opacity</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(<span class="hljs-number">1.5rem</span>);
+  <span class="hljs-attribute">transition</span>: opacity <span class="hljs-number">700ms</span> ease, transform <span class="hljs-number">700ms</span> ease;
+  <span class="hljs-attribute">will-change</span>: opacity, transform;
+}
+<span class="hljs-selector-class">.reveal</span><span class="hljs-selector-class">.visible</span> {
+  <span class="hljs-attribute">opacity</span>: <span class="hljs-number">1</span>;
+  <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(<span class="hljs-number">0</span>);
+}
+</div></code></pre>
+<p><code>will-change: opacity, transform</code> promuje element na osobną warstwę GPU — eliminuje layout recalculation.</p>
+<p><strong>Szacowany zysk</strong>: +3–5 pkt (TBT, CLS reduction)</p>
+<hr>
+<h4 id="p1-c-dodaj-loadinglazy-na-wszystkich-obrazach-off-screen">P1-C: Dodaj <code>loading=&quot;lazy&quot;</code> na wszystkich obrazach off-screen</h4>
+<p>Przeszukaj i dodaj <code>loading=&quot;lazy&quot;</code> do:</p>
+<ul>
+<li><code>Portfolio.jsx</code> — <code>&lt;img&gt;</code> w kartach</li>
+<li><code>About.jsx</code> — zdjęcie zespołu/biura</li>
+<li><code>Services/Index.jsx</code> — jeśli obrazy</li>
+<li><code>Portfolio/Index.jsx</code> — wszystkie karty</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">/* PRZED */</span>
+&lt;img src={p.<span class="hljs-property">image</span>} alt={itemTitle} className=<span class="hljs-string">&quot;w-full h-full object-cover&quot;</span> /&gt;
+
+<span class="hljs-comment">/* PO */</span>
+<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">{p.image}</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">{itemTitle}</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;w-full h-full object-cover&quot;</span> <span class="hljs-attr">loading</span>=<span class="hljs-string">&quot;lazy&quot;</span> <span class="hljs-attr">decoding</span>=<span class="hljs-string">&quot;async&quot;</span> /&gt;</span></span>
+</div></code></pre>
+<p><strong>Szacowany zysk</strong>: +5–8 pkt (LCP, pobieranie obrazów odroczone)</p>
+<hr>
+<h3 id="faza-2--optymalizacja-js-bundle-est-58-pkt-czas-12h">FAZA 2 – Optymalizacja JS Bundle (est. +5–8 pkt, czas: 1–2h)</h3>
+<hr>
+<h4 id="p2-a-lazy-loading-komponentów-below-fold-w-welcomejsx">P2-A: Lazy loading komponentów below-fold w Welcome.jsx</h4>
+<pre class="hljs"><code><div><span class="hljs-comment">// PRZED</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">CostCalculatorV2</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@/Components/Marketing/CostCalculatorV2&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Faq</span>              <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@/Components/Marketing/Faq&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Contact</span>          <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@/Components/Marketing/Contact&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Testimonials</span>     <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@/Components/Marketing/Testimonials&#x27;</span>;
+
+<span class="hljs-comment">// PO</span>
+<span class="hljs-keyword">import</span> { lazy, <span class="hljs-title class_">Suspense</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;react&#x27;</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">CostCalculatorV2</span> = <span class="hljs-title function_">lazy</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;@/Components/Marketing/CostCalculatorV2&#x27;</span>));
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Faq</span>              = <span class="hljs-title function_">lazy</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;@/Components/Marketing/Faq&#x27;</span>));
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Contact</span>          = <span class="hljs-title function_">lazy</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;@/Components/Marketing/Contact&#x27;</span>));
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Testimonials</span>     = <span class="hljs-title function_">lazy</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;@/Components/Marketing/Testimonials&#x27;</span>));
+</div></code></pre>
+<p>Opakuj sekcje below-fold w <code>&lt;Suspense fallback={null}&gt;</code>:</p>
+<pre class="hljs"><code><div>&lt;<span class="hljs-title class_">Suspense</span> fallback={<span class="hljs-literal">null</span>}&gt;
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">CostCalculatorV2</span> <span class="hljs-attr">data</span>=<span class="hljs-string">{cost_calculator_v2}</span> <span class="hljs-attr">...</span> /&gt;</span></span>
+&lt;/<span class="hljs-title class_">Suspense</span>&gt;
+</div></code></pre>
+<p><strong>Zachowaj jako eager</strong> (above fold): <code>Hero</code>, <code>About</code>, <code>TrustStrip</code>, <code>Services</code> (pierwsze 3)</p>
+<p><strong>Szacowany zysk</strong>: +4–6 pkt (TTI, TBT — mniejszy initial JS parse)</p>
+<hr>
+<h4 id="p2-b-usuń-blur-3xl-na-mobile">P2-B: Usuń blur-3xl na mobile</h4>
+<p><strong>Plik</strong>: <code>resources/js/Components/Marketing/Hero.jsx</code></p>
+<pre class="hljs"><code><div><span class="hljs-comment">/* PRZED */</span>
+&lt;div className=<span class="hljs-string">&quot;absolute top-1/4 right-0 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none&quot;</span> /&gt;
+
+<span class="hljs-comment">/* PO — ukryj na mobile, zostaw na md+ */</span>
+<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;hidden md:block absolute top-1/4 right-0 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none&quot;</span> /&gt;</span></span>
+</div></code></pre>
+<p><strong>Szacowany zysk</strong>: +2–4 pkt (FPS podczas scrollu na mobile)</p>
+<hr>
+<h3 id="faza-3--infrastruktura-est-36-pkt-czas-30min-w-nginx">FAZA 3 – Infrastruktura (est. +3–6 pkt, czas: 30min w Nginx)</h3>
+<hr>
+<h4 id="p3-a-kompresja-brotligzip-w-nginx">P3-A: Kompresja Brotli/Gzip w Nginx</h4>
+<pre class="hljs"><code><div><span class="hljs-comment"># /etc/nginx/sites-available/website-expert.uk</span>
+<span class="hljs-attribute">gzip</span> <span class="hljs-literal">on</span>;
+<span class="hljs-attribute">gzip_vary</span> <span class="hljs-literal">on</span>;
+<span class="hljs-attribute">gzip_min_length</span> <span class="hljs-number">1024</span>;
+<span class="hljs-attribute">gzip_types</span> text/html text/css application/javascript application/json image/svg+xml;
+
+<span class="hljs-attribute">brotli</span> <span class="hljs-literal">on</span>;
+<span class="hljs-attribute">brotli_comp_level</span> <span class="hljs-number">6</span>;
+<span class="hljs-attribute">brotli_types</span> text/html text/css application/javascript application/json image/svg+xml;
+</div></code></pre>
+<p><strong>Szacowany zysk</strong>: +3–5 pkt (wielkość transferu JS/CSS -60–80%)</p>
+<hr>
+<h4 id="p3-b-cache-control-dla-assetów-vite">P3-B: Cache-Control dla assetów Vite</h4>
+<pre class="hljs"><code><div><span class="hljs-comment"># Assety z hashem w nazwie – cache 1 rok</span>
+<span class="hljs-section">location</span> <span class="hljs-regexp">~* \.(js|css|woff2|woff|ttf)$</span> {
+    <span class="hljs-attribute">expires</span> <span class="hljs-number">1y</span>;
+    <span class="hljs-attribute">add_header</span> Cache-Control <span class="hljs-string">&quot;public, immutable&quot;</span>;
+}
+
+<span class="hljs-comment"># Obrazy</span>
+<span class="hljs-section">location</span> <span class="hljs-regexp">~* \.(webp|png|jpg|jpeg|svg|ico|gif)$</span> {
+    <span class="hljs-attribute">expires</span> <span class="hljs-number">6M</span>;
+    <span class="hljs-attribute">add_header</span> Cache-Control <span class="hljs-string">&quot;public&quot;</span>;
+}
+</div></code></pre>
+<hr>
+<h3 id="faza-4--dodatkowe-est-24-pkt">FAZA 4 – Dodatkowe (est. +2–4 pkt)</h3>
+<hr>
+<h4 id="p4-a-fetchpriorityhigh-na-lcp">P4-A: <code>fetchpriority=&quot;high&quot;</code> na LCP</h4>
+<p>W <code>Hero.jsx</code> – jeśli istnieje obraz hero:</p>
+<pre class="hljs"><code><div>&lt;img
+  src={heroImage}
+  fetchpriority=<span class="hljs-string">&quot;high&quot;</span>
+  loading=<span class="hljs-string">&quot;eager&quot;</span>
+  decoding=<span class="hljs-string">&quot;sync&quot;</span>
+  alt={title}
+/&gt;
+</div></code></pre>
+<p>Dla tekstowego LCP (h1 w Hero) dodaj w <code>app.blade.php</code>:</p>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;preload&quot;</span> <span class="hljs-attr">as</span>=<span class="hljs-string">&quot;style&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;...app.css&quot;</span>&gt;</span>
+</div></code></pre>
+<p>Vite robi to automatycznie z <code>modulepreload</code> — upewnij się że <code>@vite</code> tag jest przed <code>&lt;/head&gt;</code>.</p>
+<hr>
+<h4 id="p4-b-defer-gtm-do-po-lcp">P4-B: Defer GTM do po LCP</h4>
+<pre class="hljs"><code><div><span class="hljs-comment">&lt;!-- PRZED – GTM ładuje się natychmiast --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript">(<span class="hljs-keyword">function</span>(<span class="hljs-params">w,d,s,l,i</span>){...j.<span class="hljs-property">async</span>=<span class="hljs-literal">true</span>;...})()</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-comment">&lt;!-- PO – GTM ładuje się po `load` event --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript">
+<span class="hljs-variable language_">window</span>.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;load&#x27;</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    (<span class="hljs-keyword">function</span>(<span class="hljs-params">w,d,s,l,i</span>){w[l]=w[l]||[];...j.<span class="hljs-property">async</span>=<span class="hljs-literal">true</span>;...})(<span class="hljs-variable language_">window</span>,<span class="hljs-variable language_">document</span>,<span class="hljs-string">&#x27;script&#x27;</span>,<span class="hljs-string">&#x27;dataLayer&#x27;</span>,<span class="hljs-string">&#x27;{{ $gtmId }}&#x27;</span>);
+});
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</div></code></pre>
+<p><strong>Szacowany zysk</strong>: +1–2 pkt (blokuję TBT przez third-party scripts)</p>
+<hr>
+<h4 id="p4-c-webp-dla-uploadowanych-obrazów-portfolio">P4-C: WebP dla uploadowanych obrazów portfolio</h4>
+<p>W <code>PortfolioProjectService</code> lub przez Intervention Image:</p>
+<pre class="hljs"><code><div>composer require intervention/image
+</div></code></pre>
+<p>Konwertuj podczas upload w Filament:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// W PortfolioProjectResource FileUpload</span>
+-&gt;<span class="hljs-title function_ invoke__">saveUploadedFileUsing</span>(function (<span class="hljs-variable">$file</span>) {
+    <span class="hljs-variable">$img</span> = <span class="hljs-title class_">Image</span>::<span class="hljs-title function_ invoke__">read</span>(<span class="hljs-variable">$file</span>)-&gt;<span class="hljs-title function_ invoke__">toWebp</span>(<span class="hljs-number">85</span>);
+    <span class="hljs-variable">$path</span> = <span class="hljs-string">&#x27;portfolio/&#x27;</span> . <span class="hljs-title class_">Str</span>::<span class="hljs-title function_ invoke__">uuid</span>() . <span class="hljs-string">&#x27;.webp&#x27;</span>;
+    <span class="hljs-title class_">Storage</span>::<span class="hljs-title function_ invoke__">disk</span>(<span class="hljs-string">&#x27;public&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">put</span>(<span class="hljs-variable">$path</span>, <span class="hljs-variable">$img</span>-&gt;<span class="hljs-title function_ invoke__">toString</span>());
+    <span class="hljs-keyword">return</span> <span class="hljs-variable">$path</span>;
+})
+</div></code></pre>
+<hr>
+<h2 id="prognozowany-efekt">Prognozowany efekt</h2>
+<table>
+<thead>
+<tr>
+<th>Faza</th>
+<th>Działanie</th>
+<th>Est. zysk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1-A</td>
+<td>Self-hosted fonts</td>
+<td>+8–12 pkt</td>
+</tr>
+<tr>
+<td>P1-B</td>
+<td>Naprawa transition-all</td>
+<td>+3–5 pkt</td>
+</tr>
+<tr>
+<td>P1-C</td>
+<td>loading=&quot;lazy&quot; na obrazach</td>
+<td>+5–8 pkt</td>
+</tr>
+<tr>
+<td>P2-A</td>
+<td>React.lazy dla below-fold</td>
+<td>+4–6 pkt</td>
+</tr>
+<tr>
+<td>P2-B</td>
+<td>Brak blur-3xl na mobile</td>
+<td>+2–4 pkt</td>
+</tr>
+<tr>
+<td>P3-A/B</td>
+<td>Nginx gzip/brotli + cache</td>
+<td>+3–5 pkt</td>
+</tr>
+<tr>
+<td>P4</td>
+<td>fetchpriority + GTM defer + WebP</td>
+<td>+2–4 pkt</td>
+</tr>
+<tr>
+<td><strong>Suma</strong></td>
+<td></td>
+<td><strong>+27–44 pkt</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Prognoza</strong>: 68 + 27 = <strong>~95 pkt (pesymistycznie 85, optymistycznie 97)</strong></p>
+<hr>
+<h2 id="kolejność-implementacji-rekomendowana">Kolejność implementacji (rekomendowana)</h2>
+<pre class="hljs"><code><div>1. P1-A (fonty self-hosted)       ← największy zysk, 1h
+2. P1-B (transition-all fix)      ← 10 min
+3. P1-C (lazy images)             ← 30 min
+4. P3-A/B (nginx)                 ← 30 min na serwerze
+5. P2-A (React.lazy)              ← 1h
+6. P2-B (blur-3xl mobile)         ← 5 min
+7. P4   (GTM defer + fetchpriority) ← 30 min
+</div></code></pre>
+<p>Po każdej fazie: odśwież PageSpeed https://pagespeed.web.dev i porównaj wynik.</p>
+<hr>
+<h2 id="narzędzia-do-weryfikacji">Narzędzia do weryfikacji</h2>
+<ul>
+<li><strong>PageSpeed</strong>: https://pagespeed.web.dev</li>
+<li><strong>WebPageTest</strong>: https://webpagetest.org (waterfall chart)</li>
+<li><strong>Bundle analyzer</strong>: <code>npx vite-bundle-visualizer</code> w projekcie</li>
+<li><strong>Font audit</strong>: Chrome DevTools → Network → filter: Font</li>
+<li><strong>LCP debug</strong>: Chrome DevTools → Performance → Core Web Vitals</li>
+</ul>
+
+</body>
+</html>
