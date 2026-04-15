@@ -131,7 +131,7 @@ export default function Portfolio({ data }) {
                                                 href={href}
                                                 className="ml-auto text-sm font-semibold text-brand-500 hover:text-brand-600 inline-flex items-center gap-1 group/link"
                                             >
-                                                {viewLabel}
+                                                {p.client}
                                                 <svg className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                                 </svg>
@@ -148,6 +148,8 @@ export default function Portfolio({ data }) {
                     })}
                 </div>
 
+
+                {/* CTA Button /portfolio*/}
                 {buttonText && buttonUrl && (
                     <div className="text-center mt-10 reveal">
                         <a

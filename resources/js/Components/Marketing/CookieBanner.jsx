@@ -28,7 +28,7 @@ export default function CookieBanner() {
                         ? 'Używamy plików cookies, aby poprawić działanie serwisu i prowadzić analizę ruchu. Możesz zaakceptować wszystkie lub wybrać kategorie.'
                         : 'We use cookies to improve performance and analyse traffic. You can accept all or choose categories.'
                     }{' '}
-                    <a href="/cookies" className="underline text-red-600 hover:text-red-700">
+                    <a href="/cookies" className="text-brand-400 hover:text-brand-600 tracking-wide font-semibold" target="_blank" rel="noopener noreferrer">
                         {pl ? 'Polityka cookies' : 'Cookie policy'}
                     </a>
                 </p>
@@ -41,7 +41,7 @@ export default function CookieBanner() {
                                     type="checkbox"
                                     checked={custom[key]}
                                     onChange={e => setCustom(p => ({ ...p, [key]: e.target.checked }))}
-                                    className="mt-1 accent-red-600"
+                                    className="mt-1 accent-brand-500"
                                 />
                                 <span className="text-sm">
                                     <span className="font-medium text-neutral-800 dark:text-neutral-200">
@@ -58,14 +58,14 @@ export default function CookieBanner() {
                 <div className="flex flex-wrap items-center gap-2">
                     <button
                         onClick={acceptAll}
-                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors"
+                        className="px-4 py-2 border border-brand-400 hover:bg-brand-400 text-brand-400 hover:text-neutral-100 text-sm font-medium rounded-md transition-colors tracking-wide"
                     >
                         {pl ? 'Akceptuj wszystkie' : 'Accept all'}
                     </button>
 
                     <button
                         onClick={rejectAll}
-                        className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-sm rounded-md text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                        className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-sm rounded-md text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors tracking-wide"
                     >
                         {pl ? 'Tylko niezbędne' : 'Necessary only'}
                     </button>
@@ -73,14 +73,14 @@ export default function CookieBanner() {
                     {showDetails ? (
                         <button
                             onClick={() => saveCustom(custom)}
-                            className="px-4 py-2 border border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 text-sm rounded-md transition-colors"
+                            className="px-4 py-2 border border-brand-400 hover:bg-brand-400 text-brand-400 hover:text-neutral-100 text-sm font-medium rounded-md transition-colors tracking-wide"
                         >
                             {pl ? 'Zapisz wybór' : 'Save selection'}
                         </button>
                     ) : (
                         <button
                             onClick={() => setShowDetails(true)}
-                            className="px-2 py-2 text-sm text-neutral-500 dark:text-neutral-400 underline hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+                            className="px-2 py-2 text-sm text-neutral-500 dark:text-neutral-300 underline hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors tracking-wide"
                         >
                             {pl ? 'Dostosuj' : 'Customise'}
                         </button>

@@ -91,7 +91,8 @@ export default function Footer({ data = null }) {
                                 {brandPrefix}<span className="text-brand-500">{brandSuffix}</span>
                             </span>
                         </a>
-                        <p className="text-sm leading-relaxed">{tagline}</p>
+                        <p className="text-sm leading-relaxed text-neutral-200">{tagline}</p>
+                        {/* Social links */}
                         <div className="flex gap-3 mt-5">
                             {socialLinks.map(s => {
                                 const icon     = SOCIAL_ICONS[s.key];
@@ -132,7 +133,7 @@ export default function Footer({ data = null }) {
                     ))}
                 </div>
 
-                <div className="border-t border-neutral-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-500">
+                <div className="border-t border-neutral-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-300">
                     <p>&copy; {new Date().getFullYear()} {brandName}. {copyright}</p>
                     <div className="flex items-center gap-4">
                         {reopenBanner && (

@@ -8,17 +8,23 @@ const DEFAULTS = {
     extra: {
         badge_text_en:             '5-star rated on Google',
         badge_text_pl:             'Oceny 5 gwiazdek w Google',
+        badge_text_pt:             'Avaliações 5 estrelas no Google',
         secondary_button_text_en:  'View Our Work',
         secondary_button_text_pl:  'Zobacz nasze realizacje',
+        secondary_button_text_pt:  'Veja nossos trabalhos',
         secondary_button_url:      '#portfolio',
         scroll_label_en:           'Scroll',
         scroll_label_pl:           'Przewiń',
-        mockup_domain_en:          'yourcompany.co.uk',
-        mockup_domain_pl:          'twojafirma.pl',
+        scroll_label_pt:           'Role',
+        mockup_domain_en:          'www.yourcompany.co.uk',
+        mockup_domain_pl:          'www.twojafirma.pl',
+        mockup_domain_pt:          'www.suaempresa.com.br',
         mockup_timeline_label_en:  'Delivery time',
         mockup_timeline_label_pl:  'Czas realizacji',
+        mockup_timeline_label_pt:  'Prazo de entrega',
         mockup_timeline_value_en:  'from 2 weeks',
         mockup_timeline_value_pl:  'od 2 tygodni',
+        mockup_timeline_value_pt:  'a partir de 2 semanas',
         stats: [],
     },
 };
@@ -80,7 +86,7 @@ export default function Hero({ data }) {
                     <div className="mt-8 flex flex-col sm:flex-row gap-3">
                         <a
                             href={d.button_url ?? '#calculate'}
-                            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-500 text-white font-semibold text-base hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/25"
+                            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-brand-400 text-brand-400 font-semibold text-base hover:text-white hover:bg-brand-400 active:scale-95 transition-all duration-150 shadow-lg shadow-brand-400/25"
                         >
                             {d.button_text ?? DEFAULTS.button_text}
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
@@ -90,7 +96,7 @@ export default function Hero({ data }) {
                         {secondaryBtnText && (
                             <a
                                 href={secondaryBtnUrl}
-                                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-transparent border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 font-semibold text-base hover:border-brand-500 hover:text-brand-500 active:scale-95 transition-all"
+                                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-transparent border border-neutral-300 dark:border-neutral-700 text-neutral-500 dark:text-neutral-300 font-semibold text-base hover:border-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-50 active:scale-95 transition-all"
                             >
                                 {secondaryBtnText}
                             </a>
@@ -119,8 +125,8 @@ export default function Hero({ data }) {
                                 <span className="w-3 h-3 rounded-full bg-red-400" />
                                 <span className="w-3 h-3 rounded-full bg-yellow-400" />
                                 <span className="w-3 h-3 rounded-full bg-green-400" />
-                                <div className="ml-3 flex-1 h-5 rounded bg-neutral-200 dark:bg-neutral-700 flex items-center px-2">
-                                    <span className="text-xs text-neutral-400 dark:text-neutral-500">{mockupDomain}</span>
+                                <div className="ml-3 flex-1 h-6 rounded bg-neutral-200 dark:bg-neutral-700 flex items-center px-2 pb-1">
+                                    <span className="text-xs text-neutral-500 dark:text-neutral-300">{mockupDomain}</span>
                                 </div>
                             </div>
                             {/* Mock content */}

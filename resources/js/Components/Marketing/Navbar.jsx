@@ -181,7 +181,7 @@ export default function Navbar({ auth, data = null }) {
                     {/* Client Portal */}
                     <a
                         href="/portal"
-                        className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 text-sm font-semibold text-neutral-700 dark:text-neutral-200 hover:border-brand-500 hover:text-brand-500 dark:hover:text-brand-400 transition-colors"
+                        className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 text-sm font-semibold text-neutral-600 dark:text-neutral-200 hover:border-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-50 transition-colors"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -192,7 +192,7 @@ export default function Navbar({ auth, data = null }) {
                     {/* CTA button */}
                     <a
                         href={ctaHref}
-                        className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 active:scale-95 transition-all"
+                        className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg shadow-brand-400/25 hover:shadow-brand-400/50 shadow-md text-brand-400 border border-brand-400 text-sm font-semibold hover:bg-brand-400 hover:text-neutral-100 active:scale-95 transition-all"
                     >
                         {ctaText}
                     </a>

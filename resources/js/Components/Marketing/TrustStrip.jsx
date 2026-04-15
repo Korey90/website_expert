@@ -171,7 +171,7 @@ export default function TrustStrip({ data, testimonials }) {
                                         aria-selected={i === current}
                                         aria-label={`Review ${i + 1}`}
                                         onClick={() => goTo(i)}
-                                        className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'bg-brand-500 w-5' : 'w-2 bg-neutral-300 dark:bg-neutral-600'}`}
+                                        className={`h-2 rounded-full transition-all duration-300 ml-1 ${i === current ? 'bg-brand-500 w-5' : 'w-2 bg-neutral-300 dark:bg-neutral-600'}`}
                                     />
                                 ))}
                             </div>
