@@ -81,8 +81,12 @@ export default function Services({ data }) {
                                 </div>
                                 <p className="text-sm text-neutral-500 dark:text-neutral-400">{itemBody}</p>
                                 {href ? (
-                                    <a href={href} className="mt-3 inline-flex items-center gap-1 text-xs text-brand-500 font-medium hover:underline">
-                                        {locale === 'pl' ? 'Dowiedz się więcej' : locale === 'pt' ? 'Saiba mais' : 'Learn more'}
+                                    <a
+                                        href={href}
+                                        aria-label={locale === 'pl' ? `Dowiedz się więcej o ${itemTitle}` : locale === 'pt' ? `Saiba mais sobre ${itemTitle}` : `Learn more about ${itemTitle}`}
+                                        className="mt-3 inline-flex items-center gap-1 text-xs text-brand-500 font-medium hover:underline"
+                                    >
+                                        {locale === 'pl' ? `Więcej o ${itemTitle}` : locale === 'pt' ? `Mais Sobre ${itemTitle}` : `More About ${itemTitle}`}
                                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                                         </svg>
