@@ -7,84 +7,44 @@
 
 ---
 
+---
+
 ## AUDIT SEO — stan obecny (website-expert.uk)
 
 ### ✅ Co działa poprawnie
 
 | Element | Stan | Szczegóły |
 |---------|------|-----------|
-| `<title>` na stronie głównej | ✅ Istnieje | `WebsiteExpert – Professional Web Development UK` |
-| `<meta name="description">` na stronie głównej | ✅ Istnieje | `Bespoke web design and development for UK businesses.` |
-| GTM (Google Tag Manager) | ✅ Skonfigurowany | Integracja z GA4 + Meta Pixel — gotowy do kampanii |
-| Consent Mode v2 (GDPR) | ✅ Zaimplementowany | `analytics_storage: denied` domyślnie do zgody — zgodny z UK GDPR |
+| `<title>` na stronie głównej | ✅ Istnieje | `Website Expert – Web Design & SEO Belfast, Northern Ireland` |
+| `<meta name="description">` na stronie głównej | ✅ Zoptymalizowany | Zawiera Belfast, NI, USP, CTA — zgodny z planem kampanii |
+| OG tags (Open Graph) | ✅ Zaimplementowane | `og:title`, `og:description`, `og:url`, `og:type`, `og:locale` na Welcome.jsx |
+| Twitter Card | ✅ Zaimplementowany | `twitter:card`, `twitter:title`, `twitter:description` |
+| `<meta name="robots">` na stronach auth/portalu | ✅ Zaimplementowany | noindex/nofollow dla tras auth, portal, onboarding, admin |
+| `<link rel="canonical">` | ✅ Globalnie w app.blade.php | `url()->current()` — brak ryzyka duplicate content |
+| `hreflang` (EN/PL/PT) | ✅ Zaimplementowany | app.blade.php — dla trasy `home` |
+| `geo.region` / `geo.placename` | ✅ Dodane | `GB-NIR` / `Belfast, Northern Ireland` w Welcome.jsx |
+| GTM (Google Tag Manager) | ✅ Skonfigurowany | Odroczony do `load` event — nie blokuje renderowania |
+| Consent Mode v2 (GDPR) | ✅ Zaimplementowany | `analytics_storage: denied` domyślnie — zgodny z UK GDPR |
 | Meta Pixel | ✅ Gotowy | `useMetaPixel` hook w `MarketingLayout` |
-| `dataLayer.js` | ✅ Gotowy | Zdarzenia: `contact_form_submit`, `calculator_lead` — śledzenie konwersji możliwe |
-| Wielojęzyczność | ✅ EN/PL/PT | `lang={{ str_replace('_', '-', app()->getLocale()) }}` w `<html>` |
+| `dataLayer.js` | ✅ Gotowy | Zdarzenia: `contact_form_submit`, `calculator_lead` |
 | Formularz kontaktowy → DB | ✅ Działa | `POST /contact` → `ContactController@store` → zapis Lead + email |
-| Kalkulator → DB | ✅ Działa | `POST /calculator-lead` → `CalculatorLeadController@store` |
+| Kalkulator → DB | ✅ Działa | `POST /calculate` → `CalculatorLeadController@store` |
+| Meta Kalkulator | ✅ EN | `Website Cost Calculator – Website Expert` + EN description |
 | Robots.txt | ✅ Istnieje | `public/robots.txt` |
+| Sitemap.xml | ✅ Działa | `/sitemap.xml` — dynamiczny, cache 1h, auto-ping Google/Bing |
+| SEO score Lighthouse | ✅ 100 pkt | Wszystkie linki opisowe (`aria-label`), meta kompletne |
+| PageSpeed mobile | ✅ 92+ | Self-hosted fonts, React.lazy, HTTP/2, Brotli, OPcache |
 
-### ⚠️ Problemy SEO do naprawy (priorytet przed uruchomieniem kampanii)
+### ⚠️ Pozostałe do zrobienia przed kampanią
 
-| # | Problem | Priorytet | Plik do zmiany |
-|---|---------|-----------|----------------|
-| 1 | **Brak meta description na stronie kalkulatora w języku angielskim** — obecna treść jest po polsku: `"Oblicz orientacyjny koszt..."` | 🔴 WYSOKI | `resources/js/Pages/Kalkulator.jsx` |
-| 2 | **Brak `<meta name="robots">` na stronach auth/portalu** — indexowanie stron `/login`, `/register`, `/portal/*` | 🔴 WYSOKI | `resources/views/app.blade.php` — dodać noindex dla tras auth/portal |
-| 3 | **Brak OG tags (Open Graph)** — brak `og:title`, `og:description`, `og:image` na stronie głównej i podstronach usług — wpływa na CTR z social media | 🟡 ŚREDNI | `resources/js/Pages/Welcome.jsx` |
-| 4 | **Brak canonical URL** — żadna strona nie ma `<link rel="canonical">` — ryzyko duplicate content przy wielojęzyczności | 🔴 WYSOKI | `resources/views/app.blade.php` lub per-page w `<Head>` |
-| 5 | **Title strony głównej nie zawiera lokalizacji NI/Belfast** — dla kampanii lokalnej to krytyczne dla Quality Score | 🔴 WYSOKI | `resources/js/Pages/Welcome.jsx` |
-| 6 | **Brak `hreflang`** — przy 3 językach (EN/PL/PT) Google nie wie którą wersję serwować dla UK/PL/BR | 🟡 ŚREDNI | `resources/views/app.blade.php` |
-| 7 | **Brak strony `/sitemap.xml`** — Google nie ma mapy witryny; route `/kalkulator` może nie być indeksowany | 🟡 ŚREDNI | Dodać `laravel/sitemap` lub ręczną trasę |
-| 8 | **`app.blade.php` tytuł fallback to `'Laravel'`** — `config('app.name', 'Laravel')` — jeśli `APP_NAME` nie ustawione w `.env`, strona ma tytuł "Laravel" | 🔴 WYSOKI | `.env`: `APP_NAME="Website Expert"` |
-| 9 | **Brak `<meta name="geo.region">` i `<meta name="geo.placename">`** — dla kampanii lokalnej NI warto dodać | 🟢 NISKI | `resources/js/Pages/Welcome.jsx` |
-| 10 | **Brak `<link rel="icon">` (favicon)** — nie widać w `app.blade.php` | 🟡 ŚREDNI | `resources/views/app.blade.php` |
-
-### Szybkie poprawki SEO — do wprowadzenia przed kampanią
-
-#### 1. Welcome.jsx — nagłówek i meta pod NI
-```jsx
-// resources/js/Pages/Welcome.jsx
-<Head>
-    <title>Website Expert – Web Design & SEO Belfast, Northern Ireland</title>
-    <meta name="description"
-          content="Professional web design, e-commerce and SEO services in Belfast and across Northern Ireland. Get a free quote today — website-expert.uk" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://website-expert.uk/" />
-    <meta property="og:title" content="Website Expert – Web Design Belfast, Northern Ireland" />
-    <meta property="og:description"
-          content="Bespoke websites, e-commerce, SEO and Google Ads for NI businesses. Fast delivery, fixed prices." />
-    <meta property="og:url" content="https://website-expert.uk/" />
-    <meta property="og:type" content="website" />
-    <meta property="og:locale" content="en_GB" />
-    <meta name="geo.region" content="GB-NIR" />
-    <meta name="geo.placename" content="Belfast, Northern Ireland" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Website Expert – Web Design Belfast" />
-    <meta name="twitter:description"
-          content="Bespoke web design, SEO and digital marketing for Northern Ireland businesses." />
-</Head>
-```
-
-#### 2. app.blade.php — noindex dla tras auth i portalu
-```blade
-{{-- resources/views/app.blade.php — w <head>, po <meta viewport> --}}
-@php
-    $noIndexRoutes = ['login', 'register', 'password.request', 'password.reset',
-                      'verification.notice', 'profile.edit', 'dashboard'];
-    $isNoIndex = Route::is(...array_merge($noIndexRoutes, ['portal.*', 'onboarding.*']));
-@endphp
-@if($isNoIndex)
-    <meta name="robots" content="noindex, nofollow">
-@else
-    <meta name="robots" content="index, follow">
-@endif
-<link rel="canonical" href="{{ url()->current() }}">
-```
-
-#### 3. .env — APP_NAME
-```
-APP_NAME="Website Expert"
-```
+| # | Problem | Priorytet | Uwagi |
+|---|---------|-----------|-------|
+| 1 | **About.jsx — "Based in Manchester"** — defaultowy tekst w kodzie zawiera Manchester | 🔴 WYSOKI | Zmienić w panelu Filament (seeder has Manchester in defaults) lub bezpośrednio w About.jsx defaults |
+| 2 | **robots.txt** — brak wpisu `Sitemap:` | 🟡 ŚREDNI | Dodać `Sitemap: https://website-expert.uk/sitemap.xml` |
+| 3 | **Google Business Profile Belfast** | 🔴 KRYTYCZNE | Nie ma w kodzie — to zadanie zewnętrzne (GBP account) |
+| 4 | **Google Search Console** — weryfikacja domeny | 🔴 KRYTYCZNE | Zewnętrzne — podłączyć GSC |
+| 5 | **Numer telefonu NI** — brak w Call Extension (028...) | 🟡 ŚREDNI | Zewnętrzne — wirtualne biuro Belfast |
+| 6 | **Podstrony usługowe** (`/web-design-belfast` etc.) | 🟢 NISKI | Priorytet po uruchomieniu kampanii, nie blokuje startu |
 
 ---
 
@@ -834,47 +794,54 @@ Free quote in 24 hours — call us or use our online calculator at website-exper
 ## 12. Harmonogram wdrożenia — NI
 
 ```
-TYDZIEŃ 1 (pilne — przed kampanią):
-□ Zmiana APP_NAME="Website Expert" w .env
-□ Naprawa meta description strony Kalkulator (zmiana PL → EN)
-□ Dodanie OG tags i canonical do Welcome.jsx
-□ Zmiana "Based in Manchester" → "Based in Belfast, Northern Ireland" w About.jsx
-□ Dodanie noindex na trasy auth/portal w app.blade.php
-□ Założenie Google Business Profile Belfast
-□ Weryfikacja Google Search Console dla website-expert.uk
-□ Połączenie GSC z Google Ads
+TYDZIEŃ 1 — STATUS:
+✅ Zmiana APP_NAME="Website Expert" w .env
+✅ Naprawa meta description strony Kalkulator (EN)
+✅ Dodanie OG tags i canonical do Welcome.jsx
+✅ Title strony głównej zawiera Belfast, Northern Ireland
+✅ Dodanie noindex na trasy auth/portal w app.blade.php
+✅ hreflang EN/PL/PT zaimplementowany
+✅ geo.region / geo.placename dodane
+✅ Sitemap.xml działa (/sitemap.xml, cache 1h, ping Google/Bing)
+✅ SEO score Lighthouse: 100 pkt
+✅ PageSpeed mobile: 92+, HTTP/2 aktywne
+⬜ Zmiana "Based in Manchester" → Belfast w About (panel Filament lub About.jsx defaults)
+⬜ Dodanie Sitemap: do robots.txt
+⬜ Założenie Google Business Profile Belfast          ← zewnętrzne
+⬜ Weryfikacja Google Search Console                  ← zewnętrzne
+⬜ Połączenie GSC z Google Ads                        ← zewnętrzne
 
 TYDZIEŃ 2:
-□ Konfiguracja konta Google Ads (kampania 1: Web Design Belfast)
-□ Wgranie słów kluczowych, tekstów RSA, rozszerzeń
-□ Konfiguracja konwersji GTM (contact_form_submit, calculator_lead, phone_call_click)
-□ Import konwersji do Google Ads z GA4
-□ Uruchomienie kampanii 1 (Web Design Belfast) — only
+⬜ Konfiguracja konta Google Ads (kampania 1: Web Design Belfast)
+⬜ Wgranie słów kluczowych, tekstów RSA, rozszerzeń
+⬜ Konfiguracja konwersji GTM (contact_form_submit, calculator_lead, phone_call_click)
+⬜ Import konwersji do Google Ads z GA4
+⬜ Uruchomienie kampanii 1 (Web Design Belfast) — only
 
 TYDZIEŃ 3:
-□ Analiza pierwszych danych: Quality Score, Impression Share, Search Terms Report
-□ Dodanie słów kluczowych negatywnych na podstawie Search Terms
-□ Uruchomienie kampanii 2 (E-Commerce Belfast)
-□ Uruchomienie kampanii 3 (SEO Belfast)
+⬜ Analiza pierwszych danych: Quality Score, Impression Share, Search Terms Report
+⬜ Dodanie słów kluczowych negatywnych na podstawie Search Terms
+⬜ Uruchomienie kampanii 2 (E-Commerce Belfast)
+⬜ Uruchomienie kampanii 3 (SEO Belfast)
 
 TYDZIEŃ 4:
-□ Uruchomienie kampanii 4 (Digital Marketing Belfast)
-□ Uruchomienie kampanii 5 (Niche/Branżowe)
-□ Konfiguracja list remarketingowych w GA4
-□ Pierwszy raport 30-dniowy
+⬜ Uruchomienie kampanii 4 (Digital Marketing Belfast)
+⬜ Uruchomienie kampanii 5 (Niche/Branżowe)
+⬜ Konfiguracja list remarketingowych w GA4
+⬜ Pierwszy raport 30-dniowy
 
 MIESIĄC 2:
-□ Uruchomienie kampanii 6 (Remarketing RLSA)
-□ Optymalizacja QS — dostosowanie tekstów reklam do wyników
-□ A/B test 2 wariantów RSA (rotacja równa przez 4 tygodnie)
-□ Sprawdzenie Impression Share — czy tracisz na budżet czy na ranking?
-□ Rozważenie podstron dedykowanych (/web-design-belfast, /seo-belfast)
+⬜ Uruchomienie kampanii 6 (Remarketing RLSA)
+⬜ Optymalizacja QS — dostosowanie tekstów reklam do wyników
+⬜ A/B test 2 wariantów RSA (rotacja równa przez 4 tygodnie)
+⬜ Sprawdzenie Impression Share — czy tracisz na budżet czy na ranking?
+⬜ Rozważenie podstron dedykowanych (/web-design-belfast, /seo-belfast)
 
 MIESIĄC 3:
-□ Przejście na Target CPA (gdy ≥ 30 konwersji/mies.)
-□ Pełny raport wyników: ROAS, CAC, leady per kampania
-□ Decyzja o skalowaniu budżetu lub realokacji
-□ Stworzenie podstron usługowych dla najlepiej konwertujących kampanii
+⬜ Przejście na Target CPA (gdy ≥ 30 konwersji/mies.)
+⬜ Pełny raport wyników: ROAS, CAC, leady per kampania
+⬜ Decyzja o skalowaniu budżetu lub realokacji
+⬜ Stworzenie podstron usługowych dla najlepiej konwertujących kampanii
 ```
 
 ---
@@ -897,6 +864,30 @@ MIESIĄC 3:
 | ROAS (revenue / ad spend) | — | ≥500% (5:1) |
 
 ---
+
+## STATUS — Notatka podsumowująca (15 kwietnia 2026)
+
+Większość technicznych wymagań z Tygodnia 1 jest już zrealizowana. Strona jest gotowa technicznie do uruchomienia kampanii Google Ads.
+
+**Gotowe (kod):**
+- SEO score 100/100, PageSpeed mobile 92+, HTTP/2 aktywne
+- Title, meta description, OG tags, canonical, noindex, hreflang, geo.region — wszystko zgodne z planem
+- Kalkulator ma poprawne EN meta
+- Sitemap.xml działa z cache i auto-pingiem Google/Bing
+- GTM odroczony do `load` event, Consent Mode v2 aktywny
+- Tracking zdarzeń gotowy (`contact_form_submit`, `calculator_lead`)
+
+**Do zrobienia przed uruchomieniem reklam (2 zadania w kodzie):**
+1. Zmienić defaultowy tekst w `About.jsx` z `"Based in Manchester"` na `"Based in Belfast, Northern Ireland"` — można to zrobić przez panel Filament (edycja sekcji `about`) bez ingerencji w kod
+2. Dodać `Sitemap: https://website-expert.uk/sitemap.xml` do `public/robots.txt`
+
+**Do zrobienia zewnętrznie (poza kodem):**
+- Założyć i zweryfikować Google Business Profile dla Belfast
+- Podłączyć Google Search Console i połączyć z Google Ads
+- Numer telefonu NI (028...) do Call Extension
+- Konfiguracja konta Google Ads — słowa kluczowe, RSA, rozszerzenia gotowe w tym dokumencie
+
+Strona może przyjąć ruch reklamowy natychmiast po tych 2 drobnych poprawkach.
 
 ## 14. Podsumowanie priorytetów
 

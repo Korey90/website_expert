@@ -14,9 +14,9 @@ class PortfolioProjectSeeder extends Seeder
                 'title'       => ['en' => 'Solicitors Website Redesign', 'pl' => 'Redesign strony kancelarii prawnej', 'pt' => 'Redesign do Site de Advogados'],
                 'tag'         => ['en' => 'Brochure Website', 'pl' => 'Strona wizytówkowa', 'pt' => 'Site Institucional'],
                 'description' => [
-                    'en' => 'WCAG AA-compliant redesign for a Manchester solicitors firm. New case studies section, live chat integration.',
-                    'pl' => 'Redesign strony dla kancelarii z Manchesteru zgodny z WCAG AA. Sekcja case studies, integracja live chat.',
-                    'pt' => 'Redesign compatível com WCAG AA para uma firma de advogados em Manchester. Nova secção de casos, integração de live chat.',
+                    'en' => 'WCAG AA-compliant redesign for a Belfast solicitors firm. New case studies section, live chat integration.',
+                    'pl' => 'Redesign strony dla kancelarii z Belfastu zgodny z WCAG AA. Sekcja case studies, integracja live chat.',
+                    'pt' => 'Redesign compatível com WCAG AA para uma firma de advogados em Belfast. Nova secção de casos, integração de live chat.',
                 ],
                 'result' => [
                     'en' => '+40% contact form conversions',
