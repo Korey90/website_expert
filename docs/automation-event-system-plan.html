@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>automation-event-system-plan.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="plan-visual-automation-event-system">Plan: Visual Automation Event System</h1>
+<p><strong>Data:</strong> 2026-04-16<br>
+<strong>Status:</strong> DRAFT — czeka na akceptację przed implementacją</p>
+<hr>
+<h2 id="1-stan-obecny--co-już-istnieje">1. Stan obecny — co już istnieje</h2>
+<h3 id="warstwa-backendowa-w-pełni-działająca">Warstwa backendowa (w pełni działająca)</h3>
+<table>
+<thead>
+<tr>
+<th>Komponent</th>
+<th>Plik</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AutomationRule</code> model</td>
+<td><code>app/Models/AutomationRule.php</code></td>
+<td>JSON: <code>conditions[]</code>, <code>actions[]</code>, <code>trigger_event</code>, <code>delay_minutes</code></td>
+</tr>
+<tr>
+<td><code>ProcessAutomationJob</code></td>
+<td><code>app/Jobs/ProcessAutomationJob.php</code></td>
+<td>Pobiera reguły z DB, ewaluuje warunki, wykonuje akcje przez ACTION_MAP</td>
+</tr>
+<tr>
+<td><code>AutomationEventListener</code></td>
+<td><code>app/Listeners/AutomationEventListener.php</code></td>
+<td>Subskrybuje eventy Eloquent i app-events, dispatch-uje Job</td>
+</tr>
+<tr>
+<td><code>ConditionEvaluator</code></td>
+<td><code>app/Automation/ConditionEvaluator.php</code></td>
+<td>Operatory: <code>=</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>contains</code></td>
+</tr>
+<tr>
+<td><strong>Akcje</strong></td>
+<td><code>app/Automation/Actions/</code></td>
+<td><code>send_email</code>, <code>send_sms</code>, <code>notify_admin</code>, <code>add_tag</code>, <code>change_status</code>, <code>create_portal_access</code>, <code>send_internal_email</code></td>
+</tr>
+<tr>
+<td><code>SmsService</code></td>
+<td><code>app/Services/SmsService.php</code></td>
+<td>Twilio — wysyłka SMS</td>
+</tr>
+<tr>
+<td><code>EmailTemplate</code></td>
+<td>wielojęzyczny JSON (subject/body_html/body_text per locale)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>SmsTemplate</code></td>
+<td>treść z placeholderami <code>{{variable}}</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="warstwa-ui-istniejące-filament-resources">Warstwa UI (istniejące Filament Resources)</h3>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Lokalizacja</th>
+<th>Stan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AutomationRuleResource</code></td>
+<td><code>app/Filament/Resources/</code></td>
+<td>✅ Działa — formularz z Repeater dla akcji</td>
+</tr>
+<tr>
+<td><code>EmailTemplateResource</code></td>
+<td><code>app/Filament/Resources/</code></td>
+<td>✅ Działa — zakładki EN/PL/PT, TinyEditor, preview</td>
+</tr>
+<tr>
+<td><code>SmsTemplateResource</code></td>
+<td><code>app/Filament/Resources/</code></td>
+<td>✅ Działa — textarea z podglądem zmiennych</td>
+</tr>
+</tbody>
+</table>
+<h3 id="zarejestrowane-trigger-events">Zarejestrowane trigger events</h3>
+<pre class="hljs"><code><div>lead.created            lead.stage_changed      lead.assigned
+project.created         project.status_changed  project.completed
+invoice.sent            invoice.overdue         invoice.paid
+quote.sent              quote.accepted
+contract.created        contract.sent           contract.signed  contract.expired
+</div></code></pre>
+<h3 id="problemów-obecnego-ui">Problemów obecnego UI</h3>
+<ol>
+<li><strong>Brak listy dostępnych zmiennych per trigger</strong> — użytkownik nie wie co może wstawić do szablonu</li>
+<li><strong>Email Template linkowany przez <code>slug</code> (string)</strong> — zamiast ID z dropdownem; podatne na literówki</li>
+<li><strong>Brak historii wykonań</strong> — nie widać czy automation się odpaliła i z jakim wynikiem</li>
+<li><strong>Brak podglądu reguły</strong> — po zapisaniu nie widać co reguła zrobi</li>
+<li><strong>Brak <code>service_cta</code> w liście triggerów</strong> — nowe źródło leadów nie jest obsługiwane przez reguły</li>
+<li><strong>Warunki (Conditions) brak UI</strong> — sekcja <code>conditions</code> nie ma formularza w <code>AutomationRuleResource</code></li>
+<li><strong>Brak testowania reguły</strong> — nie można wyzwolić reguły testowo z UI bez tworzenia prawdziwego leada</li>
+</ol>
+<hr>
+<h2 id="2-cel">2. Cel</h2>
+<p>Uzupełnić istniejący system o:</p>
+<ol>
+<li><strong>Wygodny UI</strong> dla tworzenia reguł — z dropdownami zamiast string-ów, pomocnikami zmiennych, podglądem</li>
+<li><strong>Sekcję Conditions</strong> w formularzu reguły</li>
+<li><strong>Log wykonań</strong> — tabela <code>automation_logs</code> + widok w Filament</li>
+<li><strong>Test trigger</strong> — akcja &quot;Run Now&quot; z próbnym kontekstem</li>
+<li><strong>Nowe trigger events</strong> — <code>lead.service_cta</code>, <code>lead.contact_form</code> rozróżnione osobno</li>
+</ol>
+<hr>
+<h2 id="3-architektura-zmian">3. Architektura zmian</h2>
+<h3 id="31-nowa-tabela-automation_logs">3.1 Nowa tabela: <code>automation_logs</code></h3>
+<pre class="hljs"><code><div>id               <span class="hljs-type">bigint</span> PK
+automation_rule_id  <span class="hljs-type">bigint</span> FK → automation_rules.id  (nullable — reguła mogła <span class="hljs-keyword">by</span>ć usunięta)
+trigger_event    <span class="hljs-type">varchar</span>(<span class="hljs-number">100</span>)
+context          json          <span class="hljs-comment">-- snapshot kontekstu w momencie wywołania</span>
+actions_executed json          <span class="hljs-comment">-- [{type, status: ok|error, message?, duration_ms}]</span>
+lead_id          <span class="hljs-type">bigint</span> nullable FK
+client_id        <span class="hljs-type">bigint</span> nullable FK
+status           enum(<span class="hljs-string">&#x27;success&#x27;</span>,<span class="hljs-string">&#x27;partial&#x27;</span>,<span class="hljs-string">&#x27;failed&#x27;</span>)
+executed_at      <span class="hljs-type">timestamp</span>
+</div></code></pre>
+<p>Model: <code>AutomationLog</code>, relacja <code>automationRule()</code> belongsTo.</p>
+<h3 id="32-rozszerzenie-automationrule">3.2 Rozszerzenie <code>AutomationRule</code></h3>
+<p>Dodać kolumnę:</p>
+<pre class="hljs"><code><div>business_id  <span class="hljs-type">bigint</span> nullable FK  <span class="hljs-comment">-- multi-tenancy: null = global</span>
+</div></code></pre>
+<h3 id="33-rejestr-zmiennych-per-trigger-php-registry">3.3 Rejestr zmiennych per trigger (PHP Registry)</h3>
+<p>Nowa klasa <code>app/Automation/TriggerRegistry.php</code>:</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TriggerRegistry</span>
+</span>{
+    <span class="hljs-comment">/** Zwraca [event_key =&gt; [label, variables[]]] */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">all</span>(<span class="hljs-params"></span>): <span class="hljs-title">array</span> </span>{ ... }
+
+    <span class="hljs-comment">/** Zwraca zmienne dostępne dla danego triggera */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">variablesFor</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$event</span></span>): <span class="hljs-title">array</span> </span>{ ... }
+
+    <span class="hljs-comment">/** Zwraca human-readable label triggera */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">label</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$event</span></span>): <span class="hljs-title">string</span> </span>{ ... }
+}
+</div></code></pre>
+<p>Przykład danych:</p>
+<pre class="hljs"><code><div><span class="hljs-string">&#x27;lead.created&#x27;</span> =&gt; [
+    <span class="hljs-string">&#x27;label&#x27;</span>     =&gt; <span class="hljs-string">&#x27;Lead Created&#x27;</span>,
+    <span class="hljs-string">&#x27;group&#x27;</span>     =&gt; <span class="hljs-string">&#x27;Leads&#x27;</span>,
+    <span class="hljs-string">&#x27;variables&#x27;</span> =&gt; [
+        <span class="hljs-string">&#x27;lead_title&#x27;</span>    =&gt; <span class="hljs-string">&#x27;Lead title&#x27;</span>,
+        <span class="hljs-string">&#x27;client_name&#x27;</span>   =&gt; <span class="hljs-string">&#x27;Contact name&#x27;</span>,
+        <span class="hljs-string">&#x27;company_name&#x27;</span>  =&gt; <span class="hljs-string">&#x27;Company&#x27;</span>,
+        <span class="hljs-string">&#x27;stage_name&#x27;</span>    =&gt; <span class="hljs-string">&#x27;Pipeline stage&#x27;</span>,
+        <span class="hljs-string">&#x27;assigned_name&#x27;</span> =&gt; <span class="hljs-string">&#x27;Assigned to&#x27;</span>,
+        <span class="hljs-string">&#x27;lead_source&#x27;</span>   =&gt; <span class="hljs-string">&#x27;Lead source (contact_form, service_cta, …)&#x27;</span>,
+    ],
+],
+<span class="hljs-string">&#x27;lead.service_cta&#x27;</span> =&gt; [ ... ],
+</div></code></pre>
+<hr>
+<h2 id="4-plan-implementacji--priorytety">4. Plan implementacji — priorytety</h2>
+<h3 id="faza-1--quick-wins-nie-wymagają-migracji--high">FAZA 1 — Quick wins (nie wymagają migracji) ★★★ HIGH</h3>
+<h4 id="1a-dodać-warunki-conditions-do-formularza-automationruleresource">1A. Dodać warunki (Conditions) do formularza AutomationRuleResource</h4>
+<p>Sekcja <code>Conditions</code> z Repeater — pola:</p>
+<ul>
+<li><code>field</code> → Select z listą pól dostępnych dla wybranego triggera (reaktywne)</li>
+<li><code>operator</code> → Select: <code>=</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>contains</code></li>
+<li><code>value</code> → TextInput</li>
+</ul>
+<p>Teraz sekcja Conditions w Filament istnieje w modelu ale <strong>nie ma formularza UI</strong> — użytkownik musi wpisywać raw JSON.</p>
+<h4 id="1b-poprawić-linkowanie-emailtemplate-w-akcji">1B. Poprawić linkowanie EmailTemplate w akcji</h4>
+<p>Zamiast <code>template_slug</code> (string podatny na literówki):</p>
+<pre class="hljs"><code><div><span class="hljs-title class_">Forms\Components\Select</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;template_id&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">label</span>(<span class="hljs-string">&#x27;Email Template&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">options</span>(fn () =&gt; <span class="hljs-title class_">EmailTemplate</span>::<span class="hljs-title function_ invoke__">where</span>(<span class="hljs-string">&#x27;is_active&#x27;</span>, <span class="hljs-literal">true</span>)-&gt;<span class="hljs-title function_ invoke__">pluck</span>(<span class="hljs-string">&#x27;name&#x27;</span>, <span class="hljs-string">&#x27;id&#x27;</span>))
+    -&gt;<span class="hljs-title function_ invoke__">searchable</span>()
+    -&gt;<span class="hljs-title function_ invoke__">visible</span>(fn (Get <span class="hljs-variable">$get</span>) =&gt; <span class="hljs-variable">$get</span>(<span class="hljs-string">&#x27;type&#x27;</span>) === <span class="hljs-string">&#x27;send_email&#x27;</span>)
+</div></code></pre>
+<p>I zaktualizować <code>SendEmailAction</code> żeby używał <code>id</code> zamiast <code>slug</code>.</p>
+<h4 id="1c-dodać-service_cta-do-listy-triggerów">1C. Dodać <code>service_cta</code> do listy triggerów</h4>
+<p>W <code>AutomationRuleResource::TRIGGERS</code> i <code>AutomationEventListener</code> dodać:</p>
+<pre class="hljs"><code><div><span class="hljs-string">&#x27;lead.service_cta&#x27;</span> =&gt; <span class="hljs-string">&#x27;Lead: Service CTA Form&#x27;</span>,
+<span class="hljs-string">&#x27;lead.contact_form&#x27;</span> =&gt; <span class="hljs-string">&#x27;Lead: Contact Form&#x27;</span>,
+</div></code></pre>
+<p>I w <code>ContactController</code> emitować właściwy event po stworzeniu leada zamiast polegać na Eloquent <code>created</code>.</p>
+<hr>
+<h3 id="faza-2--automation-logs--medium">FAZA 2 — Automation Logs ★★ MEDIUM</h3>
+<h4 id="2a-migracja-create_automation_logs_table">2A. Migracja <code>create_automation_logs_table</code></h4>
+<h4 id="2b-zapis-wyniku-w-processautomationjob">2B. Zapis wyniku w <code>ProcessAutomationJob</code></h4>
+<p>Przed wykonaniem akcji: otwórz log entry. Po każdej akcji: zapisz status. Po wszystkich: zamknij z <code>status</code>.</p>
+<h4 id="2c-automationlogresource-w-filament">2C. <code>AutomationLogResource</code> w Filament</h4>
+<p>Tabela tylko do odczytu:</p>
+<ul>
+<li>Kolumny: trigger event, rule name, status (badge), executed_at, lead (link), actions count</li>
+<li>Filter: status, trigger_event, date range</li>
+<li>Row action: &quot;View details&quot; → panel z JSON kontekstu + wynikami akcji</li>
+</ul>
+<hr>
+<h3 id="faza-3--test-trigger-run-now--low">FAZA 3 — Test Trigger (Run Now) ★ LOW</h3>
+<h4 id="3a-custom-filament-action-na-stronie-widoku-reguły">3A. Custom Filament Action na stronie widoku reguły</h4>
+<p>Przycisk &quot;Test Rule&quot; → modal z polem <code>lead_id</code> lub <code>context JSON</code> → dispatch <code>ProcessAutomationJob</code> z <code>singleRuleId</code>.</p>
+<hr>
+<h3 id="faza-4--triggerregistry--dynamiczne-zmienne--low">FAZA 4 — TriggerRegistry + dynamiczne zmienne ★ LOW</h3>
+<h4 id="4a-klasa-triggerregistry">4A. Klasa <code>TriggerRegistry</code></h4>
+<h4 id="4b-w-formularzu-smsemail-template--lista-zmiennych-ładowana-per-trigger">4B. W formularzu SMS/Email Template — lista zmiennych ładowana per trigger</h4>
+<p>Gdy użytkownik buduje regułę i wybiera akcję <code>send_sms</code>, obok textarea z treścią pojawia się lista <code>Available variables for this trigger: {{lead_title}}, {{client_name}}, ...</code>.</p>
+<hr>
+<h2 id="5-pliki-do-stworzeniazmodyfikowania">5. Pliki do stworzenia/zmodyfikowania</h2>
+<table>
+<thead>
+<tr>
+<th>Plik</th>
+<th>Operacja</th>
+<th>Faza</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>app/Automation/TriggerRegistry.php</code></td>
+<td>CREATE</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>database/migrations/..._create_automation_logs_table.php</code></td>
+<td>CREATE</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>app/Models/AutomationLog.php</code></td>
+<td>CREATE</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>app/Filament/Resources/AutomationLogResource.php</code></td>
+<td>CREATE</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>app/Jobs/ProcessAutomationJob.php</code></td>
+<td>MODIFY — dodać zapis logu</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>app/Filament/Resources/AutomationRuleResource.php</code></td>
+<td>MODIFY — Conditions UI + email template_id + nowe triggery</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>app/Automation/Actions/SendEmailAction.php</code></td>
+<td>MODIFY — obsługa <code>template_id</code></td>
+<td>1B</td>
+</tr>
+<tr>
+<td><code>app/Listeners/AutomationEventListener.php</code></td>
+<td>MODIFY — nowe eventy service_cta/contact_form</td>
+<td>1C</td>
+</tr>
+<tr>
+<td><code>app/Http/Controllers/ContactController.php</code></td>
+<td>MODIFY — emit LeadCapturedFromCta event</td>
+<td>1C</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="6-nowe-eventy-aplikacji-opcjonalnie-do-fazy-1c">6. Nowe eventy aplikacji (opcjonalnie do Fazy 1C)</h2>
+<p>Można rozszerzyć <code>AutomationEventListener</code> o nasłuch na:</p>
+<ul>
+<li><code>lead.service_cta</code> — emitowany przez <code>ContactController::quickStore</code> po stworzeniu leada</li>
+<li><code>lead.contact_form</code> — emitowany przez <code>ContactController::store</code></li>
+</ul>
+<p>Albo (prostsze) — warunek w istniejącym <code>lead.created</code> trigger:</p>
+<pre class="hljs"><code><div>conditions<span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;field&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;source&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;operator&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;=&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;value&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;service_cta&quot;</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+</div></code></pre>
+<p>To rozwiązanie nie wymaga nowych eventów — <strong>preferowane w Fazie 1</strong>.</p>
+<hr>
+<h2 id="7-co-nie-wymaga-zmian">7. Co NIE wymaga zmian</h2>
+<ul>
+<li><code>ProcessAutomationJob::ACTION_MAP</code> — w pełni extensible, dodanie nowej akcji = nowa klasa</li>
+<li><code>SmsService</code> — działa, ma normalizePhone, obsługę błędów</li>
+<li><code>ConditionEvaluator</code> — działa; można rozszerzyć o <code>&gt;=</code>, <code>&lt;=</code> (minor fix)</li>
+<li><code>SmsTemplate</code> + <code>EmailTemplate</code> modele — wystarczają; nie trzeba migracji</li>
+</ul>
+<hr>
+<h2 id="8-kolejność-implementacji-zalecana">8. Kolejność implementacji (zalecana)</h2>
+<pre class="hljs"><code><div>1. FAZA 1A — Conditions UI w AutomationRuleResource        ~2h
+2. FAZA 1B — Email Template Select zamiast slug            ~1h
+3. FAZA 1C — Dodać source conditions dla service_cta       ~30min
+4. FAZA 2A+2B — Automation Logs migracja + Job             ~3h
+5. FAZA 2C — AutomationLogResource Filament                ~2h
+6. FAZA 3  — Test Trigger modal                            ~2h
+7. FAZA 4  — TriggerRegistry + dynamiczne zmienne          ~3h
+</div></code></pre>
+<hr>
+<h2 id="9-pytania-otwarte-przed-implementacją">9. Pytania otwarte przed implementacją</h2>
+<ol>
+<li>Czy logi mają być trzymane w nieskończoność czy z automatycznym czyszczeniem (np. 90 dni)?</li>
+<li>Czy <code>business_id</code> na <code>automation_rules</code> jest potrzebny teraz (multi-tenancy), czy odkładamy?</li>
+<li>Czy Faza 3 (Test Trigger) ma działać na prawdziwym leadzie z bazy, czy na mock-danych?</li>
+</ol>
+
+</body>
+</html>
