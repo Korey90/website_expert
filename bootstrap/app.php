@@ -42,5 +42,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Daily: remind clients about invoices due within 3 days → triggers invoice.due_soon automation
         $schedule->command('invoices:check-due-soon')->dailyAt('09:00')->onOneServer();
+
+        // Daily: prune old automation logs based on retention setting (default 90 days)
+        $schedule->command('automation:prune-logs')->dailyAt('03:00')->onOneServer();
     })
     ->create();

@@ -5,7 +5,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "dev:all": "concurrently --names \"vite,serve,reverb,queue\" --prefix-colors \"cyan,green,yellow,magenta\" \"npm run dev\" \"php artisan serve\" \"php artisan reverb:start\" \"php artisan queue:work\"",
+        "dev:all": "concurrently --names \"vite,serve,reverb,queue\" --prefix-colors \"cyan,green,yellow,magenta\" \"npm run dev\" \"php artisan serve\" \"php artisan reverb:start\" \"php artisan queue:work --queue=default,notifications --tries=3 --sleep=3\"",
         "test": "vitest run",
         "test:watch": "vitest",
         "lint": "eslint resources/js --ext .js,.jsx --max-warnings 0",

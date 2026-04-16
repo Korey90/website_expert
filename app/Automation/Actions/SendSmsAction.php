@@ -2,6 +2,7 @@
 
 namespace App\Automation\Actions;
 
+use App\Automation\ActionSkippedException;
 use App\Models\SmsTemplate;
 use App\Services\ClientNotificationGate;
 use App\Services\SmsService;
@@ -13,18 +14,21 @@ class SendSmsAction extends BaseAutomationAction
     {
         $client = $this->resolveClient($context);
         if ($client && ! ClientNotificationGate::canSendSms($client)) {
-            return;
+            throw new ActionSkippedException("Client #{$client->id} has notify_sms disabled.");
         }
 
         $phone = $this->resolveRecipientPhone($action['recipient'] ?? $action['to'] ?? 'client', $context);
         if (! $phone) {
-            return;
+            throw new ActionSkippedException(
+                'No phone number resolved. Lead/client may have no phone, or recipient value is invalid.'
+            );
         }
 
         $template = SmsTemplate::find($action['template_id'] ?? null);
         if (! $template) {
-            Log::warning('SendSmsAction: no valid template_id.', ['action' => $action]);
-            return;
+            throw new ActionSkippedException(
+                "SmsTemplate #{$action['template_id']} not found or template_id missing in action config."
+            );
         }
 
         $message = $template->render($this->buildTemplateVars($context));
@@ -32,3 +36,4 @@ class SendSmsAction extends BaseAutomationAction
         app(SmsService::class)->send($phone, $message);
     }
 }
+

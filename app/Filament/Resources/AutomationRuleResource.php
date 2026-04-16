@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AutomationRuleResource\Pages;
 use App\Models\AutomationRule;
+use App\Models\EmailTemplate;
+use App\Models\AutomationTrigger;
 use App\Models\SmsTemplate;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
@@ -24,8 +26,9 @@ class AutomationRuleResource extends Resource
     protected static ?string $navigationLabel = 'Automation Rules';
     protected static ?int $navigationSort = 4;
 
-    // Available trigger events
-    const TRIGGERS = [
+    // Available trigger events — loaded from DB (AutomationTrigger model).
+    // This const is kept as a fallback only for label lookups when DB is unavailable.
+    const TRIGGERS_FALLBACK = [
         'lead.created'            => 'Lead Created',
         'lead.stage_changed'      => 'Lead Stage Changed',
         'project.created'         => 'Project Created',
@@ -39,17 +42,82 @@ class AutomationRuleResource extends Resource
         'contract.sent'           => 'Contract Sent',
         'contract.signed'         => 'Contract Signed',
         'contract.expired'        => 'Contract Expired',
+        'lead.service_cta'        => 'Lead: Service CTA Form',
+        'lead.contact_form'       => 'Lead: Contact Form',
     ];
+
+    public static function getTriggerLabel(?string $key): string
+    {
+        if ($key === null) {
+            return '—';
+        }
+        return AutomationTrigger::labelFor($key) ?: (self::TRIGGERS_FALLBACK[$key] ?? $key);
+    }
 
     public static function form(Schema $form): Schema
     {
         return $form->schema([
             Forms\Components\TextInput::make('name')->required()->maxLength(255),
             Forms\Components\Select::make('trigger_event')
-                ->options(self::TRIGGERS)
+                ->options(fn () => AutomationTrigger::where('is_active', true)
+                    ->orderBy('group')
+                    ->orderBy('label')
+                    ->get()
+                    ->groupBy('group')
+                    ->map(fn ($group) => $group->pluck('label', 'key'))
+                    ->toArray()
+                )
+                ->searchable()
                 ->required(),
             Forms\Components\TextInput::make('delay_minutes')->numeric()->default(0)->helperText('0 = immediate'),
             Forms\Components\Toggle::make('is_active')->default(true),
+
+            Section::make('Conditions')
+                ->description('All conditions must pass for actions to run. Leave empty to always trigger.')
+                ->schema([
+                    Forms\Components\Repeater::make('conditions')
+                        ->schema([
+                            Forms\Components\Select::make('field')
+                                ->label('Field')
+                                ->options([
+                                    'source'       => 'Lead Source',
+                                    'status'       => 'Status',
+                                    'stage_id'     => 'Stage ID',
+                                    'assignee_id'  => 'Assigned User ID',
+                                    'lead_id'      => 'Lead ID',
+                                    'client_id'    => 'Client ID',
+                                    'business_id'  => 'Business ID',
+                                    'utm_source'   => 'UTM Source',
+                                    'utm_medium'   => 'UTM Medium',
+                                    'utm_campaign' => 'UTM Campaign',
+                                ])
+                                ->required()
+                                ->searchable(),
+                            Forms\Components\Select::make('operator')
+                                ->label('Operator')
+                                ->options([
+                                    '='        => 'equals (=)',
+                                    '!='       => 'not equals (!=)',
+                                    '>'        => 'greater than (>)',
+                                    '<'        => 'less than (<)',
+                                    '>='       => 'greater or equal (>=)',
+                                    '<='       => 'less or equal (<=)',
+                                    'contains' => 'contains',
+                                ])
+                                ->default('=')
+                                ->required(),
+                            Forms\Components\TextInput::make('value')
+                                ->label('Value')
+                                ->placeholder('e.g. landing_page, service_cta, paid ...')
+                                ->required(),
+                        ])
+                        ->columns(3)
+                        ->addActionLabel('Add Condition')
+                        ->defaultItems(0)
+                        ->collapsible(),
+                ])
+                ->collapsible()
+                ->collapsed(),
 
             Section::make('Actions')
                 ->schema([
@@ -68,8 +136,10 @@ class AutomationRuleResource extends Resource
                                 ->options(['client' => 'Client', 'admin' => 'Admin', 'assigned_user' => 'Assigned User'])
                                 ->default('client')
                                 ->visible(fn (Get $get) => $get('type') !== 'notify_admin'),
-                            Forms\Components\TextInput::make('template_slug')
-                                ->label('Email Template Slug')
+                            Forms\Components\Select::make('email_template_id')
+                                ->label('Email Template')
+                                ->options(fn () => EmailTemplate::where('is_active', true)->orderBy('name')->pluck('name', 'id'))
+                                ->searchable()
                                 ->visible(fn (Get $get) => $get('type') === 'send_email'),
                             Forms\Components\Select::make('template_id')
                                 ->label('SMS Template')
@@ -138,7 +208,7 @@ class AutomationRuleResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable(),
                 Tables\Columns\TextColumn::make('trigger_event')
-                    ->formatStateUsing(fn ($s) => self::TRIGGERS[$s] ?? $s)
+                    ->formatStateUsing(fn ($s) => self::getTriggerLabel($s))
                     ->badge(),
                 Tables\Columns\TextColumn::make('delay_minutes')->suffix(' min'),
                 Tables\Columns\IconColumn::make('is_active')->boolean(),

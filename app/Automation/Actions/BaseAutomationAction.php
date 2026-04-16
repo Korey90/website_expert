@@ -57,20 +57,20 @@ abstract class BaseAutomationAction implements AutomationActionContract
     protected function resolveClientPhone(array $context): ?string
     {
         if (isset($context['client_id'])) {
-            return Client::find($context['client_id'])?->phone;
+            return Client::find($context['client_id'])?->primary_contact_phone;
         }
         if (isset($context['lead_id'])) {
             $lead = Lead::find($context['lead_id']);
-            return $lead?->client?->phone ?? $lead?->phone;
+            return $lead?->client?->primary_contact_phone;
         }
         if (isset($context['project_id'])) {
-            return Project::find($context['project_id'])?->client?->phone;
+            return Project::find($context['project_id'])?->client?->primary_contact_phone;
         }
         if (isset($context['invoice_id'])) {
-            return Invoice::find($context['invoice_id'])?->client?->phone;
+            return Invoice::find($context['invoice_id'])?->client?->primary_contact_phone;
         }
         if (isset($context['quote_id'])) {
-            return Quote::find($context['quote_id'])?->client?->phone;
+            return Quote::find($context['quote_id'])?->client?->primary_contact_phone;
         }
 
         return null;

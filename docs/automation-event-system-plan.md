@@ -250,8 +250,57 @@ To rozwiązanie nie wymaga nowych eventów — **preferowane w Fazie 1**.
 
 ---
 
-## 9. Pytania otwarte przed implementacją
+## 9. Decyzje projektowe (zatwierdzone 2026-04-16)
 
-1. Czy logi mają być trzymane w nieskończoność czy z automatycznym czyszczeniem (np. 90 dni)?
-2. Czy `business_id` na `automation_rules` jest potrzebny teraz (multi-tenancy), czy odkładamy?
-3. Czy Faza 3 (Test Trigger) ma działać na prawdziwym leadzie z bazy, czy na mock-danych?
+| # | Pytanie | Decyzja |
+|---|---|---|
+| 1 | Retencja logów | Konfigurowalne z UI — pole `log_retention_days` w ustawieniach globalnych (Settings). Domyślnie 90 dni. Scheduled job (`automation:prune-logs`) czyści stare logi. Ręczne usuwanie: pojedyncze rekordy (row action "Delete") + bulk action "Delete selected" w tabeli AutomationLogResource. |
+| 2 | Scope funkcji | Tylko panel administracyjny — `AutomationRule`, `AutomationLog`, `TriggerRegistry` nie mają warstwy multi-tenant per business. Reguły globalne dla całej platformy. |
+| 3 | Test Trigger | **Hybrydowy**: modal z dwoma trybami: (a) wybierz istniejącego leada z dropdownem → kontekst z realnych danych, (b) mock-data → pre-filled formularz z przykładowymi wartościami. Oba tryby dispatch-ują `ProcessAutomationJob` z `dry_run: true` żeby nie wysłać prawdziwych maili/SMS — zamiast tego wynik ląduje w logu z `status = test`. |
+
+---
+
+## 10. Szczegóły decyzji — Test Trigger (tryb hybrydowy)
+
+```
+Modal "Test Rule"
+├── Radio: [● Real Lead] [○ Mock Data]
+│
+├── [Real Lead selected]
+│   └── Select lead_id (searchable, shows: name + email + source)
+│       → kontekst budowany z realnego modelu Lead
+│
+├── [Mock Data selected]
+│   └── Pre-filled inputs: lead_title, client_name, company_name, stage_name, assigned_name
+│       (wartości domyślne: "Test Lead", "Jan Kowalski", "Test Sp. z o.o.", etc.)
+│
+└── Checkbox: [✓] Dry run (nie wysyłaj prawdziwych SMS/email)
+    └── domyślnie zaznaczony
+    └── jeśli odznaczony → banner OSTRZEŻENIA "This will send real SMS/email!"
+```
+
+`dry_run: true` w kontekście → `SendSmsAction` i `SendEmailAction` logują "DRY RUN: would send..." zamiast wysyłać.  
+Log zapisywany z `source = test`.
+
+---
+
+## 11. Szczegóły decyzji — Retencja logów
+
+Nowe ustawienie w `settings` tabeli:
+```
+key: automation_log_retention_days
+value: 90
+```
+
+Edytowalne w `IntegrationSettingsPage` (lub nowa zakładka "Automation" w ustawieniach).
+
+Scheduled command:
+```php
+// app/Console/Commands/PruneAutomationLogs.php
+Schedule::command('automation:prune-logs')->daily();
+```
+
+`AutomationLogResource` — akcje usuwania:
+- **Row action**: `DeleteAction` na każdym wierszu
+- **Bulk action**: `DeleteBulkAction` na zaznaczonych wierszach
+- **Bulk action**: "Delete All Older Than 30 Days" jako custom action w headerze tabeli

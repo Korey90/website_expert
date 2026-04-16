@@ -17,6 +17,8 @@ class ConditionEvaluator
                 '!='       => $contextValue != $value,
                 '>'        => $contextValue > $value,
                 '<'        => $contextValue < $value,
+                '>='       => $contextValue >= $value,
+                '<='       => $contextValue <= $value,
                 'contains' => str_contains((string) $contextValue, (string) $value),
                 default    => true,
             };

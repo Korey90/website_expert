@@ -63,12 +63,22 @@ class AutomationEventListener
             return;
         }
 
-        $this->dispatch('lead.created', [
+        $baseContext = [
             'lead_id'     => $lead->id,
             'client_id'   => $lead->client_id,
             'business_id' => $lead->business_id,
             'source'      => $lead->source,
-        ]);
+        ];
+
+        // Generic trigger for all lead sources
+        $this->dispatch('lead.created', $baseContext);
+
+        // Source-specific triggers for granular automation rules
+        if ($lead->source === 'service_cta') {
+            $this->dispatch('lead.service_cta', $baseContext);
+        } elseif ($lead->source === 'contact_form') {
+            $this->dispatch('lead.contact_form', $baseContext);
+        }
     }
 
     /**

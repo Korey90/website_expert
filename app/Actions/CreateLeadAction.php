@@ -2,13 +2,11 @@
 
 namespace App\Actions;
 
-use App\Mail\NewLeadMail;
 use App\Models\Client;
 use App\Models\Contact;
 use App\Models\Lead;
 use App\Models\LeadActivity;
 use App\Models\PipelineStage;
-use Illuminate\Support\Facades\Mail;
 
 class CreateLeadAction
 {
@@ -112,17 +110,6 @@ class CreateLeadAction
             'client_existing' => $client->wasRecentlyCreated === false,
             'landing_page_id' => $data['landing_page_id'] ?? null,
         ], null);
-
-        // ── Email to admin ────────────────────────────────────────────────────────
-        $adminEmail = config('mail.admin_address', 'admin@websiteexpert.co.uk');
-        Mail::to($adminEmail)->queue(new NewLeadMail(
-            array_merge($data, [
-                'name'    => $data['name'] ?? $data['first_name'] ?? $data['company'] ?? $data['email'],
-                'email'   => $data['email'],
-                'message' => $data['notes'] ?? '',
-            ]),
-            $lead->id,
-        ));
 
         return $lead;
     }
