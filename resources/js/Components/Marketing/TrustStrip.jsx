@@ -142,6 +142,9 @@ export default function TrustStrip({ data, testimonials }) {
                                                 <div>
                                                     <p className="font-semibold text-neutral-900 dark:text-white text-sm">{item.name}</p>
                                                     <p className="text-xs text-neutral-500 dark:text-neutral-400">{item.company}</p>
+                                                    {item.location && (
+                                                        <p className="text-xs text-brand-500 dark:text-brand-400 mt-0.5">{item.location}</p>
+                                                    )}
                                                 </div>
                                             </div>
                                         </article>

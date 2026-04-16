@@ -23,20 +23,20 @@ const NAV_DEFAULTS = [
     {
         title_en: 'Services', title_pl: 'Usługi',
         links: [
-            { label_en: 'Brochure Websites', label_pl: 'Strony wizytówkowe', href: '#services' },
-            { label_en: 'E-Commerce Stores', label_pl: 'Sklepy e-commerce',  href: '#services' },
-            { label_en: 'SEO',               label_pl: 'SEO',                href: '#services' },
-            { label_en: 'Google Ads',        label_pl: 'Google Ads',         href: '#services' },
-            { label_en: 'Web Hosting',       label_pl: 'Hosting WWW',        href: '#services' },
+            { label_en: 'Brochure Websites', label_pl: 'Strony wizytówkowe', href: '/#services' },
+            { label_en: 'E-Commerce Stores', label_pl: 'Sklepy e-commerce',  href: '/#services' },
+            { label_en: 'SEO',               label_pl: 'SEO',                href: '/#services' },
+            { label_en: 'Google Ads',        label_pl: 'Google Ads',         href: '/#services' },
+            { label_en: 'Web Hosting',       label_pl: 'Hosting WWW',        href: '/#services' },
         ],
     },
     {
         title_en: 'Company', title_pl: 'Firma',
         links: [
-            { label_en: 'About Us',        label_pl: 'O nas',              href: '#about' },
-            { label_en: 'Portfolio',       label_pl: 'Portfolio',          href: '#portfolio' },
-            { label_en: 'Cost Calculator', label_pl: 'Kalkulator kosztów', href: '#calculate' },
-            { label_en: 'Contact',         label_pl: 'Kontakt',            href: '#contact' },
+            { label_en: 'About Us',        label_pl: 'O nas',              href: '/#about' },
+            { label_en: 'Portfolio',       label_pl: 'Portfolio',          href: '/#portfolio' },
+            { label_en: 'Cost Calculator', label_pl: 'Kalkulator kosztów', href: '/#calculate' },
+            { label_en: 'Contact',         label_pl: 'Kontakt',            href: '/#contact' },
             { label_en: 'Client Portal',   label_pl: 'Portal Klienta',     href: '/portal' },
         ],
     },
@@ -63,6 +63,12 @@ export default function Footer({ data = null }) {
     const extra = data?.extra ?? {};
     const t = (key, fallback = '') => extra[`${key}_${locale}`] ?? extra[`${key}_en`] ?? fallback;
 
+    const resolveHref = (href) => {
+        if (!href) return '#';
+        if (href.startsWith('#')) return '/' + href;
+        return href;
+    };
+
     const brandName   = extra.brand_name   || 'WebsiteExpert';
     const tagline     = t('tagline',    locale === 'pl' ? 'Tworzymy strony i aplikacje internetowe, które pracują na Twój biznes.' : 'We create websites and web apps that work for your business.');
     const copyright   = t('copyright',  locale === 'pl' ? 'Wszelkie prawa zastrzeżone.' : 'All rights reserved.');
@@ -82,7 +88,7 @@ export default function Footer({ data = null }) {
 
                     {/* Brand */}
                     <div className="col-span-2 md:col-span-1">
-                        <a href="#hero" className="flex items-center gap-2 mb-4" aria-label={brandName}>
+                        <a href="/" className="flex items-center gap-2 mb-4" aria-label={brandName}>
                             <svg width="32" height="32" viewBox="0 0 36 36" fill="none" aria-hidden="true">
                                 <rect width="36" height="36" rx="8" className="fill-brand-500" />
                                 <path d="M13 18L16.5 21.5L23 14.5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -123,7 +129,7 @@ export default function Footer({ data = null }) {
                             <ul className="space-y-2.5 text-sm">
                                 {(group.links || []).map((l, j) => (
                                     <li key={j}>
-                                        <a href={l.href || '#'} className="hover:text-brand-400 transition-colors">
+                                        <a href={resolveHref(l.href)} className="hover:text-brand-400 transition-colors">
                                             {l[`label_${locale}`] ?? l.label_en ?? ''}
                                         </a>
                                     </li>

@@ -4,7 +4,7 @@ const DEFAULTS = {
     title:    { en: 'Ready to Get Started?',                                                          pl: 'Gotowy, aby zacząć?' },
     subtitle: { en: 'Get a free, no-obligation quote in 48 hours. No jargon. No pressure. Just honest advice.', pl: 'Bezpłatna wycena bez zobowiązań w 48 godziny. Bez żargonu. Bez nacisków. Tylko uczciwe porady.' },
     button_text: { en: 'Get My Free Quote',     pl: 'Chcę bezpłatną wycenę' },
-    button_url:  '#calculator',
+    button_url:  '#calculate',
     extra: {
         secondary_button_text_en: 'Book a Discovery Call',
         secondary_button_text_pl: 'Umów rozmowę',

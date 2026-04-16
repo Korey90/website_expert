@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>raport-tresci.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="raport-treści-strony-pod-kampanię-ni">Raport treści strony pod kampanię NI</h1>
+<p>Data analizy: 2026-04-15<br>
+Analizowana wersja: lokalny render <code>http://127.0.0.1:8000/</code> po przełączeniu na język <code>en</code><br>
+Punkt odniesienia: <a href="./plan-kampanii-ni.md">docs/plan-kampanii-ni.md</a></p>
+<h2 id="cel">Cel</h2>
+<p>Celem analizy było zebranie aktualnej treści strony głównej i ocena, czy obecny przekaz wspiera planowaną kampanię Google Search na rynek <code>Northern Ireland</code>, ze szczególnym naciskiem na:</p>
+<ul>
+<li>dopasowanie do intencji wyszukiwań lokalnych,</li>
+<li>spójność komunikatów reklamowych z landing page,</li>
+<li>siłę argumentów sprzedażowych i trust signals,</li>
+<li>gotowość strony do konwersji z ruchu płatnego.</li>
+</ul>
+<h2 id="źródła">Źródła</h2>
+<p>Analiza została wykonana na podstawie:</p>
+<ul>
+<li>wyrenderowanej strony EN w headless Chrome,</li>
+<li>aktualnego DOM po wykonaniu JS,</li>
+<li>komponentów marketingowych w <code>resources/js/Components/Marketing/*</code>,</li>
+<li>planu kampanii w <code>docs/plan-kampanii-ni.md</code>.</li>
+</ul>
+<h2 id="1-co-obecnie-komunikuje-strona">1. Co obecnie komunikuje strona</h2>
+<h3 id="hero--above-the-fold">Hero / above the fold</h3>
+<p>Strona główna komunikuje bardzo jasno lokalny kontekst i główną ofertę:</p>
+<ul>
+<li>H1: <code>Professional Web Design in Belfast, Northern Ireland</code></li>
+<li>podtytuł: <code>Bespoke websites, SEO and digital marketing for NI businesses — fixed price, delivered in weeks.</code></li>
+<li>badge: <code>5-star rated on Google</code></li>
+<li>CTA 1: <code>Get a Free Quote</code></li>
+<li>CTA 2: <code>View Our Work</code></li>
+<li>statystyki: <code>200+ Websites Delivered</code>, <code>98% Client Satisfaction</code>, <code>10+ Years Experience</code></li>
+<li>dodatkowy sygnał szybkości: <code>Delivery time from 2 weeks</code></li>
+</ul>
+<p>To jest bardzo mocna warstwa wejściowa pod kampanię <code>Web Design Belfast</code>.</p>
+<h3 id="about">About</h3>
+<p>Sekcja <code>About</code> jest już dostosowana do Belfast/NI i nie trzyma starego komunikatu o Manchesterze.</p>
+<p>Aktualny przekaz:</p>
+<ul>
+<li>tytuł: <code>A Belfast Digital Agency That Treats You Like a Partner</code></li>
+<li>podtytuł: <code>Based in Belfast, Northern Ireland. Working with businesses across the UK.</code></li>
+<li>body podkreśla:
+<ul>
+<li>lokalny zespół z Belfastu,</li>
+<li>bezpośredni kontakt z wykonawcami,</li>
+<li><code>Since 2014</code>,</li>
+<li><code>200+ projects</code>,</li>
+<li>brak podejścia szablonowego.</li>
+</ul>
+</li>
+</ul>
+<p>To dobrze wzmacnia persony NI, które szukają lokalnego partnera i zaufania.</p>
+<h3 id="trust-signals">Trust signals</h3>
+<p>Na stronie obecne są czytelne sygnały zaufania:</p>
+<ul>
+<li><code>Trusted by Belfast &amp; NI Businesses</code></li>
+<li><code>5.0 Google Reviews</code></li>
+<li><code>GDPR Compliant</code></li>
+<li><code>Belfast-Based Team</code></li>
+<li><code>PageSpeed 95+</code></li>
+</ul>
+<p>Dodatkowo jest sekcja testimoniali i lista marek/klientów:</p>
+<ul>
+<li><code>Hargreaves Solicitors</code></li>
+<li><code>NTS Direct</code></li>
+<li><code>Oakfield Dental</code></li>
+<li><code>Pinnacle Recruitment</code></li>
+<li><code>Coastal Escapes</code></li>
+<li><code>Bloom &amp; Grow</code></li>
+</ul>
+<p>Jest też cytowany testimonial z oceną 5/5.</p>
+<h3 id="oferta--usługi">Oferta / usługi</h3>
+<p>Strona komunikuje szeroką ofertę agencyjną zgodną z planem kampanii:</p>
+<ul>
+<li><code>Brochure Websites</code></li>
+<li><code>E-Commerce Stores</code></li>
+<li><code>Web Applications</code></li>
+<li><code>Google Ads (PPC)</code></li>
+<li><code>Meta / Pixel Ads</code></li>
+<li><code>Website Maintenance</code></li>
+</ul>
+<p>Ważne są też widoczne anchory cenowe:</p>
+<ul>
+<li><code>Brochure Websites</code> od <code>£799</code></li>
+<li><code>E-Commerce Stores</code> od <code>£2,999</code></li>
+<li><code>Google Ads (PPC)</code> od <code>£399/mo</code></li>
+<li><code>Meta / Pixel Ads</code> od <code>£349/mo</code></li>
+<li><code>Website Maintenance</code> od <code>£149/mo</code></li>
+</ul>
+<p>To wspiera komunikację <code>fixed price</code>, <code>from £X</code>, <code>no surprises</code>, która w planie jest kluczowa dla rynku NI.</p>
+<h3 id="cta-banner">CTA banner</h3>
+<p>Dodatkowa sekcja CTA wzmacnia intencję:</p>
+<ul>
+<li>tytuł: <code>Ready to Get Started?</code></li>
+<li>obietnica: <code>Get a free, no-obligation quote in 48 hours.</code></li>
+<li>CTA główne: <code>Get My Free Quote</code></li>
+<li>CTA wtórne: <code>Book a Discovery Call</code></li>
+</ul>
+<h3 id="portfolio">Portfolio</h3>
+<p>Sekcja portfolio buduje wiarygodność dla ruchu researchowego:</p>
+<ul>
+<li>tytuł: <code>Recent Work We're Proud Of</code></li>
+<li>3 case'y widoczne na stronie głównej,</li>
+<li>osobna podstrona <code>/portfolio</code>,</li>
+<li>przykłady branż zgodne z wartościowymi segmentami:
+<ul>
+<li>solicitors,</li>
+<li>e-commerce B2B,</li>
+<li>dental.</li>
+</ul>
+</li>
+</ul>
+<h3 id="faq">FAQ</h3>
+<p>FAQ dobrze odpowiada na obawy przed zakupem:</p>
+<ul>
+<li>czas realizacji,</li>
+<li>koszt strony,</li>
+<li>praca zdalna,</li>
+<li>mobile-first,</li>
+<li>płatności etapowe,</li>
+<li>samodzielna edycja treści.</li>
+</ul>
+<p>W FAQ pada też mocny pricing anchor:</p>
+<ul>
+<li><code>Brochure websites start from £799. E-commerce from £2,999. We always provide a fixed-price quote — no surprises.</code></li>
+</ul>
+<h3 id="kontakt">Kontakt</h3>
+<p>Sekcja kontaktowa zawiera:</p>
+<ul>
+<li>deklarację odpowiedzi: <code>we'll reply within 24 business hours</code></li>
+<li>adres e-mail: <code>hello@website-expert.uk</code></li>
+<li>telefon z prefiksem NI: <code>+44 28 0000 0000</code></li>
+<li>pełny formularz kontaktowy,</li>
+<li>wybór typu projektu,</li>
+<li>zgoda GDPR,</li>
+<li>tracking leada po submit.</li>
+</ul>
+<h3 id="kalkulator">Kalkulator</h3>
+<p>Kalkulator jest mocnym elementem do ruchu wysokiej intencji:</p>
+<ul>
+<li>tytuł: <code>How Much Will Your Project Cost?</code></li>
+<li>obietnica: <code>No registration required</code></li>
+<li>wieloetapowy flow z widełkami cenowymi,</li>
+<li>lead capture po estymacji,</li>
+<li>success message: <code>We'll get back to you within 1 business day.</code></li>
+</ul>
+<p>To bardzo dobrze wspiera kampanie skierowane na <code>free quote</code>, <code>website cost</code>, <code>affordable website</code>, remarketing oraz użytkowników porównujących oferty.</p>
+<h2 id="2-ocena-dopasowania-do-planu-kampanii">2. Ocena dopasowania do planu kampanii</h2>
+<h3 id="kampania-1--web-design-belfast">Kampania 1 — Web Design Belfast</h3>
+<p>Ocena: <code>wysokie dopasowanie</code></p>
+<p>Strona bardzo dobrze wspiera tę kampanię, bo ma:</p>
+<ul>
+<li>lokalizację w H1,</li>
+<li>ofertę web design jako główny motyw hero,</li>
+<li>pricing anchor,</li>
+<li>social proof,</li>
+<li>Belfast/NI w komunikacji,</li>
+<li>formularz + kalkulator.</li>
+</ul>
+<p>To jest dziś najmocniej dopasowany obszar strony do planu kampanii.</p>
+<h3 id="kampania-2--e-commerce-belfast">Kampania 2 — E-Commerce Belfast</h3>
+<p>Ocena: <code>średnie do wysokiego dopasowania</code></p>
+<p>Plusy:</p>
+<ul>
+<li>e-commerce jest widoczną usługą,</li>
+<li>jest widełka cenowa,</li>
+<li>portfolio zawiera projekt B2B e-commerce,</li>
+<li>kalkulator wspiera wycenę projektu.</li>
+</ul>
+<p>Minus:</p>
+<ul>
+<li>brak osobnej, mocno dopasowanej sekcji/landing page pod e-commerce Belfast,</li>
+<li>komunikat hero nadal jest głównie o web design, nie o sklepie online.</li>
+</ul>
+<h3 id="kampania-3--seo-belfast">Kampania 3 — SEO Belfast</h3>
+<p>Ocena: <code>średnie dopasowanie</code></p>
+<p>Plusy:</p>
+<ul>
+<li>SEO jest obecne w hero i usługach,</li>
+<li>FAQ i About wzmacniają kompetencje,</li>
+<li>strona ma lokalny kontekst Belfast/NI.</li>
+</ul>
+<p>Minusy:</p>
+<ul>
+<li>brak osobnej sekcji z mocnym rozwinięciem oferty SEO,</li>
+<li>na stronie nie jest mocno eksponowana obietnica <code>free SEO audit</code>, która pojawia się w planie reklam,</li>
+<li>brak dedykowanego landing page typu <code>/seo-belfast</code>.</li>
+</ul>
+<h3 id="kampania-4--google-ads--digital-marketing-belfast">Kampania 4 — Google Ads / Digital Marketing Belfast</h3>
+<p>Ocena: <code>średnie dopasowanie</code></p>
+<p>Plusy:</p>
+<ul>
+<li><code>Google Ads (PPC)</code> i <code>Meta / Pixel Ads</code> są widoczne,</li>
+<li>są ceny <code>from</code>,</li>
+<li>w hero pada <code>digital marketing</code>.</li>
+</ul>
+<p>Minusy:</p>
+<ul>
+<li>brak silnej sekcji z case'em / procesem / audytem pod PPC,</li>
+<li>brak wyraźnego komunikatu typu <code>free ads audit</code>,</li>
+<li>dla tej kampanii homepage jest raczej stroną ogólną niż precyzyjnym landingiem.</li>
+</ul>
+<h2 id="3-mocne-strony-strony-pod-reklamę">3. Mocne strony strony pod reklamę</h2>
+<h3 id="31-lokalizacja-i-message-match">3.1 Lokalizacja i message match</h3>
+<p>Największa poprawa względem wcześniejszych założeń planu jest taka, że strona już realnie mówi językiem kampanii NI:</p>
+<ul>
+<li><code>Belfast</code></li>
+<li><code>Northern Ireland</code></li>
+<li><code>NI businesses</code></li>
+<li><code>Belfast-based team</code></li>
+</ul>
+<p>To bezpośrednio wspiera Quality Score i CTR dla kampanii lokalnych.</p>
+<h3 id="32-dobre-usp-dla-rynku-ni">3.2 Dobre USP dla rynku NI</h3>
+<p>Strona dobrze eksponuje argumenty ważne dla lokalnych SME:</p>
+<ul>
+<li>fixed price,</li>
+<li>szybka realizacja,</li>
+<li>bezpośredni kontakt z zespołem,</li>
+<li>doświadczenie,</li>
+<li>mobile-first,</li>
+<li>GDPR compliance,</li>
+<li>pricing anchors.</li>
+</ul>
+<h3 id="33-dużo-ścieżek-konwersji">3.3 Dużo ścieżek konwersji</h3>
+<p>Użytkownik z reklamy może:</p>
+<ul>
+<li>przejść do formularza,</li>
+<li>wypełnić kalkulator,</li>
+<li>kliknąć telefon,</li>
+<li>kliknąć e-mail,</li>
+<li>przejrzeć portfolio,</li>
+<li>umówić discovery call.</li>
+</ul>
+<p>To jest dobre pod różne poziomy gotowości zakupowej.</p>
+<h3 id="34-kalkulator-jako-przewaga">3.4 Kalkulator jako przewaga</h3>
+<p>Kalkulator jest realnym wyróżnikiem na tle wielu małych agencji i freelancerów. Dla person cenowo wrażliwych z NI może bardzo dobrze działać jako soft-conversion i źródło remarketingu.</p>
+<h2 id="4-ryzyka-i-luki">4. Ryzyka i luki</h2>
+<h3 id="41-niespójne-obietnice-czasu-odpowiedzi">4.1 Niespójne obietnice czasu odpowiedzi</h3>
+<p>Na stronie występują równolegle trzy różne obietnice:</p>
+<ul>
+<li>meta / plan komunikacyjny: <code>Free quote in 24 hours</code></li>
+<li>kontakt: <code>reply within 24 business hours</code></li>
+<li>CTA banner: <code>quote in 48 hours</code></li>
+<li>kalkulator po sukcesie: <code>within 1 business day</code></li>
+</ul>
+<p>To osłabia wiarygodność reklam i rozmywa główne USP. W kampanii Search warto mieć jedną spójną obietnicę.</p>
+<h3 id="42-problem-z-cta-do-kalkulatora">4.2 Problem z CTA do kalkulatora</h3>
+<p>W aktualnej treści CTA kierują do <code>#calculator</code>, a sekcja kalkulatora ma <code>id=&quot;calculate&quot;</code>.</p>
+<p>To oznacza ryzyko, że:</p>
+<ul>
+<li>przycisk <code>Get a Free Quote</code> nie scrolluje tam, gdzie powinien,</li>
+<li>baner <code>Get My Free Quote</code> też może prowadzić do nieistniejącego anchora,</li>
+<li>ruch z reklam może trafiać na stronę z niesprawnym lub mylącym CTA.</li>
+</ul>
+<p>To jest wysoki priorytet, bo dotyczy głównej ścieżki konwersji.</p>
+<h3 id="43-cta-w-hero-nie-jest-idealnie-spójne-z-planem">4.3 CTA w hero nie jest idealnie spójne z planem</h3>
+<p>Plan zakładał:</p>
+<ul>
+<li><code>Get a Free Quote</code> jako anchor do formularza kontaktowego.</li>
+</ul>
+<p>Obecnie CTA kieruje do kalkulatora, a nie do formularza. Sam kalkulator jest wartościowy, ale:</p>
+<ul>
+<li>dla części ruchu high-intent z Google Search formularz może być szybszą ścieżką,</li>
+<li>komunikat <code>Free Quote</code> sugeruje kontakt z człowiekiem, a nie przejście przez estymator.</li>
+</ul>
+<p>To raczej temat do testu A/B niż do natychmiastowego usunięcia kalkulatora.</p>
+<h3 id="44-lokalny-social-proof-jest-jeszcze-zbyt-mało-konkretny">4.4 Lokalny social proof jest jeszcze zbyt mało konkretny</h3>
+<p>Strona deklaruje:</p>
+<ul>
+<li><code>Trusted by Belfast &amp; NI Businesses</code></li>
+<li><code>Belfast-Based Team</code></li>
+</ul>
+<p>ale dowody są jeszcze zbyt mało lokalne wprost:</p>
+<ul>
+<li>testimoniale nie pokazują lokalizacji klienta w stylu <code>John Smith, Belfast</code>,</li>
+<li>portfolio nie komunikuje jasno <code>Belfast project</code> / <code>NI project</code>,</li>
+<li>marki klientów nie zawsze brzmią jednoznacznie lokalnie dla odbiorcy z reklamy.</li>
+</ul>
+<p>Plan kampanii słusznie zakładał, że lokalne zaufanie będzie bardzo ważne.</p>
+<h3 id="45-above-the-fold-nie-pokazuje-wszystkich-trust-signals-z-planu">4.5 Above the fold nie pokazuje wszystkich trust signals z planu</h3>
+<p>Above the fold widzimy:</p>
+<ul>
+<li><code>200+</code></li>
+<li><code>98%</code></li>
+<li><code>10+</code></li>
+</ul>
+<p>ale plan zakładał też widoczne bez scrolla:</p>
+<ul>
+<li><code>Belfast-Based Team</code></li>
+<li><code>Free Quote in 24h</code></li>
+</ul>
+<p>Te elementy są niżej lub w innych sekcjach, więc na pierwszym ekranie message match mógłby być jeszcze mocniejszy.</p>
+<h3 id="46-część-formularza-nadal-ma-polskie-artefakty">4.6 Część formularza nadal ma polskie artefakty</h3>
+<p>W wersji EN w renderze nadal widać:</p>
+<ul>
+<li>placeholder email: <code>jan@firma.pl</code></li>
+<li>etykieta: <code>VAT / NIP</code></li>
+<li>placeholder pola VAT: <code>000-000-00-00</code></li>
+</ul>
+<p>To są drobne elementy, ale dla ruchu z NI obniżają lokalną wiarygodność i mogą niepotrzebnie wprowadzać tarcie.</p>
+<h3 id="47-rozjazd-z-obietnicą-reklam-seo-i-ppc">4.7 Rozjazd z obietnicą reklam SEO i PPC</h3>
+<p>W planie reklam dla SEO i Google Ads pojawia się mocno:</p>
+<ul>
+<li><code>Free audit</code></li>
+<li><code>Free SEO audit</code></li>
+<li><code>Free Ads audit</code></li>
+</ul>
+<p>Na stronie głównej taka oferta nie jest jasno eksponowana. W efekcie:</p>
+<ul>
+<li>reklama może obiecać coś, czego landing page nie rozwija,</li>
+<li>spada spójność <code>ad -&gt; landing</code>.</li>
+</ul>
+<h3 id="48-homepage-nadal-jest-szeroką-stroną-agencyjną">4.8 Homepage nadal jest szeroką stroną agencyjną</h3>
+<p>To działa na start, ale dla kampanii:</p>
+<ul>
+<li><code>SEO Belfast</code></li>
+<li><code>E-Commerce Belfast</code></li>
+<li><code>Google Ads Belfast</code></li>
+</ul>
+<p>homepage będzie zawsze mniej dopasowana niż osobne landing pages. Plan kampanii dobrze to przewiduje i nadal warto to traktować jako kolejny etap.</p>
+<h2 id="5-rekomendacje-priorytetowe">5. Rekomendacje priorytetowe</h2>
+<h3 id="priorytet-1">Priorytet 1</h3>
+<ol>
+<li>
+<p>Naprawić anchory CTA:</p>
+<ul>
+<li>ujednolicić <code>#calculate</code> vs <code>#calculator</code></li>
+<li>sprawdzić hero, CTA banner i wszystkie przyciski typu <code>Free Quote</code></li>
+</ul>
+</li>
+<li>
+<p>Ujednolicić obietnicę czasową w całym serwisie:</p>
+<ul>
+<li>wybrać jedną wersję: <code>24 hours</code>, <code>24 business hours</code> albo <code>1 business day</code></li>
+<li>zastosować ją w hero, CTA bannerze, kontakcie, kalkulatorze i reklamach</li>
+</ul>
+</li>
+<li>
+<p>Oczyścić formularz z polskich artefaktów:</p>
+<ul>
+<li>zmienić <code>jan@firma.pl</code></li>
+<li>dopasować <code>VAT / NIP</code></li>
+<li>usunąć placeholder w polskim formacie</li>
+</ul>
+</li>
+<li>
+<p>Wzmocnić lokalny proof:</p>
+<ul>
+<li>dodać lokalizacje klientów do testimoniali,</li>
+<li>oznaczyć case studies jako <code>Belfast</code>, <code>NI</code>, <code>UK</code>,</li>
+<li>jeśli są dostępne lokalne realizacje, pokazać je wyżej.</li>
+</ul>
+</li>
+</ol>
+<h3 id="priorytet-2">Priorytet 2</h3>
+<ol start="5">
+<li>
+<p>Wystawić <code>Free Quote in 24h</code> i <code>Belfast-Based Team</code> jeszcze mocniej above the fold.</p>
+</li>
+<li>
+<p>Dodać sekcję lub micro-CTA pod:</p>
+<ul>
+<li><code>Free SEO Audit</code></li>
+<li><code>Free Google Ads Audit</code></li>
+</ul>
+</li>
+<li>
+<p>Przetestować dwa warianty głównego CTA z reklam Search:</p>
+<ul>
+<li>wariant A: <code>Get a Free Quote</code> -&gt; <code>#contact</code></li>
+<li>wariant B: <code>Get a Free Quote</code> -&gt; <code>#calculate</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="priorytet-3">Priorytet 3</h3>
+<ol start="8">
+<li>
+<p>Budować dedykowane landing pages:</p>
+<ul>
+<li><code>/seo-belfast</code></li>
+<li><code>/ecommerce-belfast</code></li>
+<li><code>/google-ads-belfast</code></li>
+</ul>
+</li>
+<li>
+<p>Rozwinąć portfolio o bardziej lokalne case studies i screenshoty pod image extensions / sitelinks.</p>
+</li>
+</ol>
+<h2 id="6-wniosek-końcowy">6. Wniosek końcowy</h2>
+<p>Aktualna strona główna jest już mocną bazą pod kampanię <code>Web Design Belfast</code> i znacznie lepiej wspiera rynek NI niż sugerowały starsze założenia planu. Najważniejsze elementy są na miejscu:</p>
+<ul>
+<li>lokalizacja w H1,</li>
+<li>Belfast/NI w treści,</li>
+<li>oferta zgodna z kampaniami,</li>
+<li>pricing anchors,</li>
+<li>trust signals,</li>
+<li>portfolio,</li>
+<li>FAQ,</li>
+<li>formularz,</li>
+<li>kalkulator.</li>
+</ul>
+<p>Największe ryzyka nie dotyczą dziś braku treści, tylko spójności i detali konwersyjnych:</p>
+<ul>
+<li>niespójny czas odpowiedzi,</li>
+<li>błędny lub niejednoznaczny anchor CTA,</li>
+<li>zbyt mało twardego lokalnego proof,</li>
+<li>słabszy message match dla kampanii SEO i PPC,</li>
+<li>drobne polskie artefakty w formularzu.</li>
+</ul>
+<p>W praktyce oznacza to, że homepage nadaje się do startu kampanii, ale przed skalowaniem budżetu warto dopracować powyższe elementy, bo właśnie one będą wpływać na CTR, Quality Score i conversion rate bardziej niż sama obecność treści.</p>
+
+</body>
+</html>

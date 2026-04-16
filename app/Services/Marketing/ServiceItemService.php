@@ -49,17 +49,22 @@ class ServiceItemService
     public function mapToArray(Collection $items, string $locale = 'en'): array
     {
         return $items->map(fn (ServiceItem $item) => [
-            'icon'           => $item->icon,
-            'title_en'       => $item->getTranslation('title', 'en'),
-            'title_pl'       => $item->getTranslation('title', 'pl'),
-            'title_pt'       => $item->getTranslation('title', 'pt'),
-            'description_en' => $item->getTranslation('description', 'en') ?? '',
-            'description_pl' => $item->getTranslation('description', 'pl') ?? '',
-            'description_pt' => $item->getTranslation('description', 'pt') ?? '',
-            'price_from'     => $item->price_from,
-            'link'           => $item->link,
-            'slug'           => $item->slug,
-            'is_active'      => $item->is_active,
+            'icon'                  => $item->icon,
+            'title_en'              => $item->getTranslation('title', 'en'),
+            'title_pl'              => $item->getTranslation('title', 'pl'),
+            'title_pt'              => $item->getTranslation('title', 'pt'),
+            'description_en'        => $item->getTranslation('description', 'en') ?? '',
+            'description_pl'        => $item->getTranslation('description', 'pl') ?? '',
+            'description_pt'        => $item->getTranslation('description', 'pt') ?? '',
+            'price_from'            => $item->price_from,
+            'link'                  => $item->link,
+            'slug'                  => $item->slug,
+            'is_active'             => $item->is_active,
+            'is_featured'           => $item->is_featured,
+            'badge_text_en'         => $item->getTranslation('badge_text', 'en') ?? '',
+            'badge_text_pl'         => $item->getTranslation('badge_text', 'pl') ?? '',
+            'badge_text_pt'         => $item->getTranslation('badge_text', 'pt') ?? '',
+            'image_path'            => $item->image_path,
         ])->values()->all();
     }
 }

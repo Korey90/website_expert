@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SiteSection;
 use App\Services\Portfolio\PortfolioProjectService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
@@ -28,6 +29,19 @@ class PortfolioController extends Controller
         App::setLocale($locale);
 
         return $locale;
+    }
+
+    private function sharedSections(): array
+    {
+        $sections = SiteSection::where('is_active', true)
+            ->whereIn('key', ['navbar', 'footer'])
+            ->get()
+            ->keyBy('key');
+
+        return [
+            'navbar' => ($s = $sections->get('navbar')) ? ['extra' => $s->extra] : null,
+            'footer' => ($s = $sections->get('footer')) ? ['extra' => $s->extra] : null,
+        ];
     }
 
     private function resolveImageUrl(?string $path): ?string
@@ -73,10 +87,10 @@ class PortfolioController extends Controller
         $locale   = $this->resolveLocale();
         $projects = $this->service->getAll()->map(fn ($p) => $this->mapProject($p))->values();
 
-        return Inertia::render('Portfolio/Index', [
+        return Inertia::render('Portfolio/Index', array_merge($this->sharedSections(), [
             'locale'   => $locale,
             'projects' => $projects,
-        ]);
+        ]));
     }
 
     public function show(string $slug): Response|\Illuminate\Http\RedirectResponse
@@ -92,9 +106,9 @@ class PortfolioController extends Controller
             return redirect()->route('portfolio.index');
         }
 
-        return Inertia::render('Portfolio/Show', [
+        return Inertia::render('Portfolio/Show', array_merge($this->sharedSections(), [
             'locale'  => $locale,
             'project' => $this->mapProject($project),
-        ]);
+        ]));
     }
 }

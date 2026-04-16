@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import MarketingLayout from '@/Layouts/MarketingLayout';
 import useScrollReveal from '@/Hooks/useScrollReveal';
@@ -17,24 +18,69 @@ const ICON_PATHS = {
 
 const labels = {
     en: {
-        back:     '← Back to Services',
-        price:    'Starting from',
-        getQuote: 'Get a Free Quote',
-        ctaDesc:  "Ready to get started? Get in touch and we'll send you a tailored proposal.",
+        back:           '← Back to Services',
+        priceFrom:      'Starting from',
+        whatsIncluded:  "What's Included",
+        faqTitle:       'Frequently Asked Questions',
+        getQuote:       'Get a Free Quote',
+        ctaDesc:        "Ready to get started? Get in touch and we'll send you a tailored proposal.",
     },
     pl: {
-        back:     '← Powrót do usług',
-        price:    'Cena od',
-        getQuote: 'Zapytaj o wycenę',
-        ctaDesc:  'Gotowy, żeby zacząć? Skontaktuj się z nami, a wyślemy Ci spersonalizowaną ofertę.',
+        back:           '← Powrót do usług',
+        priceFrom:      'Cena od',
+        whatsIncluded:  'Co otrzymujesz',
+        faqTitle:       'Najczęściej zadawane pytania',
+        getQuote:       'Zapytaj o wycenę',
+        ctaDesc:        'Gotowy, żeby zacząć? Skontaktuj się z nami, a wyślemy Ci spersonalizowaną ofertę.',
     },
     pt: {
-        back:     '← Voltar aos Serviços',
-        price:    'A partir de',
-        getQuote: 'Pedir Orçamento',
-        ctaDesc:  'Pronto para começar? Entre em contacto e enviaremos uma proposta personalizada.',
+        back:           '← Voltar aos Serviços',
+        priceFrom:      'A partir de',
+        whatsIncluded:  'O Que Está Incluído',
+        faqTitle:       'Perguntas Frequentes',
+        getQuote:       'Pedir Orçamento',
+        ctaDesc:        'Pronto para começar? Entre em contacto e enviaremos uma proposta personalizada.',
     },
 };
+
+function FaqAccordion({ items, locale }) {
+    const faqKey = (i, side) => `${side}_${locale}` in i ? `${side}_${locale}` : `${side}_en`;
+
+    return (
+        <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
+            {items.map((item, idx) => (
+                <FaqItem key={idx} question={item[faqKey(item, 'q')]} answer={item[faqKey(item, 'a')]} />
+            ))}
+        </div>
+    );
+}
+
+function FaqItem({ question, answer }) {
+    const [open, setOpen] = useState(false);
+
+    if (!question) return null;
+
+    return (
+        <div className="py-4">
+            <button
+                onClick={() => setOpen(o => !o)}
+                className="flex w-full items-center justify-between gap-4 text-left text-neutral-900 dark:text-white font-medium text-sm sm:text-base group"
+            >
+                <span>{question}</span>
+                <span className={`shrink-0 w-5 h-5 text-brand-500 transition-transform ${open ? 'rotate-45' : ''}`}>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                </span>
+            </button>
+            {open && (
+                <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                    {answer}
+                </p>
+            )}
+        </div>
+    );
+}
 
 export default function ServicesShow({ locale: localeProp, item, auth }) {
     useScrollReveal('.reveal');
@@ -43,20 +89,32 @@ export default function ServicesShow({ locale: localeProp, item, auth }) {
     const locale = localeProp ?? 'en';
     const l = labels[locale] ?? labels.en;
 
-    const title = item?.[`title_${locale}`]       ?? item?.title_en       ?? '';
-    const desc  = item?.[`description_${locale}`] ?? item?.description_en ?? '';
-    const iconPath = ICON_PATHS[item?.icon] ?? ICON_PATHS['settings'];
+    const t = (key) => item?.[`${key}_${locale}`] ?? item?.[`${key}_en`] ?? '';
+
+    const title       = t('title');
+    const desc        = t('description');
+    const body        = t('body');
+    const badge       = t('badge_text');
+    const ctaLabel    = t('cta_label') || l.getQuote;
+    const metaTitle   = t('meta_title') || `${title} – Website Expert`;
+    const metaDesc    = t('meta_description') || desc;
+    const ctaHref     = item?.cta_url || '/contact';
+    const iconPath    = ICON_PATHS[item?.icon] ?? ICON_PATHS['settings'];
+    const features    = Array.isArray(item?.features) ? item.features : [];
+    const faqItems    = Array.isArray(item?.faq) ? item.faq : [];
+
+    const featureText = (f) => f?.[`text_${locale}`] ?? f?.text_en ?? '';
 
     return (
         <MarketingLayout auth={auth} navbar={navbar} footer={footer}>
             <Head>
-                <title>{`${title} – Website Expert`}</title>
-                <meta name="description" content={desc} />
+                <title>{metaTitle}</title>
+                <meta name="description" content={metaDesc} />
             </Head>
 
+            {/* ── Hero ────────────────────────────────────────────── */}
             <section className="py-20 md:py-28 bg-white dark:bg-neutral-950">
-                <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                    {/* Back link */}
+                <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                     <a
                         href="/services"
                         className="inline-flex items-center text-sm text-neutral-500 dark:text-neutral-400 hover:text-brand-500 mb-10 transition-colors"
@@ -64,38 +122,115 @@ export default function ServicesShow({ locale: localeProp, item, auth }) {
                         {l.back}
                     </a>
 
-                    {/* Icon + Title */}
-                    <div className="flex items-start gap-5 mb-8 reveal">
+                    <div className="flex flex-col sm:flex-row items-start gap-6 mb-6 reveal">
+                        {/* Icon */}
                         <div className="w-16 h-16 rounded-2xl bg-brand-500/10 flex items-center justify-center shrink-0">
                             <svg className="w-8 h-8 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 {iconPath}
                             </svg>
                         </div>
+
                         <div className="flex-1 min-w-0">
+                            {badge && (
+                                <span className="inline-block mb-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-600 dark:text-brand-400 uppercase tracking-wider">
+                                    {badge}
+                                </span>
+                            )}
                             <h1 className="font-display text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-white leading-tight mb-2">
                                 {title}
                             </h1>
                             {item?.price_from && (
                                 <p className="text-sm font-semibold text-brand-500">
-                                    {l.price} <span className="text-base">{item.price_from}</span>
+                                    {l.priceFrom} <span className="text-base">{item.price_from}</span>
                                 </p>
                             )}
                         </div>
                     </div>
 
-                    {/* Description */}
-                    <div className="prose prose-neutral dark:prose-invert max-w-none mb-12 reveal">
-                        <p className="text-base text-neutral-700 dark:text-neutral-300 leading-relaxed">{desc}</p>
-                    </div>
+                    {/* Service image */}
+                    {item?.image_url && (
+                        <div className="mb-10 rounded-2xl overflow-hidden reveal">
+                            <img
+                                src={item.image_url}
+                                alt={title}
+                                className="w-full h-auto object-cover max-h-80"
+                                loading="lazy"
+                            />
+                        </div>
+                    )}
 
-                    {/* CTA box */}
-                    <div className="rounded-2xl bg-brand-50 dark:bg-brand-950/20 border border-brand-100 dark:border-brand-900 px-7 py-6 reveal">
-                        <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">{l.ctaDesc}</p>
+                    {/* Short description */}
+                    {desc && (
+                        <p className="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed mb-8 reveal">
+                            {desc}
+                        </p>
+                    )}
+                </div>
+            </section>
+
+            {/* ── Body (rich text) ───────────────────────────────── */}
+            {body && (
+                <section className="pb-16 bg-white dark:bg-neutral-950">
+                    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                        <div
+                            className="prose prose-neutral dark:prose-invert max-w-none text-sm sm:text-base leading-relaxed reveal"
+                            dangerouslySetInnerHTML={{ __html: body }}
+                        />
+                    </div>
+                </section>
+            )}
+
+            {/* ── Features / What's included ────────────────────── */}
+            {features.length > 0 && (
+                <section className="py-14 bg-neutral-50 dark:bg-neutral-900">
+                    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                        <h2 className="font-display text-2xl font-bold text-neutral-900 dark:text-white mb-8 reveal">
+                            {l.whatsIncluded}
+                        </h2>
+                        <ul className="grid sm:grid-cols-2 gap-3 reveal">
+                            {features.map((f, idx) => {
+                                const text = featureText(f);
+                                if (!text) return null;
+                                return (
+                                    <li key={idx} className="flex items-start gap-3">
+                                        <span className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-brand-500/10 flex items-center justify-center">
+                                            <svg className="w-3 h-3 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </span>
+                                        <span className="text-sm text-neutral-700 dark:text-neutral-300">{text}</span>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                </section>
+            )}
+
+            {/* ── FAQ ──────────────────────────────────────────────── */}
+            {faqItems.length > 0 && (
+                <section className="py-14 bg-white dark:bg-neutral-950">
+                    <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+                        <h2 className="font-display text-2xl font-bold text-neutral-900 dark:text-white mb-8 reveal">
+                            {l.faqTitle}
+                        </h2>
+                        <div className="reveal">
+                            <FaqAccordion items={faqItems} locale={locale} />
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* ── CTA ──────────────────────────────────────────────── */}
+            <section className="py-16 bg-neutral-50 dark:bg-neutral-900">
+                <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+                    <div className="rounded-2xl bg-brand-50 dark:bg-brand-950/20 border border-brand-100 dark:border-brand-900 px-7 py-8 reveal">
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-5">{l.ctaDesc}</p>
                         <a
-                            href="/contact"
+                            href={ctaHref}
                             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 active:scale-95 transition-all shadow-md shadow-brand-500/20"
                         >
-                            {l.getQuote}
+                            {ctaLabel}
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>

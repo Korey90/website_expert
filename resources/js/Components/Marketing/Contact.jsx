@@ -140,7 +140,7 @@ export default function Contact({ data = null }) {
                                 </label>
                                 <input type="email" id="cf-email" name="email" required autoComplete="email"
                                     value={form.email} onChange={e => set('email', e.target.value)}
-                                    className={inputClass} placeholder="jan@firma.pl" />
+                                    className={inputClass} placeholder={t('placeholder_email', 'info@yourcompany.co.uk')} />
                             </div>
                             <div>
                                 <label htmlFor="cf-phone" className={labelClass}>{t('label_phone', 'Phone')}</label>
@@ -152,10 +152,10 @@ export default function Contact({ data = null }) {
 
                         <div className="grid sm:grid-cols-2 gap-4 mb-4">
                             <div>
-                                <label htmlFor="cf-nip" className={labelClass}>{t('label_nip', 'VAT / NIP')}</label>
+                                <label htmlFor="cf-nip" className={labelClass}>{t('label_nip', 'VAT Number')}</label>
                                 <input type="text" id="cf-nip" name="nip" autoComplete="off"
                                     value={form.nip} onChange={e => set('nip', e.target.value)}
-                                    className={inputClass} placeholder="000-000-00-00" />
+                                    className={inputClass} placeholder={t('placeholder_nip', 'GB123456789')} />
                             </div>
                             <div>
                                 <label htmlFor="cf-project-type" className={labelClass}>{t('label_project_type', 'Project type')}</label>

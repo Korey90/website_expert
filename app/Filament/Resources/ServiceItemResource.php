@@ -43,9 +43,44 @@ class ServiceItemResource extends Resource
                         ->maxLength(120)
                         ->nullable(),
 
+                    Forms\Components\TextInput::make("badge_text.{$code}")
+                        ->label('Badge / Eyebrow')
+                        ->maxLength(60)
+                        ->nullable()
+                        ->helperText('Short label above the title, e.g. "Most Popular"'),
+
                     Forms\Components\Textarea::make("description.{$code}")
-                        ->label('Description')
+                        ->label('Short Description')
                         ->rows(3)
+                        ->nullable()
+                        ->helperText('Used on listing cards and meta fallback.'),
+
+                    Forms\Components\RichEditor::make("body.{$code}")
+                        ->label('Full Body (Rich Text)')
+                        ->nullable()
+                        ->toolbarButtons([
+                            'bold', 'italic', 'underline', 'strike',
+                            'h2', 'h3',
+                            'bulletList', 'orderedList',
+                            'link', 'blockquote',
+                        ])
+                        ->helperText('Main content shown on the service detail page.'),
+
+                    Forms\Components\TextInput::make("cta_label.{$code}")
+                        ->label('CTA Button Label')
+                        ->maxLength(80)
+                        ->nullable()
+                        ->helperText('e.g. "Get a Free Quote" — leave empty to use default'),
+
+                    Forms\Components\TextInput::make("meta_title.{$code}")
+                        ->label('Meta Title (SEO)')
+                        ->maxLength(70)
+                        ->nullable(),
+
+                    Forms\Components\Textarea::make("meta_description.{$code}")
+                        ->label('Meta Description (SEO)')
+                        ->rows(2)
+                        ->maxLength(160)
                         ->nullable(),
                 ]);
         }
@@ -65,6 +100,62 @@ class ServiceItemResource extends Resource
                             Tabs::make('Translations')
                                 ->columnSpanFull()
                                 ->tabs($tabSchemas),
+                        ]),
+
+                    Tab::make('Media')
+                        ->icon('heroicon-o-photo')
+                        ->schema([
+                            Forms\Components\FileUpload::make('image_path')
+                                ->label('Service Image / Mockup')
+                                ->image()
+                                ->disk('public')
+                                ->directory('services')
+                                ->imagePreviewHeight('200')
+                                ->nullable(),
+                        ]),
+
+                    Tab::make('Features')
+                        ->icon('heroicon-o-check-badge')
+                        ->schema([
+                            Forms\Components\Repeater::make('features')
+                                ->label('Feature / Benefit Items')
+                                ->columnSpanFull()
+                                ->addActionLabel('Add Feature')
+                                ->schema([
+                                    Forms\Components\TextInput::make('text_en')
+                                        ->label('English')
+                                        ->maxLength(200)
+                                        ->nullable(),
+                                    Forms\Components\TextInput::make('text_pl')
+                                        ->label('Polski')
+                                        ->maxLength(200)
+                                        ->nullable(),
+                                    Forms\Components\TextInput::make('text_pt')
+                                        ->label('Português')
+                                        ->maxLength(200)
+                                        ->nullable(),
+                                ])
+                                ->defaultItems(0)
+                                ->nullable(),
+                        ]),
+
+                    Tab::make('FAQ')
+                        ->icon('heroicon-o-question-mark-circle')
+                        ->schema([
+                            Forms\Components\Repeater::make('faq')
+                                ->label('FAQ Items')
+                                ->columnSpanFull()
+                                ->addActionLabel('Add FAQ')
+                                ->schema([
+                                    Forms\Components\TextInput::make('q_en')->label('Question EN')->maxLength(255)->nullable(),
+                                    Forms\Components\TextInput::make('q_pl')->label('Question PL')->maxLength(255)->nullable(),
+                                    Forms\Components\TextInput::make('q_pt')->label('Question PT')->maxLength(255)->nullable(),
+                                    Forms\Components\Textarea::make('a_en')->label('Answer EN')->rows(3)->nullable(),
+                                    Forms\Components\Textarea::make('a_pl')->label('Answer PL')->rows(3)->nullable(),
+                                    Forms\Components\Textarea::make('a_pt')->label('Answer PT')->rows(3)->nullable(),
+                                ])
+                                ->defaultItems(0)
+                                ->nullable(),
                         ]),
 
                     Tab::make('Settings')
@@ -96,6 +187,14 @@ class ServiceItemResource extends Resource
                                 ->helperText('Auto-generated from English title on creation.')
                                 ->maxLength(100)
                                 ->unique(ignoreRecord: true)
+                                ->nullable(),
+
+                            Forms\Components\TextInput::make('cta_url')
+                                ->label('Custom CTA URL')
+                                ->type('text')
+                                ->rules(['nullable', 'string', 'max:255'])
+                                ->maxLength(255)
+                                ->helperText('Override CTA destination, e.g. /contact or /order. Leave empty to use default.')
                                 ->nullable(),
 
                             Forms\Components\Toggle::make('is_featured')

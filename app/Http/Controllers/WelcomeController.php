@@ -28,8 +28,9 @@ class WelcomeController extends Controller
 
         App::setLocale($locale);
 
-        $sections = SiteSection::whereIn('key', ['hero', 'about', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator', 'navbar', 'contact', 'footer'])
-            ->where('is_active', true)
+        $knownKeys = ['hero', 'about', 'saas_landing', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator', 'navbar', 'contact', 'footer'];
+
+        $sections = SiteSection::where('is_active', true)
             ->get()
             ->keyBy('key');
 
@@ -46,6 +47,14 @@ class WelcomeController extends Controller
             'title'       => $s->title,
             'subtitle'    => $s->subtitle,
             'body'        => $s->body,
+            'button_text' => $s->button_text,
+            'button_url'  => $s->button_url,
+            'extra'       => $s->extra,
+        ] : null;
+
+        $saas_landing = ($s = $sections->get('saas_landing')) ? [
+            'title'       => $s->title,
+            'subtitle'    => $s->subtitle,
             'button_text' => $s->button_text,
             'button_url'  => $s->button_url,
             'extra'       => $s->extra,
@@ -205,6 +214,24 @@ class WelcomeController extends Controller
             ->values()
             ->all();
 
-        return Inertia::render('Welcome', compact('hero', 'about', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator_v2', 'navbar', 'contact', 'footer', 'pricing', 'strings', 'steps'));
+        // Sekcje spoza znanych kluczy — dostępne na froncie jako extra_sections[key]
+        $extra_sections = $sections
+            ->filter(fn($s) => !in_array($s->key, $knownKeys))
+            ->map(fn($s) => [
+                'key'         => $s->key,
+                'label'       => $s->label,
+                'title'       => $s->title,
+                'subtitle'    => $s->subtitle,
+                'body'        => $s->body,
+                'button_text' => $s->button_text,
+                'button_url'  => $s->button_url,
+                'extra'       => $s->extra,
+                'sort_order'  => $s->sort_order,
+            ])
+            ->sortBy('sort_order')
+            ->values()
+            ->all();
+
+        return Inertia::render('Welcome', compact('hero', 'about', 'saas_landing', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator_v2', 'navbar', 'contact', 'footer', 'pricing', 'strings', 'steps', 'extra_sections'));
     }
 }

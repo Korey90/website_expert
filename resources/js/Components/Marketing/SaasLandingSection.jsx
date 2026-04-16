@@ -104,12 +104,52 @@ const DEFAULTS = {
     ],
 };
 
-export default function SaasLandingSection() {
+export default function SaasLandingSection({ data = null }) {
     const { locale = 'en', auth } = usePage().props;
 
-    const t = (obj) => obj?.[locale] ?? obj?.en ?? '';
+    // Resolve translatable key: t(obj, 'key') → obj.key_pl → obj.key_en → obj.key → ''
+    const t = (obj, key) =>
+        obj?.[`${key}_${locale}`] ?? obj?.[`${key}_en`] ?? obj?.[key] ?? '';
+
+    // Simple object resolver: tObj({en,pl,pt}) → value for current locale
+    const tObj = (obj) => obj?.[locale] ?? obj?.en ?? '';
+
     const isAuthenticated = Boolean(auth?.user);
-    const primaryHref = isAuthenticated ? route('landing-pages.ai.create') : route('register');
+    const extra = data?.extra ?? {};
+
+    // --- Badge ---
+    const badge = t(extra, 'badge') || tObj(DEFAULTS.badge);
+
+    // --- Title / Subtitle ---
+    const title    = data?.title?.[locale]    ?? data?.title?.en    ?? tObj(DEFAULTS.title);
+    const subtitle = data?.subtitle?.[locale] ?? data?.subtitle?.en ?? tObj(DEFAULTS.subtitle);
+
+    // --- Primary CTA ---
+    const primaryCtaText = isAuthenticated
+        ? (t(extra, 'primary_cta_auth') || tObj(DEFAULTS.primaryCta.auth))
+        : (data?.button_text?.[locale] ?? data?.button_text?.en ?? tObj(DEFAULTS.primaryCta.guest));
+    const primaryHref = isAuthenticated
+        ? route('landing-pages.ai.create')
+        : (data?.button_url ?? route('register'));
+
+    // --- Secondary CTA ---
+    const secondaryCtaText = t(extra, 'secondary_cta') || tObj(DEFAULTS.secondaryCta);
+    const secondaryCtaUrl  = extra.secondary_cta_url ?? '#contact';
+
+    // --- Points ---
+    const points = extra.points?.length ? extra.points : DEFAULTS.points;
+
+    // --- Pillars ---
+    const pillars = extra.pillars?.length ? extra.pillars : DEFAULTS.pillars;
+    // Pillar fields come in two shapes:
+    //   DB format:       { title_en, title_pl, body_en, body_pl, ... }
+    //   DEFAULTS format: { title: {en, pl, pt}, body: {en, pl, pt} }
+    const tPillarTitle = (p) => p?.[`title_${locale}`] ?? p?.title_en ?? tObj(p.title) ?? '';
+    const tPillarBody  = (p) => p?.[`body_${locale}`]  ?? p?.body_en  ?? tObj(p.body)  ?? '';
+
+    // --- Flow ---
+    const flowLabel = t(extra, 'flow_label') || tObj(DEFAULTS.flowLabel);
+    const flowSteps = extra.flow_steps?.length ? extra.flow_steps : DEFAULTS.flowSteps;
 
     return (
         <section id="saas-landing" className="relative overflow-hidden bg-white py-20 text-neutral-900 dark:bg-neutral-950 dark:text-white md:py-28">
@@ -122,15 +162,15 @@ export default function SaasLandingSection() {
                     <div className="reveal">
                         <span className="inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-neutral-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] text-neutral-600 dark:border-white/15 dark:bg-white/5 dark:text-white/72">
                             <span className="h-2 w-2 rounded-full bg-brand-500" />
-                            {t(DEFAULTS.badge)}
+                            {badge}
                         </span>
 
                         <h2 className="mt-6 max-w-4xl font-display text-4xl font-black leading-[1.02] tracking-tight text-neutral-900 dark:text-white sm:text-5xl lg:text-6xl">
-                            {t(DEFAULTS.title)}
+                            {title}
                         </h2>
 
                         <p className="mt-6 max-w-3xl text-lg leading-8 text-neutral-600 dark:text-white/72">
-                            {t(DEFAULTS.subtitle)}
+                            {subtitle}
                         </p>
 
                         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -138,29 +178,29 @@ export default function SaasLandingSection() {
                                 href={primaryHref}
                                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-500 px-7 py-4 text-sm font-bold text-white shadow-xl shadow-brand-500/25 transition-all hover:-translate-y-0.5 hover:bg-brand-600"
                             >
-                                {isAuthenticated ? t(DEFAULTS.primaryCta.auth) : t(DEFAULTS.primaryCta.guest)}
+                                {primaryCtaText}
                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
                             </a>
 
                             <a
-                                href="#contact"
+                                href={secondaryCtaUrl}
                                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-300 bg-neutral-100 px-7 py-4 text-sm font-bold text-neutral-700 transition-all hover:border-brand-500/60 hover:bg-neutral-200 dark:border-white/15 dark:bg-white/5 dark:text-white/86 dark:hover:bg-white/8"
                             >
-                                {t(DEFAULTS.secondaryCta)}
+                                {secondaryCtaText}
                             </a>
                         </div>
 
                         <div className="mt-10 grid gap-3 sm:grid-cols-3">
-                            {DEFAULTS.points.map((point) => (
+                            {points.map((point) => (
                                 <div key={point.en} className="flex items-start gap-3 rounded-3xl border border-neutral-200 bg-neutral-50 p-4 dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-sm">
                                     <div className="shrink-0 h-9 w-9 rounded-2xl bg-brand-500/10 p-2 text-brand-600 dark:bg-brand-500/15 dark:text-brand-300">
                                         <svg className="h-full w-full" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                                         </svg>
                                     </div>
-                                    <p className="text-sm leading-6 text-neutral-600 dark:text-white/72">{t(point)}</p>
+                                    <p className="text-sm leading-6 text-neutral-600 dark:text-white/72">{tObj(point)}</p>
                                 </div>
                             ))}
                         </div>
@@ -169,18 +209,18 @@ export default function SaasLandingSection() {
                     <div className="reveal lg:sticky lg:top-24">
                         <div className="overflow-hidden rounded-4xl border border-neutral-200 bg-white shadow-2xl shadow-neutral-300/40 dark:border-white/10 dark:bg-white/6 dark:shadow-black/20 dark:backdrop-blur">
                             <div className="border-b border-neutral-200 px-5 py-4 dark:border-white/10">
-                                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500 dark:text-white/45">{t(DEFAULTS.flowLabel)}</p>
+                                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500 dark:text-white/45">{flowLabel}</p>
                                 <div className="mt-3 flex flex-wrap gap-2">
-                                    {DEFAULTS.flowSteps.map((step) => (
+                                    {flowSteps.map((step) => (
                                         <span key={step.en} className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600 dark:border-white/10 dark:bg-black/20 dark:text-white/72">
-                                            {t(step)}
+                                            {tObj(step)}
                                         </span>
                                     ))}
                                 </div>
                             </div>
 
                             <div className="space-y-4 p-5">
-                                {DEFAULTS.pillars.map((pillar, index) => (
+                                {pillars.map((pillar, index) => (
                                     <article
                                         key={pillar.eyebrow}
                                         className={[
@@ -193,13 +233,13 @@ export default function SaasLandingSection() {
                                         <div className="flex items-start justify-between gap-4">
                                             <div>
                                                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-600 dark:text-brand-300/90">{pillar.eyebrow}</p>
-                                                <h3 className="mt-2 text-xl font-semibold text-neutral-900 dark:text-white">{t(pillar.title)}</h3>
+                                                <h3 className="mt-2 text-xl font-semibold text-neutral-900 dark:text-white">{tPillarTitle(pillar)}</h3>
                                             </div>
                                             <span className="rounded-full border border-neutral-200 bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-500 dark:border-white/10 dark:bg-white/5 dark:text-white/55">
                                                 SaaS
                                             </span>
                                         </div>
-                                        <p className="mt-4 text-sm leading-6 text-neutral-600 dark:text-white/68">{t(pillar.body)}</p>
+                                        <p className="mt-4 text-sm leading-6 text-neutral-600 dark:text-white/68">{tPillarBody(pillar)}</p>
                                     </article>
                                 ))}
                             </div>

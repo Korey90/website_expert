@@ -13,15 +13,32 @@ class ServiceItem extends Model
 {
     use HasFactory, SoftDeletes, HasTranslations;
 
-    public array $translatable = ['title', 'description'];
+    public array $translatable = [
+        'title',
+        'description',
+        'body',
+        'badge_text',
+        'cta_label',
+        'meta_title',
+        'meta_description',
+    ];
 
     protected $fillable = [
         'title',
         'description',
+        'body',
+        'badge_text',
         'icon',
         'price_from',
         'link',
         'slug',
+        'image_path',
+        'features',
+        'faq',
+        'cta_label',
+        'cta_url',
+        'meta_title',
+        'meta_description',
         'is_featured',
         'is_active',
         'sort_order',
@@ -30,6 +47,8 @@ class ServiceItem extends Model
     protected $casts = [
         'is_featured' => 'boolean',
         'is_active'   => 'boolean',
+        'features'    => 'array',
+        'faq'         => 'array',
     ];
 
     public function scopeFeatured(Builder $query): Builder

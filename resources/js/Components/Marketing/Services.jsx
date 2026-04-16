@@ -18,7 +18,7 @@ const DEFAULTS = {
     subtitle:      { en: 'From your first website to a full digital transformation — we have the expertise to make it happen.',
                      pl: 'Od prostej wizytówki po rozbudowaną aplikację – każde rozwiązanie budujemy z myślą o realnych wynikach.' },
     button_text:   { en: 'Calculate Project Cost',                   pl: 'Oblicz koszt projektu' },
-    button_url:    '#calculator',
+    button_url:    '#calculate',
     section_label: { en: 'Services',                                  pl: 'Oferta' },
     services: [
         { icon: 'monitor',        title_en: 'Brochure Websites',     title_pl: 'Strony wizytówkowe',     description_en: 'Professional, mobile-first websites that create the right first impression.', description_pl: 'Profesjonalne strony firmowe, które budują zaufanie i generują zapytania.' },

@@ -5,6 +5,34 @@ import Hero           from '@/Components/Marketing/Hero';
 import About          from '@/Components/Marketing/About';
 import useScrollReveal from '@/Hooks/useScrollReveal';
 
+// Generyczny renderer dla sekcji bez dedykowanego komponentu
+function GenericSection({ data }) {
+    // Pola title/subtitle/body/button_text są już rozwiązane do bieżącego locale
+    // przez Spatie HasTranslations po stronie PHP — przychodza jako plain string
+    const title    = typeof data.title    === 'string' ? data.title    : (data.title?.en    ?? '');
+    const subtitle = typeof data.subtitle === 'string' ? data.subtitle : (data.subtitle?.en ?? '');
+    const body     = typeof data.body     === 'string' ? data.body     : (data.body?.en     ?? '');
+    const btnText  = typeof data.button_text === 'string' ? data.button_text : (data.button_text?.en ?? '');
+    const btnUrl   = data.button_url;
+
+    if (!title && !subtitle && !body) return null;
+
+    return (
+        <section id={data.key} className="py-16 md:py-24 bg-white dark:bg-neutral-950">
+            <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+                {title    && <h2 className="font-display text-3xl font-black tracking-tight text-neutral-900 dark:text-white sm:text-4xl">{title}</h2>}
+                {subtitle && <p className="mt-4 text-lg text-neutral-600 dark:text-white/72">{subtitle}</p>}
+                {body     && <div className="mt-6 text-neutral-700 dark:text-white/80" dangerouslySetInnerHTML={{ __html: body }} />}
+                {btnText && btnUrl && (
+                    <a href={btnUrl} className="mt-8 inline-flex items-center justify-center rounded-2xl bg-brand-500 px-7 py-4 text-sm font-bold text-white hover:bg-brand-600">
+                        {btnText}
+                    </a>
+                )}
+            </div>
+        </section>
+    );
+}
+
 // Komponenty below-fold — ładowane leniwie
 const SaasLandingSection = lazy(() => import('@/Components/Marketing/SaasLandingSection'));
 const CtaBanner          = lazy(() => import('@/Components/Marketing/CtaBanner'));
@@ -16,7 +44,7 @@ const CostCalculatorV2   = lazy(() => import('@/Components/Marketing/CostCalcula
 const Faq                = lazy(() => import('@/Components/Marketing/Faq'));
 const Contact            = lazy(() => import('@/Components/Marketing/Contact'));
 
-export default function Welcome({ auth, hero, about, cta_banner, trust_strip, testimonials, services, process, portfolio, faq, cost_calculator_v2, navbar, contact, footer, pricing, strings, steps }) {
+export default function Welcome({ auth, hero, about, saas_landing, cta_banner, trust_strip, testimonials, services, process, portfolio, faq, cost_calculator_v2, navbar, contact, footer, pricing, strings, steps, extra_sections = [] }) {
     useScrollReveal('.reveal');
 
     return (
@@ -41,7 +69,7 @@ export default function Welcome({ auth, hero, about, cta_banner, trust_strip, te
             {hero           && <Hero data={hero} />}
             {about          && <About data={about} />}
             <Suspense fallback={null}>
-                <SaasLandingSection />
+                {saas_landing && <SaasLandingSection data={saas_landing} />}
                 {cta_banner     && <CtaBanner data={cta_banner} />}
                 {trust_strip    && <TrustStrip data={trust_strip} testimonials={testimonials} />}
                 {services       && <Services data={services} />}
@@ -50,6 +78,7 @@ export default function Welcome({ auth, hero, about, cta_banner, trust_strip, te
                 {cost_calculator_v2 && <CostCalculatorV2 strings={strings} steps={steps} pricing={pricing} />}
                 {faq            && <Faq data={faq} />}
                 {contact        && <Contact data={contact} />}
+                {extra_sections.map((s) => <GenericSection key={s.key} data={s} />)}
             </Suspense>
         </MarketingLayout>
     );
