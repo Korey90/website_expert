@@ -27,7 +27,7 @@ class SessionResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-computer-desktop';
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
     protected static ?string $navigationLabel = 'Active Sessions';
     protected static ?string $modelLabel = 'Session';
     protected static ?string $pluralModelLabel = 'Sessions';

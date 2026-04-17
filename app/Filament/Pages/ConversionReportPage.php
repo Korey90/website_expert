@@ -14,7 +14,7 @@ class ConversionReportPage extends Page
     protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-funnel';
     protected static \UnitEnum|string|null   $navigationGroup = 'Reports';
     protected static ?string $navigationLabel = 'Conversion Report';
-    protected static ?int    $navigationSort  = 10;
+    protected static ?int    $navigationSort  = 1;
     protected static ?string $title           = 'Lead Conversion Report';
     protected static ?string $slug            = 'conversion-report';
 

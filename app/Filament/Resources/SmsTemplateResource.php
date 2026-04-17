@@ -19,7 +19,7 @@ class SmsTemplateResource extends Resource
     protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-chat-bubble-left-ellipsis';
     protected static \UnitEnum|string|null   $navigationGroup = 'Marketing';
     protected static ?string $navigationLabel = 'SMS Templates';
-    protected static ?int    $navigationSort  = 6;
+    protected static ?int    $navigationSort  = 3;
 
     public static function form(Schema $form): Schema
     {

@@ -64,6 +64,8 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Projects'),
                 NavigationGroup::make('Finance'),
                 NavigationGroup::make('Marketing'),
+                NavigationGroup::make('Automation'),
+                NavigationGroup::make('Reports')->collapsed(),
                 NavigationGroup::make('SaaS Billing')->collapsed(),
                 NavigationGroup::make('Settings')->collapsed(),
             ])

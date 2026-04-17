@@ -11,7 +11,7 @@ class CalculatorAdminPage extends Page
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-calculator';
     protected static \UnitEnum|string|null   $navigationGroup = 'Settings';
     protected static ?string $navigationLabel = 'Calculator';
-    protected static ?int    $navigationSort  = 2;
+    protected static ?int    $navigationSort  = 5;
     protected static ?string $title           = 'Calculator Management';
     protected static ?string $slug            = 'calculator';
 }

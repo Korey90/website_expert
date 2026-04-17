@@ -20,9 +20,9 @@ class AutomationLogResource extends Resource
 {
     protected static ?string $model = AutomationLog::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-list';
-    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+    protected static \UnitEnum|string|null $navigationGroup = 'Automation';
     protected static ?string $navigationLabel = 'Automation Logs';
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $form): Schema
     {

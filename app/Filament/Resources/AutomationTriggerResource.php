@@ -21,9 +21,9 @@ class AutomationTriggerResource extends Resource
 {
     protected static ?string $model = AutomationTrigger::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-bolt';
-    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+    protected static \UnitEnum|string|null $navigationGroup = 'Automation';
     protected static ?string $navigationLabel = 'Automation Triggers';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     // ── Form ─────────────────────────────────────────────────────────────────
 

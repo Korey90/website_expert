@@ -21,7 +21,7 @@ class CalculatorStepsResource extends Resource
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-queue-list';
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
     protected static ?string $navigationLabel = 'Calculator Steps';
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 6;
     protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Schema $form): Schema

@@ -19,7 +19,7 @@ class CalculatorStringsResource extends Resource
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-language';
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
     protected static ?string $navigationLabel = 'Calculator Strings';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 8;
     protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Schema $form): Schema

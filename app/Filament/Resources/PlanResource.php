@@ -21,7 +21,7 @@ class PlanResource extends Resource
     protected static ?string $model = Plan::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-tag';
     protected static \UnitEnum|string|null $navigationGroup = 'SaaS Billing';
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 1;
     protected static ?string $label = 'Plan';
     protected static ?string $pluralLabel = 'Plans';
 

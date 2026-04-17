@@ -22,9 +22,9 @@ class AutomationRuleResource extends Resource
 {
     protected static ?string $model = AutomationRule::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-bolt';
-    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+    protected static \UnitEnum|string|null $navigationGroup = 'Automation';
     protected static ?string $navigationLabel = 'Automation Rules';
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 1;
 
     // Available trigger events — loaded from DB (AutomationTrigger model).
     // This const is kept as a fallback only for label lookups when DB is unavailable.

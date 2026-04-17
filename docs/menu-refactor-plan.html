@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>menu-refactor-plan.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="plan-reorganizacji-menu-panelu-administracyjnego">Plan reorganizacji menu panelu administracyjnego</h1>
+<p><strong>Data analizy</strong>: 2026-04-17<br>
+<strong>Dotyczy</strong>: <code>app/Providers/Filament/AdminPanelProvider.php</code> + wszystkie Resources i Pages</p>
+<hr>
+<h2 id="1-stan-aktualny--mapa-menu">1. Stan aktualny — mapa menu</h2>
+<h3 id="grupy-nawigacyjne-zdefiniowane-w-adminpanelprovider">Grupy nawigacyjne (zdefiniowane w <code>AdminPanelProvider</code>)</h3>
+<pre class="hljs"><code><div>Dashboard (brak grupy)
+├── CRM
+├── Projects
+├── Finance
+├── Marketing
+├── SaaS Billing  [collapsed]
+└── Settings      [collapsed]
+</div></code></pre>
+<h3 id="szczegółowa-zawartość-grup">Szczegółowa zawartość grup</h3>
+<h4 id="-crm-4-pozycje">🔵 CRM (4 pozycje)</h4>
+<table>
+<thead>
+<tr>
+<th>sort</th>
+<th>Label</th>
+<th>Klasa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Clients</td>
+<td><code>ClientResource</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Leads</td>
+<td><code>LeadResource</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Sales Pipeline</td>
+<td><code>PipelinePage</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Pipeline Stages</td>
+<td><code>PipelineStageResource</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="-projects-2-pozycje">🟤 Projects (2 pozycje)</h4>
+<table>
+<thead>
+<tr>
+<th>sort</th>
+<th>Label</th>
+<th>Klasa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Projects</td>
+<td><code>ProjectResource</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Project Templates</td>
+<td><code>ProjectTemplateResource</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="-finance-5-pozycji">🟢 Finance (5 pozycji)</h4>
+<table>
+<thead>
+<tr>
+<th>sort</th>
+<th>Label</th>
+<th>Klasa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Invoices</td>
+<td><code>InvoiceResource</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Quotes</td>
+<td><code>QuoteResource</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Contracts</td>
+<td><code>ContractResource</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Payments</td>
+<td><code>PaymentResource</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Contract Templates</td>
+<td><code>ContractTemplateResource</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Konflikt sort</strong>: <code>ContractResource</code> i <code>PaymentResource</code> mają ten sam <code>navigationSort = 3</code></p>
+</blockquote>
+<h4 id="-marketing-7-pozycji">🟡 Marketing (7 pozycji)</h4>
+<table>
+<thead>
+<tr>
+<th>sort</th>
+<th>Label</th>
+<th>Klasa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Landing Pages</td>
+<td><code>LandingPageResource</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>Email Templates</td>
+<td><code>EmailTemplateResource</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Front-end Sections</td>
+<td><code>SiteSectionResource</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Portfolio Projects</td>
+<td><code>PortfolioProjectResource</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Services</td>
+<td><code>ServiceItemResource</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>SMS Templates</td>
+<td><code>SmsTemplateResource</code></td>
+</tr>
+<tr>
+<td>—</td>
+<td>(brak)</td>
+<td><code>PageResource</code> — <strong>błąd</strong>: group=Settings, label=CMS Pages</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Konflikt sort</strong>: <code>LandingPageResource</code> i <code>EmailTemplateResource</code> mają <code>sort = 1</code></p>
+</blockquote>
+<h4 id="-saas-billing-3-pozycje-collapsed">🟣 SaaS Billing (3 pozycje, collapsed)</h4>
+<table>
+<thead>
+<tr>
+<th>sort</th>
+<th>Label</th>
+<th>Klasa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5</td>
+<td>Plans</td>
+<td><code>PlanResource</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td>Businesses</td>
+<td><code>BusinessResource</code></td>
+</tr>
+<tr>
+<td>20</td>
+<td>Subscriptions</td>
+<td><code>SubscriptionResource</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="️-settings-13-pozycji--zbyt-rozbudowana">⚙️ Settings (13 pozycji — zbyt rozbudowana!)</h4>
+<table>
+<thead>
+<tr>
+<th>sort</th>
+<th>Label</th>
+<th>Klasa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Users</td>
+<td><code>UserResource</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Roles &amp; Permissions</td>
+<td><code>RoleResource</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Calculator</td>
+<td><code>CalculatorAdminPage</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Active Sessions</td>
+<td><code>SessionResource</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Calculator Pricing</td>
+<td><code>CalculatorPricingResource</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Calculator Strings</td>
+<td><code>CalculatorStringsResource</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Permissions</td>
+<td><code>PermissionResource</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>CMS Pages</td>
+<td><code>PageResource</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Automation Rules</td>
+<td><code>AutomationRuleResource</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Calculator Steps</td>
+<td><code>CalculatorStepsResource</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Automation Logs</td>
+<td><code>AutomationLogResource</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Legal &amp; Company</td>
+<td><code>LegalSettingsPage</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td>Tracking &amp; Analytics</td>
+<td><code>TrackingSettingsPage</code></td>
+</tr>
+<tr>
+<td>12</td>
+<td>Payments</td>
+<td><code>PaymentSettingsPage</code></td>
+</tr>
+<tr>
+<td>20</td>
+<td>Integrations</td>
+<td><code>IntegrationSettingsPage</code></td>
+</tr>
+<tr>
+<td>20</td>
+<td>Notifications</td>
+<td><code>NotificationResource</code></td>
+</tr>
+<tr>
+<td>25</td>
+<td>Sitemap</td>
+<td><code>SitemapPage</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ Wiele konfliktów sort: 2 (x3), 3 (x4), 4 (x2), 20 (x2)<br>
+⚠️ <code>Automation Triggers</code> bez zdefiniowanej grupy (fallback do Settings)<br>
+⚠️ <code>AutomationTriggerResource</code> — <code>sort=3</code>, ale brakuje go w powyższej liście bo używa tej samej wartości co inne</p>
+</blockquote>
+<h4 id="-reports-1-pozycja--osobna-grupa">📊 Reports (1 pozycja — osobna grupa!)</h4>
+<table>
+<thead>
+<tr>
+<th>sort</th>
+<th>Label</th>
+<th>Klasa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>Conversion Report</td>
+<td><code>ConversionReportPage</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="2-zidentyfikowane-problemy">2. Zidentyfikowane problemy</h2>
+<h3 id="p1--group-settings-jest-przepełniona-13-pozycji--high">P1 — Group &quot;Settings&quot; jest przepełniona (13+ pozycji) ⛔ HIGH</h3>
+<p>13 różnych pozycji w jednej grupie to chaos nawigacyjny. Miks odpowiedzialności: automation, calculator, uprawnienia, CMS, integracje, prawne.</p>
+<h3 id="p2--konflikty-navigationsort--high">P2 — Konflikty <code>navigationSort</code> ⛔ HIGH</h3>
+<p>Wiele pozycji ma ten sam <code>sort</code> w tej samej grupie — kolejność staje się niedeterministyczna:</p>
+<ul>
+<li>Settings: sort=2 (x3), sort=3 (x4), sort=4 (x2), sort=20 (x2)</li>
+<li>Finance: sort=3 (x2)</li>
+<li>Marketing: sort=1 (x2)</li>
+</ul>
+<h3 id="p3--calculator-rozproszony-po-settings-️-medium">P3 — Calculator rozproszony po Settings ⚠️ MEDIUM</h3>
+<p><code>CalculatorAdminPage</code>, <code>CalculatorPricingResource</code>, <code>CalculatorStepsResource</code>, <code>CalculatorStringsResource</code> — 4 pozycje kalkuatora &quot;ukryte&quot; w Settings, zamiast mieć własne miejsce lub podgrupę.</p>
+<h3 id="p4--automation-w-settings-zamiast-we-własnej-grupie-️-medium">P4 — Automation w Settings zamiast we własnej grupie ⚠️ MEDIUM</h3>
+<p><code>AutomationRuleResource</code>, <code>AutomationTriggerResource</code>, <code>AutomationLogResource</code> — wszystkie 3 siedzą w Settings. Tymczasem automation to osobny system, który rośnie.</p>
+<h3 id="p5--brak-grupy-reports-jako-stały-element-️-medium">P5 — Brak grupy &quot;Reports&quot; jako stały element ⚠️ MEDIUM</h3>
+<p><code>ConversionReportPage</code> tworzy grupę &quot;Reports&quot; jako jedyna pozycja. Nie ma jej w <code>AdminPanelProvider::navigationGroups()</code> — co oznacza że sortowanie grupy względem innych jest niecontrolowane.</p>
+<h3 id="p6--pageresource-cms-pages-przypisany-do-settings-️-medium">P6 — <code>PageResource</code> (CMS Pages) przypisany do &quot;Settings&quot; ⚠️ MEDIUM</h3>
+<p>CMS Pages logicznie należy do Marketing lub własnej grupy Content, nie do Settings.</p>
+<h3 id="p7--paymentsettingspage-i-paymentresource--zduplikowany-label-ℹ️-low">P7 — <code>PaymentSettingsPage</code> i <code>PaymentResource</code> — zduplikowany label ℹ️ LOW</h3>
+<p>Oba mają label &quot;Payments&quot; — jedno w Finance, drugie w Settings. Użytkownik może się zgubić.</p>
+<h3 id="p8--permissionresource--roleresource--duplikacja-ℹ️-low">P8 — <code>PermissionResource</code> + <code>RoleResource</code> — duplikacja ℹ️ LOW</h3>
+<p>Dwie pozycje zarządzające uprawnieniami w tej samej grupie. Można je połączyć lub wyraźniej rozróżnić.</p>
+<h3 id="p9--notificationresource-w-settings-ℹ️-low">P9 — <code>NotificationResource</code> w Settings ℹ️ LOW</h3>
+<p>Notyfikacje to nie ustawienie systemu — to operacyjne dane (historia wysłanych notyfikacji). Mogłoby należeć do CRM lub Reports.</p>
+<hr>
+<h2 id="3-proponowana-nowa-struktura-menu">3. Proponowana nowa struktura menu</h2>
+<pre class="hljs"><code><div>Dashboard
+├── CRM                     ← bez zmian, +sort fix
+│   ├── (1) Clients
+│   ├── (2) Leads
+│   ├── (3) Sales Pipeline
+│   └── (4) Pipeline Stages
+│
+├── Projects                ← bez zmian, +sort fix
+│   ├── (1) Projects
+│   └── (2) Project Templates
+│
+├── Finance                 ← sort fix, Payments przeniesione
+│   ├── (1) Invoices
+│   ├── (2) Quotes
+│   ├── (3) Contracts
+│   ├── (4) Contract Templates
+│   └── (5) Payments
+│
+├── Marketing               ← sort fix, +CMS Pages
+│   ├── (1) Landing Pages
+│   ├── (2) Email Templates
+│   ├── (3) SMS Templates
+│   ├── (4) Services
+│   ├── (5) Portfolio Projects
+│   ├── (6) Front-end Sections
+│   └── (7) CMS Pages       ← przeniesione z Settings
+│
+├── Automation  [NOWA]      ← wydzielona z Settings
+│   ├── (1) Automation Rules
+│   ├── (2) Automation Triggers
+│   └── (3) Automation Logs
+│
+├── Reports  [NOWA - collapsed]
+│   ├── (1) Conversion Report
+│   └── (2) Notifications   ← historia notyfikacji, przeniesione z Settings
+│
+├── SaaS Billing [collapsed]← bez zmian, +sort fix
+│   ├── (1) Plans
+│   ├── (2) Businesses
+│   └── (3) Subscriptions
+│
+└── Settings [collapsed]    ← odchudzona: tylko system/konfiguracja
+    ├── (1) Users
+    ├── (2) Roles &amp; Permissions
+    ├── (3) Permissions
+    ├── (4) Active Sessions
+    ├── (5) Calculator       ← Calculator Admin Page
+    ├── (6) Calculator Steps
+    ├── (7) Calculator Pricing
+    ├── (8) Calculator Strings
+    ├── (9) Legal &amp; Company
+    ├── (10) Payment Settings ← zmiana label na &quot;Payment Settings&quot;
+    ├── (11) Tracking &amp; Analytics
+    ├── (12) Integrations
+    └── (13) Sitemap
+</div></code></pre>
+<hr>
+<h2 id="4-plan-zmian--krok-po-kroku">4. Plan zmian — krok po kroku</h2>
+<h3 id="krok-1--dodaj-grupy-do-adminpanelprovider-1-plik">Krok 1 — Dodaj grupy do <code>AdminPanelProvider</code> (1 plik)</h3>
+<p><strong>Plik</strong>: <code>app/Providers/Filament/AdminPanelProvider.php</code></p>
+<pre class="hljs"><code><div>-&gt;<span class="hljs-title function_ invoke__">navigationGroups</span>([
+    <span class="hljs-title class_">NavigationGroup</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;CRM&#x27;</span>),
+    <span class="hljs-title class_">NavigationGroup</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Projects&#x27;</span>),
+    <span class="hljs-title class_">NavigationGroup</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Finance&#x27;</span>),
+    <span class="hljs-title class_">NavigationGroup</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Marketing&#x27;</span>),
+    <span class="hljs-title class_">NavigationGroup</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Automation&#x27;</span>),
+    <span class="hljs-title class_">NavigationGroup</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Reports&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">collapsed</span>(),
+    <span class="hljs-title class_">NavigationGroup</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;SaaS Billing&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">collapsed</span>(),
+    <span class="hljs-title class_">NavigationGroup</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Settings&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">collapsed</span>(),
+])
+</div></code></pre>
+<hr>
+<h3 id="krok-2--przenieś-cms-pages-do-marketing-1-plik">Krok 2 — Przenieś CMS Pages do Marketing (1 plik)</h3>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/PageResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// ZMIANA:</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">string</span> <span class="hljs-variable">$navigationGroup</span> = <span class="hljs-string">&#x27;Marketing&#x27;</span>;  <span class="hljs-comment">// było: &#x27;Settings&#x27;</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">7</span>;                 <span class="hljs-comment">// było: 3</span>
+</div></code></pre>
+<hr>
+<h3 id="krok-3--wydziel-grupę-automation-3-pliki">Krok 3 — Wydziel grupę Automation (3 pliki)</h3>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/AutomationRuleResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">string</span> <span class="hljs-variable">$navigationGroup</span> = <span class="hljs-string">&#x27;Automation&#x27;</span>; <span class="hljs-comment">// było: &#x27;Settings&#x27;</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">1</span>;                 <span class="hljs-comment">// było: 4</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/AutomationTriggerResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">string</span> <span class="hljs-variable">$navigationGroup</span> = <span class="hljs-string">&#x27;Automation&#x27;</span>; <span class="hljs-comment">// było: &#x27;Settings&#x27;</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">2</span>;                 <span class="hljs-comment">// było: 3</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/AutomationLogResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">string</span> <span class="hljs-variable">$navigationGroup</span> = <span class="hljs-string">&#x27;Automation&#x27;</span>; <span class="hljs-comment">// było: &#x27;Settings&#x27;</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">3</span>;                 <span class="hljs-comment">// było: 5</span>
+</div></code></pre>
+<hr>
+<h3 id="krok-4--napraw-sortowanie-w-settings-wiele-plików">Krok 4 — Napraw sortowanie w Settings (wiele plików)</h3>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/UserResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">1</span>; <span class="hljs-comment">// bez zmian</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/RoleResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">2</span>; <span class="hljs-comment">// bez zmian</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/PermissionResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">3</span>; <span class="hljs-comment">// było: 3 (pozostaje, ale inne zostaną zmienione)</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/SessionResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">4</span>; <span class="hljs-comment">// było: 2 — konflikt!</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Pages/CalculatorAdminPage.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">5</span>; <span class="hljs-comment">// było: 2 — konflikt!</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/CalculatorStepsResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">6</span>; <span class="hljs-comment">// było: 4</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/CalculatorPricingResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">7</span>; <span class="hljs-comment">// było: 2 — konflikt!</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/CalculatorStringsResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">8</span>; <span class="hljs-comment">// było: 3 — konflikt!</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Pages/LegalSettingsPage.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">9</span>; <span class="hljs-comment">// bez zmian</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Pages/PaymentSettingsPage.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">string</span> <span class="hljs-variable">$navigationLabel</span> = <span class="hljs-string">&#x27;Payment Settings&#x27;</span>; <span class="hljs-comment">// było: &#x27;Payments&#x27; — duplikat!</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">10</span>;                      <span class="hljs-comment">// było: 12</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Pages/TrackingSettingsPage.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">11</span>; <span class="hljs-comment">// było: 10 — konflikt z LegalSettings</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Pages/IntegrationSettingsPage.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">12</span>; <span class="hljs-comment">// było: 20</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Pages/SitemapPage.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">13</span>; <span class="hljs-comment">// było: 25</span>
+</div></code></pre>
+<hr>
+<h3 id="krok-5--przenieś-notifications-do-reports-1-plik">Krok 5 — Przenieś Notifications do Reports (1 plik)</h3>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/NotificationResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">string</span> <span class="hljs-variable">$navigationGroup</span> = <span class="hljs-string">&#x27;Reports&#x27;</span>; <span class="hljs-comment">// było: &#x27;Settings&#x27;</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">2</span>;              <span class="hljs-comment">// było: 20</span>
+</div></code></pre>
+<hr>
+<h3 id="krok-6--dodaj-conversion-report-do-navigationgroups-i-napraw-sort-1-plik">Krok 6 — Dodaj Conversion Report do navigationGroups i napraw sort (1 plik)</h3>
+<p><strong>Plik</strong>: <code>app/Filament/Pages/ConversionReportPage.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">1</span>; <span class="hljs-comment">// było: 10</span>
+</div></code></pre>
+<hr>
+<h3 id="krok-7--napraw-konflikty-sort-w-finance-2-pliki">Krok 7 — Napraw konflikty sort w Finance (2 pliki)</h3>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/ContractResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">3</span>; <span class="hljs-comment">// bez zmian</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/PaymentResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">5</span>; <span class="hljs-comment">// było: 3 — KONFLIKT z ContractResource!</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/ContractTemplateResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">4</span>; <span class="hljs-comment">// bez zmian</span>
+</div></code></pre>
+<hr>
+<h3 id="krok-8--napraw-konflikty-sort-w-marketing-2-pliki">Krok 8 — Napraw konflikty sort w Marketing (2 pliki)</h3>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/LandingPageResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">1</span>; <span class="hljs-comment">// bez zmian</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/EmailTemplateResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">2</span>; <span class="hljs-comment">// było: 1 — KONFLIKT z LandingPageResource!</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/SmsTemplateResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">3</span>; <span class="hljs-comment">// było: 6</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/ServiceItemResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">4</span>; <span class="hljs-comment">// bez zmian</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/PortfolioProjectResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">5</span>; <span class="hljs-comment">// było: 3 — konflikt z EmailTemplates po zmianie</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/SiteSectionResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">6</span>; <span class="hljs-comment">// było: 2</span>
+</div></code></pre>
+<hr>
+<h3 id="krok-9--napraw-sort-w-saas-billing-3-pliki">Krok 9 — Napraw sort w SaaS Billing (3 pliki)</h3>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/PlanResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">1</span>; <span class="hljs-comment">// było: 5</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/BusinessResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">2</span>; <span class="hljs-comment">// było: 10</span>
+</div></code></pre>
+<p><strong>Plik</strong>: <code>app/Filament/Resources/SubscriptionResource.php</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">protected</span> <span class="hljs-built_in">static</span> ?<span class="hljs-keyword">int</span> <span class="hljs-variable">$navigationSort</span> = <span class="hljs-number">3</span>; <span class="hljs-comment">// było: 20</span>
+</div></code></pre>
+<hr>
+<h2 id="5-podsumowanie-zmian">5. Podsumowanie zmian</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Zmiana</th>
+<th>Typ</th>
+<th>Priorytet</th>
+<th>Pliki</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Dodanie grup Automation + Reports do AdminPanelProvider</td>
+<td>strukturalna</td>
+<td>HIGH</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Przeniesienie CMS Pages z Settings do Marketing</td>
+<td>grupowanie</td>
+<td>HIGH</td>
+<td>1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Wydzielenie grupy Automation (3 resources)</td>
+<td>grupowanie</td>
+<td>HIGH</td>
+<td>3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Naprawa konfliktów sort w Settings (13 pozycji)</td>
+<td>sort</td>
+<td>HIGH</td>
+<td>10</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Zmiana label PaymentSettingsPage na &quot;Payment Settings&quot;</td>
+<td>label</td>
+<td>HIGH</td>
+<td>1</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Przeniesienie Notifications do Reports</td>
+<td>grupowanie</td>
+<td>MEDIUM</td>
+<td>1</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Naprawa konfliktów sort w Finance</td>
+<td>sort</td>
+<td>MEDIUM</td>
+<td>2</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Naprawa konfliktów sort w Marketing</td>
+<td>sort</td>
+<td>MEDIUM</td>
+<td>4</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Naprawa sort w SaaS Billing (ciągłość 1-2-3)</td>
+<td>sort</td>
+<td>LOW</td>
+<td>3</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Naprawa sort w Projects (Templates: 5→2)</td>
+<td>sort</td>
+<td>LOW</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Łącznie plików do modyfikacji</strong>: ~27<br>
+<strong>Zmiany tylko w <code>navigationGroup</code> / <code>navigationSort</code> / <code>navigationLabel</code></strong> — brak zmian w logice biznesowej.</p>
+<hr>
+<h2 id="6-kolejność-wdrożenia">6. Kolejność wdrożenia</h2>
+<pre class="hljs"><code><div>1. AdminPanelProvider — grupy
+2. Automation (3 pliki) — nowa grupa, od razu widoczna
+3. Marketing — sort + CMS Pages
+4. Finance — sort
+5. Settings — sort + label fixes
+6. Reports — Notifications przeniesione
+7. SaaS Billing — sort cleanup
+8. Projects — sort cleanup
+</div></code></pre>
+<blockquote>
+<p><strong>Uwaga</strong>: Wszystkie zmiany są bezpieczne — dotyczą tylko wartości <code>navigationGroup</code>, <code>navigationSort</code>, <code>navigationLabel</code>. Nie wpływają na routing, uprawnienia ani logikę CRUD.</p>
+</blockquote>
+
+</body>
+</html>

@@ -15,7 +15,7 @@ class SitemapPage extends Page
     protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-map';
     protected static \UnitEnum|string|null   $navigationGroup = 'Settings';
     protected static ?string $navigationLabel = 'Sitemap';
-    protected static ?int    $navigationSort  = 25;
+    protected static ?int    $navigationSort  = 13;
 
     public string $sitemapUrl = '';
 

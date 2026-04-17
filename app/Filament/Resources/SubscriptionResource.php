@@ -21,7 +21,7 @@ class SubscriptionResource extends Resource
     protected static ?string $model = Business::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-credit-card';
     protected static \UnitEnum|string|null $navigationGroup = 'SaaS Billing';
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 3;
     protected static ?string $label = 'Subscription';
     protected static ?string $pluralLabel = 'Stripe Subscriptions';
 

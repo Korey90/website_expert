@@ -25,7 +25,7 @@ class SiteSectionResource extends Resource
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
     protected static ?string $navigationLabel = 'Front-end Sections';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 6;
 
     public static function infolist(Schema $schema): Schema
     {

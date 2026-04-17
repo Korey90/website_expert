@@ -19,7 +19,7 @@ class IntegrationSettingsPage extends Page
     protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-puzzle-piece';
     protected static \UnitEnum|string|null   $navigationGroup = 'Settings';
     protected static ?string $navigationLabel = 'Integrations';
-    protected static ?int    $navigationSort  = 20;
+    protected static ?int    $navigationSort  = 12;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];

@@ -28,7 +28,7 @@ class NotificationResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-bell-alert';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+    protected static \UnitEnum|string|null $navigationGroup = 'Reports';
 
     protected static ?string $navigationLabel = 'Notifications';
 
@@ -36,7 +36,7 @@ class NotificationResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Notifications';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $form): Schema
     {

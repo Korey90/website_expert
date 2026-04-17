@@ -16,8 +16,8 @@ class PaymentSettingsPage extends Page
 
     protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-credit-card';
     protected static \UnitEnum|string|null   $navigationGroup = 'Settings';
-    protected static ?string $navigationLabel = 'Payments';
-    protected static ?int    $navigationSort  = 12;
+    protected static ?string $navigationLabel = 'Payment Settings';
+    protected static ?int    $navigationSort  = 10;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];

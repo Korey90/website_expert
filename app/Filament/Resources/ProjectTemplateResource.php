@@ -19,7 +19,7 @@ class ProjectTemplateResource extends Resource
     protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-rectangle-stack';
     protected static \UnitEnum|string|null   $navigationGroup = 'Projects';
     protected static ?string $navigationLabel = 'Project Templates';
-    protected static ?int    $navigationSort  = 5;
+    protected static ?int    $navigationSort  = 2;
 
     private static array $serviceTypes = [
         'wizytowka' => 'Business Card Site',

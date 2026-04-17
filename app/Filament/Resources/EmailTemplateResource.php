@@ -26,7 +26,7 @@ class EmailTemplateResource extends Resource
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-envelope';
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
     protected static ?string $navigationLabel = 'Email Templates';
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     public static function infolist(Schema $schema): Schema
     {
