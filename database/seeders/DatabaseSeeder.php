@@ -47,6 +47,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(ProjectSeeder::class);
         // $this->call(QuoteSeeder::class);
         // $this->call(InvoiceSeeder::class);
-        // $this->call(AutomationRuleSeeder::class);
+         $this->call(AutomationRuleSeeder::class);
+         $this->call(AutomationTriggerSeeder::class);
     }
 }

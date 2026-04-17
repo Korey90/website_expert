@@ -70,6 +70,12 @@ class SmsTemplateSeeder extends Seeder
                 'content'     => '{{client_name}}, bedziesmy wdzieczni za opinie Google o naszej wspolpracy! Zajmie 2 minuty. – {{company_name}}',
                 'is_active'   => true,
             ],
+            [
+                'name'        => 'Service CTA - potwierdzenie kontaktu',
+                'description' => 'wysylamy sms do klienta ktory skorzysta z cta na widoku uslugi',
+                'content'     => 'Hi Konrad will get in touch soon. thank you for choice Websiete Expert ',
+                'is_active'   => true,
+            ],
         ];
 
         foreach ($templates as $data) {

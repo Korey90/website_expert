@@ -461,6 +461,29 @@ class EmailTemplateSeeder extends Seeder
                 ),
             ],
 
+            // ── Service CTA – admin notification ─────────────────────────────
+            [
+                'name'      => 'Service CTA Recived - Email Notification to Admin',
+                'slug'      => 'service_cta_admin_mail_notice',
+                'subject'   => [
+                    'en' => 'dowy lead wpadl en',
+                    'pl' => 'dowy lead wpadl pl',
+                    'pt' => 'dowy lead wpadl pt',
+                ],
+                'body_html' => [
+                    'en' => '<p>siema nowy lead wpadł en</p>',
+                    'pl' => '<p>siema nowy lead wpadł pl</p>',
+                    'pt' => '<p>siema nowy lead wpadł pt</p>',
+                ],
+                'body_text' => [
+                    'en' => 'nowy lead wpadł en',
+                    'pl' => null,
+                    'pt' => 'siema nowy lead wpadł pt',
+                ],
+                'variables'  => ['client_name', 'lead_name'],
+                'is_active'  => true,
+            ],
+
         ];
 
         foreach ($templates as $data) {

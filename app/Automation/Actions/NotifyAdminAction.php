@@ -2,8 +2,9 @@
 
 namespace App\Automation\Actions;
 
+use App\Automation\ActionSkippedException;
 use App\Models\User;
-use Filament\Actions\Action as FilamentAction;
+use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Support\Str;
 
@@ -22,7 +23,7 @@ class NotifyAdminAction extends BaseAutomationAction
         $users = User::whereHas('roles', fn ($q) => $q->whereIn('name', (array) $roles))->get();
 
         if ($users->isEmpty()) {
-            return;
+            throw new ActionSkippedException("No users found with roles: " . implode(', ', (array) $roles));
         }
 
         foreach ($users as $user) {
@@ -37,7 +38,7 @@ class NotifyAdminAction extends BaseAutomationAction
 
             if ($followUrl) {
                 $notification->actions([
-                    FilamentAction::make('view')
+                    NotificationAction::make('view')
                         ->label('View')
                         ->url($followUrl),
                 ]);

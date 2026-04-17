@@ -61,7 +61,7 @@ class ProcessAutomationJob implements ShouldQueue
                 foreach ($rule->actions ?? [] as $action) {
                     $actionsResult[] = $this->executeAction($action);
                 }
-                $this->writeLog($rule, $actionsResult);
+                $this->safeWriteLog($rule, $actionsResult);
             }
             return;
         }
@@ -87,7 +87,7 @@ class ProcessAutomationJob implements ShouldQueue
             foreach ($rule->actions ?? [] as $action) {
                 $actionsResult[] = $this->executeAction($action);
             }
-            $this->writeLog($rule, $actionsResult);
+            $this->safeWriteLog($rule, $actionsResult);
         }
     }
 
@@ -119,10 +119,7 @@ class ProcessAutomationJob implements ShouldQueue
                 'duration_ms' => (int) ((microtime(true) - $start) * 1000),
             ];
         } catch (ActionSkippedException $e) {
-            Log::info("AutomationRule action skipped [{$type}]: " . $e->getMessage(), [
-                'context' => $this->context,
-                'action'  => $action,
-            ]);
+            try { Log::info("AutomationRule action skipped [{$type}]: " . $e->getMessage(), ['context' => $this->context, 'action' => $action]); } catch (\Throwable) {}
             return [
                 'type'        => $type,
                 'status'      => 'skipped',
@@ -130,16 +127,34 @@ class ProcessAutomationJob implements ShouldQueue
                 'duration_ms' => (int) ((microtime(true) - $start) * 1000),
             ];
         } catch (\Throwable $e) {
-            Log::error("AutomationRule action failed [{$type}]: " . $e->getMessage(), [
-                'context' => $this->context,
-                'action'  => $action,
-            ]);
+            try { Log::error("AutomationRule action failed [{$type}]: " . $e->getMessage(), ['context' => $this->context, 'action' => $action]); } catch (\Throwable) {}
             return [
                 'type'        => $type,
                 'status'      => 'error',
                 'message'     => $e->getMessage(),
                 'duration_ms' => (int) ((microtime(true) - $start) * 1000),
             ];
+        }
+    }
+
+    /**
+     * Wrapper around writeLog that silently swallows DB errors.
+     * Prevents the job from retrying (and re-sending SMS/email) just because
+     * the log table is missing a column or doesn't exist yet.
+     */
+    private function safeWriteLog(AutomationRule $rule, array $actionsResult): void
+    {
+        try {
+            $this->writeLog($rule, $actionsResult);
+        } catch (\Throwable $e) {
+            try {
+                Log::error('ProcessAutomationJob: failed to write automation log', [
+                    'rule_id'  => $rule->id,
+                    'trigger'  => $this->triggerEvent,
+                    'error'    => $e->getMessage(),
+                    'context'  => $this->context,
+                ]);
+            } catch (\Throwable) {}
         }
     }
 
