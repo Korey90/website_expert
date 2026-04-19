@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>template-audits-sales-offer-pl.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="audyt-bezpieczeństwa-i-wydajności-strony--oferta-sprzedażowa">Audyt bezpieczeństwa i wydajności strony — Oferta sprzedażowa</h1>
+<blockquote>
+<p>Service: audits
+Market: UK
+Document Type: Client-Facing Sales Offer
+Status: Template
+Last Updated: 2026-04-17
+Source Anchors: ServiceItemSeeder.php</p>
+</blockquote>
+<hr>
+<h2 id="tytuł-oferty">Tytuł oferty</h2>
+<p><strong>Audyt bezpieczeństwa i wydajności strony — £299</strong></p>
+<hr>
+<h2 id="idealny-klient">Idealny klient</h2>
+<p>Ta oferta jest dla Ciebie, jeśli:</p>
+<ul>
+<li>Obawiasz się, że Twoja strona może mieć luki bezpieczeństwa, o których nie wiesz</li>
+<li>Twoja strona jest wolna i tracisz odwiedzających, zanim w ogóle przeczytają Twoje treści</li>
+<li>Nigdy nie przeprowadzałeś formalnego audytu technicznego i chcesz wiedzieć, jak stoisz</li>
+<li>Planujesz redesign strony lub migrację platformy i chcesz najpierw zrozumieć obecny stan</li>
+<li>Prowadzisz Google Ads lub SEO i chcesz upewnić się, że wydajność strony nie podkopuje Twoich wyników</li>
+</ul>
+<hr>
+<h2 id="problem-biznesowy">Problem biznesowy</h2>
+<p>Wolna lub niezabezpieczona strona kosztuje Cię dwojako: odgania odwiedzających, zanim zdążą skonwertować, i obniża Twoje pozycje w Google. Luki bezpieczeństwa — wiele z nich niewidocznych gołym okiem — narażają Twój biznes, klientów i reputację na realne ryzyko. Większość stron kumuluje dług techniczny po cichu, dopóki coś się nie psuje lub nie zostaje wykorzystane przez atakujących.</p>
+<hr>
+<h2 id="rezultat">Rezultat</h2>
+<p>Po audycie będziesz mieć:</p>
+<ul>
+<li>Jasny, priorytetowy obraz każdej luki bezpieczeństwa i wąskiego gardła wydajności na Twojej stronie</li>
+<li>Dokładne kroki naprawy każdego problemu — bez zgadywania, bez ogólnikowych rekomendacji</li>
+<li>1-godzinną rozmowę podsumowującą do omówienia wyników i odpowiedzi na pytania</li>
+<li>Raport PDF, który możesz udostępnić swojemu programiście lub wykorzystać do kierowania nową budową</li>
+<li>Pewność, że znasz rzeczywisty stan bezpieczeństwa i wydajności swojej strony</li>
+</ul>
+<hr>
+<h2 id="zakres-usługi">Zakres usługi</h2>
+<table>
+<thead>
+<tr>
+<th>Co jest zawarte</th>
+<th>Szczegóły</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Skan bezpieczeństwa OWASP Top 10</td>
+<td>Testowanie pod kątem 10 najpoważniejszych luk bezpieczeństwa aplikacji webowych</td>
+</tr>
+<tr>
+<td>Analiza Core Web Vitals</td>
+<td>LCP, CLS i INP mierzone i oceniane względem progów Google</td>
+</tr>
+<tr>
+<td>Przegląd konfiguracji serwera</td>
+<td>Nagłówki HTTP, konfiguracja HTTPS, łańcuchy redirectów, cache</td>
+</tr>
+<tr>
+<td>Przegląd SSL</td>
+<td>Ważność certyfikatu, konfiguracja i data wygaśnięcia</td>
+</tr>
+<tr>
+<td>Audyt zależności i CVE</td>
+<td>Przegląd wtyczek, motywów i bibliotek pod kątem znanych luk bezpieczeństwa</td>
+</tr>
+<tr>
+<td>Priorytetowa lista poprawek</td>
+<td>Każdy problem oceniany pod kątem powagi z szacunkiem nakładu pracy i rekomendowaną naprawą</td>
+</tr>
+<tr>
+<td>Raport PDF</td>
+<td>Pełny pisemny raport dostarczany cyfrowo</td>
+</tr>
+<tr>
+<td>Rozmowa podsumowująca</td>
+<td>1-godzinne omówienie wyników i odpowiedzi na pytania</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="kluczowe-rezultaty">Kluczowe rezultaty</h2>
+<ol>
+<li>Pełne wyniki skanu bezpieczeństwa — pokrycie OWASP Top 10</li>
+<li>Raport Core Web Vitals — LCP, CLS, INP z benchmarkami i rekomendacjami</li>
+<li>Ocena konfiguracji serwera i SSL</li>
+<li>Wyniki audytu zależności i CVE</li>
+<li>Priorytetowa lista poprawek — ocena powagi, szacunek nakładu pracy i rekomendowane działanie dla każdego problemu</li>
+<li>Raport PDF — pełne wyniki, sformatowane i gotowe do udostępnienia</li>
+<li>1-godzinna rozmowa podsumowująca z ekspertem technicznym</li>
+</ol>
+<hr>
+<h2 id="proces">Proces</h2>
+<table>
+<thead>
+<tr>
+<th>Etap</th>
+<th>Co się dzieje</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Onboarding</td>
+<td>Prosimy o URL strony, ewentualne dane dostępowe (tylko odczyt) i informacje o platformie</td>
+</tr>
+<tr>
+<td>2. Automatyczne skanowanie</td>
+<td>Narzędzia do skanowania bezpieczeństwa i wydajności uruchamiane względem strony</td>
+</tr>
+<tr>
+<td>3. Ręczny przegląd</td>
+<td>Nasz zespół ręcznie weryfikuje wyniki, konfigurację serwera i stos zależności</td>
+</tr>
+<tr>
+<td>4. Pisanie raportu</td>
+<td>Wyniki kompilowane w priorytetowy, strukturalny raport PDF</td>
+</tr>
+<tr>
+<td>5. Dostarczenie</td>
+<td>Raport dostarczany cyfrowo; planowana rozmowa podsumowująca</td>
+</tr>
+<tr>
+<td>6. Rozmowa podsumowująca</td>
+<td>1-godzinne omówienie wyników i odpowiedzi na pytania</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="harmonogram">Harmonogram</h2>
+<p><strong>Pełny audyt dostarczany w ciągu 5–7 dni roboczych</strong> od udzielenia dostępu i wszystkich wymaganych informacji.</p>
+<p><strong>Rozmowa podsumowująca</strong> planowana w ciągu 2 dni roboczych od dostarczenia raportu.</p>
+<hr>
+<h2 id="pricing-anchor">Pricing anchor</h2>
+<table>
+<thead>
+<tr>
+<th>Usługa</th>
+<th>Cena</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Audyt bezpieczeństwa i wydajności</td>
+<td><strong>£299</strong> (jednorazowo)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Jest to usługa jednorazowa w stałej cenie. Żadne miesięczne zobowiązanie nie jest wymagane.</p>
+</blockquote>
+<hr>
+<h2 id="opcjonalne-dodatki">Opcjonalne dodatki</h2>
+<table>
+<thead>
+<tr>
+<th>Dodatek</th>
+<th>Cena od</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Implementacja poprawek — czas dewelopera do rozwiązania zidentyfikowanych problemów</td>
+<td>Wyceniane po audycie, na podstawie listy poprawek</td>
+</tr>
+<tr>
+<td>Techniczny audyt SEO (pełny crawl i analiza fraz)</td>
+<td>Zawarty w miesięcznym retainerze SEO od £499/mc</td>
+</tr>
+<tr>
+<td>Plan opieki nad stroną (bieżące bezpieczeństwo i aktualizacje)</td>
+<td>Od £149/mc</td>
+</tr>
+<tr>
+<td>Przebudowa strony lub sklepu</td>
+<td>Jeśli audyt wykaże potrzebę przebudowy — patrz odpowiednia oferta</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="co-nie-jest-zawarte">Co nie jest zawarte</h2>
+<ul>
+<li>Naprawianie zidentyfikowanych problemów — audyt dostarcza wyniki i rekomendacje; implementacja wyceniana oddzielnie</li>
+<li>Testy penetracyjne (ręczny ethical hacking) — to lżejszy automatyczny skan i ręczny przegląd, nie pełny pen test</li>
+<li>Bieżący monitoring — to audyt punktowy; do ciągłego monitorowania patrz Plan opieki nad stroną</li>
+<li>Testowanie wewnętrznej sieci lub infrastruktury serwerowej — tylko warstwa webowa</li>
+<li>Dostęp do konta dostawcy hostingu lub dostęp powłoki serwerowej (chyba że uzgodniono konkretnie)</li>
+</ul>
+<hr>
+<h2 id="obowiązki-klienta">Obowiązki klienta</h2>
+<p>Aby umożliwić przeprowadzenie audytu, prosimy o:</p>
+<ul>
+<li>Podanie pełnego URL(i) strony(stron) do audytu</li>
+<li>Dostarczenie danych logowania administratora CMS (WordPress lub odpowiednik) z prawami tylko do odczytu, jeśli dostępne</li>
+<li>Potwierdzenie dostawcy hostingu i stosu serwerowego (jeśli znane)</li>
+<li>Potwierdzenie, czy używane są wtyczki lub integracje firm trzecich</li>
+<li>Dostępność na 1-godzinną rozmowę podsumowującą w ciągu 5 dni roboczych od dostarczenia raportu</li>
+</ul>
+<hr>
+<h2 id="faq">FAQ</h2>
+<p><strong>Ile trwa audyt?</strong>
+Pełny audyt bezpieczeństwa i wydajności trwa zazwyczaj 5–7 dni roboczych. Otrzymujesz raport PDF i 1-godzinną rozmowę podsumowującą.</p>
+<p><strong>Czy naprawiacie problemy, czy tylko je raportujecie?</strong>
+Audyt dostarcza pełny raport wyników i priorytetową listę poprawek. Implementacja napraw może być wyceniona oddzielnie po audycie.</p>
+<p><strong>Czy to jest test penetracyjny?</strong>
+To strukturalny skan bezpieczeństwa i ręczny przegląd obejmujący luki OWASP Top 10, nie pełny test penetracyjny. Jeśli potrzebujesz formalnego pen testu, doradzimy odpowiedni zakres.</p>
+<p><strong>Jakie platformy CMS audytujecie?</strong>
+Audytujemy WordPress (WooCommerce, wtyczki), Laravel, niestandardowe aplikacje PHP i inne popularne stosy webowe.</p>
+<p><strong>Czy zrozumiem raport, jeśli nie jestem techniczny?</strong>
+Tak. Raport zawiera nietechniczne streszczenie dla zarządu obok szczegółowych wyników technicznych. Rozmowa podsumowująca jest zaprojektowana specjalnie po to, aby wyjaśnić wszystko w zrozumiały sposób.</p>
+<p><strong>Co się dzieje po audycie?</strong>
+Otrzymujesz raport, omawiamy go na rozmowie, a Ty decydujesz, co i kiedy naprawić. Możemy wycenić implementację poprawek lub możesz przekazać raport swojemu programiście.</p>
+<hr>
+<h2 id="call-to-action">Call to action</h2>
+<p><strong>Dowiedz się, co naprawdę dzieje się na Twojej stronie.</strong></p>
+<p><a href="/contact">Zamów audyt</a></p>
+<p>Lub skontaktuj się pod adresem <strong>[contact_email]</strong>, aby zacząć — możemy uruchomić Twój audyt w ciągu 2 dni roboczych.</p>
+<hr>
+<h2 id="rekomendowany-następny-krok">Rekomendowany następny krok</h2>
+<ol>
+<li>Skontaktuj się z nami podając URL strony i potwierdź chęć realizacji.</li>
+<li>Wysyłamy <strong>krótki formularz onboardingowy</strong> (dane dostępowe, informacje o platformie) — zajmuje 5 minut.</li>
+<li>Audyt dostarczany w ciągu <strong>5–7 dni roboczych</strong>; rozmowa podsumowująca planowana od razu po.</li>
+</ol>
+<hr>
+<blockquote>
+<p><strong>Założenia</strong></p>
+<ul>
+<li>Stała cena £299 obejmuje jedną stronę / domenę główną.</li>
+<li>Wiele domen lub duże instalacje multi-site mogą być wyceniane oddzielnie — potwierdzić na etapie zapytania.</li>
+<li>Implementacja poprawek nie jest wliczona i wyceniana oddzielnie po dostarczeniu audytu.</li>
+<li>Dane logowania CMS z prawami tylko do odczytu są pomocne, ale nie obowiązkowe do przeprowadzenia audytu.</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>Pytania otwarte</strong></p>
+<ul>
+<li><input type="checkbox" id="checkbox0"><label for="checkbox0">Ile URL(i) / domen wymaga audytu?</label></li>
+<li><input type="checkbox" id="checkbox1"><label for="checkbox1">Na jakim CMS / platformie zbudowana jest strona?</label></li>
+<li><input type="checkbox" id="checkbox2"><label for="checkbox2">Czy klient ma własnego programistę do implementacji poprawek, czy będzie potrzebował naszej wyceny?</label></li>
+<li><input type="checkbox" id="checkbox3"><label for="checkbox3">Czy audyt jest przygotowaniem do redesignu / przebudowy czy samodzielnym przeglądem stanu technicznego?</label></li>
+<li><input type="checkbox" id="checkbox4"><label for="checkbox4">Czy klient ma konkretne obawy dotyczące bezpieczeństwa (np. wcześniejszy atak, skargi na wolne ładowanie)?</label></li>
+</ul>
+</blockquote>
+
+</body>
+</html>

@@ -43,6 +43,9 @@ class DatabaseSeeder extends Seeder
         // Briefing templates (global, business_id=null)
         $this->call(BriefingTemplateSeeder::class);
 
+        // Sales Offer templates (global, business_id=null)
+        $this->call(SalesOfferTemplateSeeder::class);
+
         // ── Demo / sample data (comment out for production) ──────────────────
         // $this->call(UserSeeder::class);
         // $this->call(ClientSeeder::class);

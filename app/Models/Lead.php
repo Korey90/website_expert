@@ -94,4 +94,9 @@ class Lead extends Model
     {
         return $this->hasMany(Briefing::class)->latest();
     }
+
+    public function salesOffers(): HasMany
+    {
+        return $this->hasMany(SalesOffer::class)->latest();
+    }
 }

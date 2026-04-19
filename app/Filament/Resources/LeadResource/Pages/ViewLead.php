@@ -17,8 +17,10 @@ use App\Models\PipelineStage;
 use App\Models\Project;
 use App\Models\Quote;
 use App\Models\QuoteItem;
+use App\Models\SalesOfferTemplate;
 use App\Models\SmsTemplate;
 use App\Services\BriefingService;
+use App\Services\SalesOfferService;
 use App\Services\SmsService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -122,6 +124,90 @@ class ViewLead extends ViewRecord
                     return redirect()->route(
                         'filament.admin.resources.briefings.view',
                         $briefing->id
+                    );
+                }),
+            Action::make('send_sales_offer')
+                ->label('Wyślij ofertę')
+                ->icon('heroicon-o-paper-airplane')
+                ->color('info')
+                ->modalHeading('Wyślij ofertę sprzedażową')
+                ->form([
+                    Forms\Components\Select::make('template_id')
+                        ->label('Szablon oferty')
+                        ->options(
+                            SalesOfferTemplate::forBusiness()
+                                ->active()
+                                ->orderBy('language')
+                                ->orderBy('title')
+                                ->get()
+                                ->mapWithKeys(fn (SalesOfferTemplate $t) => [
+                                    $t->id => "[{$t->language}] {$t->title}" . ($t->service_slug ? " ({$t->service_slug})" : ''),
+                                ])
+                                ->toArray()
+                        )
+                        ->searchable()
+                        ->required(),
+                ])
+                ->action(function (array $data) use ($lead) {
+                    $template = SalesOfferTemplate::findOrFail($data['template_id']);
+                    $service  = app(SalesOfferService::class);
+
+                    $offer = $service->createFromTemplate($lead, $template, auth()->user());
+
+                    try {
+                        $service->send($offer);
+                        $email = $lead->client?->primary_contact_email ?? $lead->email ?? 'klienta';
+                        Notification::make()
+                            ->title("Oferta wysłana na: {$email}")
+                            ->success()
+                            ->send();
+                    } catch (\RuntimeException $e) {
+                        Notification::make()
+                            ->title('Oferta zapisana jako draft — ' . $e->getMessage())
+                            ->warning()
+                            ->send();
+                    }
+
+                    return redirect()->route(
+                        'filament.admin.resources.sales-offers.view',
+                        $offer->id
+                    );
+                }),
+            Action::make('save_offer_draft')
+                ->label('Zapisz ofertę (draft)')
+                ->icon('heroicon-o-document-plus')
+                ->color('gray')
+                ->modalHeading('Utwórz draft oferty sprzedażowej')
+                ->form([
+                    Forms\Components\Select::make('template_id')
+                        ->label('Szablon oferty')
+                        ->options(
+                            SalesOfferTemplate::forBusiness()
+                                ->active()
+                                ->orderBy('language')
+                                ->orderBy('title')
+                                ->get()
+                                ->mapWithKeys(fn (SalesOfferTemplate $t) => [
+                                    $t->id => "[{$t->language}] {$t->title}" . ($t->service_slug ? " ({$t->service_slug})" : ''),
+                                ])
+                                ->toArray()
+                        )
+                        ->searchable()
+                        ->required(),
+                ])
+                ->action(function (array $data) use ($lead) {
+                    $template = SalesOfferTemplate::findOrFail($data['template_id']);
+                    $offer    = app(SalesOfferService::class)
+                        ->createFromTemplate($lead, $template, auth()->user());
+
+                    Notification::make()
+                        ->title('Draft oferty zapisany.')
+                        ->success()
+                        ->send();
+
+                    return redirect()->route(
+                        'filament.admin.resources.sales-offers.view',
+                        $offer->id
                     );
                 }),
             Action::make('create_contract')

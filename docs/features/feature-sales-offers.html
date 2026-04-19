@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>feature-sales-offers.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="feature-sales-offers-oferty-sprzedażowe">Feature: Sales Offers (Oferty Sprzedażowe)</h1>
+<blockquote>
+<p>Data: 2026-04-19<br>
+Status: Draft</p>
+</blockquote>
+<hr>
+<h2 id="0-decyzja-architektoniczna--nowy-moduł-vs-rozbudowa-quotes">0. Decyzja architektoniczna — nowy moduł vs rozbudowa Quotes</h2>
+<h3 id="czym-jest-quote-istniejący-moduł">Czym jest Quote (istniejący moduł)</h3>
+<table>
+<thead>
+<tr>
+<th>Atrybut</th>
+<th>Quote</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cel</td>
+<td>Dokument finansowy — wycena</td>
+</tr>
+<tr>
+<td>Treść</td>
+<td>Line items: opis, ilość, cena, rabat, VAT, total</td>
+</tr>
+<tr>
+<td>Workflow portalu</td>
+<td>Klient akceptuje / odrzuca → zmiana statusu leada</td>
+</tr>
+<tr>
+<td>Generacja</td>
+<td>Ręcznie z poziomu ViewLead (modal) lub QuoteResource</td>
+</tr>
+<tr>
+<td>Format</td>
+<td>Tabelaryczny PDF, numer dokumentu</td>
+</tr>
+<tr>
+<td>Model</td>
+<td><code>Quote</code> + <code>QuoteItem</code>, <code>QuoteSentMail</code>, <code>portal.quotes.*</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="czym-jest-sales-offer-nowy-moduł">Czym jest Sales Offer (nowy moduł)</h3>
+<table>
+<thead>
+<tr>
+<th>Atrybut</th>
+<th>SalesOffer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cel</td>
+<td>Narracyjny dokument sprzedażowy — persuasion-first</td>
+</tr>
+<tr>
+<td>Treść</td>
+<td>Sekcje: idealny klient, problem, rezultaty, zakres, proces, harmonogram, anchor cenowy</td>
+</tr>
+<tr>
+<td>Workflow portalu</td>
+<td>Klient odczytuje ofertę (read-only), opcjonalnie: CTA &quot;Chcę to omówić&quot;</td>
+</tr>
+<tr>
+<td>Generacja</td>
+<td>Z predefiniowanego szablonu per usługa + język, edytowalna kopia</td>
+</tr>
+<tr>
+<td>Format</td>
+<td>Rich-text/markdown → HTML e-mail + publiczny link</td>
+</tr>
+<tr>
+<td>Model</td>
+<td><code>SalesOffer</code> + <code>SalesOfferTemplate</code> — <strong>nowe tabele</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="dlaczego-nowy-moduł-nie-rozbudowa-quote">Dlaczego NOWY moduł (nie rozbudowa Quote)</h3>
+<ol>
+<li><strong>Różny model danych</strong> — Quote ma <code>QuoteItem</code>, obliczenia VAT, numerację; SalesOffer ma <code>body</code> (longtext) z narracyjną treścią.</li>
+<li><strong>Różny UX portalu</strong> — Quote: accept/reject workflow; SalesOffer: view-only z opcjonalnym CTA.</li>
+<li><strong>Różna email template</strong> — QuoteSentMail wysyła numer i sumę; SalesOfferMail wysyła formatowaną prezentację usługi.</li>
+<li><strong>Różna nawigacja</strong> — Quote jest w grupie &quot;Finance&quot;; SalesOffer idzie do grupy &quot;Sales&quot; (już tam jest BriefingTemplateResource).</li>
+<li><strong>Brak wspólnej logiki biznesowej</strong> — nie ma sensu dzielić serwisów ani Policy.</li>
+</ol>
+<h3 id="potencjalne-konflikty">Potencjalne konflikty</h3>
+<table>
+<thead>
+<tr>
+<th>Konflikt</th>
+<th>Ocena</th>
+<th>Rozwiązanie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BriefingTemplate.type = 'sales_offer'</code></td>
+<td>Niski — różne byty</td>
+<td>Dodać komentarz w kodzie. Briefing type <code>sales_offer</code> = kwestionariusz do zebrania danych; <code>SalesOffer</code> = gotowy dokument wysyłany klientowi. Nie zmieniać nazw.</td>
+</tr>
+<tr>
+<td><code>dispatchProposalEmail()</code> w ViewLead — obie akcje mogą przesunąć etap na &quot;Proposal Sent&quot;</td>
+<td>Średni</td>
+<td>SalesOffer send NIE przesuwa etapu automatycznie. Admin decyduje.</td>
+</tr>
+<tr>
+<td>Trasa <code>/offers/{token}</code></td>
+<td>Brak — trasa nieużywana</td>
+<td>Nowa trasa nie koliduje z niczym.</td>
+</tr>
+<tr>
+<td><code>EmailTemplate</code> model</td>
+<td>Brak</td>
+<td>SalesOfferMail nie korzysta z EmailTemplate; wysyła body bezpośrednio.</td>
+</tr>
+<tr>
+<td>Seeder — 18 plików z docs/sales/</td>
+<td>Brak</td>
+<td>Dedykowany <code>SalesOfferTemplateSeeder</code>, guard sprawdza czy globalne już istnieją.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="1-definicja">1. Definicja</h2>
+<p><strong>Cel:</strong> Umożliwić adminowi tworzenie, personalizowanie i wysyłanie bogatych, narracyjnych ofert sprzedażowych (per usługa, per język) bezpośrednio z poziomu konkretnego leada. Oferta ma wygląd profesjonalnej prezentacji — nie tabelki z kwotami.</p>
+<p><strong>Bounded context:</strong> Sales — obok BriefingTemplate.<br>
+<strong>Priorytet:</strong> Wysoki — blokuje konwersję leadów.</p>
+<p><strong>Główne role:</strong></p>
+<ul>
+<li><code>admin</code> / <code>manager</code> — tworzy, edytuje, wysyła oferty</li>
+<li><code>super_admin</code> — zarządza szablonami globalnymi (business_id = null)</li>
+<li>Klient — czyta ofertę przez publiczny link (bez logowania)</li>
+</ul>
+<p><strong>Zależności:</strong></p>
+<ul>
+<li><code>Lead</code>, <code>Client</code> — oferta jest zawsze powiązana z leadem</li>
+<li><code>LeadActivity::log()</code> — logowanie wysłania, odczytu</li>
+<li><code>BriefingTemplate.type = 'sales_offer'</code> — poprzedni krok w pipeline (briefing zbiera dane → oferta jest wysyłana)</li>
+<li><code>Quote</code> — następny krok (po akceptacji oferty, admin tworzy Quote)</li>
+<li><code>ServiceItem</code> — slug usługi do filtrowania szablonów</li>
+</ul>
+<hr>
+<h2 id="2-stan-obecny-i-delta">2. Stan obecny i delta</h2>
+<h3 id="istniejące-elementy-bez-zmian">Istniejące elementy (BEZ ZMIAN)</h3>
+<ul>
+<li><code>Quote</code>, <code>QuoteItem</code>, <code>QuoteResource</code>, <code>QuoteSentMail</code>, <code>portal.quotes.*</code></li>
+<li><code>BriefingTemplate</code>, <code>Briefing</code>, <code>BriefingService</code></li>
+<li><code>LeadResource</code>, <code>ViewLead</code> — tylko dodajemy akcje</li>
+<li><code>EmailTemplate</code> model — nie rozszerzamy</li>
+</ul>
+<h3 id="nowe-elementy-delta">Nowe elementy (delta)</h3>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Typ</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sales_offer_templates</code></td>
+<td>Migracja</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>sales_offers</code></td>
+<td>Migracja</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>SalesOfferTemplate</code></td>
+<td>Model</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>SalesOffer</code></td>
+<td>Model</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>Lead::salesOffers()</code></td>
+<td>Relacja</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>SalesOfferService</code></td>
+<td>Serwis</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>SalesOfferPolicy</code></td>
+<td>Policy</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>SalesOfferTemplatePolicy</code></td>
+<td>Policy</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>SalesOfferMail</code></td>
+<td>Mail</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>SalesOfferTemplateResource</code></td>
+<td>Filament Resource</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>SalesOfferResource</code></td>
+<td>Filament Resource</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>ViewSalesOffer</code> (Page)</td>
+<td>Filament Page + Blade</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td>Akcja &quot;Wyślij ofertę&quot; w <code>LeadResource::table()</code></td>
+<td>Action</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td>Akcja &quot;Wyślij ofertę&quot; w <code>ViewLead::getHeaderActions()</code></td>
+<td>Action</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>SalesOfferTemplateSeeder</code></td>
+<td>Seeder</td>
+<td>nowe — 18 szablonów</td>
+</tr>
+<tr>
+<td><code>GET /offers/{token}</code></td>
+<td>Route</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>PATCH /offers/{token}/view</code></td>
+<td>Route</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>ClientSalesOfferController</code></td>
+<td>Controller</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>resources/js/Pages/SalesOffer/ClientView.jsx</code></td>
+<td>React Page</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>resources/views/pdf/sales-offer.blade.php</code></td>
+<td>Blade (dompdf)</td>
+<td>nowe</td>
+</tr>
+<tr>
+<td><code>resources/views/emails/sales-offer.blade.php</code></td>
+<td>Email Blade</td>
+<td>nowe</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="3-model-danych">3. Model danych</h2>
+<h3 id="sales_offer_templates"><code>sales_offer_templates</code></h3>
+<pre class="hljs"><code><div>id           <span class="hljs-type">bigint</span> PK autoincrement
+business_id  <span class="hljs-type">char</span>(<span class="hljs-number">26</span>) nullable, FK businesses (nullOnDelete) <span class="hljs-comment">-- null = globalny</span>
+service_slug <span class="hljs-type">varchar</span>(<span class="hljs-number">100</span>) nullable, index
+<span class="hljs-keyword">language</span>     <span class="hljs-type">char</span>(<span class="hljs-number">2</span>) <span class="hljs-keyword">default</span> <span class="hljs-string">&#x27;en&#x27;</span>
+title        <span class="hljs-type">varchar</span>(<span class="hljs-number">255</span>)
+description  text nullable          <span class="hljs-comment">-- wewnętrzny opis szablonu</span>
+body         longtext               <span class="hljs-comment">-- markdown/HTML treść oferty</span>
+is_active    <span class="hljs-type">boolean</span> <span class="hljs-keyword">default</span> <span class="hljs-literal">true</span>
+sort_order   <span class="hljs-type">smallint</span> unsigned <span class="hljs-keyword">default</span> <span class="hljs-number">0</span>
+created_at, updated_at
+</div></code></pre>
+<p>Indeksy: <code>(service_slug, language, is_active)</code>, <code>(business_id)</code></p>
+<h3 id="sales_offers"><code>sales_offers</code></h3>
+<pre class="hljs"><code><div>id           <span class="hljs-type">bigint</span> PK autoincrement
+business_id  <span class="hljs-type">char</span>(<span class="hljs-number">26</span>), FK businesses (cascadeOnDelete), index
+lead_id      <span class="hljs-type">bigint</span> FK leads (cascadeOnDelete)
+template_id  <span class="hljs-type">bigint</span> nullable FK sales_offer_templates (nullOnDelete)
+created_by   <span class="hljs-type">bigint</span> nullable FK users (nullOnDelete)
+client_token <span class="hljs-type">varchar</span>(<span class="hljs-number">64</span>) <span class="hljs-keyword">unique</span> nullable    <span class="hljs-comment">-- publiczny link bez auth</span>
+title        <span class="hljs-type">varchar</span>(<span class="hljs-number">255</span>)
+<span class="hljs-keyword">language</span>     <span class="hljs-type">char</span>(<span class="hljs-number">2</span>) <span class="hljs-keyword">default</span> <span class="hljs-string">&#x27;en&#x27;</span>
+body         longtext                       <span class="hljs-comment">-- edytowalna kopia z szablonu</span>
+status       enum(<span class="hljs-string">&#x27;draft&#x27;</span>,<span class="hljs-string">&#x27;sent&#x27;</span>,<span class="hljs-string">&#x27;viewed&#x27;</span>,<span class="hljs-string">&#x27;converted&#x27;</span>) <span class="hljs-keyword">default</span> <span class="hljs-string">&#x27;draft&#x27;</span>
+sent_at      <span class="hljs-type">timestamp</span> nullable
+viewed_at    <span class="hljs-type">timestamp</span> nullable
+notes        text nullable                  <span class="hljs-comment">-- wewnętrzne notatki admina</span>
+created_at, updated_at
+deleted_at   <span class="hljs-type">timestamp</span> nullable (SoftDeletes)
+</div></code></pre>
+<p>Indeksy: <code>(lead_id, status)</code>, <code>(business_id, status)</code></p>
+<h3 id="relacje">Relacje</h3>
+<pre class="hljs"><code><div>Lead         hasMany SalesOffer
+SalesOffer   belongsTo Lead
+SalesOffer   belongsTo SalesOfferTemplate (nullable)
+SalesOffer   belongsTo User (created_by)
+SalesOffer   belongsTo Business
+SalesOfferTemplate belongsTo Business (nullable)
+</div></code></pre>
+<h3 id="scope-salesoffertemplateforbusiness">Scope <code>SalesOfferTemplate::forBusiness()</code></h3>
+<p>Zwraca szablony danego biznesu PLUS globalne (business_id = null) — analogicznie do <code>BriefingTemplate</code>.</p>
+<hr>
+<h2 id="4-backend">4. Backend</h2>
+<h3 id="migracje">Migracje</h3>
+<p><strong><code>2026_04_19_000001_create_sales_offer_templates_table.php</code></strong><br>
+<strong><code>2026_04_19_000002_create_sales_offers_table.php</code></strong></p>
+<p>Wzorzec: <code>char('business_id', 26)-&gt;nullable()</code> + manualne FK (nie <code>foreignId()</code>).</p>
+<h3 id="salesoffertemplate-model">SalesOfferTemplate (Model)</h3>
+<ul>
+<li><code>fillable</code>: business_id, service_slug, language, title, description, body, is_active, sort_order</li>
+<li><code>casts</code>: is_active → boolean</li>
+<li>Scopes: <code>scopeActive()</code>, <code>scopeForBusiness()</code>, <code>scopeForService(string $slug)</code>, <code>scopeForLanguage(string $lang)</code></li>
+<li>Helper: <code>isGlobal(): bool</code></li>
+</ul>
+<h3 id="salesoffer-model">SalesOffer (Model)</h3>
+<ul>
+<li><code>fillable</code>: business_id, lead_id, template_id, created_by, client_token, title, language, body, status, sent_at, viewed_at, notes</li>
+<li><code>casts</code>: sent_at/viewed_at → datetime</li>
+<li>SoftDeletes</li>
+<li>Helper: <code>isSent(): bool</code>, <code>isEditable(): bool</code> (tylko draft)</li>
+</ul>
+<h3 id="salesofferservice">SalesOfferService</h3>
+<pre class="hljs"><code><div><span class="hljs-title function_ invoke__">createFromTemplate</span>(Lead <span class="hljs-variable">$lead</span>, SalesOfferTemplate <span class="hljs-variable">$tpl</span>, User <span class="hljs-variable">$creator</span>): SalesOffer
+<span class="hljs-comment">// Kopiuje body z szablonu, interpoluje {{client_name}}, {{company_name}}, {{lead_title}}</span>
+<span class="hljs-comment">// Status: draft, loguje &#x27;offer_created&#x27;</span>
+
+<span class="hljs-title function_ invoke__">send</span>(SalesOffer <span class="hljs-variable">$offer</span>): <span class="hljs-keyword">void</span>
+<span class="hljs-comment">// Generuje client_token (Str::random(64))</span>
+<span class="hljs-comment">// Wysyła SalesOfferMail do client-&gt;primary_contact_email</span>
+<span class="hljs-comment">// Ustawia status=&#x27;sent&#x27;, sent_at=now()</span>
+<span class="hljs-comment">// Loguje &#x27;offer_sent&#x27; w LeadActivity</span>
+
+<span class="hljs-title function_ invoke__">markViewed</span>(SalesOffer <span class="hljs-variable">$offer</span>): <span class="hljs-keyword">void</span>
+<span class="hljs-comment">// Ustawia viewed_at=now(), status=&#x27;viewed&#x27; (jeśli sent)</span>
+<span class="hljs-comment">// Loguje &#x27;offer_viewed&#x27;</span>
+
+<span class="hljs-title function_ invoke__">convertToQuote</span>(SalesOffer <span class="hljs-variable">$offer</span>): <span class="hljs-keyword">void</span>
+<span class="hljs-comment">// Ustawia status=&#x27;converted&#x27;</span>
+<span class="hljs-comment">// Loguje &#x27;offer_converted&#x27;</span>
+</div></code></pre>
+<h3 id="salesoffermail">SalesOfferMail</h3>
+<pre class="hljs"><code><div><span class="hljs-comment">// envelope: &quot;Oferta: {offer-&gt;title} from {business-&gt;name}&quot;</span>
+<span class="hljs-comment">// content: view(&#x27;emails.sales-offer&#x27;) — ładna prezentacja HTML z CTA</span>
+<span class="hljs-comment">// attach: opcjonalnie PDF (dompdf)</span>
+</div></code></pre>
+<h3 id="clientsalesoffercontroller">ClientSalesOfferController</h3>
+<pre class="hljs"><code><div><span class="hljs-title function_ invoke__">show</span>(<span class="hljs-keyword">string</span> <span class="hljs-variable">$token</span>)  <span class="hljs-comment">// GET /offers/{token}</span>
+<span class="hljs-comment">// Pobiera SalesOffer po client_token</span>
+<span class="hljs-comment">// Wywołuje SalesOfferService::markViewed()</span>
+<span class="hljs-comment">// Inertia::render(&#x27;SalesOffer/ClientView&#x27;, [...])</span>
+
+<span class="hljs-comment">// Brak submit — oferta jest read-only</span>
+<span class="hljs-comment">// Opcjonalnie: formularz &quot;Chcę to omówić&quot; → email do admina</span>
+</div></code></pre>
+<h3 id="policy">Policy</h3>
+<p><strong>SalesOfferPolicy:</strong></p>
+<ul>
+<li><code>viewAny</code>: admin, manager, super_admin</li>
+<li><code>create</code>: admin, manager, super_admin</li>
+<li><code>update</code>: admin, manager (tylko gdy <code>isEditable()</code>)</li>
+<li><code>delete</code>: admin, super_admin</li>
+<li><code>send</code>: admin, manager</li>
+</ul>
+<p><strong>SalesOfferTemplatePolicy:</strong></p>
+<ul>
+<li><code>create</code>: admin/manager (business-scoped); super_admin (może global)</li>
+<li><code>update</code>: owner business OR super_admin; global = tylko super_admin</li>
+<li><code>delete</code>: owner business OR super_admin</li>
+</ul>
+<h3 id="rejestracja-w-appserviceprovider">Rejestracja w AppServiceProvider</h3>
+<pre class="hljs"><code><div><span class="hljs-title class_">Gate</span>::<span class="hljs-title function_ invoke__">policy</span>(<span class="hljs-title class_">SalesOffer</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-title class_">SalesOfferPolicy</span>::<span class="hljs-variable language_">class</span>);
+<span class="hljs-title class_">Gate</span>::<span class="hljs-title function_ invoke__">policy</span>(<span class="hljs-title class_">SalesOfferTemplate</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-title class_">SalesOfferTemplatePolicy</span>::<span class="hljs-variable language_">class</span>);
+</div></code></pre>
+<h3 id="leadactivity--nowe-typy">LeadActivity — nowe typy</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Ikona</th>
+<th>Kolor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>offer_created</code></td>
+<td>heroicon-m-document-plus</td>
+<td>blue</td>
+</tr>
+<tr>
+<td><code>offer_sent</code></td>
+<td>heroicon-m-paper-airplane</td>
+<td>sky</td>
+</tr>
+<tr>
+<td><code>offer_viewed</code></td>
+<td>heroicon-m-eye</td>
+<td>indigo</td>
+</tr>
+<tr>
+<td><code>offer_converted</code></td>
+<td>heroicon-m-arrow-path</td>
+<td>green</td>
+</tr>
+</tbody>
+</table>
+<h3 id="trasy">Trasy</h3>
+<pre class="hljs"><code><div><span class="hljs-comment">// routes/web.php — publiczne, bez auth</span>
+<span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">prefix</span>(<span class="hljs-string">&#x27;offers&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;offers.&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">group</span>(function () {
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;/{token}&#x27;</span>,      [<span class="hljs-title class_">ClientSalesOfferController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;show&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;show&#x27;</span>);
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">patch</span>(<span class="hljs-string">&#x27;/{token}/view&#x27;</span>,[<span class="hljs-title class_">ClientSalesOfferController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;markViewed&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;view&#x27;</span>);
+});
+</div></code></pre>
+<h3 id="seeder--salesoffertemplateseeder">Seeder — SalesOfferTemplateSeeder</h3>
+<ul>
+<li>18 globalnych szablonów (9 usług × pl + en)</li>
+<li>Pobiera treść z plików <code>docs/sales/template-{service}-sales-offer-{lang}.md</code></li>
+<li>Guard: <code>whereNull('business_id')-&gt;exists()</code> → skip jeśli już istnieją</li>
+</ul>
+<hr>
+<h2 id="5-frontend-filament">5. Frontend (Filament)</h2>
+<h3 id="salesoffertemplateresource">SalesOfferTemplateResource</h3>
+<ul>
+<li>Grupa: &quot;Sales&quot;, ikona: <code>heroicon-o-document-text</code>, sort: 4</li>
+<li>Form: TextInput(title), Select(service_slug), Select(language), Toggle(is_active), Textarea(description), <strong>MarkdownEditor(body)</strong> — pełen edytor markdown</li>
+<li>Table: title, service_slug badge, language badge, is_active, business (Global/nazwa)</li>
+<li>Pages: List, Create, Edit, View</li>
+<li><code>getEloquentQuery()</code>: non-superadmin widzi tylko <code>forBusiness()</code></li>
+</ul>
+<h3 id="salesofferresource">SalesOfferResource</h3>
+<ul>
+<li>Grupa: &quot;CRM&quot;, ikona: <code>heroicon-o-paper-airplane</code>, sort: 4</li>
+<li>Table: title, lead.title (link), status badge, sent_at, viewed_at</li>
+<li>Pages: List, View (bez Create — tworzone z Lead)</li>
+<li><code>ViewSalesOffer</code> Page:
+<ul>
+<li>Header actions: <strong>Wyślij</strong> (jeśli draft), <strong>Export PDF</strong>, <strong>Oznacz jako skonwertowaną</strong> (jeśli sent/viewed)</li>
+<li>Widok body: MarkdownEditor z autosave (debounce 1500ms) gdy status=draft</li>
+<li>Read-only preview gdy status≠draft</li>
+</ul>
+</li>
+</ul>
+<h3 id="akcja-wyślij-ofertę-w-leadresourcetable">Akcja &quot;Wyślij ofertę&quot; w LeadResource::table()</h3>
+<pre class="hljs"><code><div><span class="hljs-title class_">Action</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;send_sales_offer&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">label</span>(<span class="hljs-string">&#x27;Wyślij ofertę&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">icon</span>(<span class="hljs-string">&#x27;heroicon-o-paper-airplane&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">color</span>(<span class="hljs-string">&#x27;info&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">modalHeading</span>(<span class="hljs-string">&#x27;Wyślij ofertę sprzedażową&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">form</span>([
+        <span class="hljs-title class_">Select</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;template_id&#x27;</span>) // filtrowane per service_slug + language
+        <span class="hljs-title class_">Select</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;language&#x27;</span>)
+    ])
+    -&gt;<span class="hljs-title function_ invoke__">action</span>(fn(Lead <span class="hljs-variable">$record</span>, <span class="hljs-keyword">array</span> <span class="hljs-variable">$data</span>) =&gt; <span class="hljs-comment">/* SalesOfferService::createFromTemplate() + send() */</span>)
+</div></code></pre>
+<h3 id="akcja-wyślij-ofertę-w-viewleadgetheaderactions">Akcja &quot;Wyślij ofertę&quot; w ViewLead::getHeaderActions()</h3>
+<ul>
+<li>Identyczna logika, modal z wyborem szablonu</li>
+<li>Po wysłaniu: Notification + redirect na ViewSalesOffer</li>
+</ul>
+<h3 id="react-page-salesofferclientviewjsx">React Page: SalesOffer/ClientView.jsx</h3>
+<ul>
+<li>Publiczna strona bez layoutu portalu</li>
+<li>Header: logo business + tytuł oferty</li>
+<li>Body: sformatowany HTML/markdown (DOMPurify sanitize)</li>
+<li>Sekcje wyróżnione wizualnie</li>
+<li>CTA: &quot;Chcę to omówić — skontaktuj się z nami&quot; → mailto lub link</li>
+</ul>
+<h3 id="email-blade-emailssales-offerbladephp">Email blade: emails/sales-offer.blade.php</h3>
+<ul>
+<li>Responsywny HTML email</li>
+<li>Nagłówek: logo + &quot;Oferta dla: {company_name}&quot;</li>
+<li>Body: sformatowana treść oferty</li>
+<li>CTA button: &quot;Otwórz pełną ofertę&quot; → link <code>/offers/{token}</code></li>
+</ul>
+<hr>
+<h2 id="6-workflow">6. Workflow</h2>
+<h3 id="happy-path--wysłanie-oferty-z-leada">Happy path — wysłanie oferty z leada</h3>
+<pre class="hljs"><code><div>Admin → /admin/leads → klik &quot;Wyślij ofertę&quot; (row action)
+  → Modal: wybierz szablon (filtrowany po service_slug leada + language)
+  → Klik &quot;Wyślij&quot;
+  → SalesOfferService::createFromTemplate() → body interpolated
+  → SalesOfferService::send() → client_token, SalesOfferMail queued
+  → LeadActivity: offer_created + offer_sent
+  → Notification: &quot;Oferta wysłana na email@client.com&quot;
+  → Redirect → ViewSalesOffer (aby admin widział co zostało wysłane)
+
+Klient → odbiera email → klik CTA
+  → GET /offers/{abc123...}
+  → ClientSalesOfferController::show() → markViewed()
+  → LeadActivity: offer_viewed
+  → Inertia: SalesOffer/ClientView.jsx
+  → Klient czyta ofertę
+  → Opcjonalny CTA: mailto do admina
+
+Admin → widzi offer_viewed w LeadActivity
+  → Tworzy Quote (finansową wycenę) — osobny krok
+  → SalesOfferService::convertToQuote() → status='converted'
+</div></code></pre>
+<h3 id="edge-cases">Edge cases</h3>
+<table>
+<thead>
+<tr>
+<th>Przypadek</th>
+<th>Zachowanie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Klient nie ma emaila</td>
+<td>Notification::danger, oferta zapisana jako draft</td>
+</tr>
+<tr>
+<td>Szablon nie istnieje dla danej usługi</td>
+<td>Dropdown pusty, admin może wybrać dowolny szablon</td>
+</tr>
+<tr>
+<td>Token nieprawidłowy lub oferta deleted</td>
+<td>abort(404)</td>
+</tr>
+<tr>
+<td>Oferta już wysłana — ponowny send</td>
+<td>Blocked (isEditable() = false); admin może &quot;Reset to draft&quot;</td>
+</tr>
+<tr>
+<td>Brak szablonu — blank offer</td>
+<td>Dozwolone — admin wpisuje treść ręcznie</td>
+</tr>
+<tr>
+<td>Lead bez client_id</td>
+<td>Ostrzeżenie, można wysłać na dowolny email (custom input)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="7-test-plan">7. Test plan</h2>
+<h3 id="backend-unit">Backend Unit</h3>
+<ul>
+<li><code>SalesOfferService::createFromTemplate()</code> interpoluje zmienne w body</li>
+<li><code>SalesOfferService::send()</code> generuje unikalny token, ustawia status</li>
+<li><code>SalesOfferService::markViewed()</code> ustawia viewed_at, nie nadpisuje jeśli już ustawione</li>
+<li><code>SalesOffer::isEditable()</code> zwraca true tylko dla draft</li>
+<li><code>SalesOfferTemplate::forBusiness()</code> zwraca globalne + własne</li>
+</ul>
+<h3 id="backend-feature">Backend Feature</h3>
+<ul>
+<li>POST tworzy offer → email w kolejce</li>
+<li>GET <code>/offers/{token}</code> z prawidłowym tokenem → 200, viewed_at ustawione</li>
+<li>GET <code>/offers/invalid-token}</code> → 404</li>
+<li>GET <code>/offers/{token}</code> ponownie → viewed_at nie zmienia się</li>
+<li>Policy: manager może send, developer nie może</li>
+<li>Policy: global template edytowalny tylko przez superadmin</li>
+</ul>
+<h3 id="frontend-smoke">Frontend Smoke</h3>
+<ul>
+<li>SalesOfferTemplateResource CRUD działa (List/Create/Edit z MarkdownEditor)</li>
+<li>SalesOfferResource List wyświetla rekordy</li>
+<li>ViewSalesOffer autosave nie wysyła requestu gdy status != draft</li>
+<li>ClientView.jsx renderuje się bez logowania</li>
+<li>PDF export generuje plik</li>
+</ul>
+<hr>
+<h2 id="8-checklist-implementacji">8. Checklist implementacji</h2>
+<h3 id="faza-1--migracje-i-modele">Faza 1 — Migracje i modele</h3>
+<ul>
+<li><input type="checkbox" id="checkbox0"><label for="checkbox0"><code>2026_04_19_000001_create_sales_offer_templates_table.php</code></label></li>
+<li><input type="checkbox" id="checkbox1"><label for="checkbox1"><code>2026_04_19_000002_create_sales_offers_table.php</code></label></li>
+<li><input type="checkbox" id="checkbox2"><label for="checkbox2">Model <code>SalesOfferTemplate</code> (scope, fillable, casts, relations)</label></li>
+<li><input type="checkbox" id="checkbox3"><label for="checkbox3">Model <code>SalesOffer</code> (scope, fillable, casts, relations, helpers)</label></li>
+<li><input type="checkbox" id="checkbox4"><label for="checkbox4"><code>Lead::salesOffers()</code> relacja</label></li>
+</ul>
+<h3 id="faza-2--seeder">Faza 2 — Seeder</h3>
+<ul>
+<li><input type="checkbox" id="checkbox5"><label for="checkbox5"><code>SalesOfferTemplateSeeder</code> — 18 szablonów z docs/sales/</label></li>
+<li><input type="checkbox" id="checkbox6"><label for="checkbox6">Rejestracja w <code>DatabaseSeeder</code></label></li>
+</ul>
+<h3 id="faza-3--service-policy-mail-activity">Faza 3 — Service, Policy, Mail, Activity</h3>
+<ul>
+<li><input type="checkbox" id="checkbox7"><label for="checkbox7"><code>SalesOfferService</code> (createFromTemplate, send, markViewed, convertToQuote)</label></li>
+<li><input type="checkbox" id="checkbox8"><label for="checkbox8"><code>SalesOfferMail</code> + <code>resources/views/emails/sales-offer.blade.php</code></label></li>
+<li><input type="checkbox" id="checkbox9"><label for="checkbox9"><code>SalesOfferPolicy</code></label></li>
+<li><input type="checkbox" id="checkbox10"><label for="checkbox10"><code>SalesOfferTemplatePolicy</code></label></li>
+<li><input type="checkbox" id="checkbox11"><label for="checkbox11">Rejestracja policy w <code>AppServiceProvider</code></label></li>
+<li><input type="checkbox" id="checkbox12"><label for="checkbox12"><code>LeadActivity</code> — 4 nowe typy (icon + color + bg)</label></li>
+</ul>
+<h3 id="faza-4--filament-resources">Faza 4 — Filament Resources</h3>
+<ul>
+<li><input type="checkbox" id="checkbox13"><label for="checkbox13"><code>SalesOfferTemplateResource</code> (CRUD z MarkdownEditor)</label></li>
+<li><input type="checkbox" id="checkbox14"><label for="checkbox14">Pages: ListSalesOfferTemplates, CreateSalesOfferTemplate, EditSalesOfferTemplate, ViewSalesOfferTemplate</label></li>
+<li><input type="checkbox" id="checkbox15"><label for="checkbox15"><code>SalesOfferResource</code> (List + View)</label></li>
+<li><input type="checkbox" id="checkbox16"><label for="checkbox16"><code>ViewSalesOffer</code> Page + Blade (<code>view-sales-offer.blade.php</code>)</label></li>
+<li><input type="checkbox" id="checkbox17"><label for="checkbox17">Autosave (wire:model.live.debounce.1500ms) dla draft</label></li>
+</ul>
+<h3 id="faza-5--lead-integration">Faza 5 — Lead integration</h3>
+<ul>
+<li><input type="checkbox" id="checkbox18"><label for="checkbox18">Akcja &quot;Wyślij ofertę&quot; w <code>LeadResource::table()</code></label></li>
+<li><input type="checkbox" id="checkbox19"><label for="checkbox19">Akcja &quot;Wyślij ofertę&quot; w <code>ViewLead::getHeaderActions()</code></label></li>
+<li><input type="checkbox" id="checkbox20"><label for="checkbox20">Sekcja z listą ofert w widoku ViewLead (opcjonalnie — w blade)</label></li>
+</ul>
+<h3 id="faza-6--pdf-export">Faza 6 — PDF Export</h3>
+<ul>
+<li><input type="checkbox" id="checkbox21"><label for="checkbox21"><code>resources/views/pdf/sales-offer.blade.php</code></label></li>
+<li><input type="checkbox" id="checkbox22"><label for="checkbox22">Akcja &quot;Export PDF&quot; w <code>ViewSalesOffer</code></label></li>
+</ul>
+<h3 id="faza-7--public-link">Faza 7 — Public link</h3>
+<ul>
+<li><input type="checkbox" id="checkbox23"><label for="checkbox23">Trasy <code>/offers/{token}</code> w <code>routes/web.php</code></label></li>
+<li><input type="checkbox" id="checkbox24"><label for="checkbox24"><code>ClientSalesOfferController</code> (show, markViewed jako AJAX)</label></li>
+<li><input type="checkbox" id="checkbox25"><label for="checkbox25"><code>resources/js/Pages/SalesOffer/ClientView.jsx</code></label></li>
+<li><input type="checkbox" id="checkbox26"><label for="checkbox26">Sanitizacja HTML (DOMPurify) w ClientView</label></li>
+</ul>
+<hr>
+<h2 id="9-pytania-otwarte--decyzje-do-podjęcia">9. Pytania otwarte / decyzje do podjęcia</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Pytanie</th>
+<th>Rekomendacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Czy ClientView ma CTA &quot;Chcę to omówić&quot;?</td>
+<td>Tak — mailto lub formularz kontaktowy</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Czy wysłanie oferty auto-przesuwa etap leada do &quot;Proposal Sent&quot;?</td>
+<td>NIE (inaczej niż Quote) — admin decyduje ręcznie</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Czy admin może ponownie wysłać ofertę (resend)?</td>
+<td>Tak — nowy token, nowy email</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Czy SalesOffer jest widoczna w portalu klienta (portal.*)?</td>
+<td>NIE — wystarczy publiczny link</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Czy seeder importuje body z plików docs/sales/ automatycznie?</td>
+<td>TAK — priorytet wysoki</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Jaki edytor treści? MarkdownEditor (Filament built-in) vs TipTap?</td>
+<td>MarkdownEditor — prostszy, bez dodatkowych zależności</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>

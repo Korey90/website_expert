@@ -291,4 +291,12 @@ Route::prefix('client/briefings')->name('client.briefings.')->group(function () 
         ->middleware('throttle:10,60');
 });
 
+// -----------------------------------------------------------------------
+// Client Sales Offers — token-based, no auth required
+// -----------------------------------------------------------------------
+Route::prefix('offers')->name('offers.')->group(function () {
+    Route::get('/{token}', [\App\Http\Controllers\ClientSalesOfferController::class, 'show'])->name('show');
+    Route::post('/{token}/accept', [\App\Http\Controllers\ClientSalesOfferController::class, 'accept'])->name('accept');
+});
+
 require __DIR__.'/auth.php';
