@@ -89,4 +89,9 @@ class Lead extends Model
     {
         return $this->hasOne(LeadConsent::class);
     }
+
+    public function briefings(): HasMany
+    {
+        return $this->hasMany(Briefing::class)->latest();
+    }
 }

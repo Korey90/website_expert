@@ -3,16 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LeadResource\Pages;
+use App\Models\Briefing;
+use App\Models\BriefingTemplate;
 use App\Models\Client;
 use App\Models\Lead;
 use App\Models\LeadSource;
 use App\Models\PipelineStage;
 use App\Models\User;
+use App\Services\BriefingService;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -120,6 +125,46 @@ class LeadResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                Action::make('conduct_briefing')
+                    ->label('Conduct Briefing')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->color('primary')
+                    ->modalHeading('Start a new briefing')
+                    ->form([
+                        Forms\Components\Select::make('briefing_template_id')
+                            ->label('Select template')
+                            ->options(
+                                fn (Lead $record) => BriefingTemplate::forBusiness()
+                                    ->active()
+                                    ->when($record->service_slug ?? null, fn ($q, $slug) => $q->where(
+                                        fn ($q) => $q->where('service_slug', $slug)->orWhereNull('service_slug')
+                                    ))
+                                    ->orderBy('type')
+                                    ->orderBy('title')
+                                    ->get()
+                                    ->mapWithKeys(fn (BriefingTemplate $t) => [
+                                        $t->id => "[{$t->type}] {$t->title}" . ($t->service_slug ? " ({$t->service_slug})" : ''),
+                                    ])
+                                    ->toArray()
+                            )
+                            ->searchable()
+                            ->required(),
+                    ])
+                    ->action(function (Lead $record, array $data) {
+                        $template = BriefingTemplate::findOrFail($data['briefing_template_id']);
+                        $briefing = app(BriefingService::class)
+                            ->createFromTemplate($record, $template, auth()->user());
+
+                        Notification::make()
+                            ->title('Briefing created.')
+                            ->success()
+                            ->send();
+
+                        return redirect()->route(
+                            'filament.admin.resources.briefings.view',
+                            $briefing->id
+                        );
+                    }),
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),

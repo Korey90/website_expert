@@ -281,4 +281,14 @@ Route::prefix('lp')->name('lp.')->group(function () {
         ->middleware('throttle:3,60');
 });
 
+// -----------------------------------------------------------------------
+// Client Briefings — token-based, no auth required
+// -----------------------------------------------------------------------
+Route::prefix('client/briefings')->name('client.briefings.')->group(function () {
+    Route::get('/{token}',        [\App\Http\Controllers\ClientBriefingController::class, 'show'])->name('show');
+    Route::patch('/{token}/save', [\App\Http\Controllers\ClientBriefingController::class, 'autosave'])->name('autosave');
+    Route::post('/{token}/submit',[\App\Http\Controllers\ClientBriefingController::class, 'submit'])->name('submit')
+        ->middleware('throttle:10,60');
+});
+
 require __DIR__.'/auth.php';

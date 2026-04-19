@@ -5,6 +5,7 @@ namespace App\Filament\Resources\LeadResource\Pages;
 use App\Filament\Resources\LeadResource;
 use App\Mail\ClientEmailMail;
 use App\Mail\QuoteSentMail;
+use App\Models\BriefingTemplate;
 use App\Models\CalculatorPricing;
 use App\Models\Contract;
 use App\Models\EmailTemplate;
@@ -17,12 +18,14 @@ use App\Models\Project;
 use App\Models\Quote;
 use App\Models\QuoteItem;
 use App\Models\SmsTemplate;
+use App\Services\BriefingService;
 use App\Services\SmsService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
+use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use App\Models\User;
@@ -84,6 +87,43 @@ class ViewLead extends ViewRecord
     {
         $lead = $this->record;
         return [
+            Action::make('conduct_briefing')
+                ->label('Conduct Briefing')
+                ->icon('heroicon-o-clipboard-document-check')
+                ->color('primary')
+                ->modalHeading('Start a new briefing')
+                ->form([
+                    Forms\Components\Select::make('briefing_template_id')
+                        ->label('Select template')
+                        ->options(
+                            BriefingTemplate::forBusiness()
+                                ->active()
+                                ->orderBy('type')
+                                ->orderBy('title')
+                                ->get()
+                                ->mapWithKeys(fn (BriefingTemplate $t) => [
+                                    $t->id => "[{$t->type}] {$t->title}" . ($t->service_slug ? " ({$t->service_slug})" : ''),
+                                ])
+                                ->toArray()
+                        )
+                        ->searchable()
+                        ->required(),
+                ])
+                ->action(function (array $data) use ($lead) {
+                    $template = BriefingTemplate::findOrFail($data['briefing_template_id']);
+                    $briefing = app(BriefingService::class)
+                        ->createFromTemplate($lead, $template, auth()->user());
+
+                    Notification::make()
+                        ->title('Briefing created.')
+                        ->success()
+                        ->send();
+
+                    return redirect()->route(
+                        'filament.admin.resources.briefings.view',
+                        $briefing->id
+                    );
+                }),
             Action::make('create_contract')
                 ->label('Create Contract')
                 ->icon('heroicon-o-document-check')

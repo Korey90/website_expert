@@ -40,6 +40,9 @@ class DatabaseSeeder extends Seeder
         //pipeline stages todo checklists
         $this->call(PipelineStageChecklistSeeder::class);
 
+        // Briefing templates (global, business_id=null)
+        $this->call(BriefingTemplateSeeder::class);
+
         // ── Demo / sample data (comment out for production) ──────────────────
         // $this->call(UserSeeder::class);
         // $this->call(ClientSeeder::class);

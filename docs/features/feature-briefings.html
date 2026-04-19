@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>feature-briefings.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="feature-briefings">Feature: Briefings</h1>
+<blockquote>
+<p>Data: 2026-04-17
+Zaktualizowano: 2026-04-17 (decyzje projektowe potwierdzone)
+Status: Approved
+Bounded Context: CRM / Leads
+Priorytet: MUST HAVE (MVP)</p>
+</blockquote>
+<p><strong>Potwierdzone decyzje projektowe:</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Pytanie</th>
+<th>Decyzja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Zapis briefingu</td>
+<td>Autosave (Livewire debounce 1500ms) <strong>+</strong> ręczny przycisk „Zapisz postęp&quot;</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Eksport</td>
+<td>PDF via <strong>dompdf</strong> (dostępny w projekcie)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Szablony globalne (<code>business_id=null</code>)</td>
+<td>Widoczne i edytowalne tylko przez <strong>superadmina</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Rola klienta</td>
+<td>Admin prowadzi podczas rozmowy <strong>LUB</strong> klient wypełnia samodzielnie gdy portal aktywny</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="1-definicja">1. Definicja</h2>
+<p><strong>Cel:</strong> Umożliwić handlowcom przeprowadzenie ustrukturyzowanego briefingu z klientem bezpośrednio z poziomu systemu — na bazie gotowych szablonów z <code>docs/sales/</code> — i zapisanie wypełnionego briefingu jako rekordu powiązanego z Leadem.</p>
+<p><strong>Użytkownicy:</strong></p>
+<ul>
+<li><strong>Superadmin</strong> — CRUD szablonów globalnych (<code>business_id=null</code>), widzi wszystkie briefingi</li>
+<li><strong>Admin / Manager</strong> — tworzy szablony per-business, prowadzi i przegląda briefingi swojego businessu</li>
+<li><strong>Developer</strong> — tylko odczyt</li>
+<li><strong>Klient (portal)</strong> — może wypełnić briefing samodzielnie przez unikalny token, jeśli portal klienta jest aktywny</li>
+</ul>
+<p><strong>Zależności:</strong></p>
+<ul>
+<li><code>Lead</code> (każdy briefing jest powiązany z leadem)</li>
+<li><code>ServiceItem</code> (opcjonalne dopasowanie do usługi)</li>
+<li><code>User</code> (prowadzący briefing)</li>
+<li><code>Business</code> (multi-tenancy przez <code>business_id</code>)</li>
+<li>Szablony MD w <code>docs/sales/</code> (discovery / qualification / proposal-input)</li>
+</ul>
+<p><strong>Słownik:</strong></p>
+<ul>
+<li><strong>BriefingTemplate</strong> — szablon briefingu (record w bazie, bazujący na plikach MD z <code>docs/sales/</code>)</li>
+<li><strong>Briefing</strong> — wypełniony/aktywny briefing powiązany z konkretnym Leadem</li>
+</ul>
+<hr>
+<h2 id="2-stan-obecny-i-delta">2. Stan obecny i delta</h2>
+<h3 id="stan-obecny">Stan obecny</h3>
+<ul>
+<li>Istnieją pliki szablonów MD w <code>docs/sales/</code>:
+<ul>
+<li>9 usług × 3 typy (discovery / qualification / proposal-input) × 2 języki (en / pl) = <strong>54 pliki</strong></li>
+</ul>
+</li>
+<li>Brak modelu <code>Briefing</code> ani <code>BriefingTemplate</code> w systemie</li>
+<li>Brak Filament Resource dla briefingów</li>
+<li><code>Lead</code> posiada <code>notes</code>, <code>activities</code>, <code>checklist</code> — ale brak struktury do prowadzenia briefingu</li>
+<li>W <code>ViewLead.php</code> istnieje pattern action (Email, SMS, ProposalBuilder) — do powielenia</li>
+</ul>
+<h3 id="delta-co-budujemy">Delta (co budujemy)</h3>
+<ol>
+<li>Migracja + model <code>BriefingTemplate</code> — przechowuje szablony (sekcje, pytania) importowane lub wpisywane ręcznie</li>
+<li>Migracja + model <code>Briefing</code> — powiązanie z Leadem, stan (draft/in_progress/completed), wypełnione odpowiedzi</li>
+<li>Filament Resource <code>BriefingTemplateResource</code> — CRUD szablonów</li>
+<li>Filament Resource <code>BriefingResource</code> — CRUD briefingów (lista wszystkich w systemie)</li>
+<li>Akcja <code>ConductBriefingAction</code> w <code>ListLeads</code> — bulk/row action &quot;Wykonaj briefing&quot;</li>
+<li>Akcja <code>ConductBriefingAction</code> w <code>ViewLead</code> — header action &quot;Wykonaj briefing&quot;</li>
+<li>Widok/modal briefingu — prowadzenie briefingu sekcja po sekcji, zapis postępu, możliwość eksportu PDF</li>
+</ol>
+<hr>
+<h2 id="3-model-danych">3. Model danych</h2>
+<h3 id="31-tabela-briefing_templates">3.1 Tabela <code>briefing_templates</code></h3>
+<pre class="hljs"><code><div>briefing_templates
+├── id                     BIGINT UNSIGNED PK
+├── business_id            BIGINT UNSIGNED FK → businesses (nullable; NULL = szablon globalny)
+├── service_slug           VARCHAR(100) nullable  — np. 'google-ads', 'ecommerce'
+├── type                   ENUM('discovery','qualification','proposal_input','sales_offer')
+├── language               CHAR(2) DEFAULT 'en'   — 'en' | 'pl'
+├── title                  VARCHAR(255)
+├── description            TEXT nullable
+├── sections               JSON                   — tablica sekcji z pytaniami
+│                            [{ &quot;title&quot;: &quot;...&quot;, &quot;questions&quot;: [{ &quot;key&quot;: &quot;...&quot;, &quot;label&quot;: &quot;...&quot;, &quot;type&quot;: &quot;text|textarea|select|bool&quot;, &quot;required&quot;: bool }] }]
+├── is_active              BOOLEAN DEFAULT true
+├── sort_order             SMALLINT DEFAULT 0
+├── created_at / updated_at
+</div></code></pre>
+<h3 id="32-tabela-briefings">3.2 Tabela <code>briefings</code></h3>
+<pre class="hljs"><code><div>briefings
+├── id                     BIGINT UNSIGNED PK
+├── business_id            BIGINT UNSIGNED FK → businesses
+├── lead_id                BIGINT UNSIGNED FK → leads
+├── briefing_template_id   BIGINT UNSIGNED FK → briefing_templates (nullable)
+├── conducted_by           BIGINT UNSIGNED FK → users (nullable gdy wypełnia klient samodzielnie)
+├── client_token           VARCHAR(64) nullable, unique
+│                            — jednorazowy token do dostępu z portalu klienta
+│                            — generowany gdy admin klika „Udostępnij klientowi&quot;
+│                            — NULL gdy admin prowadzi briefing samodzielnie
+├── client_submitted_at    TIMESTAMP nullable — kiedy klient zatwierdził odpowiedzi
+├── title                  VARCHAR(255)       — domyślnie &quot;{LeadTitle} — {TemplateTitle} — {date}&quot;
+├── type                   ENUM('discovery','qualification','proposal_input','sales_offer','custom')
+├── language               CHAR(2) DEFAULT 'en'
+├── status                 ENUM('draft','in_progress','completed','cancelled') DEFAULT 'draft'
+├── answers                JSON               — odpowiedzi per sekcja per pytanie
+│                            { &quot;section_key&quot;: { &quot;question_key&quot;: &quot;answer_value&quot; } }
+├── autosave_at            TIMESTAMP nullable — timestamp ostatniego autosave
+├── notes                  TEXT nullable      — dodatkowe notatki handlowca
+├── completed_at           TIMESTAMP nullable
+├── created_at / updated_at
+├── deleted_at             TIMESTAMP nullable (SoftDeletes)
+</div></code></pre>
+<h3 id="33-relacje">3.3 Relacje</h3>
+<pre class="hljs"><code><div>Lead         hasMany  Briefing
+Briefing     belongsTo Lead
+Briefing     belongsTo BriefingTemplate (nullable)
+Briefing     belongsTo User (conducted_by)
+Briefing     belongsTo Business
+BriefingTemplate belongsTo Business (nullable)
+</div></code></pre>
+<h3 id="34-seeder-szablonów">3.4 Seeder szablonów</h3>
+<p><code>BriefingTemplateSeeder</code> — importuje strukturę z plików MD w <code>docs/sales/</code> do tabeli <code>briefing_templates</code>.
+Format sekcji JSON pokrywa pytania z szablonów MD. Seeder uruchamiany raz; pliki MD pozostają jako źródło prawdy do ewentualnego re-importu.</p>
+<p><strong>Mapowanie pliku → rekord:</strong></p>
+<pre class="hljs"><code><div>template-{service_slug}-discovery-en.md
+→ BriefingTemplate { service_slug, type:'discovery', language:'en', title, sections: [...] }
+</div></code></pre>
+<hr>
+<h2 id="4-backend">4. Backend</h2>
+<h3 id="41-modele">4.1 Modele</h3>
+<p><strong><code>App\Models\BriefingTemplate</code></strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// fillable: business_id, service_slug, type, language, title, description, sections, is_active, sort_order</span>
+<span class="hljs-comment">// casts: sections =&gt; &#x27;array&#x27;, is_active =&gt; &#x27;boolean&#x27;</span>
+<span class="hljs-comment">// scopes: scopeActive(), scopeForService(string $slug), scopeForLanguage(string $lang)</span>
+<span class="hljs-comment">// belongs to Business (nullable)</span>
+</div></code></pre>
+<p><strong><code>App\Models\Briefing</code></strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// fillable: business_id, lead_id, briefing_template_id, conducted_by, title, type, language, status, answers, notes, completed_at</span>
+<span class="hljs-comment">// casts: answers =&gt; &#x27;array&#x27;, completed_at =&gt; &#x27;datetime&#x27;</span>
+<span class="hljs-comment">// SoftDeletes</span>
+<span class="hljs-comment">// relations: lead(), template(), conductedBy(), business()</span>
+<span class="hljs-comment">// method: isComplete(): bool — sprawdza czy wszystkie required pytania mają odpowiedź</span>
+<span class="hljs-comment">// method: getProgressPercentage(): int — % wypełnionych required pytań</span>
+</div></code></pre>
+<h3 id="42-migracje">4.2 Migracje</h3>
+<p><strong><code>create_briefing_templates_table</code></strong> — tabela jak w 3.1
+<strong><code>create_briefings_table</code></strong> — tabela jak w 3.2</p>
+<h3 id="43-seeder">4.3 Seeder</h3>
+<p><strong><code>BriefingTemplateSeeder</code></strong></p>
+<ul>
+<li>Parsuje pliki MD z <code>docs/sales/</code> (discovery + qualification + proposal-input)</li>
+<li>Wyodrębnia sekcje i pytania (nagłówki H2/H3 → sekcje, pytania z bloków → pola)</li>
+<li>Zapisuje jako JSON <code>sections</code> w <code>briefing_templates</code></li>
+<li>Fallback: dla brakujących plików tworzy szablon z jedną sekcją &quot;Notatki ogólne&quot;</li>
+<li><code>is_active = true</code>, <code>business_id = null</code> (szablony globalne)</li>
+</ul>
+<h3 id="44-service">4.4 Service</h3>
+<p><strong><code>App\Services\BriefingService</code></strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// createFromTemplate(Lead $lead, BriefingTemplate $template, User $conductor): Briefing</span>
+<span class="hljs-comment">//   - Tworzy Briefing z status=&#x27;draft&#x27;, answers={}, autosave_at=null</span>
+<span class="hljs-comment">//   - Loguje LeadActivity type=&#x27;briefing_started&#x27;</span>
+
+<span class="hljs-comment">// saveAnswers(Briefing $briefing, array $answers): void</span>
+<span class="hljs-comment">//   - Merge answers (patch per klucz — nie nadpisuje całości)</span>
+<span class="hljs-comment">//   - Aktualizuje status na &#x27;in_progress&#x27; jeśli był &#x27;draft&#x27;</span>
+<span class="hljs-comment">//   - Ustawia autosave_at = now()</span>
+<span class="hljs-comment">//   - Wywoływane przez autosave (debounce 1500ms) I przez ręczny przycisk</span>
+
+<span class="hljs-comment">// complete(Briefing $briefing, array $answers, ?string $notes): Briefing</span>
+<span class="hljs-comment">//   - Wywołuje saveAnswers() przed walidacją</span>
+<span class="hljs-comment">//   - Waliduje required pytania — rzuca ValidationException przy brakach</span>
+<span class="hljs-comment">//   - Ustawia status=&#x27;completed&#x27;, completed_at=now()</span>
+<span class="hljs-comment">//   - Loguje LeadActivity type=&#x27;briefing_completed&#x27;</span>
+
+<span class="hljs-comment">// cancel(Briefing $briefing): void</span>
+<span class="hljs-comment">//   - status=&#x27;cancelled&#x27;</span>
+<span class="hljs-comment">//   - Loguje LeadActivity type=&#x27;briefing_cancelled&#x27;</span>
+
+<span class="hljs-comment">// shareWithClient(Briefing $briefing): string</span>
+<span class="hljs-comment">//   - Wymaga: portal klienta aktywny (Setting::get(&#x27;client_portal_enabled&#x27;))</span>
+<span class="hljs-comment">//   - Generuje unikalny client_token (64-znakowy hex)</span>
+<span class="hljs-comment">//   - Zapisuje token w briefingu</span>
+<span class="hljs-comment">//   - Loguje LeadActivity type=&#x27;briefing_shared_with_client&#x27;</span>
+<span class="hljs-comment">//   - Zwraca URL: /client/briefings/{token}</span>
+
+<span class="hljs-comment">// submitByClient(Briefing $briefing, array $answers): Briefing</span>
+<span class="hljs-comment">//   - Merge answers, ustawia client_submitted_at=now()</span>
+<span class="hljs-comment">//   - Status → &#x27;in_progress&#x27; (admin musi jeszcze zatwierdzić → &#x27;completed&#x27;)</span>
+<span class="hljs-comment">//   - Loguje LeadActivity type=&#x27;briefing_submitted_by_client&#x27;</span>
+</div></code></pre>
+<h3 id="45-actions-filament">4.5 Actions (Filament)</h3>
+<p><strong><code>App\Filament\Actions\ConductBriefingAction</code></strong> — reusable Filament Action</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// Może być użyta zarówno w tabeli (ListLeads) jak i w nagłówku (ViewLead)</span>
+<span class="hljs-comment">// Krok 1: Wybór szablonu (service_slug + type + language) — Select z opcjami z BriefingTemplate::active()</span>
+<span class="hljs-comment">// Krok 2: Otwiera modal/slide-over z formularzem briefingu</span>
+<span class="hljs-comment">// submit: BriefingService::createFromTemplate() + redirect do widoku briefingu</span>
+<span class="hljs-comment">// Wymaga: $lead jako record</span>
+</div></code></pre>
+<h3 id="46-policies">4.6 Policies</h3>
+<p><strong><code>App\Policies\BriefingPolicy</code></strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// viewAny: admin, manager</span>
+<span class="hljs-comment">// view: właściciel (conducted_by) lub admin lub superadmin</span>
+<span class="hljs-comment">// create: admin, manager</span>
+<span class="hljs-comment">// update: admin, manager (tylko status != completed/cancelled)</span>
+<span class="hljs-comment">// delete: admin, superadmin</span>
+<span class="hljs-comment">// shareWithClient: admin, manager (tylko gdy portal klienta aktywny)</span>
+<span class="hljs-comment">// Brak dostępu developer do tworzenia/edycji</span>
+<span class="hljs-comment">// Klient — dostęp wyłącznie przez client_token (guard osobny, bez standardowej Policy)</span>
+</div></code></pre>
+<p><strong><code>App\Policies\BriefingTemplatePolicy</code></strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// viewAny: admin, manager, superadmin</span>
+<span class="hljs-comment">// view: admin/manager (tylko własny business), superadmin (globalne + wszystkie)</span>
+<span class="hljs-comment">// create: admin/manager (per-business); superadmin (może tworzyć globalne business_id=null)</span>
+<span class="hljs-comment">// update: właściciel lub superadmin</span>
+<span class="hljs-comment">// delete: właściciel lub superadmin</span>
+<span class="hljs-comment">// WAŻNE: szablony globalne (business_id=null) może edytować wyłącznie superadmin</span>
+</div></code></pre>
+<h3 id="47-leadactivity-types-addytywne">4.7 LeadActivity types (addytywne)</h3>
+<p>Dodać do istniejącego systemu aktywności:</p>
+<ul>
+<li><code>briefing_started</code></li>
+<li><code>briefing_completed</code></li>
+<li><code>briefing_cancelled</code></li>
+<li><code>briefing_shared_with_client</code></li>
+<li><code>briefing_submitted_by_client</code></li>
+</ul>
+<h3 id="48-routes-portal-klienta">4.8 Routes (portal klienta)</h3>
+<pre class="hljs"><code><div><span class="hljs-comment">// routes/web.php — bez auth guard; weryfikacja przez middleware client_token</span>
+<span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">middleware</span>([<span class="hljs-string">&#x27;client.portal.active&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">group</span>(function () {
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;/client/briefings/{token}&#x27;</span>,   [<span class="hljs-title class_">ClientBriefingController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;show&#x27;</span>]);
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">post</span>(<span class="hljs-string">&#x27;/client/briefings/{token}&#x27;</span>,  [<span class="hljs-title class_">ClientBriefingController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;submit&#x27;</span>]);
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">patch</span>(<span class="hljs-string">&#x27;/client/briefings/{token}/autosave&#x27;</span>, [<span class="hljs-title class_">ClientBriefingController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;autosave&#x27;</span>]);
+});
+</div></code></pre>
+<p><strong><code>App\Http\Controllers\ClientBriefingController</code></strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// show:     weryfikuje token, sprawdza status != completed/cancelled</span>
+<span class="hljs-comment">//           Renderuje Inertia page &#x27;Briefing/ClientFill&#x27;</span>
+<span class="hljs-comment">// submit:   waliduje token, wywołuje BriefingService::submitByClient() → strona sukcesu</span>
+<span class="hljs-comment">// autosave: waliduje token, wywołuje BriefingService::saveAnswers() → JSON 200</span>
+<span class="hljs-comment">// Middleware client.portal.active: sprawdza Setting::get(&#x27;client_portal_enabled&#x27;) → 503 gdy off</span>
+</div></code></pre>
+<hr>
+<h2 id="5-frontend-filament">5. Frontend (Filament)</h2>
+<h3 id="51-briefingtemplateresource">5.1 <code>BriefingTemplateResource</code></h3>
+<p><strong>Plik:</strong> <code>app/Filament/Resources/BriefingTemplateResource.php</code>
+<strong>Strony:</strong> ListBriefingTemplates, CreateBriefingTemplate, EditBriefingTemplate, ViewBriefingTemplate
+<strong>Navigation:</strong> Group: &quot;Sales&quot;, Icon: <code>heroicon-o-document-text</code>, Sort: 3</p>
+<p><strong>Formularz:</strong></p>
+<pre class="hljs"><code><div>TextInput: title (required)
+Select: service_slug (opcje z ServiceItem::pluck('slug','slug'))
+Select: type (discovery | qualification | proposal_input | sales_offer | custom)
+Select: language (en | pl)
+Textarea: description
+Toggle: is_active
+Repeater: sections
+  └── TextInput: title (sekcja)
+  └── Repeater: questions
+        ├── TextInput: key (snake_case, required)
+        ├── TextInput: label (required)
+        ├── Select: type (text | textarea | select | boolean | rating)
+        ├── TextInput: placeholder (opcjonalne)
+        └── Toggle: required
+</div></code></pre>
+<p><strong>Tabela (lista):</strong></p>
+<pre class="hljs"><code><div>TextColumn: title | service_slug | type (badge) | language (badge) | is_active (toggle)
+Actions: View, Edit, Delete
+Filters: type, service_slug, language, is_active
+</div></code></pre>
+<h3 id="52-briefingresource">5.2 <code>BriefingResource</code></h3>
+<p><strong>Plik:</strong> <code>app/Filament/Resources/BriefingResource.php</code>
+<strong>Strony:</strong> ListBriefings, ViewBriefing
+<strong>Navigation:</strong> Group: &quot;CRM&quot; (obok LeadResource), Icon: <code>heroicon-o-clipboard-document-list</code>, Sort: 3</p>
+<p><strong>Tabela (lista):</strong></p>
+<pre class="hljs"><code><div>TextColumn: title | lead.title (link) | conductedBy.name | type (badge) | status (badge) | completed_at
+Badge colors: draft=gray, in_progress=warning, completed=success, cancelled=danger
+Actions: View, Delete (soft)
+Filters: status, type, language, conducted_by
+DefaultSort: created_at DESC
+</div></code></pre>
+<p><strong>ViewBriefing — strona szczegółów:</strong></p>
+<pre class="hljs"><code><div>Sekcja górna: metadane (lead, szablon, prowadzący, status, created_at)
+Progress bar: getProgressPercentage()
+Sekcje briefingu: każda sekcja jako akordeon
+  └── Pytanie → odpowiedź (lub placeholder &quot;Brak odpowiedzi&quot;)
+Notatki handlowca
+Header actions:
+  - &quot;Kontynuuj briefing&quot; (jeśli status != completed/cancelled) → modal briefingu
+  - &quot;Eksport PDF&quot; → BriefingExportAction
+  - &quot;Oznacz jako ukończony&quot; (jeśli in_progress)
+  - DeleteAction
+</div></code></pre>
+<h3 id="53-integracja-w-listleads">5.3 Integracja w <code>ListLeads</code></h3>
+<p><strong>Plik:</strong> <code>app/Filament/Resources/LeadResource.php</code> — metoda <code>table()</code></p>
+<p>Dodać do sekcji <code>-&gt;actions([...])</code>:</p>
+<pre class="hljs"><code><div><span class="hljs-title class_">Action</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;conduct_briefing&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">label</span>(<span class="hljs-string">&#x27;Wykonaj briefing&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">icon</span>(<span class="hljs-string">&#x27;heroicon-o-clipboard-document-check&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">color</span>(<span class="hljs-string">&#x27;primary&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">modalHeading</span>(<span class="hljs-string">&#x27;Wybierz szablon briefingu&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">form</span>([
+        <span class="hljs-title class_">Select</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;briefing_template_id&#x27;</span>)
+            -&gt;<span class="hljs-title function_ invoke__">label</span>(<span class="hljs-string">&#x27;Szablon&#x27;</span>)
+            -&gt;<span class="hljs-title function_ invoke__">options</span>(fn () =&gt; <span class="hljs-title class_">BriefingTemplate</span>::<span class="hljs-title function_ invoke__">active</span>()-&gt;<span class="hljs-title function_ invoke__">get</span>()-&gt;<span class="hljs-title function_ invoke__">mapWithKeys</span>(...))
+            -&gt;<span class="hljs-title function_ invoke__">searchable</span>()
+            -&gt;<span class="hljs-title function_ invoke__">required</span>(),
+    ])
+    -&gt;<span class="hljs-title function_ invoke__">action</span>(fn (Lead <span class="hljs-variable">$record</span>, <span class="hljs-keyword">array</span> <span class="hljs-variable">$data</span>, ConductBriefingAction <span class="hljs-variable">$action</span>) =&gt; <span class="hljs-variable">$action</span>-&gt;<span class="hljs-title function_ invoke__">execute</span>(<span class="hljs-variable">$record</span>, <span class="hljs-variable">$data</span>))
+    -&gt;<span class="hljs-title function_ invoke__">successRedirectUrl</span>(fn (Briefing <span class="hljs-variable">$briefing</span>) =&gt; <span class="hljs-title class_">BriefingResource</span>::<span class="hljs-title function_ invoke__">getUrl</span>(<span class="hljs-string">&#x27;view&#x27;</span>, [<span class="hljs-string">&#x27;record&#x27;</span> =&gt; <span class="hljs-variable">$briefing</span>]))
+</div></code></pre>
+<h3 id="54-integracja-w-viewlead">5.4 Integracja w <code>ViewLead</code></h3>
+<p><strong>Plik:</strong> <code>app/Filament/Resources/LeadResource/Pages/ViewLead.php</code> — metoda <code>getHeaderActions()</code></p>
+<p>Dodać jako pierwszy element listy:</p>
+<pre class="hljs"><code><div><span class="hljs-title class_">Action</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;conduct_briefing&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">label</span>(<span class="hljs-string">&#x27;Wykonaj briefing&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">icon</span>(<span class="hljs-string">&#x27;heroicon-o-clipboard-document-check&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">color</span>(<span class="hljs-string">&#x27;primary&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">modalHeading</span>(<span class="hljs-string">&#x27;Nowy briefing&#x27;</span>)
+    -&gt;<span class="hljs-title function_ invoke__">form</span>([
+        <span class="hljs-title class_">Select</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;briefing_template_id&#x27;</span>)
+            -&gt;<span class="hljs-title function_ invoke__">label</span>(<span class="hljs-string">&#x27;Szablon briefingu&#x27;</span>)
+            -&gt;<span class="hljs-title function_ invoke__">options</span>(fn () =&gt; <span class="hljs-title class_">BriefingTemplate</span>::<span class="hljs-title function_ invoke__">active</span>()-&gt;<span class="hljs-title function_ invoke__">forBusiness</span>()-&gt;<span class="hljs-title function_ invoke__">get</span>()-&gt;<span class="hljs-title function_ invoke__">mapWithKeys</span>(...))
+            -&gt;<span class="hljs-title function_ invoke__">searchable</span>()
+            -&gt;<span class="hljs-title function_ invoke__">required</span>(),
+    ])
+    -&gt;<span class="hljs-title function_ invoke__">action</span>(fn (<span class="hljs-keyword">array</span> <span class="hljs-variable">$data</span>) =&gt; <span class="hljs-title function_ invoke__">redirect</span>(<span class="hljs-title class_">BriefingResource</span>::<span class="hljs-title function_ invoke__">getUrl</span>(<span class="hljs-string">&#x27;view&#x27;</span>, [
+        <span class="hljs-string">&#x27;record&#x27;</span> =&gt; <span class="hljs-title function_ invoke__">app</span>(<span class="hljs-title class_">BriefingService</span>::<span class="hljs-variable language_">class</span>)-&gt;<span class="hljs-title function_ invoke__">createFromTemplate</span>(
+            <span class="hljs-variable">$this</span>-&gt;record,
+            <span class="hljs-title class_">BriefingTemplate</span>::<span class="hljs-title function_ invoke__">findOrFail</span>(<span class="hljs-variable">$data</span>[<span class="hljs-string">&#x27;briefing_template_id&#x27;</span>]),
+            <span class="hljs-title function_ invoke__">auth</span>()-&gt;<span class="hljs-title function_ invoke__">user</span>()
+        )
+    ])))
+</div></code></pre>
+<h3 id="55-prowadzenie-briefingu--viewbriefing-tryb-edycji">5.5 Prowadzenie briefingu — ViewBriefing (tryb edycji)</h3>
+<p>Prowadzenie briefingu na dedykowanej stronie <code>ViewBriefing</code> (nie inline modal):</p>
+<p><strong>Autosave:</strong></p>
+<pre class="hljs"><code><div>- Livewire wire:model.live.debounce.1500ms na każdym polu formularza
+- Po każdej zmianie wywołuje saveAnswers() w tle (AJAX)
+- Wizualny wskaźnik stanu: „Zapisuję...&quot; → „Zapisano [HH:MM]&quot; (na podstawie autosave_at)
+- Przycisk „Zapisz postęp&quot; — jawny zapis na żądanie (bez oczekiwania na debounce)
+- Oba mechanizmy wywołują tę samą metodę BriefingService::saveAnswers()
+</div></code></pre>
+<p><strong>Formularz (każda sekcja jako Filament Section, akordeon):</strong></p>
+<pre class="hljs"><code><div>Każde pytanie renderowane dynamicznie na podstawie type:
+  - type=text     → TextInput (wire:model.live.debounce.1500ms)
+  - type=textarea → Textarea rows=4 (wire:model.live.debounce.1500ms)
+  - type=select   → Select z opcjami z definicji pytania
+  - type=boolean  → Toggle
+  - type=rating   → Select (1–5)
+</div></code></pre>
+<p><strong>Header actions w trybie edycji:</strong></p>
+<pre class="hljs"><code><div>- „Zapisz postęp&quot; (primary) → saveAnswers() jawny
+- „Udostępnij klientowi&quot; (secondary) → shareWithClient() → kopiuj URL
+  - visible: tylko gdy Setting::get('client_portal_enabled') = true
+  - Pokazuje URL do skopiowania lub opcję „Wyślij emailem&quot;
+- „Ukończ briefing&quot; (success) → complete() — waliduje required, status=completed
+- „Anuluj&quot; (danger, z potwierdzeniem) → cancel()
+</div></code></pre>
+<h3 id="56-frontend-portalu-klienta--briefingclientfill">5.6 Frontend portalu klienta — <code>Briefing/ClientFill</code></h3>
+<p><strong>Plik:</strong> <code>resources/js/Pages/Briefing/ClientFill.tsx</code></p>
+<pre class="hljs"><code><div>Layout: publiczny (bez sidebaru Filament, bez auth)
+Komponenty:
+  - Nagłówek z logo Website Expert i tytułem briefingu
+  - Sekcje z pytaniami — ta sama logika renderowania (type → komponent React)
+  - Autosave: PATCH /client/briefings/{token}/autosave po debounce 1500ms
+  - Wskaźnik zapisu (identyczny z widokiem admina)
+  - Przycisk „Zapisz i wróć później&quot; → autosave
+  - Przycisk „Zatwierdź i wyślij&quot; → POST → strona potwierdzenia
+Język: wynika z briefing.language (en/pl)
+Po zatwierdzeniu: strona sukcesu „Dziękujemy — Twoje odpowiedzi zostały zapisane&quot;
+</div></code></pre>
+<hr>
+<h2 id="6-workflow">6. Workflow</h2>
+<h3 id="61-happy-path-a--admin-prowadzi-briefing-podczas-rozmowy-z-klientem">6.1 Happy path A — admin prowadzi briefing podczas rozmowy z klientem</h3>
+<pre class="hljs"><code><div>1. Admin otwiera /admin/leads/ lub /admin/leads/{id}
+2. Klika „Wykonaj briefing&quot; → modal wyboru szablonu
+3. System tworzy Briefing { status:'draft', answers:{} } → redirect do /admin/briefings/{id}
+4. Admin widzi formularz z sekcjami — Livewire autosave aktywny (debounce 1500ms)
+5. Wpisuje odpowiedzi podczas rozmowy — każda zmiana autosave'owana w tle
+6. Może kliknąć „Zapisz postęp&quot; dla pewności
+7. Po zakończeniu klika „Ukończ briefing&quot;
+8. System waliduje required pytania → status='completed', completed_at=now()
+9. LeadActivity 'briefing_completed' zalogowana
+10. Admin eksportuje briefing do PDF (dompdf)
+</div></code></pre>
+<h3 id="62-happy-path-b--klient-wypełnia-briefing-samodzielnie-przez-portal">6.2 Happy path B — klient wypełnia briefing samodzielnie przez portal</h3>
+<pre class="hljs"><code><div>1. Admin tworzy Briefing (status='draft')
+2. Klika „Udostępnij klientowi&quot; → system generuje client_token
+   → LeadActivity 'briefing_shared_with_client' zalogowana
+3. Admin kopiuje URL /client/briefings/{token} i wysyła klientowi
+4. Klient otwiera URL → widzi formularz w publicznym layoucie (język z briefing.language)
+5. Klient wypełnia odpowiedzi — autosave PATCH /client/briefings/{token}/autosave
+6. Klient klika „Zatwierdź i wyślij&quot;
+   → client_submitted_at=now(), status='in_progress'
+   → LeadActivity 'briefing_submitted_by_client' zalogowana
+7. Admin widzi powiadomienie / aktywność na Leadzie
+8. Admin przegląda odpowiedzi w /admin/briefings/{id}, uzupełnia notatki
+9. Admin klika „Ukończ briefing&quot; → status='completed'
+10. Admin eksportuje PDF
+</div></code></pre>
+<h3 id="63-edge-cases">6.3 Edge cases</h3>
+<table>
+<thead>
+<tr>
+<th>Sytuacja</th>
+<th>Zachowanie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Brak szablonów w systemie</td>
+<td>Modal informuje o braku szablonów; link do BriefingTemplateResource</td>
+</tr>
+<tr>
+<td>Lead bez klienta</td>
+<td>Briefing można stworzyć; client_id=null na lead jest możliwe</td>
+</tr>
+<tr>
+<td>Wielokrotne briefingi tego samego leada</td>
+<td>Dozwolone — każdy ma osobny rekord; lista widoczna w ViewLead</td>
+</tr>
+<tr>
+<td>Admin wychodzi podczas wypełniania</td>
+<td>Status 'draft'/'in_progress', autosave zapisał stan; kontynuacja w dowolnym momencie</td>
+</tr>
+<tr>
+<td>Autosave i ręczny zapis jednocześnie</td>
+<td>Debounce resetowany przy jawnym zapisie; nie ma duplikacji requestów</td>
+</tr>
+<tr>
+<td>Próba edycji completed briefingu</td>
+<td>Formularz readonly; akcje „Udostępnij&quot;, „Kontynuuj&quot; ukryte; tylko eksport PDF</td>
+</tr>
+<tr>
+<td>Szablon usunięty po stworzeniu briefingu</td>
+<td>briefing_template_id nullable FK; briefing wyświetla answers bez struktury szablonu</td>
+</tr>
+<tr>
+<td>Szablony globalne (business_id=null)</td>
+<td>Widoczne dla wszystkich jako read-only; edytowalne tylko przez superadmina</td>
+</tr>
+<tr>
+<td>Klient otwiera token po ukończeniu briefingu</td>
+<td>403 z komunikatem „Ten briefing został już zakończony&quot;</td>
+</tr>
+<tr>
+<td>Portal klienta wyłączony</td>
+<td>Przycisk „Udostępnij klientowi&quot; ukryty; GET /client/briefings/{token} → 503</td>
+</tr>
+<tr>
+<td>Klient odświeża stronę w trakcie</td>
+<td>Autosave zapisał stan; formularz odtwarza answers z props Inertia przy reloadzie</td>
+</tr>
+<tr>
+<td>business_id mismatch</td>
+<td>BriefingTemplate scopeForBusiness() filtruje po currentBusiness() — wzorzec z LeadResource</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="7-test-plan">7. Test plan</h2>
+<h3 id="71-unit">7.1 Unit</h3>
+<ul>
+<li><code>BriefingService::createFromTemplate()</code> — tworzy Briefing z poprawnym statusem i answers={}</li>
+<li><code>BriefingService::saveAnswers()</code> — merge nie nadpisuje istniejących odpowiedzi przy partial update</li>
+<li><code>BriefingService::complete()</code> — rzuca wyjątek gdy required pytania bez odpowiedzi</li>
+<li><code>Briefing::getProgressPercentage()</code> — poprawnie liczy % dla 0/3 → 5/3 (&gt;100% niemożliwe) pytań wymaganych</li>
+<li><code>BriefingPolicy</code> — manager może tworzyć, developer nie może</li>
+</ul>
+<h3 id="72-feature--admin">7.2 Feature — admin</h3>
+<ul>
+<li>POST <code>/admin/briefings</code> → tworzy Briefing, redirect do ViewBriefing — ✓</li>
+<li>Akcja „Wykonaj briefing&quot; w ListLeads → modal, submit → redirect do briefingu — ✓</li>
+<li>Akcja „Wykonaj briefing&quot; w ViewLead → modal, submit → redirect do briefingu — ✓</li>
+<li>Autosave wysyła PATCH po debounce 1500ms, aktualizuje autosave_at — ✓</li>
+<li>Ręczny przycisk „Zapisz postęp&quot; wywołuje tę samą metodę co autosave — ✓</li>
+<li>„Ukończ briefing&quot; waliduje required, ustawia status=completed — ✓</li>
+<li>Eksport PDF zwraca poprawny <code>.pdf</code> z sekcjami i odpowiedziami — ✓</li>
+<li>Szablony globalne (business_id=null) widoczne tylko superadminowi — ✓</li>
+<li>Filtrowanie po <code>business_id</code> — briefingi innego business niewidoczne — ✓</li>
+<li><code>BriefingTemplateSeeder</code> — tworzy 54 rekordy globalne — ✓</li>
+</ul>
+<h3 id="73-feature--portal-klienta">7.3 Feature — portal klienta</h3>
+<ul>
+<li>GET <code>/client/briefings/{token}</code> → 200 gdy token aktywny, portal włączony — ✓</li>
+<li>GET <code>/client/briefings/{token}</code> → 403 gdy briefing completed — ✓</li>
+<li>GET <code>/client/briefings/{token}</code> → 503 gdy portal klienta wyłączony — ✓</li>
+<li>PATCH <code>/client/briefings/{token}/autosave</code> → 200 JSON, nie zmienia statusu — ✓</li>
+<li>POST <code>/client/briefings/{token}</code> → client_submitted_at=now(), status=in_progress, activity logged — ✓</li>
+<li>Po submit klient widzi stronę potwierdzenia — ✓</li>
+</ul>
+<hr>
+<h2 id="8-checklist-implementacji">8. Checklist implementacji</h2>
+<h3 id="faza-1--model-i-migracje">Faza 1 — Model i migracje</h3>
+<ul>
+<li><input type="checkbox" id="checkbox0"><label for="checkbox0">Migracja <code>create_briefing_templates_table</code></label></li>
+<li><input type="checkbox" id="checkbox1"><label for="checkbox1">Migracja <code>create_briefings_table</code></label></li>
+<li><input type="checkbox" id="checkbox2"><label for="checkbox2">Model <code>BriefingTemplate</code> (fillable, casts, scopes, relations)</label></li>
+<li><input type="checkbox" id="checkbox3"><label for="checkbox3">Model <code>Briefing</code> (fillable, casts, SoftDeletes, relations, helper methods)</label></li>
+<li><input type="checkbox" id="checkbox4"><label for="checkbox4">Dodać relację <code>Lead::briefings()</code> → hasMany(Briefing::class)</label></li>
+</ul>
+<h3 id="faza-2--seeder-szablonów">Faza 2 — Seeder szablonów</h3>
+<ul>
+<li><input type="checkbox" id="checkbox5"><label for="checkbox5"><code>BriefingTemplateSeeder</code> — parsowanie plików MD lub ręczne sekcje dla 9 usług × 3 typy × 2 języki</label></li>
+<li><input type="checkbox" id="checkbox6"><label for="checkbox6">Zarejestrować w <code>DatabaseSeeder</code> (warunkowo, jeśli tabela pusta)</label></li>
+</ul>
+<h3 id="faza-3--service-i-policy">Faza 3 — Service i Policy</h3>
+<ul>
+<li><input type="checkbox" id="checkbox7"><label for="checkbox7"><code>BriefingService</code> (createFromTemplate, saveAnswers, complete, cancel)</label></li>
+<li><input type="checkbox" id="checkbox8"><label for="checkbox8"><code>BriefingPolicy</code> + rejestracja w <code>AuthServiceProvider</code></label></li>
+<li><input type="checkbox" id="checkbox9"><label for="checkbox9">Dodać typy aktywności do systemu <code>LeadActivity</code></label></li>
+</ul>
+<h3 id="faza-4--filament-resources">Faza 4 — Filament Resources</h3>
+<ul>
+<li><input type="checkbox" id="checkbox10"><label for="checkbox10"><code>BriefingTemplateResource</code> (CRUD — formularz z Repeater dla sections/questions)</label></li>
+<li><input type="checkbox" id="checkbox11"><label for="checkbox11"><code>BriefingResource</code> (lista + widok + tryb edycji/prowadzenia briefingu)</label></li>
+<li><input type="checkbox" id="checkbox12"><label for="checkbox12">Zarejestrować oba resources w panelu</label></li>
+</ul>
+<h3 id="faza-5--integracja-z-leadami">Faza 5 — Integracja z Leadami</h3>
+<ul>
+<li><input type="checkbox" id="checkbox13"><label for="checkbox13">Akcja &quot;Wykonaj briefing&quot; w <code>LeadResource::table()</code> (table row action)</label></li>
+<li><input type="checkbox" id="checkbox14"><label for="checkbox14">Akcja &quot;Wykonaj briefing&quot; w <code>ViewLead::getHeaderActions()</code></label></li>
+<li><input type="checkbox" id="checkbox15"><label for="checkbox15">Relacja <code>briefings</code> widoczna w <code>ViewLead</code> (sekcja / zakładka z listą briefingów leada)</label></li>
+</ul>
+<h3 id="faza-6--eksport-pdf">Faza 6 — Eksport PDF</h3>
+<ul>
+<li><input type="checkbox" id="checkbox16"><label for="checkbox16"><code>BriefingExportAction</code> — generuje PDF via <strong>dompdf</strong></label></li>
+<li><input type="checkbox" id="checkbox17"><label for="checkbox17">Blade template <code>resources/views/pdf/briefing.blade.php</code> — sekcje + pytania + odpowiedzi + metadata</label></li>
+<li><input type="checkbox" id="checkbox18"><label for="checkbox18">Dostępna z <code>ViewBriefing</code> header action (disabled gdy status=draft)</label></li>
+</ul>
+<h3 id="faza-7--portal-klienta-wymaga-aktywnego-portalu-klienta">Faza 7 — Portal klienta (wymaga aktywnego portalu klienta)</h3>
+<ul>
+<li><input type="checkbox" id="checkbox19"><label for="checkbox19">Middleware <code>client.portal.active</code> — sprawdza <code>Setting::get('client_portal_enabled')</code></label></li>
+<li><input type="checkbox" id="checkbox20"><label for="checkbox20">Route <code>/client/briefings/{token}</code> (GET, POST, PATCH) w <code>routes/web.php</code></label></li>
+<li><input type="checkbox" id="checkbox21"><label for="checkbox21"><code>ClientBriefingController</code> (show, submit, autosave)</label></li>
+<li><input type="checkbox" id="checkbox22"><label for="checkbox22">Inertia page <code>resources/js/Pages/Briefing/ClientFill.tsx</code> (publiczny layout)</label></li>
+<li><input type="checkbox" id="checkbox23"><label for="checkbox23">Przycisk „Udostępnij klientowi&quot; w <code>ViewBriefing</code> (visible tylko gdy portal aktywny)</label></li>
+<li><input type="checkbox" id="checkbox24"><label for="checkbox24"><code>BriefingService::shareWithClient()</code> — generuje token, loguje aktywność</label></li>
+<li><input type="checkbox" id="checkbox25"><label for="checkbox25"><code>BriefingService::submitByClient()</code> — odpowiedzi klienta + client_submitted_at</label></li>
+</ul>
+<h3 id="faza-8--testy">Faza 8 — Testy</h3>
+<ul>
+<li><input type="checkbox" id="checkbox26"><label for="checkbox26">Unit: BriefingService (createFromTemplate, saveAnswers, complete, shareWithClient, submitByClient)</label></li>
+<li><input type="checkbox" id="checkbox27"><label for="checkbox27">Unit: BriefingPolicy, BriefingTemplatePolicy, Briefing helper methods</label></li>
+<li><input type="checkbox" id="checkbox28"><label for="checkbox28">Feature: CRUD briefingów + akcje w Leads</label></li>
+<li><input type="checkbox" id="checkbox29"><label for="checkbox29">Feature: portal klienta (token valid/invalid, autosave, submit, portal disabled)</label></li>
+</ul>
+<hr>
+<h2 id="9-decyzje-projektowe-zamknięte">9. Decyzje projektowe (zamknięte)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Pytanie</th>
+<th>Decyzja</th>
+<th>Data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Zapis briefingu</td>
+<td><strong>Autosave</strong> (Livewire debounce 1500ms) + <strong>ręczny przycisk</strong> „Zapisz postęp&quot;</td>
+<td>2026-04-17</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Eksport</td>
+<td><strong>dompdf</strong> — Blade template dla briefingu</td>
+<td>2026-04-17</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Szablony globalne</td>
+<td>Widoczne i edytowalne tylko przez <strong>superadmina</strong></td>
+<td>2026-04-17</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Rola klienta</td>
+<td>Admin prowadzi podczas rozmowy <strong>LUB</strong> klient wypełnia samodzielnie gdy portal aktywny</td>
+<td>2026-04-17</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>
