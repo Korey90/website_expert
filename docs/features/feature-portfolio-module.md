@@ -409,3 +409,231 @@ Rola manager: view-any, create, update
 | Format items musi być identyczny z tym co czyta Portfolio.jsx | WelcomeController mapuje nowe pola na stary format |
 | `HasTranslations` wymaga JSON w kolumnach | Wszystkie pola translatable jako `json` w migracji |
 | Obrazy — aktualnie ścieżki SVG w public/ | FileUpload w Filament zapisuje do storage/app/public/portfolio — trzeba `php artisan storage:link` |
+
+---
+
+## KROK 6 — AI Translation (Filament Header Action)
+
+> Status: Planned
+> Data: 2026-04-20
+
+### Cel
+
+Przycisk **"Translate with AI"** w widoku Edit Portfolio Project w Filament. Odczytuje pola EN (title, tag, description, result), wysyła do OpenAI i wypełnia pola PL + PT bez przeładowania strony.
+
+### Stan obecny
+
+- `OpenAiLandingClient` (`app/Services/LandingPage/OpenAiLandingClient.php`) — gotowy klient HTTP z retry i obsługą błędów, używa `config('services.openai')`
+- Konfiguracja: `config/services.php` → `openai.api_key`, `openai.model`, `openai.base_url`, `openai.timeout`
+- `PortfolioProjectResource` używa Filament 5 z `Schema $form`
+- Formularz ma Tabs: `English` / `Polski` / `Português` — pola: `title.{locale}`, `tag.{locale}`, `description.{locale}`, `result.{locale}`
+
+### Delta — co trzeba zbudować
+
+| Element | Plik | Opis |
+|---|---|---|
+| **Service** | `app/Services/Portfolio/PortfolioTranslationService.php` | Nowa klasa, wrapper na `OpenAiLandingClient`, buduje prompt, parsuje odpowiedź |
+| **Controller** | `app/Http/Controllers/Filament/PortfolioTranslateController.php` | Endpoint `POST /admin/portfolio-projects/{record}/translate` |
+| **Route** | `routes/web.php` | Pod middleware `auth` + `filament.admin` |
+| **Filament Action** | `PortfolioProjectResource::getHeaderActions()` | `Action::make('translateWithAI')` na stronie Edit |
+
+### Backend
+
+#### PortfolioTranslationService
+
+```php
+// app/Services/Portfolio/PortfolioTranslationService.php
+
+namespace App\Services\Portfolio;
+
+use App\Services\LandingPage\OpenAiLandingClient;
+
+class PortfolioTranslationService
+{
+    public function __construct(
+        private readonly OpenAiLandingClient $client,
+    ) {}
+
+    /**
+     * @param array{title: string, tag: string, description: string, result: string} $source  EN content
+     * @return array{pl: array, pt: array}
+     */
+    public function translate(array $source): array
+    {
+        $systemPrompt = <<<PROMPT
+You are a professional translator for a web agency portfolio. 
+Translate the provided fields from English into Polish (pl) and Portuguese (pt).
+Return ONLY a JSON object in this exact structure:
+{
+  "pl": { "title": "...", "tag": "...", "description": "...", "result": "..." },
+  "pt": { "title": "...", "tag": "...", "description": "...", "result": "..." }
+}
+Keep translations natural and professional. Preserve line breaks in "result".
+PROMPT;
+
+        $userPrompt = json_encode([
+            'title'       => $source['title']       ?? '',
+            'tag'         => $source['tag']         ?? '',
+            'description' => $source['description'] ?? '',
+            'result'      => $source['result']      ?? '',
+        ], JSON_UNESCAPED_UNICODE);
+
+        $response = $this->client->generateStructuredLanding([
+            'system_prompt' => $systemPrompt,
+            'user_prompt'   => $userPrompt,
+        ]);
+
+        $content = $response['content'];
+
+        return [
+            'pl' => [
+                'title'       => (string) ($content['pl']['title']       ?? ''),
+                'tag'         => (string) ($content['pl']['tag']         ?? ''),
+                'description' => (string) ($content['pl']['description'] ?? ''),
+                'result'      => (string) ($content['pl']['result']      ?? ''),
+            ],
+            'pt' => [
+                'title'       => (string) ($content['pt']['title']       ?? ''),
+                'tag'         => (string) ($content['pt']['tag']         ?? ''),
+                'description' => (string) ($content['pt']['description'] ?? ''),
+                'result'      => (string) ($content['pt']['result']      ?? ''),
+            ],
+        ];
+    }
+}
+```
+
+#### Controller endpoint
+
+```php
+// app/Http/Controllers/Filament/PortfolioTranslateController.php
+
+namespace App\Http\Controllers\Filament;
+
+use App\Http\Controllers\Controller;
+use App\Models\PortfolioProject;
+use App\Services\Portfolio\PortfolioTranslationService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class PortfolioTranslateController extends Controller
+{
+    public function __invoke(
+        Request $request,
+        PortfolioProject $record,
+        PortfolioTranslationService $service,
+    ): JsonResponse {
+        $data = $request->validate([
+            'title'       => ['nullable', 'string', 'max:255'],
+            'tag'         => ['nullable', 'string', 'max:100'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'result'      => ['nullable', 'string', 'max:500'],
+        ]);
+
+        // Walidacja: co najmniej jedno pole musi być niepuste
+        if (empty(array_filter($data))) {
+            return response()->json(['error' => 'No source content provided.'], 422);
+        }
+
+        $translations = $service->translate($data);
+
+        return response()->json($translations);
+    }
+}
+```
+
+#### Route
+
+```php
+// routes/web.php — w grupie middleware auth (panel Filament)
+Route::post(
+    '/admin/portfolio-projects/{record}/translate',
+    \App\Http\Controllers\Filament\PortfolioTranslateController::class,
+)->middleware(['web', 'auth'])->name('filament.portfolio.translate');
+```
+
+### Filament Action (Frontend Filament)
+
+```php
+// PortfolioProjectResource.php — Pages/EditPortfolioProject.php lub bezpośrednio w Resource
+
+// W klasie EditPortfolioProject (Pages):
+protected function getHeaderActions(): array
+{
+    return [
+        Actions\SaveAction::make(),
+
+        Actions\Action::make('translateWithAI')
+            ->label('Translate with AI')
+            ->icon('heroicon-o-language')
+            ->color('info')
+            ->requiresConfirmation()
+            ->modalHeading('Translate from English with AI')
+            ->modalDescription('AI will generate Polish and Portuguese translations from the English content currently saved for this record. Existing PL/PT translations will be overwritten.')
+            ->modalSubmitActionLabel('Generate translations')
+            ->action(function (PortfolioProject $record): void {
+                $service = app(\App\Services\Portfolio\PortfolioTranslationService::class);
+
+                $translations = $service->translate([
+                    'title'       => $record->getTranslation('title', 'en'),
+                    'tag'         => $record->getTranslation('tag', 'en'),
+                    'description' => $record->getTranslation('description', 'en'),
+                    'result'      => $record->getTranslation('result', 'en'),
+                ]);
+
+                // Aktualizuj tylko PL i PT — EN nie ruszamy
+                $record->setTranslation('title',       'pl', $translations['pl']['title']);
+                $record->setTranslation('title',       'pt', $translations['pt']['title']);
+                $record->setTranslation('tag',         'pl', $translations['pl']['tag']);
+                $record->setTranslation('tag',         'pt', $translations['pt']['tag']);
+                $record->setTranslation('description', 'pl', $translations['pl']['description']);
+                $record->setTranslation('description', 'pt', $translations['pt']['description']);
+                $record->setTranslation('result',      'pl', $translations['pl']['result']);
+                $record->setTranslation('result',      'pt', $translations['pt']['result']);
+                $record->save();
+
+                Notification::make()
+                    ->title('Translations generated')
+                    ->body('Polish and Portuguese fields have been updated. Review and save.')
+                    ->success()
+                    ->send();
+
+                // Odśwież formularz z nową zawartością
+                $this->fillForm();
+            })
+            ->visible(fn () => filled(config('services.openai.api_key'))),
+    ];
+}
+```
+
+### Workflow (happy path)
+
+1. Admin otwiera Edit Portfolio Project
+2. Wypełnia pola w zakładce **English** (title, tag, description, result)
+3. Klika **Save** — rekord zapisany z EN content
+4. Klika **Translate with AI** → modal z potwierdzeniem
+5. Klika **Generate translations** → Filament wysyła action
+6. `PortfolioTranslationService` buduje prompt z pól EN z bazy, wywołuje `OpenAiLandingClient`
+7. OpenAI zwraca JSON z `{pl: {...}, pt: {...}}`
+8. `setTranslation()` zapisuje PL i PT na rekordzie → `save()`
+9. `fillForm()` odświeża formularz — admin widzi wypełnione zakładki Polski i Português
+10. Notification: "Translations generated"
+
+### Edge cases
+
+| Case | Obsługa |
+|---|---|
+| Pola EN puste | Walidacja w serwisie — `array_filter($data)` pusty → błąd 422 / Notification error |
+| OpenAI nie skonfigurowane | Action niewidoczny (`->visible(fn() => filled(config(...)))`) |
+| OpenAI timeout / błąd | `LandingPageGenerationException` → catch w action → Notification danger |
+| Odpowiedź brakuje klucza pl/pt | `?? ''` w `PortfolioTranslationService::translate()` |
+| Istniejące tłumaczenia PL/PT | Nadpisywane — użytkownik jest ostrzeżony w modal description |
+
+### Checklist implementacji
+
+- [ ] `PortfolioTranslationService` — nowa klasa w `app/Services/Portfolio/`
+- [ ] Route `POST /admin/portfolio-projects/{record}/translate` (opcjonalny — jeśli chcemy przez HTTP; gdy Action działa inline, route nie jest potrzebny)
+- [ ] `EditPortfolioProject` page class (jeśli nie istnieje) z `getHeaderActions()`
+- [ ] Import `Filament\Notifications\Notification` w klasie page
+- [ ] Obsługa wyjątku `LandingPageGenerationException` w action (try/catch → Notification::danger())
+- [ ] Test: mock `OpenAiLandingClient`, sprawdź że PL/PT są zapisane, EN niezmienione

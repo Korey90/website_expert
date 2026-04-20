@@ -122,7 +122,7 @@ export default function Portfolio({ data }) {
 
                                     <div className="flex items-center justify-between">
                                         {itemResult && (
-                                            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full">
+                                            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full whitespace-pre-line">
                                                 {itemResult}
                                             </span>
                                         )}

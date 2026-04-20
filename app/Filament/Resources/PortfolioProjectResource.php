@@ -103,7 +103,6 @@ class PortfolioProjectResource extends BaseResource
 
                             Forms\Components\TagsInput::make('tags')
                                 ->label('Tags')
-                                ->separator(',')
                                 ->nullable(),
                         ]),
 

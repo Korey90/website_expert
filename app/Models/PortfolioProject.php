@@ -60,12 +60,4 @@ class PortfolioProject extends Model
         });
     }
 
-    public function getTagsAttribute(mixed $value): array
-    {
-        if (is_array($value)) {
-            return array_values($value);
-        }
-
-        return array_values((array) json_decode($value ?? '[]', true));
-    }
 }

@@ -6,7 +6,7 @@
  * The first entry is the DEFAULT locale.
  */
 return [
-    'en' => 'English 🇬🇧',
     'pl' => 'Polski 🇵🇱',
+    'en' => 'English 🇬🇧',
     'pt' => 'Português 🇵🇹',
 ];
