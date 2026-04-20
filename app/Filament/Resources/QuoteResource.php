@@ -15,7 +15,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
-class QuoteResource extends Resource
+class QuoteResource extends BaseResource
 {
     protected static ?string $model = Quote::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-list';

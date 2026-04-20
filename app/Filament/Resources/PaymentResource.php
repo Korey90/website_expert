@@ -15,7 +15,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
 
-class PaymentResource extends Resource
+class PaymentResource extends BaseResource
 {
     protected static ?string $model = Payment::class;
     protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-credit-card';

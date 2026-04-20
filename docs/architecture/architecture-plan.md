@@ -144,6 +144,23 @@ target_audience, services[], industry, language
 **Stan obecny:** Najbardziej rozbudowany kontekst — 20+ modeli, 26 Filament Resources, portal klienta.  
 **Do zrobienia:** Dodać `business_id` do wszystkich tabel.
 
+### 1.6.1 Model klienta: agencyjny vs SaaS/self-service
+
+Website Expert ma dwa różne typy klienta, które nie powinny być traktowane jak ten sam account root:
+
+| Typ | Account root | Tożsamość | Główne moduły | Rola `Client` |
+|---------|------|------|------|------|
+| **Klient agencyjny** | `Client` | opcjonalny `User` do portalu | CRM, quotes, contracts, invoices, projects, portal | główny rekord relacji handlowej i delivery |
+| **Klient SaaS / self-service** | `Business` | `User` + `BusinessUser` | onboarding, landing pages, AI, billing, API tokens | rekord pomocniczy / kompatybilnościowy, nie tenant root |
+
+Reguły graniczne:
+
+- `Business` jest zawsze rootem workspace i tenant scope.
+- `Client` jest zawsze rootem relacji agencyjnej i customer record w CRM.
+- `User` jest tylko tożsamością logowania; sam nie definiuje typu klienta.
+- `portal_user_id` to przejściowy mechanizm single-contact access dla klienta agencyjnego, a nie docelowy model członkostwa.
+- Self-service signup może tworzyć rekord `Client` dla zgodności z istniejącym portalem i CRM, ale nowe moduły SaaS nie mogą opierać autoryzacji ani scoping na `Client`.
+
 ---
 
 ### 1.7 Kontekst: Campaigns
@@ -449,6 +466,74 @@ quotes / contracts / pipeline_stages  (ISTNIEJĄCE — dodać business_id)
 automation_rules / email_templates / sms_templates / contract_templates  (dodać business_id)
 settings  (ISTNIEJĄCA — business_id zastąpi klucz globalny)
 ```
+
+#### 3.4.1 Model klienta agencyjnego
+
+Klient agencyjny jest obsługiwany w modelu CRM-first.
+
+**Root encji:** `clients`
+
+**Lifecycle:**
+
+`prospect -> active -> inactive -> archived`
+
+**Relacje obowiązkowe lub docelowe:**
+
+- `Client` -> `Lead` (1:N)
+- `Client` -> `Contact` (1:N)
+- `Client` -> `Quote` (1:N)
+- `Client` -> `Contract` (1:N)
+- `Client` -> `Invoice` (1:N)
+- `Client` -> `Project` (1:N)
+- `Client` -> `ClientActivity` (1:N)
+
+**Dostęp klienta agencyjnego:**
+
+- może nie mieć żadnego loginu,
+- może mieć jeden `User` przypięty przez `portal_user_id`,
+- docelowo powinien mieć wielu portal members, ale to osobny etap refaktoru.
+
+**Zasady architektoniczne:**
+
+- autoryzacja do klasycznego client portal musi być oparta o `client_id`,
+- `currentBusiness()` nie może być jedynym warunkiem dostępu do zasobów klienta agencyjnego,
+- `business_id` na `clients` i encjach podrzędnych jest wymagany do tenant safety, ale nie zastępuje relacji klientowej.
+
+#### 3.4.2 Model klienta SaaS / self-service
+
+Klient self-service jest obsługiwany w modelu workspace-first.
+
+**Root encji:** `businesses`
+
+**Root dostępu:** `users` + `business_users`
+
+**Relacje obowiązkowe:**
+
+- `Business` -> `BusinessProfile` (1:1)
+- `Business` -> `BusinessUser` (1:N)
+- `Business` -> `LandingPage` (1:N)
+- `Business` -> `ApiToken` (1:N)
+- `Business` -> `Subscription` (1:N lub 1:active)
+
+**Relacje kompatybilnościowe z obecnym produktem:**
+
+- signup może utworzyć rekord `Client`,
+- taki rekord `Client` nie jest tenant rootem,
+- taki rekord nie powinien być wymagany do growth tools, billingu ani workspace policy.
+
+**Zasady architektoniczne:**
+
+- autoryzacja do workspace i growth tools musi iść przez `BusinessUser`,
+- billing SaaS musi być przypięty do `Business`, nie do `Client`,
+- moduły LP, AI i API tokens nie powinny zależeć od `portal_user_id`.
+
+#### 3.4.3 Reguły współistnienia obu modeli
+
+1. Klient agencyjny i klient SaaS mogą być reprezentowani przez tego samego `User`, ale nie przez ten sam account root.
+2. Jeśli agencyjny klient dostaje tylko portal delivery, nie musi automatycznie dostawać membership w `business_users`.
+3. Membership w `business_users` nadajemy świadomie tylko wtedy, gdy klient ma wejść do workspace SaaS.
+4. `Client` pozostaje customer master record dla sprzedaży i delivery, nawet gdy użytkownik ma własny `Business`.
+5. Portal musi zostać rozdzielony na widoki `client portal` i `workspace portal` na poziomie policy i feature gating, nawet jeśli na krótką metę współdzielą layout.
 
 ### 3.5 Bounded Context: Campaigns
 
@@ -890,6 +975,28 @@ resources/js/Pages/
 **Konsekwencje:**
 - ✅ Każda agencja może mieć własne klucze Stripe, Twilio, domenę
 - ⚠️ Zmiana `Setting::get()` — wymaga sprawdzenia wszystkich wywołań
+
+---
+
+### ADR-006: `Client` nie jest tenant rootem; `Business` nie jest customer recordem CRM
+
+**Status:** Zaproponowana  
+**Kontekst:** Obecny kod miesza klienta agencyjnego, prospecta i self-service workspace usera wokół tabeli `clients` oraz zwykłego `User`. To upraszcza MVP, ale zaciera granice dostępu, onboarding i odpowiedzialności modułów.  
+**Decyzja:**
+
+- `Business` pozostaje jedynym rootem tenant/workspace dla SaaS.
+- `Client` pozostaje customer master recordem dla CRM, delivery i klasycznego client portal.
+- `User` jest wspólną tożsamością logowania dla obu światów.
+- klient agencyjny może mieć konto portalu bez pełnego membership w `business_users`.
+- self-service signup może tworzyć rekord `Client` wyłącznie jako warstwę zgodności z obecnym portalem i CRM.
+
+**Konsekwencje:**
+- ✅ Rozdziela polityki dostępu do portal delivery vs workspace SaaS
+- ✅ Umożliwia stopniowy rozwój multi-contact portal bez przebudowy tenant roota
+- ✅ Ogranicza ryzyko, że growth tools i billing będą zależne od CRM `Client`
+- ⚠️ Wymaga audytu wszystkich kontrolerów używających `currentBusiness()` w ścieżkach klienta
+- ⚠️ W krótkim terminie utrzymuje częściową duplikację danych między `Business` i `Client`
+- ⚠️ Wymaga feature gating w sidebarze i rozdzielenia policy dla portalu
 
 ---
 

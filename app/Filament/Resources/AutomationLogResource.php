@@ -16,7 +16,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
 
-class AutomationLogResource extends Resource
+class AutomationLogResource extends BaseResource
 {
     protected static ?string $model = AutomationLog::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-list';

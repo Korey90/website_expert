@@ -133,11 +133,15 @@ abstract class BaseAutomationAction implements AutomationActionContract
 
     protected function interpolate(string $template, array $vars): string
     {
+        $search  = [];
+        $replace = [];
         foreach ($vars as $key => $value) {
-            $template = str_replace('{' . $key . '}', (string) ($value ?? ''), $template);
+            if (is_scalar($value) || $value === null) {
+                $search[]  = '{{' . $key . '}}';
+                $replace[] = (string) ($value ?? '');
+            }
         }
-
-        return $template;
+        return str_replace($search, $replace, $template);
     }
 
     protected function resolveMailable(string|null $template, array $context): ?object

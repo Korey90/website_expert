@@ -2,3 +2,25 @@
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
+
+/* Chart widgets — stretch section to fill grid row height */
+.fi-wi-chart {
+    display: flex;
+    flex-direction: column;
+}
+
+.fi-wi-chart > .fi-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.fi-wi-chart > .fi-section > .fi-section-content-ctn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.fi-wi-chart > .fi-section > .fi-section-content-ctn > .fi-section-content {
+    flex: 1;
+}

@@ -18,7 +18,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
-class AutomationRuleResource extends Resource
+class AutomationRuleResource extends BaseResource
 {
     protected static ?string $model = AutomationRule::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-bolt';
@@ -155,6 +155,11 @@ class AutomationRuleResource extends Resource
                                 ->label('Notification Body')
                                 ->placeholder('{client_name} — {company_name}')
                                 ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
+                            Forms\Components\Checkbox::make('grant_workspace_access')
+                                ->label('Grant workspace access')
+                                ->helperText('Optional. Adds BusinessUser membership only when the client is linked to a business. Default remains portal-only.')
+                                ->default(false)
+                                ->visible(fn (Get $get) => $get('type') === 'create_portal_access'),
                             Forms\Components\TextInput::make('url')
                                 ->label('Action URL')
                                 ->placeholder('/admin/leads/{lead_id}')

@@ -7,7 +7,7 @@ use Filament\Pages\Page;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-class ConversionReportPage extends Page
+class ConversionReportPage extends BasePage
 {
     protected string $view = 'filament.pages.conversion-report';
 

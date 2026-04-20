@@ -10,7 +10,8 @@ use Illuminate\Support\Carbon;
 
 class SaasMetricsWidget extends BaseWidget
 {
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 3;
+    protected int|string|array $columnSpan = 'full';
 
     protected function getStats(): array
     {
@@ -74,6 +75,11 @@ class SaasMetricsWidget extends BaseWidget
                 ->description('Payment failed — require attention')
                 ->icon('heroicon-o-exclamation-triangle')
                 ->color($pastDueCount > 0 ? 'warning' : 'success'),
+
+            Stat::make('ARR', '£' . number_format($mrr * 12, 0))
+                ->description('Annual Recurring Revenue')
+                ->icon('heroicon-o-arrow-trending-up')
+                ->color($mrr > 0 ? 'success' : 'gray'),
         ];
     }
 }

@@ -4,6 +4,106 @@
 **Kontekst:** Pre-SaaS refaktoryzacja — service layer + GlobalScope + Stripe Billing  
 **Powiązane dokumenty:** `docs/project-analysis.md`, `docs/architecture-plan.md`
 
+---
+
+## AKTUALIZACJA 2026-04-19 — Program rozdzielenia klienta agencyjnego i klienta SaaS
+
+### 1. Zakres audytu
+
+Ten program dotyczy obszaru, w którym obecny kod miesza dwa modele użytkownika końcowego:
+
+- klienta agencyjnego obsługiwanego przez CRM i client portal,
+- klienta SaaS/self-service obsługiwanego przez `Business`, onboarding, billing i growth tools.
+
+Źródła decyzji:
+
+- `docs/analysis/client-handling-analysis.md`
+- `docs/architecture/architecture-plan.md`
+- portal: `app/Http/Controllers/Portal/*`, `resources/js/Layouts/PortalLayout.jsx`
+- auth i provisioning: `RegisteredUserController`, `SocialAuthController`, `CreatePortalAccessAction`, `CreatePortalUser`
+
+### 2. Problemy backendu
+
+| Problem | Lokalizacja | Priorytet | Uzasadnienie | Kierunek zmiany | Estymata |
+|---|---|---|---|---|---|
+| `Client` pełni jednocześnie rolę prospecta, customer record i konta portalowego | `app/Actions/CreateLeadAction.php`, `app/Models/Client.php` | HIGH | zaciera granice domenowe i komplikuje policy | utrzymać `Client` jako CRM root, ale odseparować go od workspace root | duża |
+| invite do portalu używa błędnego URL | `app/Automation/Actions/CreatePortalAccessAction.php` | HIGH | łamie onboarding agencyjnego klienta | ujednolicić login flow do `/login` + późniejszy redirect | mała |
+| klient agencyjny może nie mieć `currentBusiness()`, ale część portalu tego wymaga | `app/Http/Controllers/Portal/BillingController.php`, `Portal/LeadController.php` | HIGH | ryzyko błędów runtime i złego UX | jawne guardy dla workspace-only ekranów | mała |
+| membership `BusinessUser` nie jest rozstrzygnięty dla klientów agencyjnych | `CreatePortalAccessAction`, `CreatePortalUser`, `BusinessService` | HIGH | bez tego nie da się spójnie zarządzać dostępem | wprowadzić świadomy model: portal-only vs workspace-member | średnia |
+| brak centralnego klasyfikatora typu klienta | middleware + kontrolery portalu | MEDIUM | logika typu klienta rozlewa się po kodzie | dodać shared portal capabilities / portal context | mała |
+| autoryzacja części portalu opiera się wyłącznie na `currentBusiness()` | `Portal/LeadController.php`, część business routes | HIGH | w dłuższym terminie grozi wyciekiem lub błędnym deny | rozdzielić policy client portal vs workspace | średnia |
+
+### 3. Problemy frontendu
+
+| Problem | Lokalizacja | Priorytet | Uzasadnienie | Kierunek zmiany | Estymata |
+|---|---|---|---|---|---|
+| sidebar pokazuje growth tools wszystkim zalogowanym klientom | `resources/js/Layouts/PortalLayout.jsx` | HIGH | agencyjny klient widzi funkcje, których nie powinien mieć lub które go wywracają | feature gating na podstawie shared capabilities | mała |
+| portal łączy delivery UX i workspace UX w jednej nawigacji | `PortalLayout.jsx`, strony `Portal/*`, `LandingPages/*`, `Business/*` | HIGH | brak czytelnego modelu produktu | rozdzielić sekcje przez capabilities i tryb portalu | średnia |
+| brak empty state dla użytkownika portal-only vs workspace | portal pages | MEDIUM | użytkownik nie rozumie, dlaczego coś jest puste albo niedostępne | dedykowane komunikaty i redirecty | średnia |
+
+### 4. Proponowane zmiany architektoniczne
+
+1. `Business` pozostaje jedynym tenant/workspace root.
+2. `Client` pozostaje CRM/customer root dla sprzedaży i delivery.
+3. `User` jest wspólną tożsamością logowania, ale nie definiuje sam z siebie typu klienta.
+4. Portal musi rozróżniać dwa tryby pracy:
+    - `client_portal` — projekty, wyceny, umowy, faktury, komunikacja,
+    - `workspace_portal` — billing SaaS, landing pages, AI, business settings, API tokens.
+5. Membership w `business_users` nadajemy świadomie; nie jest automatycznym skutkiem nadania dostępu do client portal.
+
+### 5. Priorytetyzowana lista zmian
+
+1. HIGH — naprawić invite flow, dodać poprawny login URL i bezpieczny redirect po logowaniu.
+2. HIGH — wprowadzić shared `portal capabilities` i ukryć workspace navigation dla klientów agencyjnych.
+3. HIGH — zabezpieczyć kontrolery workspace-only przed wejściem użytkownika bez `currentBusiness()`.
+4. HIGH — rozdzielić policy dla client portal i workspace portal.
+5. MEDIUM — zdefiniować reguły nadawania `BusinessUser` dla klientów agencyjnych.
+6. MEDIUM — uporządkować onboarding po loginie: portal-only vs workspace-owner.
+7. MEDIUM — przygotować docelowy model multi-contact client access.
+
+### 6. Plan wdrożenia
+
+#### Faza 1 — Quick wins i stabilizacja wejścia
+
+- poprawa invite URL,
+- shared `portal capabilities` w Inertia,
+- ukrycie sekcji workspace w sidebarze dla klientów agencyjnych,
+- guardy w `BillingController` i innych workspace-only wejściach.
+
+#### Faza 2 — Rozdzielenie zasad dostępu
+
+- policy lub dedicated guards dla `client portal` vs `workspace portal`,
+- przegląd kontrolerów używających `currentBusiness()`,
+- doprecyzowanie redirectów po loginie.
+
+#### Faza 3 — Membership i provisioning
+
+- jasny mechanizm nadawania `BusinessUser` tylko tam, gdzie klient ma mieć workspace access,
+- decyzja: czy provisioning klienta agencyjnego tworzy membership, czy zostaje portal-only,
+- spójna warstwa provisioning service.
+
+#### Faza 4 — Docelowy portal i lifecycle
+
+- rozdzielenie UX delivery vs self-service,
+- multi-contact access dla klientów agencyjnych,
+- pełny customer lifecycle i onboarding per typ klienta.
+
+### 7. Ryzyka refaktoryzacji
+
+- obecny produkt korzysta z tego samego layoutu dla dwóch różnych modeli klienta, więc część zależności jest ukryta,
+- signup self-service tworzy jednocześnie `Client` i `Business`, więc łatwo przypadkiem utrwalić zły account root w nowych modułach,
+- zbyt agresywne odcięcie route access może zablokować istniejące flow użytkownikom hybrydowym,
+- pełne rozdzielenie multi-contact access wymaga osobnej decyzji danych i nie powinno wejść do quick wins.
+
+### 8. Pierwszy slice wdrożeniowy
+
+Startujemy od najmniejszej zmiany o dużym wpływie operacyjnym:
+
+1. naprawa URL w zaproszeniu do portalu,
+2. wprowadzenie `portal capabilities` do shared props,
+3. ukrycie growth tools / billing / business settings dla klientów bez workspace access,
+4. bezpieczny guard w `BillingController` dla użytkownika bez `currentBusiness()`.
+
 ### ZREALIZOWANE (od ostatniej aktualizacji):
 - ✅ `app/Services/Business/BusinessProfileService.php` — istnieje
 - ✅ `app/Services/Business/BusinessService.php` — istnieje

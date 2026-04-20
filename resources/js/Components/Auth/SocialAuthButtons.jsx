@@ -14,6 +14,7 @@ const T = {
 export default function SocialAuthButtons({ mode = 'login' }) {
     const { locale = 'en' } = usePage().props;
     const t = (key) => T[key]?.[locale] ?? T[key]?.en ?? '';
+    const socialRoute = (provider) => route('social.redirect', { provider, intent: mode });
 
     const label = mode === 'register'
         ? { google: t('google_register'), facebook: t('facebook_register') }
@@ -23,7 +24,7 @@ export default function SocialAuthButtons({ mode = 'login' }) {
         <div className="space-y-3">
             {/* Google */}
             <a
-                href={route('social.redirect', { provider: 'google' })}
+                href={socialRoute('google')}
                 className="flex w-full items-center justify-center gap-3 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm font-medium text-neutral-900 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors duration-200"
             >
                 <GoogleIcon />
@@ -32,7 +33,7 @@ export default function SocialAuthButtons({ mode = 'login' }) {
 
             {/* Facebook */}
             <a
-                href={route('social.redirect', { provider: 'facebook' })}
+                href={socialRoute('facebook')}
                 className="flex w-full items-center justify-center gap-3 rounded-lg bg-[#1877F2] hover:bg-[#166FE5] px-4 py-3 text-sm font-medium text-white transition-colors duration-200"
             >
                 <FacebookIcon />

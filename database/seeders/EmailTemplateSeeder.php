@@ -463,25 +463,205 @@ class EmailTemplateSeeder extends Seeder
 
             // ── Service CTA – admin notification ─────────────────────────────
             [
-                'name'      => 'Service CTA Recived - Email Notification to Admin',
+                'name'      => 'Nowy lead – Service CTA (powiadomienie admina)',
                 'slug'      => 'service_cta_admin_mail_notice',
                 'subject'   => [
-                    'en' => 'dowy lead wpadl en',
-                    'pl' => 'dowy lead wpadl pl',
-                    'pt' => 'dowy lead wpadl pt',
+                    'en' => '🔔 New lead from service page – {{client_name}}',
+                    'pl' => '🔔 Nowy lead z podstrony usługi – {{client_name}}',
+                    'pt' => '🔔 Novo lead de página de serviço – {{client_name}}',
                 ],
+                'variables' => ['client_name', 'lead_name', 'lead_source', 'lead_id', 'lead_url'],
+                'is_active' => true,
                 'body_html' => [
-                    'en' => '<p>siema nowy lead wpadł en</p>',
-                    'pl' => '<p>siema nowy lead wpadł pl</p>',
-                    'pt' => '<p>siema nowy lead wpadł pt</p>',
+                    'en' => '<div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">'
+                        . '<div style="background:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);padding:32px 40px;border-radius:10px 10px 0 0;">'
+                        . '<h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">🔔 New Lead — Service CTA</h1>'
+                        . '<p style="margin:8px 0 0;color:#c7d2fe;font-size:14px;">A prospective client submitted a service enquiry</p>'
+                        . '</div>'
+                        . '<div style="padding:32px 40px;">'
+                        . '<table style="width:100%;border-collapse:collapse;background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #4F46E5;border-radius:6px;">'
+                        . '<tr><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;width:40%;">Client</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{client_name}}</td></tr>'
+                        . '<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Lead</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{lead_name}}</td></tr>'
+                        . '<tr><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Source</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{lead_source}}</td></tr>'
+                        . '<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Lead #</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">#{{lead_id}}</td></tr>'
+                        . '</table>'
+                        . '<div style="text-align:center;margin:28px 0;">'
+                        . '<a href="{{lead_url}}" style="display:inline-block;background:#4F46E5;color:#ffffff;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:700;font-size:15px;">View Lead in CRM</a>'
+                        . '</div>'
+                        . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 16px;">'
+                        . '<p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">Website Expert · Automated notification · Do not reply to this email</p>'
+                        . '</div></div>',
+                    'pl' => '<div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">'
+                        . '<div style="background:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);padding:32px 40px;border-radius:10px 10px 0 0;">'
+                        . '<h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">🔔 Nowy Lead — Service CTA</h1>'
+                        . '<p style="margin:8px 0 0;color:#c7d2fe;font-size:14px;">Potencjalny klient złożył zapytanie z podstrony usługi</p>'
+                        . '</div>'
+                        . '<div style="padding:32px 40px;">'
+                        . '<table style="width:100%;border-collapse:collapse;background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #4F46E5;border-radius:6px;">'
+                        . '<tr><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;width:40%;">Klient</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{client_name}}</td></tr>'
+                        . '<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Lead</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{lead_name}}</td></tr>'
+                        . '<tr><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Źródło</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{lead_source}}</td></tr>'
+                        . '<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Lead #</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">#{{lead_id}}</td></tr>'
+                        . '</table>'
+                        . '<div style="text-align:center;margin:28px 0;">'
+                        . '<a href="{{lead_url}}" style="display:inline-block;background:#4F46E5;color:#ffffff;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:700;font-size:15px;">Zobacz Lead w CRM</a>'
+                        . '</div>'
+                        . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 16px;">'
+                        . '<p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">Website Expert · Powiadomienie automatyczne · Nie odpowiadaj na tę wiadomość</p>'
+                        . '</div></div>',
+                    'pt' => '<div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">'
+                        . '<div style="background:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);padding:32px 40px;border-radius:10px 10px 0 0;">'
+                        . '<h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">🔔 Novo Lead — Service CTA</h1>'
+                        . '<p style="margin:8px 0 0;color:#c7d2fe;font-size:14px;">Um cliente potencial submeteu uma consulta na página de serviço</p>'
+                        . '</div>'
+                        . '<div style="padding:32px 40px;">'
+                        . '<table style="width:100%;border-collapse:collapse;background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #4F46E5;border-radius:6px;">'
+                        . '<tr><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;width:40%;">Cliente</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{client_name}}</td></tr>'
+                        . '<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Lead</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{lead_name}}</td></tr>'
+                        . '<tr><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Origem</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{lead_source}}</td></tr>'
+                        . '<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Lead #</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">#{{lead_id}}</td></tr>'
+                        . '</table>'
+                        . '<div style="text-align:center;margin:28px 0;">'
+                        . '<a href="{{lead_url}}" style="display:inline-block;background:#4F46E5;color:#ffffff;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:700;font-size:15px;">Ver Lead no CRM</a>'
+                        . '</div>'
+                        . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 16px;">'
+                        . '<p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">Website Expert · Notificação automática · Não responda a este e-mail</p>'
+                        . '</div></div>',
                 ],
                 'body_text' => [
-                    'en' => 'nowy lead wpadł en',
-                    'pl' => null,
-                    'pt' => 'siema nowy lead wpadł pt',
+                    'en' => "New lead from service CTA\n\nClient: {{client_name}}\nLead: {{lead_name}}\nSource: {{lead_source}}\n\nView in CRM: {{lead_url}}",
+                    'pl' => "Nowy lead z Service CTA\n\nKlient: {{client_name}}\nLead: {{lead_name}}\nŹródło: {{lead_source}}\n\nZobacz w CRM: {{lead_url}}",
+                    'pt' => "Novo lead de Service CTA\n\nCliente: {{client_name}}\nLead: {{lead_name}}\nOrigem: {{lead_source}}\n\nVer no CRM: {{lead_url}}",
                 ],
-                'variables'  => ['client_name', 'lead_name'],
-                'is_active'  => true,
+            ],
+
+            // ── Contact Form – admin notification ─────────────────────────────
+            [
+                'name'      => 'Nowy lead – Contact Form (powiadomienie admina)',
+                'slug'      => 'contact_form_admin_notice',
+                'subject'   => [
+                    'en' => '📩 New contact form submission – {{client_name}}',
+                    'pl' => '📩 Nowe zgłoszenie z formularza kontaktowego – {{client_name}}',
+                    'pt' => '📩 Nova submissão de formulário de contato – {{client_name}}',
+                ],
+                'variables' => ['client_name', 'lead_name', 'lead_source', 'lead_id', 'lead_url'],
+                'is_active' => true,
+                'body_html' => [
+                    'en' => '<div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">'
+                        . '<div style="background:linear-gradient(135deg,#0EA5E9 0%,#0284C7 100%);padding:32px 40px;border-radius:10px 10px 0 0;">'
+                        . '<h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">📩 New Contact Form Lead</h1>'
+                        . '<p style="margin:8px 0 0;color:#bae6fd;font-size:14px;">A visitor submitted the contact form on your website</p>'
+                        . '</div>'
+                        . '<div style="padding:32px 40px;">'
+                        . '<table style="width:100%;border-collapse:collapse;background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #0EA5E9;border-radius:6px;">'
+                        . '<tr><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;width:40%;">Client</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{client_name}}</td></tr>'
+                        . '<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Lead</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{lead_name}}</td></tr>'
+                        . '<tr><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Source</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{lead_source}}</td></tr>'
+                        . '<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Lead #</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">#{{lead_id}}</td></tr>'
+                        . '</table>'
+                        . '<div style="text-align:center;margin:28px 0;">'
+                        . '<a href="{{lead_url}}" style="display:inline-block;background:#0EA5E9;color:#ffffff;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:700;font-size:15px;">View Lead in CRM</a>'
+                        . '</div>'
+                        . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 16px;">'
+                        . '<p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">Website Expert · Automated notification · Do not reply to this email</p>'
+                        . '</div></div>',
+                    'pl' => '<div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">'
+                        . '<div style="background:linear-gradient(135deg,#0EA5E9 0%,#0284C7 100%);padding:32px 40px;border-radius:10px 10px 0 0;">'
+                        . '<h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">📩 Nowy Lead z Formularza</h1>'
+                        . '<p style="margin:8px 0 0;color:#bae6fd;font-size:14px;">Użytkownik wypełnił formularz kontaktowy na Twojej stronie</p>'
+                        . '</div>'
+                        . '<div style="padding:32px 40px;">'
+                        . '<table style="width:100%;border-collapse:collapse;background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #0EA5E9;border-radius:6px;">'
+                        . '<tr><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;width:40%;">Klient</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{client_name}}</td></tr>'
+                        . '<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Lead</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{lead_name}}</td></tr>'
+                        . '<tr><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Źródło</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{lead_source}}</td></tr>'
+                        . '<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Lead #</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">#{{lead_id}}</td></tr>'
+                        . '</table>'
+                        . '<div style="text-align:center;margin:28px 0;">'
+                        . '<a href="{{lead_url}}" style="display:inline-block;background:#0EA5E9;color:#ffffff;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:700;font-size:15px;">Zobacz Lead w CRM</a>'
+                        . '</div>'
+                        . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 16px;">'
+                        . '<p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">Website Expert · Powiadomienie automatyczne · Nie odpowiadaj na tę wiadomość</p>'
+                        . '</div></div>',
+                    'pt' => '<div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">'
+                        . '<div style="background:linear-gradient(135deg,#0EA5E9 0%,#0284C7 100%);padding:32px 40px;border-radius:10px 10px 0 0;">'
+                        . '<h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">📩 Novo Lead de Formulário</h1>'
+                        . '<p style="margin:8px 0 0;color:#bae6fd;font-size:14px;">Um visitante preencheu o formulário de contato do seu site</p>'
+                        . '</div>'
+                        . '<div style="padding:32px 40px;">'
+                        . '<table style="width:100%;border-collapse:collapse;background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #0EA5E9;border-radius:6px;">'
+                        . '<tr><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;width:40%;">Cliente</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{client_name}}</td></tr>'
+                        . '<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Lead</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{lead_name}}</td></tr>'
+                        . '<tr><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Origem</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">{{lead_source}}</td></tr>'
+                        . '<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:500;">Lead #</td><td style="padding:12px 16px;color:#1e293b;font-weight:700;">#{{lead_id}}</td></tr>'
+                        . '</table>'
+                        . '<div style="text-align:center;margin:28px 0;">'
+                        . '<a href="{{lead_url}}" style="display:inline-block;background:#0EA5E9;color:#ffffff;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:700;font-size:15px;">Ver Lead no CRM</a>'
+                        . '</div>'
+                        . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 16px;">'
+                        . '<p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">Website Expert · Notificação automática · Não responda a este e-mail</p>'
+                        . '</div></div>',
+                ],
+                'body_text' => [
+                    'en' => "New lead from contact form\n\nClient: {{client_name}}\nLead: {{lead_name}}\nSource: {{lead_source}}\n\nView in CRM: {{lead_url}}",
+                    'pl' => "Nowy lead z formularza kontaktowego\n\nKlient: {{client_name}}\nLead: {{lead_name}}\nŹródło: {{lead_source}}\n\nZobacz w CRM: {{lead_url}}",
+                    'pt' => "Novo lead de formulário de contato\n\nCliente: {{client_name}}\nLead: {{lead_name}}\nOrigem: {{lead_source}}\n\nVer no CRM: {{lead_url}}",
+                ],
+            ],
+
+            // ── Lead received – client confirmation ───────────────────────────
+            [
+                'name'      => 'Lead received – client confirmation',
+                'slug'      => 'lead_received_client',
+                'subject'   => [
+                    'en' => '✅ We received your enquiry – {{client_name}}',
+                    'pl' => '✅ Otrzymaliśmy Twoje zapytanie – {{client_name}}',
+                    'pt' => '✅ Recebemos a sua solicitação – {{client_name}}',
+                ],
+                'variables' => ['client_name', 'lead_name', 'company_name'],
+                'is_active' => true,
+                'body_html' => [
+                    'en' => '<div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">'
+                        . '<div style="background:linear-gradient(135deg,#10B981 0%,#059669 100%);padding:32px 40px;border-radius:10px 10px 0 0;">'
+                        . '<h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">✅ We received your enquiry</h1>'
+                        . '<p style="margin:8px 0 0;color:#a7f3d0;font-size:14px;">Thank you for reaching out — we\'ll be in touch shortly</p>'
+                        . '</div>'
+                        . '<div style="padding:32px 40px;">'
+                        . '<p style="color:#1e293b;font-size:15px;line-height:1.6;">Hi <strong>{{client_name}}</strong>,</p>'
+                        . '<p style="color:#475569;font-size:14px;line-height:1.6;">Thank you for getting in touch with <strong>{{company_name}}</strong>. We have received your enquiry and one of our team members will review it and get back to you as soon as possible.</p>'
+                        . '<p style="color:#475569;font-size:14px;line-height:1.6;">In the meantime, feel free to browse our services or reply to this email if you have any immediate questions.</p>'
+                        . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 16px;">'
+                        . '<p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">Website Expert · Automated notification · Do not reply to this email</p>'
+                        . '</div></div>',
+                    'pl' => '<div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">'
+                        . '<div style="background:linear-gradient(135deg,#10B981 0%,#059669 100%);padding:32px 40px;border-radius:10px 10px 0 0;">'
+                        . '<h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">✅ Otrzymaliśmy Twoje zapytanie</h1>'
+                        . '<p style="margin:8px 0 0;color:#a7f3d0;font-size:14px;">Dziękujemy za kontakt — odezwiemy się wkrótce</p>'
+                        . '</div>'
+                        . '<div style="padding:32px 40px;">'
+                        . '<p style="color:#1e293b;font-size:15px;line-height:1.6;">Cześć <strong>{{client_name}}</strong>,</p>'
+                        . '<p style="color:#475569;font-size:14px;line-height:1.6;">Dziękujemy za kontakt z <strong>{{company_name}}</strong>. Otrzymaliśmy Twoje zapytanie i jeden z naszych specjalistów skontaktuje się z Tobą tak szybko, jak to możliwe.</p>'
+                        . '<p style="color:#475569;font-size:14px;line-height:1.6;">W razie pilnych pytań możesz odpowiedzieć na tę wiadomość lub skontaktować się z nami bezpośrednio.</p>'
+                        . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 16px;">'
+                        . '<p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">Website Expert · Powiadomienie automatyczne · Nie odpowiadaj na tę wiadomość</p>'
+                        . '</div></div>',
+                    'pt' => '<div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">'
+                        . '<div style="background:linear-gradient(135deg,#10B981 0%,#059669 100%);padding:32px 40px;border-radius:10px 10px 0 0;">'
+                        . '<h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">✅ Recebemos a sua solicitação</h1>'
+                        . '<p style="margin:8px 0 0;color:#a7f3d0;font-size:14px;">Obrigado por entrar em contacto — retornaremos em breve</p>'
+                        . '</div>'
+                        . '<div style="padding:32px 40px;">'
+                        . '<p style="color:#1e293b;font-size:15px;line-height:1.6;">Olá <strong>{{client_name}}</strong>,</p>'
+                        . '<p style="color:#475569;font-size:14px;line-height:1.6;">Obrigado por entrar em contacto com <strong>{{company_name}}</strong>. Recebemos a sua solicitação e um dos nossos especialistas irá analisá-la e responder o mais brevemente possível.</p>'
+                        . '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 16px;">'
+                        . '<p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">Website Expert · Notificação automática · Não responda a este e-mail</p>'
+                        . '</div></div>',
+                ],
+                'body_text' => [
+                    'en' => "Hi {{client_name}},\n\nThank you for contacting {{company_name}}. We have received your enquiry and will be in touch shortly.\n\nKind regards,\n{{company_name}} Team",
+                    'pl' => "Cześć {{client_name}},\n\nDziękujemy za kontakt z {{company_name}}. Twoje zapytanie zostało odebrane i odezwiemy się wkrótce.\n\nPozdrawiamy,\nZespół {{company_name}}",
+                    'pt' => "Olá {{client_name}},\n\nObrigado por entrar em contacto com {{company_name}}. Recebemos a sua solicitação e retornaremos em breve.\n\nCumprimentos,\nEquipa {{company_name}}",
+                ],
             ],
 
         ];

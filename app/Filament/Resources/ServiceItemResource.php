@@ -16,7 +16,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 
-class ServiceItemResource extends Resource
+class ServiceItemResource extends BaseResource
 {
     protected static ?string $model = ServiceItem::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-wrench-screwdriver';

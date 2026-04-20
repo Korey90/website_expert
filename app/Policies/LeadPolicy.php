@@ -4,12 +4,13 @@ namespace App\Policies;
 
 use App\Models\Lead;
 use App\Models\User;
+use App\Support\PermissionHelper;
 
 class LeadPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('view_leads') || $user->hasAnyRole(['admin', 'manager', 'developer']);
+        return PermissionHelper::allows($user, 'view_leads');
     }
 
     public function view(User $user, Lead $lead): bool
@@ -19,21 +20,23 @@ class LeadPolicy
 
     public function create(User $user): bool
     {
-        return $user->can('manage_leads') || $user->hasAnyRole(['admin', 'manager']);
+        return PermissionHelper::allows($user, 'create_leads')
+            || PermissionHelper::allows($user, 'manage_leads');
     }
 
     public function update(User $user, Lead $lead): bool
     {
-        return $user->can('manage_leads') || $user->hasAnyRole(['admin', 'manager']);
+        return PermissionHelper::allows($user, 'edit_leads')
+            || PermissionHelper::allows($user, 'manage_leads');
     }
 
     public function delete(User $user, Lead $lead): bool
     {
-        return $user->can('delete_leads') || $user->hasRole('admin');
+        return PermissionHelper::allows($user, 'delete_leads');
     }
 
     public function export(User $user): bool
     {
-        return $user->can('export_leads') || $user->hasRole('admin');
+        return PermissionHelper::allows($user, 'export_leads');
     }
 }

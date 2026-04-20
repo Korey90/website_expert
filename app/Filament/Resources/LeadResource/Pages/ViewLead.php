@@ -5,6 +5,7 @@ namespace App\Filament\Resources\LeadResource\Pages;
 use App\Filament\Resources\LeadResource;
 use App\Mail\ClientEmailMail;
 use App\Mail\QuoteSentMail;
+use App\Mail\ContractSentMail;
 use App\Models\BriefingTemplate;
 use App\Models\CalculatorPricing;
 use App\Models\Contract;
@@ -209,6 +210,37 @@ class ViewLead extends ViewRecord
                         'filament.admin.resources.sales-offers.view',
                         $offer->id
                     );
+                }),
+            Action::make('send_contract')
+                ->label('Wyślij kontrakt')
+                ->icon('heroicon-o-document-check')
+                ->color('success')
+                ->visible(fn () => Contract::where('client_id', $lead->client_id)
+                    ->where('status', 'draft')
+                    ->exists())
+                ->requiresConfirmation()
+                ->modalHeading('Wyślij kontrakt do klienta')
+                ->modalDescription('Kontrakt zostanie oznaczony jako Wysłany i pojawi się w portalu klienta do podpisania.')
+                ->modalSubmitActionLabel('Wyślij')
+                ->action(function () use ($lead) {
+                    $contract = Contract::where('client_id', $lead->client_id)
+                        ->where('status', 'draft')
+                        ->latest()
+                        ->firstOrFail();
+
+                    $contract->update(['status' => 'sent', 'sent_at' => now()]);
+
+                    $clientEmail = $lead->client?->primary_contact_email;
+                    if ($clientEmail) {
+                        Mail::to($clientEmail)->send(new ContractSentMail($contract));
+                    }
+
+                    Notification::make()
+                        ->title('Kontrakt wysłany do klienta.')
+                        ->success()
+                        ->send();
+
+                    return redirect()->route('filament.admin.resources.contracts.view', $contract->id);
                 }),
             Action::make('create_contract')
                 ->label('Create Contract')

@@ -16,7 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class PipelineStageResource extends Resource
+class PipelineStageResource extends BaseResource
 {
     protected static ?string $model = PipelineStage::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-adjustments-horizontal';

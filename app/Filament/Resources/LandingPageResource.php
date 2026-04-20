@@ -3,7 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LandingPageResource\Pages;
+use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\LandingPage;
+use App\Support\PermissionHelper;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -15,7 +17,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class LandingPageResource extends Resource
+class LandingPageResource extends BaseResource
 {
     protected static ?string $model = LandingPage::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-globe-alt';
@@ -106,7 +108,7 @@ class LandingPageResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable()
-                    ->visible(fn () => auth()->user()?->hasAnyRole(['admin', 'manager', 'developer']) ?? false),
+                    ->visible(fn () => PermissionHelper::allows(auth()->user(), FilamentPermissionRegistry::panelAccessPermission())),
 
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
@@ -150,7 +152,7 @@ class LandingPageResource extends Resource
                 Tables\Filters\SelectFilter::make('business_id')
                     ->label('Business')
                     ->relationship('business', 'name')
-                    ->visible(fn () => auth()->user()?->hasAnyRole(['admin', 'manager', 'developer']) ?? false),
+                    ->visible(fn () => PermissionHelper::allows(auth()->user(), FilamentPermissionRegistry::panelAccessPermission())),
 
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
@@ -180,7 +182,7 @@ class LandingPageResource extends Resource
     {
         $user = auth()->user();
 
-        if ($user && $user->hasAnyRole(['admin', 'manager', 'developer'])) {
+        if (PermissionHelper::allows($user, FilamentPermissionRegistry::panelAccessPermission())) {
             // Staff see all tenants — bypass BusinessScope GlobalScope
             return parent::getEloquentQuery()
                 ->withoutGlobalScope(\App\Scopes\BusinessScope::class)

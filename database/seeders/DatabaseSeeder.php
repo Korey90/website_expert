@@ -55,5 +55,6 @@ class DatabaseSeeder extends Seeder
         // $this->call(InvoiceSeeder::class);
          $this->call(AutomationRuleSeeder::class);
          $this->call(AutomationTriggerSeeder::class);
+         $this->call(DeployConfigSeeder::class);
     }
 }

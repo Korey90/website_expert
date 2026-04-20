@@ -11,7 +11,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class SalesOfferResource extends Resource
+class SalesOfferResource extends BaseResource
 {
     protected static ?string $model = SalesOffer::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-paper-airplane';

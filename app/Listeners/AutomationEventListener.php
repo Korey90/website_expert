@@ -68,6 +68,7 @@ class AutomationEventListener
             'client_id'   => $lead->client_id,
             'business_id' => $lead->business_id,
             'source'      => $lead->source,
+            'locale'      => app()->getLocale(),
         ];
 
         // Generic trigger for all lead sources
@@ -100,6 +101,7 @@ class AutomationEventListener
             'utm_source'      => $lead->utm_source,
             'utm_medium'      => $lead->utm_medium,
             'utm_campaign'    => $lead->utm_campaign,
+            'locale'          => app()->getLocale(),
         ]);
     }
 

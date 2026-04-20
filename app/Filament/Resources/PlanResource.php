@@ -16,7 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class PlanResource extends Resource
+class PlanResource extends BaseResource
 {
     protected static ?string $model = Plan::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-tag';

@@ -27,7 +27,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
-class LeadResource extends Resource
+class LeadResource extends BaseResource
 {
     protected static ?string $model = Lead::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-funnel';

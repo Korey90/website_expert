@@ -20,7 +20,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
-class InvoiceResource extends Resource
+class InvoiceResource extends BaseResource
 {
     protected static ?string $model = Invoice::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';

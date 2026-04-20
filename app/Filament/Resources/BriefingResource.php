@@ -11,7 +11,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class BriefingResource extends Resource
+class BriefingResource extends BaseResource
 {
     protected static ?string $model = Briefing::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-list';

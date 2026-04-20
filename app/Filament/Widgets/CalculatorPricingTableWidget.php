@@ -15,6 +15,8 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class CalculatorPricingTableWidget extends BaseWidget
 {
+    protected static bool $isDiscoverable = false;
+
     protected static ?string $heading = 'Pricing — options, costs & multipliers';
     protected int|string|array $columnSpan = 'full';
 

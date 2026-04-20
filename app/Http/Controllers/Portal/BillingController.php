@@ -23,10 +23,14 @@ class BillingController extends BasePortalController
      * GET /portal/billing
      * Show current plan, usage, and upgrade options.
      */
-    public function index(): Response
+    public function index(): Response|RedirectResponse
     {
         $client   = $this->clientForUser();
         $business = currentBusiness();
+
+        if (! $business) {
+            return $this->redirectWithoutWorkspace('Workspace access is required for billing and plan management.');
+        }
 
         $plans = collect(PlanService::getPlans())->map(fn ($limits, $key) => [
             'key'           => $key,
@@ -67,6 +71,10 @@ class BillingController extends BasePortalController
     public function checkout(Request $request, string $plan): RedirectResponse
     {
         $business = currentBusiness();
+
+        if (! $business) {
+            return $this->redirectWithoutWorkspace('Workspace access is required for billing and plan management.');
+        }
 
         $priceId = match ($plan) {
             'pro'    => config('services.stripe.price_pro_monthly'),
@@ -109,10 +117,14 @@ class BillingController extends BasePortalController
      * GET /portal/billing/success
      * Handle successful Stripe Checkout redirect.
      */
-    public function success(Request $request): Response
+    public function success(Request $request): Response|RedirectResponse
     {
         $client   = $this->clientForUser();
         $business = currentBusiness();
+
+        if (! $business) {
+            return $this->redirectWithoutWorkspace('Workspace access is required for billing and plan management.');
+        }
 
         return Inertia::render('Portal/Billing/Success', [
             'client'   => $client?->only('id', 'company_name'),
@@ -127,6 +139,10 @@ class BillingController extends BasePortalController
     public function portal(): RedirectResponse
     {
         $business = currentBusiness();
+
+        if (! $business) {
+            return $this->redirectWithoutWorkspace('Workspace access is required for billing and plan management.');
+        }
 
         if (! $business->stripe_customer_id) {
             return back()->withErrors(['stripe' => 'No active subscription found.']);
@@ -146,4 +162,5 @@ class BillingController extends BasePortalController
             return back()->withErrors(['stripe' => 'Could not open billing portal.']);
         }
     }
+
 }

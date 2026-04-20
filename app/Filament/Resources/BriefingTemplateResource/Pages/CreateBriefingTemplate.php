@@ -11,10 +11,7 @@ class CreateBriefingTemplate extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Non-superadmin templates are always scoped to their business
-        if (!auth()->user()?->hasRole('super_admin')) {
-            $data['business_id'] = currentBusiness()?->id;
-        }
+        $data['business_id'] = currentBusiness()?->id;
 
         return $data;
     }

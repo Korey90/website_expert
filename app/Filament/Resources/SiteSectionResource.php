@@ -19,7 +19,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class SiteSectionResource extends Resource
+class SiteSectionResource extends BaseResource
 {
     protected static ?string $model = SiteSection::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';

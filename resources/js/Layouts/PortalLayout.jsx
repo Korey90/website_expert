@@ -28,9 +28,12 @@ export default function PortalLayout({ client, children }) {
     const locale = props.locale ?? 'en';
     const t = (key) => T[key]?.[locale] ?? T[key]?.en ?? key;
     const [mobileOpen, setMobileOpen] = useState(false);
+    const capabilities = props.auth?.portal_capabilities ?? {};
+    const canAccessClientPortal = !!capabilities.can_access_client_portal;
+    const canAccessWorkspace = !!capabilities.can_access_workspace;
 
     const sections = [
-        {
+        canAccessClientPortal ? {
             key: 'portal',
             label: t('portal'),
             items: [
@@ -40,16 +43,16 @@ export default function PortalLayout({ client, children }) {
                 { href: route('portal.invoices'),  label: t('invoices'),   icon: '🧾' },
                 { href: route('portal.quotes'),    label: t('quotes'),     icon: '📋' },
             ],
-        },
-        {
+        } : null,
+        canAccessWorkspace ? {
             key: 'growthTools',
             label: t('growthTools'),
             items: [
                 { href: route('landing-pages.index'),     label: t('landingPages'), icon: '🚀' },
                 { href: route('landing-pages.ai.create'), label: t('aiGenerator'),  icon: '✨' },
             ],
-        },
-        {
+        } : null,
+        canAccessWorkspace ? {
             key: 'business',
             label: t('business'),
             items: [
@@ -58,8 +61,8 @@ export default function PortalLayout({ client, children }) {
                 { href: route('business.api-tokens.index'),label: t('apiTokens'),   icon: '🔑' },
                 { href: route('portal.billing'),            label: t('billing'),     icon: '💳' },
             ],
-        },
-    ];
+        } : null,
+    ].filter(Boolean);
 
     const isActive = (href) => url.startsWith(new URL(href).pathname);
 
@@ -108,15 +111,17 @@ export default function PortalLayout({ client, children }) {
                     </nav>
 
                     <div className="px-4 py-4 border-t border-gray-200 space-y-1">
-                        <Link
-                            href={route('portal.settings.notifications')}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
-                                ${isActive(route('portal.settings.notifications'))
-                                    ? 'bg-red-50 text-red-700 font-medium'
-                                    : 'text-gray-600 hover:bg-gray-100'}`}
-                        >
-                            <span>🔔</span> {t('notifications')}
-                        </Link>
+                        {canAccessClientPortal && (
+                            <Link
+                                href={route('portal.settings.notifications')}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
+                                    ${isActive(route('portal.settings.notifications'))
+                                        ? 'bg-red-50 text-red-700 font-medium'
+                                        : 'text-gray-600 hover:bg-gray-100'}`}
+                            >
+                                <span>🔔</span> {t('notifications')}
+                            </Link>
+                        )}
                         <Link
                             href={route('profile.edit')}
                             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors

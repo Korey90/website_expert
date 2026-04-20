@@ -137,7 +137,7 @@ class LeadService
         $leadData['business_id'] = $business?->id ?? null;
 
         /** @var Lead $lead */
-        $lead = app(CreateLeadAction::class)->execute($leadData);
+        $lead = DB::transaction(fn () => app(CreateLeadAction::class)->execute($leadData));
 
         if ($business) {
             $this->sourceService->record($lead, $business, $sourceData);
@@ -146,6 +146,12 @@ class LeadService
         if (! empty($consentData['given'])) {
             $this->consentService->record($lead, $consentData);
         }
+
+        Log::channel('leads')->info('Lead created from source', [
+            'lead_id' => $lead->id,
+            'source'  => $lead->source,
+            'email'   => $lead->client?->primary_contact_email,
+        ]);
 
         return $lead;
     }

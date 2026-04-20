@@ -15,7 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class CalculatorStepsResource extends Resource
+class CalculatorStepsResource extends BaseResource
 {
     protected static ?string $model = CalculatorStep::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-queue-list';

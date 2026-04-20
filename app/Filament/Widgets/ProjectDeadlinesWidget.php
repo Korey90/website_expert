@@ -14,8 +14,9 @@ use Filament\Widgets\TableWidget as BaseWidget;
  */
 class ProjectDeadlinesWidget extends BaseWidget
 {
-    protected static ?int $sort = 5;
+    protected static ?int $sort = 9;
     protected int|string|array $columnSpan = 'full';
+    protected static bool $isLazy = true;
     protected static ?string $heading = 'Upcoming & Overdue Deadlines';
 
     public function table(Table $table): Table

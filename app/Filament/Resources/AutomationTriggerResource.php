@@ -17,7 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class AutomationTriggerResource extends Resource
+class AutomationTriggerResource extends BaseResource
 {
     protected static ?string $model = AutomationTrigger::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-bolt';

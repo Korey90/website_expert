@@ -13,7 +13,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 
-class SmsTemplateResource extends Resource
+class SmsTemplateResource extends BaseResource
 {
     protected static ?string $model = SmsTemplate::class;
     protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-chat-bubble-left-ellipsis';

@@ -17,7 +17,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 use Spatie\Permission\Models\Role;
 
-class UserResource extends Resource
+class UserResource extends BaseResource
 {
     protected static ?string $model = User::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-users';

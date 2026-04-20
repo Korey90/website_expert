@@ -59,7 +59,7 @@ class CalculatorLeadController extends Controller
                 'ip_address'   => $request->ip(),
                 'locale'       => app()->getLocale(),
             ],
-            business: currentBusiness(),
+            business: currentBusiness() ?? defaultBusiness(),
         );
 
         return response()->json(['message' => 'ok', 'lead_id' => $lead->id], 201);

@@ -6,9 +6,11 @@ use App\Automation\ActionSkippedException;
 use App\Automation\AutomationActionContract;
 use App\Automation\ConditionEvaluator;
 use App\Automation\Actions\AddTagAction;
+use App\Automation\Actions\AssignTaskAction;
 use App\Automation\Actions\ChangeStatusAction;
 use App\Automation\Actions\CreatePortalAccessAction;
 use App\Automation\Actions\NotifyAdminAction;
+use App\Automation\Actions\NotifyTeamAction;
 use App\Automation\Actions\SendEmailAction;
 use App\Automation\Actions\SendInternalEmailAction;
 use App\Automation\Actions\SendSmsAction;
@@ -39,6 +41,8 @@ class ProcessAutomationJob implements ShouldQueue
         'send_internal_email'  => SendInternalEmailAction::class,
         'send_sms'             => SendSmsAction::class,
         'notify_admin'         => NotifyAdminAction::class,
+        'notify_team'          => NotifyTeamAction::class,
+        'assign_task'          => AssignTaskAction::class,
         'add_tag'              => AddTagAction::class,
         'change_status'        => ChangeStatusAction::class,
         'create_portal_access' => CreatePortalAccessAction::class,

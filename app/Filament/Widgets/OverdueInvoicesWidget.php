@@ -10,8 +10,9 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class OverdueInvoicesWidget extends BaseWidget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 7;
     protected int|string|array $columnSpan = 'full';
+    protected static bool $isLazy = true;
     protected static ?string $heading = 'Overdue & Unpaid Invoices';
 
     public function table(Table $table): Table

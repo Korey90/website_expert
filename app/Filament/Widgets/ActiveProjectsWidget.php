@@ -10,6 +10,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class ActiveProjectsWidget extends BaseWidget
 {
+    protected static bool $isDiscoverable = false;
     protected static ?int $sort = 4;
     protected int|string|array $columnSpan = 'full';
     protected static ?string $heading = 'Active Projects';

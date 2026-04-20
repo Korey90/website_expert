@@ -13,7 +13,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 
-class ProjectTemplateResource extends Resource
+class ProjectTemplateResource extends BaseResource
 {
     protected static ?string $model = ProjectTemplate::class;
     protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-rectangle-stack';

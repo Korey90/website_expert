@@ -17,6 +17,7 @@ class AutomationRuleSeeder extends Seeder
         $quoteSentTpl     = EmailTemplate::where('slug', 'quote_sent')->value('id');
         $launchedTpl      = EmailTemplate::where('slug', 'project_launched')->value('id');
         $phaseTpl         = EmailTemplate::where('slug', 'project_phase_complete')->value('id');
+        $clientConfirmTpl = EmailTemplate::where('slug', 'lead_received_client')->value('id');
         $wonStageId       = PipelineStage::where('is_won', true)->value('id');
 
         $rules = [
@@ -81,8 +82,16 @@ class AutomationRuleSeeder extends Seeder
                 'trigger_event' => 'lead.created',
                 'conditions'    => [],
                 'actions'       => [
-                    ['type' => 'notify_team', 'message' => 'New lead added to pipeline: {{lead_title}}'],
-                    ['type' => 'assign_task',  'task_title' => 'Initial contact with new lead', 'due_days' => 1],
+                    [
+                        'type'          => 'notify_team',
+                        'title'         => 'New Lead: {{lead_title}}',
+                        'message'       => 'New lead added to pipeline: {{lead_title}}',
+                        'template_slug' => 'service_cta_admin_mail_notice',
+                        'icon'          => 'heroicon-o-funnel',
+                        'color'         => 'info',
+                    ],
+                    ['type' => 'send_email', 'template_id' => $clientConfirmTpl, 'recipient' => 'client'],
+                    ['type' => 'assign_task', 'task_title' => 'Initial contact with new lead', 'due_days' => 1],
                 ],
                 'delay_minutes' => 0,
                 'is_active'     => true,
@@ -123,7 +132,7 @@ class AutomationRuleSeeder extends Seeder
         ];
 
         foreach ($rules as $data) {
-            AutomationRule::firstOrCreate(['name' => $data['name']], $data);
+            AutomationRule::updateOrCreate(['name' => $data['name']], $data);
         }
     }
 }

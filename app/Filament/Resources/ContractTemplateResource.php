@@ -18,7 +18,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class ContractTemplateResource extends Resource
+class ContractTemplateResource extends BaseResource
 {
     protected static ?string $model = ContractTemplate::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';

@@ -4,32 +4,32 @@ namespace App\Policies;
 
 use App\Models\BriefingTemplate;
 use App\Models\User;
+use App\Support\PermissionHelper;
 
 class BriefingTemplatePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'developer', 'super_admin']);
+        return PermissionHelper::allows($user, 'view_briefing_templates');
     }
 
     public function view(User $user, BriefingTemplate $template): bool
     {
-        return $user->hasRole('super_admin')
-            || $user->hasAnyRole(['admin', 'manager', 'developer']);
+        return PermissionHelper::allows($user, 'view_briefing_templates');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'super_admin']);
+        return PermissionHelper::allows($user, 'create_briefing_templates');
     }
 
     public function update(User $user, BriefingTemplate $template): bool
     {
-        return $user->hasAnyRole(['admin', 'super_admin']);
+        return PermissionHelper::allows($user, 'edit_briefing_templates');
     }
 
     public function delete(User $user, BriefingTemplate $template): bool
     {
-        return $user->hasAnyRole(['admin', 'super_admin']);
+        return PermissionHelper::allows($user, 'delete_briefing_templates');
     }
 }

@@ -5,20 +5,18 @@ namespace App\Filament\Resources\ClientResource\Pages;
 use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\ContractResource;
 use App\Filament\Resources\LeadResource;
-use App\Mail\PortalInviteMail;
-use App\Models\User;
+use App\Services\Account\PortalAccessService;
+use DomainException;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
 
 class ViewClient extends ViewRecord
 {
@@ -62,103 +60,136 @@ class ViewClient extends ViewRecord
                 : 'Utwórz dostęp do portalu klienta'
             )
             ->modalDescription(fn () => $client()->portal_user_id
-                ? 'Konto portalu jest aktywne. Możesz wysłać klientowi link do resetowania hasła.'
-                : 'Zostanie utworzone konto użytkownika i wysłany e-mail z danymi logowania.'
+                ? 'Konto portalu jest aktywne. Możesz wysłać link do resetowania hasła i opcjonalnie nadać dostęp do workspace.'
+                : 'Zostanie utworzone konto użytkownika i wysłany e-mail z danymi logowania. Dostęp do workspace SaaS pozostaje opcjonalny.'
             )
             ->modalWidth('lg')
 
             // ── form fields (shown only when no account yet) ────────────────
-            ->form(fn () => $client()->portal_user_id ? [] : [
+            ->form(fn () => [
                 TextInput::make('name')
                     ->label('Imię i nazwisko')
                     ->default($client()->primary_contact_name)
+                    ->visible(fn () => ! $client()->portal_user_id)
                     ->required()
                     ->maxLength(100),
                 TextInput::make('email')
                     ->label('Adres e-mail (login)')
                     ->email()
                     ->default($client()->primary_contact_email)
+                    ->visible(fn () => ! $client()->portal_user_id)
                     ->required()
                     ->maxLength(255),
+                Checkbox::make('grant_workspace_access')
+                    ->label('Nadaj także dostęp do workspace SaaS')
+                    ->visible(fn () => (bool) $client()->business_id)
+                    ->helperText('Tworzy membership w business_users tylko jawnie. Dla klienta agencyjnego domyślny tryb to portal-only.'),
+                Checkbox::make('send_password_reset')
+                    ->label('Wyślij link do resetowania hasła')
+                    ->default(true)
+                    ->visible(fn () => (bool) $client()->portal_user_id),
             ])
 
             // ── submit button label ─────────────────────────────────────────
             ->modalSubmitActionLabel(fn () => $client()->portal_user_id
-                ? 'Wyślij link do resetowania hasła'
+                ? 'Zastosuj zmiany'
                 : 'Utwórz konto i wyślij hasło e-mailem'
             )
 
             ->action(function (array $data) use ($client): void {
                 $record = $client();
+                $portalAccessService = app(PortalAccessService::class);
+                $grantWorkspaceAccess = (bool) ($data['grant_workspace_access'] ?? false);
 
                 // ── Case A: account already exists → send password reset ───
                 if ($record->portal_user_id) {
                     $portalUser = $record->portalUser;
 
-                    if ($portalUser) {
-                        Password::sendResetLink(['email' => $portalUser->email]);
+                    $messages = [];
 
-                        Notification::make()
-                            ->success()
-                            ->title('Link do resetowania hasła wysłany')
-                            ->body('Wiadomość e-mail wysłana na adres: ' . $portalUser->email)
-                            ->send();
+                    if ($grantWorkspaceAccess) {
+                        try {
+                            $result = $portalAccessService->ensurePortalAccess($record, [
+                                'grant_workspace_access' => true,
+                                'send_invite' => false,
+                                'invited_by' => auth()->id(),
+                            ]);
+                        } catch (DomainException $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Nie udało się nadać workspace access')
+                                ->body($e->getMessage())
+                                ->send();
+
+                            return;
+                        }
+
+                        $messages[] = $result['workspace_membership_created']
+                            ? 'Workspace access został nadany.'
+                            : 'Workspace access był już aktywny.';
                     }
 
-                    return;
-                }
+                    if (($data['send_password_reset'] ?? false) && $portalUser) {
+                        Password::sendResetLink(['email' => $portalUser->email]);
 
-                // ── Case B: no account yet ─────────────────────────────────
-                $email = $data['email'];
-                $name  = $data['name'];
+                        $messages[] = 'Link do resetowania hasła wysłany na adres: ' . $portalUser->email;
+                    }
 
-                // Re-use existing User if email already registered
-                $existingUser = User::where('email', $email)->first();
+                    if ($messages === []) {
+                        Notification::make()
+                            ->warning()
+                            ->title('Brak zmian')
+                            ->body('Nie wybrano żadnej akcji do wykonania.')
+                            ->send();
 
-                if ($existingUser) {
-                    $record->update(['portal_user_id' => $existingUser->id]);
-
-                    if (! $existingUser->hasRole('client')) {
-                        $existingUser->assignRole('client');
+                        return;
                     }
 
                     Notification::make()
                         ->success()
-                        ->title('Konto portalu połączone')
-                        ->body("Istniejące konto {$email} zostało powiązane z tym klientem.")
+                        ->title('Dostęp zaktualizowany')
+                        ->body(implode(' ', $messages))
                         ->send();
 
                     return;
                 }
 
-                // Create a brand-new portal user
-                $plainPassword = Str::password(12, symbols: false);
+                // ── Case B: no account yet ─────────────────────────────────
+                try {
+                    $result = $portalAccessService->ensurePortalAccess($record, [
+                        'name' => $data['name'],
+                        'email' => $data['email'],
+                        'grant_workspace_access' => $grantWorkspaceAccess,
+                        'send_invite' => true,
+                        'queue_invite' => false,
+                        'invited_by' => auth()->id(),
+                    ]);
+                } catch (DomainException $e) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Nie udało się utworzyć dostępu do portalu')
+                        ->body($e->getMessage())
+                        ->send();
 
-                $user = User::create([
-                    'name'     => $name,
-                    'email'    => $email,
-                    'password' => Hash::make($plainPassword),
-                    'is_active' => true,
-                    'locale'   => 'pl',
-                ]);
+                    return;
+                }
 
-                $user->assignRole('client');
-                $record->update(['portal_user_id' => $user->id]);
+                $title = $result['user_was_created']
+                    ? 'Konto portalu utworzone!'
+                    : 'Konto portalu połączone';
 
-                $companyName = config('mail.from.name', config('app.name'));
+                $body = $result['user_was_created']
+                    ? "Dane logowania wysłane na adres: {$result['user']->email}"
+                    : "Istniejące konto {$result['user']->email} zostało powiązane z tym klientem.";
 
-                Mail::to($email)->send(new PortalInviteMail(
-                    clientName:    $name,
-                    loginEmail:    $email,
-                    plainPassword: $plainPassword,
-                    loginUrl:      route('login'),
-                    companyName:   $companyName,
-                ));
+                if ($result['workspace_membership_created']) {
+                    $body .= ' Nadano też dostęp do workspace.';
+                }
 
                 Notification::make()
                     ->success()
-                    ->title('Konto portalu utworzone!')
-                    ->body("Dane logowania wysłane na adres: {$email}")
+                    ->title($title)
+                    ->body($body)
                     ->send();
             });
     }

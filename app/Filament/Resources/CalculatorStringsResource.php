@@ -13,7 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class CalculatorStringsResource extends Resource
+class CalculatorStringsResource extends BaseResource
 {
     protected static ?string $model = CalculatorString::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-language';

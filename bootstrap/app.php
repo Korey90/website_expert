@@ -18,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'has.business' => \App\Http\Middleware\EnsureHasBusiness::class,
             'api.token'    => \App\Http\Middleware\ApiTokenAuthentication::class,
             'landing-page.tenant' => \App\Http\Middleware\EnsureLandingPageTenantAccess::class,
+            'portal.client' => \App\Http\Middleware\EnsurePortalClientAccess::class,
+            'portal.workspace' => \App\Http\Middleware\EnsurePortalWorkspaceAccess::class,
         ]);
 
         $middleware->web(append: [

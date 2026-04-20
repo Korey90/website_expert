@@ -22,7 +22,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class NotificationResource extends Resource
+class NotificationResource extends BaseResource
 {
     protected static ?string $model = DatabaseNotification::class;
 

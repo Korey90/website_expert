@@ -4,32 +4,32 @@ namespace App\Policies;
 
 use App\Models\SalesOfferTemplate;
 use App\Models\User;
+use App\Support\PermissionHelper;
 
 class SalesOfferTemplatePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'developer', 'super_admin']);
+        return PermissionHelper::allows($user, 'view_sales_offer_templates');
     }
 
     public function view(User $user, SalesOfferTemplate $template): bool
     {
-        return $user->hasRole('super_admin')
-            || $user->hasAnyRole(['admin', 'manager', 'developer']);
+        return PermissionHelper::allows($user, 'view_sales_offer_templates');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'super_admin']);
+        return PermissionHelper::allows($user, 'create_sales_offer_templates');
     }
 
     public function update(User $user, SalesOfferTemplate $template): bool
     {
-        return $user->hasAnyRole(['admin', 'super_admin']);
+        return PermissionHelper::allows($user, 'edit_sales_offer_templates');
     }
 
     public function delete(User $user, SalesOfferTemplate $template): bool
     {
-        return $user->hasAnyRole(['admin', 'super_admin']);
+        return PermissionHelper::allows($user, 'delete_sales_offer_templates');
     }
 }

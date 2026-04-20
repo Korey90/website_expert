@@ -11,8 +11,9 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class RecentLeadsWidget extends BaseWidget
 {
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 8;
     protected int|string|array $columnSpan = 'full';
+    protected static bool $isLazy = true;
     protected static ?string $heading = 'Recent Leads';
 
     public function table(Table $table): Table

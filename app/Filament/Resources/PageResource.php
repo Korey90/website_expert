@@ -19,7 +19,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
-class PageResource extends Resource
+class PageResource extends BaseResource
 {
     protected static ?string $model = Page::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document';

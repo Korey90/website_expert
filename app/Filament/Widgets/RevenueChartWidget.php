@@ -3,12 +3,18 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Invoice;
+use App\Models\Lead;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 
 class RevenueChartWidget extends ChartWidget
 {
-    protected static ?int $sort = 6;
+    protected static ?int $sort = 4;
+
+    public function getColumnSpan(): int|string|array
+    {
+        return Lead::whereNotNull('source')->exists() ? 1 : 2;
+    }
 
     protected string $color = 'success';
 

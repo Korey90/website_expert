@@ -14,7 +14,11 @@ class LeadController extends BasePortalController
         $client   = $this->clientForUser();
         $business = currentBusiness();
 
-        if (! $business || $lead->business_id !== $business->id) {
+        if (! $business) {
+            return $this->redirectWithoutWorkspace('Workspace access is required to view captured leads.');
+        }
+
+        if ($lead->business_id !== $business->id) {
             abort(403);
         }
 
@@ -33,7 +37,7 @@ class LeadController extends BasePortalController
         ])->filter()->all();
 
         return Inertia::render('Portal/Leads/Show', [
-            'client' => $client->only('id', 'company_name'),
+            'client' => $client?->only('id', 'company_name'),
             'lead'   => [
                 'id'           => $lead->id,
                 'title'        => $lead->title,

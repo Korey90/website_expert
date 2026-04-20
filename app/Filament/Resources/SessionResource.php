@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
-class SessionResource extends Resource
+class SessionResource extends BaseResource
 {
     protected static ?string $model = Session::class;
 

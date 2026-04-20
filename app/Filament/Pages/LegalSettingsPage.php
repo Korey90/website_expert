@@ -10,7 +10,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class LegalSettingsPage extends Page
+class LegalSettingsPage extends BasePage
 {
     protected string $view = 'filament.pages.legal-settings';
 

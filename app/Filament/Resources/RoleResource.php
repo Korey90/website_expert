@@ -15,7 +15,7 @@ use Filament\Tables\Table;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class RoleResource extends Resource
+class RoleResource extends BaseResource
 {
     protected static ?string $model = Role::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
@@ -29,13 +29,14 @@ class RoleResource extends Resource
     public static function permissionGroups(): array
     {
         return [
-            'crm'         => ['label' => 'CRM',          'icon' => 'heroicon-o-building-office-2', 'suffixes' => ['clients', 'leads', 'contracts']],
-            'finance'     => ['label' => 'Finance',       'icon' => 'heroicon-o-banknotes',          'suffixes' => ['quotes', 'invoices']],
-            'projects'    => ['label' => 'Projects',      'icon' => 'heroicon-o-briefcase',           'suffixes' => ['projects']],
-            'templates'   => ['label' => 'Templates',     'icon' => 'heroicon-o-document-duplicate',  'suffixes' => ['contract_templates', 'email_templates', 'sms_templates']],
-            'automations' => ['label' => 'Automations',   'icon' => 'heroicon-o-bolt',                'suffixes' => ['automations']],
-            'cms'         => ['label' => 'Website CMS',   'icon' => 'heroicon-o-globe-alt',           'suffixes' => ['pages', 'site_sections']],
-            'users'       => ['label' => 'Users',         'icon' => 'heroicon-o-users',               'suffixes' => ['users']],
+            'crm'         => ['label' => 'CRM',          'icon' => 'heroicon-o-building-office-2', 'suffixes' => ['clients', 'leads', 'contracts', 'briefings', 'sales_offers']],
+            'finance'     => ['label' => 'Finance',       'icon' => 'heroicon-o-banknotes',          'suffixes' => ['quotes', 'invoices', 'payments']],
+            'projects'    => ['label' => 'Projects',      'icon' => 'heroicon-o-briefcase',          'suffixes' => ['projects', 'portfolio_projects', 'services']],
+            'templates'   => ['label' => 'Templates',     'icon' => 'heroicon-o-document-duplicate', 'suffixes' => ['contract_templates', 'email_templates', 'sms_templates', 'briefing_templates', 'sales_offer_templates', 'project_templates']],
+            'automations' => ['label' => 'Automations',   'icon' => 'heroicon-o-bolt',               'suffixes' => ['automations', 'automation_triggers', 'automation_logs', 'notifications']],
+            'website'     => ['label' => 'Website',       'icon' => 'heroicon-o-globe-alt',          'suffixes' => ['pages', 'site_sections', 'landing_pages', 'landing_pages_ai']],
+            'billing'     => ['label' => 'SaaS Billing',  'icon' => 'heroicon-o-credit-card',        'suffixes' => ['businesses', 'business_settings', 'business_profile', 'plans', 'subscriptions', 'sessions']],
+            'users'       => ['label' => 'Users',         'icon' => 'heroicon-o-users',              'suffixes' => ['users', 'roles', 'permissions', 'api_tokens', 'lead_sources', 'admin_panel']],
             'reports'     => ['label' => 'Reports',       'icon' => 'heroicon-o-chart-bar',           'suffixes' => ['reports']],
             'system'      => ['label' => 'System',        'icon' => 'heroicon-o-cog-6-tooth',         'suffixes' => ['settings', 'roles', 'pipeline', 'calculator', 'project_templates']],
         ];

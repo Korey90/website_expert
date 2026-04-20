@@ -27,7 +27,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class ContractResource extends Resource
+class ContractResource extends BaseResource
 {
     protected static ?string $model = Contract::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-check';

@@ -8,7 +8,7 @@ use Filament\Pages\Page;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
-class SitemapPage extends Page
+class SitemapPage extends BasePage
 {
     protected string $view = 'filament.pages.sitemap';
 

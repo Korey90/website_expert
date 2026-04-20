@@ -7,7 +7,13 @@ use Filament\Widgets\ChartWidget;
 
 class LeadsBySourceWidget extends ChartWidget
 {
-    protected static ?int $sort = 7;
+    protected static ?int $sort = 5;
+    protected int|string|array $columnSpan = 1;
+
+    public static function canView(): bool
+    {
+        return Lead::whereNotNull('source')->exists();
+    }
 
     protected string $color = 'info';
 

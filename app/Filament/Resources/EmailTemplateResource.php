@@ -20,7 +20,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class EmailTemplateResource extends Resource
+class EmailTemplateResource extends BaseResource
 {
     protected static ?string $model = EmailTemplate::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-envelope';

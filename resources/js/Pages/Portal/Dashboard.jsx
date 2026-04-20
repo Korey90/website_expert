@@ -1,6 +1,6 @@
 import PortalLayout from '@/Layouts/PortalLayout';
 import usePortalTrans from '@/Hooks/usePortalTrans';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 const statusColors = {
     // Projects
@@ -60,7 +60,7 @@ function TimelineItem({ item }) {
     const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     return (
         <div className="flex items-start gap-3">
-            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0 ${meta.color}`}>
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0 ${meta.color}`}>
                 {meta.icon}
             </div>
             <div className="flex-1 min-w-0">
@@ -69,13 +69,14 @@ function TimelineItem({ item }) {
                     <p className="text-xs text-gray-500 truncate">{item.description}</p>
                 )}
             </div>
-            <span className="text-xs text-gray-400 flex-shrink-0 pt-0.5">{dateStr}</span>
+            <span className="text-xs text-gray-400 shrink-0 pt-0.5">{dateStr}</span>
         </div>
     );
 }
 
 export default function Dashboard({ client, projects, invoices, quotes, timeline = [] }) {
     const t = usePortalTrans();
+    const { flash = {} } = usePage().props;
 
     const pendingInvoices = invoices.filter(i => ['sent', 'overdue'].includes(i.status));
     const activeProjects  = projects.filter(p => p.status === 'active');
@@ -102,6 +103,24 @@ export default function Dashboard({ client, projects, invoices, quotes, timeline
     return (
         <PortalLayout client={client}>
             <div className="max-w-6xl mx-auto space-y-8">
+
+                {flash.error && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {flash.error}
+                    </div>
+                )}
+
+                {flash.warning && (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                        {flash.warning}
+                    </div>
+                )}
+
+                {flash.success && (
+                    <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                        {flash.success}
+                    </div>
+                )}
 
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">

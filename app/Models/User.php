@@ -3,8 +3,10 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\Business;
 use App\Models\BusinessUser;
+use App\Support\PermissionHelper;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -57,7 +59,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->is_active && $this->hasAnyRole(['admin', 'manager', 'developer']);
+        return $this->is_active && PermissionHelper::allows($this, FilamentPermissionRegistry::panelAccessPermission());
     }
 
     /**

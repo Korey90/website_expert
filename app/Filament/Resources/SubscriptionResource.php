@@ -16,7 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class SubscriptionResource extends Resource
+class SubscriptionResource extends BaseResource
 {
     protected static ?string $model = Business::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-credit-card';

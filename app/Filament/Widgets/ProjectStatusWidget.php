@@ -7,7 +7,8 @@ use Filament\Widgets\ChartWidget;
 
 class ProjectStatusWidget extends ChartWidget
 {
-    protected static ?int $sort = 8;
+    protected static ?int $sort = 6;
+    protected int|string|array $columnSpan = 1;
 
     protected string $color = 'primary';
 
@@ -15,7 +16,7 @@ class ProjectStatusWidget extends ChartWidget
 
     protected ?string $description = 'Current project status breakdown';
 
-    protected ?string $maxHeight = '260px';
+    protected ?string $maxHeight = null;
 
     protected function getType(): string
     {

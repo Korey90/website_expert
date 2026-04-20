@@ -4,7 +4,7 @@ namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
 
-class CalculatorAdminPage extends Page
+class CalculatorAdminPage extends BasePage
 {
     protected string $view = 'filament.pages.calculator-admin';
 

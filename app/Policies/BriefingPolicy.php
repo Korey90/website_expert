@@ -4,23 +4,23 @@ namespace App\Policies;
 
 use App\Models\Briefing;
 use App\Models\User;
+use App\Support\PermissionHelper;
 
 class BriefingPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'developer', 'super_admin']);
+        return PermissionHelper::allows($user, 'view_briefings');
     }
 
     public function view(User $user, Briefing $briefing): bool
     {
-        return $user->hasRole('super_admin')
-            || $user->hasAnyRole(['admin', 'manager', 'developer']);
+        return PermissionHelper::allows($user, 'view_briefings');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'super_admin']);
+        return PermissionHelper::allows($user, 'create_briefings');
     }
 
     public function update(User $user, Briefing $briefing): bool
@@ -29,17 +29,17 @@ class BriefingPolicy
             return false;
         }
 
-        return $user->hasAnyRole(['admin', 'manager', 'super_admin']);
+        return PermissionHelper::allows($user, 'edit_briefings');
     }
 
     public function delete(User $user, Briefing $briefing): bool
     {
-        return $user->hasAnyRole(['admin', 'super_admin']);
+        return PermissionHelper::allows($user, 'delete_briefings');
     }
 
     public function shareWithClient(User $user, Briefing $briefing): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'super_admin'])
+        return PermissionHelper::allows($user, 'share_briefings')
             && $briefing->isEditable();
     }
 }

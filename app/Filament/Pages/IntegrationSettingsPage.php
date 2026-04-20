@@ -12,7 +12,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Mail;
 
-class IntegrationSettingsPage extends Page
+class IntegrationSettingsPage extends BasePage
 {
     protected string $view = 'filament.pages.integration-settings';
 

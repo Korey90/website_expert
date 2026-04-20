@@ -11,19 +11,27 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
 {
     private const ALLOWED_PROVIDERS = ['google', 'facebook'];
+    private const ALLOWED_INTENTS = ['login', 'register'];
 
     /**
      * Redirect guest to the OAuth provider (new login / register flow).
      */
-    public function redirect(string $provider): RedirectResponse
+    public function redirect(Request $request, string $provider): RedirectResponse
     {
         abort_unless(in_array($provider, self::ALLOWED_PROVIDERS, true), 404);
+
+        $intent = $request->query('intent', 'login');
+
+        if (! in_array($intent, self::ALLOWED_INTENTS, true)) {
+            $intent = 'login';
+        }
+
+        $request->session()->put('social_auth_intent', $intent);
 
         return Socialite::driver($provider)->redirect();
     }
@@ -51,6 +59,12 @@ class SocialAuthController extends Controller
     public function callback(string $provider, Request $request, BusinessService $businessService): RedirectResponse
     {
         abort_unless(in_array($provider, self::ALLOWED_PROVIDERS, true), 404);
+
+        $intent = $request->session()->pull('social_auth_intent', 'login');
+
+        if (! in_array($intent, self::ALLOWED_INTENTS, true)) {
+            $intent = 'login';
+        }
 
         try {
             $socialUser = Socialite::driver($provider)->user();
@@ -87,18 +101,25 @@ class SocialAuthController extends Controller
             return redirect()->intended(route('portal.dashboard', absolute: false));
         }
 
-        // Find user by email (link accounts) or create new user
-        $user = User::firstOrNew(
-            ['email' => $socialUser->getEmail()],
-            [
+        $user = User::where('email', $socialUser->getEmail())->first();
+        $isNewUser = false;
+
+        if (! $user) {
+            if ($intent !== 'register') {
+                return redirect()->route('login')
+                    ->withErrors(['email' => __('auth.social_account_not_registered')]);
+            }
+
+            $user = new User([
+                'email'             => $socialUser->getEmail(),
                 'name'              => $socialUser->getName() ?? $socialUser->getNickname() ?? 'User',
                 'avatar_url'        => $socialUser->getAvatar(),
                 'email_verified_at' => now(),
                 'password'          => null,
-            ]
-        );
+            ]);
 
-        $isNewUser = ! $user->exists;
+            $isNewUser = true;
+        }
 
         if ($isNewUser) {
             $user->save();

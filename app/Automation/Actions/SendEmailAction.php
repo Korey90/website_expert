@@ -24,21 +24,23 @@ class SendEmailAction extends BaseAutomationAction
             );
         }
 
-        // New path: EmailTemplate by ID
-        if (! empty($action['email_template_id'])) {
-            $template = EmailTemplate::where('is_active', true)->find($action['email_template_id']);
+        // New path: EmailTemplate by ID (accepts 'email_template_id' or 'template_id')
+        $templateId = $action['email_template_id'] ?? $action['template_id'] ?? null;
+        if (! empty($templateId)) {
+            $template = EmailTemplate::where('is_active', true)->find($templateId);
             if (! $template) {
                 throw new ActionSkippedException(
-                    "EmailTemplate #{$action['email_template_id']} not found or is inactive."
+                    "EmailTemplate #{$templateId} not found or is inactive."
                 );
             }
             $vars    = $this->buildTemplateVars($context);
-            $locale  = app()->getLocale();
+            $locale  = $context['locale'] ?? app()->getLocale();
             $locData = $template->getForLocale($locale);
-            $subject = $this->interpolate($locData['subject'], $vars);
-            $body    = $this->interpolate($locData['body_html'] ?: $locData['body_text'], $vars);
+            $subject = $this->interpolate($locData['subject'] ?? '', $vars);
+            $body    = $this->interpolate($locData['body_html'] ?: ($locData['body_text'] ?? ''), $vars);
 
-            Mail::to($to)->queue(new ClientEmailMail($subject, $body));
+            // Already running inside a queued job — send synchronously, no double-hop
+            Mail::to($to)->send(new ClientEmailMail($subject, $body));
             return;
         }
 

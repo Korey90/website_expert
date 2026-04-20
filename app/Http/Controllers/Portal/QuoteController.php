@@ -2,8 +2,15 @@
 
 namespace App\Http\Controllers\Portal;
 
+use App\Mail\ContractSentMail;
+use App\Mail\QuoteAcceptedAdminMail;
+use App\Models\Contract;
 use App\Models\Quote;
+use App\Models\User;
+use App\Notifications\QuoteAcceptedNotification;
+use Filament\Notifications\Events\DatabaseNotificationsSent;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -60,6 +67,47 @@ class QuoteController extends BasePortalController
             'status'      => 'accepted',
             'accepted_at' => now(),
         ]);
+
+        $quote->loadMissing(['lead.assignedTo', 'client']);
+
+        // Auto-create contract linked to accepted quote
+        $assignedUserId = $quote->lead?->assignedTo?->id ?? $quote->created_by;
+        $clientName     = $quote->client?->company_name ?? $quote->client?->primary_contact_name ?? 'Client';
+
+        $contract = Contract::create([
+            'number'     => Contract::nextNumber(),
+            'title'      => "Contract — {$clientName}",
+            'client_id'  => $quote->client_id,
+            'quote_id'   => $quote->id,
+            'project_id' => $quote->lead?->project?->id,
+            'created_by' => $assignedUserId,
+            'status'     => 'sent',
+            'sent_at'    => now(),
+            'value'      => $quote->total,
+            'currency'   => $quote->currency,
+            'terms'      => $quote->terms,
+        ]);
+
+        // Email to client
+        $clientEmail = $quote->client?->primary_contact_email;
+        if ($clientEmail) {
+            Mail::to($clientEmail)->send(new ContractSentMail($contract));
+        }
+
+        // Notify assigned user + all admins/managers
+        $admins        = User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'manager', 'super_admin']))->get();
+        $assignedUser  = $quote->lead?->assignedTo;
+        $recipients    = $admins;
+
+        if ($assignedUser && ! $admins->contains('id', $assignedUser->id)) {
+            $recipients = $recipients->push($assignedUser);
+        }
+
+        foreach ($recipients as $recipient) {
+            Mail::to($recipient->email)->send(new QuoteAcceptedAdminMail($quote, $recipient));
+            $recipient->notify(new QuoteAcceptedNotification($quote));
+            DatabaseNotificationsSent::dispatch($recipient);
+        }
 
         return redirect()->route('portal.quotes.show', $quote)
             ->with('success', 'Quote accepted! We will be in touch shortly.');

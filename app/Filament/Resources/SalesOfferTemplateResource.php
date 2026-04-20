@@ -16,7 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class SalesOfferTemplateResource extends Resource
+class SalesOfferTemplateResource extends BaseResource
 {
     protected static ?string $model = SalesOfferTemplate::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
@@ -143,12 +143,6 @@ class SalesOfferTemplateResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $query = parent::getEloquentQuery();
-
-        if (! auth()->user()?->hasRole('super_admin')) {
-            $query->forBusiness();
-        }
-
-        return $query;
+        return parent::getEloquentQuery()->forBusiness();
     }
 }

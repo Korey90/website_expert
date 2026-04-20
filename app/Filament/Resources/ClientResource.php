@@ -23,7 +23,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class ClientResource extends Resource
+class ClientResource extends BaseResource
 {
     protected static ?string $model = Client::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-building-office-2';

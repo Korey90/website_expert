@@ -16,7 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class BriefingTemplateResource extends Resource
+class BriefingTemplateResource extends BaseResource
 {
     protected static ?string $model = BriefingTemplate::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
@@ -211,13 +211,6 @@ class BriefingTemplateResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $query = parent::getEloquentQuery();
-
-        // Non-superadmin sees only global + their own business templates
-        if (!auth()->user()?->hasRole('super_admin')) {
-            $query->forBusiness();
-        }
-
-        return $query;
+        return parent::getEloquentQuery()->forBusiness();
     }
 }

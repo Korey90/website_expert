@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>client-handling-analysis.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="analiza-obsługi-klienta--website-expert">Analiza obsługi klienta — Website Expert</h1>
+<blockquote>
+<p>Data: 2026-04-19
+Zakres: jak Website Expert pozyskuje, modeluje, obsługuje i rozwija relację z klientem w CRM, portalu i self-service SaaS.</p>
+</blockquote>
+<hr>
+<h2 id="1-podsumowanie-wykonawcze">1. Podsumowanie wykonawcze</h2>
+<p>Obsługa klienta w Website Expert jest już szeroka, ale nie jest jednolita domenowo. System używa jednego rekordu <code>Client</code> jako wspólnego punktu dla prospecta, aktywnego klienta agencyjnego i klienta z dostępem do portalu, a osobno używa <code>User</code> jako tożsamości logowania. To działa dobrze dla MVP, bo szybko spina lead capture, CRM, wyceny, kontrakty, projekty, płatności i portal. Jednocześnie miesza dwa różne modele biznesowe:</p>
+<ol>
+<li>klient agencyjny obsługiwany przez CRM,</li>
+<li>klient self-service korzystający z workspace, billing i growth tools.</li>
+</ol>
+<p>Najważniejszy wniosek: projekt już umie prowadzić klienta od pierwszego kontaktu do podpisania umowy i realizacji projektu, ale ma kilka szczelin na styku <code>CRM -&gt; portal -&gt; business workspace</code>, które trzeba domknąć przed dalszym skalowaniem.</p>
+<hr>
+<h2 id="2-jak-system-rozumie-klienta">2. Jak system rozumie klienta</h2>
+<h3 id="21-główne-encje">2.1 Główne encje</h3>
+<table>
+<thead>
+<tr>
+<th>Encja</th>
+<th>Rola w systemie</th>
+<th>Fakty z kodu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Lead</code></td>
+<td>szansa sprzedażowa / inbound enquiry</td>
+<td><code>app/Models/Lead.php</code>, <code>app/Services/Leads/LeadService.php</code></td>
+</tr>
+<tr>
+<td><code>Client</code></td>
+<td>rekord CRM dla firmy lub osoby kontaktowej</td>
+<td><code>app/Models/Client.php</code>, <code>app/Filament/Resources/ClientResource.php</code></td>
+</tr>
+<tr>
+<td><code>Contact</code></td>
+<td>dodatkowa osoba po stronie klienta</td>
+<td>tworzona przez <code>CreateLeadAction</code>, ale nie ma osobnego UI listy kontaktów</td>
+</tr>
+<tr>
+<td><code>User</code></td>
+<td>konto logowania do portalu / self-service</td>
+<td><code>app/Models/User.php</code></td>
+</tr>
+<tr>
+<td><code>Business</code></td>
+<td>workspace SaaS / tenant</td>
+<td><code>app/Services/Business/BusinessService.php</code>, <code>app/Helpers/BusinessHelper.php</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-kluczowy-model-domenowy">2.2 Kluczowy model domenowy</h3>
+<p>Aktualny model nie robi twardego rozdziału między prospectem a klientem. Zamiast tego:</p>
+<ul>
+<li>pierwszy inbound kontakt tworzy lub znajduje rekord <code>Client</code>,</li>
+<li>ten rekord startuje ze statusem <code>prospect</code>,</li>
+<li>wygrany lead promuje klienta do <code>active</code>,</li>
+<li>portal działa przez powiązanie <code>clients.portal_user_id -&gt; users.id</code>.</li>
+</ul>
+<p>To oznacza, że tabela <code>clients</code> pełni dziś rolę zarówno:</p>
+<ul>
+<li>prospect registry,</li>
+<li>customer master record,</li>
+<li>punktu wejścia do portalu.</li>
+</ul>
+<h3 id="23-co-jest-osią-relacji">2.3 Co jest osią relacji</h3>
+<p>Najważniejsze pole w praktyce to <code>primary_contact_email</code>.</p>
+<ul>
+<li><code>CreateLeadAction</code> szuka klienta po <code>primary_contact_email</code> oraz opcjonalnie <code>business_id</code>.</li>
+<li>Jeśli klient nie istnieje, tworzy go automatycznie jako <code>prospect</code>.</li>
+<li>Portal logowania nie działa przez osobny <code>ClientPortalAccount</code>, tylko przez zwykłego <code>User</code>, którego system przypina do klienta przez <code>portal_user_id</code>.</li>
+</ul>
+<p>To upraszcza MVP, ale słabiej skaluje się do wielu kontaktów po stronie jednego klienta.</p>
+<hr>
+<h2 id="3-lifecycle-klienta-w-obecnym-kodzie">3. Lifecycle klienta w obecnym kodzie</h2>
+<h2 id="31-pozyskanie-klienta--prospecta">3.1 Pozyskanie klienta / prospecta</h2>
+<p>Projekt ma kilka punktów wejścia:</p>
+<table>
+<thead>
+<tr>
+<th>Kanał wejścia</th>
+<th>Jak działa</th>
+<th>Kluczowe pliki</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Public landing page</td>
+<td>deduplikacja 24h, UTM, consent, source attribution, increment <code>conversions_count</code></td>
+<td><code>app/Http/Controllers/Leads/LeadCaptureController.php</code>, <code>app/Services/Leads/PublicLeadCaptureService.php</code>, <code>app/Services/Leads/LeadService.php</code></td>
+</tr>
+<tr>
+<td>Kontakt publiczny</td>
+<td>zwykły formularz kontaktowy tworzy lead i consent</td>
+<td><code>app/Http/Controllers/ContactController.php</code></td>
+</tr>
+<tr>
+<td>Quick CTA z usług</td>
+<td>skrócony formularz z service pages</td>
+<td><code>app/Http/Controllers/ContactController.php</code></td>
+</tr>
+<tr>
+<td>Kalkulator</td>
+<td>lead z <code>calculator_data</code>, estimate i source=<code>calculator</code></td>
+<td><code>app/Http/Controllers/CalculatorLeadController.php</code></td>
+</tr>
+<tr>
+<td>API</td>
+<td>leady z integracji zewnętrznych pod token biznesu</td>
+<td><code>app/Http/Controllers/Api/LeadCaptureController.php</code></td>
+</tr>
+<tr>
+<td>Rejestracja / social login</td>
+<td>tworzy <code>User</code>, <code>Client</code>, rolę <code>client</code> i <code>Business</code></td>
+<td><code>app/Http/Controllers/Auth/RegisteredUserController.php</code>, <code>app/Http/Controllers/Auth/SocialAuthController.php</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="co-dzieje-się-technicznie-po-capture">Co dzieje się technicznie po capture</h3>
+<p><code>CreateLeadAction</code> wykonuje trzy ważne kroki:</p>
+<ol>
+<li>znajduje lub tworzy <code>Client</code>,</li>
+<li>znajduje lub tworzy <code>Contact</code>,</li>
+<li>tworzy <code>Lead</code> w pierwszym etapie pipeline.</li>
+</ol>
+<p>To znaczy, że system bardzo wcześnie materializuje prospecta jako <code>Client</code>. Zaletą jest spójność relacji. Wadą jest to, że CRM klienta szybko puchnie rekordami, które nigdy nie zostaną prawdziwymi klientami.</p>
+<h2 id="32-prowadzenie-klienta-w-crm">3.2 Prowadzenie klienta w CRM</h2>
+<p>Po utworzeniu leada system obsługuje klienta przez moduł CRM:</p>
+<ul>
+<li>przypisanie właściciela leada,</li>
+<li>zmianę stage,</li>
+<li>oznaczenie lead jako <code>won</code> lub <code>lost</code>,</li>
+<li>aktywność i timeline,</li>
+<li>automatyzacje zależne od triggerów.</li>
+</ul>
+<p>Kluczowe fakty:</p>
+<ul>
+<li><code>LeadService::assign()</code> loguje aktywność i emituje <code>LeadAssigned</code>.</li>
+<li><code>LeadService::updateStage()</code> loguje zmianę etapu.</li>
+<li><code>LeadService::markWon()</code> ustawia <code>won_at</code>, przenosi do etapu <code>is_won=true</code> i promuje klienta z <code>prospect</code> do <code>active</code>.</li>
+<li><code>LeadService::markLost()</code> ustawia <code>lost_at</code> i przenosi do etapu <code>is_lost=true</code>.</li>
+</ul>
+<p>W praktyce to właśnie <code>markWon()</code> jest momentem, w którym prospect staje się klientem w sensie operacyjnym.</p>
+<h2 id="33-komunikacja-i-automatyzacje">3.3 Komunikacja i automatyzacje</h2>
+<p>Obsługa klienta nie kończy się na CRM. Projekt ma pełny silnik automatyzacji oparty o eventy i kolejkę.</p>
+<h3 id="triggery-używane-w-relacji-z-klientem">Triggery używane w relacji z klientem</h3>
+<ul>
+<li><code>lead.created</code></li>
+<li><code>lead.assigned</code></li>
+<li><code>lead.stage_changed</code></li>
+<li><code>lead.won</code></li>
+<li><code>lead.lost</code></li>
+<li><code>project.created</code></li>
+<li><code>project.status_changed</code></li>
+<li><code>invoice.sent</code></li>
+<li><code>invoice.paid</code></li>
+<li><code>quote.sent</code></li>
+<li><code>quote.accepted</code></li>
+<li><code>contract.created</code></li>
+<li><code>contract.sent</code></li>
+<li><code>contract.signed</code></li>
+</ul>
+<p>Źródło: <code>app/Listeners/AutomationEventListener.php</code>.</p>
+<h3 id="preferencje-komunikacji-klienta">Preferencje komunikacji klienta</h3>
+<p>Klient ma cztery główne przełączniki komunikacyjne:</p>
+<ul>
+<li><code>notify_email_transactional</code></li>
+<li><code>notify_email_projects</code></li>
+<li><code>notify_email_marketing</code></li>
+<li><code>notify_sms</code></li>
+</ul>
+<p>Gatekeeping robi <code>ClientNotificationGate</code>, a klient sam może edytować te ustawienia w portalu przez <code>Portal/NotificationController</code>.</p>
+<h3 id="kanały-kontaktu-już-obecne">Kanały kontaktu już obecne</h3>
+<ul>
+<li>e-mail systemowy,</li>
+<li>e-mail marketing/automation,</li>
+<li>SMS przez Twilio,</li>
+<li>powiadomienia adminom przy akcjach klienta,</li>
+<li>timeline aktywności klienta.</li>
+</ul>
+<h2 id="34-sprzedaż-i-formalizacja-współpracy">3.4 Sprzedaż i formalizacja współpracy</h2>
+<p>Website Expert prowadzi klienta przez kilka etapów domknięcia sprzedaży:</p>
+<h3 id="sales-offers">Sales offers</h3>
+<ul>
+<li>klient dostaje publiczny link token-based do oferty,</li>
+<li>otwarcie oferty oznacza <code>viewed</code>,</li>
+<li>kliknięcie CTA zapisuje akceptację i uruchamia notyfikacje do adminów,</li>
+<li>klient dostaje mail potwierdzający.</li>
+</ul>
+<p>Pliki: <code>app/Http/Controllers/ClientSalesOfferController.php</code>, <code>app/Services/SalesOfferService.php</code>.</p>
+<h3 id="quotes">Quotes</h3>
+<ul>
+<li>klient w portalu może zaakceptować lub odrzucić wycenę,</li>
+<li>status zmienia się bezpośrednio z poziomu portalu,</li>
+<li>wydarzenie wpada do aktywności i automatyzacji.</li>
+</ul>
+<p>Plik: <code>app/Http/Controllers/Portal/QuoteController.php</code>.</p>
+<h3 id="contracts">Contracts</h3>
+<ul>
+<li>klient widzi umowę w portalu,</li>
+<li>może ją podpisać elektronicznie,</li>
+<li>system zapisuje <code>signed_at</code>, <code>signer_name</code>, <code>signer_ip</code>, opcjonalnie <code>signature_data</code>.</li>
+</ul>
+<p>Plik: <code>app/Http/Controllers/Portal/ContractController.php</code>.</p>
+<h3 id="invoices-i-płatności">Invoices i płatności</h3>
+<ul>
+<li>klient widzi tylko niedraftowe faktury,</li>
+<li>może wejść w wybór metody płatności,</li>
+<li>obsługiwane są Stripe i PayU,</li>
+<li>wynik płatności wraca do portalu.</li>
+</ul>
+<p>Pliki: <code>app/Http/Controllers/Portal/InvoiceController.php</code>, <code>app/Http/Controllers/Portal/PaymentController.php</code>, <code>app/Services/PayuService.php</code>.</p>
+<h2 id="35-portal-klienta">3.5 Portal klienta</h2>
+<p>Portal klienta działa pod <code>/portal</code> i jest oparty o <code>BasePortalController</code>, który odnajduje klienta po <code>portal_user_id</code>.</p>
+<p>Funkcje portalu potwierdzone w kodzie:</p>
+<ul>
+<li>dashboard z projektami, fakturami, wycenami i timeline (<code>Portal/DashboardController</code>),</li>
+<li>projekty i messaging (<code>Portal/ProjectController</code>),</li>
+<li>wyceny (<code>Portal/QuoteController</code>),</li>
+<li>umowy (<code>Portal/ContractController</code>),</li>
+<li>faktury i płatności (<code>Portal/InvoiceController</code>, <code>Portal/PaymentController</code>),</li>
+<li>preferencje komunikacji (<code>Portal/NotificationController</code>),</li>
+<li>szczegóły leadów wygenerowanych z landing pages (<code>Portal/LeadController</code>),</li>
+<li>billing i plan SaaS (<code>Portal/BillingController</code>),</li>
+<li>growth tools: landing pages, AI generator, business profile, API tokens (<code>resources/js/Layouts/PortalLayout.jsx</code>).</li>
+</ul>
+<p>To jest ważne: portal nie jest wyłącznie „klasycznym client portalem”. To także wejście do workspace produktu.</p>
+<h2 id="36-self-service-saas">3.6 Self-service SaaS</h2>
+<p>Rejestracja i social login tworzą jednocześnie:</p>
+<ul>
+<li><code>User</code> z rolą <code>client</code>,</li>
+<li>rekord <code>Client</code>,</li>
+<li>własny <code>Business</code>,</li>
+<li>membership w <code>business_users</code> z rolą <code>owner</code>.</li>
+</ul>
+<p>To powoduje, że klient self-service od razu ma pełny workspace i może używać:</p>
+<ul>
+<li>landing pages,</li>
+<li>AI generatora,</li>
+<li>ustawień firmy,</li>
+<li>billing i planów,</li>
+<li>tokenów API.</li>
+</ul>
+<p>Ta ścieżka jest znacznie pełniejsza niż ścieżka klienta agencyjnego zapraszanego później do portalu.</p>
+<h2 id="37-token-based-klient-facing-flows-poza-portalem">3.7 Token-based klient-facing flows poza portalem</h2>
+<p>Poza logowaniem istnieją dwa niezależne kanały obsługi klienta bez auth:</p>
+<ul>
+<li><code>client/briefings/{token}</code> — klient wypełnia briefing, autosave + submit,</li>
+<li><code>offers/{token}</code> — klient ogląda ofertę i akceptuje CTA.</li>
+</ul>
+<p>To daje wygodny low-friction entry, ale rozbija doświadczenie klienta na osobne wejścia: portal i publiczne linki tokenowe.</p>
+<hr>
+<h2 id="4-co-jest-już-mocne">4. Co jest już mocne</h2>
+<h3 id="41-end-to-end-lifecycle-istnieje-naprawdę">4.1 End-to-end lifecycle istnieje naprawdę</h3>
+<p>Projekt nie kończy się na lead capture. Ma realny ciąg:</p>
+<p><code>lead -&gt; CRM -&gt; quote/offer -&gt; contract -&gt; project -&gt; invoice/payment -&gt; portal</code></p>
+<p>To jest bardzo dobra baza pod produkt usługowy i agencyjny SaaS.</p>
+<h3 id="42-dane-klienta-są-spinane-wcześnie">4.2 Dane klienta są spinane wcześnie</h3>
+<p>Automatyczne tworzenie <code>Client</code> przy capture powoduje, że od pierwszego kontaktu system ma jeden rekord odniesienia dla leadów, kontaktów, projektów, faktur i umów.</p>
+<h3 id="43-komunikacja-jest-już-segmentowana">4.3 Komunikacja jest już segmentowana</h3>
+<p>Rozdzielenie transactional / project / marketing / SMS to dobry fundament pod compliance i customer experience.</p>
+<h3 id="44-portal-robi-coś-więcej-niż-podgląd-pdf-ów">4.4 Portal robi coś więcej niż podgląd PDF-ów</h3>
+<p>Klient może:</p>
+<ul>
+<li>pisać wiadomości w projekcie,</li>
+<li>akceptować wyceny,</li>
+<li>podpisywać kontrakty,</li>
+<li>płacić faktury,</li>
+<li>zmieniać preferencje komunikacyjne,</li>
+<li>w modelu self-service także generować landing pages i zarządzać workspace.</li>
+</ul>
+<h3 id="45-jest-activity-trail-klienta">4.5 Jest activity trail klienta</h3>
+<p><code>ClientActivityListener</code> buduje osobny timeline klienta na podstawie leadów, projektów, faktur, wycen i kontraktów. To jest dobra baza pod customer success i account management.</p>
+<hr>
+<h2 id="5-najważniejsze-luki-i-ryzyka">5. Najważniejsze luki i ryzyka</h2>
+<h2 id="51-mieszanie-dwóch-typów-klienta-w-jednym-modelu">5.1 Mieszanie dwóch typów klienta w jednym modelu</h2>
+<p>System łączy w jednym UX i jednej encji:</p>
+<ul>
+<li>klienta agencyjnego,</li>
+<li>prospecta z formularza,</li>
+<li>klienta self-service z własnym workspace.</li>
+</ul>
+<p>Na dziś to działa, ale zaciera granice odpowiedzialności i utrudnia precyzyjne policy, onboarding i feature gating.</p>
+<h2 id="52-automatyczny-invite-do-portalu-ma-zły-url">5.2 Automatyczny invite do portalu ma zły URL</h2>
+<p><code>CreatePortalAccessAction</code> wysyła login URL z końcówką <code>/client</code>, ale w trasach nie ma takiego endpointu. Portal działa pod <code>/portal</code>, a standardowe logowanie pod <code>/login</code>.</p>
+<p>To oznacza, że automatyczne zaproszenie do portalu jest dziś logicznie niespójne.</p>
+<p>Pliki:</p>
+<ul>
+<li><code>app/Automation/Actions/CreatePortalAccessAction.php</code></li>
+<li><code>routes/web.php</code></li>
+</ul>
+<h2 id="53-zapraszany-klient-agencyjny-nie-dostaje-membership-w-business">5.3 Zapraszany klient agencyjny nie dostaje membership w <code>Business</code></h2>
+<p>Self-service registration tworzy <code>BusinessUser</code>, ale <code>CreatePortalAccessAction</code> i <code>CreatePortalUser</code> tego nie robią.</p>
+<p>Skutek:</p>
+<ul>
+<li>klient agencyjny może mieć konto portalu,</li>
+<li>ale nie musi mieć <code>currentBusiness()</code>,</li>
+<li>a część funkcji portalu opiera się właśnie na <code>currentBusiness()</code>.</li>
+</ul>
+<p>Dotyczy to szczególnie:</p>
+<ul>
+<li>billing,</li>
+<li>growth tools,</li>
+<li>landing pages,</li>
+<li>szczegółu leadów w portalu.</li>
+</ul>
+<p>To jest dziś najważniejsza luka architektoniczna na styku agency client vs SaaS workspace.</p>
+<h2 id="54-portal-pokazuje-sekcje-biznesowe-wszystkim-zalogowanym-użytkownikom">5.4 Portal pokazuje sekcje biznesowe wszystkim zalogowanym użytkownikom</h2>
+<p><code>PortalLayout.jsx</code> renderuje growth tools i business settings bez rozróżnienia, czy użytkownik:</p>
+<ul>
+<li>jest self-service ownerem biznesu,</li>
+<li>jest zaproszonym klientem agencyjnym,</li>
+<li>ma aktywne membership w <code>business_users</code>.</li>
+</ul>
+<p>To może prowadzić do pustych ekranów, redirect loops lub UX, które wygląda na zepsute.</p>
+<h2 id="55-autoryzacja-leada-w-portalu-jest-oparta-o-business-nie-o-klienta">5.5 Autoryzacja leada w portalu jest oparta o business, nie o klienta</h2>
+<p><code>Portal/LeadController</code> sprawdza <code>lead.business_id === currentBusiness()-&gt;id</code>, ale nie potwierdza <code>lead.client_id === current client</code>.</p>
+<p>W modelu jednoosobowego self-service to jest akceptowalne. W modelu wielu użytkowników w jednym biznesie lub przy przyszłym multi-contact portalu to jest potencjalny wyciek danych między klientami.</p>
+<h2 id="56-clientresource-nie-jest-centrum-pracy-z-klientem">5.6 <code>ClientResource</code> nie jest centrum pracy z klientem</h2>
+<p>Obecny <code>ClientResource</code> jest raczej kartą danych niż hubem relacji.</p>
+<p>Potwierdzone ograniczenia:</p>
+<ul>
+<li>brak relation managers w <code>app/Filament/Resources/ClientResource/</code>,</li>
+<li><code>getRelations()</code> zwraca pustą tablicę,</li>
+<li>brak szybkiego spójnego widoku leadów, projektów, wycen, faktur i kontaktów z poziomu klienta,</li>
+<li><code>getEloquentQuery()</code> nie dokłada scopa po <code>business_id</code>.</li>
+</ul>
+<p>To utrudnia account management i pracę opiekuna klienta.</p>
+<h2 id="57-jeden-portal-user-na-klienta-to-za-mało">5.7 Jeden portal user na klienta to za mało</h2>
+<p>Relacja <code>portal_user_id</code> narzuca jeden login na jednego klienta. Model <code>Contact</code> istnieje, ale nie służy do wielu dostępów portalowych.</p>
+<p>Brakuje:</p>
+<ul>
+<li>multi-user access dla klienta,</li>
+<li>ról po stronie klienta,</li>
+<li>zapraszania kilku kontaktów,</li>
+<li>ograniczeń typu billing-only / contracts-only / marketing-only.</li>
+</ul>
+<h2 id="58-nie-wszystkie-inbound-leady-są-jednoznacznie-tenant-scoped">5.8 Nie wszystkie inbound leady są jednoznacznie tenant-scoped</h2>
+<p><code>landing_page</code> i <code>api</code> są dobrze osadzone w biznesie. Publiczny kontakt i kalkulator przekazują <code>currentBusiness()</code>, więc w scenariuszach publicznych często kończą z <code>business_id = null</code>.</p>
+<p>Dla single-business deployment to jest do przeżycia. Dla skalowanego SaaS to słaba izolacja i trudniejsza analityka.</p>
+<h2 id="59-doświadczenie-klienta-jest-rozproszone">5.9 Doświadczenie klienta jest rozproszone</h2>
+<p>Klient może wchodzić przez:</p>
+<ul>
+<li>portal po loginie,</li>
+<li>publiczny link do briefingu,</li>
+<li>publiczny link do sales offer,</li>
+<li>maile z wyceną / kontraktem / fakturą.</li>
+</ul>
+<p>Każdy kanał ma sens osobno, ale dziś nie buduje jednego, spójnego customer workspace.</p>
+<hr>
+<h2 id="6-co-warto-dodać-i-usprawnić">6. Co warto dodać i usprawnić</h2>
+<h2 id="61-quick-wins">6.1 Quick wins</h2>
+<h3 id="1-naprawić-invite-flow-do-portalu">1. Naprawić invite flow do portalu</h3>
+<ul>
+<li>ujednolicić URL logowania w invite mailach,</li>
+<li>dodać jeden serwis <code>PortalAccessService</code>,</li>
+<li>obsłużyć resend invite, reset hasła i status aktywacji.</li>
+</ul>
+<h3 id="2-rozdzielić-tryb-klienta-agencyjnego-i-self-service">2. Rozdzielić tryb klienta agencyjnego i self-service</h3>
+<p>Minimum na teraz:</p>
+<ul>
+<li>feature-gating w <code>PortalLayout</code>,</li>
+<li>ukrywanie growth tools i billing dla userów bez <code>BusinessUser</code>,</li>
+<li>osobny empty state dla klienta portalowego bez workspace.</li>
+</ul>
+<h3 id="3-dociągnąć-membership-biznesowe-przy-invite">3. Dociągnąć membership biznesowe przy invite</h3>
+<p>Jeśli klient agencyjny ma widzieć leady, billing lub workspace-level funkcje, to konto musi być świadomie dołączane do <code>business_users</code>. Jeśli nie ma ich widzieć, interfejs też musi to odzwierciedlać.</p>
+<h3 id="4-zaostrzyć-autoryzację-portalu">4. Zaostrzyć autoryzację portalu</h3>
+<ul>
+<li>policy dla <code>PortalLeadController</code>,</li>
+<li>jawne sprawdzenie <code>client_id</code>,</li>
+<li>middleware lub dedicated guard dla client portal routes.</li>
+</ul>
+<h3 id="5-zrobić-z-clientresource-prawdziwe-centrum-relacji">5. Zrobić z <code>ClientResource</code> prawdziwe centrum relacji</h3>
+<p>Dołożyć relation managers lub custom tabs dla:</p>
+<ul>
+<li>kontaktów,</li>
+<li>leadów,</li>
+<li>projektów,</li>
+<li>wycen,</li>
+<li>faktur,</li>
+<li>kontraktów,</li>
+<li>aktywności klienta.</li>
+</ul>
+<h2 id="62-usprawnienia-produktowe-średniego-horyzontu">6.2 Usprawnienia produktowe średniego horyzontu</h2>
+<h3 id="6-wielu-użytkowników-po-stronie-klienta">6. Wielu użytkowników po stronie klienta</h3>
+<p>Warto wprowadzić:</p>
+<ul>
+<li><code>ClientPortalMember</code> albo wykorzystanie <code>Contact</code> jako konta portalu,</li>
+<li>role typu <code>owner</code>, <code>billing</code>, <code>legal</code>, <code>marketing</code>,</li>
+<li>osobne invite i revoke access.</li>
+</ul>
+<h3 id="7-jednolity-customer-timeline">7. Jednolity customer timeline</h3>
+<p>Scalić w jednym widoku:</p>
+<ul>
+<li>leady,</li>
+<li>oferty,</li>
+<li>wyceny,</li>
+<li>kontrakty,</li>
+<li>wiadomości,</li>
+<li>płatności,</li>
+<li>briefingi,</li>
+<li>aktywności automatyzacji.</li>
+</ul>
+<p>To może być zarówno ekran dla klienta, jak i account management view dla zespołu.</p>
+<h3 id="8-client-onboarding-i-customer-success">8. Client onboarding i customer success</h3>
+<p>Brakuje warstwy post-sale:</p>
+<ul>
+<li>onboarding checklisty,</li>
+<li>milestones,</li>
+<li>ownership po stronie agency,</li>
+<li>health score,</li>
+<li>feedback / NPS / CSAT,</li>
+<li>risk flags typu „brak odpowiedzi”, „opóźniona płatność”, „niska aktywność”.</li>
+</ul>
+<h3 id="9-lepsze-preferencje-komunikacji">9. Lepsze preferencje komunikacji</h3>
+<p>Obecne toggles są dobre jako start, ale można dodać:</p>
+<ul>
+<li>preferowany język komunikacji,</li>
+<li>okna czasowe dla SMS,</li>
+<li>digest frequency,</li>
+<li>granularne zgody per event class,</li>
+<li>audit log zmian preferencji widoczny dla supportu.</li>
+</ul>
+<h3 id="10-ujednolicenie-token-flows-z-portalem">10. Ujednolicenie token flows z portalem</h3>
+<p>Briefing i sales offer mogą dalej działać bez logowania, ale warto dodać:</p>
+<ul>
+<li>możliwość „claim this in portal”,</li>
+<li>podpięcie tych akcji do timeline w portalu,</li>
+<li>spójny branding i breadcrumbs do workspace.</li>
+</ul>
+<h2 id="63-kierunek-architektoniczny">6.3 Kierunek architektoniczny</h2>
+<h3 id="11-zdecydować-czy-client-ma-dalej-oznaczać-wszystko">11. Zdecydować, czy <code>Client</code> ma dalej oznaczać wszystko</h3>
+<p>Są dwa rozsądne kierunki:</p>
+<ol>
+<li>zostawić <code>Client</code> jako master record, ale dodać wyraźny lifecycle i typy person,</li>
+<li>rozdzielić <code>Prospect</code>, <code>ClientAccount</code> i <code>PortalUser</code> na osobne byty.</li>
+</ol>
+<p>Dla Website Expert na obecnym etapie sensowniejszy wydaje się wariant 1, bo wymaga mniejszego refaktoru, ale musi dostać:</p>
+<ul>
+<li>jasny lifecycle,</li>
+<li>poprawne policy,</li>
+<li>feature gating,</li>
+<li>spójne scoping po <code>business_id</code>.</li>
+</ul>
+<h3 id="12-uporządkować-zależność-client---business">12. Uporządkować zależność <code>Client &lt;-&gt; Business</code></h3>
+<p>Pole <code>business_id</code> już istnieje w <code>clients</code>, ale model nie jest jeszcze do końca wykorzystywany jako pełnoprawna relacja domenowa.</p>
+<p>To warto doprowadzić do końca, bo bez tego trudniej o:</p>
+<ul>
+<li>tenant safety,</li>
+<li>segmentację klientów per business,</li>
+<li>precyzyjne raporty,</li>
+<li>skalowanie do agency SaaS.</li>
+</ul>
+<hr>
+<h2 id="7-rekomendowana-kolejność-prac">7. Rekomendowana kolejność prac</h2>
+<ol>
+<li>Naprawić portal invite flow i URL-e.</li>
+<li>Ustalić zasady membership <code>BusinessUser</code> dla klientów agencyjnych.</li>
+<li>Wprowadzić feature gating i poprawne policy dla portalu.</li>
+<li>Zamienić <code>ClientResource</code> w realny cockpit klienta.</li>
+<li>Dopiero potem rozwijać multi-contact access, onboarding i customer success.</li>
+</ol>
+<hr>
+<h2 id="8-konkluzja">8. Konkluzja</h2>
+<p>Website Expert już dziś obsługuje klienta szerzej niż typowy prosty CRM: potrafi go pozyskać, kwalifikować, prowadzić przez ofertę i kontrakt, rozliczać, komunikować się z nim i dać mu portal do współpracy. To jest silna baza.</p>
+<p>Największy problem nie leży w braku funkcji, tylko w tym, że klient agencyjny i klient produktu SaaS zaczynają korzystać z tego samego interfejsu i części tych samych modeli, ale nie mają jeszcze domkniętych granic dostępu, onboardingów i scoping rules. To właśnie tam są dziś najlepsze miejsca do usprawnień.</p>
+
+</body>
+</html>

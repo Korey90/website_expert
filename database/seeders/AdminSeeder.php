@@ -28,18 +28,27 @@ class AdminSeeder extends Seeder
         // Permissions
         // ---------------------------------------------------
         $permissions = [
+            'access_admin_panel',
             // CRM — ClientResource
             'view_clients', 'create_clients', 'edit_clients', 'delete_clients',
             // CRM — LeadResource / PipelinePage
             'view_leads', 'create_leads', 'edit_leads', 'delete_leads',
+            'view_briefings', 'create_briefings', 'edit_briefings', 'delete_briefings', 'share_briefings',
+            'view_briefing_templates', 'create_briefing_templates', 'edit_briefing_templates', 'delete_briefing_templates',
+            'view_sales_offers', 'create_sales_offers', 'edit_sales_offers', 'delete_sales_offers', 'send_sales_offers',
+            'view_sales_offer_templates', 'create_sales_offer_templates', 'edit_sales_offer_templates', 'delete_sales_offer_templates',
             // CRM — ContractResource
             'view_contracts', 'create_contracts', 'edit_contracts', 'delete_contracts',
             // Finance — QuoteResource
             'view_quotes', 'create_quotes', 'edit_quotes', 'delete_quotes',
             // Finance — InvoiceResource
             'view_invoices', 'create_invoices', 'edit_invoices', 'delete_invoices',
+            // Finance — PaymentResource
+            'view_payments', 'create_payments', 'edit_payments', 'delete_payments',
             // Projects — ProjectResource
             'view_projects', 'create_projects', 'edit_projects', 'delete_projects',
+            'view_portfolio_projects', 'create_portfolio_projects', 'edit_portfolio_projects', 'delete_portfolio_projects',
+            'view_services', 'create_services', 'edit_services', 'delete_services',
             // Templates — ContractTemplateResource
             'view_contract_templates', 'create_contract_templates', 'edit_contract_templates', 'delete_contract_templates',
             // Templates — EmailTemplateResource
@@ -48,12 +57,16 @@ class AdminSeeder extends Seeder
             'view_sms_templates', 'create_sms_templates', 'edit_sms_templates', 'delete_sms_templates',
             // Automations — AutomationRuleResource
             'view_automations', 'create_automations', 'edit_automations', 'delete_automations',
+            'view_automation_triggers', 'create_automation_triggers', 'edit_automation_triggers', 'delete_automation_triggers',
+            'view_automation_logs', 'delete_automation_logs',
+            'view_notifications', 'create_notifications', 'delete_notifications',
             // Website CMS — PageResource
             'view_pages', 'create_pages', 'edit_pages', 'delete_pages',
             // Website CMS — SiteSectionResource
             'view_site_sections', 'create_site_sections', 'edit_site_sections', 'delete_site_sections',
             // Users — UserResource
             'view_users', 'create_users', 'edit_users', 'delete_users',
+            'manage_permissions',
             // Reports
             'view_reports', 'export_reports',
             // System Settings — IntegrationSettingsPage, LegalSettingsPage, TrackingSettingsPage
@@ -70,6 +83,11 @@ class AdminSeeder extends Seeder
             'manage_business_profile',
             'view_business_settings',
             'manage_business_settings',
+            'view_businesses',
+            'edit_businesses',
+            'view_plans', 'create_plans', 'edit_plans', 'delete_plans',
+            'view_subscriptions',
+            'view_sessions', 'revoke_sessions',
             // Landing Pages
             'view_landing_pages',
             'manage_landing_pages',
@@ -91,15 +109,20 @@ class AdminSeeder extends Seeder
         $admin->syncPermissions($permissions);
 
         // Manager: full CRM/Finance/Projects access; no role/user admin
-        $managerExclude = ['manage_roles', 'delete_users', 'manage_pipeline', 'manage_project_templates', 'export_leads'];
+        $managerExclude = ['manage_roles', 'manage_permissions', 'delete_users', 'manage_pipeline', 'manage_project_templates', 'export_leads'];
         $manager->syncPermissions(array_values(array_filter($permissions, fn ($p) => ! in_array($p, $managerExclude))));
 
         // Developer: read-only on CRM/Finance + edit projects/contracts
         $developer->syncPermissions([
+            'access_admin_panel',
             'view_clients',
             'view_leads',
+            'view_briefings',
+            'view_briefing_templates',
+            'view_sales_offer_templates',
             'view_quotes',
             'view_invoices',
+            'view_payments',
             'view_contracts',
             'view_projects', 'edit_projects',
             'view_business_settings',
@@ -119,7 +142,7 @@ class AdminSeeder extends Seeder
         // Default admin user
         // ---------------------------------------------------
         $adminUser = User::firstOrCreate(
-            ['email' => 'admin@websiteexpert.co.uk'],
+            ['email' => '20noname22x@gmail.com'],//admin@websiteexpert.co.uk
             [
                 'name'      => 'Admin WebsiteExpert',
                 'password'  => bcrypt('password'), // Change this to a secure password in production!

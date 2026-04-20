@@ -362,18 +362,110 @@ Brak Zustand/Redux. Stan zarządzany lokalnie przez `useState`/`useReducer` i cu
 
 ## 4. Role i uprawnienia (Spatie Permission 7.2)
 
-| Rola | Kluczowe uprawnienia | Dostęp |
+### 4.1 Stan obecny
+
+Seeder `AdminSeeder.php` definiuje 4 role (`admin`, `manager`, `developer`, `client`) oraz około 70 permissionów obejmujących głównie klasyczne CRUD-y CRM, CMS, templates, landing pages i wybrane ustawienia systemowe.
+
+| Rola | Faktyczny zakres | Dostęp |
 |---|---|---|
-| `admin` | wszystkie (~70 uprawnień) | Filament panel + cały portal |
-| `manager` | CRM, Finanse, Projekty, LP, Leads — bez manage_roles, delete_users, export_leads | Filament panel |
-| `developer` | view_* CRM/Finance, edit_projects, view_landing_pages, view_lead_sources | Filament panel |
-| `client` | `view/manage/publish_landing_pages`, `generate_landing_pages_ai`, `view/create_leads` | tylko portal klienta |
+| `admin` | wszystkie zdefiniowane permissiony | Filament panel + zaplecze operacyjne |
+| `manager` | szeroki dostęp operacyjny, ale bez `manage_roles`, `delete_users`, `manage_pipeline`, `manage_project_templates`, `export_leads` | Filament panel |
+| `developer` | głównie odczyt CRM/Finance + `edit_projects`, `view_landing_pages`, `view_lead_sources` | Filament panel |
+| `client` | tylko `view_landing_pages`, `manage_landing_pages`, `publish_landing_pages`, `generate_landing_pages_ai` | portal / self-service |
 
-**Polityki**:
-- `LandingPagePolicy.php` — viewAny, create, update, delete, publish, generateAi
-- `LeadPolicy.php` — view, create, update, delete
+Najważniejsza korekta względem wcześniejszego opisu: rola `client` nie dostaje dziś `view_leads` ani `create_leads` w seederze.
 
-**Seedery**: `AdminSeeder.php` — role, uprawnienia, admin user, domyślny business, pipeline stages, szablony projektów.
+### 4.2 Gdzie permissiony są faktycznie używane
+
+Realne, jawne użycie nazw permissionów w kodzie jest dziś wąskie:
+
+- `LandingPagePolicy.php` mapuje dostęp do LP na `view_landing_pages`, `manage_landing_pages`, `publish_landing_pages`, `generate_landing_pages_ai`.
+- `LeadPolicy.php` używa `view_leads`, `manage_leads`, `delete_leads`, `export_leads`, ale nadal ma fallbacki na role `admin` / `manager` / `developer`.
+- część testów potwierdza zachowanie LP / leads na poziomie permissionów.
+
+Jednocześnie duża część panelu Filament nie ma widocznego, analogicznego mapowania do permissionów i opiera się na samym dostępie do panelu lub na politykach role-based.
+
+### 4.3 Główne luki architektoniczne
+
+#### A. Permissiony istnieją, ale nie widać ich egzekwowania w kodzie
+
+W repo nie ma widocznego, konsekwentnego podpięcia wielu istniejących permissionów do zasobów Filament lub stron administracyjnych. Dotyczy to szczególnie permissionów z grup:
+
+- `view/create/edit/delete_clients`
+- `view/create/edit/delete_contracts`
+- `view/create/edit/delete_quotes`
+- `view/create/edit/delete_invoices`
+- `view/create/edit/delete_projects`
+- `view/create/edit/delete_pages`
+- `view/create/edit/delete_site_sections`
+- `view/create/edit/delete_email_templates`
+- `view/create/edit/delete_sms_templates`
+- `view/create/edit/delete_contract_templates`
+- `view/create/edit/delete_users`
+- `view_automations`, `create_automations`, `edit_automations`, `delete_automations`
+- `view_reports`, `export_reports`
+- `manage_settings`, `manage_calculator`, `manage_project_templates`, `manage_roles`
+
+W praktyce oznacza to, że sama obecność permissionu w bazie nie gwarantuje dziś, że dany moduł jest naprawdę kontrolowany przez Spatie Permission.
+
+#### B. Część modułów działa wyłącznie role-based, bez odpowiadających permissionów
+
+Polityki dla poniższych modułów nie używają nazw permissionów, tylko sprawdzają role:
+
+- `BriefingPolicy.php`
+- `BriefingTemplatePolicy.php`
+- `SalesOfferPolicy.php`
+- `SalesOfferTemplatePolicy.php`
+
+Dodatkowo polityki te odwołują się do roli `super_admin`, która nie jest seedowana w `AdminSeeder.php`.
+
+#### C. Istnieją zasoby Filament bez odpowiadających permissionów w seederze
+
+Aktualna lista 70 permissionów nie pokrywa kilku realnych modułów panelu.
+
+### 4.4 Brakujące permissiony — rekomendowana lista
+
+Poniżej moduły znalezione w kodzie, dla których brak spójnych permissionów w `AdminSeeder.php`.
+
+| Moduł | Dowód w kodzie | Brakujące / rekomendowane permissiony |
+|---|---|---|
+| Briefings | `BriefingResource.php`, `BriefingPolicy.php` | `view_briefings`, `create_briefings`, `edit_briefings`, `delete_briefings`, `share_briefings` |
+| Briefing templates | `BriefingTemplateResource.php`, `BriefingTemplatePolicy.php` | `view_briefing_templates`, `create_briefing_templates`, `edit_briefing_templates`, `delete_briefing_templates` |
+| Sales offers | `SalesOfferResource.php`, `SalesOfferPolicy.php` | `view_sales_offers`, `create_sales_offers`, `edit_sales_offers`, `delete_sales_offers`, `send_sales_offers` |
+| Sales offer templates | `SalesOfferTemplateResource.php`, `SalesOfferTemplatePolicy.php` | `view_sales_offer_templates`, `create_sales_offer_templates`, `edit_sales_offer_templates`, `delete_sales_offer_templates` |
+| Payments | `PaymentResource.php` | `view_payments`, `create_payments`, `edit_payments`, `delete_payments`, opcjonalnie `refund_payments` |
+| Notifications | `NotificationResource.php` | `view_notifications`, `create_notifications`, `delete_notifications` |
+| Automation triggers | `AutomationTriggerResource.php` | `view_automation_triggers`, `create_automation_triggers`, `edit_automation_triggers`, `delete_automation_triggers` |
+| Automation logs | `AutomationLogResource.php` | `view_automation_logs`, `delete_automation_logs` |
+| Businesses / tenants | `BusinessResource.php` | `view_businesses`, `edit_businesses`, opcjonalnie `manage_businesses` |
+| SaaS plans | `PlanResource.php` | `view_plans`, `create_plans`, `edit_plans`, `delete_plans` |
+| Stripe subscriptions | `SubscriptionResource.php` | `view_subscriptions`, opcjonalnie `manage_subscriptions` |
+| Active sessions | `SessionResource.php` | `view_sessions`, `revoke_sessions` |
+| Portfolio projects | `PortfolioProjectResource.php` | `view_portfolio_projects`, `create_portfolio_projects`, `edit_portfolio_projects`, `delete_portfolio_projects` |
+| Services marketingowe | `ServiceItemResource.php` | `view_services`, `create_services`, `edit_services`, `delete_services` |
+| Permission administration | `PermissionResource.php` | `manage_permissions` lub jawne rozszerzenie `manage_roles` na permissiony |
+
+### 4.5 Moduły z permissionami zbyt szerokimi lub zbyt ogólnymi
+
+Niektóre obecne permissiony są zbyt ogólne jak na aktualny zakres produktu:
+
+- `manage_settings` obejmuje kilka różnych stron (`IntegrationSettingsPage.php`, `PaymentSettingsPage.php`, `LegalSettingsPage.php`, `TrackingSettingsPage.php`, prawdopodobnie też `SitemapPage.php`).
+- `manage_calculator` prawdopodobnie ma obejmować zarówno `CalculatorAdminPage.php`, jak i zasoby `CalculatorPricingResource.php`, `CalculatorStepsResource.php`, `CalculatorStringsResource.php`.
+- `view_reports` / `export_reports` nie rozróżniają klasycznych raportów od innych zasobów wrzuconych do grupy `Reports`, np. `NotificationResource.php`.
+
+To nie musi być błąd, ale utrudnia dalsze delegowanie dostępu i budowę bardziej precyzyjnych ról operacyjnych.
+
+### 4.6 Rekomendacja wdrożeniowa
+
+Najbezpieczniejszy kierunek dalszych prac:
+
+1. zachować obecną konwencję nazw `view/create/edit/delete_*` dla CRUD-ów,
+2. dodać brakujące permissiony dla nowych modułów SaaS / CRM,
+3. przepiąć polityki `Briefing*` i `SalesOffer*` z role-based na permission-based,
+4. jawnie spiąć zasoby i strony Filament z permissionami zamiast polegać tylko na `canAccessPanel()`,
+5. zdecydować, czy `PermissionResource` ma być objęty `manage_roles`, czy dostać osobny `manage_permissions`.
+
+**Seedery**: `AdminSeeder.php` nadal jest jedynym centralnym miejscem definicji ról i permissionów, ale obecnie nie odzwierciedla już pełnego feature inventory panelu.
 
 ---
 

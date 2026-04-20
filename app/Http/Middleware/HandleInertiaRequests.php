@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Client;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use App\Models\Setting;
@@ -36,16 +37,48 @@ class HandleInertiaRequests extends Middleware
             $locale = $supported[0];
         }
 
+        app()->setLocale($locale);
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user'                => $request->user(),
+                'portal_capabilities' => $this->resolvePortalCapabilities($request),
             ],
             'locale'              => $locale,
             'available_locales'   => config('languages'),
             'tracking'            => $this->resolveTrackingSettings(),
             'portal_translations' => $this->resolvePortalTranslations($locale),
             'landing_page_translations' => $this->resolveTranslations('landing_pages', $locale),
+        ];
+    }
+
+    private function resolvePortalCapabilities(Request $request): array
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            return [
+                'can_access_client_portal' => false,
+                'can_access_workspace'     => false,
+                'mode'                     => 'guest',
+            ];
+        }
+
+        $canAccessWorkspace = $user->currentBusiness() !== null;
+        $canAccessClientPortal = Client::where('portal_user_id', $user->id)->exists();
+
+        $mode = match (true) {
+            $canAccessWorkspace && $canAccessClientPortal => 'hybrid',
+            $canAccessWorkspace                           => 'workspace',
+            $canAccessClientPortal                        => 'client',
+            default                                       => 'none',
+        };
+
+        return [
+            'can_access_client_portal' => $canAccessClientPortal,
+            'can_access_workspace'     => $canAccessWorkspace,
+            'mode'                     => $mode,
         ];
     }
 

@@ -10,7 +10,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class PaymentSettingsPage extends Page
+class PaymentSettingsPage extends BasePage
 {
     protected string $view = 'filament.pages.payment-settings';
 

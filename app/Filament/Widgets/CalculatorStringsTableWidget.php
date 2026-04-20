@@ -13,6 +13,8 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class CalculatorStringsTableWidget extends BaseWidget
 {
+    protected static bool $isDiscoverable = false;
+
     protected static ?string $heading = 'UI Strings — all text labels by language';
     protected int|string|array $columnSpan = 'full';
 

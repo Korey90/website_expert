@@ -146,37 +146,41 @@ Route::middleware('auth')->group(function () {
     Route::prefix('portal')->name('portal.')->group(function () {
         Route::get('/', [PortalDashboardController::class, 'index'])->name('dashboard');
 
-        Route::get('/projects', [PortalProjectController::class, 'index'])->name('projects');
-        Route::get('/projects/{project}', [PortalProjectController::class, 'show'])->name('projects.show');
-        Route::post('/projects/{project}/messages', [PortalProjectController::class, 'storeMessage'])->name('messages.store');
+        Route::middleware('portal.client')->group(function () {
+            Route::get('/projects', [PortalProjectController::class, 'index'])->name('projects');
+            Route::get('/projects/{project}', [PortalProjectController::class, 'show'])->name('projects.show');
+            Route::post('/projects/{project}/messages', [PortalProjectController::class, 'storeMessage'])->name('messages.store');
 
-        Route::get('/invoices', [PortalInvoiceController::class, 'index'])->name('invoices');
-        Route::get('/invoices/{invoice}', [PortalInvoiceController::class, 'show'])->name('invoices.show');
-        Route::get('/invoices/{invoice}/pay', [PortalPaymentController::class, 'selectMethod'])->name('invoices.pay');
-        Route::post('/invoices/{invoice}/pay/stripe', [PortalPaymentController::class, 'stripeCheckout'])->name('invoices.pay.stripe');
-        Route::post('/invoices/{invoice}/pay/payu', [PortalPaymentController::class, 'payuInitiate'])->name('invoices.pay.payu');
-        Route::get('/invoices/{invoice}/payment-result', [PortalPaymentResultController::class, 'show'])->name('invoices.payment-result');
+            Route::get('/invoices', [PortalInvoiceController::class, 'index'])->name('invoices');
+            Route::get('/invoices/{invoice}', [PortalInvoiceController::class, 'show'])->name('invoices.show');
+            Route::get('/invoices/{invoice}/pay', [PortalPaymentController::class, 'selectMethod'])->name('invoices.pay');
+            Route::post('/invoices/{invoice}/pay/stripe', [PortalPaymentController::class, 'stripeCheckout'])->name('invoices.pay.stripe');
+            Route::post('/invoices/{invoice}/pay/payu', [PortalPaymentController::class, 'payuInitiate'])->name('invoices.pay.payu');
+            Route::get('/invoices/{invoice}/payment-result', [PortalPaymentResultController::class, 'show'])->name('invoices.payment-result');
 
-        Route::get('/quotes', [PortalQuoteController::class, 'index'])->name('quotes');
-        Route::get('/quotes/{quote}', [PortalQuoteController::class, 'show'])->name('quotes.show');
-        Route::post('/quotes/{quote}/accept', [PortalQuoteController::class, 'accept'])->name('quotes.accept');
-        Route::post('/quotes/{quote}/reject', [PortalQuoteController::class, 'reject'])->name('quotes.reject');
+            Route::get('/quotes', [PortalQuoteController::class, 'index'])->name('quotes');
+            Route::get('/quotes/{quote}', [PortalQuoteController::class, 'show'])->name('quotes.show');
+            Route::post('/quotes/{quote}/accept', [PortalQuoteController::class, 'accept'])->name('quotes.accept');
+            Route::post('/quotes/{quote}/reject', [PortalQuoteController::class, 'reject'])->name('quotes.reject');
 
-        Route::get('/leads/{lead}', [PortalLeadController::class, 'show'])->name('leads.show');
+            Route::get('/contracts', [PortalContractController::class, 'index'])->name('contracts');
+            Route::get('/contracts/{contract}', [PortalContractController::class, 'show'])->name('contracts.show');
+            Route::post('/contracts/{contract}/sign', [PortalContractController::class, 'sign'])->name('contracts.sign');
 
-        Route::get('/contracts', [PortalContractController::class, 'index'])->name('contracts');
-        Route::get('/contracts/{contract}', [PortalContractController::class, 'show'])->name('contracts.show');
-        Route::post('/contracts/{contract}/sign', [PortalContractController::class, 'sign'])->name('contracts.sign');
+            Route::get('/settings/notifications', [PortalNotificationController::class, 'settings'])->name('settings.notifications');
+            Route::post('/settings/notifications', [PortalNotificationController::class, 'updateSettings'])->name('settings.notifications.update');
+        });
 
-        // Communication preferences
-        Route::get('/settings/notifications', [PortalNotificationController::class, 'settings'])->name('settings.notifications');
-        Route::post('/settings/notifications', [PortalNotificationController::class, 'updateSettings'])->name('settings.notifications.update');
+        Route::get('/leads/{lead}', [PortalLeadController::class, 'show'])
+            ->middleware('portal.workspace:leads')
+            ->name('leads.show');
 
-        // Billing (SaaS plan management)
-        Route::get('/billing', [\App\Http\Controllers\Portal\BillingController::class, 'index'])->name('billing');
-        Route::post('/billing/checkout/{plan}', [\App\Http\Controllers\Portal\BillingController::class, 'checkout'])->name('billing.checkout');
-        Route::get('/billing/success', [\App\Http\Controllers\Portal\BillingController::class, 'success'])->name('billing.success');
-        Route::post('/billing/portal', [\App\Http\Controllers\Portal\BillingController::class, 'portal'])->name('billing.portal');
+        Route::middleware('portal.workspace:billing')->group(function () {
+            Route::get('/billing', [\App\Http\Controllers\Portal\BillingController::class, 'index'])->name('billing');
+            Route::post('/billing/checkout/{plan}', [\App\Http\Controllers\Portal\BillingController::class, 'checkout'])->name('billing.checkout');
+            Route::get('/billing/success', [\App\Http\Controllers\Portal\BillingController::class, 'success'])->name('billing.success');
+            Route::post('/billing/portal', [\App\Http\Controllers\Portal\BillingController::class, 'portal'])->name('billing.portal');
+        });
     });
 
     // Email template preview (admin only)

@@ -15,7 +15,7 @@ use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
-class PipelinePage extends Page
+class PipelinePage extends BasePage
 {
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-funnel';
     protected static \UnitEnum|string|null $navigationGroup = 'CRM';

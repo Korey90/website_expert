@@ -16,7 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class BusinessResource extends Resource
+class BusinessResource extends BaseResource
 {
     protected static ?string $model = Business::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-building-storefront';

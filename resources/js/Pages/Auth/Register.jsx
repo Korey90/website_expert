@@ -42,12 +42,11 @@ export default function Register() {
     };
 
     return (
-        <MarketingLayout>
+        <MarketingLayout navbar={{}} footer={{}}>
             <Head title={t('title')} />
 
-            <div className="min-h-screen bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white flex flex-col">
-                <main className="flex-1 flex items-center justify-center px-4 py-20">
-                    <div className="w-full max-w-md">
+            <section className="flex items-center justify-center py-24 px-4">
+                <div className="w-full max-w-md">
                         <h1 className="text-3xl font-bold mb-2 text-neutral-900 dark:text-white">{t('heading')}</h1>
                         <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-8">
                             {t('have_account')}{' '}
@@ -175,9 +174,8 @@ export default function Register() {
                             {' '}and{' '}
                             <a href="/privacy" className="underline hover:text-neutral-600 dark:hover:text-neutral-300">Privacy Policy</a>.
                         </p>
-                    </div>
-                </main>
-            </div>
+                </div>
+            </section>
         </MarketingLayout>
     );
 }

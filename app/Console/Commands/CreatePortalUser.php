@@ -2,24 +2,22 @@
 
 namespace App\Console\Commands;
 
-use App\Mail\PortalInviteMail;
 use App\Models\Client;
-use App\Models\User;
+use App\Services\Account\PortalAccessService;
+use DomainException;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 
-#[Signature('app:create-portal-user {email : E-mail adres klienta} {--client= : ID klienta do powiązania}')]
+#[Signature('app:create-portal-user {email : E-mail adres klienta} {--client= : ID klienta do powiązania} {--workspace : Nadaj też dostęp do workspace klienta, jeśli jest powiązany z business}')]
 #[Description('Tworzy konto portalu klienta i wysyła dane logowania e-mailem')]
 class CreatePortalUser extends Command
 {
-    public function handle(): int
+    public function handle(PortalAccessService $portalAccessService): int
     {
         $email    = $this->argument('email');
         $clientId = $this->option('client');
+        $workspace = (bool) $this->option('workspace');
 
         // Find the Client record if --client given
         $client = $clientId ? Client::find($clientId) : Client::where('primary_contact_email', $email)->first();
@@ -29,52 +27,44 @@ class CreatePortalUser extends Command
             return self::FAILURE;
         }
 
-        // Check if User already exists
-        $existing = User::where('email', $email)->first();
-
-        if ($existing) {
-            if ($client) {
-                $client->update(['portal_user_id' => $existing->id]);
-            }
-            if (! $existing->hasRole('client')) {
-                $existing->assignRole('client');
-            }
-            $this->info("✓ Istniejące konto {$email} powiązane z klientem.");
-            return self::SUCCESS;
+        if ($workspace && ! $client) {
+            $this->error('Opcja --workspace wymaga klienta powiązanego z rekordem Client.');
+            return self::FAILURE;
         }
 
-        // Ask for name if not derivable from client record
         $name = $client ? ($client->primary_contact_name ?: $client->company_name) : $this->ask('Imię i nazwisko użytkownika');
 
-        $plainPassword = Str::password(12, symbols: false);
-
-        $user = User::create([
-            'name'      => $name,
-            'email'     => $email,
-            'password'  => Hash::make($plainPassword),
-            'is_active' => true,
-            'locale'    => 'pl',
-        ]);
-
-        $user->assignRole('client');
-
-        if ($client) {
-            $client->update(['portal_user_id' => $user->id]);
+        try {
+            $result = $portalAccessService->ensurePortalAccess($client, [
+                'email' => $email,
+                'name' => $name,
+                'grant_workspace_access' => $workspace,
+                'send_invite' => true,
+                'queue_invite' => false,
+            ]);
+        } catch (DomainException $e) {
+            $this->error($e->getMessage());
+            return self::FAILURE;
         }
 
-        $companyName = config('mail.from.name', config('app.name'));
+        if ($result['user_was_created']) {
+            $this->info("✓ Konto portalu utworzone dla: {$email}");
+            if ($result['plain_password']) {
+                $this->line("  Hasło tymczasowe: <comment>{$result['plain_password']}</comment>");
+            }
+            $this->line('  E-mail z danymi logowania wysłany.');
+        } elseif ($client) {
+            $this->info("✓ Istniejące konto {$result['user']->email} powiązane z klientem.");
+        } else {
+            $this->info("✓ Konto {$result['user']->email} jest już gotowe do użycia.");
+        }
 
-        Mail::to($email)->send(new PortalInviteMail(
-            clientName:    $name,
-            loginEmail:    $email,
-            plainPassword: $plainPassword,
-            loginUrl:      route('login'),
-            companyName:   $companyName,
-        ));
-
-        $this->info("✓ Konto portalu utworzone dla: {$email}");
-        $this->line("  Hasło tymczasowe: <comment>{$plainPassword}</comment>");
-        $this->line("  E-mail z danymi logowania wysłany.");
+        if ($workspace) {
+            $this->line($result['workspace_membership_created']
+                ? '  Workspace access został nadany.'
+                : '  Workspace access był już aktywny.'
+            );
+        }
 
         return self::SUCCESS;
     }

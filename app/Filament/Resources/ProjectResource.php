@@ -24,7 +24,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
-class ProjectResource extends Resource
+class ProjectResource extends BaseResource
 {
     protected static ?string $model = Project::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-briefcase';

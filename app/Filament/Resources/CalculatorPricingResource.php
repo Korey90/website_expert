@@ -13,7 +13,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 
-class CalculatorPricingResource extends Resource
+class CalculatorPricingResource extends BaseResource
 {
     protected static ?string $model = CalculatorPricing::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-calculator';

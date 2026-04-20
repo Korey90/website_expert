@@ -17,7 +17,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Illuminate\Support\Facades\Storage;
 
-class PortfolioProjectResource extends Resource
+class PortfolioProjectResource extends BaseResource
 {
     protected static ?string $model = PortfolioProject::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-photo';

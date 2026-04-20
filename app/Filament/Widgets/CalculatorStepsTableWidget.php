@@ -15,6 +15,8 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class CalculatorStepsTableWidget extends BaseWidget
 {
+    protected static bool $isDiscoverable = false;
+
     protected static ?string $heading = 'Steps — questions & hints per step';
     protected int|string|array $columnSpan = 'full';
 

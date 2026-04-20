@@ -16,7 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Spatie\Permission\Models\Permission;
 
-class PermissionResource extends Resource
+class PermissionResource extends BaseResource
 {
     protected static ?string $model = Permission::class;
 

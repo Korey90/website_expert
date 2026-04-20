@@ -10,7 +10,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class TrackingSettingsPage extends Page
+class TrackingSettingsPage extends BasePage
 {
     protected string $view = 'filament.pages.tracking-settings';
 

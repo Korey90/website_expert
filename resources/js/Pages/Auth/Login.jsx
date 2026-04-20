@@ -20,7 +20,7 @@ const T = {
 };
 
 export default function Login({ status, canResetPassword }) {
-    const { locale = 'en' } = usePage().props;
+    const { locale = 'en', errors: pageErrors = {} } = usePage().props;
     const t = (key) => T[key]?.[locale] ?? T[key]?.en ?? '';
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -37,18 +37,23 @@ export default function Login({ status, canResetPassword }) {
     };
 
     return (
-        <MarketingLayout>
+        <MarketingLayout navbar={{}} footer={{}}>
             <Head title={t('title')} />
 
-            <div className="min-h-screen bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white flex flex-col">
-                <main className="flex-1 flex items-center justify-center px-4 py-20">
-                    <div className="w-full max-w-md">
+            <section className="flex items-center justify-center py-24 px-4">
+                <div className="w-full max-w-md">
                         <h1 className="text-3xl font-bold mb-2 text-neutral-900 dark:text-white">{t('heading')}</h1>
                         <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-8">{t('subtitle')}</p>
 
                         {status && (
                             <div className="mb-6 text-sm font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-4 py-3 rounded-lg">
                                 {status}
+                            </div>
+                        )}
+
+                        {pageErrors.email && (
+                            <div className="mb-6 text-sm font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-4 py-3 rounded-lg">
+                                {pageErrors.email}
                             </div>
                         )}
 
@@ -125,9 +130,8 @@ export default function Login({ status, canResetPassword }) {
                                 {processing ? t('submitting') : t('submit')}
                             </button>
                         </form>
-                    </div>
-                </main>
-            </div>
+                </div>
+            </section>
         </MarketingLayout>
     );
 }
