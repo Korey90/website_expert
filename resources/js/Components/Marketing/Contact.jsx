@@ -36,14 +36,15 @@ export default function Contact({ data = null }) {
     const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
 
     const extra = data?.extra ?? {};
+    console.log('Contact extra data:', extra);
     const t     = (key, fallback = '') => extra[`${key}_${locale}`] ?? extra[`${key}_en`] ?? fallback;
 
     const title        = (locale === 'pl' ? data?.title?.pl : data?.title?.en) || data?.title || DEFAULTS.title[locale];
     const subtitle     = (locale === 'pl' ? data?.subtitle?.pl : data?.subtitle?.en) || data?.subtitle || DEFAULTS.subtitle[locale];
     const sectionLabel = t('section_label') || DEFAULTS.section_label[locale];
 
-    const email       = extra.email      || 'hello@websiteexpert.co.uk';
-    const phone       = extra.phone      || '+44 000 000 000';
+    const email       = extra.email      || 'hto-ello@websiteexpert.co.uk';
+    const phone       = extra.phone      || '+44 000 000 200';
     const phoneHref   = extra.phone_href || 'tel:+44000000000';
     const privacyUrl  = extra.privacy_url || '#';
 
