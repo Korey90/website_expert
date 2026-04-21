@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>feature-navbar-menu.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="feature-navbar-menu-module">Feature: Navbar Menu Module</h1>
+<blockquote>
+<p>Data: 2026-04-21
+Status: Draft</p>
+</blockquote>
+<hr>
+<h2 id="1-definicja">1. Definicja</h2>
+<p><strong>Cel:</strong> Zastąpić nawigację przechowywaną jako <code>SiteSection.extra</code> dedykowanym, relacyjnym modułem z własnym zasobem Filament. Menu musi rozpoznawać, które sekcje strony są aktualnie widoczne, i wyróżniać aktywny link.</p>
+<p><strong>Bounded context:</strong> Marketing → strona główna. Niezależny od multi-tenancy (jedna globalna nawigacja serwisu).</p>
+<p><strong>Rola:</strong> Administrator edytuje pozycje menu w Filamencie. Gość widzi menu dopasowane do swojego języka z podświetleniem aktywnej sekcji.</p>
+<p><strong>Zależności:</strong></p>
+<ul>
+<li><code>SiteSection</code> — klucze sekcji (<code>#about</code>, <code>#services</code>, …) służą jako kotwice do wykrywania widoczności</li>
+<li><code>HandleInertiaRequests</code> — global share danych nawigacji</li>
+<li><code>Navbar.jsx</code> — komponent frontendowy (bez zmian wizualnych)</li>
+</ul>
+<hr>
+<h2 id="2-stan-obecny-i-delta">2. Stan obecny i delta</h2>
+<h3 id="stan-obecny">Stan obecny</h3>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Gdzie</th>
+<th>Problem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dane nawigacji</td>
+<td><code>site_sections.extra</code> (klucz <code>navbar</code>)</td>
+<td>Filament nadpisuje cały JSON <code>extra</code> tylko widocznymi polami → links znikają</td>
+</tr>
+<tr>
+<td>Edycja linków</td>
+<td><code>SiteSectionResource</code> Repeater</td>
+<td><code>-&gt;defaultItems(5)</code> inicjalizuje puste rekordy, brak izolacji od innych kluczy w <code>extra</code></td>
+</tr>
+<tr>
+<td>Aktywna sekcja</td>
+<td>brak</td>
+<td>Navbar nie rozpoznaje widocznych sekcji</td>
+</tr>
+<tr>
+<td>Fallback</td>
+<td><code>LINK_DEFAULTS</code> w <code>Navbar.jsx</code></td>
+<td>Twardy fallback hardcoded w JS</td>
+</tr>
+</tbody>
+</table>
+<h3 id="delta-nowa-praca">Delta (nowa praca)</h3>
+<ul>
+<li>Nowa tabela <code>nav_items</code> (relacyjna, nie JSON blob)</li>
+<li>Model <code>NavItem</code> + resource <code>NavItemResource</code> w Filamencie</li>
+<li>Global share <code>nav_items</code> w <code>HandleInertiaRequests</code> (dostępne na każdej stronie)</li>
+<li>Intersection Observer w <code>Navbar.jsx</code> — wykrywa widoczną sekcję i wyróżnia link</li>
+<li>Usunięcie sekcji <code>navbar</code> z <code>SiteSection</code> (lub zostawienie jako legacy, wyłączenie z nawigacji)</li>
+<li>Usunięcie <code>LINK_DEFAULTS</code> z Navbar.jsx</li>
+</ul>
+<hr>
+<h2 id="3-model-danych">3. Model danych</h2>
+<h3 id="tabela-nav_items">Tabela <code>nav_items</code></h3>
+<pre class="hljs"><code><div>nav_items
+├── id                bigint unsigned PK
+├── label             json  — {&quot;pl&quot;:&quot;O nas&quot;,&quot;en&quot;:&quot;About Us&quot;,&quot;pt&quot;:&quot;Sobre Nós&quot;}  (HasTranslations)
+├── href              varchar(200)    — &quot;#about&quot; | &quot;/portfolio&quot; | &quot;https://...&quot;
+├── section_key       varchar(100) nullable — &quot;about&quot; | &quot;services&quot; | null (linki zewnętrzne)
+├── sort_order        unsignedSmallInt default 0
+├── is_active         boolean default true
+├── open_in_new_tab   boolean default false
+├── timestamps
+</div></code></pre>
+<p><strong>NavItem model:</strong></p>
+<ul>
+<li><code>HasTranslations</code> → pole <code>label</code></li>
+<li><code>scopeActive()</code> → <code>where('is_active', true)-&gt;orderBy('sort_order')</code></li>
+<li>Brak <code>business_id</code> — globalna nawigacja serwisu</li>
+</ul>
+<h3 id="brak-zmian-w-istniejących-tabelach">Brak zmian w istniejących tabelach</h3>
+<p><code>site_sections</code> pozostaje bez modyfikacji. Rekord <code>navbar</code> może zostać w DB jako archiwum danych CTA (brand_name, cta_text, cta_href) — te pola zostają w <code>SiteSectionResource</code> i nadal trafiają do <code>Navbar.jsx</code> przez <code>WelcomeController</code>. Tylko <code>links</code> jest przeniesione.</p>
+<hr>
+<h2 id="4-backend">4. Backend</h2>
+<h3 id="migration">Migration</h3>
+<pre class="hljs"><code><div>php artisan make:migration create_nav_items_table
+</div></code></pre>
+<h3 id="model">Model</h3>
+<pre class="hljs"><code><div>app/Models/NavItem.php
+- HasTranslations, translatable = ['label']
+- casts: is_active =&gt; boolean, open_in_new_tab =&gt; boolean
+- scopeActive, scopeOrdered
+</div></code></pre>
+<h3 id="filament-resource">Filament Resource</h3>
+<pre class="hljs"><code><div>app/Filament/Resources/NavItemResource.php
+</div></code></pre>
+<ul>
+<li>Group: <code>Marketing</code>, icon <code>heroicon-o-bars-3</code>, label <code>Navigation Menu</code>, sort 0</li>
+<li><strong>Table</strong>: sort_order (reorderable drag), label (locale aktualnego admina), href, section_key badge, is_active toggle, open_in_new_tab</li>
+<li><strong>Form</strong> (inline w tabeli lub modal):
+<ul>
+<li><code>sort_order</code> hidden (zarządza reorder)</li>
+<li>Tabs językowe → <code>label.pl</code> / <code>label.en</code> / <code>label.pt</code></li>
+<li><code>href</code> TextInput</li>
+<li><code>section_key</code> TextInput (helper: klucz sekcji, np. <code>about</code> → kotwica <code>#about</code>)</li>
+<li><code>is_active</code> Toggle</li>
+<li><code>open_in_new_tab</code> Toggle</li>
+</ul>
+</li>
+<li><strong>Reorder</strong>: <code>-&gt;reorderable('sort_order')</code> na tabeli</li>
+<li>Brak osobnej strony Edit — wystarczy <code>-&gt;actions([EditAction, DeleteAction])</code> w wierszu</li>
+</ul>
+<h3 id="global-share--handleinertiarequests">Global share — HandleInertiaRequests</h3>
+<pre class="hljs"><code><div><span class="hljs-comment">// share():</span>
+<span class="hljs-string">&#x27;nav_items&#x27;</span> =&gt; <span class="hljs-title class_">Cache</span>::<span class="hljs-title function_ invoke__">remember</span>(<span class="hljs-string">&#x27;nav_items&#x27;</span>, <span class="hljs-number">60</span>, fn () =&gt;
+    <span class="hljs-title class_">NavItem</span>::<span class="hljs-title function_ invoke__">active</span>()-&gt;<span class="hljs-title function_ invoke__">ordered</span>()-&gt;<span class="hljs-title function_ invoke__">get</span>()-&gt;<span class="hljs-title function_ invoke__">map</span>(fn (<span class="hljs-variable">$item</span>) =&gt; [
+        <span class="hljs-string">&#x27;href&#x27;</span>            =&gt; <span class="hljs-variable">$item</span>-&gt;href,
+        <span class="hljs-string">&#x27;label&#x27;</span>           =&gt; <span class="hljs-variable">$item</span>-&gt;<span class="hljs-title function_ invoke__">getTranslations</span>(<span class="hljs-string">&#x27;label&#x27;</span>),
+        <span class="hljs-string">&#x27;section_key&#x27;</span>     =&gt; <span class="hljs-variable">$item</span>-&gt;section_key,
+        <span class="hljs-string">&#x27;open_in_new_tab&#x27;</span> =&gt; <span class="hljs-variable">$item</span>-&gt;open_in_new_tab,
+    ])-&gt;<span class="hljs-title function_ invoke__">values</span>()-&gt;<span class="hljs-title function_ invoke__">all</span>()
+),
+</div></code></pre>
+<p>Cache z <code>Cache::tags(['nav'])</code> lub zwykły TTL 60 s — czyści się przy <code>NavItem::saved/deleted</code> Observerem albo po prostu TTL wystarczy w MVP.</p>
+<h3 id="welcomecontroller">WelcomeController</h3>
+<p><code>navbar</code> prop pozostaje (brand_name, cta_text, cta_href). Pole <code>extra.links</code> jest ignorowane przez <code>Navbar.jsx</code> jeśli <code>nav_items</code> jest dostępne.</p>
+<hr>
+<h2 id="5-frontend">5. Frontend</h2>
+<h3 id="navbarjsx--zmiany">Navbar.jsx — zmiany</h3>
+<p><strong>Źródło linków:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// BYŁO</span>
+<span class="hljs-keyword">const</span> rawLinks = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(extra.<span class="hljs-property">links</span>) &amp;&amp; extra.<span class="hljs-property">links</span>.<span class="hljs-property">length</span> &gt; <span class="hljs-number">0</span> ? extra.<span class="hljs-property">links</span> : <span class="hljs-variable constant_">LINK_DEFAULTS</span>;
+
+<span class="hljs-comment">// BĘDZIE</span>
+<span class="hljs-keyword">const</span> { nav_items } = page.<span class="hljs-property">props</span>;          <span class="hljs-comment">// global share</span>
+<span class="hljs-keyword">const</span> rawLinks = nav_items ?? [];
+</div></code></pre>
+<p><strong>Usunąć:</strong> <code>LINK_DEFAULTS</code>, oba <code>console.log</code>.</p>
+<p><strong>Aktywna sekcja — Intersection Observer:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">const</span> [activeSection, setActiveSection] = <span class="hljs-title function_">useState</span>(<span class="hljs-literal">null</span>);
+
+<span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">if</span> (!isHome) <span class="hljs-keyword">return</span>;                    <span class="hljs-comment">// aktywność tylko na stronie głównej</span>
+    <span class="hljs-keyword">const</span> sectionKeys = rawLinks
+        .<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">l</span> =&gt;</span> l.<span class="hljs-property">section_key</span>)
+        .<span class="hljs-title function_">filter</span>(<span class="hljs-title class_">Boolean</span>);
+
+    <span class="hljs-keyword">const</span> observers = [];
+    sectionKeys.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> {
+        <span class="hljs-keyword">const</span> el = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(key);
+        <span class="hljs-keyword">if</span> (!el) <span class="hljs-keyword">return</span>;
+        <span class="hljs-keyword">const</span> obs = <span class="hljs-keyword">new</span> <span class="hljs-title class_">IntersectionObserver</span>(
+            <span class="hljs-function">(<span class="hljs-params">[entry]</span>) =&gt;</span> { <span class="hljs-keyword">if</span> (entry.<span class="hljs-property">isIntersecting</span>) <span class="hljs-title function_">setActiveSection</span>(key); },
+            { <span class="hljs-attr">threshold</span>: <span class="hljs-number">0.4</span> }
+        );
+        obs.<span class="hljs-title function_">observe</span>(el);
+        observers.<span class="hljs-title function_">push</span>(obs);
+    });
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> observers.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">o</span> =&gt;</span> o.<span class="hljs-title function_">disconnect</span>());
+}, [isHome, rawLinks]);
+</div></code></pre>
+<p><strong>Mapowanie linków:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">const</span> navLinks = rawLinks.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">l</span> =&gt;</span> ({
+    <span class="hljs-attr">href</span>:        <span class="hljs-title function_">resolveHref</span>(l.<span class="hljs-property">href</span>),
+    <span class="hljs-attr">label</span>:       l.<span class="hljs-property">label</span>[locale] ?? l.<span class="hljs-property">label</span>[<span class="hljs-string">&#x27;en&#x27;</span>] ?? l.<span class="hljs-property">href</span>,
+    <span class="hljs-attr">sectionKey</span>:  l.<span class="hljs-property">section_key</span> ?? <span class="hljs-literal">null</span>,
+    <span class="hljs-attr">newTab</span>:      l.<span class="hljs-property">open_in_new_tab</span> ?? <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">isActive</span>:    l.<span class="hljs-property">section_key</span> === activeSection,
+}));
+</div></code></pre>
+<p><strong>Render linku (desktop i mobile):</strong></p>
+<pre class="hljs"><code><div>&lt;a
+    href={l.<span class="hljs-property">href</span>}
+    target={l.<span class="hljs-property">newTab</span> ? <span class="hljs-string">&#x27;_blank&#x27;</span> : <span class="hljs-literal">undefined</span>}
+    rel={l.<span class="hljs-property">newTab</span> ? <span class="hljs-string">&#x27;noopener noreferrer&#x27;</span> : <span class="hljs-literal">undefined</span>}
+    className={<span class="hljs-string">`hover:text-brand-500 transition-colors <span class="hljs-subst">${
+        l.isActive ? <span class="hljs-string">&#x27;text-brand-500 font-semibold&#x27;</span> : <span class="hljs-string">&#x27;&#x27;</span>
+    }</span>`</span>}
+&gt;
+    {l.<span class="hljs-property">label</span>}
+&lt;/a&gt;
+</div></code></pre>
+<p><strong>Wizualnie:</strong> zero zmian — te same klasy Tailwind, ta sama struktura HTML.</p>
+<h3 id="sekcje-strony">Sekcje strony</h3>
+<p>Każda sekcja <code>&lt;section&gt;</code> musi mieć <code>id</code> równy <code>section_key</code>, np.:</p>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">section</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;about&quot;</span> …&gt;</span>
+</div></code></pre>
+<p>Większość sekcji już to ma (kotwice <code>#about</code>, <code>#services</code> itp.). Do zweryfikowania przy implementacji.</p>
+<hr>
+<h2 id="6-workflow">6. Workflow</h2>
+<h3 id="happy-path--admin-edytuje-menu">Happy path — admin edytuje menu</h3>
+<ol>
+<li>Admin otwiera <code>Marketing → Navigation Menu</code></li>
+<li>Widzi listę pozycji z drag &amp; drop po sort_order</li>
+<li>Klika <code>Edit</code> na pozycji → modal z polami <code>label</code> (3 języki), <code>href</code>, <code>section_key</code>, toggle <code>is_active</code></li>
+<li>Zapisuje → rekord aktualizowany, cache TTL wygasa w ciągu ≤60 s</li>
+<li>Na froncie gość odświeża stronę → widzi nowe menu</li>
+</ol>
+<h3 id="happy-path--dodanie-nowej-pozycji">Happy path — dodanie nowej pozycji</h3>
+<ol>
+<li>Admin klika <code>Add item</code></li>
+<li>Wpisuje label (PL + EN + PT), href, section_key</li>
+<li>Sort_order ustawia drag &amp; drop po dodaniu</li>
+<li>Zapisuje → nowy <code>NavItem</code> w DB</li>
+</ol>
+<h3 id="edge-cases">Edge cases</h3>
+<table>
+<thead>
+<tr>
+<th>Sytuacja</th>
+<th>Zachowanie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nav_items</code> puste (brak rekordów w DB)</td>
+<td>Navbar.jsx renderuje puste menu — brak fallbacku; admin widzi komunikat w Filamencie &quot;No items yet&quot;</td>
+</tr>
+<tr>
+<td><code>section_key</code> ustawiony ale sekcja nie istnieje w DOM</td>
+<td>Observer nic nie znajdzie, <code>activeSection</code> nie zmienia się dla tego klucza — bezpieczne</td>
+</tr>
+<tr>
+<td>Link zewnętrzny (href: <code>https://…</code>)</td>
+<td><code>section_key = null</code>, <code>open_in_new_tab = true</code>, Intersection Observer go pomija</td>
+</tr>
+<tr>
+<td>Strona inna niż <code>/</code></td>
+<td><code>isHome = false</code> → Observer nie startuje, żaden link nie jest &quot;aktywny&quot;</td>
+</tr>
+<tr>
+<td>Zmiana języka</td>
+<td><code>locale</code> zmienia się, <code>l.label[locale]</code> zwraca tłumaczenie bez przeładowania komponentu</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="7-test-plan">7. Test plan</h2>
+<h3 id="backend">Backend</h3>
+<ul>
+<li><input type="checkbox" id="checkbox0"><label for="checkbox0">Migration tworzy tabelę z poprawnymi typami</label></li>
+<li><input type="checkbox" id="checkbox1"><label for="checkbox1"><code>NavItem::active()-&gt;ordered()</code> zwraca tylko <code>is_active=true</code> w kolejności sort_order</label></li>
+<li><input type="checkbox" id="checkbox2"><label for="checkbox2"><code>getTranslation('label', 'pl')</code> zwraca polskie tłumaczenie</label></li>
+<li><input type="checkbox" id="checkbox3"><label for="checkbox3">Global share <code>nav_items</code> zawiera klucz w każdym żądaniu Inertia</label></li>
+<li><input type="checkbox" id="checkbox4"><label for="checkbox4">Zapis w Filamencie nie niszczy innych danych (brak <code>extra</code> blob)</label></li>
+</ul>
+<h3 id="frontend">Frontend</h3>
+<ul>
+<li><input type="checkbox" id="checkbox5"><label for="checkbox5">Linki renderują się z poprawnym <code>label</code> dla locale PL / EN / PT</label></li>
+<li><input type="checkbox" id="checkbox6"><label for="checkbox6">Po przescrollowaniu do sekcji <code>#about</code> → link &quot;O nas&quot; ma klasę <code>text-brand-500</code></label></li>
+<li><input type="checkbox" id="checkbox7"><label for="checkbox7">Link zewnętrzny otwiera się w nowej karcie</label></li>
+<li><input type="checkbox" id="checkbox8"><label for="checkbox8">Na stronie <code>/portfolio</code> żaden link nie jest wyróżniony (isHome = false)</label></li>
+<li><input type="checkbox" id="checkbox9"><label for="checkbox9">Usunięcie pozycji w Filamencie → po ≤60 s znika z menu</label></li>
+</ul>
+<hr>
+<h2 id="8-checklist-implementacji">8. Checklist implementacji</h2>
+<h3 id="backend-1">Backend</h3>
+<ul>
+<li><input type="checkbox" id="checkbox10"><label for="checkbox10"><code>create_nav_items_table</code> migration</label></li>
+<li><input type="checkbox" id="checkbox11"><label for="checkbox11"><code>NavItem</code> model (HasTranslations, scopes)</label></li>
+<li><input type="checkbox" id="checkbox12"><label for="checkbox12"><code>NavItemResource</code> + Pages (List z reorder, modal Edit)</label></li>
+<li><input type="checkbox" id="checkbox13"><label for="checkbox13">Global share <code>nav_items</code> w <code>HandleInertiaRequests</code></label></li>
+<li><input type="checkbox" id="checkbox14"><label for="checkbox14">Seeder <code>NavItemSeeder</code> z 5 domyślnymi pozycjami (About, Services, Portfolio, Calculator, Contact)</label></li>
+<li><input type="checkbox" id="checkbox15"><label for="checkbox15">Zarejestrować seeder w <code>DatabaseSeeder</code></label></li>
+</ul>
+<h3 id="frontend-1">Frontend</h3>
+<ul>
+<li><input type="checkbox" id="checkbox16"><label for="checkbox16">Usunąć <code>LINK_DEFAULTS</code> z <code>Navbar.jsx</code></label></li>
+<li><input type="checkbox" id="checkbox17"><label for="checkbox17">Podmienić źródło linków na <code>page.props.nav_items</code></label></li>
+<li><input type="checkbox" id="checkbox18"><label for="checkbox18">Dodać Intersection Observer (tylko <code>isHome</code>)</label></li>
+<li><input type="checkbox" id="checkbox19"><label for="checkbox19">Dodać <code>isActive</code> klasę do linków desktop i mobile</label></li>
+<li><input type="checkbox" id="checkbox20"><label for="checkbox20">Dodać <code>target/_blank</code> + <code>rel</code> dla <code>open_in_new_tab</code></label></li>
+<li><input type="checkbox" id="checkbox21"><label for="checkbox21">Usunąć <code>console.log</code></label></li>
+</ul>
+<h3 id="weryfikacja">Weryfikacja</h3>
+<ul>
+<li><input type="checkbox" id="checkbox22"><label for="checkbox22"><code>php artisan migrate</code></label></li>
+<li><input type="checkbox" id="checkbox23"><label for="checkbox23"><code>php artisan db:seed --class=NavItemSeeder</code></label></li>
+<li><input type="checkbox" id="checkbox24"><label for="checkbox24">Filament: dodaj/usuń pozycję → sprawdź front</label></li>
+<li><input type="checkbox" id="checkbox25"><label for="checkbox25">Sprawdź aktywną sekcję przy scrollu na <code>/</code></label></li>
+<li><input type="checkbox" id="checkbox26"><label for="checkbox26">Sprawdź brak aktywności na <code>/portfolio</code></label></li>
+</ul>
+
+</body>
+</html>

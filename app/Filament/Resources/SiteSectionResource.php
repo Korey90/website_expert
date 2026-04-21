@@ -439,47 +439,6 @@ class SiteSectionResource extends BaseResource
                     Forms\Components\TextInput::make('extra.success_msg_pl')->label('Success message (PL)')->maxLength(150)->columnSpanFull(),
                 ]),
 
-            Section::make('Navbar – Links & CTA')
-                ->description('Navigation links and call-to-action button text.')
-                ->columns(2)
-                ->collapsed()
-                ->visible(fn ($get) => $get('key') === 'navbar')
-                ->schema([
-                    Forms\Components\TextInput::make('extra.brand_name')
-                        ->label('Brand Name')
-                        ->maxLength(40),
-                    Forms\Components\TextInput::make('extra.cta_href')
-                        ->label('CTA Button URL')
-                        ->placeholder('#kontakt')
-                        ->maxLength(100),
-                    Forms\Components\TextInput::make('extra.cta_text_en')
-                        ->label('CTA Button Text (EN)')
-                        ->placeholder('Free Quote')
-                        ->maxLength(40),
-                    Forms\Components\TextInput::make('extra.cta_text_pl')
-                        ->label('CTA Button Text (PL)')
-                        ->placeholder('Bezpłatna wycena')
-                        ->maxLength(40),
-                    Forms\Components\Repeater::make('extra.links')
-                        ->label('Navigation Links (in order)')
-                        ->schema([
-                            Forms\Components\TextInput::make('href')
-                                ->label('URL / hash')
-                                ->placeholder('#oferta')
-                                ->maxLength(100),
-                            Forms\Components\TextInput::make('label_en')
-                                ->label('Label (EN)')
-                                ->maxLength(60),
-                            Forms\Components\TextInput::make('label_pl')
-                                ->label('Label (PL)')
-                                ->maxLength(60),
-                        ])
-                        ->columns(3)
-                        ->defaultItems(5)
-                        ->reorderable()
-                        ->columnSpanFull(),
-                ]),
-
             Section::make('Contact – Info & Form Texts')
                 ->description('Contact details, field labels, and all UI strings for the contact form.')
                 ->columns(2)
@@ -553,7 +512,7 @@ class SiteSectionResource extends BaseResource
 
             Section::make('Extra Data (JSON)')
                 ->collapsed()
-                ->hidden(fn ($get) => in_array($get('key'), ['about', 'trust_strip', 'testimonials', 'services', 'portfolio', 'cost_calculator', 'navbar', 'contact', 'footer']))
+                ->hidden(fn ($get) => in_array($get('key'), ['about', 'trust_strip', 'testimonials', 'services', 'portfolio', 'cost_calculator', 'contact', 'footer']))
                 ->schema([
                     Forms\Components\KeyValue::make('extra')
                         ->label('Custom Key-Value Pairs')

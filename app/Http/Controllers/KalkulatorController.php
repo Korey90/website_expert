@@ -25,14 +25,10 @@ class KalkulatorController extends Controller
 
         App::setLocale($locale);
 
-        $sections = SiteSection::whereIn('key', ['navbar', 'footer'])
+        $sections = SiteSection::whereIn('key', ['footer'])
             ->where('is_active', true)
             ->get()
             ->keyBy('key');
-
-        $navbar = ($s = $sections->get('navbar')) ? [
-            'extra' => $s->extra,
-        ] : null;
 
         $footer = ($s = $sections->get('footer')) ? [
             'extra' => $s->extra,
@@ -100,6 +96,6 @@ class KalkulatorController extends Controller
             ->values()
             ->all();
 
-        return Inertia::render('Kalkulator', compact('navbar', 'footer', 'pricing', 'strings', 'steps'));
+        return Inertia::render('Kalkulator', compact('footer', 'pricing', 'strings', 'steps'));
     }
 }

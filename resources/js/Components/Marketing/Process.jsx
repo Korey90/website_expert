@@ -43,7 +43,7 @@ export default function Process({ data }) {
     const steps    = extra.steps?.length ? extra.steps : DEFAULTS.steps;
 
     return (
-        <section id="proces" className="py-20 md:py-28 bg-neutral-50 dark:bg-neutral-900 overflow-hidden">
+        <section id="process" className="py-20 md:py-28 bg-neutral-50 dark:bg-neutral-900 overflow-hidden">
             <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 
                 {/* Header */}

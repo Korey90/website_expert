@@ -42,7 +42,7 @@ export default function Register() {
     };
 
     return (
-        <MarketingLayout navbar={{}} footer={{}}>
+        <MarketingLayout footer={{}}>
             <Head title={t('title')} />
 
             <section className="flex items-center justify-center py-24 px-4">

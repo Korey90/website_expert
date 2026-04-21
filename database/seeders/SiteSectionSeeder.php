@@ -734,35 +734,6 @@ class SiteSectionSeeder extends Seeder
                 'sort_order'  => 9,
             ],
             // -------------------------------------------------------
-            // Navbar
-            // -------------------------------------------------------
-            [
-                'key'         => 'navbar',
-                'label'       => 'Navigation Bar',
-                'title'       => ['en' => 'Navigation', 'pl' => 'Nawigacja', 'pt' => 'Navega\u00e7\u00e3o'],
-                'subtitle'    => null,
-                'body'        => null,
-                'button_text' => null,
-                'button_url'  => null,
-                'image_path'  => null,
-                'extra'       => [
-                    'brand_name'  => 'WebsiteExpert',
-                    'cta_text_en' => 'Free Quote',
-                    'cta_text_pl' => 'Bezpłatna wycena',
-                    'cta_text_pt' => 'Orçamento Gratuito',
-                    'cta_href'    => '#contact',
-                    'links'       => [
-                        ['label_en' => 'About Us',        'label_pl' => 'O nas',      'label_pt' => 'Sobre Nós',    'href' => '#about'],
-                        ['label_en' => 'Services',        'label_pl' => 'Oferta',     'label_pt' => 'Serviços',     'href' => '#services'],
-                        ['label_en' => 'Portfolio',       'label_pl' => 'Portfolio',  'label_pt' => 'Portfolio',    'href' => '#portfolio'],
-                        ['label_en' => 'Cost Calculator', 'label_pl' => 'Kalkulator', 'label_pt' => 'Calculadora',  'href' => '#calculate'],
-                        ['label_en' => 'Contact',         'label_pl' => 'Kontakt',    'label_pt' => 'Contacto',     'href' => '#contact'],
-                    ],
-                ],
-                'is_active'   => true,
-                'sort_order'  => 0,
-            ],
-            // -------------------------------------------------------
             // Contact Section
             // -------------------------------------------------------
             [

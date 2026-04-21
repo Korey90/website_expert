@@ -28,7 +28,7 @@ class WelcomeController extends Controller
 
         App::setLocale($locale);
 
-        $knownKeys = ['hero', 'about', 'saas_landing', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator', 'navbar', 'contact', 'footer'];
+        $knownKeys = ['hero', 'about', 'saas_landing', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator', 'contact', 'footer'];
 
         $sections = SiteSection::where('is_active', true)
             ->get()
@@ -141,10 +141,6 @@ class WelcomeController extends Controller
 
         $cost_calculator_v2 = $sections->has('cost_calculator') ? true : null;
 
-        $navbar = ($s = $sections->get('navbar')) ? [
-            'extra' => $s->extra,
-        ] : null;
-
         $contact = ($s = $sections->get('contact')) ? [
             'title'    => $s->title,
             'subtitle' => $s->subtitle,
@@ -232,6 +228,14 @@ class WelcomeController extends Controller
             ->values()
             ->all();
 
-        return Inertia::render('Welcome', compact('hero', 'about', 'saas_landing', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator_v2', 'navbar', 'contact', 'footer', 'pricing', 'strings', 'steps', 'extra_sections'));
+        // Sorted list of active section keys (frontend uses this to respect sort_order)
+        $section_order = $sections
+            ->sortBy('sort_order')
+            ->keys()
+            ->filter(fn ($k) => $k !== 'footer')
+            ->values()
+            ->all();
+
+        return Inertia::render('Welcome', compact('hero', 'about', 'saas_landing', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator_v2', 'contact', 'footer', 'pricing', 'strings', 'steps', 'extra_sections', 'section_order'));
     }
 }

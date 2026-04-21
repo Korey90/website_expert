@@ -350,7 +350,7 @@ function InlineContactForm({ l, locale, serviceTitle, serviceSlug }) {
 export default function ServicesShow({ locale: localeProp, item, auth }) {
     useScrollReveal('.reveal');
 
-    const { navbar, footer } = usePage().props;
+    const { footer } = usePage().props;
     const locale = localeProp ?? 'en';
     const l = labels[locale] ?? labels.en;
 
@@ -372,7 +372,7 @@ export default function ServicesShow({ locale: localeProp, item, auth }) {
     const featureText = (f) => f?.[`text_${locale}`] ?? f?.text_en ?? '';
 
     return (
-        <MarketingLayout auth={auth} navbar={navbar} footer={footer}>
+        <MarketingLayout auth={auth} footer={footer}>
             <Head>
                 <title>{metaTitle}</title>
                 <meta name="description" content={metaDesc} />

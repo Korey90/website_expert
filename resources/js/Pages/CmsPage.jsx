@@ -12,7 +12,7 @@ function slugify(text) {
         .replace(/^-+|-+$/g, '');
 }
 
-export default function CmsPage({ auth, page, navbar, footer }) {
+export default function CmsPage({ auth, page, footer }) {
     useScrollReveal('.reveal');
 
     const { locale = 'en', available_locales = {} } = usePage().props;
@@ -60,7 +60,7 @@ export default function CmsPage({ auth, page, navbar, footer }) {
     const handleTop   = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
     return (
-        <MarketingLayout auth={auth} navbar={navbar} footer={footer}>
+        <MarketingLayout auth={auth} footer={footer}>
             <Head title={`${String(metaTitle || 'WebsiteExpert')} – WebsiteExpert`}>
                 <meta name="description" content={String(metaDesc || '')} />
             </Head>

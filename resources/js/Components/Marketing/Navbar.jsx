@@ -4,30 +4,21 @@ import { usePage, router } from '@inertiajs/react';
 // Flag emoji map – add more as needed
 const FLAG = { en: '🇬🇧', pl: '🇵🇱', de: '🇩🇪', fr: '🇫🇷', es: '🇪🇸', pt: '🇵🇹', uk: '🇺🇦' };
 
-const LINK_DEFAULTS = [
-    { href: '#about',      label_en: 'About Us',        label_pl: 'O nas' },
-    { href: '#services',   label_en: 'Services',        label_pl: 'Oferta' },
-    { href: '#portfolio',  label_en: 'Portfolio',       label_pl: 'Portfolio' },
-    { href: '#calculate',  label_en: 'Cost Calculator', label_pl: 'Kalkulator' },
-    { href: '#contact',    label_en: 'Contact',         label_pl: 'Kontakt' },
-];
-
-export default function Navbar({ auth, data = null }) {
+export default function Navbar({ auth }) {
     const page = usePage();
-    const { locale, available_locales } = page.props;
+    const { locale, available_locales, nav_items, nav_settings } = page.props;
     const isHome = page.url === '/' || page.url.startsWith('/?');
     const resolveHref = (href) => href.startsWith('#') && !isHome ? '/' + href : href;
 
-    const extra = data?.extra ?? {};
-    const nt    = (key, fb = '') => extra[`${key}_${locale}`] ?? extra[`${key}_en`] ?? fb;
-
-    const rawLinks = Array.isArray(extra.links) && extra.links.length > 0 ? extra.links : LINK_DEFAULTS;
-    const navLinks = rawLinks.map(l => ({
-        href:  resolveHref(l.href),
-        label: l[`label_${locale}`] ?? l.label_en ?? l.href,
-    }));
-    const ctaText = nt('cta_text', locale === 'pl' ? 'Bezpłatna wycena' : 'Free Quote');
-    const ctaHref = resolveHref(extra.cta_href || '#contact');
+    const rawItems  = Array.isArray(nav_items) ? nav_items : [];
+    const settings  = nav_settings ?? {};
+    const brandName        = settings.brand_name || 'WebsiteExpert';
+    const ctaText          = settings[`cta_text_${locale}`] ?? settings.cta_text_en ?? 'Free Quote';
+    const ctaHref          = resolveHref(settings.cta_href || '#contact');
+    const showCtaButton    = settings.show_cta_button    !== false;
+    const showLangSwitcher = settings.show_lang_switcher !== false;
+    const showThemeToggle  = settings.show_theme_toggle  !== false;
+    const showClientPortal = settings.show_client_portal !== false;
 
     const langOptions = Object.entries(available_locales ?? {}).map(([code, label]) => ({
         code,
@@ -35,15 +26,89 @@ export default function Navbar({ auth, data = null }) {
         flag: FLAG[code] ?? '🌐',
     }));
 
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const [scrolled, setScrolled]     = useState(false);
-    const [dark, setDark]             = useState(() => (localStorage.getItem('theme') || 'dark') === 'dark');
-    const [langOpen, setLangOpen]     = useState(false);
-    const langRef    = useRef(null);
-    const headerRef  = useRef(null);
+    const [mobileOpen, setMobileOpen]   = useState(false);
+    const [scrolled, setScrolled]       = useState(false);
+    const [dark, setDark]               = useState(() => (localStorage.getItem('theme') || 'dark') === 'dark');
+    const [langOpen, setLangOpen]       = useState(false);
+    const [activeSection, setActiveSection] = useState(() =>
+        typeof window !== 'undefined' ? window.location.hash.replace('#', '') || null : null
+    );
+    const langRef       = useRef(null);
+    const headerRef     = useRef(null);
     const mobileOpenRef = useRef(false);
 
     useEffect(() => { mobileOpenRef.current = mobileOpen; }, [mobileOpen]);
+
+    // Active section highlight – scroll-based (homepage only)
+    useEffect(() => {
+        if (!isHome || rawItems.length === 0) return;
+
+        // DOM id = hash from href (e.g. #calculate → 'calculate')
+        // This is the source of truth; section_key may differ from actual DOM id
+        const anchors = rawItems
+            .map(item => item.href?.replace(/^[^#]*#/, '') || null)
+            .filter(Boolean);
+
+        const getActive = () => {
+            const focus = window.scrollY + window.innerHeight * 0.35;
+            let active = null;
+            anchors.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.offsetTop <= focus) active = id;
+            });
+            return active;
+        };
+
+        const onScroll = () => {
+            const a = getActive();
+            if (a) setActiveSection(a);
+        };
+
+        const onHashChange = () => {
+            const hash = window.location.hash.replace('#', '');
+            if (hash) setActiveSection(hash);
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('hashchange', onHashChange);
+
+        // Delay initial check – Suspense/lazy components need time to mount
+        let retryTimer;
+        const check = () => {
+            const hash = window.location.hash.replace('#', '');
+            if (hash) {
+                const el = document.getElementById(hash);
+                if (el) {
+                    setActiveSection(hash);
+                } else {
+                    // Element not yet in DOM (lazy Suspense), retry
+                    retryTimer = setTimeout(check, 150);
+                }
+            } else {
+                const a = getActive();
+                if (a) setActiveSection(a);
+            }
+        };
+        const timer = setTimeout(check, 200);
+
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener('hashchange', onHashChange);
+            clearTimeout(timer);
+            clearTimeout(retryTimer);
+        };
+    }, [isHome, rawItems]);
+
+    const navLinks = rawItems.map(item => {
+        const hash = item.href?.replace(/^[^#]*#/, '') || null;
+        return {
+            href:       resolveHref(item.href),
+            label:      item.label?.[locale] ?? item.label?.en ?? item.href,
+            sectionKey: item.section_key ?? null,
+            newTab:     item.open_in_new_tab ?? false,
+            isActive:   hash !== null && hash === activeSection,
+        };
+    });
 
     const switchLang = (code) => {
         setLangOpen(false);
@@ -102,7 +167,7 @@ export default function Navbar({ auth, data = null }) {
                         <path d="M13 18L16.5 21.5L23 14.5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     <span className="font-display font-bold text-xl tracking-tight text-neutral-900 dark:text-white group-hover:text-brand-500 transition-colors">
-                        Website<span className="text-brand-500">Expert</span>
+                        {brandName}
                     </span>
                 </a>
 
@@ -110,7 +175,14 @@ export default function Navbar({ auth, data = null }) {
                 <ul className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-600 dark:text-neutral-300">
                     {navLinks.map(l => (
                         <li key={l.href}>
-                            <a href={l.href} className="hover:text-brand-500 transition-colors">{l.label}</a>
+                            <a
+                                href={l.href}
+                                target={l.newTab ? '_blank' : undefined}
+                                rel={l.newTab ? 'noopener noreferrer' : undefined}
+                                className={`hover:text-brand-500 transition-colors ${l.isActive ? 'text-brand-500 font-semibold' : ''}`}
+                            >
+                                {l.label}
+                            </a>
                         </li>
                     ))}
                 </ul>
@@ -119,6 +191,7 @@ export default function Navbar({ auth, data = null }) {
                 <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
 
                     {/* Language switcher */}
+                    {showLangSwitcher && (
                     <div className="relative" ref={langRef}>
                         <button
                             onClick={() => setLangOpen(o => !o)}
@@ -157,8 +230,10 @@ export default function Navbar({ auth, data = null }) {
                             </ul>
                         )}
                     </div>
+                    )}
 
                     {/* Dark mode toggle */}
+                    {showThemeToggle && (
                     <button
                         onClick={() => setDark(d => !d)}
                         aria-label="Przełącz tryb ciemny/jasny"
@@ -177,8 +252,10 @@ export default function Navbar({ auth, data = null }) {
                             </svg>
                         )}
                     </button>
+                    )}
 
                     {/* Client Portal */}
+                    {showClientPortal && (
                     <a
                         href="/portal"
                         className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 text-sm font-semibold text-neutral-600 dark:text-neutral-200 hover:border-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-50 transition-colors"
@@ -188,14 +265,17 @@ export default function Navbar({ auth, data = null }) {
                         </svg>
                         {locale === 'pl' ? 'Portal Klienta' : locale === 'pt' ? 'Portal do Cliente' : 'Client Portal'}
                     </a>
+                    )}
 
                     {/* CTA button */}
+                    {showCtaButton && (
                     <a
                         href={ctaHref}
                         className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg shadow-brand-400/25 hover:shadow-brand-400/50 shadow-md text-brand-400 border border-brand-400 text-sm font-semibold hover:bg-brand-400 hover:text-neutral-100 active:scale-95 transition-all"
                     >
                         {ctaText}
                     </a>
+                    )}
 
                     {/* Mobile hamburger */}
                     <button
@@ -230,13 +310,20 @@ export default function Navbar({ auth, data = null }) {
                     <ul className="flex flex-col gap-1 pt-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                         {navLinks.map(l => (
                             <li key={l.href}>
-                                <a href={l.href} onClick={() => setMobileOpen(false)} className="block py-2.5 hover:text-brand-500 transition-colors">
+                                <a
+                                    href={l.href}
+                                    target={l.newTab ? '_blank' : undefined}
+                                    rel={l.newTab ? 'noopener noreferrer' : undefined}
+                                    onClick={() => setMobileOpen(false)}
+                                    className={`block py-2.5 hover:text-brand-500 transition-colors ${l.isActive ? 'text-brand-500 font-semibold' : ''}`}
+                                >
                                     {l.label}
                                 </a>
                             </li>
                         ))}
 
                         {/* Language row */}
+                        {showLangSwitcher && (
                         <li className="border-t border-neutral-100 dark:border-neutral-800 pt-3 mt-1">
                             <p className="text-xs text-neutral-400 uppercase tracking-widest mb-2">Język / Language</p>
                             <div className="flex gap-2">
@@ -255,7 +342,9 @@ export default function Navbar({ auth, data = null }) {
                                 ))}
                             </div>
                         </li>
+                        )}
 
+                        {showClientPortal && (
                         <li className="pt-2">
                             <a
                                 href="/portal"
@@ -265,6 +354,8 @@ export default function Navbar({ auth, data = null }) {
                                 {locale === 'pl' ? '🔒 Portal Klienta' : locale === 'pt' ? '🔒 Portal do Cliente' : '🔒 Client Portal'}
                             </a>
                         </li>
+                        )}
+                        {showCtaButton && (
                         <li className="pt-2">
                             <a
                                 href={ctaHref}
@@ -274,6 +365,7 @@ export default function Navbar({ auth, data = null }) {
                                 {ctaText}
                             </a>
                         </li>
+                        )}
                     </ul>
                 </div>
             </div>

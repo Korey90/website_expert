@@ -3,9 +3,11 @@
 namespace App\Http\Middleware;
 
 use App\Models\Client;
+use App\Models\NavItem;
+use App\Models\Setting;
+use App\Models\SiteSection;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use App\Models\Setting;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -47,6 +49,8 @@ class HandleInertiaRequests extends Middleware
             ],
             'locale'              => $locale,
             'available_locales'   => config('languages'),
+            'nav_items'           => $this->resolveNavItems(),
+            'nav_settings'        => $this->resolveNavSettings(),
             'tracking'            => $this->resolveTrackingSettings(),
             'portal_translations' => $this->resolvePortalTranslations($locale),
             'landing_page_translations' => $this->resolveTranslations('landing_pages', $locale),
@@ -124,6 +128,61 @@ class HandleInertiaRequests extends Middleware
                 'gads_enabled'           => false,
                 'gads_id'                => '',
                 'cookie_consent_enabled' => true,
+            ];
+        }
+    }
+
+    private function resolveNavItems(): array
+    {
+        try {
+            $activeSectionKeys = SiteSection::where('is_active', true)
+                ->pluck('key')
+                ->all();
+
+            return NavItem::active()
+                ->ordered()
+                ->get()
+                ->filter(fn (NavItem $item) =>
+                    blank($item->section_key) || in_array($item->section_key, $activeSectionKeys)
+                )
+                ->map(fn (NavItem $item) => [
+                    'href'            => $item->href,
+                    'label'           => $item->getTranslations('label'),
+                    'section_key'     => $item->section_key,
+                    'open_in_new_tab' => $item->open_in_new_tab,
+                ])
+                ->values()
+                ->all();
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    private function resolveNavSettings(): array
+    {
+        try {
+            return [
+                'brand_name'          => Setting::get('nav_brand_name',         'WebsiteExpert'),
+                'cta_href'            => Setting::get('nav_cta_href',           '#contact'),
+                'cta_text_pl'         => Setting::get('nav_cta_text_pl',        'Bezpłatna wycena'),
+                'cta_text_en'         => Setting::get('nav_cta_text_en',        'Free Quote'),
+                'cta_text_pt'         => Setting::get('nav_cta_text_pt',        'Orçamento Gratuito'),
+                'show_cta_button'     => (bool) Setting::get('nav_show_cta_button',     true),
+                'show_lang_switcher'  => (bool) Setting::get('nav_show_lang_switcher', true),
+                'show_theme_toggle'   => (bool) Setting::get('nav_show_theme_toggle',  true),
+                'show_client_portal'  => (bool) Setting::get('nav_show_client_portal', true),
+            ];
+        } catch (\Throwable) {
+            return [
+                'brand_name'          => 'WebsiteExpert',
+                'cta_href'            => '#contact',
+                'cta_text_pl'         => 'Bezpłatna wycena',
+                'cta_text_en'         => 'Free Quote',
+                'cta_text_pt'         => 'Orçamento Gratuito',
+                'show_cta_button'     => true,
+                'show_lang_switcher'  => true,
+                'show_theme_toggle'   => true,
+                'show_client_portal'  => true,
             ];
         }
     }

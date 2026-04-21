@@ -5,7 +5,7 @@ import useScrollReveal from '@/Hooks/useScrollReveal';
 export default function PortfolioShow({ locale: localeProp, project, auth }) {
     useScrollReveal('.reveal');
 
-    const { navbar, footer } = usePage().props;
+    const { footer } = usePage().props;
     const locale = localeProp ?? 'en';
 
     const t = (key) =>
@@ -25,7 +25,7 @@ export default function PortfolioShow({ locale: localeProp, project, auth }) {
     const tags     = Array.isArray(project.tags) ? project.tags : [];
 
     return (
-        <MarketingLayout auth={auth} navbar={navbar} footer={footer}>
+        <MarketingLayout auth={auth} footer={footer}>
             <Head>
                 <title>{`${title} – Website Expert Portfolio`}</title>
                 <meta name="description" content={desc} />

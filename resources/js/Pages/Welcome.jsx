@@ -44,11 +44,33 @@ const CostCalculatorV2   = lazy(() => import('@/Components/Marketing/CostCalcula
 const Faq                = lazy(() => import('@/Components/Marketing/Faq'));
 const Contact            = lazy(() => import('@/Components/Marketing/Contact'));
 
-export default function Welcome({ auth, hero, about, saas_landing, cta_banner, trust_strip, testimonials, services, process, portfolio, faq, cost_calculator_v2, navbar, contact, footer, pricing, strings, steps, extra_sections = [] }) {
+export default function Welcome({ auth, hero, about, saas_landing, cta_banner, trust_strip, testimonials, services, process, portfolio, faq, cost_calculator_v2, contact, footer, pricing, strings, steps, extra_sections = [], section_order = [] }) {
     useScrollReveal('.reveal');
 
+    const extraByKey = Object.fromEntries(extra_sections.map(s => [s.key, s]));
+
+    const renderSection = (key) => {
+        switch (key) {
+            case 'hero':            return hero             ? <Hero key={key} data={hero} />                                                               : null;
+            case 'about':           return about            ? <About key={key} data={about} />                                                          : null;
+            case 'saas_landing':    return saas_landing     ? <SaasLandingSection key={key} data={saas_landing} />                                      : null;
+            case 'cta_banner':      return cta_banner       ? <CtaBanner key={key} data={cta_banner} />                                                 : null;
+            case 'trust_strip':     return trust_strip      ? <TrustStrip key={key} data={trust_strip} testimonials={testimonials} />                    : null;
+            case 'services':        return services         ? <Services key={key} data={services} />                                                     : null;
+            case 'process':         return process          ? <Process key={key} data={process} />                                                       : null;
+            case 'portfolio':       return portfolio        ? <Portfolio key={key} data={portfolio} />                                                   : null;
+            case 'cost_calculator': return cost_calculator_v2 ? <CostCalculatorV2 key={key} strings={strings} steps={steps} pricing={pricing} />        : null;
+            case 'faq':             return faq              ? <Faq key={key} data={faq} />                                                               : null;
+            case 'contact':         return contact          ? <Contact key={key} data={contact} />                                                       : null;
+            default: {
+                const extra = extraByKey[key];
+                return extra ? <GenericSection key={key} data={extra} /> : null;
+            }
+        }
+    };
+
     return (
-        <MarketingLayout auth={auth} navbar={navbar} footer={footer}>
+        <MarketingLayout auth={auth} footer={footer}>
             <Head>
                 <title>Website Expert – Web Design & SEO Belfast, Northern Ireland</title>
                 <meta name="description" content="Professional web design, e-commerce and SEO services in Belfast and across Northern Ireland. Fixed price, delivered in 2–6 weeks. Free quote in 24 hours — website-expert.uk" />
@@ -66,19 +88,8 @@ export default function Welcome({ auth, hero, about, saas_landing, cta_banner, t
                 <meta name="geo.placename" content="Belfast, Northern Ireland" />
             </Head>
 
-            {hero           && <Hero data={hero} />}
-            {about          && <About data={about} />}
             <Suspense fallback={null}>
-                {saas_landing && <SaasLandingSection data={saas_landing} />}
-                {cta_banner     && <CtaBanner data={cta_banner} />}
-                {trust_strip    && <TrustStrip data={trust_strip} testimonials={testimonials} />}
-                {services       && <Services data={services} />}
-                {process        && <Process data={process} />}
-                {portfolio      && <Portfolio data={portfolio} />}
-                {cost_calculator_v2 && <CostCalculatorV2 strings={strings} steps={steps} pricing={pricing} />}
-                {faq            && <Faq data={faq} />}
-                {contact        && <Contact data={contact} />}
-                {extra_sections.map((s) => <GenericSection key={s.key} data={s} />)}
+                {section_order.map(renderSection)}
             </Suspense>
         </MarketingLayout>
     );

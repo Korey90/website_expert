@@ -28,12 +28,11 @@ class PageController extends Controller
             ->where('status', 'published')
             ->firstOrFail();
 
-        $sections = SiteSection::whereIn('key', ['navbar', 'footer'])
+        $sections = SiteSection::whereIn('key', ['footer'])
             ->where('is_active', true)
             ->get()
             ->keyBy('key');
 
-        $navbar = ($s = $sections->get('navbar')) ? ['extra' => $s->extra] : null;
         $footer = ($s = $sections->get('footer')) ? ['extra' => $s->extra] : null;
 
         $content = $this->replaceLegalVars(
@@ -52,7 +51,6 @@ class PageController extends Controller
                 'version'          => $page->version,
                 'updated_at'       => $page->updated_at?->format('j F Y'),
             ],
-            'navbar' => $navbar,
             'footer' => $footer,
         ]);
     }

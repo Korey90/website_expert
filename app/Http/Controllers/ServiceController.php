@@ -34,12 +34,11 @@ class ServiceController extends Controller
     private function sharedSections(): array
     {
         $sections = SiteSection::where('is_active', true)
-            ->whereIn('key', ['navbar', 'footer'])
+            ->whereIn('key', ['footer'])
             ->get()
             ->keyBy('key');
 
         return [
-            'navbar' => ($s = $sections->get('navbar')) ? ['extra' => $s->extra] : null,
             'footer' => ($s = $sections->get('footer')) ? ['extra' => $s->extra] : null,
         ];
     }

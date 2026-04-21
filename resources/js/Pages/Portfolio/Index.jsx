@@ -14,7 +14,7 @@ const GRADIENTS = [
 export default function PortfolioIndex({ locale: localeProp, projects, auth }) {
     useScrollReveal('.reveal');
 
-    const { navbar, footer } = usePage().props;
+    const { footer } = usePage().props;
     const locale = localeProp ?? 'en';
 
     const t = (obj, key) =>
@@ -44,7 +44,7 @@ export default function PortfolioIndex({ locale: localeProp, projects, auth }) {
     const l = labels[locale] ?? labels.en;
 
     return (
-        <MarketingLayout auth={auth} navbar={navbar} footer={footer}>
+        <MarketingLayout auth={auth} footer={footer}>
             <Head>
                 <title>Portfolio – Website Expert</title>
                 <meta name="description" content="Browse our portfolio of web design, e-commerce and digital marketing projects delivered for businesses across Northern Ireland and the UK." />

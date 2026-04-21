@@ -29,4 +29,17 @@ class EditSiteSection extends EditRecord
 
         return $data;
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $record = $this->getRecord();
+        $existing  = $record->extra ?? [];
+        $submitted = $data['extra'] ?? [];
+
+        // Merge: submitted wins for keys it provides; existing preserved for keys
+        // the current form view does not include (hidden sections for other section types).
+        $data['extra'] = array_merge($existing, $submitted);
+
+        return $data;
+    }
 }

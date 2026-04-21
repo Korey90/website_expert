@@ -51,7 +51,7 @@ const labels = {
 export default function ServicesIndex({ locale: localeProp, items, auth }) {
     useScrollReveal('.reveal');
 
-    const { navbar, footer } = usePage().props;
+    const { footer } = usePage().props;
     const locale = localeProp ?? 'en';
     const l = labels[locale] ?? labels.en;
 
@@ -59,7 +59,7 @@ export default function ServicesIndex({ locale: localeProp, items, auth }) {
         obj?.[`${key}_${locale}`] ?? obj?.[`${key}_en`] ?? '';
 
     return (
-        <MarketingLayout auth={auth} navbar={navbar} footer={footer}>
+        <MarketingLayout auth={auth} footer={footer}>
             <Head>
                 <title>Services – Website Expert</title>
                 <meta name="description" content="Professional web design, e-commerce, SEO, Google Ads, Meta Ads, content creation and website maintenance services." />

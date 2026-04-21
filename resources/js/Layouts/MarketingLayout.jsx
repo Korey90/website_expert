@@ -10,13 +10,13 @@ function TrackingInit() {
     return null;
 }
 
-export default function MarketingLayout({ children, auth, navbar, footer }) {
+export default function MarketingLayout({ children, auth, footer }) {
     const consent = useConsent();
 
     return (
         <ConsentContext.Provider value={consent}>
             <div className="min-h-screen w-full overflow-x-hidden bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white">
-                {navbar && <Navbar auth={auth} data={navbar} />}
+                <Navbar auth={auth} />
                 <main className="overflow-x-hidden">{children}</main>
                 {footer && <Footer data={footer} />}
                 <CookieBanner />
