@@ -110,6 +110,8 @@ Route::get('/lang/{locale}', function (string $locale) {
     return redirect()->back(302, [], route('home'));
 })->where('locale', '[a-z]{2}')->name('lang.switch');
 
+Route::get('/contact',        [ContactController::class, 'index'])->name('contact.index');
+Route::get('/about-us',       [ContactController::class, 'aboutUs'])->name('about.index');
 Route::post('/contact',       [ContactController::class, 'store'])->name('contact.store');
 Route::post('/contact/quick', [ContactController::class, 'quickStore'])->name('contact.quick');
 Route::post('/calculator-lead', [CalculatorLeadController::class, 'store'])->name('calculator.lead');

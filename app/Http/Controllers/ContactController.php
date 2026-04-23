@@ -4,12 +4,75 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ContactRequest;
 use App\Http\Requests\QuickContactRequest;
+use App\Models\SiteSection;
 use App\Services\Leads\LeadService;
 use App\Services\Leads\LeadConsentService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\App;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class ContactController extends Controller
 {
+    public function index(): Response
+    {
+        $supported = array_keys(config('languages'));
+        $locale    = session('locale');
+
+        if (! $locale || ! in_array($locale, $supported)) {
+            $locale = in_array(request()->getPreferredLanguage($supported), $supported)
+                ? request()->getPreferredLanguage($supported)
+                : $supported[0];
+        }
+
+        App::setLocale($locale);
+
+        $sections = SiteSection::where('is_active', true)->get()->keyBy('key');
+
+        $contact = ($s = $sections->get('contact')) ? [
+            'title'    => $s->title,
+            'subtitle' => $s->subtitle,
+            'extra'    => $s->extra,
+        ] : null;
+
+        $footer = ($s = $sections->get('footer')) ? [
+            'extra' => $s->extra,
+        ] : null;
+
+        return Inertia::render('Contact/Index', compact('contact', 'footer', 'locale'));
+    }
+
+    public function aboutUs(): Response
+    {
+        $supported = array_keys(config('languages'));
+        $locale    = session('locale');
+
+        if (! $locale || ! in_array($locale, $supported)) {
+            $locale = in_array(request()->getPreferredLanguage($supported), $supported)
+                ? request()->getPreferredLanguage($supported)
+                : $supported[0];
+        }
+
+        App::setLocale($locale);
+
+        $sections = SiteSection::where('is_active', true)->get()->keyBy('key');
+
+        $about = ($s = $sections->get('about')) ? [
+            'title'       => $s->title,
+            'subtitle'    => $s->subtitle,
+            'body'        => $s->body,
+            'button_text' => $s->button_text,
+            'button_url'  => $s->button_url,
+            'extra'       => $s->extra,
+        ] : null;
+
+        $footer = ($s = $sections->get('footer')) ? [
+            'extra' => $s->extra,
+        ] : null;
+
+        return Inertia::render('AboutUs/Index', compact('about', 'footer', 'locale'));
+    }
+
     public function store(ContactRequest $request, LeadService $leadService, LeadConsentService $consentService): JsonResponse
     {
         $data = $request->validated();

@@ -533,6 +533,14 @@ Estate agent websites for Belfast and NI. Integrated property search, lead captu
 ✓ No Contract Tie-In
 ✓ GDPR Compliant
 ✓ UK-Based Support
+✓ Free Website Audit
+✓ Google Partner Agency
+✓ Responsive on All Devices
+✓ 24/7 Technical Support
+✓ Serving All of NI
+✓ Belfast & Beyond
+✓ NI Small Biz Specialists
+✓ Trusted Across NI
 ```
 
 ### 6.3 Structured Snippets
