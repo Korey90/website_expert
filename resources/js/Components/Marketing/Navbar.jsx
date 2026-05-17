@@ -39,63 +39,50 @@ export default function Navbar({ auth }) {
 
     useEffect(() => { mobileOpenRef.current = mobileOpen; }, [mobileOpen]);
 
-    // Active section highlight – scroll-based (homepage only)
+    // Active section highlight — IntersectionObserver (zero forced reflow)
+    // Poprzednia implementacja używała el.offsetTop na każdym scroll event
+    // co powodowało forced reflow i blokowało main thread (TBT 620ms).
     useEffect(() => {
         if (!isHome || rawItems.length === 0) return;
 
-        // DOM id = hash from href (e.g. #calculate → 'calculate')
-        // This is the source of truth; section_key may differ from actual DOM id
         const anchors = rawItems
             .map(item => item.href?.replace(/^[^#]*#/, '') || null)
             .filter(Boolean);
-
-        const getActive = () => {
-            const focus = window.scrollY + window.innerHeight * 0.35;
-            let active = null;
-            anchors.forEach(id => {
-                const el = document.getElementById(id);
-                if (el && el.offsetTop <= focus) active = id;
-            });
-            return active;
-        };
-
-        const onScroll = () => {
-            const a = getActive();
-            if (a) setActiveSection(a);
-        };
 
         const onHashChange = () => {
             const hash = window.location.hash.replace('#', '');
             if (hash) setActiveSection(hash);
         };
-
-        window.addEventListener('scroll', onScroll, { passive: true });
         window.addEventListener('hashchange', onHashChange);
 
-        // Delay initial check – Suspense/lazy components need time to mount
-        let retryTimer;
-        const check = () => {
-            const hash = window.location.hash.replace('#', '');
-            if (hash) {
-                const el = document.getElementById(hash);
-                if (el) {
-                    setActiveSection(hash);
-                } else {
-                    // Element not yet in DOM (lazy Suspense), retry
-                    retryTimer = setTimeout(check, 150);
-                }
-            } else {
-                const a = getActive();
-                if (a) setActiveSection(a);
-            }
+        // IntersectionObserver — nie czyta layoutu, zero reflow
+        // rootMargin '-35% 0px -60%' = element aktywny gdy jest w górnych 35-40% viewportu
+        const io = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) setActiveSection(e.target.id);
+                });
+            },
+            { rootMargin: '-35% 0px -60% 0px', threshold: 0 }
+        );
+
+        const attachAll = () => {
+            anchors.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) io.observe(el);
+            });
         };
-        const timer = setTimeout(check, 200);
+
+        attachAll();
+
+        // Obserwuj nowe sekcje dodawane przez React.lazy (Suspense)
+        const mo = new MutationObserver(attachAll);
+        mo.observe(document.body, { childList: true, subtree: true });
 
         return () => {
-            window.removeEventListener('scroll', onScroll);
             window.removeEventListener('hashchange', onHashChange);
-            clearTimeout(timer);
-            clearTimeout(retryTimer);
+            io.disconnect();
+            mo.disconnect();
         };
     }, [isHome, rawItems]);
 

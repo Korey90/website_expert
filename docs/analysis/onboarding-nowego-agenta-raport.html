@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>onboarding-nowego-agenta-raport.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="-raport-onboarding--deep-analysis--digital-growth-os">📋 Raport Onboarding &amp; Deep Analysis — Digital Growth OS</h1>
+<p><strong>Data:</strong> 17 maja 2026 | <strong>Wykonano:</strong> WebsiteExpert (project-onboarding skill)</p>
+<hr>
+<h2 id="1-zrozumienie-projektu">1. Zrozumienie projektu</h2>
+<p><strong>Digital Growth OS</strong> to platforma B2B SaaS przeznaczona dla agencji webowych i freelancerów. Produkt łączy trzy konteksty:</p>
+<table>
+<thead>
+<tr>
+<th>Kontekst</th>
+<th>Opis</th>
+<th>Dostęp</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Public Site</strong></td>
+<td>Strony publiczne, landing pages, formularz kontaktowy, kalkulator</td>
+<td>Niezalogowani</td>
+</tr>
+<tr>
+<td><strong>Client Portal</strong></td>
+<td>Projekty, wyceny, faktury, umowy, komunikacja</td>
+<td>Klient agencji</td>
+</tr>
+<tr>
+<td><strong>Admin Panel (Filament)</strong></td>
+<td>CRM, pipeline leadów, zarządzanie, billing</td>
+<td>Użytkownicy agencji</td>
+</tr>
+</tbody>
+</table>
+<h3 id="główne-domeny-biznesowe">Główne domeny biznesowe</h3>
+<ul>
+<li><strong>Lead Management</strong> — pipeline, source attribution, consent GDPR, automatyzacje</li>
+<li><strong>Projects &amp; Delivery</strong> — projekt, fazy, zadania, pliki, wiadomości</li>
+<li><strong>Billing</strong> — faktury, wyceny, płatności (Stripe + PayU)</li>
+<li><strong>Landing Pages</strong> — builder + AI generator (OpenAI gpt-4o-mini) + publiczne LP + lead capture</li>
+<li><strong>Client Portal</strong> — dostęp klienta do własnych danych delivery</li>
+<li><strong>Automation</strong> — trigger/rule/action engine (eventy)</li>
+<li><strong>Business (Tenant)</strong> — profil, plan SaaS, billing, team members</li>
+</ul>
+<hr>
+<h2 id="2-aktualny-stan-techniczny">2. Aktualny stan techniczny</h2>
+<h3 id="-stack--zweryfikowany">✅ Stack — zweryfikowany</h3>
+<table>
+<thead>
+<tr>
+<th>Warstwa</th>
+<th>Technologia</th>
+<th>Wersja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backend</td>
+<td>Laravel</td>
+<td><code>^13.0</code></td>
+</tr>
+<tr>
+<td>PHP</td>
+<td>PHP</td>
+<td><code>^8.3</code></td>
+</tr>
+<tr>
+<td>Admin</td>
+<td>Filament</td>
+<td><code>^5.4</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td>React + Inertia.js</td>
+<td><code>^18.2</code> + <code>^2.0</code></td>
+</tr>
+<tr>
+<td>Typowanie</td>
+<td>TypeScript</td>
+<td>via Vite + tsconfig</td>
+</tr>
+<tr>
+<td>CSS</td>
+<td>Tailwind CSS</td>
+<td><code>^4.2.2</code></td>
+</tr>
+<tr>
+<td>Realtime</td>
+<td>Laravel Reverb</td>
+<td><code>^1.10</code></td>
+</tr>
+<tr>
+<td>Płatności</td>
+<td>Stripe + PayU</td>
+<td><code>^19.4</code> SDK</td>
+</tr>
+<tr>
+<td>SMS</td>
+<td>Twilio</td>
+<td><code>^8.11</code></td>
+</tr>
+<tr>
+<td>Auth</td>
+<td>Sanctum + Socialite (Google)</td>
+<td><code>^4.0</code> / <code>*</code></td>
+</tr>
+<tr>
+<td>Uprawnienia</td>
+<td>Spatie Permission</td>
+<td><code>^7.2</code></td>
+</tr>
+<tr>
+<td>Tłumaczenia</td>
+<td>Spatie Translatable</td>
+<td><code>^6.13</code></td>
+</tr>
+<tr>
+<td>PDF</td>
+<td>DomPDF</td>
+<td><code>^3.1</code></td>
+</tr>
+<tr>
+<td>Testy FE</td>
+<td>Vitest + Testing Library</td>
+<td><code>^4.1.2</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="-co-działa-dobrze">✅ Co działa dobrze</h3>
+<ul>
+<li><strong>54 modele</strong> — bogaty model domenowy, SoftDeletes tam gdzie potrzebne, właściwe casts</li>
+<li><strong>37 Filament Resources</strong> — pełne pokrycie panelu admin (Leads, Projects, Invoices, LPs, Automation, Roles, etc.)</li>
+<li><strong>Action pattern</strong> — <code>CreateLeadAction</code> jest dobrze napisany: DTL-typed phpDoc, multi-source, auto-stage fallback</li>
+<li><strong>Lead pipeline</strong> — pełna ścieżka: LP form → <code>PublicLeadCaptureService</code> → <code>LeadService</code> → <code>CreateLeadAction</code> → Events → Automations</li>
+<li><strong>Event-driven</strong> — 5 zdefiniowanych eventów (<code>LeadCaptured</code>, <code>LeadAssigned</code>, <code>BusinessCreated</code>, <code>BusinessProfileUpdated</code>, <code>LandingPagePublished</code>)</li>
+<li><strong>Automation engine</strong> — <code>ProcessAutomationJob</code>, <code>ConditionEvaluator</code>, 9 akcji (<code>SendEmailAction</code>, <code>SendSmsAction</code>, <code>AssignTaskAction</code>, etc.)</li>
+<li><strong>Multi-language</strong> — pl/en/pt na wszystkich tabelach lang/</li>
+<li><strong>Testy</strong> — 87% coverage (critical paths), Feature + Unit, w tym <code>FullLeadWorkflowTest</code></li>
+<li><strong>Security</strong> — recaptcha v3, GDPR consent flow, PII cleanup job (<code>CleanLeadSourcePiiJob</code>), open-redirect guard w routes</li>
+<li><strong>BelongsToTenant trait + BusinessScope</strong> — zaimplementowany GlobalScope z auto-fill i query isolation</li>
+</ul>
+<hr>
+<h2 id="3-kluczowe-ryzyka-i-dług-techniczny">3. Kluczowe ryzyka i dług techniczny</h2>
+<h3 id="-krytyczne">🔴 KRYTYCZNE</h3>
+<p><strong>1. Niespójność multi-tenancy (<code>business_id</code>)</strong>
+Trait <code>BelongsToTenant</code> (aktywujący <code>BusinessScope</code> GlobalScope) jest użyty tylko w <strong>3 modelach</strong>:</p>
+<ul>
+<li><code>LandingPage</code></li>
+<li><code>LandingPageAiGeneration</code></li>
+<li><code>LandingPageGenerationVariant</code></li>
+</ul>
+<p>Modele <code>Lead</code>, <code>Client</code>, <code>Project</code>, <code>Invoice</code>, <code>Quote</code>, <code>Briefing</code>, <code>SalesOffer</code> i inne mają kolumnę <code>business_id</code> w <code>$fillable</code>, ale <strong>nie używają traitu</strong> — brak automatycznej izolacji tenanta.</p>
+<p><strong>2. Stara <code>LeadCaptureService</code> (app/Services/LandingPage)</strong>
+Istnieje legacy klasa <code>App\Services\LandingPage\LeadCaptureService</code> — uproszczona, bez deduplicacji, bez consent, bez source attribution. Nowa ścieżka (<code>PublicLeadCaptureService</code>) działa poprawnie, ale stary plik pozostaje w codebase i może być przypadkowo wstrzykiwany.</p>
+<p><strong>3. Dualny model <code>Client</code></strong>
+Z refactor-plan.md: model <code>Client</code> pełni jednocześnie rolę CRM record i konta portalowego. W <code>CreateLeadAction</code> <code>Client</code> jest tworzony automatycznie na podstawie emaila — co zaciera granicę między prospektem a klientem portalu.</p>
+<h3 id="-poważne">🟡 POWAŻNE</h3>
+<p><strong>4. Brak <code>BelongsToTenant</code> na większości modeli</strong>
+Konsekwencja punktu 1 — <code>Pipeline Stages</code> nie są scopowane do tenanta (co status-dashboard potwierdza).</p>
+<p><strong>5. 12 brakujących kluczy tłumaczeń</strong>
+Status-dashboard: <code>⚠️ 12 missing keys</code> — nie wiadomo których (pt najprawdopodobniej).</p>
+<p><strong>6. <code>BusinessUser</code> membership model</strong>
+Klient agencyjny (portal-only) vs member workspace'u — brak jasnej granicy. <code>CreatePortalAccessAction</code> używa nieprawidłowego URL do invite.</p>
+<p><strong>7. Tylko 1 Action klasa</strong>
+Konwencja zakłada <code>app/Actions/{Domain}/</code> — istnieje tylko <code>CreateLeadAction</code>. Reszta logiki (Billing, Portal, LandingPage) siedzi w Services. Niespójność ze zdefiniowaną architekturą.</p>
+<h3 id="-niski-priorytet">🟢 NISKI PRIORYTET</h3>
+<p><strong>8. Sprint i Current Task nieuzupełnione</strong>
+current-sprint.md i current-task.md mają puste szablony — brak aktywnie trackowanego zadania.</p>
+<p><strong>9. ESLint skonfigurowany tylko dla <code>.js/.jsx</code></strong>
+W package.json lint dotyczy <code>.js,.jsx</code> — brak <code>--ext .ts,.tsx</code>. TypeScript pliki mogą omijać lint.</p>
+<hr>
+<h2 id="4-najważniejsze-konwencje-i-twarde-reguły">4. Najważniejsze konwencje i twarde reguły</h2>
+<table>
+<thead>
+<tr>
+<th>Reguła</th>
+<th>Szczegół</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Thin controllers</strong></td>
+<td>Logika biznesowa → Actions lub Services, nigdy w kontrolerze</td>
+</tr>
+<tr>
+<td><strong>Delta-first</strong></td>
+<td>Zawsze sprawdź istniejący kod przed każdą zmianą</td>
+</tr>
+<tr>
+<td><strong>Tłumaczenia obowiązkowe</strong></td>
+<td>Po każdej zmianie UI: pl + en + pt (<code>multi-language-check</code> skill)</td>
+</tr>
+<tr>
+<td><strong>TypeScript strict</strong></td>
+<td>Brak <code>any</code> — bez wyjątków</td>
+</tr>
+<tr>
+<td><strong>Multi-tenancy</strong></td>
+<td><code>business_id</code> wszędzie + <code>BelongsToTenant</code> trait na nowych modelach</td>
+</tr>
+<tr>
+<td><strong>Inertia useForm</strong></td>
+<td>Wszystkie mutacje przez <code>useForm</code>, nie przez <code>axios</code> bezpośrednio</td>
+</tr>
+<tr>
+<td><strong>Form Requests</strong></td>
+<td>Złożona walidacja → dedykowany FormRequest, nie inline <code>validate()</code></td>
+</tr>
+<tr>
+<td><strong>Policies/Gates</strong></td>
+<td>Autoryzacja → Policy lub Gate, nie w kontrolerze</td>
+</tr>
+<tr>
+<td><strong>Reuse komponentów</strong></td>
+<td>Nie tworzyć nowych UI primitives jeśli istnieje odpowiednik</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Języki:</strong></p>
+<ul>
+<li>Kod + nazwy techniczne → <strong>angielski</strong></li>
+<li>Teksty UI + dokumentacja → <strong>polski</strong> (z tłumaczeniami en/pt)</li>
+</ul>
+<hr>
+<h2 id="5-mapa-modułów--status-szczegółowy">5. Mapa modułów — status szczegółowy</h2>
+<table>
+<thead>
+<tr>
+<th>Moduł</th>
+<th>Stan</th>
+<th>Uwagi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lead Capture (LP → CRM)</td>
+<td>⚠️ Krytyczny</td>
+<td>Nowa ścieżka działa, stara legacy klasa wciąż w repo</td>
+</tr>
+<tr>
+<td>Pipeline CRM</td>
+<td>✅ Stabilny</td>
+<td>Brak BelongsToTenant na PipelineStage</td>
+</tr>
+<tr>
+<td>Landing Pages + AI</td>
+<td>✅ Dobry</td>
+<td>BelongsToTenant aktywny</td>
+</tr>
+<tr>
+<td>Client Portal</td>
+<td>🔄 W toku</td>
+<td>Dualny model Client/User do rozwiązania</td>
+</tr>
+<tr>
+<td>Billing (Stripe)</td>
+<td>✅ Dobry</td>
+<td>Plany: free/starter/pro/agency, limity w config</td>
+</tr>
+<tr>
+<td>Automatyzacje</td>
+<td>✅ Dobry</td>
+<td>9 akcji, trigger/rule/condition engine</td>
+</tr>
+<tr>
+<td>Umowy</td>
+<td>✅ Stabilny</td>
+<td></td>
+</tr>
+<tr>
+<td>Briefings</td>
+<td>✅ Stabilny</td>
+<td></td>
+</tr>
+<tr>
+<td>Sales Offers</td>
+<td>✅ Stabilny</td>
+<td></td>
+</tr>
+<tr>
+<td>Portfolio</td>
+<td>✅ Stabilny</td>
+<td></td>
+</tr>
+<tr>
+<td>Kalkulator</td>
+<td>✅ Stabilny</td>
+<td></td>
+</tr>
+<tr>
+<td>Tłumaczenia (pl/en/pt)</td>
+<td>⚠️ Uwaga</td>
+<td>12 brakujących kluczy</td>
+</tr>
+<tr>
+<td>Testy</td>
+<td>✅ 87%</td>
+<td>Feature + Unit, FullLeadWorkflowTest</td>
+</tr>
+<tr>
+<td>Multi-tenancy</td>
+<td>⚠️ Częściowy</td>
+<td>Tylko 3 modele mają GlobalScope</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="6-gotowość-do-pracy">6. Gotowość do pracy</h2>
+<p><strong>Ocena:</strong> ✅ Gotowy do realizacji nowych zadań.</p>
+<p>Projekt jest dobrze ustrukturyzowany, dokumentacja żywa (live-docs), stack nowoczesny i spójny. Trzy obszary wymagają uwagi <strong>przed</strong> dodaniem nowych funkcji wielodostępnych:</p>
+<ol>
+<li>Rozszerzenie <code>BelongsToTenant</code> na modele z <code>business_id</code> (Lead, Client, Project, Invoice)</li>
+<li>Usunięcie/deprecacja <code>LeadCaptureService</code> z LandingPage</li>
+<li>Uzupełnienie 12 brakujących kluczy tłumaczeń</li>
+</ol>
+<p>Wszystkie plany techniczne istnieją w plans — w tym refactor-plan.md, mvp-plan.md i <code>automation-event-system-plan.md</code>.</p>
+<hr>
+<p>Czy chcesz, abym zaczął od któregoś z ww. obszarów długu technicznego, czy masz nowe zadanie do realizacji?</p>
+<p>Completed: <em>Perform deep analysis of the project</em> (2/3)</p>
+
+</body>
+</html>

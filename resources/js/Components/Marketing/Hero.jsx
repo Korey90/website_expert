@@ -96,7 +96,7 @@ export default function Hero({ data }) {
                         {secondaryBtnText && (
                             <a
                                 href={secondaryBtnUrl}
-                                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-transparent border border-neutral-300 dark:border-neutral-700 text-neutral-500 dark:text-neutral-300 font-semibold text-base hover:border-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-50 active:scale-95 transition-all"
+                                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-transparent border border-neutral-300 dark:border-neutral-700 text-neutral-500 dark:text-neutral-300 font-semibold text-base hover:border-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-50 active:scale-95 transition-[border-color,color,transform] duration-150"
                             >
                                 {secondaryBtnText}
                             </a>
@@ -157,7 +157,7 @@ export default function Hero({ data }) {
             {/* Scroll indicator */}
             <a
                 href="#about"
-                className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce text-neutral-400 hover:text-brand-500 transition-colors"
+                className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce text-neutral-400 hover:text-brand-500 transition-colors will-change-transform"
                 aria-label={scrollLabel}
             >
                 <span className="text-xs">{scrollLabel}</span>

@@ -46,6 +46,8 @@
         @endif
 
         <!-- Fonts (self-hosted via Vite/fontsource) -->
+        {{-- Pre-connect hints pomagają szybciej załadować zasoby z external origins --}}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
 
         <!-- Cookie Consent Mode v2 — default denied BEFORE GTM loads -->
         <script>

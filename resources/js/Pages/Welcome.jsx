@@ -69,6 +69,13 @@ export default function Welcome({ auth, hero, about, saas_landing, cta_banner, t
         }
     };
 
+    // Sekcje above-fold renderowane bezpośrednio — poza Suspense,
+    // żeby React nie zawieszał ich gdy lazy komponenty below-fold się ładują.
+    // To był root cause CLS = 0.583 po commicie e14e5eb.
+    const ABOVE_FOLD = ['hero', 'about'];
+    const aboveFold  = section_order.filter(k => ABOVE_FOLD.includes(k));
+    const belowFold  = section_order.filter(k => !ABOVE_FOLD.includes(k));
+
     return (
         <MarketingLayout auth={auth} footer={footer}>
             <Head>
@@ -88,8 +95,12 @@ export default function Welcome({ auth, hero, about, saas_landing, cta_banner, t
                 <meta name="geo.placename" content="Belfast, Northern Ireland" />
             </Head>
 
+            {/* Above-fold: renderowane natychmiast, bez Suspense */}
+            {aboveFold.map(renderSection)}
+
+            {/* Below-fold: lazy komponenty w Suspense z minimalnym fallback */}
             <Suspense fallback={null}>
-                {section_order.map(renderSection)}
+                {belowFold.map(renderSection)}
             </Suspense>
         </MarketingLayout>
     );

@@ -5,6 +5,7 @@
 .env.production
 .phpactor.json
 .phpunit.result.cache
+.github/.ignore
 /.fleet
 /.idea
 /.nova
