@@ -3,6 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\Client;
+use App\Models\ClientPortalAccess;
 use App\Models\User;
 use Database\Seeders\AdminSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,7 +37,9 @@ class RegistrationTest extends TestCase
         $this->assertTrue($user->hasRole('client'));
         $this->assertDatabaseHas('clients', [
             'primary_contact_email' => 'test@example.com',
-            'portal_user_id'        => $user->id,
+        ]);
+        $this->assertDatabaseHas('client_portal_accesses', [
+            'user_id' => $user->id,
         ]);
 
         $response->assertRedirect(route('portal.dashboard', absolute: false));

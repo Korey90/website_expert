@@ -42,6 +42,18 @@ return [
     'section_deleted'   => 'Section removed.',
     'lead_captured'     => 'Thank you! We will be in touch soon.',
 
+    // Nested flash messages (used in controllers)
+    'messages' => [
+        'created'       => 'Landing page created.',
+        'updated'       => 'Landing page updated.',
+        'deleted'       => 'Landing page deleted.',
+        'published'     => 'Landing page published and live!',
+        'unpublished'   => 'Landing page unpublished.',
+        'section_added'   => 'Section added.',
+        'section_updated' => 'Section saved.',
+        'section_deleted' => 'Section removed.',
+    ],
+
     // Create — template picker
     'choose_template'      => 'Choose a starting template',
     'template_label'       => 'Template',
@@ -108,6 +120,16 @@ return [
         'cannot_delete_last_form' => 'Cannot remove the last form section from a published page.',
         'submission_failed'       => 'Something went wrong. Please try again.',
         'page_not_published'      => 'This page is not currently available.',
+        'invalid_section_type'    => 'Section type ":type" is not supported.',
+        'invalid_video_domain'    => 'Video URL domain ":domain" is not allowed.',
+        'plan_limit_reached'      => 'Your plan does not support more than :limit landing pages.',
+    ],
+
+    // Validation messages (used in Form Requests)
+    'validation' => [
+        'slug_taken'           => 'This URL slug is already taken.',
+        'invalid_video_domain' => 'Video URL domain ":domain" is not allowed.',
+        'max_sections_reached' => 'Maximum number of sections (:max) reached.',
     ],
 
     'ai' => [
@@ -188,6 +210,7 @@ return [
             'variant_not_found' => 'Generated landing page variant was not found.',
             'variant_already_saved' => 'This generated landing page variant has already been saved.',
             'variant_expired' => 'This generated landing page variant has expired. Generate a new one.',
+            'plan_limit_reached' => 'Your plan allows :limit AI generations. Upgrade your plan to continue.',
         ],
     ],
 

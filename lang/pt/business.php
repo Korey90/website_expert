@@ -13,6 +13,7 @@ return [
     'step_of'           => 'Etapa :step de :total',
     'skip_for_now'      => 'Pular por agora',
     'save_and_continue' => 'Salvar e continuar',
+    'onboarding_required' => 'Por favor, complete primeiro a configuração do perfil da sua empresa para aceder a esta funcionalidade.',
     'complete_title'    => 'Tudo pronto!',
     'complete_sub'      => 'O perfil da sua marca foi salvo. Você está pronto para criar sua primeira landing page com IA.',
     'redirecting'       => 'Redirecionando para o painel em instantes…',

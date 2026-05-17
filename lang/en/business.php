@@ -42,6 +42,7 @@ return [
     'company_name_hint' => 'Optional — we\'ll use your name if blank.',
 
     // Validation / hints
+    'onboarding_required' => 'Please complete your business profile setup to access this feature.',
     'optional'          => 'optional',
     'profile_complete'  => 'Profile complete — ready for AI landing page generation',
     'profile_missing'   => 'Missing: :fields',

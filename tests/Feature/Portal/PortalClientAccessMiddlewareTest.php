@@ -3,6 +3,7 @@
 namespace Tests\Feature\Portal;
 
 use App\Models\Client;
+use App\Models\ClientPortalAccess;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -31,11 +32,12 @@ class PortalClientAccessMiddlewareTest extends TestCase
     {
         $user = User::factory()->create();
 
-        Client::create([
+        $client = Client::create([
             'company_name' => 'Agency Client Ltd',
             'primary_contact_email' => $user->email,
-            'portal_user_id' => $user->id,
         ]);
+
+        ClientPortalAccess::create(['client_id' => $client->id, 'user_id' => $user->id]);
 
         $this->actingAs($user)
             ->get(route('portal.projects'))

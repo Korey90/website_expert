@@ -48,7 +48,7 @@ class LandingPageController extends Controller
             'archived'  => $statusCounts->get('archived', 0),
         ];
 
-        $client = Client::where('portal_user_id', auth()->id())->first();
+        $client = Client::forPortalUser(auth()->id())->first();
 
         return Inertia::render('LandingPages/Index', [
             'landingPages' => $landingPages,
@@ -61,7 +61,7 @@ class LandingPageController extends Controller
     {
         $this->authorize('create', LandingPage::class);
 
-        $client = Client::where('portal_user_id', auth()->id())->first();
+        $client = Client::forPortalUser(auth()->id())->first();
 
         return Inertia::render('LandingPages/Create', [
             'templates'        => array_values(config('landing_pages.templates')),
@@ -76,7 +76,7 @@ class LandingPageController extends Controller
 
         $business = currentBusiness();
         $profile = $this->businessProfileService->getOrCreate($business);
-        $client = Client::where('portal_user_id', auth()->id())->first();
+        $client = Client::forPortalUser(auth()->id())->first();
 
         return Inertia::render('LandingPages/AiGenerator', [
             'business' => array_merge(
@@ -131,7 +131,7 @@ class LandingPageController extends Controller
                 'created_at'      => $lead->created_at?->format('d M Y H:i'),
             ]);
 
-        $client = Client::where('portal_user_id', auth()->id())->first();
+        $client = Client::forPortalUser(auth()->id())->first();
 
         return Inertia::render('LandingPages/Show', [
             'page'         => $landingPage->append(['public_url', 'conversion_rate', 'is_published']),
@@ -146,7 +146,7 @@ class LandingPageController extends Controller
 
         $landingPage->load('sections');
 
-        $client = Client::where('portal_user_id', auth()->id())->first();
+        $client = Client::forPortalUser(auth()->id())->first();
 
         return Inertia::render('LandingPages/Edit', [
             'page'             => $landingPage->append(['public_url', 'conversion_rate', 'is_published']),

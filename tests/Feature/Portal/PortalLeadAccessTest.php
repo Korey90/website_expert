@@ -5,6 +5,7 @@ namespace Tests\Feature\Portal;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\Client;
+use App\Models\ClientPortalAccess;
 use App\Models\Lead;
 use App\Models\PipelineStage;
 use App\Models\User;
@@ -25,11 +26,12 @@ class PortalLeadAccessTest extends TestCase
     {
         $user = User::factory()->create();
 
-        Client::create([
+        $client = Client::create([
             'company_name'          => 'Agency Client Ltd',
             'primary_contact_email' => $user->email,
-            'portal_user_id'        => $user->id,
         ]);
+
+        ClientPortalAccess::create(['client_id' => $client->id, 'user_id' => $user->id]);
 
         $stage = PipelineStage::create([
             'name'  => 'New',

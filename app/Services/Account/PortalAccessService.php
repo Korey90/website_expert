@@ -5,6 +5,7 @@ namespace App\Services\Account;
 use App\Mail\PortalInviteMail;
 use App\Models\BusinessUser;
 use App\Models\Client;
+use App\Models\ClientPortalAccess;
 use App\Models\User;
 use DomainException;
 use Illuminate\Support\Facades\Hash;
@@ -70,8 +71,8 @@ class PortalAccessService
             $user->assignRole('client');
         }
 
-        if ($client && $client->portal_user_id !== $user->id) {
-            $client->update(['portal_user_id' => $user->id]);
+        if ($client && ! $client->portalAccesses()->where('user_id', $user->id)->exists()) {
+            $client->portalAccesses()->create(['user_id' => $user->id]);
         }
 
         $workspaceMembershipCreated = false;

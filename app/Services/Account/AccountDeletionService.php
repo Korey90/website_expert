@@ -3,7 +3,7 @@
 namespace App\Services\Account;
 
 use App\Mail\AccountDeletedMail;
-use App\Models\Client;
+use App\Models\ClientPortalAccess;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 
@@ -28,8 +28,7 @@ class AccountDeletionService
         $userEmail = $user->email;
 
         // 1. Sever portal link — agency retains the Client CRM record
-        Client::where('portal_user_id', $user->id)
-            ->update(['portal_user_id' => null]);
+        ClientPortalAccess::where('user_id', $user->id)->delete();
 
         // 2. Handle businesses where user is the sole active member
         foreach ($user->businesses as $business) {

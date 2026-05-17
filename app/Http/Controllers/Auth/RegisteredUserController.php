@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Models\ClientPortalAccess;
 use App\Models\User;
 use App\Services\Business\BusinessService;
 use Illuminate\Auth\Events\Registered;
@@ -56,13 +57,17 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        Client::create([
+        $client = Client::create([
             'company_name'          => $request->input('company_name') ?: $user->name,
             'primary_contact_name'  => $user->name,
             'primary_contact_email' => $user->email,
-            'portal_user_id'        => $user->id,
             'status'                => 'prospect',
             'source'                => 'website',
+        ]);
+
+        ClientPortalAccess::create([
+            'client_id' => $client->id,
+            'user_id'   => $user->id,
         ]);
 
         $this->businessService->createForUser($user, [

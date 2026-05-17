@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Models\ClientPortalAccess;
 use App\Models\SocialAccount;
 use App\Models\User;
 use App\Services\Business\BusinessService;
@@ -143,13 +144,17 @@ class SocialAuthController extends Controller
         if ($isNewUser) {
             $user->assignRole('client');
 
-            Client::create([
+            $client = Client::create([
                 'company_name'          => $user->name,
                 'primary_contact_name'  => $user->name,
                 'primary_contact_email' => $user->email,
-                'portal_user_id'        => $user->id,
                 'status'                => 'prospect',
                 'source'                => 'website',
+            ]);
+
+            ClientPortalAccess::create([
+                'client_id' => $client->id,
+                'user_id'   => $user->id,
             ]);
 
             $businessService->createForUser($user, ['name' => $user->name]);

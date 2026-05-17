@@ -3,6 +3,7 @@
 namespace Tests\Feature\Portal;
 
 use App\Models\Client;
+use App\Models\ClientPortalAccess;
 use App\Models\Project;
 use App\Models\ProjectMessage;
 use App\Models\User;
@@ -20,8 +21,9 @@ class PortalMessagesTest extends TestCase
             'company_name'          => 'Message Test Ltd',
             'primary_contact_name'  => 'Alice Smith',
             'primary_contact_email' => $user->email,
-            'portal_user_id'        => $user->id,
         ]);
+
+        ClientPortalAccess::create(['client_id' => $client->id, 'user_id' => $user->id]);
 
         return [$user, $client];
     }

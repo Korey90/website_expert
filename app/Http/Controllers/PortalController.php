@@ -20,7 +20,7 @@ class PortalController extends Controller
 {
     private function clientForUser(): ?Client
     {
-        return Client::where('portal_user_id', auth()->id())->first();
+        return Client::forPortalUser(auth()->id())->first();
     }
 
     public function dashboard(): Response|RedirectResponse

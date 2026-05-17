@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Client;
+use App\Models\ClientPortalAccess;
 use App\Models\NavItem;
 use App\Models\Setting;
 use App\Models\SiteSection;
@@ -70,7 +70,7 @@ class HandleInertiaRequests extends Middleware
         }
 
         $canAccessWorkspace = $user->currentBusiness() !== null;
-        $canAccessClientPortal = Client::where('portal_user_id', $user->id)->exists();
+        $canAccessClientPortal = ClientPortalAccess::where('user_id', $user->id)->exists();
 
         $mode = match (true) {
             $canAccessWorkspace && $canAccessClientPortal => 'hybrid',

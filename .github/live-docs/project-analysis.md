@@ -10,12 +10,12 @@ B2B SaaS platform for web agency management with Client Portal + Filament Admin.
 
 | Module                  | Status      | Notes / Technical Debt                  | Last Reviewed |
 |-------------------------|-------------|-----------------------------------------|---------------|
-| Lead Capture            | ⚠️ Critical | Old service still in use                | 2026-05-17    |
-| Multi-Tenancy           | ⚠️ Partial  | Inconsistent `business_id` usage        | 2026-05-17    |
+| Lead Capture            | ✅ OK       | `LeadCaptureService` (dead code) usunięty; `PublicLeadCaptureService` aktywny, pokryty 20+ testami HTTP | 2026-05-17    |
+| Multi-Tenancy           | ✅ Unified  | BelongsToTenant na wszystkich kluczowych modelach; 13 isolation testów; GlobalTemplateVisibilityTest (9 testów) | 2026-05-17    |
 | Pipeline & Stages       | ✅ Stable    | Missing tenant scope in some places     | 2026-05-10    |
-| Client Portal           | 🔄 In Progress | —                                    | —             |
+| Client Portal           | ✅ Refactored | `ClientPortalAccess` model + migracja produkcyjna; ToggleColumn w Filament | 2026-05-17 |
 | Stripe Integration      | ✅ Good      | —                                       | —             |
-| Translations            | ⚠️ Needs attention | Many missing keys after recent changes | 2026-05-17 |
+| Translations            | ✅ Complete  | 54 brakujące klucze uzupełnione w EN/PL/PT; nowy plik `sales_offers.php` | 2026-05-17 |
 
 ## Architecture Decisions
 - Light multi-tenancy via `business_id`

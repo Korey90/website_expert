@@ -66,8 +66,10 @@ class SocialAuthControllerTest extends TestCase
             'provider_user_id' => 'google-user-2',
         ]);
         $this->assertDatabaseHas('clients', [
-            'portal_user_id' => $user->id,
             'primary_contact_email' => 'register-social@example.com',
+        ]);
+        $this->assertDatabaseHas('client_portal_accesses', [
+            'user_id' => $user->id,
         ]);
     }
 

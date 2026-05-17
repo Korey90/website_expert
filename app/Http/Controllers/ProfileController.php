@@ -21,7 +21,7 @@ class ProfileController extends Controller
     public function edit(Request $request): Response
     {
         $user   = $request->user();
-        $client = Client::where('portal_user_id', $user->id)
+        $client = Client::forPortalUser($user->id)
             ->first(['id', 'company_name', 'primary_contact_name']);
 
         $socialAccounts = $user->socialAccounts()

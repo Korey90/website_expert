@@ -10,7 +10,7 @@ abstract class BasePortalController extends Controller
 {
     protected function clientForUser(): ?Client
     {
-        return Client::where('portal_user_id', auth()->id())->first();
+        return Client::forPortalUser(auth()->id())->first();
     }
 
     protected function redirectWithoutWorkspace(string $message = 'Workspace access is required to continue.'): RedirectResponse

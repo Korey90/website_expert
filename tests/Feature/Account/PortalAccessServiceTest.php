@@ -5,6 +5,7 @@ namespace Tests\Feature\Account;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\Client;
+use App\Models\ClientPortalAccess;
 use App\Models\User;
 use App\Services\Account\PortalAccessService;
 use DomainException;
@@ -47,7 +48,10 @@ class PortalAccessServiceTest extends TestCase
 
         $this->assertTrue($result['user_was_created']);
         $this->assertNull(BusinessUser::where('user_id', $result['user']->id)->first());
-        $this->assertSame($result['user']->id, $client->fresh()->portal_user_id);
+        $this->assertDatabaseHas('client_portal_accesses', [
+            'client_id' => $client->id,
+            'user_id'   => $result['user']->id,
+        ]);
     }
 
     public function test_workspace_access_can_be_granted_explicitly(): void

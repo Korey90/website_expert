@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToTenant;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Client extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected static function booted(): void
     {
@@ -27,7 +30,7 @@ class Client extends Model
         'website', 'status', 'source', 'industry',
         'address_line1', 'address_line2', 'city', 'county', 'postcode', 'country',
         'primary_contact_name', 'primary_contact_email', 'primary_contact_phone',
-        'assigned_to', 'lifetime_value', 'currency', 'notes', 'portal_user_id',
+        'assigned_to', 'lifetime_value', 'currency', 'notes',
         'notify_email_transactional', 'notify_email_projects', 'notify_email_marketing',
         'notify_sms', 'communication_prefs_updated_at',
     ];
@@ -46,9 +49,26 @@ class Client extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    public function portalUser(): BelongsTo
+    public function portalAccesses(): HasMany
     {
-        return $this->belongsTo(User::class, 'portal_user_id');
+        return $this->hasMany(ClientPortalAccess::class);
+    }
+
+    public function portalUser(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            User::class,
+            ClientPortalAccess::class,
+            'client_id',
+            'id',
+            'id',
+            'user_id'
+        );
+    }
+
+    public function scopeForPortalUser(Builder $query, int $userId): Builder
+    {
+        return $query->whereHas('portalAccesses', fn (Builder $q) => $q->where('user_id', $userId));
     }
 
     public function contacts(): HasMany

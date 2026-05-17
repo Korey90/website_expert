@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Client;
+use App\Models\ClientPortalAccess;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,7 +15,7 @@ class EnsurePortalClientAccess
             return $next($request);
         }
 
-        $hasClientPortalAccess = Client::where('portal_user_id', $request->user()->id)->exists();
+        $hasClientPortalAccess = ClientPortalAccess::where('user_id', $request->user()->id)->exists();
 
         if ($hasClientPortalAccess) {
             return $next($request);

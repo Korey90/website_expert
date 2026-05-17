@@ -3,7 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClientResource\Pages;
+use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\Client;
+use App\Scopes\BusinessScope;
+use App\Support\PermissionHelper;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -134,14 +137,14 @@ class ClientResource extends BaseResource
                 ->icon('heroicon-o-lock-closed')
                 ->columns(3)
                 ->schema([
-                    IconEntry::make('portal_user_id')
+                    IconEntry::make('has_portal_access')
                         ->label('Status konta')
                         ->boolean()
                         ->trueIcon('heroicon-o-check-circle')
                         ->falseIcon('heroicon-o-x-circle')
                         ->trueColor('success')
                         ->falseColor('danger')
-                        ->getStateUsing(fn ($record) => (bool) $record->portal_user_id),
+                        ->getStateUsing(fn ($record) => $record->portalAccesses()->exists()),
 
                     TextEntry::make('portalUser.email')
                         ->label('Login (e-mail)')
@@ -286,6 +289,10 @@ class ClientResource extends BaseResource
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn ($state) => match($state) { 'prospect' => 'gray', 'active' => 'success', 'inactive' => 'warning', 'archived' => 'danger', default => 'gray' }),
+                Tables\Columns\ToggleColumn::make('portal_access')
+                    ->label('Portal Access')
+                    ->getStateUsing(fn (Client $record): bool => $record->portalAccesses()->exists())
+                    ->disabled(),
                 Tables\Columns\TextColumn::make('city')->sortable(),
                 Tables\Columns\TextColumn::make('lifetime_value')->label('LTV')->money('GBP')->sortable(),
                 Tables\Columns\TextColumn::make('assignedTo.name')->label('Assigned')->sortable(),
@@ -328,6 +335,14 @@ class ClientResource extends BaseResource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
+        $user = auth()->user();
+
+        if (PermissionHelper::allows($user, FilamentPermissionRegistry::panelAccessPermission())) {
+            return parent::getEloquentQuery()
+                ->withoutGlobalScope(BusinessScope::class)
+                ->withTrashed();
+        }
+
         return parent::getEloquentQuery()->withTrashed();
     }
 }

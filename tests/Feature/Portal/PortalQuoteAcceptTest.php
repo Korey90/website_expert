@@ -3,6 +3,7 @@
 namespace Tests\Feature\Portal;
 
 use App\Models\Client;
+use App\Models\ClientPortalAccess;
 use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,8 +19,9 @@ class PortalQuoteAcceptTest extends TestCase
         $client = Client::create([
             'company_name'          => 'Test Client Ltd',
             'primary_contact_email' => $user->email,
-            'portal_user_id'        => $user->id,
         ]);
+
+        ClientPortalAccess::create(['client_id' => $client->id, 'user_id' => $user->id]);
 
         return [$user, $client];
     }

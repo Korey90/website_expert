@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LeadResource\Pages;
+use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\Briefing;
 use App\Models\BriefingTemplate;
 use App\Models\Client;
@@ -11,8 +12,10 @@ use App\Models\LeadSource;
 use App\Models\PipelineStage;
 use App\Models\SalesOfferTemplate;
 use App\Models\User;
+use App\Scopes\BusinessScope;
 use App\Services\BriefingService;
 use App\Services\SalesOfferService;
+use App\Support\PermissionHelper;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
@@ -281,9 +284,15 @@ class LeadResource extends BaseResource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()
-            ->withTrashed()
-            ->when(currentBusiness(), fn ($q, $b) => $q->where('business_id', $b->id));
+        $user = auth()->user();
+
+        if (PermissionHelper::allows($user, FilamentPermissionRegistry::panelAccessPermission())) {
+            return parent::getEloquentQuery()
+                ->withoutGlobalScope(BusinessScope::class)
+                ->withTrashed();
+        }
+
+        return parent::getEloquentQuery()->withTrashed();
     }
 }
 

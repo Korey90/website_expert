@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * WAŻNE — CELOWO BEZ BelongsToTenant:
+ * Ten model obsługuje zarówno szablony globalne (business_id = NULL, widoczne dla wszystkich
+ * tenantów) jak i szablony prywatne (business_id = X, widoczne tylko dla X).
+ * Dodanie traitu BelongsToTenant (GlobalScope) ukryłoby szablony globalne — NIE dodawać.
+ * Izolacja tenanta jest realizowana przez scopeForBusiness().
+ */
 class BriefingTemplate extends Model
 {
     use HasFactory;
@@ -63,7 +70,7 @@ class BriefingTemplate extends Model
      * - templates belonging to the current business, OR
      * - global templates (business_id = null)
      */
-    public function scopeForBusiness(Builder $query, ?int $businessId = null): Builder
+    public function scopeForBusiness(Builder $query, string|null $businessId = null): Builder
     {
         $id = $businessId ?? currentBusiness()?->id;
 

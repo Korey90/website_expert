@@ -37,6 +37,18 @@ return [
     'section_deleted'   => 'Sekcja usunięta.',
     'lead_captured'     => 'Dziękujemy! Skontaktujemy się wkrótce.',
 
+    // Zagnieżdżone komunikaty flash (używane w kontrolerach)
+    'messages' => [
+        'created'       => 'Landing page została utworzona.',
+        'updated'       => 'Landing page zaktualizowana.',
+        'deleted'       => 'Landing page usunięta.',
+        'published'     => 'Landing page opublikowana i dostępna na żywo!',
+        'unpublished'   => 'Publikacja landing page została cofnięta.',
+        'section_added'   => 'Sekcja dodana.',
+        'section_updated' => 'Sekcja zapisana.',
+        'section_deleted' => 'Sekcja usunięta.',
+    ],
+
     'choose_template'      => 'Wybierz szablon startowy',
     'template_label'       => 'Szablon',
     'template_blank'       => 'Pusty (zacznij od zera)',
@@ -97,6 +109,16 @@ return [
         'cannot_delete_last_form' => 'Nie można usunąć ostatniej sekcji formularza z opublikowanej strony.',
         'submission_failed'       => 'Coś poszło nie tak. Spróbuj ponownie.',
         'page_not_published'      => 'Ta strona jest aktualnie niedostępna.',
+        'invalid_section_type'    => 'Typ sekcji ":type" nie jest obsługiwany.',
+        'invalid_video_domain'    => 'Domena ":domain" nie jest dozwolona dla wideo.',
+        'plan_limit_reached'      => 'Twój plan nie obsługuje więcej niż :limit stron landing page.',
+    ],
+
+    // Komunikaty walidacji (używane w Form Requests)
+    'validation' => [
+        'slug_taken'           => 'Ten URL jest już zajęty.',
+        'invalid_video_domain' => 'Domena ":domain" nie jest dozwolona dla wideo.',
+        'max_sections_reached' => 'Osiągnięto maksymalną liczbę sekcji (:max).',
     ],
 
     'ai' => [
@@ -177,6 +199,7 @@ return [
             'variant_not_found' => 'Nie znaleziono wygenerowanego wariantu landing page.',
             'variant_already_saved' => 'Ten wygenerowany wariant landing page został już zapisany.',
             'variant_expired' => 'Ten wygenerowany wariant landing page wygasł. Wygeneruj nowy.',
+            'plan_limit_reached' => 'Twój plan obsługuje tylko :limit generowania AI. Zmień plan, aby kontynuować.',
         ],
     ],
 

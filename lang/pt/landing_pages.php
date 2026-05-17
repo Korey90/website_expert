@@ -37,6 +37,18 @@ return [
     'section_deleted'   => 'Secção removida.',
     'lead_captured'     => 'Obrigado! Entraremos em contacto em breve.',
 
+    // Mensagens flash aninhadas (usadas nos controladores)
+    'messages' => [
+        'created'       => 'Landing page criada.',
+        'updated'       => 'Landing page atualizada.',
+        'deleted'       => 'Landing page eliminada.',
+        'published'     => 'Landing page publicada e disponível ao vivo!',
+        'unpublished'   => 'Publicação da landing page revertida.',
+        'section_added'   => 'Secção adicionada.',
+        'section_updated' => 'Secção guardada.',
+        'section_deleted' => 'Secção removida.',
+    ],
+
     'choose_template'      => 'Escolha um modelo inicial',
     'template_label'       => 'Modelo',
     'template_blank'       => 'Em branco (começo do zero)',
@@ -97,6 +109,16 @@ return [
         'cannot_delete_last_form' => 'Não é possível remover o último formulário de uma página publicada.',
         'submission_failed'       => 'Algo correu mal. Por favor tente novamente.',
         'page_not_published'      => 'Esta página não está disponível de momento.',
+        'invalid_section_type'    => 'O tipo de secção ":type" não é suportado.',
+        'invalid_video_domain'    => 'O domínio ":domain" não é permitido para vídeos.',
+        'plan_limit_reached'      => 'O seu plano não suporta mais do que :limit landing pages.',
+    ],
+
+    // Mensagens de validação (usadas nos Form Requests)
+    'validation' => [
+        'slug_taken'           => 'Este URL já está em uso.',
+        'invalid_video_domain' => 'O domínio ":domain" não é permitido para vídeos.',
+        'max_sections_reached' => 'Número máximo de secções (:max) atingido.',
     ],
 
     'ai' => [
@@ -177,6 +199,7 @@ return [
             'variant_not_found' => 'O variante gerado da landing page não foi encontrado.',
             'variant_already_saved' => 'Este variante gerado da landing page já foi guardado.',
             'variant_expired' => 'Este variante gerado da landing page expirou. Gere um novo.',
+            'plan_limit_reached' => 'O seu plano permite apenas :limit gerações de IA. Atualize o plano para continuar.',
         ],
     ],
 

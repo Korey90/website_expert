@@ -3,7 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\BriefingResource\Pages;
+use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\Briefing;
+use App\Scopes\BusinessScope;
+use App\Support\PermissionHelper;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Resource;
@@ -104,6 +107,13 @@ class BriefingResource extends BaseResource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->forBusiness();
+        $user = auth()->user();
+
+        if (PermissionHelper::allows($user, FilamentPermissionRegistry::panelAccessPermission())) {
+            return parent::getEloquentQuery()
+                ->withoutGlobalScope(BusinessScope::class);
+        }
+
+        return parent::getEloquentQuery();
     }
 }

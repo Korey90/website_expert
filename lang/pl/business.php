@@ -42,6 +42,7 @@ return [
     'company_name_hint' => 'Opcjonalnie — użyjemy Twojego imienia, jeśli pole pozostanie puste.',
 
     // Validation / hints
+    'onboarding_required' => 'Uzupełnij konfigurację profilu firmy, aby uzyskać dostęp do tej funkcji.',
     'optional'          => 'opcjonalnie',
     'profile_complete'  => 'Profil kompletny — gotowy do generowania landing pages przez AI',
     'profile_missing'   => 'Brakuje: :fields',

@@ -6,4 +6,5 @@ return [
     'lead_assigned_title' => 'Lead przypisany do Ciebie',
     'lead_assigned_body'  => 'Lead „:title" został Ci przypisany przez :by',
     'view_lead'           => 'Otwórz lead',
+    'lead_source_body'    => ':name wypełnił formularz przez :source',
 ];
