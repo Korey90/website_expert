@@ -671,6 +671,108 @@
                 </div>
             </div>
 
+            {{-- ── Events & Reminders ────────────────────────────── --}}
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+                <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+                    <h2 class="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <x-heroicon-m-calendar-days class="h-4 w-4 text-indigo-400" />
+                        Events &amp; Reminders
+                        @if($leadEvents->count())
+                            <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-normal text-gray-500 dark:bg-gray-800">{{ $leadEvents->count() }}</span>
+                        @endif
+                    </h2>
+                    <button wire:click="openEventModal"
+                            class="flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-400 dark:hover:bg-indigo-900/30">
+                        <x-heroicon-m-plus class="h-3.5 w-3.5" />
+                        Add
+                    </button>
+                </div>
+
+                @if($leadEvents->isEmpty())
+                    <div class="flex flex-col items-center justify-center gap-2 py-10">
+                        <x-heroicon-o-calendar-days class="h-8 w-8 text-gray-300 dark:text-gray-600" />
+                        <p class="text-sm text-gray-400">No events scheduled yet.</p>
+                        <button wire:click="openEventModal"
+                                class="mt-1 flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700">
+                            <x-heroicon-m-plus class="h-3.5 w-3.5" />
+                            Schedule first event
+                        </button>
+                    </div>
+                @else
+                    @php
+                        $typeColors = [
+                            'meeting'  => ['bg' => 'bg-blue-100 dark:bg-blue-900/30',   'text' => 'text-blue-700 dark:text-blue-400',   'dot' => '#3b82f6'],
+                            'call'     => ['bg' => 'bg-green-100 dark:bg-green-900/30', 'text' => 'text-green-700 dark:text-green-400', 'dot' => '#10b981'],
+                            'deadline' => ['bg' => 'bg-red-100 dark:bg-red-900/30',     'text' => 'text-red-700 dark:text-red-400',     'dot' => '#ef4444'],
+                            'reminder' => ['bg' => 'bg-amber-100 dark:bg-amber-900/30', 'text' => 'text-amber-700 dark:text-amber-400', 'dot' => '#f59e0b'],
+                            'task'     => ['bg' => 'bg-purple-100 dark:bg-purple-900/30','text'=> 'text-purple-700 dark:text-purple-400','dot' => '#8b5cf6'],
+                        ];
+                        $now = now();
+                    @endphp
+                    <ul class="divide-y divide-gray-100 dark:divide-gray-800">
+                        @foreach($leadEvents as $ev)
+                            @php
+                                $tc       = $typeColors[$ev->type] ?? $typeColors['reminder'];
+                                $isDone   = $ev->status === 'done';
+                                $isCancelled = $ev->status === 'cancelled';
+                                $isPast   = $ev->starts_at->isPast() && !$isDone;
+                                $overdue  = $isPast && !$isCancelled;
+                            @endphp
+                            <li class="group flex items-start gap-3 px-4 py-3 transition hover:bg-gray-50 dark:hover:bg-gray-800/50 {{ $isDone || $isCancelled ? 'opacity-60' : '' }}">
+                                {{-- Type dot --}}
+                                <div class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full {{ $tc['bg'] }}">
+                                    <span class="h-2 w-2 rounded-full" style="background:{{ $tc['dot'] }}"></span>
+                                </div>
+
+                                {{-- Content --}}
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-medium text-gray-900 dark:text-white {{ $isDone ? 'line-through text-gray-400 dark:text-gray-500' : '' }}">
+                                        {{ $ev->title }}
+                                    </p>
+                                    <div class="mt-0.5 flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+                                        <span class="{{ $overdue ? 'font-semibold text-red-500' : '' }}">
+                                            {{ $ev->all_day ? $ev->starts_at->format('d M Y') : $ev->starts_at->format('d M Y, H:i') }}
+                                        </span>
+                                        @if($overdue)
+                                            <span class="rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-600 dark:bg-red-900/30 dark:text-red-400">overdue</span>
+                                        @elseif($isDone)
+                                            <span class="rounded bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-600 dark:bg-green-900/30 dark:text-green-400">done</span>
+                                        @elseif($isCancelled)
+                                            <span class="rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-800">cancelled</span>
+                                        @endif
+                                        <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium {{ $tc['bg'] }} {{ $tc['text'] }}">{{ ucfirst($ev->type) }}</span>
+                                    </div>
+                                </div>
+
+                                {{-- Actions (visible on hover) --}}
+                                <div class="flex shrink-0 items-center gap-0.5 opacity-0 transition group-hover:opacity-100">
+                                    <button wire:click="toggleLeadEventDone({{ $ev->id }})"
+                                            title="{{ $isDone ? 'Mark as scheduled' : 'Mark as done' }}"
+                                            class="rounded-md p-1.5 transition {{ $isDone ? 'text-green-500 hover:text-green-600 dark:text-green-400' : 'text-gray-400 hover:text-green-500 dark:text-gray-600 dark:hover:text-green-400' }}">
+                                        <x-heroicon-m-check class="h-4 w-4" />
+                                    </button>
+                                    <button wire:click="deleteLeadEvent({{ $ev->id }})"
+                                            wire:confirm="Delete this event?"
+                                            title="Delete event"
+                                            class="rounded-md p-1.5 text-gray-400 transition hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
+                                        <x-heroicon-m-trash class="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                {{-- Footer link to main calendar --}}
+                <div class="border-t border-gray-100 px-4 py-2.5 dark:border-gray-800">
+                    <a href="{{ route('filament.admin.pages.calendar-page') }}"
+                       class="flex items-center justify-center gap-1.5 text-xs text-gray-400 transition hover:text-indigo-600 dark:text-gray-500 dark:hover:text-indigo-400">
+                        <x-heroicon-m-arrow-top-right-on-square class="h-3.5 w-3.5" />
+                        Open full Calendar
+                    </a>
+                </div>
+            </div>
+
             {{-- ── Client & Contact ──────────────────────────────── --}}
             @if($record->client || $record->contact)
                 <div class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
@@ -775,6 +877,117 @@
         </div>{{-- end right column --}}
 
     </div>
+
+{{-- ═══════════════════════════════════════════════════════════════════
+     Lead Event Quick-Create Modal
+════════════════════════════════════════════════════════════════════ --}}
+<div x-data
+     x-show="$wire.showEventModal"
+     x-cloak
+     @keydown.escape.window="$wire.set('showEventModal', false)"
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+
+    <div @click.stop
+         x-show="$wire.showEventModal"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-700">
+
+        {{-- Header --}}
+        <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+            <div class="flex items-center gap-2.5">
+                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/40">
+                    <x-heroicon-m-calendar-days class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                </span>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Schedule Event</h3>
+            </div>
+            <button wire:click="$set('showEventModal', false)"
+                    class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                <x-heroicon-m-x-mark class="h-5 w-5" />
+            </button>
+        </div>
+
+        {{-- Body --}}
+        <div class="space-y-4 px-6 py-5">
+
+            {{-- Title --}}
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Title <span class="text-red-500">*</span>
+                </label>
+                <input wire:model="evTitle"
+                       type="text"
+                       placeholder="Event title…"
+                       maxlength="255"
+                       class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500" />
+            </div>
+
+            {{-- Type buttons --}}
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                <div class="grid grid-cols-5 gap-2">
+                    @foreach([
+                        ['meeting',  'Meet',    '#3b82f6'],
+                        ['call',     'Call',    '#10b981'],
+                        ['deadline', 'Dead.',   '#ef4444'],
+                        ['reminder', 'Remind',  '#f59e0b'],
+                        ['task',     'Task',    '#8b5cf6'],
+                    ] as [$val, $label, $dot])
+                        <button type="button"
+                                wire:click="$set('evType', '{{ $val }}')"
+                                @class([
+                                    'flex flex-col items-center gap-1.5 rounded-xl border-2 px-1 py-2.5 transition',
+                                    'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30' => $evType === $val,
+                                    'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600' => $evType !== $val,
+                                ])>
+                            <span class="inline-block h-3 w-3 rounded-full" style="background:{{ $dot }}"></span>
+                            <span @class([
+                                    'text-xs font-medium',
+                                    'text-indigo-600 dark:text-indigo-400' => $evType === $val,
+                                    'text-gray-500 dark:text-gray-400' => $evType !== $val,
+                                ])>{{ $label }}</span>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Date / all-day --}}
+            <div class="flex items-end gap-3">
+                <div class="flex-1">
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Date &amp; time</label>
+                    <input wire:model="evDate"
+                           type="{{ $evAllDay ? 'date' : 'datetime-local' }}"
+                           class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
+                </div>
+                <div class="pb-2.5">
+                    <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-600 dark:text-gray-400 select-none">
+                        <input wire:model.live="evAllDay" type="checkbox" class="rounded text-indigo-600 focus:ring-indigo-500" />
+                        All day
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        {{-- Footer --}}
+        <div class="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+            <button wire:click="$set('showEventModal', false)"
+                    class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 transition">
+                Cancel
+            </button>
+            <button wire:click="createLeadEvent"
+                    wire:loading.attr="disabled"
+                    class="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition disabled:opacity-60">
+                <x-heroicon-m-calendar-days class="h-4 w-4" />
+                <span wire:loading.remove wire:target="createLeadEvent">Schedule</span>
+                <span wire:loading wire:target="createLeadEvent">Saving…</span>
+            </button>
+        </div>
+    </div>
+</div>
 
 {{-- ═══════════════════════════════════════════════════════════════════
      Email Modal

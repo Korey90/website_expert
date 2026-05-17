@@ -15,6 +15,7 @@ use Filament\Tables\Table;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 
 class ServiceItemResource extends BaseResource
 {
@@ -225,6 +226,7 @@ class ServiceItemResource extends BaseResource
     {
         return $table
             ->defaultSort('sort_order')
+            ->recordUrl(null)
             ->columns([
                 Tables\Columns\TextColumn::make('icon')
                     ->label('Icon')
@@ -239,9 +241,17 @@ class ServiceItemResource extends BaseResource
                     })
                     ->limit(45),
 
-                Tables\Columns\TextColumn::make('price_from')
+                Tables\Columns\TextInputColumn::make('price_from')
                     ->label('Price From')
-                    ->sortable(),
+                    ->sortable()
+                    ->afterStateUpdated(function (ServiceItem $record, ?string $state): void {
+                        $record->save();
+                        Notification::make()
+                            ->title('Price updated')
+                            ->body(($record->getTranslation('title', 'en') ?: $record->slug) . ': ' . ($state ?? '—'))
+                            ->success()
+                            ->send();
+                    }),
 
                 Tables\Columns\IconColumn::make('is_featured')
                     ->label('Featured')

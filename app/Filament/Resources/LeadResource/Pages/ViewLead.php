@@ -31,10 +31,12 @@ use Filament\Actions\RestoreAction;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use App\Models\CalendarEvent;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Livewire\WithFileUploads;
 
 class ViewLead extends ViewRecord
@@ -74,7 +76,12 @@ class ViewLead extends ViewRecord
     public bool            $showSmsModal   = false;
     public string|int|null $smsTemplateId  = null;
     public string          $smsMessage     = '';
-
+    // ── Calendar / event widget ────────────────────────────────────────
+    public bool   $showEventModal = false;
+    public string $evTitle        = '';
+    public string $evType         = 'meeting';
+    public string $evDate         = '';
+    public bool   $evAllDay       = false;
     // ── Proposal builder ─────────────────────────────────────────────────
     public bool   $showProposalModal  = false;
     public ?int   $proposalQuoteId    = null;
@@ -299,10 +306,84 @@ class ViewLead extends ViewRecord
             ->latest()
             ->first();
 
-        return compact('activities', 'leadNotes', 'allStages', 'hasProject', 'emailTemplates', 'smsTemplates', 'stageChecklist', 'completedItems', 'autoSatisfied', 'users', 'existingQuote');
+        $leadEvents = CalendarEvent::where('related_type', Lead::class)
+            ->where('related_id', $this->record->id)
+            ->where('business_id', $this->record->business_id)
+            ->orderBy('starts_at')
+            ->get();
+
+        return compact('activities', 'leadNotes', 'allStages', 'hasProject', 'emailTemplates', 'smsTemplates', 'stageChecklist', 'completedItems', 'autoSatisfied', 'users', 'existingQuote', 'leadEvents');
     }
 
     // ── Email ─────────────────────────────────────────────────────────────
+
+    // ── Lead Calendar Events ──────────────────────────────────────────────
+
+    public function openEventModal(): void
+    {
+        $this->evTitle  = '';
+        $this->evType   = 'meeting';
+        $this->evDate   = now()->format('Y-m-d\TH:i');
+        $this->evAllDay = false;
+        $this->showEventModal = true;
+    }
+
+    public function createLeadEvent(): void
+    {
+        $v = Validator::make(
+            ['title' => $this->evTitle, 'type' => $this->evType, 'date' => $this->evDate],
+            [
+                'title' => ['required', 'string', 'max:255'],
+                'type'  => ['required', 'in:meeting,call,deadline,reminder,task'],
+                'date'  => ['required', 'string'],
+            ]
+        );
+
+        if ($v->fails()) {
+            Notification::make()->title($v->errors()->first())->danger()->send();
+            return;
+        }
+
+        CalendarEvent::create([
+            'business_id'  => $this->record->business_id,
+            'user_id'      => auth()->id(),
+            'title'        => strip_tags($this->evTitle),
+            'type'         => $this->evType,
+            'starts_at'    => $this->evDate,
+            'all_day'      => $this->evAllDay,
+            'status'       => 'scheduled',
+            'related_type' => Lead::class,
+            'related_id'   => $this->record->id,
+        ]);
+
+        $this->showEventModal = false;
+        Notification::make()->title('Event scheduled')->success()->send();
+    }
+
+    public function deleteLeadEvent(int $id): void
+    {
+        CalendarEvent::where('related_type', Lead::class)
+            ->where('related_id', $this->record->id)
+            ->where('business_id', $this->record->business_id)
+            ->findOrFail($id)
+            ->delete();
+
+        Notification::make()->title('Event deleted')->success()->send();
+    }
+
+    public function toggleLeadEventDone(int $id): void
+    {
+        $event = CalendarEvent::where('related_type', Lead::class)
+            ->where('related_id', $this->record->id)
+            ->where('business_id', $this->record->business_id)
+            ->findOrFail($id);
+
+        $event->update([
+            'status' => $event->status === 'done' ? 'scheduled' : 'done',
+        ]);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
 
     public function openEmailModal(): void
     {

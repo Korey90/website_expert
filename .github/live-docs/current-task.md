@@ -2,9 +2,18 @@
 
 **Status:** Done
 
-**Task Title:** Technical Debt Cleanup Sprint (T1–T5)
+**Task Title:** Calendar Feature — E1–E5 (CalendarEvent + Google Calendar Integration)
 **Requested by:** User (2026-05-17)
 **Completed:** 2026-05-17
+
+**Implemented:**
+- E1: Migrations `calendar_events` + `google_calendar_tokens`, Models `CalendarEvent` + `GoogleCalendarToken`
+- E2: `CalendarEventResource` (CRUD) + `CalendarPage` z FullCalendar.js (CDN/Alpine.js) + Blade view
+- E3: `CalendarFeedService` (agregacja Lead/Project/Invoice/Contract)
+- E4: `GoogleCalendarService` (OAuth tokens, push/delete events, refresh) + `GoogleCalendarController` + routes
+- E5: Push eventów do Google Calendar via EditCalendarEvent "Sync to Google" action
+
+**Tests:** 260/260 ✅ (no regressions)
 
 **Results:**
 - T1 ✅ — Usunięto `app/Services/LandingPage/LeadCaptureService.php` (martwy kod, 0 referencji)
