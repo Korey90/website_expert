@@ -319,10 +319,19 @@ class ViewLead extends ViewRecord
 
     // ── Lead Calendar Events ──────────────────────────────────────────────
 
-    public function openEventModal(): void
+    public function openEventModal(string $type = 'meeting'): void
     {
-        $this->evTitle  = '';
-        $this->evType   = 'meeting';
+        $validType      = in_array($type, ['meeting', 'call', 'deadline', 'reminder', 'task']) ? $type : 'meeting';
+        $lead           = $this->record->title ?? '';
+        $this->evTitle  = match ($validType) {
+            'call'     => 'Discovery call' . ($lead ? " — {$lead}" : ''),
+            'meeting'  => 'Meeting'        . ($lead ? " — {$lead}" : ''),
+            'deadline' => 'Deadline'       . ($lead ? " — {$lead}" : ''),
+            'reminder' => 'Reminder'       . ($lead ? " — {$lead}" : ''),
+            'task'     => 'Task'           . ($lead ? " — {$lead}" : ''),
+            default    => '',
+        };
+        $this->evType   = $validType;
         $this->evDate   = now()->format('Y-m-d\TH:i');
         $this->evAllDay = false;
         $this->showEventModal = true;
@@ -357,16 +366,27 @@ class ViewLead extends ViewRecord
         ]);
 
         $this->showEventModal = false;
+
+        LeadActivity::log($this->record->id, 'event_scheduled', "Event scheduled: {$this->evTitle}", [
+            'type'      => $this->evType,
+            'starts_at' => $this->evDate,
+            'all_day'   => $this->evAllDay,
+        ]);
+
         Notification::make()->title('Event scheduled')->success()->send();
     }
 
     public function deleteLeadEvent(int $id): void
     {
-        CalendarEvent::where('related_type', Lead::class)
+        $event = CalendarEvent::where('related_type', Lead::class)
             ->where('related_id', $this->record->id)
             ->where('business_id', $this->record->business_id)
-            ->findOrFail($id)
-            ->delete();
+            ->findOrFail($id);
+
+        $title = $event->title;
+        $event->delete();
+
+        LeadActivity::log($this->record->id, 'event_deleted', "Event deleted: {$title}");
 
         Notification::make()->title('Event deleted')->success()->send();
     }
@@ -613,6 +633,11 @@ class ViewLead extends ViewRecord
             'has_phone'           => ! empty($lead->client?->primary_contact_phone),
             'has_email'           => ! empty($lead->client?->primary_contact_email),
             'email_sent'          => $lead->activities()->where('type', 'email_sent')->exists(),
+            'call_scheduled'      => CalendarEvent::where('related_type', Lead::class)
+                                        ->where('related_id', $lead->id)
+                                        ->where('type', 'call')
+                                        ->where('status', '!=', 'cancelled')
+                                        ->exists(),
             'has_project'         => $lead->project()->exists(),
             'has_notes'           => $lead->notes()->exists(),
             'has_calculator_data' => ! empty($lead->calculator_data),

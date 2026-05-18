@@ -416,6 +416,7 @@
                                         $itemCondition = $item['condition'] ?? null;
                                         $hasForm       = in_array($itemCondition, ['has_value', 'has_assignee', 'has_expected_close', 'has_notes', 'has_phone', 'has_email']);
                                         $hasEmailIcon  = $itemCondition === 'email_sent';
+                                        $hasCalendarIcon = $itemCondition === 'call_scheduled';
                                     @endphp
 
                                     <div @class([
@@ -485,6 +486,16 @@
                                                             'text-gray-400 hover:text-primary-600 dark:text-gray-500 dark:hover:text-primary-400 opacity-0 group-hover:opacity-100' => !$isDone,
                                                         ])>
                                                     <x-heroicon-m-envelope class="h-3.5 w-3.5" />
+                                                </button>
+                                            @elseif($hasCalendarIcon)
+                                                <button wire:click="openEventModal('call')"
+                                                        title="Schedule call"
+                                                        @class([
+                                                            'rounded p-0.5 transition',
+                                                            'text-gray-300 hover:text-green-500 dark:text-gray-600 dark:hover:text-green-400' => $isDone,
+                                                            'text-gray-400 hover:text-green-600 dark:text-gray-500 dark:hover:text-green-400 opacity-0 group-hover:opacity-100' => !$isDone,
+                                                        ])>
+                                                    <x-heroicon-m-calendar-days class="h-3.5 w-3.5" />
                                                 </button>
                                             @endif
                                         </div>
@@ -884,24 +895,25 @@
 <div x-data
      x-show="$wire.showEventModal"
      x-cloak
+     x-effect="if ($wire.showEventModal) $nextTick(() => $refs.evTitleInput?.focus())"
      @keydown.escape.window="$wire.set('showEventModal', false)"
-     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
 
     <div @click.stop
          x-show="$wire.showEventModal"
          x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 scale-95 translate-y-2"
-         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         x-transition:enter-start="opacity-0 translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
          x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
-         class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-700">
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-2"
+         class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 shadow-2xl border border-gray-200 dark:border-gray-700">
 
         {{-- Header --}}
-        <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+        <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <div class="flex items-center gap-2.5">
-                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/40">
-                    <x-heroicon-m-calendar-days class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/40">
+                    <x-heroicon-m-calendar-days class="h-4 w-4 text-primary-600 dark:text-primary-400" />
                 </span>
                 <h3 class="text-base font-semibold text-gray-900 dark:text-white">Schedule Event</h3>
             </div>
@@ -916,19 +928,20 @@
 
             {{-- Title --}}
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     Title <span class="text-red-500">*</span>
                 </label>
                 <input wire:model="evTitle"
+                       x-ref="evTitleInput"
                        type="text"
                        placeholder="Event title…"
                        maxlength="255"
-                       class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500" />
+                       class="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
 
             {{-- Type buttons --}}
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Type</label>
                 <div class="grid grid-cols-5 gap-2">
                     @foreach([
                         ['meeting',  'Meet',    '#3b82f6'],
@@ -941,13 +954,13 @@
                                 wire:click="$set('evType', '{{ $val }}')"
                                 @class([
                                     'flex flex-col items-center gap-1.5 rounded-xl border-2 px-1 py-2.5 transition',
-                                    'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30' => $evType === $val,
+                                    'border-primary-500 bg-primary-50 dark:bg-primary-900/30' => $evType === $val,
                                     'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600' => $evType !== $val,
                                 ])>
                             <span class="inline-block h-3 w-3 rounded-full" style="background:{{ $dot }}"></span>
                             <span @class([
                                     'text-xs font-medium',
-                                    'text-indigo-600 dark:text-indigo-400' => $evType === $val,
+                                    'text-primary-600 dark:text-primary-400' => $evType === $val,
                                     'text-gray-500 dark:text-gray-400' => $evType !== $val,
                                 ])>{{ $label }}</span>
                         </button>
@@ -955,32 +968,111 @@
                 </div>
             </div>
 
-            {{-- Date / all-day --}}
-            <div class="flex items-end gap-3">
-                <div class="flex-1">
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Date &amp; time</label>
-                    <input wire:model="evDate"
-                           type="{{ $evAllDay ? 'date' : 'datetime-local' }}"
-                           class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
+            {{-- Date / time / all-day --}}
+            <div x-data="{
+                    localDate: '',
+                    localTime: '09:00',
+                    get slots() {
+                        const s = [];
+                        for (let h = 6; h <= 22; h++) {
+                            s.push(String(h).padStart(2,'0') + ':00');
+                            if (h < 22) s.push(String(h).padStart(2,'0') + ':30');
+                        }
+                        return s;
+                    },
+                    parse(v) {
+                        if (!v) return;
+                        v = String(v);
+                        if (v.includes('T')) {
+                            this.localDate = v.split('T')[0];
+                            this.localTime = v.split('T')[1].substring(0, 5);
+                        } else {
+                            this.localDate = v;
+                        }
+                    },
+                    sync() {
+                        const val = this.$wire.evAllDay
+                            ? this.localDate
+                            : this.localDate + 'T' + this.localTime;
+                        this.$wire.set('evDate', val);
+                    },
+                    init() {
+                        this.parse(this.$wire.evDate);
+                        this.$wire.$watch('evDate', v => this.parse(v));
+                        this.$wire.$watch('evAllDay', () => this.$nextTick(() => this.sync()));
+                    }
+                }">
+
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Date &amp; time
+                </label>
+
+                {{-- Date + time row --}}
+                <div class="flex gap-2">
+
+                    {{-- Date input --}}
+                    <div class="relative flex-1 min-w-0">
+                        <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                            <x-heroicon-m-calendar-days class="h-4 w-4 text-gray-400" />
+                        </div>
+                        <input type="date"
+                               x-model="localDate"
+                               @change="sync()"
+                               class="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 pl-9 pr-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]" />
+                    </div>
+
+                    {{-- Time select --}}
+                    <div class="relative w-40 shrink-0"
+                         x-show="!$wire.evAllDay"
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95">
+                        <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                            <x-heroicon-m-clock class="h-4 w-4 text-gray-400" />
+                        </div>
+                        <select x-model="localTime"
+                                @change="sync()"
+                                class="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 pl-9 pr-2 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <template x-for="slot in slots" :key="slot">
+                                <option :value="slot" x-text="slot"></option>
+                            </template>
+                        </select>
+                    </div>
                 </div>
-                <div class="pb-2.5">
-                    <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-600 dark:text-gray-400 select-none">
-                        <input wire:model.live="evAllDay" type="checkbox" class="rounded text-indigo-600 focus:ring-indigo-500" />
-                        All day
+
+                {{-- All day toggle switch --}}
+                <div class="mt-2.5 flex items-center gap-2.5">
+                    <label class="relative inline-flex cursor-pointer items-center">
+                        <input wire:model.live="evAllDay"
+                               type="checkbox"
+                               class="peer sr-only" />
+                        <div class="h-5 w-9 rounded-full bg-gray-200 dark:bg-gray-700
+                                    transition-colors duration-200
+                                    peer-checked:bg-primary-500
+                                    peer-focus:ring-2 peer-focus:ring-primary-500 peer-focus:ring-offset-2
+                                    peer-focus:ring-offset-white dark:peer-focus:ring-offset-gray-900">
+                        </div>
+                        <div class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow
+                                    transition-transform duration-200 peer-checked:translate-x-4">
+                        </div>
                     </label>
+                    <span class="text-sm text-gray-600 dark:text-gray-400 select-none">All day</span>
                 </div>
             </div>
         </div>
 
         {{-- Footer --}}
-        <div class="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+        <div class="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
             <button wire:click="$set('showEventModal', false)"
-                    class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 transition">
+                    class="rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                 Cancel
             </button>
             <button wire:click="createLeadEvent"
                     wire:loading.attr="disabled"
-                    class="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition disabled:opacity-60">
+                    class="flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2 text-sm font-semibold text-white hover:bg-primary-700 transition disabled:opacity-60">
                 <x-heroicon-m-calendar-days class="h-4 w-4" />
                 <span wire:loading.remove wire:target="createLeadEvent">Schedule</span>
                 <span wire:loading wire:target="createLeadEvent">Saving…</span>

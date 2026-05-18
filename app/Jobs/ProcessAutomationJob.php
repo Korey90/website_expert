@@ -8,6 +8,7 @@ use App\Automation\ConditionEvaluator;
 use App\Automation\Actions\AddTagAction;
 use App\Automation\Actions\AssignTaskAction;
 use App\Automation\Actions\ChangeStatusAction;
+use App\Automation\Actions\CreateCalendarEventAction;
 use App\Automation\Actions\CreatePortalAccessAction;
 use App\Automation\Actions\NotifyAdminAction;
 use App\Automation\Actions\NotifyTeamAction;
@@ -42,10 +43,11 @@ class ProcessAutomationJob implements ShouldQueue
         'send_sms'             => SendSmsAction::class,
         'notify_admin'         => NotifyAdminAction::class,
         'notify_team'          => NotifyTeamAction::class,
-        'assign_task'          => AssignTaskAction::class,
-        'add_tag'              => AddTagAction::class,
-        'change_status'        => ChangeStatusAction::class,
-        'create_portal_access' => CreatePortalAccessAction::class,
+        'assign_task'             => AssignTaskAction::class,
+        'add_tag'                 => AddTagAction::class,
+        'change_status'           => ChangeStatusAction::class,
+        'create_portal_access'    => CreatePortalAccessAction::class,
+        'create_calendar_event'   => CreateCalendarEventAction::class,
     ];
 
     public function __construct(

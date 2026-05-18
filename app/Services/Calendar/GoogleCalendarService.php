@@ -106,20 +106,26 @@ class GoogleCalendarService
             return null;
         }
 
-        if ($token->isExpired() && ! $this->refreshAccessToken($token)) {
-            return null;
+        // Proactively refresh if expired; also retry once on 401
+        if ($token->isExpired()) {
+            if (! $this->refreshAccessToken($token)) {
+                return null;
+            }
+            $token->refresh();
         }
 
         $calendarId = $token->calendar_id;
         $payload    = $this->buildGoogleEventPayload($event);
 
-        // Update if already synced, otherwise create
-        if ($event->google_event_id) {
-            $response = Http::withToken($token->access_token)
-                ->put(self::API_BASE . "/calendars/{$calendarId}/events/{$event->google_event_id}", $payload);
-        } else {
-            $response = Http::withToken($token->access_token)
-                ->post(self::API_BASE . "/calendars/{$calendarId}/events", $payload);
+        $response = $this->doApiCall($token, $event, $calendarId, $payload);
+
+        // 401 = access token expired despite isExpired() returning false → refresh & retry once
+        if ($response->status() === 401) {
+            if (! $this->refreshAccessToken($token)) {
+                return null;
+            }
+            $token->refresh();
+            $response = $this->doApiCall($token, $event, $calendarId, $payload);
         }
 
         if (! $response->successful()) {
@@ -162,6 +168,146 @@ class GoogleCalendarService
     }
 
     // ── Payload builder ───────────────────────────────────────────────────
+
+    /**
+     * List all calendars in the user's Google Calendar account.
+     * Returns array of ['id' => string, 'summary' => string].
+     */
+    public function fetchCalendarList(int $userId, ?string $businessId): array
+    {
+        $token = $this->getToken($userId, $businessId);
+        if (! $token) {
+            return [];
+        }
+
+        if ($token->isExpired()) {
+            if (! $this->refreshAccessToken($token)) {
+                return [];
+            }
+            $token->refresh();
+        }
+
+        $response = Http::withToken($token->access_token)
+            ->get(self::API_BASE . '/users/me/calendarList', ['maxResults' => 250]);
+
+        if ($response->status() === 401) {
+            if (! $this->refreshAccessToken($token)) {
+                return [['id' => $token->calendar_id, 'summary' => 'Primary']];
+            }
+            $token->refresh();
+            $response = Http::withToken($token->access_token)
+                ->get(self::API_BASE . '/users/me/calendarList', ['maxResults' => 250]);
+        }
+
+        if (! $response->successful()) {
+            Log::warning('GoogleCalendar: fetchCalendarList failed', [
+                'user_id' => $userId,
+                'status'  => $response->status(),
+                'body'    => $response->json(),
+            ]);
+            return [['id' => $token->calendar_id, 'summary' => 'Primary']];
+        }
+
+        $calendars = array_values(array_map(
+            fn ($cal) => [
+                'id'      => $cal['id'],
+                'summary' => $cal['summary'] ?? $cal['id'],
+            ],
+            array_filter(
+                $response->json('items', []),
+                fn ($cal) => ($cal['deleted'] ?? false) === false,
+            )
+        ));
+
+        Log::info('GoogleCalendar: fetchCalendarList', [
+            'user_id'   => $userId,
+            'count'     => count($calendars),
+            'calendars' => array_column($calendars, 'id'),
+        ]);
+
+        return $calendars;
+    }
+
+    /**
+     * Fetch events from Google Calendar for the given date range.
+     * Returns raw Google API items array.
+     */
+    public function fetchEventsFromGoogle(
+        int     $userId,
+        ?string $businessId,
+        Carbon  $start,
+        Carbon  $end,
+        ?string $calendarId = null,
+    ): array {
+        $token = $this->getToken($userId, $businessId);
+        if (! $token) {
+            return [];
+        }
+
+        if ($token->isExpired()) {
+            if (! $this->refreshAccessToken($token)) {
+                return [];
+            }
+            $token->refresh();
+        }
+
+        $items     = [];
+        $pageToken = null;
+        $calId     = $calendarId ?? $token->calendar_id;
+        $calIdEnc  = rawurlencode($calId);
+
+        do {
+            $params = [
+                'timeMin'      => $start->toIso8601String(),
+                'timeMax'      => $end->toIso8601String(),
+                'singleEvents' => 'true',
+                'orderBy'      => 'startTime',
+                'maxResults'   => 250,
+            ];
+            if ($pageToken) {
+                $params['pageToken'] = $pageToken;
+            }
+
+            $response = Http::withToken($token->access_token)
+                ->get(self::API_BASE . "/calendars/{$calIdEnc}/events", $params);
+
+            if ($response->status() === 401) {
+                if (! $this->refreshAccessToken($token)) {
+                    break;
+                }
+                $token->refresh();
+                $response = Http::withToken($token->access_token)
+                    ->get(self::API_BASE . "/calendars/{$calIdEnc}/events", $params);
+            }
+
+            if (! $response->successful()) {
+                Log::warning('GoogleCalendar: fetchEvents failed', [
+                    'user_id'     => $userId,
+                    'calendar_id' => $calId,
+                    'status'      => $response->status(),
+                    'body'        => $response->json(),
+                ]);
+                break;
+            }
+
+            $data      = $response->json();
+            $items     = array_merge($items, $data['items'] ?? []);
+            $pageToken = $data['nextPageToken'] ?? null;
+        } while ($pageToken);
+
+        return $items;
+    }
+
+    private function doApiCall(GoogleCalendarToken $token, CalendarEvent $event, string $calendarId, array $payload): \Illuminate\Http\Client\Response
+    {
+        if ($event->google_event_id) {
+            return Http::withToken($token->access_token)
+                ->put(self::API_BASE . "/calendars/{$calendarId}/events/{$event->google_event_id}", $payload);
+        }
+
+        return Http::withToken($token->access_token)
+            ->post(self::API_BASE . "/calendars/{$calendarId}/events", $payload);
+    }
 
     private function buildGoogleEventPayload(CalendarEvent $event): array
     {

@@ -75,6 +75,8 @@ class LeadActivity extends Model
             'offer_viewed'               => 'heroicon-m-eye',
             'offer_converted'            => 'heroicon-m-arrow-path',
             'offer_cta_clicked'          => 'heroicon-m-cursor-arrow-rays',
+            'event_scheduled'            => 'heroicon-m-calendar-days',
+            'event_deleted'              => 'heroicon-m-calendar',
             default                        => 'heroicon-m-information-circle',
         };
     }
@@ -102,6 +104,8 @@ class LeadActivity extends Model
             'offer_viewed'               => 'text-indigo-500',
             'offer_converted'            => 'text-green-500',
             'offer_cta_clicked'          => 'text-emerald-600',
+            'event_scheduled'            => 'text-cyan-500',
+            'event_deleted'              => 'text-red-400',
             default                        => 'text-gray-400',
         };
     }
@@ -127,6 +131,8 @@ class LeadActivity extends Model
             'offer_viewed'               => 'bg-indigo-100 dark:bg-indigo-900/30',
             'offer_converted'            => 'bg-green-100 dark:bg-green-900/30',
             'offer_cta_clicked'          => 'bg-emerald-100 dark:bg-emerald-900/30',
+            'event_scheduled'            => 'bg-cyan-100 dark:bg-cyan-900/30',
+            'event_deleted'              => 'bg-red-100 dark:bg-red-900/30',
             default                        => 'bg-gray-100 dark:bg-gray-800',
         };
     }

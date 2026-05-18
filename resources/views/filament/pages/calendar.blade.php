@@ -37,7 +37,7 @@
         </div>
 
         {{-- ── Calendar card ──────────────────────────────────────── --}}
-        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xs dark:border-gray-700 dark:bg-gray-900">
+        <div wire:ignore class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xs dark:border-gray-700 dark:bg-gray-900">
 
             {{-- Legend --}}
             <div class="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-gray-100 px-5 py-3 dark:border-gray-800">
@@ -53,16 +53,15 @@
                 </span>
             </div>
 
-            {{-- Loading --}}
-            <div x-show="loading" class="flex items-center justify-center gap-2 py-24 text-sm text-gray-400">
-                <svg class="h-5 w-5 animate-spin text-indigo-500" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
-                Loading…
-            </div>
-
-            <div x-show="!loading" class="p-4">
+            {{-- Calendar (always visible; loading shows as overlay so FullCalendar keeps its DOM) --}}
+            <div class="relative p-4">
+                <div x-show="loading" style="display:none"
+                    class="absolute inset-0 z-10 flex items-center justify-center rounded-b-xl bg-white/80 dark:bg-gray-900/80">
+                    <svg class="h-5 w-5 animate-spin text-indigo-500" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                </div>
                 <div id="calendar"></div>
             </div>
         </div>
@@ -219,13 +218,11 @@
                     <span x-show="dm.virtual" class="text-xs text-gray-400 dark:text-gray-500 italic">Auto-generated from project / invoice</span>
 
                     <div class="flex items-center gap-2">
-                        @if($googleConnected)
-                        <button x-show="!dm.virtual && !dm.synced" @click="syncGoogle()"
+                        <button x-show="!dm.virtual && !dm.synced && googleConnected" @click="syncGoogle()"
                             class="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 transition">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
                             Sync
                         </button>
-                        @endif
                         <a :href="dm.editUrl" class="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700 transition">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             Open
@@ -264,6 +261,7 @@
             dm: { open:false, id:null, title:'', type:'', color:'#6b7280',
                   dateFormatted:'', description:'', status:'',
                   synced:false, virtual:false, editUrl:'#' },
+            googleConnected: {{ $googleConnected ? 'true' : 'false' }},
 
             init() {
                 const self = this;

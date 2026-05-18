@@ -6,10 +6,13 @@ use App\Automation\ConditionEvaluator;
 use App\Jobs\ProcessAutomationJob;
 use App\Mail\NewLeadMail;
 use App\Models\AutomationRule;
+use App\Models\Business;
+use App\Models\CalendarEvent;
 use App\Models\Client;
 use App\Models\Lead;
 use App\Models\PipelineStage;
 use App\Models\User;
+use App\Scopes\BusinessScope;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -21,6 +24,7 @@ class AutomationActionTest extends TestCase
 
     private Client $client;
     private PipelineStage $stage;
+    private Business $business;
 
     protected function setUp(): void
     {
@@ -28,10 +32,11 @@ class AutomationActionTest extends TestCase
         Queue::fake(); // prevent listener from dispatching jobs during data setup
         Mail::fake();
 
-        $this->stage  = PipelineStage::create(['name' => 'New', 'slug' => 'new', 'order' => 1]);
-        $this->client = Client::create([
-            'company_name'          => 'Acme Ltd',
-            'primary_contact_email' => 'client@acme.com',
+        $this->stage    = PipelineStage::create(['name' => 'New', 'slug' => 'new', 'order' => 1]);
+        $this->business = Business::create(['name' => 'Test Agency', 'slug' => 'test-agency', 'is_active' => true]);
+        $this->client   = Client::create([
+            'company_name'           => 'Acme Ltd',
+            'primary_contact_email'  => 'client@acme.com',
             'notify_email_marketing' => true,
         ]);
     }
@@ -170,5 +175,156 @@ class AutomationActionTest extends TestCase
         ]);
 
         Mail::assertNothingQueued();
+    }
+
+    // ── CreateCalendarEventAction ────────────────────────────────────────
+
+    public function test_create_calendar_event_action_creates_event_linked_to_lead(): void
+    {
+        $lead = $this->makeLead();
+
+        AutomationRule::create([
+            'name'          => 'Auto follow-up event',
+            'trigger_event' => 'lead.created',
+            'conditions'    => [],
+            'actions'       => [[
+                'type'        => 'create_calendar_event',
+                'title'       => 'Follow-up call: {{lead_title}}',
+                'event_type'  => 'call',
+                'offset_days' => 1,
+                'all_day'     => true,
+            ]],
+            'is_active' => true,
+        ]);
+
+        $this->runJob('lead.created', [
+            'lead_id'     => $lead->id,
+            'client_id'   => $this->client->id,
+            'business_id' => $this->business->id,
+        ]);
+
+        $this->assertDatabaseHas('calendar_events', [
+            'type'         => 'call',
+            'status'       => 'scheduled',
+            'all_day'      => true,
+            'related_type' => Lead::class,
+            'related_id'   => $lead->id,
+            'business_id'  => $this->business->id,
+        ]);
+    }
+
+    public function test_create_calendar_event_interpolates_title_with_vars(): void
+    {
+        $lead = $this->makeLead();
+
+        AutomationRule::create([
+            'name'          => 'Titled event rule',
+            'trigger_event' => 'lead.created',
+            'conditions'    => [],
+            'actions'       => [[
+                'type'        => 'create_calendar_event',
+                'title'       => 'Meeting for {{lead_title}}',
+                'event_type'  => 'meeting',
+                'all_day'     => true,
+            ]],
+            'is_active' => true,
+        ]);
+
+        $this->runJob('lead.created', [
+            'lead_id'     => $lead->id,
+            'client_id'   => $this->client->id,
+            'business_id' => $this->business->id,
+        ]);
+
+        $this->assertDatabaseHas('calendar_events', [
+            'title' => 'Meeting for Test Lead',
+        ]);
+    }
+
+    public function test_create_calendar_event_skips_when_business_id_missing(): void
+    {
+        $lead = $this->makeLead();
+
+        AutomationRule::create([
+            'name'          => 'Event without business',
+            'trigger_event' => 'lead.created',
+            'conditions'    => [],
+            'actions'       => [[
+                'type'       => 'create_calendar_event',
+                'title'      => 'Event',
+                'event_type' => 'reminder',
+                'all_day'    => true,
+            ]],
+            'is_active' => true,
+        ]);
+
+        // No business_id in context
+        $this->runJob('lead.created', [
+            'lead_id'   => $lead->id,
+            'client_id' => $this->client->id,
+        ]);
+
+        $this->assertDatabaseMissing('calendar_events', ['related_id' => $lead->id]);
+    }
+
+    public function test_create_calendar_event_skips_with_invalid_type(): void
+    {
+        $lead = $this->makeLead();
+
+        AutomationRule::create([
+            'name'          => 'Invalid type event',
+            'trigger_event' => 'lead.created',
+            'conditions'    => [],
+            'actions'       => [[
+                'type'        => 'create_calendar_event',
+                'title'       => 'Event',
+                'event_type'  => 'invalid_type',
+                'all_day'     => true,
+            ]],
+            'is_active' => true,
+        ]);
+
+        $this->runJob('lead.created', [
+            'lead_id'     => $lead->id,
+            'client_id'   => $this->client->id,
+            'business_id' => $this->business->id,
+        ]);
+
+        $this->assertDatabaseMissing('calendar_events', ['related_id' => $lead->id]);
+    }
+
+    public function test_create_calendar_event_non_all_day_sets_ends_at(): void
+    {
+        $lead = $this->makeLead();
+
+        AutomationRule::create([
+            'name'          => 'Timed event rule',
+            'trigger_event' => 'lead.created',
+            'conditions'    => [],
+            'actions'       => [[
+                'type'             => 'create_calendar_event',
+                'title'            => 'Timed call',
+                'event_type'       => 'call',
+                'all_day'          => false,
+                'duration_minutes' => 30,
+            ]],
+            'is_active' => true,
+        ]);
+
+        $this->runJob('lead.created', [
+            'lead_id'     => $lead->id,
+            'client_id'   => $this->client->id,
+            'business_id' => $this->business->id,
+        ]);
+
+        $event = CalendarEvent::withoutGlobalScope(BusinessScope::class)
+            ->where('related_id', $lead->id)
+            ->where('related_type', Lead::class)
+            ->first();
+
+        $this->assertNotNull($event);
+        $this->assertFalse($event->all_day);
+        $this->assertNotNull($event->ends_at);
+        $this->assertEquals(30, $event->starts_at->diffInMinutes($event->ends_at));
     }
 }

@@ -18,7 +18,7 @@ class PipelineStageChecklistSeeder extends Seeder
             ],
             'Contacted' => [
                 ['label' => 'Send introductory email',         'condition' => 'email_sent'],
-                ['label' => 'Schedule discovery call',         'condition' => null],
+                ['label' => 'Schedule discovery call',         'condition' => 'call_scheduled'],
                 ['label' => 'Qualify requirements & goals',    'condition' => null],
                 ['label' => 'Confirm decision-maker contact',  'condition' => 'has_contact'],
             ],
