@@ -31,6 +31,18 @@ class GoogleCalendarService
     }
 
     /**
+     * Check whether the stored token has a refresh_token.
+     * Without it, once the access_token expires the connection is permanently broken.
+     */
+    public function hasValidRefreshToken(int $userId, ?string $businessId): bool
+    {
+        return GoogleCalendarToken::where('user_id', $userId)
+            ->where('business_id', $businessId)
+            ->whereNotNull('refresh_token')
+            ->exists();
+    }
+
+    /**
      * Store or update token from Socialite OAuth callback.
      */
     public function saveToken(
@@ -187,24 +199,44 @@ class GoogleCalendarService
             $token->refresh();
         }
 
-        $response = Http::withToken($token->access_token)
-            ->get(self::API_BASE . '/users/me/calendarList', ['maxResults' => 250]);
+        $allItems  = [];
+        $pageToken = null;
+        $retried   = false;
 
-        if ($response->status() === 401) {
-            if (! $this->refreshAccessToken($token)) {
-                return [['id' => $token->calendar_id, 'summary' => 'Primary']];
+        do {
+            $params = ['maxResults' => 250];
+            if ($pageToken) {
+                $params['pageToken'] = $pageToken;
             }
-            $token->refresh();
-            $response = Http::withToken($token->access_token)
-                ->get(self::API_BASE . '/users/me/calendarList', ['maxResults' => 250]);
-        }
 
-        if (! $response->successful()) {
-            Log::warning('GoogleCalendar: fetchCalendarList failed', [
-                'user_id' => $userId,
-                'status'  => $response->status(),
-                'body'    => $response->json(),
-            ]);
+            $response = Http::withToken($token->access_token)
+                ->get(self::API_BASE . '/users/me/calendarList', $params);
+
+            if ($response->status() === 401 && ! $retried) {
+                $retried = true;
+                if (! $this->refreshAccessToken($token)) {
+                    break;
+                }
+                $token->refresh();
+                $response = Http::withToken($token->access_token)
+                    ->get(self::API_BASE . '/users/me/calendarList', $params);
+            }
+
+            if (! $response->successful()) {
+                Log::warning('GoogleCalendar: fetchCalendarList failed', [
+                    'user_id' => $userId,
+                    'status'  => $response->status(),
+                    'body'    => $response->json(),
+                ]);
+                break;
+            }
+
+            $data      = $response->json();
+            $allItems  = array_merge($allItems, $data['items'] ?? []);
+            $pageToken = $data['nextPageToken'] ?? null;
+        } while ($pageToken);
+
+        if (empty($allItems)) {
             return [['id' => $token->calendar_id, 'summary' => 'Primary']];
         }
 
@@ -214,7 +246,7 @@ class GoogleCalendarService
                 'summary' => $cal['summary'] ?? $cal['id'],
             ],
             array_filter(
-                $response->json('items', []),
+                $allItems,
                 fn ($cal) => ($cal['deleted'] ?? false) === false,
             )
         ));
@@ -238,15 +270,15 @@ class GoogleCalendarService
         Carbon  $start,
         Carbon  $end,
         ?string $calendarId = null,
-    ): array {
+    ): ?array {
         $token = $this->getToken($userId, $businessId);
         if (! $token) {
-            return [];
+            return null;
         }
 
         if ($token->isExpired()) {
             if (! $this->refreshAccessToken($token)) {
-                return [];
+                return null;
             }
             $token->refresh();
         }
@@ -273,7 +305,7 @@ class GoogleCalendarService
 
             if ($response->status() === 401) {
                 if (! $this->refreshAccessToken($token)) {
-                    break;
+                    return null;
                 }
                 $token->refresh();
                 $response = Http::withToken($token->access_token)
@@ -287,7 +319,7 @@ class GoogleCalendarService
                     'status'      => $response->status(),
                     'body'        => $response->json(),
                 ]);
-                break;
+                return null;
             }
 
             $data      = $response->json();

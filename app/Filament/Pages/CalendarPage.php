@@ -7,8 +7,10 @@ use App\Models\GoogleCalendarToken;
 use App\Services\Calendar\CalendarFeedService;
 use App\Services\Calendar\GoogleCalendarService;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class CalendarPage extends BasePage
@@ -38,7 +40,28 @@ class CalendarPage extends BasePage
         return route('admin.google-calendar.disconnect');
     }
 
-    // ── Livewire actions (called from Alpine via $wire) ───────────────────
+    // GC-4: warn when connected but refresh_token is missing
+    public function mount(): void
+    {
+        $userId     = auth()->id();
+        $businessId = currentBusiness()?->id;
+        $service    = app(GoogleCalendarService::class);
+
+        if ($this->getGoogleConnected() && ! $service->hasValidRefreshToken($userId, $businessId)) {
+            Notification::make()
+                ->title('Google Calendar: reconnect required')
+                ->body('Your Google token cannot be refreshed automatically. Reconnect to restore sync.')
+                ->warning()
+                ->persistent()
+                ->actions([
+                    \Filament\Notifications\Actions\Action::make('reconnect')
+                        ->label('Reconnect')
+                        ->url(route('admin.google-calendar.connect'))
+                        ->button(),
+                ])
+                ->send();
+        }
+    }
 
     /**
      * Quick-create a CalendarEvent from the inline modal.
@@ -160,36 +183,48 @@ class CalendarPage extends BasePage
 
     /**
      * Pull events from Google Calendar and create local CalendarEvent records.
-     * Skips events already imported (matched by google_event_id).
-     * Range: past 30 days → next 90 days.
+     * GC-2: accepts optional date range (shown as form in the header action).
      */
-    public function importFromGoogle(): void
+    public function importFromGoogle(?Carbon $from = null, ?Carbon $to = null): void
     {
         if (! $this->getGoogleConnected()) {
             Notification::make()->title('Google Calendar not connected')->danger()->send();
             return;
         }
 
-        $service      = app(GoogleCalendarService::class);
-        $start        = Carbon::now()->subDays(30)->startOfDay();
-        $end          = Carbon::now()->addDays(90)->endOfDay();
-        $businessId   = currentBusiness()?->id;
+        $service    = app(GoogleCalendarService::class);
+        $start      = ($from ?? Carbon::now()->subDays(30))->startOfDay();
+        $end        = ($to   ?? Carbon::now()->addDays(90))->endOfDay();
+        $businessId = currentBusiness()?->id;
 
         // Fetch from all calendars (primary + holidays, birthdays, etc.)
-        $calendars    = $service->fetchCalendarList(auth()->id(), $businessId);
+        $calendars = $service->fetchCalendarList(auth()->id(), $businessId);
         if (empty($calendars)) {
             $calendars = [['id' => 'primary', 'summary' => 'Primary']];
         }
 
-        $imported = 0;
-        $skipped  = 0;
+        $imported        = 0;
+        $skipped         = 0;
+        $failed          = 0;
+        $failedSummaries = [];
 
         foreach ($calendars as $calendar) {
             $googleEvents = $service->fetchEventsFromGoogle(
                 auth()->id(), $businessId, $start, $end, $calendar['id']
             );
 
-            \Illuminate\Support\Facades\Log::info('CalendarPage: importFromGoogle calendar', [
+            // GC-5: null = API error for this calendar
+            if ($googleEvents === null) {
+                $failed++;
+                $failedSummaries[] = $calendar['summary'];
+                Log::warning('CalendarPage: importFromGoogle skipped calendar (API error)', [
+                    'id'      => $calendar['id'],
+                    'summary' => $calendar['summary'],
+                ]);
+                continue;
+            }
+
+            Log::info('CalendarPage: importFromGoogle calendar', [
                 'id'          => $calendar['id'],
                 'summary'     => $calendar['summary'],
                 'event_count' => count($googleEvents),
@@ -201,13 +236,11 @@ class CalendarPage extends BasePage
                     continue;
                 }
 
-                // Skip already imported events
                 if (CalendarEvent::where('google_event_id', $googleId)->exists()) {
                     $skipped++;
                     continue;
                 }
 
-                // Skip cancelled Google events
                 if (($gEvent['status'] ?? '') === 'cancelled') {
                     continue;
                 }
@@ -230,7 +263,7 @@ class CalendarPage extends BasePage
                     'user_id'          => auth()->id(),
                     'title'            => strip_tags($gEvent['summary'] ?? '(no title)'),
                     'description'      => isset($gEvent['description']) ? strip_tags($gEvent['description']) : null,
-                    'type'             => 'meeting',
+                    'type'             => $this->resolveEventType($calendar['id']), // GC-1
                     'starts_at'        => $startsAt,
                     'ends_at'          => $endsAt,
                     'all_day'          => $allDay,
@@ -243,12 +276,46 @@ class CalendarPage extends BasePage
             }
         }
 
-        $msg = $imported > 0
-            ? "{$imported} event(s) imported from Google Calendar" . ($skipped > 0 ? " ({$skipped} already existed)" : '')
-            : ($skipped > 0 ? "All {$skipped} Google events already exist in the system" : 'No events found in Google Calendar for the selected range');
-
+        // Success notification
+        if ($imported > 0) {
+            $msg = "{$imported} event(s) imported from Google Calendar";
+            if ($skipped > 0) {
+                $msg .= " ({$skipped} already existed)";
+            }
+        } elseif ($skipped > 0) {
+            $msg = "All {$skipped} Google events already exist in the system";
+        } else {
+            $msg = 'No events found in Google Calendar for the selected range';
+        }
         Notification::make()->title($msg)->success()->send();
+
+        // GC-5: warn about calendars that failed
+        if ($failed > 0) {
+            Notification::make()
+                ->title("{$failed} calendar(s) could not be fetched")
+                ->body('Failed: ' . implode(', ', $failedSummaries))
+                ->warning()
+                ->send();
+        }
+
         $this->dispatch('calendarRefresh');
+    }
+
+    /**
+     * GC-1: Resolve CalendarEvent type from Google calendar ID.
+     * Holiday / birthday calendars → 'reminder'; everything else → 'meeting'.
+     */
+    private function resolveEventType(string $calendarId): string
+    {
+        if (
+            str_contains($calendarId, '#holiday') ||
+            str_contains($calendarId, '#holidays') ||
+            str_contains($calendarId, '#birthdays')
+        ) {
+            return 'reminder';
+        }
+
+        return 'meeting';
     }
 
     // ── Header actions ────────────────────────────────────────────────────
@@ -272,7 +339,20 @@ class CalendarPage extends BasePage
                 ->label('Import from Google')
                 ->icon('heroicon-o-cloud-arrow-down')
                 ->color('info')
-                ->action('importFromGoogle')
+                ->form([
+                    DatePicker::make('from')
+                        ->label('Import from')
+                        ->default(now()->subDays(30)->toDateString())
+                        ->required(),
+                    DatePicker::make('to')
+                        ->label('Import to')
+                        ->default(now()->addDays(90)->toDateString())
+                        ->required(),
+                ])
+                ->action(fn (array $data) => $this->importFromGoogle(
+                    Carbon::parse($data['from'])->startOfDay(),
+                    Carbon::parse($data['to'])->endOfDay(),
+                ))
                 ->visible(fn () => $this->getGoogleConnected()),
 
             Action::make('connectGoogle')
