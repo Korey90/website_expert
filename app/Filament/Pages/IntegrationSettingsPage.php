@@ -43,6 +43,16 @@ class IntegrationSettingsPage extends BasePage
             'twilio_token'    => Setting::get('twilio_token',      ''),
             'twilio_from'     => Setting::get('twilio_from',       config('services.twilio.from', '')),
             'sms_test_number' => Setting::get('sms_test_number',   ''),
+
+            // Openprovider Domain Registrar
+            'op_provider'    => Setting::get('op_provider',    config('services.domain_registrar.provider', 'manual')),
+            'op_username'    => Setting::get('op_username',    config('services.domain_registrar.openprovider.username', '')),
+            'op_password'    => Setting::get('op_password',    ''),
+            'op_reseller_id' => Setting::get('op_reseller_id', config('services.domain_registrar.openprovider.reseller_id', '')),
+            'op_sandbox'     => (bool) Setting::get('op_sandbox', config('services.domain_registrar.openprovider.sandbox', true)),
+
+            // Domain Pricing — Margins
+            'domain_default_margin' => (float) Setting::get('domain_default_margin', 50),
         ]);
     }
 
@@ -132,6 +142,51 @@ class IntegrationSettingsPage extends BasePage
                             ->placeholder('+44xxxxxxxxxx')
                             ->helperText('Your personal mobile — used only by the "Send test SMS" button.'),
                     ]),
+
+                Section::make('Domain Pricing — Margins')
+                    ->description('Default markup applied when syncing Openprovider wholesale prices to retail prices. Individual TLDs can override this in TLD Price List.')
+                    ->schema([
+                        Forms\Components\TextInput::make('domain_default_margin')
+                            ->label('Default margin (%)')
+                            ->numeric()
+                            ->step('0.5')
+                            ->minValue(0)
+                            ->maxValue(1000)
+                            ->default(50)
+                            ->suffix('%')
+                            ->helperText('50% means retail = wholesale × 1.5. Applied when syncing prices from Openprovider for TLDs with margin set to 0.'),
+                    ]),
+
+                Section::make('Domain Registrar — Openprovider')
+                    ->description('Openprovider reseller API credentials. Leave provider as "Manual" until you have tested the connection.')
+                    ->schema([
+                        Forms\Components\Select::make('op_provider')
+                            ->label('Active registrar')
+                            ->options([
+                                'manual'       => 'Manual (admin registers domains manually)',
+                                'openprovider' => 'Openprovider API',
+                            ])
+                            ->required()
+                            ->helperText('Switch to Openprovider only after verifying credentials with the test button.'),
+
+                        Forms\Components\TextInput::make('op_username')
+                            ->label('API username')
+                            ->placeholder('sales@yourdomain.com'),
+
+                        Forms\Components\TextInput::make('op_password')
+                            ->label('API password')
+                            ->password()
+                            ->revealable()
+                            ->placeholder('Leave blank to keep existing'),
+
+                        Forms\Components\TextInput::make('op_reseller_id')
+                            ->label('Reseller ID')
+                            ->placeholder('319848'),
+
+                        Forms\Components\Toggle::make('op_sandbox')
+                            ->label('Use sandbox / CTE environment')
+                            ->helperText('CTE requires separate access request to Openprovider. Leave disabled unless you have confirmed CTE access.'),
+                    ]),
             ])
             ->statePath('data');
     }
@@ -164,6 +219,22 @@ class IntegrationSettingsPage extends BasePage
         }
 
         Setting::set('sms_test_number', $data['sms_test_number'] ?? '', 'integrations');
+
+        // Openprovider settings
+        Setting::set('op_provider',    $data['op_provider']    ?? 'manual', 'integrations');
+        Setting::set('op_username',    $data['op_username']    ?? '',        'integrations');
+        Setting::set('op_reseller_id', $data['op_reseller_id'] ?? '',        'integrations');
+        Setting::set('op_sandbox',     $data['op_sandbox'] ? '1' : '0',     'integrations');
+
+        if (! empty($data['op_password'])) {
+            Setting::set('op_password', $data['op_password'], 'integrations');
+        }
+
+        // Domain pricing margin
+        Setting::set('domain_default_margin', $data['domain_default_margin'] ?? 50, 'integrations');
+
+        // Sync active provider to runtime config
+        config(['services.domain_registrar.provider' => $data['op_provider'] ?? 'manual']);
 
         Notification::make()
             ->title('Integration settings saved')
@@ -210,6 +281,64 @@ class IntegrationSettingsPage extends BasePage
         }
     }
 
+    public function testOpenproviderConnection(): void
+    {
+        // Build a temporary client using the values currently in the form (not yet saved)
+        $data     = $this->form->getState();
+        $username = $data['op_username'] ?? '';
+        $password = ! empty($data['op_password'])
+            ? $data['op_password']
+            : Setting::get('op_password', '');
+        $sandbox  = (bool) ($data['op_sandbox'] ?? true);
+
+        if (! $username || ! $password) {
+            Notification::make()
+                ->title('Missing credentials')
+                ->body('Enter your Openprovider username and password before testing.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $baseUrl = $sandbox
+            ? 'https://api.cte.openprovider.eu/v1beta'
+            : 'https://api.openprovider.eu/v1beta';
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::timeout(15)
+                ->post("{$baseUrl}/auth/login", [
+                    'username' => $username,
+                    'password' => $password,
+                    'ip'       => '0.0.0.0',
+                ]);
+
+            $json = $response->json();
+
+            if ($response->successful() && ($json['code'] ?? -1) === 0) {
+                // Bust cached token so next real request uses the fresh one
+                \Illuminate\Support\Facades\Cache::forget('openprovider_api_token');
+
+                Notification::make()
+                    ->title('Connection successful')
+                    ->body('Openprovider API authenticated correctly. You can now switch the Active registrar to Openprovider and save.')
+                    ->success()
+                    ->send();
+            } else {
+                Notification::make()
+                    ->title('Authentication failed')
+                    ->body($json['desc'] ?? $response->body())
+                    ->danger()
+                    ->send();
+            }
+        } catch (\Throwable $e) {
+            Notification::make()
+                ->title('Connection error')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -229,6 +358,12 @@ class IntegrationSettingsPage extends BasePage
                 ->label('Send test SMS')
                 ->action('sendTestSms')
                 ->icon('heroicon-o-device-phone-mobile')
+                ->color('gray'),
+
+            Action::make('testOpenprovider')
+                ->label('Test Openprovider connection')
+                ->action('testOpenproviderConnection')
+                ->icon('heroicon-o-globe-alt')
                 ->color('gray'),
         ];
     }

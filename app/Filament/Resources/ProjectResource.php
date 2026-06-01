@@ -256,6 +256,14 @@ class ProjectResource extends BaseResource
                         ->options(ProjectTemplate::where('is_active', true)->pluck('name', 'id'))
                         ->reactive()
                         ->helperText('Selecting a template will auto-create project phases on save.'),
+                    Forms\Components\Select::make('domain_order_id')
+                        ->label('Domain order')
+                        ->relationship('domainOrder', 'full_domain')
+                        ->searchable()
+                        ->preload()
+                        ->nullable()
+                        ->placeholder('None')
+                        ->columnSpanFull(),
                     Forms\Components\Select::make('currency')->options(['GBP' => '£ GBP', 'EUR' => '€ EUR', 'USD' => '$ USD'])->default('GBP'),
                     Forms\Components\TextInput::make('budget')->numeric()->prefix('£'),
                     Forms\Components\DatePicker::make('start_date'),

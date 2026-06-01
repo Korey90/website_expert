@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Mail\PaymentReceivedMail;
+use App\Models\DomainOrder;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Setting;
 use App\Services\ClientNotificationGate;
+use App\Services\Domain\DomainOrderService;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -117,6 +119,21 @@ class StripeWebhookController extends Controller
 
     private function handleCheckoutSessionCompleted(\Stripe\Checkout\Session $session): void
     {
+        // ── Domain order payment ────────────────────────────────────────────
+        $domainOrderId = $session->metadata->domain_order_id ?? null;
+        if ($domainOrderId) {
+            $order = DomainOrder::find($domainOrderId);
+            if ($order && $order->status === 'pending_payment') {
+                app(DomainOrderService::class)->markAsPaid(
+                    $order,
+                    $session->payment_intent ?? $session->id,
+                );
+                Log::info("Stripe: domain order #{$domainOrderId} marked as paid via session {$session->id}");
+            }
+            return;
+        }
+
+        // ── Invoice payment ─────────────────────────────────────────────────
         $invoiceId = $session->metadata->invoice_id ?? null;
         if (! $invoiceId) {
             return;

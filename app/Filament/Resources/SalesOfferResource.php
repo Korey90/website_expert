@@ -9,7 +9,9 @@ use App\Scopes\BusinessScope;
 use App\Support\PermissionHelper;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -24,7 +26,45 @@ class SalesOfferResource extends BaseResource
 
     public static function form(Schema $form): Schema
     {
-        return $form->schema([]);
+        return $form->schema([
+            Section::make('Offer Details')
+                ->columns(3)
+                ->schema([
+                    Forms\Components\TextInput::make('title')
+                        ->required()
+                        ->maxLength(255)
+                        ->columnSpan(2),
+
+                    Forms\Components\Select::make('language')
+                        ->options(['en' => 'English', 'pl' => 'Polish', 'pt' => 'Portuguese'])
+                        ->default('en')
+                        ->required(),
+
+                    Forms\Components\Select::make('status')
+                        ->options(['draft' => 'Draft', 'sent' => 'Sent', 'viewed' => 'Viewed', 'converted' => 'Converted'])
+                        ->default('draft')
+                        ->required(),
+
+                    Forms\Components\Select::make('domain_order_id')
+                        ->label('Domain Order')
+                        ->relationship('domainOrder', 'full_domain')
+                        ->searchable()
+                        ->preload()
+                        ->nullable()
+                        ->placeholder('None')
+                        ->columnSpan(2),
+                ]),
+
+            Forms\Components\Textarea::make('body')
+                ->label('Body')
+                ->rows(12)
+                ->columnSpanFull(),
+
+            Forms\Components\Textarea::make('notes')
+                ->label('Internal Notes')
+                ->rows(3)
+                ->columnSpanFull(),
+        ]);
     }
 
     public static function table(Table $table): Table

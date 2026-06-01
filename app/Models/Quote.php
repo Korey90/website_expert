@@ -13,7 +13,7 @@ class Quote extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'number', 'client_id', 'lead_id', 'created_by',
+        'number', 'client_id', 'lead_id', 'domain_order_id', 'created_by',
         'status', 'currency', 'subtotal', 'discount_amount',
         'vat_rate', 'vat_amount', 'total', 'notes', 'terms',
         'valid_until', 'sent_at', 'accepted_at', 'rejected_at',
@@ -49,6 +49,11 @@ class Quote extends Model
     public function items(): HasMany
     {
         return $this->hasMany(QuoteItem::class)->orderBy('order');
+    }
+
+    public function domainOrder(): BelongsTo
+    {
+        return $this->belongsTo(DomainOrder::class);
     }
 
     public function recalculate(): void

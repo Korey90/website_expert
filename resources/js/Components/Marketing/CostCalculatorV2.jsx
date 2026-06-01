@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { pushEvent } from '@/utils/dataLayer';
 
 /**
@@ -130,11 +130,14 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
     const [a, setA]                 = useState({
         projectType: '', pages: 5, design: '', cms: '',
         integrations: [], seoPackage: '', deadline: '', hosting: '',
+        wantsDomain: null, domain: '', domainYears: 1,
         companyName: '', contactEmail: '',
     });
     const [submitted,   setSubmitted]  = useState(false);
     const [submitting,  setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState(false);
+    const [domainStatus, setDomainStatus] = useState('idle'); // 'idle' | 'checking' | 'available' | 'taken' | 'error'
+    const [domainPrice,  setDomainPrice]  = useState(null);
 
     const set       = useCallback((k, v) => setA(prev => ({ ...prev, [k]: v })), []);
     const toggleInt = useCallback((k)    => setA(prev => {
@@ -144,16 +147,55 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
         return { ...prev, integrations: list };
     }), []);
 
+    // Debounced domain availability check (1.5 s after the user stops typing)
+    useEffect(() => {
+        if (a.wantsDomain !== 'yes' || a.domain.trim().length < 3) {
+            setDomainStatus('idle');
+            setDomainPrice(null);
+            return;
+        }
+        setDomainStatus('checking');
+        const timer = setTimeout(async () => {
+            try {
+                const res = await fetch(
+                    route('domains.availability') + '?q=' + encodeURIComponent(a.domain),
+                    { headers: { 'X-Requested-With': 'XMLHttpRequest' } },
+                );
+                if (!res.ok) throw new Error('network');
+                const data = await res.json();
+                const needle = a.domain.toLowerCase();
+                const match  = data.results.find(r => r.domain.toLowerCase() === needle);
+                if (match) {
+                    setDomainStatus(match.is_available ? 'available' : 'taken');
+                    setDomainPrice(match.is_available ? match.register_price : null);
+                } else {
+                    const first = data.results.find(r => r.is_available);
+                    setDomainStatus(first ? 'available' : (data.results.length ? 'taken' : 'error'));
+                    setDomainPrice(first ? first.register_price : null);
+                }
+            } catch {
+                setDomainStatus('error');
+                setDomainPrice(null);
+            }
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, [a.domain, a.wantsDomain]);
+
     const next  = () => setStep(s => s + 1);
     const back  = () => setStep(s => s - 1);
     const reset = () => {
         setStep(1);
-        setA({ projectType: '', pages: 5, design: '', cms: '', integrations: [], seoPackage: '', deadline: '', hosting: '', companyName: '', contactEmail: '' });
+        setA({ projectType: '', pages: 5, design: '', cms: '', integrations: [], seoPackage: '', deadline: '', hosting: '', wantsDomain: null, domain: '', domainYears: 1, companyName: '', contactEmail: '' });
         setSubmitted(false);
         setSubmitError(false);
+        setDomainStatus('idle');
+        setDomainPrice(null);
     };
 
     const estimate = calcEstimate(a, pricing);
+
+    // Domain step is inserted after all DB-driven steps
+    const DOMAIN_STEP = TOTAL_STEPS + 1;
 
     const handleSubmit = useCallback(async () => {
         if (!a.contactEmail || submitting) return;
@@ -210,7 +252,7 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
     // -----------------------------------------------------------------------
     // Result screen
     // -----------------------------------------------------------------------
-    if (step > TOTAL_STEPS && estimate) {
+    if (step > DOMAIN_STEP && estimate) {
         return (
             <div className="rounded-2xl border border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 p-6 sm:p-8 text-center max-w-2xl mx-auto">
                 <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-brand-500/10">
@@ -235,6 +277,11 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
                             {s('hosting_addon_label', '+ hosting')} {fmt(pricing.hosting[a.hosting].cost)}{perYearLabel}
                         </p>
                     )}
+                    {a.wantsDomain === 'yes' && a.domain && (
+                        <p className="text-xs text-neutral-400 mt-1">
+                            + {a.domain} ({a.domainYears} {a.domainYears === 1 ? s('year', 'year') : s('years', 'years')}) {s('domain_registration_note', 'domain registration')}
+                        </p>
+                    )}
                 </div>
 
                 <div className="flex flex-wrap gap-2 justify-center mb-6">
@@ -249,6 +296,11 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
                     {a.integrations.length > 0 && (
                         <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
                             {a.integrations.length} {s('integrations_chip', 'integrations')}
+                        </span>
+                    )}
+                    {a.wantsDomain === 'yes' && a.domain && (
+                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-brand-500/10 text-brand-500">
+                            {a.domain}
                         </span>
                     )}
                     {a.deadline && pricing?.deadline?.[a.deadline] && (
@@ -500,7 +552,95 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
                         />
                     ))}
                 </div>
-                <NavBtns onBack={back} onNext={next} canNext={!!a.hosting} nextLabel={calcLabel} backLabel={backLabel} />
+                <NavBtns onBack={back} onNext={next} canNext={!!a.hosting} nextLabel={nextLabel} backLabel={backLabel} />
+            </>
+        ),
+
+        [DOMAIN_STEP]: (
+            <>
+                <ProgressBar step={DOMAIN_STEP} total={DOMAIN_STEP} />
+                <p className="text-xs uppercase tracking-widest text-brand-500 font-semibold mb-1">
+                    {s('domain_step_label', 'Domain')}
+                </p>
+                <h3 className="font-display text-xl font-bold text-neutral-900 dark:text-white mb-6">
+                    {s('domain_step_title', 'Do you need a domain name?')}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                    {[
+                        { val: 'yes',  icon: '🌐', label: s('domain_yes', 'Yes, register one') },
+                        { val: 'have', icon: '✅', label: s('domain_have', 'I already have one') },
+                        { val: 'no',   icon: '⏭️', label: s('domain_no',  'Not needed') },
+                    ].map(({ val, icon, label }) => (
+                        <button
+                            key={val}
+                            onClick={() => set('wantsDomain', val)}
+                            className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all text-sm font-medium
+                                ${a.wantsDomain === val
+                                    ? 'border-brand-500 bg-brand-500/10 text-brand-600 dark:text-brand-400'
+                                    : 'border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-brand-300'}`}
+                        >
+                            <span className="text-2xl">{icon}</span>
+                            {label}
+                        </button>
+                    ))}
+                </div>
+
+                {a.wantsDomain === 'yes' && (
+                    <div className="space-y-3 mb-4">
+                        <div>
+                            <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-1">
+                                {s('domain_name_label', 'Domain name (e.g. mybusiness.co.uk)')}
+                            </label>
+                            <input
+                                type="text"
+                                value={a.domain}
+                                onChange={e => set('domain', e.target.value.toLowerCase().replace(/[^a-z0-9.-]/g, ''))}
+                                placeholder="example.co.uk"
+                                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            />
+                            {a.domain.trim().length >= 3 && domainStatus !== 'idle' && (
+                                <p className={`mt-1.5 text-xs font-medium ${
+                                    domainStatus === 'checking'  ? 'text-neutral-400' :
+                                    domainStatus === 'available' ? 'text-green-600 dark:text-green-400' :
+                                    domainStatus === 'taken'     ? 'text-red-500 dark:text-red-400' :
+                                                                   'text-amber-500 dark:text-amber-400'
+                                }`}>
+                                    {domainStatus === 'checking'  && ('⏳ ' + s('domain_checking', 'Checking availability…'))}
+                                    {domainStatus === 'available' && ('✅ ' + s('domain_available', 'Available') + (domainPrice ? ` — £${domainPrice}/yr` : ''))}
+                                    {domainStatus === 'taken'     && ('❌ ' + s('domain_taken', 'Not available — try a different name or extension'))}
+                                    {domainStatus === 'error'     && ('⚠️ ' + s('domain_check_error', 'Could not check availability'))}
+                                </p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-1">
+                                {s('domain_years_label', 'Registration period')}
+                            </label>
+                            <div className="flex gap-2">
+                                {[1, 2, 3].map(y => (
+                                    <button
+                                        key={y}
+                                        onClick={() => set('domainYears', y)}
+                                        className={`px-4 py-2 rounded-xl border-2 text-sm font-medium transition-all
+                                            ${a.domainYears === y
+                                                ? 'border-brand-500 bg-brand-500/10 text-brand-600 dark:text-brand-400'
+                                                : 'border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-brand-300'}`}
+                                    >
+                                        {y} {y === 1 ? s('year', 'year') : s('years', 'years')}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <NavBtns
+                    onBack={back}
+                    onNext={next}
+                    canNext={a.wantsDomain !== null && (a.wantsDomain !== 'yes' || a.domain.trim().length > 2)}
+                    nextLabel={calcLabel}
+                    backLabel={backLabel}
+                />
             </>
         ),
     };

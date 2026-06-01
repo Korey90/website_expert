@@ -14,7 +14,7 @@ class Project extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'title', 'client_id', 'lead_id', 'template_id', 'assigned_to',
+        'title', 'client_id', 'lead_id', 'domain_order_id', 'template_id', 'assigned_to',
         'service_type', 'status', 'description', 'budget', 'currency',
         'start_date', 'deadline', 'completed_at', 'portal_token',
     ];
@@ -78,5 +78,10 @@ class Project extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function domainOrder(): BelongsTo
+    {
+        return $this->belongsTo(DomainOrder::class);
     }
 }

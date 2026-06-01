@@ -82,4 +82,24 @@ return [
         'secret_key' => env('RECAPTCHA_SECRET_KEY'),
     ],
 
+    'domain_registrar' => [
+        // Possible values: manual | opensrs | openprovider
+        // 'manual' means the admin registers domains manually (MVP mode)
+        'provider' => env('DOMAIN_REGISTRAR_PROVIDER', 'manual'),
+
+        'opensrs' => [
+            'username'   => env('OPENSRS_USERNAME'),
+            'api_key'    => env('OPENSRS_API_KEY'),
+            'reseller_id'=> env('OPENSRS_RESELLER_ID'),
+            'sandbox'    => env('OPENSRS_SANDBOX', true),
+        ],
+
+        'openprovider' => [
+            'username'    => env('OPENPROVIDER_USERNAME'),
+            'password'    => env('OPENPROVIDER_PASSWORD'),
+            'reseller_id' => env('OPENPROVIDER_RESELLER_ID'),
+            'sandbox'     => env('OPENPROVIDER_SANDBOX', true),
+        ],
+    ],
+
 ];

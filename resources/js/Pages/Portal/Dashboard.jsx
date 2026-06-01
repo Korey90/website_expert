@@ -74,7 +74,7 @@ function TimelineItem({ item }) {
     );
 }
 
-export default function Dashboard({ client, projects, invoices, quotes, timeline = [] }) {
+export default function Dashboard({ client, projects, invoices, quotes, timeline = [], domains = [], domainsExpiringCount = 0 }) {
     const t = usePortalTrans();
     const { flash = {} } = usePage().props;
 
@@ -130,11 +130,17 @@ export default function Dashboard({ client, projects, invoices, quotes, timeline
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                     <SummaryCard title={t('active_projects')} value={activeProjects.length}  icon="📁" colorClass="bg-blue-50 text-blue-600" />
                     <SummaryCard title={t('open_invoices')}   value={pendingInvoices.length}  icon="🧾" colorClass="bg-red-50 text-red-600" />
                     <SummaryCard title={t('pending_quotes')}  value={pendingQuotes.length}    icon="📋" colorClass="bg-yellow-50 text-yellow-600" />
                     <SummaryCard title={t('total_projects')}  value={projects.length}          icon="✅" colorClass="bg-green-50 text-green-600" />
+                    <SummaryCard
+                        title="Your Domains"
+                        value={domains.length}
+                        icon="🌐"
+                        colorClass={domainsExpiringCount > 0 ? 'bg-orange-50 text-orange-600' : 'bg-indigo-50 text-indigo-600'}
+                    />
                 </div>
 
                 {/* Recent Projects */}
@@ -188,6 +194,66 @@ export default function Dashboard({ client, projects, invoices, quotes, timeline
                         )}
                     </div>
                 </section>
+
+                {/* Your Domains */}
+                {domains.length > 0 && (
+                    <section>
+                        <div className="flex justify-between items-center mb-3">
+                            <h2 className="text-lg font-semibold text-gray-800">Your Domains</h2>
+                            <Link href={route('portal.domains.index')} className="text-sm text-red-600 hover:underline">View all</Link>
+                        </div>
+                        {domainsExpiringCount > 0 && (
+                            <div className="mb-3 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800 flex items-center gap-2">
+                                <span>⚠️</span>
+                                <span>
+                                    {domainsExpiringCount === 1
+                                        ? '1 domain is expiring within 30 days.'
+                                        : `${domainsExpiringCount} domains are expiring within 30 days.`}
+                                    {' '}
+                                    <Link href={route('portal.domains.index')} className="underline font-medium">Renew now →</Link>
+                                </span>
+                            </div>
+                        )}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <table className="min-w-full divide-y divide-gray-100">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Domain</th>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Expires</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {domains.map(d => {
+                                        const expiresAt = d.expires_at ? new Date(d.expires_at) : null;
+                                        const expiresStr = expiresAt
+                                            ? expiresAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                                            : '—';
+                                        const daysLeft = expiresAt ? Math.ceil((expiresAt - Date.now()) / 86400000) : null;
+                                        const expiringSoon = daysLeft !== null && daysLeft <= 30 && daysLeft >= 0;
+                                        return (
+                                            <tr key={d.id} className="hover:bg-gray-50">
+                                                <td className="px-5 py-3">
+                                                    <Link href={route('portal.domains.show', d.id)} className="text-sm font-medium text-red-600 hover:underline">
+                                                        {d.full_domain}
+                                                    </Link>
+                                                </td>
+                                                <td className="px-5 py-3">
+                                                    <StatusBadge status={d.status} />
+                                                </td>
+                                                <td className="px-5 py-3 hidden sm:table-cell">
+                                                    <span className={`text-sm ${expiringSoon ? 'text-orange-600 font-medium' : 'text-gray-600'}`}>
+                                                        {expiringSoon ? `⚠️ ` : ''}{expiresStr}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                )}
 
                 {/* Recent Invoices */}
                 <section>

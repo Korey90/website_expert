@@ -26,6 +26,11 @@ use App\Http\Controllers\Portal\PaymentController as PortalPaymentController;
 use App\Http\Controllers\Portal\PaymentResultController as PortalPaymentResultController;
 use App\Http\Controllers\Portal\ProjectController as PortalProjectController;
 use App\Http\Controllers\Portal\QuoteController as PortalQuoteController;
+use App\Http\Controllers\Domain\DomainOrderController;
+use App\Http\Controllers\Domain\PublicDomainController;
+use App\Http\Controllers\Portal\DomainController as PortalDomainController;
+use App\Http\Controllers\Portal\DomainOrderController as PortalDomainOrderController;
+use App\Http\Controllers\Portal\DomainCheckoutController as PortalDomainCheckoutController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\PortalController;
@@ -111,6 +116,20 @@ Route::get('/lang/{locale}', function (string $locale) {
     return redirect()->back(302, [], route('home'));
 })->where('locale', '[a-z]{2}')->name('lang.switch');
 
+// Domain registration public pages
+Route::get('/domains', [PublicDomainController::class, 'index'])->name('domains.index');
+Route::get('/domains/check', [PublicDomainController::class, 'check'])->name('domains.check');
+Route::get('/domains/availability', [PublicDomainController::class, 'availability'])->name('domains.availability');
+
+// Domain order flow — requires auth (public-facing layout, not portal)
+Route::middleware('auth')->group(function () {
+    Route::get('/domains/order', [DomainOrderController::class, 'order'])->name('domains.order');
+    Route::post('/domains/order', [DomainOrderController::class, 'store'])->name('domains.order.store');
+    Route::get('/domains/order/{order}/checkout', [DomainOrderController::class, 'checkout'])->name('domains.checkout');
+    Route::post('/domains/order/{order}/checkout', [DomainOrderController::class, 'pay'])->name('domains.pay');
+    Route::get('/domains/order/{order}/result', [DomainOrderController::class, 'result'])->name('domains.result');
+});
+
 Route::get('/contact',        [ContactController::class, 'index'])->name('contact.index');
 Route::get('/about-us',       [ContactController::class, 'aboutUs'])->name('about.index');
 Route::post('/contact',       [ContactController::class, 'store'])->name('contact.store');
@@ -128,6 +147,10 @@ Route::post('/stripe/subscription/webhook', [\App\Http\Controllers\Billing\Subsc
 
 // PayU IPN — CSRF exempt (see bootstrap/app.php)
 Route::post('/payu/notify', [PayuWebhookController::class, 'notify'])->name('payu.notify');
+
+// Domain registrar provider webhooks — CSRF exempt (see bootstrap/app.php)
+Route::post('/webhooks/domain/{provider}', \App\Http\Controllers\Domain\DomainProviderWebhookController::class)
+    ->name('webhooks.domain');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -172,6 +195,17 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/settings/notifications', [PortalNotificationController::class, 'settings'])->name('settings.notifications');
             Route::post('/settings/notifications', [PortalNotificationController::class, 'updateSettings'])->name('settings.notifications.update');
+
+            // Domain management + ordering flow
+            Route::prefix('domains')->name('domains.')->group(function () {
+                Route::get('/', [PortalDomainController::class, 'index'])->name('index');
+                Route::get('/order', [PortalDomainController::class, 'order'])->name('order');
+                Route::post('/order', [PortalDomainOrderController::class, 'store'])->name('order.store');
+                Route::get('/order/{order}/checkout', [PortalDomainCheckoutController::class, 'show'])->name('checkout');
+                Route::post('/order/{order}/checkout', [PortalDomainCheckoutController::class, 'pay'])->name('pay');
+                Route::get('/order/{order}/result', [PortalDomainCheckoutController::class, 'result'])->name('result');
+                Route::get('/{domain}', [PortalDomainController::class, 'show'])->name('show');
+            });
         });
 
         Route::get('/leads/{lead}', [PortalLeadController::class, 'show'])

@@ -55,6 +55,12 @@ class LegalSettingsPage extends BasePage
             'cookies_version'              => Setting::get('legal.cookies_version',              '1.0'),
             'accessibility_effective_date' => Setting::get('legal.accessibility_effective_date', ''),
             'accessibility_version'        => Setting::get('legal.accessibility_version',        '1.0'),
+            // Domain Registration — Legal
+            'domain_terms_effective_date' => Setting::get('legal.domain_terms_effective_date', ''),
+            'domain_terms_version'        => Setting::get('legal.domain_terms_version',        '1.0'),
+            'domain_registrar_name'       => Setting::get('legal.domain_registrar_name',       'Openprovider B.V.'),
+            'domain_abuse_email'          => Setting::get('legal.domain_abuse_email',          ''),
+            'domain_dispute_email'        => Setting::get('legal.domain_dispute_email',        ''),
         ]);
     }
 
@@ -180,6 +186,31 @@ class LegalSettingsPage extends BasePage
                             ->label('Accessibility Statement — version')
                             ->placeholder('1.0'),
                     ]),
+
+                Section::make('Domain Registration — Legal')
+                    ->description('Regulatory disclosures for domain registration services. Used in Terms & domain-specific documents.')
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\DatePicker::make('domain_terms_effective_date')
+                            ->label('Domain T&C — effective from')
+                            ->displayFormat('d M Y'),
+                        Forms\Components\TextInput::make('domain_terms_version')
+                            ->label('Domain T&C — version')
+                            ->placeholder('1.0'),
+                        Forms\Components\TextInput::make('domain_registrar_name')
+                            ->label('Registrar name (regulatory disclosure)')
+                            ->placeholder('Openprovider B.V.')
+                            ->helperText('Disclosed to clients as the underlying domain registrar.')
+                            ->columnSpanFull(),
+                        Forms\Components\TextInput::make('domain_abuse_email')
+                            ->label('Domain abuse contact email')
+                            ->email()
+                            ->placeholder('abuse@yourdomain.co.uk'),
+                        Forms\Components\TextInput::make('domain_dispute_email')
+                            ->label('Domain dispute contact email')
+                            ->email()
+                            ->placeholder('disputes@yourdomain.co.uk'),
+                    ]),
             ])
             ->statePath('data');
     }
@@ -214,6 +245,11 @@ class LegalSettingsPage extends BasePage
             'cookies_version'              => 'legal.cookies_version',
             'accessibility_effective_date' => 'legal.accessibility_effective_date',
             'accessibility_version'        => 'legal.accessibility_version',
+            'domain_terms_effective_date'  => 'legal.domain_terms_effective_date',
+            'domain_terms_version'         => 'legal.domain_terms_version',
+            'domain_registrar_name'        => 'legal.domain_registrar_name',
+            'domain_abuse_email'           => 'legal.domain_abuse_email',
+            'domain_dispute_email'         => 'legal.domain_dispute_email',
         ];
 
         foreach ($map as $field => $key) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Models\ClientActivity;
+use App\Models\Domain;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Models\Quote;
@@ -18,11 +19,13 @@ class DashboardController extends BasePortalController
 
         if (! $client) {
             return Inertia::render('Portal/Dashboard', [
-                'client'   => null,
-                'projects' => [],
-                'invoices' => [],
-                'quotes'   => [],
-                'timeline' => [],
+                'client'               => null,
+                'projects'             => [],
+                'invoices'             => [],
+                'quotes'               => [],
+                'timeline'             => [],
+                'domains'              => [],
+                'domainsExpiringCount' => 0,
             ]);
         }
 
@@ -52,12 +55,26 @@ class DashboardController extends BasePortalController
             ->take(10)
             ->get(['id', 'event_type', 'title', 'description', 'created_at']);
 
+        $domains = Domain::where('client_id', $client->id)
+            ->whereIn('status', ['active', 'pending', 'expired'])
+            ->orderBy('expires_at')
+            ->take(5)
+            ->get(['id', 'full_domain', 'status', 'expires_at', 'auto_renew']);
+
+        $domainsExpiringCount = Domain::where('client_id', $client->id)
+            ->where('status', 'active')
+            ->whereNotNull('expires_at')
+            ->whereBetween('expires_at', [now(), now()->addDays(30)])
+            ->count();
+
         return Inertia::render('Portal/Dashboard', [
-            'client'   => $client->only('id', 'company_name', 'primary_contact_name'),
-            'projects' => $projects,
-            'invoices' => $invoices,
-            'quotes'   => $quotes,
-            'timeline' => $timeline,
+            'client'                  => $client->only('id', 'company_name', 'primary_contact_name'),
+            'projects'                => $projects,
+            'invoices'                => $invoices,
+            'quotes'                  => $quotes,
+            'timeline'                => $timeline,
+            'domains'                 => $domains,
+            'domainsExpiringCount'    => $domainsExpiringCount,
         ]);
     }
 }

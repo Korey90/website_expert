@@ -103,6 +103,19 @@ class AppServiceProvider extends ServiceProvider
                     ['driver' => $mailer],
                 ));
             }
+
+            // Openprovider domain registrar settings
+            $opProvider   = Setting::get('op_provider');
+            $opUsername   = Setting::get('op_username');
+            $opPassword   = Setting::get('op_password');
+            $opResellerId = Setting::get('op_reseller_id');
+            $opSandbox    = Setting::get('op_sandbox');
+
+            if ($opProvider)   Config::set('services.domain_registrar.provider',                   $opProvider);
+            if ($opUsername)   Config::set('services.domain_registrar.openprovider.username',       $opUsername);
+            if ($opPassword)   Config::set('services.domain_registrar.openprovider.password',       $opPassword);
+            if ($opResellerId) Config::set('services.domain_registrar.openprovider.reseller_id',    $opResellerId);
+            if ($opSandbox !== null) Config::set('services.domain_registrar.openprovider.sandbox',  $opSandbox !== '0');
         } catch (\Throwable) {
             // DB unavailable (e.g. first deploy) — silently fall back to .env
         }

@@ -36,6 +36,13 @@ class QuoteResource extends BaseResource
                         ->label('Client')
                         ->options(Client::withTrashed()->pluck('company_name', 'id'))
                         ->searchable()->required(),
+                    Forms\Components\Select::make('domain_order_id')
+                        ->label('Domain order')
+                        ->relationship('domainOrder', 'full_domain')
+                        ->searchable()
+                        ->preload()
+                        ->nullable()
+                        ->placeholder('None'),
                     Forms\Components\Select::make('status')
                         ->options(['draft' => 'Draft', 'sent' => 'Sent', 'accepted' => 'Accepted', 'rejected' => 'Rejected', 'expired' => 'Expired'])
                         ->default('draft')->required(),

@@ -8,6 +8,7 @@ const T = {
     contracts:        { en: 'Contracts',         pl: 'Umowy',            pt: 'Contratos' },
     invoices:         { en: 'Invoices',          pl: 'Faktury',          pt: 'Faturas' },
     quotes:           { en: 'Quotes',            pl: 'Wyceny',           pt: 'Orçamentos' },
+    domains:          { en: 'Domains',           pl: 'Domeny',           pt: 'Domínios' },
     growthTools:      { en: 'Growth Tools',      pl: 'Narzędzia wzrostu',pt: 'Ferramentas' },
     landingPages:     { en: 'Landing Pages',     pl: 'Landing Pages',    pt: 'Landing Pages' },
     aiGenerator:      { en: 'AI Generator',      pl: 'Generator AI',     pt: 'Gerador AI' },
@@ -41,7 +42,8 @@ export default function PortalLayout({ client, children }) {
                 { href: route('portal.projects'),  label: t('projects'),   icon: '📁' },
                 { href: route('portal.contracts'), label: t('contracts'),  icon: '📝' },
                 { href: route('portal.invoices'),  label: t('invoices'),   icon: '🧾' },
-                { href: route('portal.quotes'),    label: t('quotes'),     icon: '📋' },
+                { href: route('portal.quotes'),         label: t('quotes'),   icon: '📋' },
+                { href: route('portal.domains.index'),  label: t('domains'),  icon: '🌐' },
             ],
         } : null,
         canAccessWorkspace ? {

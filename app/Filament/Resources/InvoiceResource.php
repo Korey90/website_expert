@@ -46,6 +46,13 @@ class InvoiceResource extends BaseResource
                         ->label('Project')
                         ->options(Project::withTrashed()->pluck('title', 'id'))
                         ->searchable(),
+                    Forms\Components\Select::make('domain_order_id')
+                        ->label('Domain order')
+                        ->relationship('domainOrder', 'full_domain')
+                        ->searchable()
+                        ->preload()
+                        ->nullable()
+                        ->placeholder('None'),
                     Forms\Components\Select::make('status')
                         ->options(['draft' => 'Draft', 'sent' => 'Sent', 'partially_paid' => 'Partially Paid', 'paid' => 'Paid', 'overdue' => 'Overdue', 'cancelled' => 'Cancelled'])
                         ->default('draft')->required(),

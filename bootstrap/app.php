@@ -30,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'stripe/webhook',
             'payu/notify',
+            'webhooks/domain/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -47,5 +48,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Daily: prune old automation logs based on retention setting (default 90 days)
         $schedule->command('automation:prune-logs')->dailyAt('03:00')->onOneServer();
+
+        // Daily: check domain expiry and dispatch renewal reminder emails (30/14/7/1 days)
+        $schedule->job(new \App\Jobs\CheckDomainExpiryJob)->dailyAt('08:30')->withoutOverlapping()->onOneServer();
     })
     ->create();

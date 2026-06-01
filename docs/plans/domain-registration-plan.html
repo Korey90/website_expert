@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>domain-registration-plan.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="plan-domain-registration-feature--websiteexperts">Plan: Domain Registration Feature — WebsiteExperts</h1>
+<p><strong>Data planu:</strong> 2026-05-29<br>
+<strong>Etap realizacji:</strong> MVP (ręczny) → Integracja API → Bundling<br>
+<strong>Stack:</strong> Laravel 13 + Inertia.js/React + Filament 5 + Stripe</p>
+<hr>
+<h2 id="kontekst-i-podejście">Kontekst i podejście</h2>
+<p>Sprzedaż domen jako <strong>entry product</strong> prowadzący do strony, hostingu, email, SSL i maintenance.<br>
+Nie budujemy pełnego GoDaddy. Budujemy:</p>
+<ol>
+<li>Najpierw ręczny MVP (formularz + zamówienie + Stripe + ręczna rejestracja u providera)</li>
+<li>Potem automatyzację przez API (OpenSRS lub Openprovider)</li>
+<li>Na końcu bundling z innymi produktami platformy</li>
+</ol>
+<hr>
+<h2 id="etap-1--mvp-ręczny--półautomatyczny">ETAP 1 — MVP (ręczny / półautomatyczny)</h2>
+<h3 id="11-baza-danych--nowe-migracje">1.1 Baza danych — nowe migracje</h3>
+<p><strong>Kolejność tworzenia tabel:</strong></p>
+<pre class="hljs"><code><div>domain_orders         — zamówienia domen
+domains               — zarejestrowane domeny
+domain_contacts       — dane kontaktowe do rejestracji (WHOIS)
+domain_price_list     — cennik (snapshot na potrzeby wyceny)
+domain_renewals       — harmonogram odnowień
+domain_events         — log zdarzeń domeny (rejestracja, transfer, odnowienie)
+</div></code></pre>
+<p><strong>Schemat <code>domain_orders</code>:</strong></p>
+<pre class="hljs"><code><div>id, business_id, user_id, domain_name, tld, years,
+action (register|transfer|renew),
+status (pending_payment|paid|registering|completed|failed|cancelled),
+provider, wholesale_price, retail_price, currency,
+payment_id, stripe_payment_intent_id,
+notes, admin_notes,
+timestamps
+</div></code></pre>
+<p><strong>Schemat <code>domains</code>:</strong></p>
+<pre class="hljs"><code><div>id, business_id, user_id, domain_order_id,
+provider, provider_domain_id,
+name, tld, full_domain,
+status (pending|active|expired|transferred|cancelled),
+registered_at, expires_at, auto_renew (bool),
+nameservers (json), dns_records (json),
+whois_privacy (bool),
+timestamps
+</div></code></pre>
+<p><strong>Schemat <code>domain_price_list</code>:</strong></p>
+<pre class="hljs"><code><div>id, tld, register_price, renew_price, transfer_price,
+currency, is_active, notes,
+timestamps
+</div></code></pre>
+<p><strong>Schemat <code>domain_renewals</code>:</strong></p>
+<pre class="hljs"><code><div>id, domain_id, due_date, years, status (pending|completed|failed),
+notified_30d, notified_14d, notified_7d, notified_1d,
+timestamps
+</div></code></pre>
+<hr>
+<h3 id="12-modele-laravel">1.2 Modele Laravel</h3>
+<ul>
+<li><code>DomainOrder</code> — relacje: <code>belongsTo(Business)</code>, <code>belongsTo(User)</code>, <code>hasOne(Domain)</code></li>
+<li><code>Domain</code> — relacje: <code>belongsTo(Business)</code>, <code>belongsTo(User)</code>, <code>belongsTo(DomainOrder)</code>, <code>hasMany(DomainRenewal)</code>, <code>hasMany(DomainEvent)</code></li>
+<li><code>DomainPriceList</code></li>
+<li><code>DomainRenewal</code></li>
+<li><code>DomainEvent</code></li>
+<li><code>DomainContact</code></li>
+</ul>
+<hr>
+<h3 id="13-service-layer-kontrakt--implementacje">1.3 Service Layer (kontrakt + implementacje)</h3>
+<p><strong>Interfejs:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// app/Services/Domain/DomainRegistrarInterface.php</span>
+<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">DomainRegistrarInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">search</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$query</span></span>): <span class="hljs-title">array</span></span>;
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">checkAvailability</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$domain</span></span>): <span class="hljs-title">DomainAvailabilityResult</span></span>;
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span>(<span class="hljs-params">DomainRegistrationPayload <span class="hljs-variable">$payload</span></span>): <span class="hljs-title">DomainRegistrationResult</span></span>;
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renew</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$domain</span>, <span class="hljs-keyword">int</span> <span class="hljs-variable">$years</span></span>): <span class="hljs-title">DomainRenewalResult</span></span>;
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateNameservers</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$domain</span>, <span class="hljs-keyword">array</span> <span class="hljs-variable">$nameservers</span></span>): <span class="hljs-title">bool</span></span>;
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDomainInfo</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$domain</span></span>): <span class="hljs-title">DomainInfoResult</span></span>;
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">transfer</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$domain</span>, <span class="hljs-keyword">string</span> <span class="hljs-variable">$authCode</span></span>): <span class="hljs-title">DomainTransferResult</span></span>;
+}
+</div></code></pre>
+<p><strong>Data Transfer Objects (DTOs):</strong></p>
+<pre class="hljs"><code><div>app/Data/Domain/
+  DomainAvailabilityResult.php
+  DomainRegistrationPayload.php
+  DomainRegistrationResult.php
+  DomainRenewalResult.php
+  DomainInfoResult.php
+  DomainTransferResult.php
+  DomainSearchResult.php
+  DomainPriceSnapshot.php
+</div></code></pre>
+<p><strong>Implementacje serwisów:</strong></p>
+<pre class="hljs"><code><div>app/Services/Domain/
+  ManualDomainRegistrarService.php     ← MVP: ręczna obsługa (stub bez API)
+  OpenSrsRegistrarService.php          ← Etap 3
+  OpenProviderRegistrarService.php     ← Etap 3
+  DomainPricingService.php             ← zarządzanie cennikiem
+  DomainRenewalService.php             ← wysyłanie powiadomień o odnowieniu
+  DomainOrderService.php               ← logika zamówień
+</div></code></pre>
+<p><strong>Service Provider binding (DomainServiceProvider):</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// W etapie 1 binduje ManualDomainRegistrarService</span>
+<span class="hljs-comment">// W etapie 3 zmiana na OpenSrsRegistrarService</span>
+<span class="hljs-variable language_">$this</span>-&gt;app-&gt;<span class="hljs-title function_ invoke__">bind</span>(<span class="hljs-title class_">DomainRegistrarInterface</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-title class_">ManualDomainRegistrarService</span>::<span class="hljs-variable language_">class</span>);
+</div></code></pre>
+<hr>
+<h3 id="14-actions">1.4 Actions</h3>
+<pre class="hljs"><code><div>app/Actions/Domain/
+  CreateDomainOrderAction.php
+  ProcessDomainPaymentAction.php
+  RegisterDomainAction.php
+  RenewDomainAction.php
+  CancelDomainOrderAction.php
+  UpdateNameserversAction.php
+  CheckDomainAvailabilityAction.php
+  SendRenewalReminderAction.php
+</div></code></pre>
+<hr>
+<h3 id="15-jobs">1.5 Jobs</h3>
+<pre class="hljs"><code><div>app/Jobs/
+  RegisterDomainJob.php          ← odpala się po udanej płatności
+  SendDomainRenewalReminderJob.php
+  CheckDomainExpiryJob.php       ← scheduled cron
+</div></code></pre>
+<hr>
+<h3 id="16-controllers">1.6 Controllers</h3>
+<pre class="hljs"><code><div>app/Http/Controllers/
+  Domain/
+    PublicDomainController.php         ← publiczna strona + wyszukiwarka
+    DomainOrderController.php          ← flow zamówienia (checkout)
+  Portal/
+    DomainController.php               ← panel klienta: lista domen, odnowienie
+    DomainCheckoutController.php       ← płatność Stripe za domenę
+</div></code></pre>
+<hr>
+<h3 id="17-routes">1.7 Routes</h3>
+<p><strong>Publiczne (routes/web.php):</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// Public domain registration</span>
+<span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;/domains&#x27;</span>, [<span class="hljs-title class_">PublicDomainController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;index&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;domains.index&#x27;</span>);
+<span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;/domains/check&#x27;</span>, [<span class="hljs-title class_">PublicDomainController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;check&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;domains.check&#x27;</span>);
+<span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">post</span>(<span class="hljs-string">&#x27;/domains/check&#x27;</span>, [<span class="hljs-title class_">PublicDomainController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;checkPost&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;domains.check.post&#x27;</span>);
+</div></code></pre>
+<p><strong>Portal klienta (/portal/domains):</strong></p>
+<pre class="hljs"><code><div><span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">prefix</span>(<span class="hljs-string">&#x27;domains&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;portal.domains.&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">group</span>(function () {
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;/&#x27;</span>, [<span class="hljs-title class_">DomainController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;index&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;index&#x27;</span>);
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;/order&#x27;</span>, [<span class="hljs-title class_">DomainController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;order&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;order&#x27;</span>);
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">post</span>(<span class="hljs-string">&#x27;/order&#x27;</span>, [<span class="hljs-title class_">DomainOrderController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;store&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;order.store&#x27;</span>);
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;/order/{order}/checkout&#x27;</span>, [<span class="hljs-title class_">DomainCheckoutController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;show&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;checkout&#x27;</span>);
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">post</span>(<span class="hljs-string">&#x27;/order/{order}/pay&#x27;</span>, [<span class="hljs-title class_">DomainCheckoutController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;pay&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;pay&#x27;</span>);
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;/{domain}&#x27;</span>, [<span class="hljs-title class_">DomainController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;show&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;show&#x27;</span>);
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">post</span>(<span class="hljs-string">&#x27;/{domain}/renew&#x27;</span>, [<span class="hljs-title class_">DomainController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;renew&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;renew&#x27;</span>);
+    <span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">patch</span>(<span class="hljs-string">&#x27;/{domain}/nameservers&#x27;</span>, [<span class="hljs-title class_">DomainController</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-string">&#x27;updateNameservers&#x27;</span>])-&gt;<span class="hljs-title function_ invoke__">name</span>(<span class="hljs-string">&#x27;nameservers.update&#x27;</span>);
+});
+</div></code></pre>
+<hr>
+<h3 id="18-powiadomienia-notifications">1.8 Powiadomienia (Notifications)</h3>
+<pre class="hljs"><code><div>app/Notifications/
+  DomainOrderPlacedNotification.php       ← do klienta po zamówieniu
+  DomainRegisteredNotification.php        ← do klienta po rejestracji
+  DomainExpiryReminderNotification.php    ← 30/14/7/1 dni przed wygaśnięciem
+  DomainOrderAdminNotification.php        ← do admina o nowym zamówieniu
+  DomainRegistrationFailedNotification.php
+</div></code></pre>
+<hr>
+<h2 id="etap-2--panel-administracyjny-filament">ETAP 2 — Panel administracyjny (Filament)</h2>
+<h3 id="21-filament-resources">2.1 Filament Resources</h3>
+<pre class="hljs"><code><div>app/Filament/Resources/
+  DomainOrderResource.php          ← zarządzanie zamówieniami
+    Pages/
+      ListDomainOrders.php
+      ViewDomainOrder.php           ← szczegóły + akcje (zatwierdź, anuluj, oznacz jako zarejestrowaną)
+  DomainResource.php               ← lista zarejestrowanych domen
+    Pages/
+      ListDomains.php
+      ViewDomain.php
+  DomainPriceListResource.php      ← edycja cennika TLD
+    Pages/
+      ListDomainPriceLists.php
+      EditDomainPriceList.php
+</div></code></pre>
+<h3 id="22-filament-pages--widgets">2.2 Filament Pages / Widgets</h3>
+<pre class="hljs"><code><div>app/Filament/Widgets/
+  DomainOrderStatsWidget.php       ← liczba zamówień, status, przychód z domen
+  DomainExpiryWidget.php           ← domeny wygasające w ciągu 30 dni
+</div></code></pre>
+<h3 id="23-kluczowe-akcje-w-panelu-admina">2.3 Kluczowe akcje w panelu admina</h3>
+<p>W <code>DomainOrderResource</code> → <code>ViewDomainOrder</code>:</p>
+<ul>
+<li><strong>&quot;Mark as Registered&quot;</strong> — zmień status zamówienia i utwórz rekord <code>Domain</code></li>
+<li><strong>&quot;Cancel Order&quot;</strong> — anuluj + zwrot (Stripe refund action)</li>
+<li><strong>&quot;Add notes&quot;</strong> — notatki dla admina</li>
+<li><strong>Tabela powiązanych domen</strong> — lista domen klienta</li>
+</ul>
+<p>W <code>DomainResource</code> → <code>ViewDomain</code>:</p>
+<ul>
+<li>Edycja nameserverów</li>
+<li>Przycisk &quot;Send renewal reminder&quot;</li>
+<li>Historia zdarzeń (DomainEvent)</li>
+<li>Link do zamówienia, do klienta</li>
+</ul>
+<hr>
+<h2 id="etap-3--frontend-publiczny-inertiajsreact">ETAP 3 — Frontend publiczny (Inertia.js/React)</h2>
+<h3 id="31-nowe-strony-react">3.1 Nowe strony React</h3>
+<pre class="hljs"><code><div>resources/js/Pages/
+  Domains/
+    Index.tsx              ← strona landing &quot;Domain Registration UK&quot;
+    Check.tsx              ← wyniki wyszukiwania domeny
+    Order.tsx              ← podsumowanie zamówienia
+    Checkout.tsx           ← płatność Stripe
+</div></code></pre>
+<h3 id="32-komponenty-react">3.2 Komponenty React</h3>
+<pre class="hljs"><code><div>resources/js/Components/
+  Domain/
+    DomainSearchForm.tsx          ← input + przycisk szukaj
+    DomainAvailabilityResult.tsx  ← wynik sprawdzenia dostępności
+    DomainPriceCard.tsx           ← karta z ceną i TLD
+    DomainOrderSummary.tsx        ← podsumowanie zamówienia
+    DomainTldSelector.tsx         ← wybór TLD (.co.uk, .com, .uk, .net, .org)
+    DomainFeatureList.tsx         ← &quot;Co dostajesz z domeną&quot;
+    DomainFaq.tsx                 ← FAQ sekcja
+    DomainBundleCards.tsx         ← pakiety bundlingowe
+</div></code></pre>
+<h3 id="33-struktura-strony-domains-indextsx">3.3 Struktura strony <code>/domains</code> (Index.tsx)</h3>
+<pre class="hljs"><code><div>[Hero Section]
+  &quot;Register your UK business domain&quot;
+  Wyszukiwarka DomainSearchForm
+  &quot;from £X/year&quot;
+
+[Popular TLDs Section]
+  Karty: .co.uk | .uk | .com | .net | .org
+  Cena rejestracji + odnowienia
+
+[Bundles Section]
+  1. Domain Registration — od £X/rok
+  2. Domain + Website Setup — od £X
+  3. Domain + Business Email — od £X
+  4. Website Launch Package — od £X (domena + hosting + SSL + email + SEO)
+
+[Features Section]
+  ✓ Free DNS management
+  ✓ WHOIS privacy
+  ✓ Auto-renewal reminders
+  ✓ Managed for you
+
+[FAQ Section]
+
+[CTA Section]
+  &quot;Let us handle everything&quot;
+  → Formularz kontaktowy / zamówienie
+</div></code></pre>
+<h3 id="34-portal-klienta--nowe-strony">3.4 Portal klienta — nowe strony</h3>
+<pre class="hljs"><code><div>resources/js/Pages/Portal/
+  Domains/
+    Index.tsx         ← lista domen klienta (status, data wygaśnięcia, nameservery)
+    Show.tsx          ← szczegóły domeny
+    Order.tsx         ← zamów nową domenę
+    Checkout.tsx      ← płatność za domenę
+</div></code></pre>
+<h3 id="35-portal--widgety--nawigacja">3.5 Portal — widgety / nawigacja</h3>
+<ul>
+<li>Dodać &quot;Domains&quot; do nav portalu klienta (obok Projects, Invoices, Contracts)</li>
+<li>Dodać widget na dashboardzie portalu: &quot;Your domains&quot; z alertem o wygasaniu</li>
+<li>Badge z liczbą domen wygasających w ciągu 30 dni</li>
+</ul>
+<hr>
+<h2 id="etap-4--integracja-api-etap-3-wg-roadmapy">ETAP 4 — Integracja API (Etap 3 wg roadmapy)</h2>
+<h3 id="41-wybór-providera-rekomendacja-opensrs-lub-openprovider">4.1 Wybór providera (rekomendacja: OpenSRS lub Openprovider)</h3>
+<p><strong>OpenSRS:</strong></p>
+<ul>
+<li>Sprawdzona platforma reseller</li>
+<li>API XML + REST</li>
+<li>White-label</li>
+<li>Moduły WHMCS (nieobowiązkowe)</li>
+<li>Pakiety: domeny + email + SSL</li>
+</ul>
+<p><strong>Openprovider:</strong></p>
+<ul>
+<li>1900+ TLD</li>
+<li>REST API</li>
+<li>Moduły WHMCS</li>
+<li>Dobry dla .uk + Nominet</li>
+</ul>
+<h3 id="42-implementacja-opensrsregistrarservice">4.2 Implementacja <code>OpenSrsRegistrarService</code></h3>
+<pre class="hljs"><code><div><span class="hljs-comment">// app/Services/Domain/OpenSrsRegistrarService.php</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OpenSrsRegistrarService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">DomainRegistrarInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params">
+        <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> OpenSrsClient <span class="hljs-variable">$client</span>,
+        <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> DomainEventRepository <span class="hljs-variable">$events</span>,
+    </span>) </span>{}
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">checkAvailability</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$domain</span></span>): <span class="hljs-title">DomainAvailabilityResult</span> </span>{ ... }
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span>(<span class="hljs-params">DomainRegistrationPayload <span class="hljs-variable">$payload</span></span>): <span class="hljs-title">DomainRegistrationResult</span> </span>{ ... }
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renew</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$domain</span>, <span class="hljs-keyword">int</span> <span class="hljs-variable">$years</span></span>): <span class="hljs-title">DomainRenewalResult</span> </span>{ ... }
+    <span class="hljs-comment">// itd.</span>
+}
+</div></code></pre>
+<h3 id="43-zmiana-bindingu-w-domainserviceprovider">4.3 Zmiana bindingu w DomainServiceProvider</h3>
+<pre class="hljs"><code><div><span class="hljs-comment">// config/services.php — dodać sekcję domain_registrar</span>
+<span class="hljs-comment">// .env — DOMAIN_REGISTRAR_PROVIDER=opensrs</span>
+
+<span class="hljs-variable language_">$this</span>-&gt;app-&gt;<span class="hljs-title function_ invoke__">bind</span>(<span class="hljs-title class_">DomainRegistrarInterface</span>::<span class="hljs-variable language_">class</span>, function (<span class="hljs-variable">$app</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">match</span>(<span class="hljs-title function_ invoke__">config</span>(<span class="hljs-string">&#x27;services.domain_registrar.provider&#x27;</span>)) {
+        <span class="hljs-string">&#x27;opensrs&#x27;</span>       =&gt; <span class="hljs-variable">$app</span>-&gt;<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-title class_">OpenSrsRegistrarService</span>::<span class="hljs-variable language_">class</span>),
+        <span class="hljs-string">&#x27;openprovider&#x27;</span>  =&gt; <span class="hljs-variable">$app</span>-&gt;<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-title class_">OpenProviderRegistrarService</span>::<span class="hljs-variable language_">class</span>),
+        <span class="hljs-keyword">default</span>         =&gt; <span class="hljs-variable">$app</span>-&gt;<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-title class_">ManualDomainRegistrarService</span>::<span class="hljs-variable language_">class</span>),
+    };
+});
+</div></code></pre>
+<h3 id="44-obsługa-webhooków-od-providera">4.4 Obsługa webhooków od providera</h3>
+<pre class="hljs"><code><div>app/Http/Controllers/Domain/
+  DomainProviderWebhookController.php   ← eventy z OpenSRS/Openprovider
+</div></code></pre>
+<pre class="hljs"><code><div><span class="hljs-comment">// routes/web.php (CSRF exempt)</span>
+<span class="hljs-title class_">Route</span>::<span class="hljs-title function_ invoke__">post</span>(<span class="hljs-string">&#x27;/webhooks/domain/{provider}&#x27;</span>, <span class="hljs-title class_">DomainProviderWebhookController</span>::<span class="hljs-variable language_">class</span>);
+</div></code></pre>
+<hr>
+<h2 id="etap-5--bundling-z-innymi-produktami">ETAP 5 — Bundling z innymi produktami</h2>
+<h3 id="51-pakiety-sprzedażowe">5.1 Pakiety sprzedażowe</h3>
+<table>
+<thead>
+<tr>
+<th>Pakiet</th>
+<th>Zawartość</th>
+<th>Cena</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Domain Only</td>
+<td>Domena + DNS + WHOIS privacy</td>
+<td>od £12/rok</td>
+</tr>
+<tr>
+<td>Domain + Email</td>
+<td>Domena + business email</td>
+<td>od £25/rok</td>
+</tr>
+<tr>
+<td>Domain + Website</td>
+<td>Domena + konfiguracja DNS + podpięcie</td>
+<td>od £X</td>
+</tr>
+<tr>
+<td>Website Launch</td>
+<td>Domena + strona + hosting + SSL + email + SEO</td>
+<td>od £X</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-integracja-z-istniejącymi-modułami">5.2 Integracja z istniejącymi modułami</h3>
+<ul>
+<li><strong>Invoice</strong> → po rejestracji domeny generuj fakturę automatycznie</li>
+<li><strong>Client</strong> → domeny przypisane do klienta w CRM</li>
+<li><strong>Project</strong> → możliwość powiązania domeny z projektem</li>
+<li><strong>Sales Offer / Quote</strong> → dodaj domenę jako pozycję w ofercie/wycenie</li>
+<li><strong>Automation</strong> → reguła: &quot;30 dni przed wygaśnięciem → wyślij powiadomienie&quot;</li>
+</ul>
+<h3 id="53-integracja-z-kalkulatorem-cen">5.3 Integracja z kalkulatorem cen</h3>
+<ul>
+<li>Dodać &quot;Domain Registration&quot; jako krok w <code>CalculatorStep</code></li>
+<li>Możliwość dodania domeny do wyceny projektu</li>
+</ul>
+<hr>
+<h2 id="etap-6--aspekty-prawne-i-formalne">ETAP 6 — Aspekty prawne i formalne</h2>
+<h3 id="61-wymagane-dokumenty-przed-sprzedażą">6.1 Wymagane dokumenty (przed sprzedażą)</h3>
+<ul>
+<li><input type="checkbox" id="checkbox0"><label for="checkbox0">Regulamin rejestracji domen</label></li>
+<li><input type="checkbox" id="checkbox1"><label for="checkbox1">Polityka odnowień (terminy, automatyczne odnowienie)</label></li>
+<li><input type="checkbox" id="checkbox2"><label for="checkbox2">Zasady anulowania i zwrotów</label></li>
+<li><input type="checkbox" id="checkbox3"><label for="checkbox3">Zasady transferu domeny</label></li>
+<li><input type="checkbox" id="checkbox4"><label for="checkbox4">Aktualizacja Polityki Prywatności (GDPR)</label></li>
+<li><input type="checkbox" id="checkbox5"><label for="checkbox5">Informacja o rejestratorze nadrzędnym (OpenSRS/Openprovider)</label></li>
+<li><input type="checkbox" id="checkbox6"><label for="checkbox6">Procedura zgłaszania nadużyć DNS</label></li>
+<li><input type="checkbox" id="checkbox7"><label for="checkbox7">Cennik z jasnym rozróżnieniem cena rejestracji vs. odnowienia</label></li>
+</ul>
+<h3 id="62-nowe-strony-cms-pslug">6.2 Nowe strony CMS (<code>/p/slug</code>)</h3>
+<ul>
+<li><code>/p/domain-registration-terms</code> — Regulamin rejestracji domen</li>
+<li><code>/p/domain-renewal-policy</code> — Polityka odnowień</li>
+<li><code>/p/domain-transfer-policy</code> — Zasady transferu</li>
+<li><code>/p/dns-abuse-policy</code> — Polityka nadużyć DNS</li>
+</ul>
+<hr>
+<h2 id="kolejność-implementacji-sprint-plan">Kolejność implementacji (sprint plan)</h2>
+<h3 id="sprint-1--fundament">Sprint 1 — Fundament</h3>
+<ol>
+<li>Migracje: <code>domain_price_list</code>, <code>domain_orders</code>, <code>domains</code>, <code>domain_renewals</code>, <code>domain_events</code></li>
+<li>Modele z relacjami</li>
+<li><code>DomainRegistrarInterface</code> + DTOs</li>
+<li><code>ManualDomainRegistrarService</code> (stub)</li>
+<li><code>DomainPricingService</code></li>
+</ol>
+<h3 id="sprint-2--panel-admina-filament">Sprint 2 — Panel admina (Filament)</h3>
+<ol>
+<li><code>DomainPriceListResource</code> + edycja cennika</li>
+<li><code>DomainOrderResource</code> z widokiem szczegółów + akcjami (zatwierdź, anuluj)</li>
+<li><code>DomainResource</code></li>
+<li>Widgety dashboardu: stats + expiry</li>
+</ol>
+<h3 id="sprint-3--frontend-publiczny">Sprint 3 — Frontend publiczny</h3>
+<ol>
+<li>Strona <code>/domains</code> (React + Inertia)</li>
+<li>Wyszukiwarka domeny (formularz → check → wyniki)</li>
+<li>Flow zamówienia: Order → Checkout → Stripe payment</li>
+<li>Potwierdzenie zamówienia + email</li>
+</ol>
+<h3 id="sprint-4--portal-klienta">Sprint 4 — Portal klienta</h3>
+<ol>
+<li>Strona <code>/portal/domains</code> — lista domen klienta</li>
+<li>Szczegóły domeny (<code>/portal/domains/{domain}</code>)</li>
+<li>Odnowienie domeny + płatność</li>
+<li>Widget na dashboardzie portalu</li>
+<li>Nawigacja portalu — dodanie &quot;Domains&quot;</li>
+</ol>
+<h3 id="sprint-5--notyfikacje-i-cron">Sprint 5 — Notyfikacje i cron</h3>
+<ol>
+<li>Notyfikacje email (zamówienie, rejestracja, wygaśnięcie)</li>
+<li><code>CheckDomainExpiryJob</code> (scheduled)</li>
+<li><code>SendDomainRenewalReminderJob</code></li>
+<li><code>RegisterDomainJob</code></li>
+</ol>
+<h3 id="sprint-6--integracja-api-po-pierwszych-klientach">Sprint 6 — Integracja API (po pierwszych klientach)</h3>
+<ol>
+<li>Rejestracja konta reseller (OpenSRS lub Openprovider)</li>
+<li><code>OpenSrsRegistrarService</code> lub <code>OpenProviderRegistrarService</code></li>
+<li>Testy sandbox</li>
+<li>Zmiana bindingu w DomainServiceProvider</li>
+<li>Webhook handler od providera</li>
+</ol>
+<h3 id="sprint-7--bundling">Sprint 7 — Bundling</h3>
+<ol>
+<li>Powiązanie domen z Invoice, Project, Quote, SalesOffer</li>
+<li>Krok &quot;Domain&quot; w kalkulatorze</li>
+<li>Pakiety sprzedażowe na stronie <code>/domains</code></li>
+<li>Dokumenty prawne (CMS pages)</li>
+</ol>
+<hr>
+<h2 id="kluczowe-decyzje-architektoniczne">Kluczowe decyzje architektoniczne</h2>
+<table>
+<thead>
+<tr>
+<th>Decyzja</th>
+<th>Wybór</th>
+<th>Uzasadnienie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Płatność</td>
+<td>Stripe (istniejący)</td>
+<td>Już zintegrowany w platformie</td>
+</tr>
+<tr>
+<td>Provider API (Etap 3)</td>
+<td>OpenSRS lub Openprovider</td>
+<td>Szerokie TLD, REST API, white-label</td>
+</tr>
+<tr>
+<td>Flow rejestracji</td>
+<td>Pay → Job → Register</td>
+<td>Unikamy utraty domeny między wyszukaniem a płatnością</td>
+</tr>
+<tr>
+<td>Architektura serwisów</td>
+<td>Interface + adaptery</td>
+<td>Swap providera bez zmian w kontrolerach</td>
+</tr>
+<tr>
+<td>MVP</td>
+<td>ManualDomainRegistrarService</td>
+<td>Zero integracji API na start</td>
+</tr>
+<tr>
+<td>Ceny premium domen</td>
+<td>Explicit acknowledgement</td>
+<td>Zgodnie z ICANN i dobrymi praktykami</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="pliki-do-utworzenia-pełna-lista">Pliki do utworzenia (pełna lista)</h2>
+<h3 id="baza-danych">Baza danych</h3>
+<pre class="hljs"><code><div>database/migrations/
+  xxxx_create_domain_price_list_table.php
+  xxxx_create_domain_orders_table.php
+  xxxx_create_domains_table.php
+  xxxx_create_domain_contacts_table.php
+  xxxx_create_domain_renewals_table.php
+  xxxx_create_domain_events_table.php
+</div></code></pre>
+<h3 id="backend-php">Backend (PHP)</h3>
+<pre class="hljs"><code><div>app/
+  Data/Domain/
+    DomainAvailabilityResult.php
+    DomainRegistrationPayload.php
+    DomainRegistrationResult.php
+    DomainRenewalResult.php
+    DomainInfoResult.php
+    DomainTransferResult.php
+    DomainSearchResult.php
+    DomainPriceSnapshot.php
+  Models/
+    Domain.php
+    DomainOrder.php
+    DomainContact.php
+    DomainPriceList.php
+    DomainRenewal.php
+    DomainEvent.php
+  Services/Domain/
+    DomainRegistrarInterface.php
+    ManualDomainRegistrarService.php
+    OpenSrsRegistrarService.php        (Etap 3)
+    OpenProviderRegistrarService.php   (Etap 3)
+    DomainPricingService.php
+    DomainRenewalService.php
+    DomainOrderService.php
+  Actions/Domain/
+    CreateDomainOrderAction.php
+    ProcessDomainPaymentAction.php
+    RegisterDomainAction.php
+    RenewDomainAction.php
+    CancelDomainOrderAction.php
+    UpdateNameserversAction.php
+    CheckDomainAvailabilityAction.php
+    SendRenewalReminderAction.php
+  Http/Controllers/
+    Domain/
+      PublicDomainController.php
+      DomainOrderController.php
+      DomainProviderWebhookController.php
+    Portal/
+      DomainController.php
+      DomainCheckoutController.php
+  Jobs/
+    RegisterDomainJob.php
+    SendDomainRenewalReminderJob.php
+    CheckDomainExpiryJob.php
+  Notifications/
+    DomainOrderPlacedNotification.php
+    DomainRegisteredNotification.php
+    DomainExpiryReminderNotification.php
+    DomainOrderAdminNotification.php
+    DomainRegistrationFailedNotification.php
+  Filament/Resources/
+    DomainOrderResource.php
+    DomainResource.php
+    DomainPriceListResource.php
+  Filament/Widgets/
+    DomainOrderStatsWidget.php
+    DomainExpiryWidget.php
+  Providers/
+    DomainServiceProvider.php
+</div></code></pre>
+<h3 id="frontend-reacttypescript">Frontend (React/TypeScript)</h3>
+<pre class="hljs"><code><div>resources/js/
+  Pages/
+    Domains/
+      Index.tsx
+      Check.tsx
+      Order.tsx
+      Checkout.tsx
+    Portal/Domains/
+      Index.tsx
+      Show.tsx
+      Order.tsx
+      Checkout.tsx
+  Components/Domain/
+    DomainSearchForm.tsx
+    DomainAvailabilityResult.tsx
+    DomainPriceCard.tsx
+    DomainOrderSummary.tsx
+    DomainTldSelector.tsx
+    DomainFeatureList.tsx
+    DomainFaq.tsx
+    DomainBundleCards.tsx
+    DomainStatusBadge.tsx
+    DomainExpiryAlert.tsx
+</div></code></pre>
+<h3 id="tłumaczenia">Tłumaczenia</h3>
+<pre class="hljs"><code><div>lang/
+  en/domain.php
+  pl/domain.php
+  pt/domain.php
+</div></code></pre>
+<hr>
+<h2 id="notatki--do-ustalenia">Notatki / Do ustalenia</h2>
+<ul>
+<li><input type="checkbox" id="checkbox8"><label for="checkbox8">Które TLD obsługujemy na start? Rekomendacja: .co.uk, .uk, .com, .net, .org</label></li>
+<li><input type="checkbox" id="checkbox9"><label for="checkbox9">Ceny startowe — do ustalenia po weryfikacji cen hurtowych u providera</label></li>
+<li><input type="checkbox" id="checkbox10"><label for="checkbox10">Czy WHOIS privacy ma być w cenie, czy jako addon?</label></li>
+<li><input type="checkbox" id="checkbox11"><label for="checkbox11">Czy domeny mogą być zamawiane tylko w ramach projektu/strony, czy też samodzielnie?</label></li>
+<li><input type="checkbox" id="checkbox12"><label for="checkbox12">Minimalny okres rejestracji: 1 rok</label></li>
+<li><input type="checkbox" id="checkbox13"><label for="checkbox13">Auto-renewal: domyślnie wyłączone (klient decyduje)</label></li>
+<li><input type="checkbox" id="checkbox14"><label for="checkbox14">Provider do integracji w Etapie 3: OpenSRS vs Openprovider — do decyzji</label></li>
+</ul>
+
+</body>
+</html>

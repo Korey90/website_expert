@@ -179,6 +179,22 @@ class AutomationTriggerSeeder extends Seeder
                 'group' => 'Contracts',
                 'variables' => [['name' => 'contract_id', 'description' => 'Contract ID']],
             ],
+            // ── Domains ───────────────────────────────────────────────────────
+            [
+                'key'         => 'domain.expiry_reminder',
+                'label'       => 'Domain Expiry Reminder Sent',
+                'group'       => 'Domains',
+                'description' => 'Fires when an expiry reminder email is sent (30, 14, 7 or 1 day before expiry).',
+                'variables'   => [
+                    ['name' => 'domain_id',         'description' => 'Domain ID'],
+                    ['name' => 'domain_name',        'description' => 'Full domain name (e.g. example.com)'],
+                    ['name' => 'client_id',          'description' => 'Client ID'],
+                    ['name' => 'business_id',        'description' => 'Business ID'],
+                    ['name' => 'days_until_expiry',  'description' => 'Days until expiry (30 / 14 / 7 / 1)'],
+                    ['name' => 'due_date',           'description' => 'Renewal due date (Y-m-d)'],
+                    ['name' => 'renewal_id',         'description' => 'DomainRenewal record ID'],
+                ],
+            ],
         ];
 
         foreach ($triggers as $data) {

@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
         // Legal & compliance content
         $this->call(LegalSettingsSeeder::class);
         $this->call(PageSeeder::class);
+        $this->call(DomainLegalPagesSeeder::class);
+        $this->call(DomainLegalPagesExtraSeeder::class);
 
         // Website front-end content
         $this->call(SiteSectionSeeder::class);

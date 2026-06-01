@@ -16,6 +16,7 @@ class SalesOffer extends Model
     protected $fillable = [
         'business_id',
         'lead_id',
+        'domain_order_id',
         'template_id',
         'created_by',
         'client_token',
@@ -55,6 +56,11 @@ class SalesOffer extends Model
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function domainOrder(): BelongsTo
+    {
+        return $this->belongsTo(DomainOrder::class);
     }
 
     // ── Scopes ─────────────────────────────────────────────────────────────

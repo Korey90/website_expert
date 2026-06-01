@@ -13,7 +13,7 @@ class Invoice extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'number', 'client_id', 'project_id', 'quote_id', 'created_by',
+        'number', 'client_id', 'project_id', 'quote_id', 'domain_order_id', 'created_by',
         'status', 'currency', 'subtotal', 'discount_amount',
         'vat_rate', 'vat_amount', 'total', 'amount_paid', 'amount_due',
         'issue_date', 'due_date', 'notes', 'terms',
@@ -47,6 +47,11 @@ class Invoice extends Model
     public function quote(): BelongsTo
     {
         return $this->belongsTo(Quote::class)->withTrashed();
+    }
+
+    public function domainOrder(): BelongsTo
+    {
+        return $this->belongsTo(DomainOrder::class);
     }
 
     public function createdBy(): BelongsTo
