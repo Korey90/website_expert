@@ -56,8 +56,10 @@ const SOCIAL_DEFAULTS = [
     { key: 'instagram', url: '#', label: 'Instagram' },
 ];
 
+const LEGAL_LABEL = { pl: 'Dokumenty i polityki', en: 'Legal & Policies', pt: 'Documentos e políticas' };
+
 export default function Footer({ data = null }) {
-    const { locale = 'en' } = usePage().props;
+    const { locale = 'en', footer_pages = [] } = usePage().props;
     const consentCtx = useConsentContext();
     const reopenBanner = consentCtx?.reopenBanner ?? null;
     const extra = data?.extra ?? {};
@@ -69,26 +71,31 @@ export default function Footer({ data = null }) {
         return href;
     };
 
-    const brandName   = extra.brand_name   || 'WebsiteExpert';
+    const brandName   = extra.brand_name || 'WebsiteExpert';
     const tagline     = t('tagline',    locale === 'pl' ? 'Tworzymy strony i aplikacje internetowe, które pracują na Twój biznes.' : 'We create websites and web apps that work for your business.');
     const copyright   = t('copyright',  locale === 'pl' ? 'Wszelkie prawa zastrzeżone.' : 'All rights reserved.');
     const builtWith   = t('built_with', locale === 'pl' ? 'Zaprojektowane i zbudowane z ❤️ w Polsce' : 'Designed and built with ❤️ in Poland');
-    const navGroups   = extra.nav_groups   || NAV_DEFAULTS;
-    const socialLinks = extra.social       || SOCIAL_DEFAULTS;
+    const socialLinks = extra.social || SOCIAL_DEFAULTS;
 
-    // Split brand name at 'Expert' for styling: prefix gets neutral, 'Expert' gets brand color
+    // When dynamic pages exist, strip the hardcoded Legal column — pages render in their own strip below
+    const navGroups = (extra.nav_groups || NAV_DEFAULTS).filter(
+        g => footer_pages.length === 0 || (g.title_en ?? '').toLowerCase() !== 'legal'
+    );
+
     const expertIdx   = brandName.indexOf('Expert');
     const brandPrefix = expertIdx >= 0 ? brandName.slice(0, expertIdx) : brandName;
-    const brandSuffix = expertIdx >= 0 ? 'Expert'                       : '';
+    const brandSuffix = expertIdx >= 0 ? 'Expert' : '';
 
     return (
         <footer className="bg-neutral-950 text-neutral-400 pt-16 pb-8">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
 
-                    {/* Brand */}
-                    <div className="col-span-2 md:col-span-1">
-                        <a href="/" className="flex items-center gap-2 mb-4" aria-label={brandName}>
+                {/* Main grid: Brand (wide) + nav columns */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10 items-start">
+
+                    {/* Brand — takes 2 of 4 columns on desktop */}
+                    <div className="col-span-2 md:col-span-2">
+                        <a href="/" className="inline-flex items-center gap-2 mb-5" aria-label={brandName}>
                             <svg width="32" height="32" viewBox="0 0 36 36" fill="none" aria-hidden="true">
                                 <rect width="36" height="36" rx="8" className="fill-brand-500" />
                                 <path d="M13 18L16.5 21.5L23 14.5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -97,9 +104,8 @@ export default function Footer({ data = null }) {
                                 {brandPrefix}<span className="text-brand-500">{brandSuffix}</span>
                             </span>
                         </a>
-                        <p className="text-sm leading-relaxed text-neutral-200">{tagline}</p>
-                        {/* Social links */}
-                        <div className="flex gap-3 mt-5">
+                        <p className="text-sm leading-relaxed text-neutral-300 max-w-xs">{tagline}</p>
+                        <div className="flex gap-3 mt-6">
                             {socialLinks.map(s => {
                                 const icon     = SOCIAL_ICONS[s.key];
                                 const isStroke = SOCIAL_STROKE.has(s.key);
@@ -123,13 +129,13 @@ export default function Footer({ data = null }) {
                     {/* Nav columns */}
                     {navGroups.map((group, i) => (
                         <div key={i}>
-                            <h3 className="text-sm font-semibold text-white mb-4">
+                            <h3 className="text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-4">
                                 {group[`title_${locale}`] ?? group.title_en ?? ''}
                             </h3>
                             <ul className="space-y-2.5 text-sm">
                                 {(group.links || []).map((l, j) => (
                                     <li key={j}>
-                                        <a href={resolveHref(l.href)} className="hover:text-brand-400 transition-colors">
+                                        <a href={resolveHref(l.href)} className="text-neutral-300 hover:text-brand-400 transition-colors">
                                             {l[`label_${locale}`] ?? l.label_en ?? ''}
                                         </a>
                                     </li>
@@ -139,7 +145,25 @@ export default function Footer({ data = null }) {
                     ))}
                 </div>
 
-                <div className="border-t border-neutral-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-300">
+                {/* Legal documents strip */}
+                {footer_pages.length > 0 && (
+                    <div className="border-t border-neutral-800/60 pt-6 mb-8">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-neutral-600 mb-3">
+                            {LEGAL_LABEL[locale] ?? LEGAL_LABEL.en}
+                        </p>
+                        <div className="flex flex-wrap gap-x-5 gap-y-2">
+                            {footer_pages.map((page, i) => (
+                                <a key={i} href={page.href}
+                                    className="text-xs text-neutral-400 hover:text-brand-400 transition-colors">
+                                    {page.title[locale] ?? page.title.en ?? page.title.pl ?? ''}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Copyright bar */}
+                <div className="border-t border-neutral-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-500">
                     <p>&copy; {new Date().getFullYear()} {brandName}. {copyright}</p>
                     <div className="flex items-center gap-4">
                         {reopenBanner && (
@@ -153,6 +177,7 @@ export default function Footer({ data = null }) {
                         <p>{builtWith}</p>
                     </div>
                 </div>
+
             </div>
         </footer>
     );

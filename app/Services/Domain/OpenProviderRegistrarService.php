@@ -2,6 +2,7 @@
 
 namespace App\Services\Domain;
 
+use App\Data\Domain\DnsRecord;
 use App\Data\Domain\DomainAvailabilityResult;
 use App\Data\Domain\DomainInfoResult;
 use App\Data\Domain\DomainPriceSnapshot;
@@ -57,7 +58,7 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
                     $full = is_array($r['domain'])
                         ? $r['domain']['name'] . '.' . $r['domain']['extension']
                         : (string) $r['domain'];
-                    if ($r['status'] === 'free') {
+                    if ($r['status'] === 'free' && empty($r['reason'] ?? null)) {
                         $results[] = DomainAvailabilityResult::available(
                             domain: $full,
                             isPremium: (bool) ($r['is_premium'] ?? false),
@@ -66,7 +67,7 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
                                 : null,
                         );
                     } else {
-                        $results[] = DomainAvailabilityResult::unavailable($full);
+                        $results[] = DomainAvailabilityResult::unavailable($full, $r['reason'] ?? null);
                     }
                 }
             }
@@ -97,7 +98,12 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
                 return DomainAvailabilityResult::error($domain, 'Empty response from Openprovider.');
             }
 
-            if ($result['status'] === 'free') {
+            $reason = $result['reason'] ?? null;
+
+            // Even when status is "free", a non-empty reason may indicate a transient registry issue
+            // (e.g. sandbox returns status="free" but reason="Registry is busy").
+            // In that case treat as unavailable so callers can detect registry problems.
+            if ($result['status'] === 'free' && empty($reason)) {
                 return DomainAvailabilityResult::available(
                     domain: $domain,
                     isPremium: (bool) ($result['is_premium'] ?? false),
@@ -107,9 +113,8 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
                 );
             }
 
-            // 'active' = registered/taken; any other non-free status = unavailable
-
-            return DomainAvailabilityResult::unavailable($domain);
+            // 'active' / 'in use' / 'reserved' — or "free" with a non-empty reason (sandbox quirk)
+            return DomainAvailabilityResult::unavailable($domain, $reason);
         } catch (\Throwable $e) {
             return DomainAvailabilityResult::error($domain, $e->getMessage());
         }
@@ -124,7 +129,7 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
     public function register(DomainRegistrationPayload $payload): DomainRegistrationResult
     {
         try {
-            $handle      = $this->resolveCustomerHandle($payload);
+            $handle      = $payload->ownerHandle ?? $this->resolveCustomerHandle($payload);
             $nameServers = $this->buildNameServers($payload->nameservers);
             $extension   = $this->tldExtension($payload->tld);
 
@@ -152,9 +157,31 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
                     ? Carbon::parse($data['expiration_date'])
                     : now()->addYears($payload->years),
             );
+        } catch (\RuntimeException $e) {
+            // code 10 = registry temporarily unreachable; OP queues the request and retries.
+            // The domain entry exists in their system (status REQ) — look it up to get the ID.
+            if (str_contains($e->getMessage(), 'code 10') || str_contains($e->getMessage(), 'Registry currently not reachable')) {
+                return $this->resolveQueuedRegistration($payload);
+            }
+
+            return DomainRegistrationResult::failure($e->getMessage());
         } catch (\Throwable $e) {
             return DomainRegistrationResult::failure($e->getMessage());
         }
+    }
+
+    /**
+     * When OP returns code 10 (registry unreachable), the domain is queued in their system.
+     * Return a success with empty providerId — the ID can be resolved later via GET /domains
+     * once the registry processes the request.
+     */
+    private function resolveQueuedRegistration(DomainRegistrationPayload $payload): DomainRegistrationResult
+    {
+        return DomainRegistrationResult::success(
+            providerId: '',
+            registeredAt: now(),
+            expiresAt: now()->addYears($payload->years),
+        );
     }
 
     /**
@@ -290,6 +317,82 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
         }
     }
 
+    // ── DNS record management ─────────────────────────────────────────────────
+
+    public function getDnsRecords(string $domain): array
+    {
+        try {
+            $data = $this->client->get("/dns/zones/{$domain}/records");
+
+            return array_map(
+                fn (array $r) => new DnsRecord(
+                    id:    0, // OP has no record IDs — FetchDnsRecordsAction assigns array index
+                    type:  strtoupper($r['type'] ?? 'A'),
+                    name:  $r['name'] ?? '@',
+                    value: $r['value'] ?? '',
+                    ttl:   (int) ($r['ttl'] ?? 3600),
+                    prio:  (int) ($r['prio'] ?? 0),
+                ),
+                $data['results'] ?? []
+            );
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    public function createDnsRecord(string $domain, array $record): array
+    {
+        $this->client->put("/dns/zones/{$domain}", [
+            'records' => [
+                'add' => [$this->formatRecord($record)],
+            ],
+        ]);
+
+        return ['id' => 0];
+    }
+
+    public function updateDnsRecord(string $domain, array $originalRecord, array $newRecord): bool
+    {
+        try {
+            $this->client->put("/dns/zones/{$domain}", [
+                'records' => [
+                    'remove' => [$this->formatRecord($originalRecord)],
+                    'add'    => [$this->formatRecord($newRecord)],
+                ],
+            ]);
+
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    public function deleteDnsRecord(string $domain, array $record): bool
+    {
+        try {
+            $this->client->put("/dns/zones/{$domain}", [
+                'records' => [
+                    'remove' => [$this->formatRecord($record)],
+                ],
+            ]);
+
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    private function formatRecord(array $record): array
+    {
+        return [
+            'type'  => strtoupper($record['type']),
+            'name'  => $record['name'],
+            'value' => $record['value'],
+            'ttl'   => (int) ($record['ttl'] ?? 3600),
+            'prio'  => (int) ($record['prio'] ?? 0),
+        ];
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────────
 
     /**
@@ -419,7 +522,7 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
                 'number'   => $payload->registrantAddressLine2 ?? '',
                 'city'     => $payload->registrantCity,
                 'province' => $payload->registrantCounty ?? '',
-                'zip_code' => $payload->registrantPostcode,
+                'zipcode'  => $payload->registrantPostcode,
                 'country'  => strtoupper($payload->registrantCountryCode),
             ],
         ];
@@ -446,8 +549,8 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
         if (str_starts_with($phone, '+')) {
             if (preg_match('/^\+(\d{1,3})[\s\-.]*([\d\s\-.]+)$/', $phone, $m)) {
                 return [
-                    'country_code'      => '+' . $m[1],
-                    'area_code'         => '',
+                    'country_code'      => $m[1],
+                    'area_code'         => '0',
                     'subscriber_number' => preg_replace('/\D/', '', $m[2]),
                 ];
             }
@@ -455,26 +558,26 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
 
         // Fallback: derive country calling code from ISO-3166-1 alpha-2
         $cc = match (strtoupper($isoCountry)) {
-            'US', 'CA'           => '+1',
-            'GB'                 => '+44',
-            'DE'                 => '+49',
-            'FR'                 => '+33',
-            'PL'                 => '+48',
-            'PT'                 => '+351',
-            'ES'                 => '+34',
-            'IT'                 => '+39',
-            'NL'                 => '+31',
-            'SE'                 => '+46',
-            'NO'                 => '+47',
-            'DK'                 => '+45',
-            'FI'                 => '+358',
-            'IE'                 => '+353',
-            default              => '+1',
+            'US', 'CA'           => '1',
+            'GB'                 => '44',
+            'DE'                 => '49',
+            'FR'                 => '33',
+            'PL'                 => '48',
+            'PT'                 => '351',
+            'ES'                 => '34',
+            'IT'                 => '39',
+            'NL'                 => '31',
+            'SE'                 => '46',
+            'NO'                 => '47',
+            'DK'                 => '45',
+            'FI'                 => '358',
+            'IE'                 => '353',
+            default              => '1',
         };
 
         return [
             'country_code'      => $cc,
-            'area_code'         => '',
+            'area_code'         => '0',
             'subscriber_number' => preg_replace('/\D/', '', $phone),
         ];
     }

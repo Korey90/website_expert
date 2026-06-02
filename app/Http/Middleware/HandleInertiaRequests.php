@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\ClientPortalAccess;
 use App\Models\NavItem;
+use App\Models\Page;
 use App\Models\Setting;
 use App\Models\SiteSection;
 use Illuminate\Http\Request;
@@ -54,6 +55,7 @@ class HandleInertiaRequests extends Middleware
             'tracking'            => $this->resolveTrackingSettings(),
             'portal_translations' => $this->resolvePortalTranslations($locale),
             'landing_page_translations' => $this->resolveTranslations('landing_pages', $locale),
+            'footer_pages'        => $this->resolveFooterPages(),
         ];
     }
 
@@ -152,6 +154,23 @@ class HandleInertiaRequests extends Middleware
                     'open_in_new_tab' => $item->open_in_new_tab,
                 ])
                 ->values()
+                ->all();
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    private function resolveFooterPages(): array
+    {
+        try {
+            return Page::where('show_in_footer', true)
+                ->where('status', 'published')
+                ->orderBy('sort_order')
+                ->get(['id', 'title', 'slug'])
+                ->map(fn (Page $page) => [
+                    'title' => $page->getTranslations('title'),
+                    'href'  => '/' . ltrim($page->slug, '/'),
+                ])
                 ->all();
         } catch (\Throwable) {
             return [];

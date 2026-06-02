@@ -23,6 +23,7 @@ final readonly class DomainRegistrationPayload
         public bool $autoRenew,
         /** @var string[] */
         public array $nameservers,
+        public ?string $ownerHandle = null,
     ) {}
 
     public function getFullDomain(): string
@@ -50,6 +51,7 @@ final readonly class DomainRegistrationPayload
             whoisPrivacy: (bool) ($data['whois_privacy'] ?? true),
             autoRenew: (bool) ($data['auto_renew'] ?? false),
             nameservers: $data['nameservers'] ?? [],
+            ownerHandle: $data['owner_handle'] ?? null,
         );
     }
 
@@ -73,6 +75,7 @@ final readonly class DomainRegistrationPayload
             'whois_privacy'              => $this->whoisPrivacy,
             'auto_renew'                 => $this->autoRenew,
             'nameservers'                => $this->nameservers,
+            'owner_handle'               => $this->ownerHandle,
         ];
     }
 }

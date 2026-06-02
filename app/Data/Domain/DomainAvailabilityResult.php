@@ -10,6 +10,7 @@ final readonly class DomainAvailabilityResult
         public bool $isPremium,
         public ?float $premiumPrice,
         public ?string $error,
+        public ?string $reason = null,
     ) {}
 
     public static function available(string $domain, bool $isPremium = false, ?float $premiumPrice = null): self
@@ -23,7 +24,7 @@ final readonly class DomainAvailabilityResult
         );
     }
 
-    public static function unavailable(string $domain): self
+    public static function unavailable(string $domain, ?string $reason = null): self
     {
         return new self(
             domain: $domain,
@@ -31,6 +32,7 @@ final readonly class DomainAvailabilityResult
             isPremium: false,
             premiumPrice: null,
             error: null,
+            reason: $reason,
         );
     }
 
@@ -45,6 +47,18 @@ final readonly class DomainAvailabilityResult
         );
     }
 
+    /**
+     * Returns true when the registry signals it is temporarily busy/unreachable.
+     * The OP sandbox often returns status "active" with reason "Registry is busy"
+     * for domains that are actually free — a transient sandbox artefact.
+     */
+    public function isRegistryBusy(): bool
+    {
+        $reason = strtolower($this->reason ?? '');
+
+        return str_contains($reason, 'busy') || str_contains($reason, 'not reachable');
+    }
+
     public function toArray(): array
     {
         return [
@@ -53,6 +67,7 @@ final readonly class DomainAvailabilityResult
             'is_premium'    => $this->isPremium,
             'premium_price' => $this->premiumPrice,
             'error'         => $this->error,
+            'reason'        => $this->reason,
         ];
     }
 }

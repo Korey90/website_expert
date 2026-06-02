@@ -29,6 +29,7 @@ use App\Http\Controllers\Portal\QuoteController as PortalQuoteController;
 use App\Http\Controllers\Domain\DomainOrderController;
 use App\Http\Controllers\Domain\PublicDomainController;
 use App\Http\Controllers\Portal\DomainController as PortalDomainController;
+use App\Http\Controllers\Portal\DomainDnsController;
 use App\Http\Controllers\Portal\DomainOrderController as PortalDomainOrderController;
 use App\Http\Controllers\Portal\DomainCheckoutController as PortalDomainCheckoutController;
 use App\Http\Controllers\PortfolioController;
@@ -205,6 +206,11 @@ Route::middleware('auth')->group(function () {
                 Route::post('/order/{order}/checkout', [PortalDomainCheckoutController::class, 'pay'])->name('pay');
                 Route::get('/order/{order}/result', [PortalDomainCheckoutController::class, 'result'])->name('result');
                 Route::get('/{domain}', [PortalDomainController::class, 'show'])->name('show');
+                Route::put('/{domain}/nameservers', [PortalDomainController::class, 'updateNameservers'])->name('nameservers.update');
+                Route::get('/{domain}/dns', [DomainDnsController::class, 'index'])->name('dns.index');
+                Route::post('/{domain}/dns', [DomainDnsController::class, 'store'])->name('dns.store');
+                Route::put('/{domain}/dns/{recordId}', [DomainDnsController::class, 'update'])->name('dns.update');
+                Route::delete('/{domain}/dns/{recordId}', [DomainDnsController::class, 'destroy'])->name('dns.destroy');
             });
         });
 

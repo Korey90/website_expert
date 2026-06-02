@@ -2,6 +2,7 @@
 
 namespace App\Services\Domain;
 
+use App\Data\Domain\DnsRecord;
 use App\Data\Domain\DomainAvailabilityResult;
 use App\Data\Domain\DomainInfoResult;
 use App\Data\Domain\DomainPriceSnapshot;
@@ -92,6 +93,26 @@ class ManualDomainRegistrarService implements DomainRegistrarInterface
     public function getDomainInfo(string $domain): DomainInfoResult
     {
         return DomainInfoResult::notFound($domain);
+    }
+
+    public function getDnsRecords(string $domain): array
+    {
+        return [];
+    }
+
+    public function createDnsRecord(string $domain, array $record): array
+    {
+        return ['id' => 0];
+    }
+
+    public function updateDnsRecord(string $domain, array $originalRecord, array $newRecord): bool
+    {
+        return true;
+    }
+
+    public function deleteDnsRecord(string $domain, array $record): bool
+    {
+        return true;
     }
 
     public function getPrice(string $tld): DomainPriceSnapshot

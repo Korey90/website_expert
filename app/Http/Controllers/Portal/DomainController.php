@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Portal;
 
+use App\Actions\Domain\UpdateNameserversAction;
 use App\Models\Domain;
 use App\Services\Domain\DomainPricingService;
 use Illuminate\Http\RedirectResponse;
@@ -83,6 +84,22 @@ class DomainController extends BasePortalController
             ],
             'renewals' => $renewals,
         ]);
+    }
+
+    public function updateNameservers(Domain $domain, Request $request): RedirectResponse
+    {
+        $client = $this->clientForUser();
+        abort_if(! $client || $domain->client_id !== $client->id, 403);
+
+        $validated = $request->validate([
+            'nameservers'   => ['required', 'array', 'min:1', 'max:5'],
+            'nameservers.*' => ['required', 'string', 'max:255',
+                'regex:/^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$/'],
+        ]);
+
+        app(UpdateNameserversAction::class)->execute($domain, $validated['nameservers']);
+
+        return redirect()->back()->with('success', 'Nameservers updated successfully.');
     }
 
     /**

@@ -1,8 +1,8 @@
 # Current Sprint
 
-**Sprint Name:** Google Calendar — Hardening & UX
-**Date:** 2026-05-18 → 2026-05-31
-**Goal:** Dopracowanie integracji Google Calendar — smart-import, solidność tokenów OAuth, konfigurowalny zakres importu, paginacja listy kalendarzy, surface błędów do użytkownika
+**Sprint Name:** Domain Management — Nameservery & DNS w Portalu Klienta
+**Date:** 2026-06-01 → bieżący
+**Goal:** Umożliwienie klientowi zarządzania domeną z portalu — edycja nameserverów i pełny CRUD rekordów DNS przez OpenProvider API
 
 ## Backlog
 
@@ -13,47 +13,35 @@
 - (brak)
 
 ### Done
-- [x] GC-1 — Smart type detection (holiday/birthday → `reminder`) — 2026-05-18
-- [x] GC-2 — Konfigurowalny zakres dat importu (modal z DatePicker) — 2026-05-18
-- [x] GC-3 — Paginacja listy kalendarzy (`nextPageToken` loop) — 2026-05-18
-- [x] GC-4 — Detekcja braku `refresh_token` + persistent warning z reconnect — 2026-05-18
-- [x] GC-5 — Surface błędów kalendarzy do UI (warning notification) — 2026-05-18
-- [x] GC-0 — Activity History, Sync All, Import multi-calendar, wire:ignore fix — 2026-05-18
-- [x] T1–T5, multi-tenancy, ClientPortalAccess, ToggleColumn — 2026-05-17
-
-### In Progress
-- (brak)
-
-### Done
-- [x] GC-0 — Activity History (event_scheduled + event_deleted), Sync All, Import multi-calendar, wire:ignore fix — 2026-05-18
-- [x] T1–T5, multi-tenancy, ClientPortalAccess, ToggleColumn — 2026-05-17
-
-## Status
-**Translation Status:** ✅ Wszystkie klucze uzupełnione (EN/PL/PT)
-**Test Coverage:** 265/265 ✅
-**Multi-Tenancy Compliance:** 100% ✅
-
-## Backlog
-
-### To Do
-- (brak)
-
-### In Progress
-- (brak)
-
-### Done
-- [x] T1 — Usunięto `app/Services/LandingPage/LeadCaptureService.php` (martwy kod) — 2026-05-17
-- [x] T2 — Komentarze ochronne w `BriefingTemplate` + `SalesOfferTemplate` — 2026-05-17
-- [x] T3 — `GlobalTemplateVisibilityTest` (9 testów: BriefingTemplate + SalesOfferTemplate) — 2026-05-17
-  - Bonus: naprawiono bug `BriefingTemplate::scopeForBusiness()` (type hint `?int` → `string|null`)
-- [x] T4 — Pokryte przez istniejący `PublicLeadCaptureTest.php` (20+ testów HTTP) — 2026-05-17
-- [x] T5 — 54 brakujące klucze tłumaczeń dodane w EN/PL/PT + nowe pliki `sales_offers.php` — 2026-05-17
-- [x] Multi-tenancy unification (BelongsToTenant na 5 modelach + TenantIsolationTest) — 2026-05-17
-- [x] ClientPortalAccess refactor (nowy model, migracja, 9 plików produkcyjnych, 11 testów) — 2026-05-17
-- [x] ClientResource: ToggleColumn portal_access w tabeli /admin/clients — 2026-05-17
-- [x] MySQL migration uruchomiona — 2026-05-17
+- [x] DOM-1 — Naprawa sandbox URL OpenProvider (`api.cte` → `api.sandbox.openprovider.nl:8480`) — 2026-06-01
+- [x] DOM-2 — Izolacja credentiali sandbox (`op_sandbox_username` / `op_sandbox_password`) — 2026-06-01
+- [x] DOM-3 — Fix formatu telefonu OP (`country_code` bez `+`, `area_code` = `'0'`) — 2026-06-01
+- [x] DOM-4 — Fix pola adresu (`zip_code` → `zipcode`) — 2026-06-01
+- [x] DOM-5 — Obsługa `code 10` (Registry not reachable — kolejkowanie) — 2026-06-01
+- [x] DOM-6 — `DnsRecord` DTO + 4 metody DNS w `DomainRegistrarInterface` — 2026-06-01
+- [x] DOM-7 — Implementacja DNS w `OpenProviderRegistrarService` (GET/POST/PUT/DELETE `/dns/zones/`) — 2026-06-01
+- [x] DOM-8 — `FetchDnsRecordsAction`, `SaveDnsRecordAction`, `DeleteDnsRecordAction` — 2026-06-01
+- [x] DOM-9 — `DomainDnsController` (index, store, update, destroy) — 2026-06-01
+- [x] DOM-10 — Route `updateNameservers` + 4 trasy DNS w `routes/web.php` — 2026-06-01
+- [x] DOM-11 — `DomainController::updateNameservers()` — 2026-06-01
+- [x] DOM-12 — `Show.jsx` — modal edycji nameserverów + link "Manage DNS →" — 2026-06-01
+- [x] DOM-13 — `Dns.jsx` — nowa strona: tabela DNS + modal add/edit + inline delete — 2026-06-01
+- [x] DOM-14 — Weryfikacja: 321/321 testów ✅, build OK, route:list OK — 2026-06-01
 
 ## Status
-**Translation Status:** ✅ Wszystkie klucze uzupełnione (EN/PL/PT)
-**Test Coverage:** 260/260 ✅
+**Translation Status:** ✅ Inline w JSX (EN/PL/PT)
+**Test Coverage:** 321/321 ✅
 **Multi-Tenancy Compliance:** 100% ✅
+**Build:** ✅ brak błędów TS/JS
+
+---
+
+# Poprzedni Sprint — Google Calendar Hardening (2026-05-18)
+
+- [x] GC-1 — Smart type detection (holiday/birthday → `reminder`)
+- [x] GC-2 — Konfigurowalny zakres dat importu (modal z DatePicker)
+- [x] GC-3 — Paginacja listy kalendarzy (`nextPageToken` loop)
+- [x] GC-4 — Detekcja braku `refresh_token` + persistent warning z reconnect
+- [x] GC-5 — Surface błędów kalendarzy do UI (warning notification)
+- [x] GC-0 — Activity History, Sync All, Import multi-calendar, wire:ignore fix
+- [x] T1–T5, multi-tenancy, ClientPortalAccess, ToggleColumn — 2026-05-17

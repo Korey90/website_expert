@@ -1,48 +1,51 @@
+import Modal from '@/Components/Modal';
 import PortalLayout from '@/Layouts/PortalLayout';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
 const T = {
-    backToDomains:  { en: 'Back to Domains',     pl: 'Powr\u00f3t do domen',       pt: 'Voltar aos dom\u00ednios' },
-    domainDetails:  { en: 'Domain Details',       pl: 'Szczeg\u00f3\u0142y domeny', pt: 'Detalhes do dom\u00ednio' },
-    renewDomain:    { en: 'Renew Domain',         pl: 'Odnowi\u0107 dom\u0119n\u0119', pt: 'Renovar dom\u00ednio' },
-    registration:   { en: 'Registration',         pl: 'Rejestracja',                pt: 'Registo' },
-    status:         { en: 'Status',               pl: 'Status',                     pt: 'Estado' },
-    registeredOn:   { en: 'Registered on',        pl: 'Zarejestrowana',             pt: 'Registado em' },
-    expiresOn:      { en: 'Expires on',           pl: 'Wyga\u015bnie',              pt: 'Expira em' },
-    autoRenew:      { en: 'Auto-Renew',           pl: 'Auto-odnowienie',            pt: 'Auto-renova\u00e7\u00e3o' },
-    whoisPrivacy:   { en: 'WHOIS Privacy',        pl: 'Ochrona WHOIS',              pt: 'Privacidade WHOIS' },
-    provider:       { en: 'Provider',             pl: 'Dostawca',                   pt: 'Fornecedor' },
-    nameservers:    { en: 'Nameservers',          pl: 'Serwery nazw',               pt: 'Servidores de nome' },
-    noNameservers:  { en: 'No nameservers configured yet.',
-                      pl: 'Brak skonfigurowanych serwerów nazw.',
-                      pt: 'Nenhum servidor de nome configurado.' },
-    renewalHistory: { en: 'Renewal History',      pl: 'Historia odnowie\u0144',     pt: 'Hist\u00f3rico de renova\u00e7\u00f5es' },
-    noRenewals:     { en: 'No renewals yet.',     pl: 'Brak odnowie\u0144.',        pt: 'Sem renova\u00e7\u00f5es.' },
-    date:           { en: 'Date',                 pl: 'Data',                       pt: 'Data' },
-    years:          { en: 'Years',                pl: 'Lata',                       pt: 'Anos' },
-    amount:         { en: 'Amount',               pl: 'Kwota',                      pt: 'Valor' },
-    renewStatus:    { en: 'Status',               pl: 'Status',                     pt: 'Estado' },
-    enabled:        { en: 'Enabled',              pl: 'W\u0142\u0105czona',         pt: 'Ativada' },
-    disabled:       { en: 'Disabled',             pl: 'Wy\u0142\u0105czona',        pt: 'Desativada' },
-    expiringSoon:   { en: 'Expiring soon',        pl: 'Wyga\u015bnie wkr\u00f3tce', pt: 'Expira em breve' },
-    contactSupport: { en: 'Contact support to update nameservers or DNS settings.',
-                      pl: 'Skontaktuj si\u0119 z obs\u0142ug\u0105, aby zaktualizowa\u0107 serwery nazw lub ustawienia DNS.',
-                      pt: 'Contacte o suporte para atualizar servidores de nome ou definições de DNS.' },
+    backToDomains:    { en: 'Back to Domains',        pl: 'Powrót do domen',         pt: 'Voltar aos domínios' },
+    domainDetails:    { en: 'Domain Details',          pl: 'Szczegóły domeny',        pt: 'Detalhes do domínio' },
+    renewDomain:      { en: 'Renew Domain',            pl: 'Odnowić domenę',          pt: 'Renovar domínio' },
+    registration:     { en: 'Registration',            pl: 'Rejestracja',             pt: 'Registo' },
+    status:           { en: 'Status',                  pl: 'Status',                  pt: 'Estado' },
+    registeredOn:     { en: 'Registered on',           pl: 'Zarejestrowana',          pt: 'Registado em' },
+    expiresOn:        { en: 'Expires on',              pl: 'Wygaśnie',                pt: 'Expira em' },
+    autoRenew:        { en: 'Auto-Renew',              pl: 'Auto-odnowienie',         pt: 'Auto-renovação' },
+    whoisPrivacy:     { en: 'WHOIS Privacy',           pl: 'Ochrona WHOIS',           pt: 'Privacidade WHOIS' },
+    provider:         { en: 'Provider',                pl: 'Dostawca',                pt: 'Fornecedor' },
+    nameservers:      { en: 'Nameservers',             pl: 'Serwery nazw',            pt: 'Servidores de nome' },
+    noNameservers:    { en: 'No nameservers configured yet.', pl: 'Brak skonfigurowanych serwerów nazw.', pt: 'Nenhum servidor de nome configurado.' },
+    editNameservers:  { en: 'Edit Nameservers',        pl: 'Edytuj serwery nazw',     pt: 'Editar servidores de nome' },
+    manageDns:        { en: 'Manage DNS →',            pl: 'Zarządzaj DNS →',         pt: 'Gerir DNS →' },
+    renewalHistory:   { en: 'Renewal History',         pl: 'Historia odnowień',       pt: 'Histórico de renovações' },
+    noRenewals:       { en: 'No renewals yet.',        pl: 'Brak odnowień.',          pt: 'Sem renovações.' },
+    date:             { en: 'Date',                    pl: 'Data',                    pt: 'Data' },
+    years:            { en: 'Years',                   pl: 'Lata',                    pt: 'Anos' },
+    amount:           { en: 'Amount',                  pl: 'Kwota',                   pt: 'Valor' },
+    renewStatus:      { en: 'Status',                  pl: 'Status',                  pt: 'Estado' },
+    enabled:          { en: 'Enabled',                 pl: 'Włączona',                pt: 'Ativada' },
+    disabled:         { en: 'Disabled',                pl: 'Wyłączona',               pt: 'Desativada' },
+    expiringSoon:     { en: 'Expiring soon',           pl: 'Wygaśnie wkrótce',        pt: 'Expira em breve' },
+    save:             { en: 'Save',                    pl: 'Zapisz',                  pt: 'Guardar' },
+    cancel:           { en: 'Cancel',                  pl: 'Anuluj',                  pt: 'Cancelar' },
+    addNameserver:    { en: 'Add nameserver',          pl: 'Dodaj serwer nazw',       pt: 'Adicionar servidor de nome' },
+    nsUpdated:        { en: 'Nameservers updated.',    pl: 'Serwery nazw zaktualizowane.', pt: 'Servidores de nome atualizados.' },
 };
 
 const STATUS_COLORS = {
-    active:       'bg-green-100 text-green-800',
-    pending:      'bg-yellow-100 text-yellow-800',
-    expired:      'bg-red-100 text-red-800',
-    transferred:  'bg-blue-100 text-blue-800',
-    cancelled:    'bg-gray-100 text-gray-500',
+    active:      'bg-green-100 text-green-800',
+    pending:     'bg-yellow-100 text-yellow-800',
+    expired:     'bg-red-100 text-red-800',
+    transferred: 'bg-blue-100 text-blue-800',
+    cancelled:   'bg-gray-100 text-gray-500',
 };
 
 const RENEWAL_STATUS_COLORS = {
-    pending:    'bg-yellow-100 text-yellow-800',
-    paid:       'bg-blue-100 text-blue-800',
-    completed:  'bg-green-100 text-green-800',
-    failed:     'bg-red-100 text-red-800',
+    pending:   'bg-yellow-100 text-yellow-800',
+    paid:      'bg-blue-100 text-blue-800',
+    completed: 'bg-green-100 text-green-800',
+    failed:    'bg-red-100 text-red-800',
 };
 
 function Row({ label, children }) {
@@ -55,7 +58,7 @@ function Row({ label, children }) {
 }
 
 export default function DomainsShow({ client, domain, renewals }) {
-    const { locale } = usePage().props;
+    const { locale, flash } = usePage().props;
     const t = (key) => T[key]?.[locale] ?? T[key]?.en ?? key;
 
     const days = domain.expires_at
@@ -64,10 +67,53 @@ export default function DomainsShow({ client, domain, renewals }) {
     const expiringSoon = days !== null && days <= 30 && days >= 0 && domain.status === 'active';
     const symbol = '£';
 
+    // ── Nameserver modal ──────────────────────────────────────────────────────
+    const [showNsModal, setShowNsModal] = useState(false);
+    const { data, setData, put, processing, errors, reset } = useForm({
+        nameservers: domain.nameservers?.length ? [...domain.nameservers] : [''],
+    });
+
+    function addNs() {
+        if (data.nameservers.length < 5) {
+            setData('nameservers', [...data.nameservers, '']);
+        }
+    }
+
+    function removeNs(i) {
+        if (data.nameservers.length > 1) {
+            setData('nameservers', data.nameservers.filter((_, idx) => idx !== i));
+        }
+    }
+
+    function updateNs(i, val) {
+        const updated = [...data.nameservers];
+        updated[i] = val;
+        setData('nameservers', updated);
+    }
+
+    function submitNs(e) {
+        e.preventDefault();
+        put(route('portal.domains.nameservers.update', domain.id), {
+            onSuccess: () => { setShowNsModal(false); },
+        });
+    }
+
+    function openNsModal() {
+        setData('nameservers', domain.nameservers?.length ? [...domain.nameservers] : ['']);
+        setShowNsModal(true);
+    }
+
     return (
         <PortalLayout client={client}>
             <Head title={domain.full_domain} />
             <div className="max-w-3xl mx-auto space-y-6">
+
+                {/* Flash success */}
+                {flash?.success && (
+                    <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+                        {flash.success}
+                    </div>
+                )}
 
                 {/* Header */}
                 <div>
@@ -134,7 +180,23 @@ export default function DomainsShow({ client, domain, renewals }) {
 
                 {/* Nameservers */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-6 py-4">
-                    <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">{t('nameservers')}</h2>
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">{t('nameservers')}</h2>
+                        <div className="flex items-center gap-3">
+                            <Link
+                                href={route('portal.domains.dns.index', domain.id)}
+                                className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                            >
+                                {t('manageDns')}
+                            </Link>
+                            <button
+                                onClick={openNsModal}
+                                className="text-xs font-medium text-gray-600 hover:text-gray-900 border border-gray-300 rounded-md px-2.5 py-1 hover:bg-gray-50 transition-colors"
+                            >
+                                {t('editNameservers')}
+                            </button>
+                        </div>
+                    </div>
                     {domain.nameservers && domain.nameservers.length > 0 ? (
                         <ul className="space-y-2">
                             {domain.nameservers.map((ns, i) => (
@@ -147,7 +209,6 @@ export default function DomainsShow({ client, domain, renewals }) {
                     ) : (
                         <p className="text-sm text-gray-400">{t('noNameservers')}</p>
                     )}
-                    <p className="mt-3 text-xs text-gray-400">{t('contactSupport')}</p>
                 </div>
 
                 {/* Renewal history */}
@@ -184,6 +245,69 @@ export default function DomainsShow({ client, domain, renewals }) {
                 </div>
 
             </div>
+
+            {/* Edit Nameservers Modal */}
+            <Modal show={showNsModal} maxWidth="lg" onClose={() => setShowNsModal(false)}>
+                <form onSubmit={submitNs} className="p-6 space-y-4">
+                    <h3 className="text-base font-semibold text-gray-900">{t('editNameservers')}</h3>
+
+                    <div className="space-y-2">
+                        {data.nameservers.map((ns, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                                <span className="text-xs text-gray-400 w-8 text-right">NS{i + 1}</span>
+                                <input
+                                    type="text"
+                                    value={ns}
+                                    onChange={e => updateNs(i, e.target.value)}
+                                    placeholder="ns1.example.com"
+                                    className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                                {data.nameservers.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeNs(i)}
+                                        className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                        {errors.nameservers && (
+                            <p className="text-xs text-red-600">{errors.nameservers}</p>
+                        )}
+                    </div>
+
+                    {data.nameservers.length < 5 && (
+                        <button
+                            type="button"
+                            onClick={addNs}
+                            className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                        >
+                            + {t('addNameserver')}
+                        </button>
+                    )}
+
+                    <div className="flex justify-end gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={() => setShowNsModal(false)}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                            {t('cancel')}
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                        >
+                            {processing ? '…' : t('save')}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </PortalLayout>
     );
 }

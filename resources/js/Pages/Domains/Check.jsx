@@ -24,6 +24,8 @@ const LABELS = {
         readyDesc:          'Log in or create a free account to complete your order.',
         readyBtn:           'Log in to Register',
         metaTitle:          (q) => q ? `"${q}" \u2014 Domain Search` : 'Check Domain Availability',
+        exactAvailable:     (name) => <>Domain <strong>{name}</strong> is <span className="text-green-600 dark:text-green-400 font-semibold">available</span>.</>,
+        exactTaken:         (name) => <>Domain <strong>{name}</strong> is <span className="text-neutral-500 dark:text-neutral-400 font-semibold">taken</span>.</>,
     },
     pl: {
         backToDomains:      'Powr\u00f3t do domen',
@@ -46,6 +48,8 @@ const LABELS = {
         readyDesc:          'Zaloguj się lub utwórz bezpłatne konto, aby sfinalizować zamówienie.',
         readyBtn:           'Zaloguj i zarejestruj',
         metaTitle:          (q) => q ? `"${q}" \u2014 Wyszukiwanie domeny` : 'Sprawdź dostępność domeny',
+        exactAvailable:     (name) => <>Domena <strong>{name}</strong> jest <span className="text-green-600 dark:text-green-400 font-semibold">dostępna</span>.</>,
+        exactTaken:         (name) => <>Domena <strong>{name}</strong> jest <span className="text-neutral-500 dark:text-neutral-400 font-semibold">zajęta</span>.</>,
     },
     pt: {
         backToDomains:      'Voltar aos Dom\u00ednios',
@@ -68,6 +72,8 @@ const LABELS = {
         readyDesc:          'Inicie sess\u00e3o ou crie uma conta gratuita para concluir a sua encomenda.',
         readyBtn:           'Iniciar sess\u00e3o e registar',
         metaTitle:          (q) => q ? `"${q}" \u2014 Pesquisa de Dom\u00ednio` : 'Verificar Disponibilidade de Dom\u00ednio',
+        exactAvailable:     (name) => <>Dom\u00ednio <strong>{name}</strong> est\u00e1 <span className="text-green-600 dark:text-green-400 font-semibold">dispon\u00edvel</span>.</>,
+        exactTaken:         (name) => <>Dom\u00ednio <strong>{name}</strong> est\u00e1 <span className="text-neutral-500 dark:text-neutral-400 font-semibold">indispon\u00edvel</span>.</>,
     },
 };
 
@@ -184,6 +190,7 @@ export default function DomainsCheck({ query = '', results = [], auth }) {
     const l = LABELS[locale] ?? LABELS.en;
     const available   = results.filter(r => r.is_available);
     const unavailable = results.filter(r => !r.is_available);
+    const exactMatch  = results.find(r => r.domain === query);
 
     return (
         <MarketingLayout auth={auth} footer={footer}>
@@ -204,6 +211,11 @@ export default function DomainsCheck({ query = '', results = [], auth }) {
                     <h1 className="font-display text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white mb-5">
                         {query ? l.resultsFor(query) : l.checkTitle}
                     </h1>
+                    {exactMatch && (
+                        <p className={`text-base mb-5 ${exactMatch.is_available ? 'text-green-600 dark:text-green-400' : 'text-neutral-600 dark:text-neutral-400'}`}>
+                            {exactMatch.is_available ? l.exactAvailable(exactMatch.domain) : l.exactTaken(exactMatch.domain)}
+                        </p>
+                    )}
                     <SearchBar initialQuery={query} l={l} />
                 </div>
             </section>

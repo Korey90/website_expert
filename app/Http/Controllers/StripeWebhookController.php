@@ -129,6 +129,28 @@ class StripeWebhookController extends Controller
                     $session->payment_intent ?? $session->id,
                 );
                 Log::info("Stripe: domain order #{$domainOrderId} marked as paid via session {$session->id}");
+
+                // Mark the associated invoice as paid and record the payment
+                $invoice = Invoice::where('domain_order_id', $order->id)->first();
+                if ($invoice && $invoice->status !== 'paid') {
+                    $payment = Payment::create([
+                        'invoice_id'               => $invoice->id,
+                        'amount'                   => ($session->amount_total ?? 0) / 100,
+                        'currency'                 => strtoupper($session->currency ?? $order->currency ?? 'GBP'),
+                        'method'                   => 'stripe',
+                        'status'                   => 'completed',
+                        'stripe_payment_intent_id' => $session->payment_intent,
+                        'reference'                => $session->id,
+                        'paid_at'                  => now(),
+                    ]);
+
+                    $invoice->recalculate();
+                    $invoice->update(['status' => 'paid', 'paid_at' => now()]);
+
+                    $this->sendPaymentNotifications($payment);
+
+                    Log::info("Stripe: Invoice #{$invoice->id} marked as paid for domain order #{$domainOrderId}");
+                }
             }
             return;
         }

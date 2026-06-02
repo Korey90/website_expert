@@ -2,6 +2,7 @@
 
 namespace App\Services\Domain;
 
+use App\Data\Domain\DnsRecord;
 use App\Data\Domain\DomainAvailabilityResult;
 use App\Data\Domain\DomainInfoResult;
 use App\Data\Domain\DomainPriceSnapshot;
@@ -55,4 +56,26 @@ interface DomainRegistrarInterface
      * Get the wholesale price snapshot for a TLD from the registrar.
      */
     public function getPrice(string $tld): DomainPriceSnapshot;
+
+    /**
+     * Fetch all DNS records for a domain zone.
+     * @return DnsRecord[]
+     */
+    public function getDnsRecords(string $domain): array;
+
+    /**
+     * Create a DNS record. Returns array with 'id' of the new record.
+     */
+    public function createDnsRecord(string $domain, array $record): array;
+
+    /**
+     * Update an existing DNS record. The original record data is used to identify
+     * the record in registrars that have no per-record IDs (e.g. Openprovider).
+     */
+    public function updateDnsRecord(string $domain, array $originalRecord, array $newRecord): bool;
+
+    /**
+     * Delete a DNS record identified by its data (registrars without record IDs).
+     */
+    public function deleteDnsRecord(string $domain, array $record): bool;
 }

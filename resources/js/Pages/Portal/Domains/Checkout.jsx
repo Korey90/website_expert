@@ -54,10 +54,18 @@ export default function DomainsCheckout({ client, order }) {
                             <span className="text-gray-600">Period</span>
                             <span className="text-gray-900">{order.years} {order.years === 1 ? 'year' : 'years'}</span>
                         </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Subtotal (ex. VAT)</span>
+                            <span className="text-gray-900">{symbol}{Number(order.retail_price).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">VAT ({order.vat_rate}%)</span>
+                            <span className="text-gray-900">{symbol}{Number(order.vat_amount).toFixed(2)}</span>
+                        </div>
                         <div className="border-t border-gray-100 pt-3 flex justify-between">
-                            <span className="font-semibold text-gray-900">Total</span>
+                            <span className="font-semibold text-gray-900">Total (inc. VAT)</span>
                             <span className="text-xl font-black text-gray-900">
-                                {symbol}{Number(order.retail_price).toFixed(2)}
+                                {symbol}{Number(order.total).toFixed(2)}
                             </span>
                         </div>
                     </div>
@@ -89,7 +97,7 @@ export default function DomainsCheckout({ client, order }) {
                             >
                                 {submitting
                                     ? <><span className="animate-spin">⏳</span> Redirecting to Stripe…</>
-                                    : <>🔒 Pay {symbol}{Number(order.retail_price).toFixed(2)} Securely</>
+                                    : <>🔒 Pay {symbol}{Number(order.total).toFixed(2)} Securely</>
                                 }
                             </button>
                         </form>

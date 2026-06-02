@@ -8,6 +8,7 @@ use App\Models\DomainEvent;
 use App\Models\DomainOrder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class DomainOrderService
 {
@@ -16,6 +17,7 @@ class DomainOrderService
      */
     public function createOrder(array $data): DomainOrder
     {
+        Log::info("Creating new domain order for {$data['full_domain']} ({$data['action']}, {$data['years']}yr) at £{$data['retail_price']} {$data['currency']}");
         $order = DomainOrder::create([
             'business_id'   => $data['business_id'],
             'client_id'     => $data['client_id'] ?? null,
@@ -31,6 +33,7 @@ class DomainOrderService
             'notes'         => $data['notes'] ?? null,
         ]);
 
+        Log::info("Domain order #{$order->id} created for {$order->full_domain} ({$order->action}, {$order->years}yr) at £{$order->retail_price} {$order->currency}");
         DomainEvent::log(
             domainId: null,
             domainOrderId: $order->id,
@@ -38,6 +41,8 @@ class DomainOrderService
             description: "Domain order created for {$order->full_domain}",
             payload: ['action' => $order->action, 'years' => $order->years],
         );
+
+        Log::info("Domain order #{$order->id} created for {$order->full_domain} ({$order->action}, {$order->years}yr) at £{$order->retail_price} {$order->currency}");
 
         return $order;
     }
@@ -47,6 +52,7 @@ class DomainOrderService
      */
     public function markAsPaid(DomainOrder $order, string $stripePaymentIntentId): DomainOrder
     {
+        Log::info("Marking domain order #{$order->id} as 'paid' for {$order->full_domain}");
         $order->update([
             'status'                    => 'paid',
             'stripe_payment_intent_id'  => $stripePaymentIntentId,
@@ -70,6 +76,7 @@ class DomainOrderService
      */
     public function markAsRegistering(DomainOrder $order): DomainOrder
     {
+        Log::info("Marking domain order #{$order->id} as 'registering' for {$order->full_domain}");
         $order->update(['status' => 'registering']);
 
         DomainEvent::log(
@@ -79,6 +86,7 @@ class DomainOrderService
             description: "Domain registration initiated for {$order->full_domain}",
         );
 
+        Log::info("RegisterDomainJob: started for {$order->full_domain} (order #{$order->id})");
         return $order->fresh();
     }
 
@@ -91,26 +99,34 @@ class DomainOrderService
         Carbon $registeredAt,
         ?Carbon $expiresAt,
     ): Domain {
+        Log::info("Completing domain order #{$order->id} for {$order->full_domain}: providerDomainId={$providerDomainId}, registeredAt={$registeredAt}, expiresAt={$expiresAt}");
         $domain = Domain::create([
-            'business_id'       => $order->business_id,
-            'client_id'         => $order->client_id,
-            'domain_order_id'   => $order->id,
-            'provider'          => $order->provider,
-            'provider_domain_id'=> $providerDomainId,
-            'name'              => $order->domain_name,
-            'tld'               => $order->tld,
-            'full_domain'       => $order->full_domain,
-            'status'            => 'active',
-            'registered_at'     => $registeredAt,
-            'expires_at'        => $expiresAt,
-            'auto_renew'        => false,
-            'whois_privacy'     => true,
+            'business_id'        => $order->business_id,
+            'client_id'          => $order->client_id,
+            'domain_order_id'    => $order->id,
+            'provider'           => $order->provider,
+            'provider_domain_id' => $providerDomainId,
+            'name'               => $order->domain_name,
+            'tld'                => $order->tld,
+            'full_domain'        => $order->full_domain,
+            // Empty providerId means the registrar queued the request (e.g. OP code 10).
+            // Use 'pending' until the registry confirms and we have a real ID.
+            'status'             => empty($providerDomainId) ? 'pending' : 'active',
+            'registered_at'      => $registeredAt,
+            'expires_at'         => $expiresAt,
+            'auto_renew'         => false,
+            'whois_privacy'      => true,
         ]);
+
+
+        Log::info("Domain order #{$order->id} completed: domain {$domain->full_domain} created with provider ID '{$providerDomainId}'");
 
         $order->update([
             'status'        => 'completed',
             'completed_at'  => now(),
         ]);
+
+        Log::info("Domain order #{$order->id} marked as completed.");
 
         DomainEvent::log(
             domainId: $domain->id,
@@ -123,6 +139,8 @@ class DomainOrderService
                 'expires_at'         => $expiresAt?->toIso8601String(),
             ],
         );
+
+        Log::info("Domain order #{$order->id} registration completed for {$domain->full_domain} (provider ID: '{$providerDomainId}')");
 
         return $domain;
     }
@@ -142,6 +160,8 @@ class DomainOrderService
             payload: ['reason' => $reason],
         );
 
+        Log::info("Domain order #{$order->id} registration failed for {$order->full_domain}: {$reason}");
+
         return $order->fresh();
     }
 
@@ -160,6 +180,8 @@ class DomainOrderService
             payload: $reason ? ['reason' => $reason] : null,
         );
 
+        Log::info("Domain order #{$order->id} cancelled for {$order->full_domain}" . ($reason ? ": {$reason}" : ''));
+
         return $order->fresh();
     }
 
@@ -170,6 +192,7 @@ class DomainOrderService
      */
     public function getStalePendingOrders(): Collection
     {
+        Log::info("Fetching stale pending domain orders (created more than 1 hour ago)");
         return DomainOrder::pendingPayment()
             ->where('created_at', '<', now()->subHour())
             ->get();

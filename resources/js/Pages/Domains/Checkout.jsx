@@ -60,10 +60,18 @@ export default function DomainsCheckout({ order, auth }) {
                             <span className="text-neutral-500 dark:text-neutral-400">Period</span>
                             <span className="text-neutral-900 dark:text-white">{order.years} {order.years === 1 ? 'year' : 'years'}</span>
                         </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-neutral-500 dark:text-neutral-400">Subtotal (ex. VAT)</span>
+                            <span className="text-neutral-900 dark:text-white">{symbol}{Number(order.retail_price).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-neutral-500 dark:text-neutral-400">VAT ({order.vat_rate}%)</span>
+                            <span className="text-neutral-900 dark:text-white">{symbol}{Number(order.vat_amount).toFixed(2)}</span>
+                        </div>
                         <div className="border-t border-neutral-100 dark:border-neutral-800 pt-3 flex justify-between">
-                            <span className="font-semibold text-neutral-900 dark:text-white">Total</span>
+                            <span className="font-semibold text-neutral-900 dark:text-white">Total (inc. VAT)</span>
                             <span className="text-2xl font-black text-neutral-900 dark:text-white">
-                                {symbol}{Number(order.retail_price).toFixed(2)}
+                                {symbol}{Number(order.total).toFixed(2)}
                             </span>
                         </div>
                     </div>
@@ -96,7 +104,7 @@ export default function DomainsCheckout({ order, auth }) {
                                 {submitting ? (
                                     <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg> Redirecting to Stripe…</>
                                 ) : (
-                                    <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg> Pay {symbol}{Number(order.retail_price).toFixed(2)} Securely</>
+                                    <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg> Pay {symbol}{Number(order.total).toFixed(2)} Securely</>
                                 )}
                             </button>
                         </form>

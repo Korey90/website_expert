@@ -18,7 +18,7 @@ use RuntimeException;
 class OpenProviderClient
 {
     private const PROD_URL    = 'https://api.openprovider.eu/v1beta';
-    private const SANDBOX_URL = 'https://api.cte.openprovider.eu/v1beta';
+    private const SANDBOX_URL = 'http://api.sandbox.openprovider.nl:8480/v1beta';
     private const TOKEN_TTL   = 82_800; // 23 hours (tokens valid for ~24h)
     private const TOKEN_KEY   = 'openprovider_api_token';
 

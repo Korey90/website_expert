@@ -34,6 +34,7 @@ function GenericSection({ data }) {
 }
 
 // Komponenty below-fold — ładowane leniwie
+const DomainsHeroSection = lazy(() => import('@/Components/Marketing/DomainsHeroSection'));
 const SaasLandingSection = lazy(() => import('@/Components/Marketing/SaasLandingSection'));
 const CtaBanner          = lazy(() => import('@/Components/Marketing/CtaBanner'));
 const TrustStrip         = lazy(() => import('@/Components/Marketing/TrustStrip'));
@@ -51,6 +52,7 @@ export default function Welcome({ auth, hero, about, saas_landing, cta_banner, t
 
     const renderSection = (key) => {
         switch (key) {
+            case 'domain_search':  return extraByKey['domain_search'] ? <DomainsHeroSection key={key} data={extraByKey['domain_search']} /> : null;
             case 'hero':            return hero             ? <Hero key={key} data={hero} />                                                               : null;
             case 'about':           return about            ? <About key={key} data={about} />                                                          : null;
             case 'saas_landing':    return saas_landing     ? <SaasLandingSection key={key} data={saas_landing} />                                      : null;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Models\DomainOrder;
+use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -31,6 +32,11 @@ class DomainCheckoutController extends BasePortalController
                 ->with('payment', 'success');
         }
 
+        $netPrice  = (float) $order->retail_price;
+        $vatRate   = 20.0;
+        $vatAmount = round($netPrice * $vatRate / 100, 2);
+        $total     = round($netPrice + $vatAmount, 2);
+
         return Inertia::render('Portal/Domains/Checkout', [
             'client' => $client?->only('id', 'company_name'),
             'order'  => [
@@ -38,7 +44,10 @@ class DomainCheckoutController extends BasePortalController
                 'full_domain'  => $order->full_domain,
                 'action'       => $order->action,
                 'years'        => $order->years,
-                'retail_price' => (float) $order->retail_price,
+                'retail_price' => $netPrice,
+                'vat_rate'     => $vatRate,
+                'vat_amount'   => $vatAmount,
+                'total'        => $total,
                 'currency'     => $order->currency,
                 'status'       => $order->status,
             ],
@@ -48,7 +57,7 @@ class DomainCheckoutController extends BasePortalController
     /**
      * POST /portal/domains/order/{order}/checkout — create Stripe Checkout Session and redirect.
      */
-    public function pay(Request $request, DomainOrder $order): RedirectResponse
+    public function pay(Request $request, DomainOrder $order): RedirectResponse|\Symfony\Component\HttpFoundation\Response
     {
         $client = $this->clientForUser();
 
@@ -60,17 +69,21 @@ class DomainCheckoutController extends BasePortalController
             return back()->withErrors(['order' => 'This order cannot be paid at this time.']);
         }
 
-        $stripeSecret = config('services.stripe.secret', '');
-        abort_if(empty($stripeSecret), 503, 'Stripe payments are not configured.');
+        $stripeSecret = Setting::get('stripe_sk', config('services.stripe.secret', ''));
+        abort_if(empty($stripeSecret) || ! Setting::get('stripe_enabled'), 503, 'Stripe payments are not configured.');
 
         try {
             Stripe::setApiKey($stripeSecret);
 
-            $amount   = (int) round((float) $order->retail_price * 100);
+            // retail_price is net (ex-VAT); charge the VAT-inclusive gross amount
+            $netPrice = (float) $order->retail_price;
+            $gross    = round($netPrice * 1.2, 2);
+            $amount   = (int) round($gross * 100);
             $currency = strtolower($order->currency ?? 'gbp');
             $email    = $client?->primary_contact_email ?? auth()->user()->email;
             $label    = ucfirst($order->action) . ' ' . $order->full_domain
                 . ' (' . $order->years . ' ' . ($order->years === 1 ? 'year' : 'years') . ')';
+            unset($netPrice, $gross);
 
             $session = StripeSession::create([
                 'mode'           => 'payment',
@@ -91,7 +104,7 @@ class DomainCheckoutController extends BasePortalController
                 'cancel_url'  => route('portal.domains.result', $order->id) . '?payment=cancelled',
             ]);
 
-            return redirect($session->url);
+            return Inertia::location($session->url);
         } catch (ApiErrorException $e) {
             Log::error('Stripe domain checkout error: ' . $e->getMessage(), ['order_id' => $order->id]);
             return back()->withErrors(['stripe' => 'Payment provider error. Please try again.']);

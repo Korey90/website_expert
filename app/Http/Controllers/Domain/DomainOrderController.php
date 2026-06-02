@@ -7,13 +7,18 @@ use App\Actions\Domain\ProcessDomainPaymentAction;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\DomainOrder;
+use App\Models\Setting;
+use App\Services\Domain\DomainOrderService;
 use App\Services\Domain\DomainPricingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Stripe\Checkout\Session as StripeSession;
 use Stripe\Exception\ApiErrorException;
+use Stripe\Stripe;
 
 class DomainOrderController extends Controller
 {
@@ -119,13 +124,21 @@ class DomainOrderController extends Controller
                 ->with('payment', 'success');
         }
 
+        $netPrice  = (float) $order->retail_price;
+        $vatRate   = 20.0;
+        $vatAmount = round($netPrice * $vatRate / 100, 2);
+        $total     = round($netPrice + $vatAmount, 2);
+
         return Inertia::render('Domains/Checkout', [
             'order' => [
                 'id'           => $order->id,
                 'full_domain'  => $order->full_domain,
                 'action'       => $order->action,
                 'years'        => $order->years,
-                'retail_price' => (float) $order->retail_price,
+                'retail_price' => $netPrice,
+                'vat_rate'     => $vatRate,
+                'vat_amount'   => $vatAmount,
+                'total'        => $total,
                 'currency'     => $order->currency,
                 'status'       => $order->status,
             ],
@@ -136,22 +149,29 @@ class DomainOrderController extends Controller
     /**
      * POST /domains/order/{order}/checkout — create Stripe Checkout Session and redirect.
      */
-    public function pay(Request $request, DomainOrder $order): RedirectResponse
+    public function pay(Request $request, DomainOrder $order): RedirectResponse|\Symfony\Component\HttpFoundation\Response
     {
+        Log::info("Initiating payment for domain order #{$order->id} by user " . auth()->id());
         $this->authorizeOrder($order);
 
+        Log::info("Domain order #{$order->id} current status: '{$order->status}'");
         if ($order->status !== 'pending_payment') {
             return back()->withErrors(['order' => 'This order cannot be paid at this time.']);
         }
 
+        Log::info("Creating Stripe Checkout Session for domain order #{$order->id}");
+
         try {
+            Log::info("Stripe configuration check for domain order #{$order->id}");
             $session = $this->paymentAction->execute(
                 $order,
                 route('domains.result', $order->id) . '?payment=success',
                 route('domains.result', $order->id) . '?payment=cancelled',
             );
 
-            return redirect($session->url);
+            Log::info("Stripe Checkout Session created for domain order #{$order->id}: session_id={$session->id} url={$session->url}");
+
+            return Inertia::location($session->url);
         } catch (\RuntimeException $e) {
             abort(503, $e->getMessage());
         } catch (ApiErrorException $e) {
@@ -168,6 +188,16 @@ class DomainOrderController extends Controller
     {
         $this->authorizeOrder($order);
 
+        // Fallback: webhook may not have arrived (local dev / delayed delivery).
+        // Verify the Stripe session directly and process the order if still pending.
+        if ($request->input('payment') === 'success'
+            && $order->status === 'pending_payment'
+            && $request->filled('session_id')
+        ) {
+            $this->verifyAndProcess($order, $request->input('session_id'));
+            $order->refresh();
+        }
+
         return Inertia::render('Domains/Result', [
             'order' => [
                 'id'           => $order->id,
@@ -183,8 +213,37 @@ class DomainOrderController extends Controller
         ]);
     }
 
+    private function verifyAndProcess(DomainOrder $order, string $sessionId): void
+    {
+        try {
+            $stripeSecret = config('services.stripe.secret') ?: Setting::get('stripe_sk', '');
+            if (empty($stripeSecret)) {
+                return;
+            }
+
+            Stripe::setApiKey($stripeSecret);
+            $session = StripeSession::retrieve($sessionId);
+
+            Log::info("Verifying Stripe session {$sessionId} for domain order #{$order->id}: payment_status='{$session->payment_status}' metadata=" . json_encode($session->metadata));
+
+            if ($session->payment_status === 'paid'
+                && (string) ($session->metadata->domain_order_id ?? '') === (string) $order->id
+            ) {
+                app(DomainOrderService::class)->markAsPaid(
+                    $order,
+                    $session->payment_intent ?? $session->id,
+                );
+                Log::info("Domain order #{$order->id} processed via success-URL session verification.");
+            }
+            Log::info("Stripe session verification completed for domain order #{$order->id}.");
+        } catch (\Throwable $e) {
+            Log::warning("Domain order #{$order->id} session verification failed: " . $e->getMessage());
+        }
+    }
+
     private function authorizeOrder(DomainOrder $order): void
     {
+        Log::info("Authorizing access to domain order #{$order->id} for user " . auth()->id());
         // Allow owner or admin-created orders (no created_by set)
         if ($order->created_by && $order->created_by !== auth()->id()) {
             abort(403);

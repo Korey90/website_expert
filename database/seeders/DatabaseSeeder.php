@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
 
         // Website front-end content
         $this->call(SiteSectionSeeder::class);
+        $this->call(DomainSaleSectionSeeder::class);
         $this->call(NavItemSeeder::class);
         $this->call(PortfolioProjectSeeder::class);
         $this->call(ServiceItemSeeder::class);

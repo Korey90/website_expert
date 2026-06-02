@@ -2,11 +2,13 @@
 
 namespace App\Jobs;
 
+use App\Actions\Domain\EnsureOpHandleAction;
 use App\Actions\Domain\GenerateDomainInvoiceAction;
 use App\Data\Domain\DomainRegistrationPayload;
 use App\Models\DomainContact;
 use App\Models\DomainOrder;
 use App\Models\DomainRenewal;
+use App\Models\Payment;
 use App\Models\User;
 use App\Notifications\DomainOrderAdminNotification;
 use App\Notifications\DomainOrderPlacedNotification;
@@ -46,23 +48,98 @@ class RegisterDomainJob implements ShouldQueue
     ): void {
         // ── 1. Notify client: payment confirmed ──────────────────────────────
         $clientEmail = $this->resolveClientEmail();
+        Log::info("RegisterDomainJob: resolved client email for order #{$this->order->id}: " . ($clientEmail ?? 'NULL'));
         if ($clientEmail) {
+            Log::info("RegisterDomainJob: sending payment received notification to client for order #{$this->order->id}");
             Notification::route('mail', $clientEmail)
                 ->notify(new DomainOrderPlacedNotification($this->order));
         }
 
         // ── 2. Notify admins: new paid order requires processing ──────────────
+        Log::info("RegisterDomainJob: notifying admins for order #{$this->order->id}");
         $this->notifyAdmins(new DomainOrderAdminNotification($this->order));
 
         // ── 3. Mark as registering ────────────────────────────────────────────
+        Log::info("RegisterDomainJob: marking order #{$this->order->id} as registering");
         $orderService->markAsRegistering($this->order);
 
-        // ── 4. Call registrar ─────────────────────────────────────────────────
+        // ── 4. Create invoice after payment and mark it as paid ──────────────
         try {
+            Log::debug("RegisterDomainJob step4: generating invoice for order #{$this->order->id}");
+            // Re-fetch from DB to guarantee we have the latest stripe_payment_intent_id,
+            // regardless of how the model was serialised/restored in the queue payload.
+            $freshOrder = DomainOrder::withoutGlobalScopes()->findOrFail($this->order->id);
+            $invoice    = app(GenerateDomainInvoiceAction::class)->execute($freshOrder);
+
+            Log::debug("RegisterDomainJob step4: order #{$freshOrder->id} pi='{$freshOrder->stripe_payment_intent_id}' invoice #{$invoice->id} status='{$invoice->status}'");
+
+            // The order was paid via Stripe — mark the invoice as paid immediately.
+            // The webhook handler only marks it if the invoice already existed at webhook time;
+            // since the invoice is created here (after the job is dispatched by the webhook),
+            // we must do it here instead.
+            if ($invoice->status !== 'paid' && $freshOrder->stripe_payment_intent_id) {
+                // Payment must match the VAT-inclusive (gross) amount that Stripe charged
+                $grossAmount = round((float) $freshOrder->retail_price * 1.2, 2);
+                Payment::firstOrCreate(
+                    ['stripe_payment_intent_id' => $freshOrder->stripe_payment_intent_id],
+                    [
+                        'invoice_id' => $invoice->id,
+                        'amount'     => $grossAmount,
+                        'currency'   => strtoupper($freshOrder->currency ?? 'GBP'),
+                        'method'     => 'stripe',
+                        'status'     => 'completed',
+                        'reference'  => $freshOrder->stripe_payment_intent_id,
+                        'paid_at'    => now(),
+                    ]
+                );
+
+                $invoice->recalculate();
+                $invoice->update(['status' => 'paid', 'paid_at' => now()]);
+
+                Log::info("RegisterDomainJob: invoice #{$invoice->id} marked as paid for order #{$freshOrder->id}");
+            } else {
+                Log::debug("RegisterDomainJob step4 skipped: invoice_status='{$invoice->status}' pi='" . ($freshOrder->stripe_payment_intent_id ?: 'NULL') . "'");
+            }
+        } catch (\Throwable $e) {
+            Log::warning("RegisterDomainJob: failed to generate/mark invoice for order #{$this->order->id}: " . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+        }
+
+        Log::info("RegisterDomainJob: starting registrar process for order #{$this->order->id} (domain: {$this->order->full_domain}, action: {$this->order->action})");
+        // ── 5. Call registrar ─────────────────────────────────────────────────
+        try {
+            Log::info("RegisterDomainJob: sending registration request to registrar for order #{$this->order->id}");
             $contact = DomainContact::where('domain_order_id', $this->order->id)
                 ->where('type', 'registrant')
                 ->first();
 
+            $ownerHandle = null;
+            Log::info("RegisterDomainJob: checking if OP handle is needed for order #{$this->order->id} (client_id={$this->order->client_id}, registrar=" . config('services.domain_registrar.provider') . ")");
+
+            if ($this->order->client_id
+                && config('services.domain_registrar.provider') === 'openprovider'
+                && $this->order->client
+            ) {
+                Log::info("RegisterDomainJob: ensuring OP handle for client_id={$this->order->client_id} (order #{$this->order->id})");
+                $ownerHandle = app(EnsureOpHandleAction::class)->execute(
+                    $this->order->client,
+                    [
+                        'email'        => $contact?->email ?? '',
+                        'first_name'   => $contact?->first_name  ?? '',
+                        'last_name'    => $contact?->last_name   ?? '',
+                        'phone'        => $contact?->phone       ?? '',
+                        'country_code' => $contact?->country_code ?? 'GB',
+                        'address_line1'=> $contact?->address_line1 ?? '',
+                        'address_line2'=> $contact?->address_line2,
+                        'city'         => $contact?->city        ?? '',
+                        'county'       => $contact?->county,
+                        'postcode'     => $contact?->postcode    ?? '',
+                        'organisation' => $contact?->organisation,
+                    ]
+                );
+            }
+            
+            Log::info("RegisterDomainJob: OP handle for order #{$this->order->id}: " . ($ownerHandle ?? 'NULL'));
+            
             $payload = new DomainRegistrationPayload(
                 domainName:               $this->order->domain_name,
                 tld:                      $this->order->tld,
@@ -81,8 +158,10 @@ class RegisterDomainJob implements ShouldQueue
                 whoisPrivacy:             true,
                 autoRenew:                false,
                 nameservers:              [],
+                ownerHandle:              $ownerHandle,
             );
 
+            Log::info("RegisterDomainJob: sending registration request to registrar for {$payload->domainName}. Payload: " . json_encode($payload));
             $result = $registrar->register($payload);
 
         } catch (\Throwable $e) {
@@ -95,8 +174,9 @@ class RegisterDomainJob implements ShouldQueue
             return;
         }
 
-        // ── 5. Handle result ──────────────────────────────────────────────────
+        // ── 6. Handle result ──────────────────────────────────────────────────
         if (! $result->success) {
+            Log::error("RegisterDomainJob: registrar error for order #{$this->order->id}: " . ($result->error ?? 'Unknown error'));
             $reason = $result->error ?? 'Unknown registrar error';
             $orderService->failOrder($this->order->fresh(), $reason);
             $this->notifyAdmins(new DomainRegistrationFailedNotification($this->order, $reason));
@@ -109,9 +189,11 @@ class RegisterDomainJob implements ShouldQueue
             registeredAt:   $result->registeredAt,
             expiresAt:      $result->expiresAt,
         );
+        Log::info("zawartosc domain: {$domain}");
 
-        // ── 6. Create upcoming renewal record ─────────────────────────────────
+        // ── 7. Create upcoming renewal record ─────────────────────────────────
         if ($domain->expires_at) {
+            Log::info("RegisterDomainJob: creating renewal record for {$domain->full_domain} due on {$domain->expires_at->toDateString()}");
             $renewPrice = $pricing->calculateRetailPrice($domain->tld, 1, 'renew');
             DomainRenewal::create([
                 'domain_id'    => $domain->id,
@@ -122,15 +204,9 @@ class RegisterDomainJob implements ShouldQueue
             ]);
         }
 
-        // ── 7. Auto-generate draft invoice ────────────────────────────────────
-        try {
-            app(GenerateDomainInvoiceAction::class)->execute($this->order->fresh());
-        } catch (\Throwable $e) {
-            Log::warning("RegisterDomainJob: failed to generate invoice for order #{$this->order->id}: " . $e->getMessage());
-        }
-
         // ── 8. Notify client: domain registered ───────────────────────────────
         if ($clientEmail) {
+            Log::info("RegisterDomainJob: sending domain registered notification to client for order #{$this->order->id}");
             Notification::route('mail', $clientEmail)
                 ->notify(new DomainRegisteredNotification($domain));
         }
@@ -157,9 +233,19 @@ class RegisterDomainJob implements ShouldQueue
 
     private function notifyAdmins(mixed $notification): void
     {
-        User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'manager', 'super_admin']))
-            ->where('business_id', $this->order->business_id)
-            ->get()
-            ->each(fn (User $u) => $u->notify($notification));
+        try {
+            User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'manager', 'super_admin']))
+                ->whereHas('businesses', function ($q) {
+                    $q->where('businesses.id', $this->order->business_id)
+                        ->where('business_users.is_active', true);
+                })
+                ->get()
+                ->each(fn (User $u) => $u->notify($notification));
+        } catch (\Throwable $e) {
+            // Notifications should never block core domain registration flow.
+            Log::warning("RegisterDomainJob: admin notification failed for order #{$this->order->id}", [
+                'exception' => $e->getMessage(),
+            ]);
+        }
     }
 }
