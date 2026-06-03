@@ -53,6 +53,7 @@ class FilamentPermissionRegistry
         'PipelinePage' => 'manage_leads',
         'SitemapPage' => 'manage_settings',
         'TrackingSettingsPage' => 'manage_settings',
+        'LogViewerPage' => 'manage_settings',
     ];
 
     public static function panelAccessPermission(): string

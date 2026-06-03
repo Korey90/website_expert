@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CHANGELOG.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="changelog">Changelog</h1>
+<p>Wszystkie istotne zmiany w projekcie WebsiteExpert.</p>
+<hr>
+<h2 id="unreleased--2026-06-02">[Unreleased] — 2026-06-02</h2>
+<h3 id="naprawiono">Naprawiono</h3>
+<ul>
+<li>Poprawki flow zamawiania nowej domeny (<code>097798c</code>)</li>
+</ul>
+<hr>
+<h2 id="2026-06-01">2026-06-01</h2>
+<h3 id="dodano">Dodano</h3>
+<ul>
+<li><strong>Moduł domen</strong> — ukończenie pełnej funkcji rejestracji domen, wszystkie sprinty zakończone (<code>210df0a</code>)</li>
+</ul>
+<hr>
+<h2 id="2026-05-29">2026-05-29</h2>
+<h3 id="inne">Inne</h3>
+<ul>
+<li>Eksperymenty z agentami Copilot (<code>00359b8</code>)</li>
+</ul>
+<hr>
+<h2 id="2026-05-17--2026-05-18">2026-05-17 — 2026-05-18</h2>
+<h3 id="dodano-1">Dodano</h3>
+<ul>
+<li><strong>Kalendarz</strong> — wdrożenie modułu kalendarza z synchronizacją historii aktywności Google Calendar (<code>28fd906</code>, <code>862f27c</code>, <code>7467f0c</code>)</li>
+</ul>
+<h3 id="inne-1">Inne</h3>
+<ul>
+<li>Technical Debt Cleanup Sprint T1–T5 (<code>b055af7</code>)</li>
+<li>Aktualizacja konfiguracji agentów i skilli w projekcie (<code>28e0b0b</code>)</li>
+</ul>
+<hr>
+<h2 id="2026-04-14--2026-04-23">2026-04-14 — 2026-04-23</h2>
+<h3 id="dodano-2">Dodano</h3>
+<ul>
+<li>Dedykowane widoki pod reklamy: <code>/contact/</code>, <code>/about-us</code> (<code>10379a6</code>)</li>
+<li>Dedykowany moduł nawigacji na froncie z pełnym panelem zarządzania; navbar usunięty z site-sections (<code>e14e5eb</code>)</li>
+<li>Moduł szczegółów oferty (<code>9a0ac29</code>)</li>
+<li>Moduł briefings (<code>ebb2b9f</code>)</li>
+<li>Moduł odświeżający <code>sitemap.xml</code> automatycznie (<code>3aec334</code>)</li>
+<li>Widoki front-end dla modułu services + admin UI (<code>e510843</code>)</li>
+<li>Moduł portfolio z widokami index (<code>ed8f58a</code>)</li>
+</ul>
+<h3 id="zmieniono">Zmieniono</h3>
+<ul>
+<li>Poprawki w edycji portfolio items — naprawiono bug z tagami i obrazem; dodano funkcje AI (<code>0d627df</code>)</li>
+<li>Poprawki automatyzacji badania jakości obsługi klienta (<code>15032b8</code>)</li>
+<li>Porządkowanie linków w menu admina (<code>f8a2382</code>)</li>
+<li>Rozbudowa <code>/services/*</code> i <code>/portfolio/*</code> — więcej szczegółów + tagi SEO (<code>ec62c74</code>)</li>
+<li>Poprawki treści CMS (<code>5cf7d98</code>)</li>
+<li>Poprawki widoku mobilnego na froncie, poprawki SEO (<code>3bfccbd</code>)</li>
+<li>Poprawki w site-sections &gt; contact; zaktualizowano seeder pod nowego klienta (<code>8b41e98</code>)</li>
+</ul>
+<h3 id="naprawiono-1">Naprawiono</h3>
+<ul>
+<li>Fix: zapobieganie ponownemu wysyłaniu SMS/email przy retry'ach w kolejce (<code>1179965</code>)</li>
+</ul>
+<h3 id="wydajność">Wydajność</h3>
+<ul>
+<li>Osiągnięto wynik 90+ we wszystkich testach Google PageSpeed na desktop/mobile (<code>6ae74c5</code>)</li>
+<li>SEO: osiągnięto wynik 100 pkt; dodano opisowe linki (<code>4c99654</code>)</li>
+<li>Poprawki dostępności; wynik 95+ pkt (<code>c7509b3</code>)</li>
+</ul>
+<hr>
+<h2 id="2026-04-09">2026-04-09</h2>
+<h3 id="zmieniono-1">Zmieniono</h3>
+<ul>
+<li>Funkcje AI + poprawki widoków mobile/desktop oraz trybów light/dark (<code>86315e9</code>)</li>
+</ul>
+<hr>
+<h2 id="2026-03-31--2026-04-03">2026-03-31 — 2026-04-03</h2>
+<h3 id="dodano-3">Dodano</h3>
+<ul>
+<li><strong>SaaS faza 1</strong> — wdrożenie multi-tenancy (<code>ef495ff</code>, <code>43bdc88</code>)</li>
+</ul>
+<h3 id="zmieniono-2">Zmieniono</h3>
+<ul>
+<li>Refaktoryzacja i poprawki z testami — zakończenie planu poprawek (<code>21da3c3</code>, <code>43cae7b</code>, <code>a5a2a66</code>)</li>
+</ul>
+<hr>
+<h2 id="2026-03-27">2026-03-27</h2>
+<h3 id="dodano-4">Dodano</h3>
+<ul>
+<li>UI + CRUD dla zarządzania uprawnieniami (Permissions) (<code>3d4eb6c</code>)</li>
+<li>System powiadomień — widget oraz CRUD (<code>9ecb5ba</code>)</li>
+</ul>
+<hr>
+<h2 id="2026-03-24--2026-03-26">2026-03-24 — 2026-03-26</h2>
+<h3 id="dodano-5">Dodano</h3>
+<ul>
+<li><strong>Moduł kontraktów</strong> wraz z szablonami (<code>05251e0</code>, <code>b07acb9</code>)</li>
+<li>Zarządzanie zgodami na komunikację w Portalu Klienta (<code>da0b642</code>)</li>
+<li>Integracja bramek płatności + historia płatności (<code>054f7df</code>)</li>
+</ul>
+<h3 id="zmieniono-3">Zmieniono</h3>
+<ul>
+<li>Przebudowa kalkulatora (front + admin); poprawione tłumaczenia i logika (<code>bb6bd70</code>)</li>
+<li>Poprawki sekcji frontowych od strony admina (<code>1ee4353</code>)</li>
+<li>Poprawki UI (<code>b0c6e80</code>, <code>4d26b84</code>)</li>
+</ul>
+<hr>
+<h2 id="2026-03-21--2026-03-22">2026-03-21 — 2026-03-22</h2>
+<h3 id="dodano-6">Dodano</h3>
+<ul>
+<li>Szablony wiadomości SMS; ukończono integrację Twilio (SMS + email) (<code>c1f45e0</code>)</li>
+<li>Szablony projektów + automatyczne zadania na podstawie szablonu; redesign widoku <code>project.show</code> (<code>c0a044e</code>)</li>
+<li>Zwijanie/rozwijanie panelu bocznego; trigger z przypiętymi notatkami w belce (<code>c655a70</code>)</li>
+<li>Widoki index dla wszystkich modułów; rozbudowa <code>lead.show</code> (<code>69f7cd8</code>, <code>afc3fe5</code>)</li>
+</ul>
+<h3 id="zmieniono-4">Zmieniono</h3>
+<ul>
+<li>Poprawki redesign i logiki działu projektów; aktualizacje w Portalu Klienta (<code>52faaa8</code>)</li>
+</ul>
+<hr>
+<h2 id="2026-03-19--2026-03-20">2026-03-19 — 2026-03-20</h2>
+<h3 id="dodano-7">Dodano</h3>
+<ul>
+<li>Integracja logowania z frontem; poprawki wyświetlania CMS Pages (<code>25f1072</code>)</li>
+</ul>
+<h3 id="naprawiono-2">Naprawiono</h3>
+<ul>
+<li>Poprawki flow po wysłaniu kalkulatora i formularza kontaktowego (<code>f05e1eb</code>)</li>
+</ul>
+<hr>
+<h2 id="2026-03-19--wersja-inicjalna">2026-03-19 — Wersja inicjalna</h2>
+<h3 id="dodano-8">Dodano</h3>
+<ul>
+<li>Wersja core projektu (<code>a04305c</code>)</li>
+<li>Połączenie sekcji hero z backendem przez Inertia; fix konfiguracji Tailwind v4 (<code>58ac577</code>)</li>
+<li>Pierwszy commit (<code>adfafae</code>)</li>
+</ul>
+
+</body>
+</html>

@@ -171,12 +171,42 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
     }
 
     /**
-     * When OP returns code 10 (registry unreachable), the domain is queued in their system.
-     * Return a success with empty providerId — the ID can be resolved later via GET /domains
-     * once the registry processes the request.
+     * When OP returns code 10 (registry unreachable), the domain is queued in their system
+     * with status REQ. Try to look up the domain via GET /domains to get the provider ID.
+     * If the lookup fails or returns nothing, return an empty providerId so the caller
+     * can detect the pending state.
      */
     private function resolveQueuedRegistration(DomainRegistrationPayload $payload): DomainRegistrationResult
     {
+        $extension = $this->tldExtension($payload->tld);
+
+        try {
+            $data = $this->client->get('/domains', [
+                'domain_name_pattern' => $payload->domainName,
+                'extension'           => $extension,
+                'status'              => 'REQ',
+                'limit'               => 1,
+            ]);
+
+            $entry = $data['results'][0] ?? null;
+
+            if ($entry && ! empty($entry['id'])) {
+                return DomainRegistrationResult::success(
+                    providerId:  (string) $entry['id'],
+                    registeredAt: isset($entry['order_date'])
+                        ? Carbon::parse($entry['order_date'])
+                        : now(),
+                    expiresAt: isset($entry['expiration_date'])
+                        ? Carbon::parse($entry['expiration_date'])
+                        : now()->addYears($payload->years),
+                );
+            }
+        } catch (\Throwable) {
+            // Lookup failed — fall through to empty-providerId result
+        }
+
+        // Domain is queued but not yet visible via API — return success with empty ID.
+        // The ID can be resolved later once the registry activates the domain.
         return DomainRegistrationResult::success(
             providerId: '',
             registeredAt: now(),
@@ -290,20 +320,35 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
         $extension = $this->tldExtension($tld);
 
         try {
-            $data = $this->client->get('/products/domains', [
-                'tld'       => $extension,
-                'operation' => 'create',
+            // Correct OP endpoint: GET /domains/prices?domain.extension=com&operation=create
+            // (the old /products/domains endpoint returns 501 "Method is not implemented")
+            $data = $this->client->get('/domains/prices', [
+                'domain.extension' => $extension,
+                'operation'        => 'create',
             ]);
 
-            // Openprovider returns price as a float in the reseller's billing currency
-            $regPrice = (float) ($data['price'] ?? $data['results'][0]['price'] ?? 0);
+            // Response shape: data.price.reseller.{price, currency}
+            $resellerPrice = $data['price']['reseller'] ?? [];
+            $productPrice  = $data['price']['product']  ?? [];
+
+            $regPrice = (float) ($resellerPrice['price'] ?? $productPrice['price'] ?? 0);
+            $currency = $resellerPrice['currency'] ?? $productPrice['currency'] ?? 'EUR';
+
+            // Renewal price: try /domains/prices with operation=renew
+            $renewData  = $this->client->get('/domains/prices', [
+                'domain.extension' => $extension,
+                'operation'        => 'renew',
+            ]);
+            $renewReseller = $renewData['price']['reseller'] ?? [];
+            $renewProduct  = $renewData['price']['product']  ?? [];
+            $renewPrice    = (float) ($renewReseller['price'] ?? $renewProduct['price'] ?? $regPrice);
 
             return DomainPriceSnapshot::fromPriceList(
                 tld: $tld,
                 registerPrice: $regPrice,
-                renewPrice: (float) ($data['renewal_price'] ?? $regPrice),
+                renewPrice: $renewPrice,
                 transferPrice: null,
-                currency: $data['currency'] ?? 'EUR',
+                currency: $currency,
             );
         } catch (\Throwable $e) {
             // Return zero-price on failure; the system falls back to its own price list

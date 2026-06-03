@@ -59,6 +59,9 @@ class OpenProviderSandboxTest extends TestCase
 
         $this->client    = app(OpenProviderClient::class);
         $this->registrar = app(OpenProviderRegistrarService::class);
+
+        $this->info('Środowisko: sandbox — ' . config('services.domain_registrar.openprovider.sandbox') ? 'tak' : 'nie');
+        $this->info('Użytkownik: ' . $username);
     }
 
     // ── Autentykacja ──────────────────────────────────────────────────────────
@@ -68,7 +71,11 @@ class OpenProviderSandboxTest extends TestCase
      */
     public function test_can_authenticate_with_sandbox_api(): void
     {
+        $this->step('Wysyłam żądanie logowania do sandbox API...');
         $token = $this->client->bearerToken();
+
+        $preview = substr($token, 0, 10) . '...[MASKED]';
+        $this->ok("Token otrzymany: {$preview}");
 
         $this->assertNotEmpty($token);
         $this->assertIsString($token);
@@ -79,8 +86,13 @@ class OpenProviderSandboxTest extends TestCase
      */
     public function test_bearer_token_is_cached_on_repeat_call(): void
     {
+        $this->step('Pierwsze pobranie tokenu...');
         $token1 = $this->client->bearerToken();
+        $this->ok('Token #1 otrzymany.');
+
+        $this->step('Drugie pobranie tokenu (powinno trafić w cache)...');
         $token2 = $this->client->bearerToken();
+        $this->ok('Token #2 otrzymany — ' . ($token1 === $token2 ? 'identyczny z #1 (cache działa)' : 'RÓŻNY od #1 (cache nie działa!)'));
 
         $this->assertSame($token1, $token2);
     }
@@ -92,14 +104,17 @@ class OpenProviderSandboxTest extends TestCase
      */
     public function test_known_taken_domain_is_unavailable(): void
     {
+        $this->step('Sprawdzam dostępność example.com (powinna być zajęta)...');
         $result = $this->registrar->checkAvailability('example.com');
 
         $this->assertSame('example.com', $result->domain);
 
         if ($result->error !== null) {
+            $this->warn('Błąd API: ' . $result->error);
             $this->markTestIncomplete('Sprawdzenie niedostępności pominięte — błąd API: ' . $result->error);
         }
 
+        $this->ok('Domena example.com jest ' . ($result->isAvailable ? 'DOSTĘPNA (nieoczekiwane!)' : 'zajęta — poprawnie'));
         $this->assertFalse($result->isAvailable);
     }
 
@@ -108,17 +123,21 @@ class OpenProviderSandboxTest extends TestCase
      */
     public function test_random_unique_domain_is_available(): void
     {
-        $unique = 'we-sandbox-avail-' . uniqid() . '.com';
+        $unique = 'we-sandbox-avail-' . uniqid() . $this->getTestTld();
+        $this->step("Sprawdzam dostępność unikalnej domeny: {$unique}");
         $result = $this->registrar->checkAvailability($unique);
 
         if ($result->error !== null) {
+            $this->warn('Błąd API: ' . $result->error);
             $this->markTestIncomplete('Sprawdzenie dostępności pominięte — błąd API: ' . $result->error);
         }
 
         if ($result->isRegistryBusy()) {
+            $this->warn('Rejestr chwilowo niedostępny: ' . $result->reason);
             $this->markTestIncomplete('Sprawdzenie dostępności pominięte — rejestr chwilowo niedostępny: ' . $result->reason);
         }
 
+        $this->ok('Domena ' . $unique . ' jest ' . ($result->isAvailable ? 'dostępna — poprawnie' : 'ZAJĘTA (nieoczekiwane!)'));
         $this->assertTrue($result->isAvailable, "Oczekiwano dostępności dla: {$unique}");
     }
 
@@ -127,18 +146,25 @@ class OpenProviderSandboxTest extends TestCase
      */
     public function test_search_returns_results_for_multiple_tlds(): void
     {
+        $this->step('Wyszukuję domenę websiteexpert-sandboxtest przez wiele TLD...');
         $result = $this->registrar->search('websiteexpert-sandboxtest');
 
         $this->assertNotEmpty($result->results);
 
         $hasErrors = collect($result->results)->every(fn ($r) => $r->error !== null);
         if ($hasErrors) {
+            $this->warn('Błąd API: ' . ($result->results[0]->error ?? ''));
             $this->markTestIncomplete('Search pominięty — błąd API: ' . ($result->results[0]->error ?? ''));
         }
 
         $this->assertGreaterThan(3, count($result->results));
 
+        $available = collect($result->results)->where('isAvailable', true)->count();
+        $taken     = collect($result->results)->where('isAvailable', false)->count();
+        $this->ok('Wyniki: ' . count($result->results) . ' TLD — dostępnych: ' . $available . ', zajętych: ' . $taken);
         foreach ($result->results as $r) {
+            $status = $r->isAvailable ? 'wolna' : 'zajęta';
+            $this->info('  ' . $r->domain . ' → ' . $status . ($r->error ? ' [błąd: ' . $r->error . ']' : ''));
             $this->assertNotEmpty($r->domain);
             $this->assertIsBool($r->isAvailable);
         }
@@ -149,9 +175,10 @@ class OpenProviderSandboxTest extends TestCase
      */
     public function test_search_strips_tld_from_full_domain_query(): void
     {
-        // Użytkownik wpisuje pełną domenę — search() powinien obsłużyć stripping
+        $this->step('Wyszukuję pełną domenę websiteexpert-strip.com — search() powinien usunąć .com i wyszukać label...');
         $result = $this->registrar->search('websiteexpert-strip.com');
 
+        $this->ok('Otrzymano ' . count($result->results) . ' wyników (TLD zostało poprawnie odcięte)');
         $this->assertNotEmpty($result->results);
     }
 
@@ -166,25 +193,29 @@ class OpenProviderSandboxTest extends TestCase
      */
     public function test_can_register_unique_domain_on_sandbox(): void
     {
-        // TLD to try — .nl is the most reliable in OP sandbox.
-        // NOTE: .pl, .com, .net, .io always return code 10 "Registry not reachable" in sandbox.
-        $tld   = '.nl';
+        // TLD is selected interactively via `php artisan domain:sandbox-test`
+        // or falls back to .nl (most reliable in OP sandbox).
+        // NOTE: .pl, .com, .net, .io often return code 10 "Registry not reachable" in sandbox.
+        $tld   = $this->getTestTld();
         $label = 'domena-test-' . uniqid();
         $fqdn  = "{$label}{$tld}";
 
-        // ── DEBUG: availability check ─────────────────────────────────────────
+        $this->step("Krok 1/3 — sprawdzam dostępność: {$fqdn}");
         $avail = $this->registrar->checkAvailability($fqdn);
-        fwrite(STDERR, "\n[DEBUG] checkAvailability({$fqdn})\n");
-        fwrite(STDERR, "  isAvailable : " . ($avail->isAvailable ? 'true' : 'false') . "\n");
-        fwrite(STDERR, "  reason      : " . ($avail->reason ?? '—') . "\n");
-        fwrite(STDERR, "  error       : " . ($avail->error  ?? '—') . "\n");
+        $this->ok('checkAvailability: ' . ($avail->isAvailable ? 'dostępna' : 'niedostępna') . ($avail->reason ? ' (powód: ' . $avail->reason . ')' : ''));
 
         if (! $avail->isAvailable) {
             $reason = $avail->reason ?? $avail->error ?? 'unknown';
+            $this->warn("Rejestr {$tld} niedostępny: {$reason}");
             $this->markTestIncomplete(
                 "Sandbox registry for {$tld} currently busy/unavailable. Reason: {$reason}. Try again later."
             );
         }
+
+        $this->step('Krok 2/3 — buduję payload rejestracji (bez klienta, dane testowe)...');
+        $this->info('  Registrant: Test Registrant <sandbox@websiteexpert.test>');
+        $this->info('  Adres: 1 Sandbox Street, London SW1A 1AA, GB');
+        $this->info('  Okres: 1 rok, autoRenew: nie, whoisPrivacy: nie');
 
         $payload = new DomainRegistrationPayload(
             domainName:             $label,
@@ -206,18 +237,19 @@ class OpenProviderSandboxTest extends TestCase
             nameservers:            [],
         );
 
-        // ── DEBUG: registration attempt ───────────────────────────────────────
-        fwrite(STDERR, "[DEBUG] register({$fqdn})\n");
+        $this->step('Krok 3/3 — wysyłam żądanie rejestracji do OpenProvider...');
         $result = $this->registrar->register($payload);
-        fwrite(STDERR, "  success    : " . ($result->success ? 'true' : 'false') . "\n");
-        fwrite(STDERR, "  providerId : " . ($result->providerId ?? '—') . "\n");
-        fwrite(STDERR, "  error      : " . ($result->error      ?? '—') . "\n");
-        fwrite(STDERR, "  registeredAt: " . ($result->registeredAt?->toDateTimeString() ?? '—') . "\n");
-        fwrite(STDERR, "  expiresAt   : " . ($result->expiresAt?->toDateTimeString()   ?? '—') . "\n");
+
+        $this->info('  success    : ' . ($result->success ? 'tak' : 'nie'));
+        $this->info('  providerId : ' . ($result->providerId ?: '(brak — kolejka)'));
+        $this->info('  error      : ' . ($result->error     ?: 'brak'));
+        $this->info('  registeredAt: ' . ($result->registeredAt?->toDateTimeString() ?: '—'));
+        $this->info('  expiresAt   : ' . ($result->expiresAt?->toDateTimeString()   ?: '—'));
 
         // Sandbox can return 311 "not free" even after a successful availability check
         // (inconsistent registry state — race condition). Treat as incomplete, not failure.
         if (! $result->success && str_contains($result->error ?? '', '311')) {
+            $this->warn('Rejestr zwrócił 311 (domena nie wolna) mimo pozytywnego availability check — sandbox race condition.');
             $this->markTestIncomplete(
                 "{$tld} registry returned 311 after availability check passed — sandbox inconsistency. Try again later. Error: " . $result->error
             );
@@ -225,6 +257,7 @@ class OpenProviderSandboxTest extends TestCase
 
         // Code 10 = registry temporarily unreachable, domain queued by OP internally
         if (! $result->success && str_contains($result->error ?? '', '10')) {
+            $this->warn('Rejestr zwrócił kod 10 (rejestr tymczasowo nieosiągalny) — domena w kolejce OP.');
             $this->markTestIncomplete(
                 "{$tld} registry returned code 10 (not reachable) — sandbox limitation. Error: " . $result->error
             );
@@ -234,11 +267,15 @@ class OpenProviderSandboxTest extends TestCase
             $result->success,
             'Rejestracja nie powiodła się: ' . ($result->error ?? 'brak informacji o błędzie')
         );
+
+        $this->ok("{$fqdn} zarejestrowana pomyślnie! providerId: {$result->providerId}, wygasa: " . $result->expiresAt?->toDateString());
+
         $this->assertNotNull($result->registeredAt);
         $this->assertNotNull($result->expiresAt);
         $this->assertTrue($result->expiresAt->isAfter(now()));
 
         if (empty($result->providerId)) {
+            $this->warn('providerId puste — domena w kolejce OP (rejestr przetworzy ją asynchronicznie).');
             $this->markTestIncomplete(
                 'Rejestracja wysłana do kolejki OP (code 10 — registry chwilowo niedostępny). ' .
                 'Domena widoczna w panelu sandbox jako pending. providerId zostanie przypisane po aktywacji rejestru.'
@@ -259,15 +296,20 @@ class OpenProviderSandboxTest extends TestCase
      */
     public function test_can_register_domain_for_client_test(): void
     {
+        $this->step('Krok 1/5 — szukam użytkownika test@gmail.com w bazie...');
         $user = DB::connection('app_db')
             ->table('users')
             ->where('email', 'test@gmail.com')
             ->first();
 
         if (! $user) {
+            $this->warn('Użytkownik test@gmail.com nie istnieje — test pominięty.');
             $this->markTestSkipped('Użytkownik test@gmail.com nie istnieje w bazie.');
         }
 
+        $this->ok('Znaleziono użytkownika: id=' . $user->id . ', email=' . $user->email);
+
+        $this->step('Krok 2/5 — szukam klienta powiązanego przez client_portal_accesses...');
         $clientRow = DB::connection('app_db')
             ->table('clients')
             ->join('client_portal_accesses', 'clients.id', '=', 'client_portal_accesses.client_id')
@@ -276,8 +318,11 @@ class OpenProviderSandboxTest extends TestCase
             ->first();
 
         if (! $clientRow) {
+            $this->warn('Brak klienta powiązanego z test@gmail.com.');
             $this->markTestSkipped('Brak klienta powiązanego z 20noname22x@gmail.com (client_portal_accesses).');
         }
+
+        $this->ok('Znaleziono klienta: id=' . $clientRow->id . ', firma=' . ($clientRow->company_name ?: '(brak)'));
 
         // Build contact data from client record
         $nameParts = explode(' ', (string) $clientRow->primary_contact_name, 2);
@@ -295,6 +340,10 @@ class OpenProviderSandboxTest extends TestCase
             'organisation' => $clientRow->company_name  ?? null,
         ];
 
+        $this->step('Krok 3/5 — resetuję op_handle (wymuszam świeże tworzenie w OP) i uruchamiam EnsureOpHandleAction...');
+        $this->info('  Dane kontaktowe: ' . $contactData['first_name'] . ' ' . $contactData['last_name'] . ' <' . $contactData['email'] . '>');
+        $this->info('  Adres: ' . $contactData['address_line1'] . ', ' . $contactData['city'] . ', ' . $contactData['country_code']);
+
         // Reset cached handle — force fresh creation so OP customer gets complete contact data
         // (city is required for .nl; old cached handle may have been created without it)
         DB::connection('app_db')
@@ -308,32 +357,40 @@ class OpenProviderSandboxTest extends TestCase
         $ensureHandle = new EnsureOpHandleAction($this->client);
         $handle       = $ensureHandle->execute($client, $contactData);
 
+        $this->ok('EnsureOpHandleAction zwrócił handle: ' . $handle);
         $this->assertNotEmpty($handle, 'EnsureOpHandleAction musi zwrócić niepusty handle OP.');
 
-        // Verify handle was persisted (or was already there)
+        $this->step('Weryfikuję czy handle został zapisany w clients.op_handle...');
         $freshOpHandle = DB::connection('app_db')
             ->table('clients')
             ->where('id', $clientRow->id)
             ->value('op_handle');
 
+        $this->ok('Handle w bazie: ' . ($freshOpHandle ?: '(brak — błąd zapisu!)'));
         $this->assertSame($handle, $freshOpHandle, 'Handle powinien być zapisany w clients.op_handle.');
 
-        // Use .nl — the Dutch registry is fully accessible in OP sandbox (unlike .com which returns code 10)
+        // TLD is selected interactively via `php artisan domain:sandbox-test` (default: .nl)
+        $tld   = $this->getTestTld();
         $label = 'we-client-' . uniqid();
 
-        // Pre-check: if sandbox .nl registry is busy it reports the domain as "active"
+        $this->step('Krok 4/5 — sprawdzam dostępność ' . $label . $tld . ' przed rejestracją...');
+
+        // Pre-check: if sandbox registry is busy it reports the domain as "active"
         // with reason "Registry is busy" — registration would fail with code 311.
-        $avail = $this->registrar->checkAvailability("{$label}.nl");
+        $avail = $this->registrar->checkAvailability("{$label}{$tld}");
+        $this->ok('checkAvailability: ' . ($avail->isAvailable ? 'dostępna' : 'niedostępna') . ($avail->reason ? ' (powód: ' . $avail->reason . ')' : ''));
+
         if (! $avail->isAvailable) {
             $reason = $avail->reason ?? $avail->error ?? 'unknown';
+            $this->warn("Rejestr {$tld} niedostępny: {$reason}");
             $this->markTestIncomplete(
-                ".nl sandbox registry is currently busy (domain '{$label}.nl' reported as non-free). Reason: {$reason}. Try again later."
+                "{$tld} sandbox registry is currently busy (domain '{$label}{$tld}' reported as non-free). Reason: {$reason}. Try again later."
             );
         }
 
         $payload = new DomainRegistrationPayload(
             domainName:             $label,
-            tld:                    '.nl',
+            tld:                    $tld,
             years:                  1,
             registrantFirstName:    $contactData['first_name'],
             registrantLastName:     $contactData['last_name'],
@@ -352,38 +409,48 @@ class OpenProviderSandboxTest extends TestCase
             ownerHandle:            $handle,
         );
 
+        $this->step('Krok 5/5 — wysyłam żądanie rejestracji dla klienta (handle: ' . $handle . ')...');
         $result = $this->registrar->register($payload);
+
+        $this->info('  success    : ' . ($result->success ? 'tak' : 'nie'));
+        $this->info('  providerId : ' . ($result->providerId ?: '(brak — kolejka)'));
+        $this->info('  error      : ' . ($result->error     ?: 'brak'));
+        $this->info('  registeredAt: ' . ($result->registeredAt?->toDateTimeString() ?: '—'));
+        $this->info('  expiresAt   : ' . ($result->expiresAt?->toDateTimeString()   ?: '—'));
 
         // Sandbox can return 311 "not free" even after a successful availability check
         // (inconsistent registry state). Treat as incomplete rather than a test failure.
         if (! $result->success && str_contains($result->error ?? '', '311')) {
+            $this->warn('Rejestr zwrócił 311 (domena nie wolna) mimo pozytywnego availability check — sandbox race condition.');
             $this->markTestIncomplete(
-                ".nl registry returned 311 after availability check passed — sandbox inconsistency. Handle: {$handle}. Try again later."
+                "{$tld} registry returned 311 after availability check passed — sandbox inconsistency. Handle: {$handle}. Try again later."
             );
         }
 
         $this->assertTrue(
             $result->success,
-            "Rejestracja '{$label}.nl' nie powiodła się: " . ($result->error ?? 'brak informacji')
+            "Rejestracja '{$label}{$tld}' nie powiodła się: " . ($result->error ?? 'brak informacji')
         );
         $this->assertNotEmpty($handle);
 
         if (empty($result->providerId)) {
+            $this->warn('providerId puste — domena w kolejce OP.');
             $this->markTestIncomplete(
-                "Domena '{$label}.nl' wysłana do kolejki OP (code 10). " .
+                "Domena '{$label}{$tld}' wysłana do kolejki OP (code 10). " .
                 "Widoczna w panelu sandbox jako pending. Handle klienta: {$handle}"
             );
         }
 
+        $this->ok("{$label}{$tld} zarejestrowana dla klienta. providerId: {$result->providerId}, handle: {$handle}");
         $this->assertNotEmpty($result->providerId);
 
-        // Persist Domain to app DB so it appears in portal and admin panel
+        $this->step('Zapisuję domenę do tabeli domains w bazie aplikacji...');
         DB::connection('app_db')->table('domains')->insert([
             'business_id'        => $clientRow->business_id,
             'client_id'          => $clientRow->id,
-            'full_domain'        => "{$label}.nl",
+            'full_domain'        => "{$label}{$tld}",
             'name'               => $label,
-            'tld'                => '.nl',
+            'tld'                => $tld,
             'status'             => 'active',
             'provider'           => 'openprovider',
             'provider_domain_id' => $result->providerId,
@@ -398,9 +465,11 @@ class OpenProviderSandboxTest extends TestCase
         ]);
 
         $this->assertTrue(
-            DB::connection('app_db')->table('domains')->where('full_domain', "{$label}.nl")->exists(),
-            "Domena {$label}.nl powinna być zapisana w tabeli domains."
+            DB::connection('app_db')->table('domains')->where('full_domain', "{$label}{$tld}")->exists(),
+            "Domena {$label}{$tld} powinna być zapisana w tabeli domains."
         );
+
+        $this->ok("Domena {$label}{$tld} zapisana w tabeli domains. Test zakończony pomyślnie.");
     }
 
     // ── Pobieranie cen ────────────────────────────────────────────────────────
@@ -410,14 +479,17 @@ class OpenProviderSandboxTest extends TestCase
      */
     public function test_can_fetch_price_for_com_tld(): void
     {
+        $this->step('Pobieram cennik dla .com z OpenProvider...');
         $snapshot = $this->registrar->getPrice('.com');
 
         $this->assertSame('.com', $snapshot->tld);
 
         if ($snapshot->registerPrice === 0.0) {
+            $this->warn('Brak danych cenowych dla .com — prawdopodobnie błąd API.');
             $this->markTestIncomplete('Ceny pominięte — błąd API lub brak danych cenowych dla .com.');
         }
 
+        $this->ok('.com — rejestracja: ' . $snapshot->registerPrice . ' ' . $snapshot->currency . ', odnowienie: ' . $snapshot->renewPrice . ' ' . $snapshot->currency);
         $this->assertGreaterThan(0, $snapshot->registerPrice);
         $this->assertNotEmpty($snapshot->currency);
     }
@@ -427,18 +499,60 @@ class OpenProviderSandboxTest extends TestCase
      */
     public function test_can_fetch_price_for_co_uk_tld(): void
     {
+        $this->step('Pobieram cennik dla .co.uk z OpenProvider...');
         $snapshot = $this->registrar->getPrice('.co.uk');
 
         $this->assertSame('.co.uk', $snapshot->tld);
 
         if ($snapshot->registerPrice === 0.0) {
+            $this->warn('Brak danych cenowych dla .co.uk — prawdopodobnie błąd API.');
             $this->markTestIncomplete('Ceny pominięte — błąd API lub brak danych cenowych dla .co.uk.');
         }
 
+        $this->ok('.co.uk — rejestracja: ' . $snapshot->registerPrice . ' ' . $snapshot->currency);
         $this->assertGreaterThan(0, $snapshot->registerPrice);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Zwraca TLD wybrany przez użytkownika przed uruchomieniem testów.
+     * Wartość pochodzi ze zmiennej środowiskowej DOMAIN_TEST_TLD ustawianej
+     * przez komendę `php artisan domain:sandbox-test`.
+     * Domyślnie: .nl (najbardziej stabilny TLD w sandboxie OpenProvider).
+     */
+    // ── Logging helpers ───────────────────────────────────────────────────────
+
+    /** Loguje krok procedury (nagłówek kroku). */
+    private function step(string $message): void
+    {
+        fwrite(STDERR, "\n\033[1;36m  ● {$message}\033[0m\n");
+    }
+
+    /** Loguje sukces / wynik. */
+    private function ok(string $message): void
+    {
+        fwrite(STDERR, "\033[32m  ✔ {$message}\033[0m\n");
+    }
+
+    /** Loguje informację neutralną. */
+    private function info(string $message): void
+    {
+        fwrite(STDERR, "\033[90m  {$message}\033[0m\n");
+    }
+
+    /** Loguje ostrzeżenie (nie zatrzymuje testu). */
+    private function warn(string $message): void
+    {
+        fwrite(STDERR, "\033[1;33m  ⚠ {$message}\033[0m\n");
+    }
+
+    private function getTestTld(): string
+    {
+        $tld = (string) env('DOMAIN_TEST_TLD', '.nl');
+
+        return str_starts_with($tld, '.') ? $tld : '.' . $tld;
+    }
 
     /**
      * Odczytuje wartość z tabeli `settings` używając rzeczywistego połączenia MySQL.
