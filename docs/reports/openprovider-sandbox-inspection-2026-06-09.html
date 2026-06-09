@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>openprovider-sandbox-inspection-2026-06-09.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="raport-inspekcji-test_can_register_domain_for_client_test-vs-openprovider-api">Raport inspekcji: <code>test_can_register_domain_for_client_test</code> vs. OpenProvider API</h1>
+<p><strong>Data:</strong> 2026-06-09<br>
+<strong>Źródło dokumentacji:</strong> https://support.openprovider.eu/hc/en-us/articles/360025090374<br>
+<strong>Pliki poddane inspekcji:</strong></p>
+<ul>
+<li><code>tests/Feature/Domain/OpenProviderSandboxTest.php</code></li>
+<li><code>app/Services/Domain/OpenProviderRegistrarService.php</code></li>
+<li><code>app/Services/Domain/OpenProviderClient.php</code></li>
+<li><code>app/Actions/Domain/EnsureOpHandleAction.php</code></li>
+<li><code>app/Data/Domain/DomainRegistrationPayload.php</code></li>
+</ul>
+<hr>
+<h2 id="1-wymagania-dokumentacji-openprovider-post-domains">1. Wymagania dokumentacji OpenProvider (POST /domains)</h2>
+<h3 id="pola-wymagane-required">Pola wymagane (Required)</h3>
+<table>
+<thead>
+<tr>
+<th>Pole API</th>
+<th>Typ</th>
+<th>Opis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>domain.name</code></td>
+<td>string</td>
+<td>Nazwa domeny bez TLD</td>
+</tr>
+<tr>
+<td><code>domain.extension</code></td>
+<td>string</td>
+<td>TLD bez kropki, np. <code>nl</code>, <code>co.uk</code></td>
+</tr>
+<tr>
+<td><code>period</code></td>
+<td>integer</td>
+<td>Liczba lat rejestracji</td>
+</tr>
+<tr>
+<td><code>owner_handle</code></td>
+<td>varchar</td>
+<td>Handle klienta OP (właściciel)</td>
+</tr>
+<tr>
+<td><code>admin_handle</code></td>
+<td>varchar</td>
+<td>Handle klienta OP (admin)</td>
+</tr>
+<tr>
+<td><code>tech_handle</code></td>
+<td>varchar</td>
+<td>Handle klienta OP (techniczny)</td>
+</tr>
+<tr>
+<td><code>ns_group</code> <strong>LUB</strong> <code>name_servers</code></td>
+<td>—</td>
+<td>Wymagane jedno z dwóch</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pola-opcjonalne-optional">Pola opcjonalne (Optional)</h3>
+<p><code>auth_code</code>, <code>billing_handle</code>, <code>reseller_handle</code>, <code>ns_template_name</code>, <code>autorenew</code> (<code>on</code>/<code>off</code>/<code>default</code>), <code>is_dnssec_enabled</code>, <code>dnssec_keys</code>, <code>use_domicile</code>, <code>accept_premium_fee</code>, <code>is_private_whois_enabled</code>, <code>promo_code</code>, <code>comments</code>, <code>additional_data</code>, <code>application_mode</code></p>
+<h3 id="odpowiedź-response">Odpowiedź (Response)</h3>
+<pre class="hljs"><code><div><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;code&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;activation_date&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2019-04-29 17:15:19&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;auth_code&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;...&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;expiration_date&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2020-04-29 17:15:19&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">10592139</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;renewal_date&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2020-04-29 17:15:19&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ACT&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</div></code></pre>
+<p>Statusy: <code>ACT</code> (aktywna) lub <code>REQ</code> (zlecona).</p>
+<hr>
+<h2 id="2-payload-generowany-przez-kod-openproviderregistrarserviceregister">2. Payload generowany przez kod (<code>OpenProviderRegistrarService::register()</code>)</h2>
+<pre class="hljs"><code><div><span class="hljs-variable language_">$this</span>-&gt;client-&gt;<span class="hljs-title function_ invoke__">post</span>(<span class="hljs-string">&#x27;/domains&#x27;</span>, [
+    <span class="hljs-string">&#x27;domain&#x27;</span> =&gt; [
+        <span class="hljs-string">&#x27;name&#x27;</span>      =&gt; <span class="hljs-variable">$payload</span>-&gt;domainName,   // np. <span class="hljs-string">&quot;we-client-abc123&quot;</span>
+        <span class="hljs-string">&#x27;extension&#x27;</span> =&gt; <span class="hljs-variable">$extension</span>,             // np. <span class="hljs-string">&quot;nl&quot;</span>
+    ],
+    <span class="hljs-string">&#x27;owner_handle&#x27;</span>             =&gt; <span class="hljs-variable">$handle</span>,     // z EnsureOpHandleAction
+    <span class="hljs-string">&#x27;admin_handle&#x27;</span>             =&gt; <span class="hljs-variable">$handle</span>,     // identyczny z owner
+    <span class="hljs-string">&#x27;tech_handle&#x27;</span>              =&gt; <span class="hljs-variable">$handle</span>,     // identyczny z owner
+    <span class="hljs-string">&#x27;period&#x27;</span>                   =&gt; <span class="hljs-variable">$payload</span>-&gt;years,  // <span class="hljs-number">1</span>
+    <span class="hljs-string">&#x27;unit&#x27;</span>                     =&gt; <span class="hljs-string">&#x27;y&#x27;</span>,
+    <span class="hljs-string">&#x27;name_servers&#x27;</span>             =&gt; <span class="hljs-variable">$nameServers</span>, // OP defaults gdy puste
+    <span class="hljs-string">&#x27;autorenew&#x27;</span>                =&gt; <span class="hljs-string">&#x27;off&#x27;</span>,        // <span class="hljs-attr">autoRenew</span>: <span class="hljs-literal">false</span>
+    <span class="hljs-string">&#x27;is_private_whois_enabled&#x27;</span> =&gt; <span class="hljs-literal">false</span>,        // <span class="hljs-attr">whoisPrivacy</span>: <span class="hljs-literal">false</span>
+]);
+</div></code></pre>
+<p>Nameservery domyślne gdy <code>nameservers: []</code>:</p>
+<pre class="hljs"><code><div>ns1.openprovider.eu / ns2.openprovider.be / ns3.openprovider.eu
+</div></code></pre>
+<hr>
+<h2 id="3-wyniki-inspekcji">3. Wyniki inspekcji</h2>
+<h3 id="-zgodne--pola-wymagane">✅ ZGODNE — pola wymagane</h3>
+<table>
+<thead>
+<tr>
+<th>Wymaganie API</th>
+<th>Implementacja</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>domain.name</code></td>
+<td><code>$payload-&gt;domainName</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>domain.extension</code></td>
+<td><code>ltrim($payload-&gt;tld, '.')</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>owner_handle</code></td>
+<td>z <code>EnsureOpHandleAction</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>admin_handle</code></td>
+<td>identyczny z <code>owner_handle</code></td>
+<td>✅ (dozwolone per docs)</td>
+</tr>
+<tr>
+<td><code>tech_handle</code></td>
+<td>identyczny z <code>owner_handle</code></td>
+<td>✅ (dozwolone per docs)</td>
+</tr>
+<tr>
+<td><code>period</code></td>
+<td><code>$payload-&gt;years</code> (int)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>name_servers</code> (lub <code>ns_group</code>)</td>
+<td>budowane z fallbackiem na ns OP</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="-zgodne--format-odpowiedzi">✅ ZGODNE — format odpowiedzi</h3>
+<table>
+<thead>
+<tr>
+<th>Pole odpowiedzi</th>
+<th>Mapowanie kodu</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data.id</code></td>
+<td><code>$data['id']</code> → <code>$result-&gt;providerId</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>data.activation_date</code></td>
+<td><code>Carbon::parse($data['activation_date'])</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>data.expiration_date</code></td>
+<td><code>Carbon::parse($data['expiration_date'])</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>code === 0</code></td>
+<td><code>parse()</code> w <code>OpenProviderClient</code></td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="-zgodne--wartości-autorenew">✅ ZGODNE — wartości <code>autorenew</code></h3>
+<p>Dokumentacja dopuszcza: <code>on</code> / <code>off</code> / <code>default</code>.<br>
+Kod wysyła: <code>$payload-&gt;autoRenew ? 'on' : 'off'</code> → test używa <code>autoRenew: false</code> → <code>'off'</code>. ✅</p>
+<h3 id="-zgodne--flow-ensureophandleaction-krok-35">✅ ZGODNE — flow EnsureOpHandleAction (Krok 3/5)</h3>
+<p>Akcja wysyła <code>POST /customers</code> lub <code>PUT /customers/{handle}</code> z polami:
+<code>name.first_name</code>, <code>name.last_name</code>, <code>email</code>, <code>phone</code>, <code>address</code> — wszystkie wymagane przez OP.<br>
+Handle jest zapisywany z powrotem na rekordzie <code>clients.op_handle</code>. ✅</p>
+<hr>
+<h2 id="4-znalezione-problemy">4. Znalezione problemy</h2>
+<h3 id="-problem-1--martwy-kod-sprawdzenie-code10-w-teście">🔴 Problem 1 — Martwy kod: sprawdzenie <code>'&quot;code&quot;:10'</code> w teście</h3>
+<p><strong>Lokalizacja:</strong> <code>OpenProviderSandboxTest.php</code> — funkcja <code>test_can_register_domain_for_client_test</code>, Krok 5/5.</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// W teście:</span>
+<span class="hljs-keyword">if</span> (! <span class="hljs-variable">$result</span>-&gt;success &amp;&amp; <span class="hljs-title function_ invoke__">str_contains</span>(<span class="hljs-variable">$result</span>-&gt;error ?? <span class="hljs-string">&#x27;&#x27;</span>, <span class="hljs-string">&#x27;&quot;code&quot;:10&#x27;</span>)) {
+    <span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">markTestIncomplete</span>(...);
+}
+</div></code></pre>
+<p><strong>Dlaczego nie zadziała:</strong><br>
+Gdy OP zwraca HTTP 200 z <code>&quot;code&quot;: 10</code>, metoda <code>parse()</code> rzuca wyjątek:</p>
+<pre class="hljs"><code><div>&quot;Openprovider API error on POST /domains (code 10): Registry currently not reachable&quot;
+</div></code></pre>
+<p>Ciąg <code>'&quot;code&quot;:10'</code> <strong>nie</strong> występuje w tym komunikacie (jest <code>&quot;code 10&quot;</code> z spacją, bez cudzysłowów).</p>
+<p>Serwis przechwytuje ten wyjątek i zawsze zwraca <code>DomainRegistrationResult::success(...)</code> z <code>providerId: ''</code> przez <code>resolveQueuedRegistration()</code>. Nie dochodzi do <code>DomainRegistrationResult::failure()</code>.</p>
+<p><strong>Skutek:</strong> Warunek <code>! $result-&gt;success &amp;&amp; str_contains(..., '&quot;code&quot;:10')</code> nie zostanie nigdy spełniony — code 10 jest absorbowany w serwisie i staje się sukcesem z pustym <code>providerId</code>, który jest obsługiwany niżej przez <code>if (empty($result-&gt;providerId))</code>.</p>
+<p><strong>Taki sam problem istnieje w <code>test_can_register_unique_domain_on_sandbox</code>.</strong></p>
+<p><strong>Rekomendacja:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// Usuń martwy blok — jest zbędny, bo serwis zawsze zwraca success dla code 10:</span>
+<span class="hljs-comment">// if (! $result-&gt;success &amp;&amp; str_contains($result-&gt;error ?? &#x27;&#x27;, &#x27;&quot;code&quot;:10&#x27;)) { ... }</span>
+</div></code></pre>
+<hr>
+<h3 id="-problem-2--niezdokumentowane-pole-unit-y">🟡 Problem 2 — Niezdokumentowane pole <code>unit: 'y'</code></h3>
+<p><strong>Lokalizacja:</strong> <code>OpenProviderRegistrarService.php</code> linia ~143.</p>
+<pre class="hljs"><code><div><span class="hljs-string">&#x27;unit&#x27;</span> =&gt; <span class="hljs-string">&#x27;y&#x27;</span>,  <span class="hljs-comment">// nie ma w dokumentacji POST /domains</span>
+</div></code></pre>
+<p>Dokumentacja OpenProvider z artykułu 13 (i potwierdzony endpoint w docs.openprovider.com) nie wymienia pola <code>unit</code> w <code>POST /domains</code>. Pole <code>period</code> jest opisane jako <code>integer</code> bez jednostki.</p>
+<p><strong>Skutek:</strong> Żadnego — OP akceptuje nieznane pola (ignoruje je). W praktyce sandbox działa poprawnie. Jednak może powodować niejasności podczas przeglądu kodu.</p>
+<p><strong>Rekomendacja:</strong> Pozostaw lub usuń po weryfikacji z oficjalnym API docs (<code>docs.openprovider.com</code>).</p>
+<hr>
+<h3 id="-problem-3--semantyczna-pomyłka-address_line2--addressnumber">🟡 Problem 3 — Semantyczna pomyłka: <code>address_line2</code> → <code>address.number</code></h3>
+<p><strong>Lokalizacja:</strong> <code>EnsureOpHandleAction.php</code>, metody <code>syncHandle()</code> i <code>createHandle()</code>.</p>
+<pre class="hljs"><code><div><span class="hljs-string">&#x27;address&#x27;</span> =&gt; [
+    <span class="hljs-string">&#x27;street&#x27;</span>   =&gt; <span class="hljs-variable">$contact</span>[<span class="hljs-string">&#x27;address_line1&#x27;</span>] ?? <span class="hljs-string">&#x27;&#x27;</span>,
+    <span class="hljs-string">&#x27;number&#x27;</span>   =&gt; <span class="hljs-variable">$contact</span>[<span class="hljs-string">&#x27;address_line2&#x27;</span>] ?? <span class="hljs-string">&#x27;&#x27;</span>,  <span class="hljs-comment">// ⚠️</span>
+    ...
+],
+</div></code></pre>
+<p>W API OpenProvider pole <code>address.number</code> to <strong>numer budynku</strong> (np. <code>&quot;42&quot;</code>), natomiast <code>address_line2</code> to zazwyczaj dodatkowy opis adresu (piętro, nr lokalu, np. <code>&quot;Apt 3&quot;</code>).</p>
+<p><strong>Skutek:</strong> Przy rejestrowaniu klientów z <code>address_line2 = &quot;Flat 5&quot;</code>, OP otrzymuje <code>number: &quot;Flat 5&quot;</code> zamiast poprawnego numeru budynku. Dla niektórych TLD weryfikujących dane adresowe może to powodować odrzucenie rejestracji lub niepoprawny WHOIS.</p>
+<p>W teście <code>test_can_register_domain_for_client_test</code>, pole <code>address_line2</code> pochodzi z <code>$clientRow-&gt;address_line2 ?? null</code>. Jeśli klient ma adres drugiej linii, problem materializuje się podczas tworzenia handle'u.</p>
+<p><strong>Rekomendacja:</strong> Sprawdzić schemat API <code>/customers</code> (docs.openprovider.com) i dostosować mapowanie. Prawdopodobnie <code>address_line1</code> powinien zawierać <code>street + number</code>, a <code>address_line2</code> powinno iść do <code>province</code> lub być pomijane.</p>
+<hr>
+<h3 id="-obserwacja-4--billing_handle-nie-jest-wysyłany">🟢 Obserwacja 4 — <code>billing_handle</code> nie jest wysyłany</h3>
+<p>Dokumentacja oznacza <code>billing_handle</code> jako <code>Optional</code>. Kod nie wysyła tego pola. ✅ Zgodne.</p>
+<hr>
+<h3 id="-obserwacja-5--url-sandbox">🟢 Obserwacja 5 — URL sandbox</h3>
+<p>Kod używa: <code>http://api.sandbox.openprovider.nl:8480/v1beta</code> (HTTP, port 8480).<br>
+Dokumentacja OpenProvider sandbox potwierdza ten URL. ✅ Zgodne.</p>
+<hr>
+<h2 id="5-podsumowanie">5. Podsumowanie</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Kategoria</th>
+<th>Status</th>
+<th>Wpływ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Martwy kod — check <code>'&quot;code&quot;:10'</code> w teście</td>
+<td>🔴 Bug</td>
+<td>Niski (test nie kłamie, ale wprowadza w błąd)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Niezdokumentowane pole <code>unit: 'y'</code></td>
+<td>🟡 Info</td>
+<td>Brak (OP ignoruje)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>address_line2</code> → <code>address.number</code> (błędne mapowanie)</td>
+<td>🟡 Bug</td>
+<td>Średni (może odrzucać rejestracje TLD z walidacją adresu)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>billing_handle</code> brak</td>
+<td>🟢 OK</td>
+<td>Brak — pole opcjonalne</td>
+</tr>
+<tr>
+<td>5</td>
+<td>URL sandbox</td>
+<td>🟢 OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Wszystkie wymagane pola API</td>
+<td>🟢 OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Parsowanie odpowiedzi API</td>
+<td>🟢 OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Obsługa code 10 / 311 (sandbox quirks)</td>
+<td>🟢 OK</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Wniosek:</strong> Test jest ogólnie poprawny i pokrywa kluczowe ścieżki. Dwie kwestie wymagają uwagi: martwy kod <code>'&quot;code&quot;:10'</code> w bloku <code>markTestIncomplete</code> oraz błędne mapowanie <code>address_line2 → address.number</code> w <code>EnsureOpHandleAction</code>, które może powodować problemy przy TLD z rygorystyczną walidacją adresu WHOIS.</p>
+
+</body>
+</html>

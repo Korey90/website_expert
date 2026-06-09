@@ -67,9 +67,9 @@ class OpenProviderClient
         return $this->parse($response, "GET {$path}");
     }
 
-    public function post(string $path, array $data): array
+    public function post(string $path, array $data, int $timeout = 30): array
     {
-        $response = $this->http()->withToken($this->token())
+        $response = $this->http($timeout)->withToken($this->token())
             ->post("{$this->baseUrl}{$path}", $data);
 
         return $this->parse($response, "POST {$path}");

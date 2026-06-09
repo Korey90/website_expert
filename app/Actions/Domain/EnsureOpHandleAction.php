@@ -65,7 +65,10 @@ class EnsureOpHandleAction
                 'phone'   => $phone,
                 'address' => [
                     'street'   => $contact['address_line1'] ?? '',
-                    'number'   => $contact['address_line2'] ?? '',
+                    // address_line1 already contains the full street+number (UK format);
+                    // address_line2 is supplementary (flat/suite) and does not map to OP's
+                    // `number` field which expects the building number only.
+                    'number'   => '',
                     'city'     => $contact['city']          ?? '',
                     'province' => $contact['county']        ?? '',
                     'zipcode'  => $contact['postcode']      ?? '',
@@ -96,7 +99,10 @@ class EnsureOpHandleAction
             'phone'   => $phone,
             'address' => [
                 'street'   => $contact['address_line1'] ?? '',
-                'number'   => $contact['address_line2'] ?? '',
+                // address_line1 already contains the full street+number (UK format);
+                // address_line2 is supplementary (flat/suite) and does not map to OP's
+                // `number` field which expects the building number only.
+                'number'   => '',
                 'city'     => $contact['city']          ?? '',
                 'province' => $contact['county']        ?? '',
                 'zipcode'  => $contact['postcode']      ?? '',

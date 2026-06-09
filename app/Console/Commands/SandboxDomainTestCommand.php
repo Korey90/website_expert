@@ -7,7 +7,7 @@ use Symfony\Component\Process\Process;
 
 class SandboxDomainTestCommand extends Command
 {
-    protected $signature   = 'domain:sandbox-test {--tld= : TLD do testowania, np. .nl, .com, .pl} {--log : Loguj pełny ruch HTTP do STDERR}';
+    protected $signature   = 'domain:sandbox-test {--tld= : TLD do testowania, np. .nl, .com, .pl} {--log : Loguj pełny ruch HTTP do STDERR} {--filter= : Filtr PHPUnit — nazwa metody testowej lub jej fragment}';
     protected $description = 'Uruchamia testy OpenProvider sandbox z wybranym TLD';
 
     private const TLD_OPTIONS = [
@@ -65,8 +65,13 @@ class SandboxDomainTestCommand extends Command
             $env['OP_HTTP_LOG'] = 'true';
         }
 
+        $cmd = [PHP_BINARY, 'artisan', 'test', 'tests/Feature/Domain/OpenProviderSandboxTest.php'];
+        if ($filter = $this->option('filter')) {
+            $cmd[] = '--filter=' . $filter;
+        }
+
         $process = new Process(
-            [PHP_BINARY, 'artisan', 'test', 'tests/Feature/Domain/OpenProviderSandboxTest.php'],
+            $cmd,
             base_path(),
             $env,
             null,

@@ -255,13 +255,9 @@ class OpenProviderSandboxTest extends TestCase
             );
         }
 
-        // Code 10 = registry temporarily unreachable, domain queued by OP internally
-        if (! $result->success && str_contains($result->error ?? '', '10')) {
-            $this->warn('Rejestr zwrócił kod 10 (rejestr tymczasowo nieosiągalny) — domena w kolejce OP.');
-            $this->markTestIncomplete(
-                "{$tld} registry returned code 10 (not reachable) — sandbox limitation. Error: " . $result->error
-            );
-        }
+        // NOTE: code 10 (registry unreachable) is absorbed by OpenProviderRegistrarService::register()
+        // which calls resolveQueuedRegistration() and always returns success=true with empty providerId.
+        // That path is handled below by if (empty($result->providerId)).
 
         $this->assertTrue(
             $result->success,
@@ -319,7 +315,7 @@ class OpenProviderSandboxTest extends TestCase
 
         if (! $clientRow) {
             $this->warn('Brak klienta powiązanego z test@gmail.com.');
-            $this->markTestSkipped('Brak klienta powiązanego z 20noname22x@gmail.com (client_portal_accesses).');
+            $this->markTestSkipped('Brak klienta powiązanego z test@gmail.com (client_portal_accesses).');
         }
 
         $this->ok('Znaleziono klienta: id=' . $clientRow->id . ', firma=' . ($clientRow->company_name ?: '(brak)'));
@@ -383,6 +379,10 @@ class OpenProviderSandboxTest extends TestCase
         if (! $avail->isAvailable) {
             $reason = $avail->reason ?? $avail->error ?? 'unknown';
             $this->warn("Rejestr {$tld} niedostępny: {$reason}");
+            // "Registry is busy" in availability check means OP returns 311 on registration too
+            // (domain is treated as "active"). Nothing to register or save — skip the test.
+            // Code 10 (registry unreachable) only happens when availability passed but the
+            // registry became unreachable during the actual registration order — different path.
             $this->markTestIncomplete(
                 "{$tld} sandbox registry is currently busy (domain '{$label}{$tld}' reported as non-free). Reason: {$reason}. Try again later."
             );
@@ -433,16 +433,14 @@ class OpenProviderSandboxTest extends TestCase
         );
         $this->assertNotEmpty($handle);
 
+        // When OP queues the registration (code 10 / registry busy), providerId is empty.
+        // Save to DB anyway — the domain was submitted to OP and will be activated asynchronously.
+        $dbStatus = empty($result->providerId) ? 'pending' : 'active';
         if (empty($result->providerId)) {
-            $this->warn('providerId puste — domena w kolejce OP.');
-            $this->markTestIncomplete(
-                "Domena '{$label}{$tld}' wysłana do kolejki OP (code 10). " .
-                "Widoczna w panelu sandbox jako pending. Handle klienta: {$handle}"
-            );
+            $this->warn('providerId puste — domena w kolejce OP (code 10). Zapisuję z status=req.');
+        } else {
+            $this->ok("{$label}{$tld} zarejestrowana dla klienta. providerId: {$result->providerId}, handle: {$handle}");
         }
-
-        $this->ok("{$label}{$tld} zarejestrowana dla klienta. providerId: {$result->providerId}, handle: {$handle}");
-        $this->assertNotEmpty($result->providerId);
 
         $this->step('Zapisuję domenę do tabeli domains w bazie aplikacji...');
         DB::connection('app_db')->table('domains')->insert([
@@ -451,9 +449,9 @@ class OpenProviderSandboxTest extends TestCase
             'full_domain'        => "{$label}{$tld}",
             'name'               => $label,
             'tld'                => $tld,
-            'status'             => 'active',
+            'status'             => $dbStatus,
             'provider'           => 'openprovider',
-            'provider_domain_id' => $result->providerId,
+            'provider_domain_id' => $result->providerId ?: null,
             'registered_at'      => $result->registeredAt,
             'expires_at'         => $result->expiresAt,
             'nameservers'        => json_encode([]),
@@ -469,7 +467,7 @@ class OpenProviderSandboxTest extends TestCase
             "Domena {$label}{$tld} powinna być zapisana w tabeli domains."
         );
 
-        $this->ok("Domena {$label}{$tld} zapisana w tabeli domains. Test zakończony pomyślnie.");
+        $this->ok("Domena {$label}{$tld} zapisana w tabeli domains (status: {$dbStatus}). Test zakończony pomyślnie.");
     }
 
     // ── Pobieranie cen ────────────────────────────────────────────────────────

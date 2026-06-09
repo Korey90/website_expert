@@ -4,6 +4,7 @@ namespace App\Actions\Domain;
 
 use App\Models\DomainPriceList;
 use App\Services\Domain\OpenProviderClient;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -103,9 +104,9 @@ class FetchOpenproviderPricesAction
         return $changes;
     }
 
-    private function parsePrice(?Response $response): ?float
+    private function parsePrice(Response|ConnectionException|null $response): ?float
     {
-        if (! $response || ! $response->successful()) {
+        if (! $response instanceof Response || ! $response->successful()) {
             return null;
         }
 

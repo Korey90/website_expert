@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 const LABELS = {
     en: {
+        exactBadge:         'Your search',
         backToDomains:      'Back to Domains',
         resultsFor:         (q) => <>Results for <span className="text-brand-500">"{q}"</span></>,
         checkTitle:         'Check Domain Availability',
@@ -28,6 +29,7 @@ const LABELS = {
         exactTaken:         (name) => <>Domain <strong>{name}</strong> is <span className="text-neutral-500 dark:text-neutral-400 font-semibold">taken</span>.</>,
     },
     pl: {
+        exactBadge:         'Szukana domena',
         backToDomains:      'Powr\u00f3t do domen',
         resultsFor:         (q) => <>Wyniki dla <span className="text-brand-500">"{q}"</span></>,
         checkTitle:         'Sprawdź dostępność domeny',
@@ -52,6 +54,7 @@ const LABELS = {
         exactTaken:         (name) => <>Domena <strong>{name}</strong> jest <span className="text-neutral-500 dark:text-neutral-400 font-semibold">zajęta</span>.</>,
     },
     pt: {
+        exactBadge:         'A sua pesquisa',
         backToDomains:      'Voltar aos Dom\u00ednios',
         resultsFor:         (q) => <>Resultados para <span className="text-brand-500">"{q}"</span></>,
         checkTitle:         'Verificar Disponibilidade de Dom\u00ednio',
@@ -105,7 +108,7 @@ function SearchBar({ initialQuery, l }) {
     );
 }
 
-function ResultRow({ result, auth, l }) {
+function ResultRow({ result, auth, l, isExact = false }) {
     const symbol = result.currency === 'GBP' ? '£' : result.currency === 'EUR' ? '€' : '$';
     const orderUrl = auth
         ? route('domains.order') + `?domain=${encodeURIComponent(result.name)}&tld=${encodeURIComponent(result.tld)}`
@@ -113,13 +116,21 @@ function ResultRow({ result, auth, l }) {
 
     return (
         <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border px-5 py-4 transition-all ${
-            result.is_available
-                ? 'border-brand-500/25 bg-brand-500/5 dark:border-brand-500/20 dark:bg-brand-500/5'
-                : result.error
-                    ? 'border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-900/10'
-                    : 'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900'
+            isExact
+                ? 'border-brand-500 bg-brand-500/8 dark:border-brand-400 dark:bg-brand-500/10 ring-2 ring-brand-500/20 shadow-lg shadow-brand-500/10'
+                : result.is_available
+                    ? 'border-brand-500/25 bg-brand-500/5 dark:border-brand-500/20 dark:bg-brand-500/5'
+                    : result.error
+                        ? 'border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-900/10'
+                        : 'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900'
         }`}>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
+                {isExact && (
+                    <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-brand-500 text-white shadow-sm">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        {l.exactBadge}
+                    </span>
+                )}
                 <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                     result.is_available
                         ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
@@ -135,7 +146,7 @@ function ResultRow({ result, auth, l }) {
                         <><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg> {l.taken}</>
                     )}
                 </span>
-                <span className="font-display font-bold text-neutral-900 dark:text-white text-lg">{result.domain}</span>
+                <span className={`font-display font-bold text-neutral-900 dark:text-white ${isExact ? 'text-xl' : 'text-lg'}`}>{result.domain}</span>
                 <a
                     href={`https://www.${result.domain}`}
                     target="_blank"
@@ -188,9 +199,12 @@ function ResultRow({ result, auth, l }) {
 export default function DomainsCheck({ query = '', results = [], auth }) {
     const { footer, locale } = usePage().props;
     const l = LABELS[locale] ?? LABELS.en;
-    const available   = results.filter(r => r.is_available);
-    const unavailable = results.filter(r => !r.is_available);
     const exactMatch  = results.find(r => r.domain === query);
+    const available   = [
+        ...results.filter(r => r.is_available && r.domain === query),
+        ...results.filter(r => r.is_available && r.domain !== query),
+    ];
+    const unavailable = results.filter(r => !r.is_available);
 
     return (
         <MarketingLayout auth={auth} footer={footer}>
@@ -239,7 +253,7 @@ export default function DomainsCheck({ query = '', results = [], auth }) {
                             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-green-600 dark:text-green-400 mb-3">
                                 {l.availableCount(available.length)}
                             </p>
-                            {available.map(r => <ResultRow key={r.domain} result={r} auth={auth} l={l} />)}
+                            {available.map(r => <ResultRow key={r.domain} result={r} auth={auth} l={l} isExact={r.domain === query} />)}
                         </div>
                     )}
 

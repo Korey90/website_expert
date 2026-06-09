@@ -151,20 +151,20 @@ class DomainPriceListResource extends BaseResource
                     ->money('GBP')
                     ->placeholder('—')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('wholesale_renew')
                     ->label('Renew /yr (wholesale)')
                     ->money('GBP')
                     ->placeholder('—')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('wholesale_transfer')
                     ->label('Transfer (wholesale)')
                     ->money('GBP')
                     ->placeholder('—')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('margin_percent')
                     ->label('Margin')

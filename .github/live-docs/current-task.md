@@ -2,6 +2,6 @@
 
 **Status:** Brak aktywnego zadania
 
-**Last completed:** Log Viewer — moduł przeglądania/czyszczenia logów Laravel w panelu Filament — 2026-06-03
+**Last completed:** Job Manager — zarządzanie Laravel Jobs (failed, pending, batches) z poziomu panelu admina Filament — 2026-06-09
 
-**Last Updated:** 2026-06-03
+**Last Updated:** 2026-06-09

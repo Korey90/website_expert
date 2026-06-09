@@ -133,6 +133,7 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
             $nameServers = $this->buildNameServers($payload->nameservers);
             $extension   = $this->tldExtension($payload->tld);
 
+            // Domain registration can be slow on sandbox; use 60 s timeout.
             $data = $this->client->post('/domains', [
                 'domain' => [
                     'name'      => $payload->domainName,
@@ -146,7 +147,7 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
                 'name_servers'             => $nameServers,
                 'autorenew'                => $payload->autoRenew ? 'on' : 'off',
                 'is_private_whois_enabled' => $payload->whoisPrivacy,
-            ]);
+            ], 60);
 
             return DomainRegistrationResult::success(
                 providerId: (string) ($data['id'] ?? ''),
@@ -160,21 +161,27 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
         } catch (\RuntimeException $e) {
             // code 10 = registry temporarily unreachable; OP queues the request and retries.
             // The domain entry exists in their system (status REQ) — look it up to get the ID.
-            if (str_contains($e->getMessage(), 'code 10') || str_contains($e->getMessage(), 'Registry currently not reachable')) {
+            if (str_contains($e->getMessage(), '"code":10') || str_contains($e->getMessage(), 'Registry currently not reachable')) {
                 return $this->resolveQueuedRegistration($payload);
             }
 
             return DomainRegistrationResult::failure($e->getMessage());
         } catch (\Throwable $e) {
+            // cURL timeout (error 28): the registration request may have reached OP before the
+            // connection dropped. Treat it like code 10 — try to look up the domain in OP.
+            if (str_contains($e->getMessage(), 'cURL error 28') || str_contains($e->getMessage(), 'Operation timed out')) {
+                return $this->resolveQueuedRegistration($payload);
+            }
+
             return DomainRegistrationResult::failure($e->getMessage());
         }
     }
 
     /**
-     * When OP returns code 10 (registry unreachable), the domain is queued in their system
-     * with status REQ. Try to look up the domain via GET /domains to get the provider ID.
-     * If the lookup fails or returns nothing, return an empty providerId so the caller
-     * can detect the pending state.
+     * Called when OP returns code 10 (registry unreachable) or when the HTTP connection
+     * times out after the request was already sent. In both cases OP may have queued or
+     * even activated the domain. Look it up without a status filter so both REQ and ACT
+     * domains are found. Returns an empty providerId if the domain is not yet visible.
      */
     private function resolveQueuedRegistration(DomainRegistrationPayload $payload): DomainRegistrationResult
     {
@@ -184,7 +191,6 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
             $data = $this->client->get('/domains', [
                 'domain_name_pattern' => $payload->domainName,
                 'extension'           => $extension,
-                'status'              => 'REQ',
                 'limit'               => 1,
             ]);
 
@@ -320,9 +326,11 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
         $extension = $this->tldExtension($tld);
 
         try {
-            // Correct OP endpoint: GET /domains/prices?domain.extension=com&operation=create
-            // (the old /products/domains endpoint returns 501 "Method is not implemented")
+            // Correct OP endpoint: GET /domains/prices?domain.name=test&domain.extension=com&operation=create
+            // Both domain.name and domain.extension are required; without domain.name the sandbox
+            // returns code 302 "Your domain request has more than 63 characters!"
             $data = $this->client->get('/domains/prices', [
+                'domain.name'      => 'test',
                 'domain.extension' => $extension,
                 'operation'        => 'create',
             ]);
@@ -336,6 +344,7 @@ class OpenProviderRegistrarService implements DomainRegistrarInterface
 
             // Renewal price: try /domains/prices with operation=renew
             $renewData  = $this->client->get('/domains/prices', [
+                'domain.name'      => 'test',
                 'domain.extension' => $extension,
                 'operation'        => 'renew',
             ]);
