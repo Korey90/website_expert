@@ -184,8 +184,8 @@ class IntegrationSettingsPage extends BasePage
                             ->placeholder('319848'),
 
                         Forms\Components\Toggle::make('op_sandbox')
-                            ->label('Use sandbox / CTE environment')
-                            ->helperText('CTE requires separate access request to Openprovider. Leave disabled unless you have confirmed CTE access.'),
+                            ->label('Use sandbox environment')
+                            ->helperText('Enables the standard Openprovider sandbox (api.sandbox.openprovider.nl). Use this for testing. Disable only when you are ready to use the live production API.'),
                     ]),
             ])
             ->statePath('data');
@@ -301,7 +301,7 @@ class IntegrationSettingsPage extends BasePage
         }
 
         $baseUrl = $sandbox
-            ? 'https://api.cte.openprovider.eu/v1beta'
+            ? 'http://api.sandbox.openprovider.nl:8480/v1beta'
             : 'https://api.openprovider.eu/v1beta';
 
         try {
