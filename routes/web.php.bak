@@ -10,7 +10,49 @@ Route::get('/', function () {
 })->name('home');
 
 Route::post('/contact', function (\Illuminate\Http\Request $request) {
-    // TODO: implement email sending / store in DB
+    $data = $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'company' => ['nullable', 'string', 'max:255'],
+        'email' => ['required', 'email', 'max:255'],
+        'phone' => ['nullable', 'string', 'max:50'],
+        'nip' => ['nullable', 'string', 'max:50'],
+        'project_type' => ['nullable', 'string', 'max:100'],
+        'message' => ['required', 'string', 'max:5000'],
+        'gdpr_consent' => ['accepted'],
+    ]);
+
+    app(\App\Services\Leads\LeadService::class)->createFromSource(
+        leadData: [
+            'email' => $data['email'],
+            'name' => $data['name'],
+            'company' => $data['company'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'nip' => $data['nip'] ?? null,
+            'project_type' => $data['project_type'] ?? null,
+            'source' => 'contact_form',
+            'notes' => $data['message'],
+            'calculator_data' => null,
+        ],
+        sourceData: [
+            'type' => 'contact_form',
+            'referrer_url' => $request->header('Referer'),
+            'page_url' => $request->header('Origin'),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'utm_source' => $request->query('utm_source'),
+            'utm_medium' => $request->query('utm_medium'),
+            'utm_campaign' => $request->query('utm_campaign'),
+        ],
+        consentData: [
+            'given' => true,
+            'consent_text' => app(\App\Services\Leads\LeadConsentService::class)->getConsentTextForLocale(app()->getLocale()),
+            'source_url' => $request->header('Referer'),
+            'ip_address' => $request->ip(),
+            'locale' => app()->getLocale(),
+        ],
+        business: currentBusiness() ?? defaultBusiness(),
+    );
+
     return back()->with('success', 'Wiadomość wysłana.');
 })->name('contact.store');
 

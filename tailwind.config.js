@@ -12,6 +12,7 @@ export default {
     ],
 
     safelist: [
+        // Background (settings.bg)
         'bg-white',
         'bg-neutral-50',
         'bg-neutral-900',
@@ -21,6 +22,36 @@ export default {
         'dark:bg-neutral-950',
         'dark:bg-neutral-900',
         'dark:bg-brand-500/10',
+        // Text alignment (per-field _align)
+        'text-left',
+        'text-center',
+        'text-right',
+        // Per-field size (_size)
+        'text-xs',
+        'text-sm',
+        'text-base',
+        'text-lg',
+        'text-xl',
+        'text-2xl',
+        'text-3xl',
+        'text-4xl',
+        'text-5xl',
+        'text-6xl',
+        'sm:text-2xl',
+        'sm:text-3xl',
+        'sm:text-4xl',
+        'sm:text-5xl',
+        'sm:text-6xl',
+        // Per-field color (_color)
+        'text-brand-500',
+        'text-white',
+        'text-neutral-500',
+        'text-neutral-900',
+        'dark:text-white',
+        'dark:text-neutral-400',
+        // Font families
+        'font-display',
+        'font-sans',
     ],
 
     theme: {

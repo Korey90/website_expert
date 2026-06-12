@@ -11,10 +11,12 @@ interface BlockContent {
     [key: string]: unknown;
 }
 
+/** Per-block settings stored in `settings` JSON column.
+ *  Includes static keys (bg, columns, layout) plus per-field typography:
+ *  {fieldKey}_size | {fieldKey}_color | {fieldKey}_align
+ *  e.g. heading_size, badge_color, subheading_align, section_label_size … */
 interface BlockSettings {
-    bg?: 'white' | 'gray' | 'dark' | 'brand';
-    columns?: '2' | '3' | '4';
-    layout?: 'full' | 'split';
+    [key: string]: string | undefined;
 }
 
 interface Block {
@@ -63,6 +65,82 @@ function colsClass(columns: string | undefined): string {
     return columns === '4' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
          : columns === '2' ? 'grid-cols-1 sm:grid-cols-2'
          : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+}
+
+const HEADING_SIZE: Record<string, string> = {
+    sm:  'text-xl sm:text-2xl',
+    md:  'text-2xl sm:text-3xl',
+    lg:  'text-3xl sm:text-4xl',
+    xl:  'text-4xl sm:text-5xl',
+    '2xl': 'text-5xl sm:text-6xl',
+};
+
+const HEADING_COLOR: Record<string, string> = {
+    neutral: 'text-neutral-900 dark:text-white',
+    brand:   'text-brand-500',
+    white:   'text-white',
+    muted:   'text-neutral-500 dark:text-neutral-400',
+};
+
+const FIELD_SIZE: Record<string, string> = {
+    xs:  'text-xs',
+    sm:  'text-sm',
+    md:  'text-base',
+    lg:  'text-lg',
+    xl:  'text-xl',
+    '2xl': 'text-2xl',
+    '3xl': 'text-3xl',
+    '4xl': 'text-4xl',
+    '5xl': 'text-5xl',
+    '6xl': 'text-6xl',
+    '7xl': 'text-7xl',
+};
+
+const FIELD_COLOR: Record<string, string> = {
+    neutral: 'text-neutral-900 dark:text-white',
+    brand:   'text-brand-500',
+    white:   'text-white',
+    muted:   'text-neutral-500 dark:text-neutral-400',
+};
+
+const FIELD_ALIGN: Record<string, string> = {
+    left:   'text-left',
+    center: 'text-center',
+    right:  'text-right',
+};
+
+const FIELD_FONT: Record<string, string> = {
+    sans:    'font-sans',
+    display: 'font-display',
+};
+
+/** Returns Tailwind className for a specific content field based on per-field settings.
+ *  `key` matches the settingsKey used in fieldRow(), e.g. 'heading', 'badge', 'subheading'. */
+function fieldCls(settings: BlockSettings, key: string): string {
+    const size  = FIELD_SIZE[settings[`${key}_size`]  ?? 'md']      ?? FIELD_SIZE.md;
+    const color = FIELD_COLOR[settings[`${key}_color`] ?? 'neutral'] ?? FIELD_COLOR.neutral;
+    const align = FIELD_ALIGN[settings[`${key}_align`] ?? 'left']    ?? FIELD_ALIGN.left;
+    const font  = FIELD_FONT[settings[`${key}_font`]   ?? 'sans']    ?? FIELD_FONT.sans;
+    return `${font} ${size} ${color} ${align}`;
+}
+
+/** Backward-compat: heading class derived from per-field heading settings. */
+function headingCls(settings: BlockSettings): string {
+    const font  = settings['heading_font'] === 'sans' ? 'font-sans' : 'font-display';
+    const size  = HEADING_SIZE[settings['heading_size'] ?? 'lg'] ?? HEADING_SIZE.lg;
+    const color = HEADING_COLOR[settings['heading_color'] ?? 'neutral'] ?? HEADING_COLOR.neutral;
+    return `${font} font-bold ${size} ${color}`;
+}
+
+/** Backward-compat: section align from per-field heading_align setting. */
+function sectionAlign(settings: BlockSettings): string {
+    switch (settings['heading_align']) {
+        case 'left':  return 'text-left';
+        case 'right': return 'text-right';
+        default:      return settings['text_align'] === 'left' ? 'text-left'
+                           : settings['text_align'] === 'right' ? 'text-right'
+                           : 'text-center';
+    }
 }
 
 /** Filament Repeater stores items as {uuid: itemData} when saved without ->relationship().
@@ -125,32 +203,36 @@ function HeroBlock({ block, locale }: { block: Block; locale: string }) {
                     <img src={imagePath} alt="" className="w-full h-full object-cover opacity-40 dark:opacity-20" />
                 </div>
             )}
-            <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+            <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 {badge && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-500 mb-5">
-                        {badge}
-                    </span>
+                    <div className={`mb-5 ${FIELD_ALIGN[block.settings.badge_align ?? 'left'] ?? 'text-left'}`}>
+                        <span className={`inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 font-semibold ${fieldCls(block.settings, 'badge').replace(/text-(left|center|right)/, '').trim()}`}>
+                            {badge}
+                        </span>
+                    </div>
                 )}
                 {heading && (
-                    <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 dark:text-white leading-tight mb-4">
+                    <h1 className={`font-display font-bold leading-tight mb-4 ${fieldCls(block.settings, 'heading')}`}>
                         {heading}
                     </h1>
                 )}
                 {subheading && (
-                    <p className="text-lg text-neutral-500 dark:text-neutral-400 max-w-2xl mx-auto mb-8">
+                    <p className={`mb-8 ${fieldCls(block.settings, 'subheading')}`}>
                         {subheading}
                     </p>
                 )}
                 {ctaLabel && (
-                    <Link
-                        href={ctaUrl}
-                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/20"
-                    >
-                        {ctaLabel}
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                    </Link>
+                    <div className={FIELD_ALIGN[block.settings.cta_label_align ?? 'left'] ?? 'text-left'}>
+                        <Link
+                            href={ctaUrl}
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/20"
+                        >
+                            {ctaLabel}
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                        </Link>
+                    </div>
                 )}
             </div>
         </section>
@@ -172,19 +254,21 @@ function FeaturesGridBlock({ block, locale }: { block: Block; locale: string }) 
         <section className={`py-20 md:py-28 ${bg(block.settings)}`}>
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {(label || heading || sub) && (
-                    <div className="text-center mb-12">
+                    <div className="mb-12">
                         {label && (
-                            <span className="inline-block text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">
-                                {label}
-                            </span>
+                            <div className={`mb-3 ${FIELD_ALIGN[block.settings.section_label_align ?? 'left'] ?? 'text-left'}`}>
+                                <span className={`inline-block font-semibold uppercase tracking-widest ${FIELD_SIZE[block.settings.section_label_size ?? 'md'] ?? FIELD_SIZE.md} ${FIELD_COLOR[block.settings.section_label_color ?? 'neutral'] ?? FIELD_COLOR.neutral}`}>
+                                    {label}
+                                </span>
+                            </div>
                         )}
                         {heading && (
-                            <h2 className="font-display text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white mb-3">
+                            <h2 className={`font-display font-bold leading-tight mb-3 ${fieldCls(block.settings, 'heading')}`}>
                                 {heading}
                             </h2>
                         )}
                         {sub && (
-                            <p className="text-neutral-500 dark:text-neutral-400 max-w-lg mx-auto">{sub}</p>
+                            <p className={`${fieldCls(block.settings, 'subheading')}`}>{sub}</p>
                         )}
                     </div>
                 )}
@@ -220,21 +304,29 @@ function FeaturesGridBlock({ block, locale }: { block: Block; locale: string }) 
 function PackagesBlock({ block, locale }: { block: Block; locale: string }) {
     const c        = block.content;
     const packages = toList(c.packages);
+    const sectionBadge = t(c, 'badge', locale);
     const heading  = t(c, 'heading', locale);
     const sub      = t(c, 'subheading', locale);
 
     return (
         <section id="packages" className={`py-20 md:py-28 ${bg(block.settings)}`}>
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                {(heading || sub) && (
-                    <div className="text-center mb-12">
+                {(sectionBadge || heading || sub) && (
+                    <div className="mb-12">
+                        {sectionBadge && (
+                            <div className={`mb-3 ${FIELD_ALIGN[block.settings.badge_align ?? 'left'] ?? 'text-left'}`}>
+                                <span className={`inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 font-semibold ${fieldCls(block.settings, 'badge').replace(/text-(left|center|right)/, '').trim()}`}>
+                                    {sectionBadge}
+                                </span>
+                            </div>
+                        )}
                         {heading && (
-                            <h2 className="font-display text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white mb-3">
+                            <h2 className={`font-display font-bold leading-tight mb-3 ${fieldCls(block.settings, 'heading')}`}>
                                 {heading}
                             </h2>
                         )}
                         {sub && (
-                            <p className="text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto">{sub}</p>
+                            <p className={`${fieldCls(block.settings, 'subheading')}`}>{sub}</p>
                         )}
                     </div>
                 )}
@@ -249,6 +341,7 @@ function PackagesBlock({ block, locale }: { block: Block; locale: string }) {
                         const features    = featuresRaw ? featuresRaw.split('\n').filter(Boolean) : [];
                         const ctaLabel    = t(pkg, 'cta_label', locale) || 'Get Started';
                         const ctaUrl      = String(pkg.cta_url ?? '/contact');
+                        const pkgSettings = (typeof pkg.settings === 'object' && pkg.settings !== null ? pkg.settings : {}) as BlockSettings;
 
                         return (
                             <div
@@ -260,16 +353,18 @@ function PackagesBlock({ block, locale }: { block: Block; locale: string }) {
                                 }`}
                             >
                                 {badge && (
-                                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold bg-brand-500 text-white shadow-sm">
-                                        {badge}
-                                    </span>
+                                    <div className={`mb-4 ${FIELD_ALIGN[pkgSettings.badge_align ?? 'left'] ?? 'text-left'}`}>
+                                        <span className={`inline-flex px-3 py-1 rounded-full font-bold bg-brand-500 text-white shadow-sm ${FIELD_SIZE[pkgSettings.badge_size ?? 'xs'] ?? FIELD_SIZE.xs} ${FIELD_FONT[pkgSettings.badge_font ?? 'sans'] ?? FIELD_FONT.sans}`}>
+                                            {badge}
+                                        </span>
+                                    </div>
                                 )}
+                                <h3 className={`font-extrabold mb-2 ${fieldCls(pkgSettings, 'name')}`}>{name}</h3>
                                 {price && (
-                                    <p className="text-xs font-semibold text-brand-500 uppercase tracking-widest mb-1">{price}</p>
+                                    <p className={`font-semibold uppercase tracking-widest mb-1 ${fieldCls(pkgSettings, 'price')}`}>{price}</p>
                                 )}
-                                <h3 className="font-display text-xl font-bold text-neutral-900 dark:text-white mb-2">{name}</h3>
                                 {desc && (
-                                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">{desc}</p>
+                                    <p className={`mb-6 ${fieldCls(pkgSettings, 'desc')}`}>{desc}</p>
                                 )}
                                 {features.length > 0 && (
                                     <ul className="space-y-2 mb-8 flex-1">
@@ -289,9 +384,12 @@ function PackagesBlock({ block, locale }: { block: Block; locale: string }) {
                                         highlight
                                             ? 'bg-brand-500 text-white hover:bg-brand-600 shadow-lg shadow-brand-500/20'
                                             : 'border border-brand-500 text-brand-500 hover:bg-brand-500 hover:text-white'
-                                    }`}
+                                    } ${FIELD_FONT[pkgSettings.cta_label_font ?? 'sans'] ?? FIELD_FONT.sans}`}
                                 >
                                     {ctaLabel}
+                                    <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                    </svg>
                                 </Link>
                             </div>
                         );
@@ -315,7 +413,7 @@ function PricingTableBlock({ block, locale }: { block: Block; locale: string }) 
         <section className={`py-20 ${bg(block.settings)}`}>
             <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 {heading && (
-                    <h2 className="font-display text-2xl font-bold text-neutral-900 dark:text-white mb-8 text-center">
+                    <h2 className={`font-display font-bold leading-tight mb-8 ${fieldCls(block.settings, 'heading')}`}>
                         {heading}
                     </h2>
                 )}
@@ -357,7 +455,7 @@ function FaqBlock({ block, locale }: { block: Block; locale: string }) {
         <section className={`py-20 ${bg(block.settings)}`}>
             <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 {heading && (
-                    <h2 className="font-display text-2xl font-bold text-neutral-900 dark:text-white mb-8 text-center">
+                    <h2 className={`font-display font-bold leading-tight mb-8 ${fieldCls(block.settings, 'heading')}`}>
                         {heading}
                     </h2>
                 )}
@@ -408,25 +506,27 @@ function CtaBannerBlock({ block, locale }: { block: Block; locale: string }) {
 
     return (
         <section className={`py-16 ${bg(block.settings)}`}>
-            <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+            <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 {heading && (
-                    <h2 className="font-display text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white mb-3">
+                    <h2 className={`font-display font-bold leading-tight mb-3 ${fieldCls(block.settings, 'heading')}`}>
                         {heading}
                     </h2>
                 )}
                 {subheading && (
-                    <p className="text-neutral-500 dark:text-neutral-400 mb-8 max-w-xl mx-auto">{subheading}</p>
+                    <p className={`mb-8 ${fieldCls(block.settings, 'subheading')}`}>{subheading}</p>
                 )}
                 {ctaLabel && (
-                    <Link
-                        href={ctaUrl}
-                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/20"
-                    >
-                        {ctaLabel}
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                    </Link>
+                    <div className={FIELD_ALIGN[block.settings.cta_label_align ?? 'left'] ?? 'text-left'}>
+                        <Link
+                            href={ctaUrl}
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/20"
+                        >
+                            {ctaLabel}
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                        </Link>
+                    </div>
                 )}
             </div>
         </section>
@@ -447,7 +547,7 @@ function TextSectionBlock({ block, locale }: { block: Block; locale: string }) {
         <section className={`py-20 ${bg(block.settings)}`}>
             <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${isSplit ? 'grid gap-12 lg:grid-cols-2 items-start' : 'max-w-3xl'}`}>
                 {heading && (
-                    <h2 className="font-display text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white">
+                    <h2 className={`font-display font-bold leading-tight ${fieldCls(block.settings, 'heading')}`}>
                         {heading}
                     </h2>
                 )}
@@ -482,7 +582,7 @@ function ComparisonTableBlock({ block, locale }: { block: Block; locale: string 
         <section className={`py-20 ${bg(block.settings)}`}>
             <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 overflow-x-auto">
                 {heading && (
-                    <h2 className="font-display text-2xl font-bold text-neutral-900 dark:text-white mb-8 text-center">
+                    <h2 className={`font-display font-bold leading-tight mb-8 ${fieldCls(block.settings, 'heading')}`}>
                         {heading}
                     </h2>
                 )}
