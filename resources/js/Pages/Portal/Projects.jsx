@@ -1,4 +1,5 @@
 import EmptyState from '@/Components/Shared/EmptyState';
+import useCurrency from '@/Hooks/useCurrency';
 import PortalLayout from '@/Layouts/PortalLayout';
 import { Link } from '@inertiajs/react';
 
@@ -20,6 +21,8 @@ function StatusBadge({ status }) {
 }
 
 export default function Projects({ client, projects }) {
+    const { formatCurrency } = useCurrency();
+
     return (
         <PortalLayout client={client}>
             <div className="max-w-5xl mx-auto space-y-6">
@@ -58,7 +61,7 @@ export default function Projects({ client, projects }) {
                                     )}
                                     {project.budget && (
                                         <span>Budget: <span className="text-gray-700 font-medium">
-                                            {project.currency ?? '£'}{parseFloat(project.budget).toLocaleString()}
+                                            {formatCurrency(project.budget, project.currency)}
                                         </span></span>
                                     )}
                                 </div>

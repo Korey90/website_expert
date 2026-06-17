@@ -1,11 +1,12 @@
 import { Head, Link, router } from '@inertiajs/react';
+import useCurrency from '@/Hooks/useCurrency';
 import PortalLayout from '@/Layouts/PortalLayout';
 import { useState } from 'react';
 
 export default function DomainsCheckout({ client, order }) {
+    const { formatCurrency } = useCurrency();
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
-    const symbol = order.currency === 'GBP' ? '£' : order.currency === 'EUR' ? '€' : '$';
 
     function handlePay(e) {
         e.preventDefault();
@@ -56,16 +57,16 @@ export default function DomainsCheckout({ client, order }) {
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-600">Subtotal (ex. VAT)</span>
-                            <span className="text-gray-900">{symbol}{Number(order.retail_price).toFixed(2)}</span>
+                            <span className="text-gray-900">{formatCurrency(order.retail_price, order.currency)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-600">VAT ({order.vat_rate}%)</span>
-                            <span className="text-gray-900">{symbol}{Number(order.vat_amount).toFixed(2)}</span>
+                            <span className="text-gray-900">{formatCurrency(order.vat_amount, order.currency)}</span>
                         </div>
                         <div className="border-t border-gray-100 pt-3 flex justify-between">
                             <span className="font-semibold text-gray-900">Total (inc. VAT)</span>
                             <span className="text-xl font-black text-gray-900">
-                                {symbol}{Number(order.total).toFixed(2)}
+                                {formatCurrency(order.total, order.currency)}
                             </span>
                         </div>
                     </div>
@@ -97,7 +98,7 @@ export default function DomainsCheckout({ client, order }) {
                             >
                                 {submitting
                                     ? <><span className="animate-spin">⏳</span> Redirecting to Stripe…</>
-                                    : <>🔒 Pay {symbol}{Number(order.total).toFixed(2)} Securely</>
+                                    : <>🔒 Pay {formatCurrency(order.total, order.currency)} Securely</>
                                 }
                             </button>
                         </form>

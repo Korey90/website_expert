@@ -8,13 +8,16 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Setting;
 use App\Services\ClientNotificationGate;
+use App\Services\Currency\MoneyFormatter;
 use App\Services\Domain\DomainOrderService;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Stripe\Checkout\Session;
 use Stripe\Exception\SignatureVerificationException;
+use Stripe\PaymentIntent;
 use Stripe\Webhook;
 
 class StripeWebhookController extends Controller
@@ -27,33 +30,35 @@ class StripeWebhookController extends Controller
      */
     public function handle(Request $request): Response
     {
-        $payload   = $request->getContent();
+        $payload = $request->getContent();
         $sigHeader = $request->header('Stripe-Signature');
-        $secret    = Setting::get('stripe_webhook_secret', config('services.stripe.webhook_secret', ''));
+        $secret = Setting::get('stripe_webhook_secret', config('services.stripe.webhook_secret', ''));
 
         try {
             $event = Webhook::constructEvent($payload, $sigHeader, $secret);
         } catch (SignatureVerificationException $e) {
-            Log::warning('Stripe webhook signature verification failed: ' . $e->getMessage());
+            Log::warning('Stripe webhook signature verification failed: '.$e->getMessage());
+
             return response('Invalid signature', 400);
         } catch (\UnexpectedValueException $e) {
-            Log::warning('Stripe webhook invalid payload: ' . $e->getMessage());
+            Log::warning('Stripe webhook invalid payload: '.$e->getMessage());
+
             return response('Invalid payload', 400);
         }
 
         match ($event->type) {
-            'payment_intent.succeeded'              => $this->handlePaymentIntentSucceeded($event->data->object),
-            'payment_intent.payment_failed'         => $this->handlePaymentIntentFailed($event->data->object),
-            'invoice.payment_succeeded'             => $this->handleInvoicePaymentSucceeded($event->data->object),
-            'invoice.payment_failed'                => $this->handleInvoicePaymentFailed($event->data->object),
-            'checkout.session.completed'            => $this->handleCheckoutSessionCompleted($event->data->object),
-            default => Log::info('Stripe webhook received unhandled event: ' . $event->type),
+            'payment_intent.succeeded' => $this->handlePaymentIntentSucceeded($event->data->object),
+            'payment_intent.payment_failed' => $this->handlePaymentIntentFailed($event->data->object),
+            'invoice.payment_succeeded' => $this->handleInvoicePaymentSucceeded($event->data->object),
+            'invoice.payment_failed' => $this->handleInvoicePaymentFailed($event->data->object),
+            'checkout.session.completed' => $this->handleCheckoutSessionCompleted($event->data->object),
+            default => Log::info('Stripe webhook received unhandled event: '.$event->type),
         };
 
         return response('OK', 200);
     }
 
-    private function handlePaymentIntentSucceeded(\Stripe\PaymentIntent $paymentIntent): void
+    private function handlePaymentIntentSucceeded(PaymentIntent $paymentIntent): void
     {
         $payment = Payment::where('stripe_payment_intent_id', $paymentIntent->id)->first();
 
@@ -62,7 +67,7 @@ class StripeWebhookController extends Controller
         }
 
         $payment->update([
-            'status'  => 'completed',
+            'status' => 'completed',
             'paid_at' => now(),
         ]);
 
@@ -78,7 +83,7 @@ class StripeWebhookController extends Controller
         Log::info("Stripe: PaymentIntent {$paymentIntent->id} succeeded — Payment #{$payment->id}");
     }
 
-    private function handlePaymentIntentFailed(\Stripe\PaymentIntent $paymentIntent): void
+    private function handlePaymentIntentFailed(PaymentIntent $paymentIntent): void
     {
         $payment = Payment::where('stripe_payment_intent_id', $paymentIntent->id)->first();
 
@@ -117,7 +122,7 @@ class StripeWebhookController extends Controller
         }
     }
 
-    private function handleCheckoutSessionCompleted(\Stripe\Checkout\Session $session): void
+    private function handleCheckoutSessionCompleted(Session $session): void
     {
         // ── Domain order payment ────────────────────────────────────────────
         $domainOrderId = $session->metadata->domain_order_id ?? null;
@@ -134,14 +139,14 @@ class StripeWebhookController extends Controller
                 $invoice = Invoice::where('domain_order_id', $order->id)->first();
                 if ($invoice && $invoice->status !== 'paid') {
                     $payment = Payment::create([
-                        'invoice_id'               => $invoice->id,
-                        'amount'                   => ($session->amount_total ?? 0) / 100,
-                        'currency'                 => strtoupper($session->currency ?? $order->currency ?? 'GBP'),
-                        'method'                   => 'stripe',
-                        'status'                   => 'completed',
+                        'invoice_id' => $invoice->id,
+                        'amount' => ($session->amount_total ?? 0) / 100,
+                        'currency' => strtoupper($session->currency ?? $order->currency ?? 'GBP'),
+                        'method' => 'stripe',
+                        'status' => 'completed',
                         'stripe_payment_intent_id' => $session->payment_intent,
-                        'reference'                => $session->id,
-                        'paid_at'                  => now(),
+                        'reference' => $session->id,
+                        'paid_at' => now(),
                     ]);
 
                     $invoice->recalculate();
@@ -152,6 +157,7 @@ class StripeWebhookController extends Controller
                     Log::info("Stripe: Invoice #{$invoice->id} marked as paid for domain order #{$domainOrderId}");
                 }
             }
+
             return;
         }
 
@@ -167,14 +173,14 @@ class StripeWebhookController extends Controller
         }
 
         Payment::create([
-            'invoice_id'                => $invoice->id,
-            'amount'                    => ($session->amount_total ?? 0) / 100,
-            'currency'                  => strtoupper($session->currency ?? 'gbp'),
-            'method'                    => 'stripe',
-            'status'                    => 'completed',
-            'stripe_payment_intent_id'  => $session->payment_intent,
-            'reference'                 => $session->id,
-            'paid_at'                   => now(),
+            'invoice_id' => $invoice->id,
+            'amount' => ($session->amount_total ?? 0) / 100,
+            'currency' => strtoupper($session->currency ?? 'gbp'),
+            'method' => 'stripe',
+            'status' => 'completed',
+            'stripe_payment_intent_id' => $session->payment_intent,
+            'reference' => $session->id,
+            'paid_at' => now(),
         ]);
 
         $invoice->update(['status' => 'paid', 'paid_at' => now()]);
@@ -191,7 +197,7 @@ class StripeWebhookController extends Controller
     private function sendPaymentNotifications(Payment $payment): void
     {
         $invoice = $payment->invoice;
-        $client  = $invoice?->client;
+        $client = $invoice?->client;
 
         if (! $client) {
             return;
@@ -204,20 +210,20 @@ class StripeWebhookController extends Controller
                 Mail::to($email)->send(new PaymentReceivedMail($payment));
             }
         } catch (\Throwable $e) {
-            Log::error('Payment notification email failed: ' . $e->getMessage());
+            Log::error('Payment notification email failed: '.$e->getMessage());
         }
 
         // SMS confirmation (if Twilio is enabled)
         try {
             $phone = $client->primary_contact_phone;
             if ($phone && Setting::get('twilio_enabled') && ClientNotificationGate::canSendSms($client)) {
-                $sms = new SmsService();
-                $amount    = strtoupper($payment->currency ?? 'GBP') . ' ' . number_format($payment->amount, 2);
+                $sms = new SmsService;
+                $amount = app(MoneyFormatter::class)->format($payment->amount, $payment->currency);
                 $invoiceNo = $invoice?->number ?? '';
                 $sms->send($phone, "WebsiteExpert: Payment of {$amount} received for invoice {$invoiceNo}. Thank you!");
             }
         } catch (\Throwable $e) {
-            Log::error('Payment notification SMS failed: ' . $e->getMessage());
+            Log::error('Payment notification SMS failed: '.$e->getMessage());
         }
     }
 }

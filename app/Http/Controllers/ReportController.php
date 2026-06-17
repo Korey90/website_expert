@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Models\Lead;
 use App\Models\Project;
+use App\Services\Currency\CurrencySummaryFormatter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
@@ -22,15 +25,15 @@ class ReportController extends Controller
     {
         $leads = Lead::with('client', 'stage')
             ->when($request->date_from, fn ($q) => $q->whereDate('created_at', '>=', $request->date_from))
-            ->when($request->date_to,   fn ($q) => $q->whereDate('created_at', '<=', $request->date_to))
-            ->when($request->stage_id,  fn ($q) => $q->where('pipeline_stage_id', $request->stage_id))
+            ->when($request->date_to, fn ($q) => $q->whereDate('created_at', '<=', $request->date_to))
+            ->when($request->stage_id, fn ($q) => $q->where('pipeline_stage_id', $request->stage_id))
             ->orderByDesc('created_at')
             ->get();
 
         return match ($format) {
-            'pdf'  => $this->pdfResponse('reports.leads', compact('leads'), 'leads-report'),
+            'pdf' => $this->pdfResponse('reports.leads', compact('leads'), 'leads-report'),
             'xlsx' => $this->xlsxResponse($this->leadsSpreadsheet($leads), 'leads-report'),
-            'csv'  => $this->csvResponse($this->leadsSpreadsheet($leads), 'leads-report'),
+            'csv' => $this->csvResponse($this->leadsSpreadsheet($leads), 'leads-report'),
             default => view('reports.leads', compact('leads')),
         };
     }
@@ -43,23 +46,21 @@ class ReportController extends Controller
     {
         $invoices = Invoice::with('client', 'project')
             ->when($request->date_from, fn ($q) => $q->whereDate('created_at', '>=', $request->date_from))
-            ->when($request->date_to,   fn ($q) => $q->whereDate('created_at', '<=', $request->date_to))
-            ->when($request->status,    fn ($q) => $q->where('status', $request->status))
+            ->when($request->date_to, fn ($q) => $q->whereDate('created_at', '<=', $request->date_to))
+            ->when($request->status, fn ($q) => $q->where('status', $request->status))
             ->orderByDesc('created_at')
             ->get();
 
-        $totals = [
-            'draft'     => $invoices->where('status', 'draft')->sum('total'),
-            'sent'      => $invoices->where('status', 'sent')->sum('total'),
-            'paid'      => $invoices->where('status', 'paid')->sum('total'),
-            'overdue'   => $invoices->where('status', 'overdue')->sum('total'),
-            'cancelled' => $invoices->where('status', 'cancelled')->sum('total'),
-        ];
+        $totals = collect(['draft', 'sent', 'paid', 'overdue', 'cancelled'])
+            ->mapWithKeys(fn (string $status): array => [
+                $status => $this->totalsByCurrency($invoices->where('status', $status)),
+            ])
+            ->all();
 
         return match ($format) {
-            'pdf'  => $this->pdfResponse('reports.invoices', compact('invoices', 'totals'), 'invoices-report'),
+            'pdf' => $this->pdfResponse('reports.invoices', compact('invoices', 'totals'), 'invoices-report'),
             'xlsx' => $this->xlsxResponse($this->invoicesSpreadsheet($invoices), 'invoices-report'),
-            'csv'  => $this->csvResponse($this->invoicesSpreadsheet($invoices), 'invoices-report'),
+            'csv' => $this->csvResponse($this->invoicesSpreadsheet($invoices), 'invoices-report'),
             default => view('reports.invoices', compact('invoices', 'totals')),
         };
     }
@@ -76,9 +77,9 @@ class ReportController extends Controller
             ->get();
 
         return match ($format) {
-            'pdf'  => $this->pdfResponse('reports.projects', compact('projects'), 'projects-report'),
+            'pdf' => $this->pdfResponse('reports.projects', compact('projects'), 'projects-report'),
             'xlsx' => $this->xlsxResponse($this->projectsSpreadsheet($projects), 'projects-report'),
-            'csv'  => $this->csvResponse($this->projectsSpreadsheet($projects), 'projects-report'),
+            'csv' => $this->csvResponse($this->projectsSpreadsheet($projects), 'projects-report'),
             default => view('reports.projects', compact('projects')),
         };
     }
@@ -92,41 +93,41 @@ class ReportController extends Controller
         $pdf = Pdf::loadView($view, $data)->setPaper('a4', 'landscape');
 
         return response($pdf->output(), 200, [
-            'Content-Type'        => 'application/pdf',
-            'Content-Disposition' => "attachment; filename=\"{$filename}-" . now()->format('Y-m-d') . '.pdf"',
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "attachment; filename=\"{$filename}-".now()->format('Y-m-d').'.pdf"',
         ]);
     }
 
-    private function xlsxResponse(Spreadsheet $spreadsheet, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
+    private function xlsxResponse(Spreadsheet $spreadsheet, string $filename): StreamedResponse
     {
         $writer = new Xlsx($spreadsheet);
 
         return response()->streamDownload(function () use ($writer) {
             $writer->save('php://output');
-        }, "{$filename}-" . now()->format('Y-m-d') . '.xlsx', [
+        }, "{$filename}-".now()->format('Y-m-d').'.xlsx', [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
 
-    private function csvResponse(Spreadsheet $spreadsheet, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
+    private function csvResponse(Spreadsheet $spreadsheet, string $filename): StreamedResponse
     {
         $writer = new Csv($spreadsheet);
         $writer->setUseBOM(true);
 
         return response()->streamDownload(function () use ($writer) {
             $writer->save('php://output');
-        }, "{$filename}-" . now()->format('Y-m-d') . '.csv', [
+        }, "{$filename}-".now()->format('Y-m-d').'.csv', [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
 
-    private function leadsSpreadsheet(\Illuminate\Support\Collection $leads): Spreadsheet
+    private function leadsSpreadsheet(Collection $leads): Spreadsheet
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet()->setTitle('Leads');
 
         $sheet->fromArray(
-            ['ID', 'Name', 'Email', 'Phone', 'Company', 'Source', 'Stage ID', 'Stage', 'Value', 'Created'],
+            ['ID', 'Name', 'Email', 'Phone', 'Company', 'Source', 'Stage ID', 'Stage', 'Value', 'Currency', 'Created'],
             null,
             'A1'
         );
@@ -142,16 +143,17 @@ class ReportController extends Controller
                 $lead->pipeline_stage_id ?? '',
                 $lead->stage?->name ?? '',
                 $lead->value ?? '',
+                $lead->currency ?? 'GBP',
                 $lead->created_at?->format('Y-m-d') ?? '',
-            ], null, 'A' . ($index + 2));
+            ], null, 'A'.($index + 2));
         }
 
         return $spreadsheet;
     }
 
-    private function invoicesSpreadsheet(\Illuminate\Support\Collection $invoices): Spreadsheet
+    private function invoicesSpreadsheet(Collection $invoices): Spreadsheet
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet()->setTitle('Invoices');
 
         $sheet->fromArray(
@@ -173,15 +175,15 @@ class ReportController extends Controller
                 $invoice->total ?? 0,
                 $invoice->due_date?->format('Y-m-d') ?? '',
                 $invoice->created_at?->format('Y-m-d') ?? '',
-            ], null, 'A' . ($index + 2));
+            ], null, 'A'.($index + 2));
         }
 
         return $spreadsheet;
     }
 
-    private function projectsSpreadsheet(\Illuminate\Support\Collection $projects): Spreadsheet
+    private function projectsSpreadsheet(Collection $projects): Spreadsheet
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet()->setTitle('Projects');
 
         $sheet->fromArray(
@@ -202,9 +204,19 @@ class ReportController extends Controller
                 $project->start_date?->format('Y-m-d') ?? '',
                 $project->due_date?->format('Y-m-d') ?? '',
                 $project->created_at?->format('Y-m-d') ?? '',
-            ], null, 'A' . ($index + 2));
+            ], null, 'A'.($index + 2));
         }
 
         return $spreadsheet;
+    }
+
+    /**
+     * @return array<string, float>
+     */
+    private function totalsByCurrency(Collection $records, string $amountField = 'total'): array
+    {
+        return app(CurrencySummaryFormatter::class)
+            ->sumByCurrency($records, $amountField)
+            ->all();
     }
 }

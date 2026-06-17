@@ -7,6 +7,7 @@ use App\Models\Contact;
 use App\Models\Lead;
 use App\Models\LeadActivity;
 use App\Models\PipelineStage;
+use App\Services\Currency\CurrencyResolver;
 
 class CreateLeadAction
 {
@@ -41,9 +42,12 @@ class CreateLeadAction
     public function execute(array $data): Lead
     {
         $businessId = $data['business_id'] ?? null;
+        $currency = app(CurrencyResolver::class)->normalize(
+            $data['currency'] ?? app(CurrencyResolver::class)->resolve(request())
+        );
 
         // ── Client: firstOrCreate scoped per business (multi-tenant safe) ──────────
-        $client = $this->findOrCreateClient($data, $businessId);
+        $client = $this->findOrCreateClient($data, $businessId, $currency);
 
         // ── Contact: create from name fields if provided ──────────────────────────
         $contact = $this->findOrCreateContact($data, $client);
@@ -54,19 +58,19 @@ class CreateLeadAction
         // Auto-create a default stage when none exist (guards EC-07: empty pipeline)
         if (! $stage) {
             $stage = PipelineStage::create([
-                'name'     => 'New Lead',
-                'slug'     => 'new-lead',
-                'color'    => '#6B7280',
-                'order'    => 1,
-                'is_won'   => false,
-                'is_lost'  => false,
+                'name' => 'New Lead',
+                'slug' => 'new-lead',
+                'color' => '#6B7280',
+                'order' => 1,
+                'is_won' => false,
+                'is_lost' => false,
             ]);
         }
 
         // ── Lead title ────────────────────────────────────────────────────────────
         $projectType = $data['project_type'] ?? 'Enquiry';
         $nameOrEmail = $data['company'] ?? $data['name'] ?? $data['first_name'] ?? $data['email'];
-        $sourceLabel = $data['source'] !== 'contact_form' ? ' (' . $data['source'] . ')' : '';
+        $sourceLabel = $data['source'] !== 'contact_form' ? ' ('.$data['source'].')' : '';
 
         if (! empty($data['landing_page_title'])) {
             $title = trim("{$nameOrEmail} — {$data['landing_page_title']}{$sourceLabel}");
@@ -79,33 +83,34 @@ class CreateLeadAction
 
         // ── Lead creation ─────────────────────────────────────────────────────────
         $lead = Lead::create([
-            'title'             => $title,
-            'client_id'         => $client->id,
-            'contact_id'        => $contact?->id,
+            'title' => $title,
+            'client_id' => $client->id,
+            'contact_id' => $contact?->id,
             'pipeline_stage_id' => $stage->id,
-            'assigned_to'       => $assignedTo,
-            'source'            => $data['source'],
-            'notes'             => $data['notes'] ?? null,
-            'value'             => $data['value'] ?? null,
-            'calculator_data'   => $data['calculator_data'] ?? null,
-            'form_data'         => $data['form_data'] ?? null,
-            'budget_min'        => $data['budget_min'] ?? null,
-            'budget_max'        => $data['budget_max'] ?? null,
-            'business_id'       => $businessId,
-            'landing_page_id'   => $data['landing_page_id'] ?? null,
-            'utm_source'        => $data['utm_source'] ?? null,
-            'utm_medium'        => $data['utm_medium'] ?? null,
-            'utm_campaign'      => $data['utm_campaign'] ?? null,
-            'utm_content'       => $data['utm_content'] ?? null,
-            'utm_term'          => $data['utm_term'] ?? null,
+            'assigned_to' => $assignedTo,
+            'source' => $data['source'],
+            'currency' => $currency,
+            'notes' => $data['notes'] ?? null,
+            'value' => $data['value'] ?? null,
+            'calculator_data' => $data['calculator_data'] ?? null,
+            'form_data' => $data['form_data'] ?? null,
+            'budget_min' => $data['budget_min'] ?? null,
+            'budget_max' => $data['budget_max'] ?? null,
+            'business_id' => $businessId,
+            'landing_page_id' => $data['landing_page_id'] ?? null,
+            'utm_source' => $data['utm_source'] ?? null,
+            'utm_medium' => $data['utm_medium'] ?? null,
+            'utm_campaign' => $data['utm_campaign'] ?? null,
+            'utm_content' => $data['utm_content'] ?? null,
+            'utm_term' => $data['utm_term'] ?? null,
         ]);
 
         // ── Activity log ──────────────────────────────────────────────────────────
-        LeadActivity::log($lead->id, 'created', 'Lead created via ' . $data['source'], [
-            'name'            => $nameOrEmail,
-            'email'           => $data['email'],
-            'project_type'    => $projectType,
-            'source'          => $data['source'],
+        LeadActivity::log($lead->id, 'created', 'Lead created via '.$data['source'], [
+            'name' => $nameOrEmail,
+            'email' => $data['email'],
+            'project_type' => $projectType,
+            'source' => $data['source'],
             'contact_created' => $contact !== null,
             'client_existing' => $client->wasRecentlyCreated === false,
             'landing_page_id' => $data['landing_page_id'] ?? null,
@@ -119,7 +124,7 @@ class CreateLeadAction
     /**
      * Find or create Client scoped to business_id (prevents cross-tenant collisions).
      */
-    private function findOrCreateClient(array $data, ?string $businessId): Client
+    private function findOrCreateClient(array $data, ?string $businessId, string $currency): Client
     {
         $query = Client::where('primary_contact_email', $data['email']);
 
@@ -133,17 +138,19 @@ class CreateLeadAction
             return $existing;
         }
 
+        $resolver = app(CurrencyResolver::class);
+
         return Client::create([
-            'business_id'           => $businessId,
-            'company_name'          => $data['company'] ?? $data['name'] ?? $data['first_name'] ?? $data['email'],
-            'primary_contact_name'  => $this->buildDisplayName($data),
+            'business_id' => $businessId,
+            'company_name' => $data['company'] ?? $data['name'] ?? $data['first_name'] ?? $data['email'],
+            'primary_contact_name' => $this->buildDisplayName($data),
             'primary_contact_email' => $data['email'],
             'primary_contact_phone' => $data['phone'] ?? null,
-            'vat_number'            => $data['nip'] ?? null,
-            'status'                => 'prospect',
-            'source'                => 'website',
-            'country'               => 'GB',
-            'currency'              => 'GBP',
+            'vat_number' => $data['nip'] ?? null,
+            'status' => 'prospect',
+            'source' => 'website',
+            'country' => strtoupper($data['country'] ?? $data['country_code'] ?? $resolver->countryForLocale(app()->getLocale())),
+            'currency' => $currency,
         ]);
     }
 
@@ -168,11 +175,11 @@ class CreateLeadAction
         }
 
         return Contact::create([
-            'client_id'  => $client->id,
+            'client_id' => $client->id,
             'first_name' => $firstName,
-            'last_name'  => $lastName ?? '',
-            'email'      => $data['email'],
-            'phone'      => $data['phone'] ?? null,
+            'last_name' => $lastName ?? '',
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
             'is_primary' => true,
         ]);
     }
@@ -189,6 +196,7 @@ class CreateLeadAction
 
         if (! empty($data['name'])) {
             $parts = explode(' ', trim($data['name']), 2);
+
             return [
                 $parts[0],
                 $parts[1] ?? null,
@@ -208,10 +216,9 @@ class CreateLeadAction
     private function buildDisplayName(array $data): string
     {
         if (! empty($data['first_name'])) {
-            return trim($data['first_name'] . ' ' . ($data['last_name'] ?? ''));
+            return trim($data['first_name'].' '.($data['last_name'] ?? ''));
         }
 
         return $data['name'] ?? $data['company'] ?? $data['email'];
     }
 }
-

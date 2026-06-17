@@ -1,15 +1,18 @@
 import PortalLayout from '@/Layouts/PortalLayout';
+import useCurrency from '@/Hooks/useCurrency';
 import { Link, router } from '@inertiajs/react';
 import usePortalTrans from '@/Hooks/usePortalTrans';
 
 const PLAN_COLORS = {
     free:   'bg-gray-100 text-gray-700 border-gray-200',
+    basic:  'bg-emerald-50 text-emerald-700 border-emerald-200',
     pro:    'bg-blue-50 text-blue-700 border-blue-200',
     agency: 'bg-purple-50 text-purple-700 border-purple-200',
 };
 
 const PLAN_CTA_COLORS = {
     free:   'bg-brand-600 hover:bg-brand-700 text-white',
+    basic:  'bg-emerald-600 hover:bg-emerald-700 text-white',
     pro:    'bg-blue-600 hover:bg-blue-700 text-white',
     agency: 'bg-purple-700 hover:bg-purple-800 text-white',
 };
@@ -36,7 +39,7 @@ function UsageBar({ used, limit, label }) {
     );
 }
 
-function PlanCard({ plan, current, effectivePlan, onUpgrade }) {
+function PlanCard({ plan, current, effectivePlan, onUpgrade, formatCurrency }) {
     const isCurrent = plan.key === effectivePlan;
     const isFree    = plan.key === 'free';
 
@@ -50,7 +53,7 @@ function PlanCard({ plan, current, effectivePlan, onUpgrade }) {
 
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">{plan.name}</h3>
             <p className="mt-1 text-2xl font-extrabold text-gray-900 dark:text-white">
-                {plan.price === 0 ? 'Free' : `£${plan.price}/mo`}
+                {plan.price === 0 ? 'Free' : `${formatCurrency(plan.price, plan.currency)}/mo`}
             </p>
 
             <ul className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
@@ -99,9 +102,10 @@ export default function BillingIndex({
     can_use_ai,
 }) {
     const t = usePortalTrans();
+    const { formatCurrency } = useCurrency();
 
     const handleUpgrade = (plan) => {
-        router.post(route('portal.billing.checkout', { plan }));
+        router.post(route('portal.billing.checkout', { plan }), { interval: 'monthly' });
     };
 
     const planBadgeClass = PLAN_COLORS[business.effective_plan] ?? PLAN_COLORS.free;
@@ -169,6 +173,7 @@ export default function BillingIndex({
                                 current={business.plan}
                                 effectivePlan={business.effective_plan}
                                 onUpgrade={handleUpgrade}
+                                formatCurrency={formatCurrency}
                             />
                         ))}
                     </div>

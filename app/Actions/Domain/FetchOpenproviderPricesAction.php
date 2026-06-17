@@ -3,6 +3,7 @@
 namespace App\Actions\Domain;
 
 use App\Models\DomainPriceList;
+use App\Models\Setting;
 use App\Services\Domain\OpenProviderClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Pool;
@@ -26,14 +27,15 @@ class FetchOpenproviderPricesAction
      */
     public function execute(): array
     {
-        $records    = DomainPriceList::active()->get();
-        $tlds       = $records->map(fn ($r) => ltrim($r->tld, '.'))->values()->all();
+        $baseCurrency = strtoupper((string) config('currencies.default', 'GBP'));
+        $records = DomainPriceList::active()->where('currency', $baseCurrency)->get();
+        $tlds = $records->map(fn ($r) => ltrim($r->tld, '.'))->unique()->values()->all();
         $operations = ['create', 'renew', 'transfer'];
 
         // Fire all requests in parallel
         // Use an unlikely-to-be-premium random label to get standard (non-premium) pricing
         $testLabel = 'zxq9k2w7m4ptest';
-        $token   = $this->client->bearerToken();
+        $token = $this->client->bearerToken();
         $baseUrl = $this->client->getBaseUrl();
 
         // Fire all 48 requests (16 TLDs × 3 operations) in parallel
@@ -44,27 +46,27 @@ class FetchOpenproviderPricesAction
                         ->withToken($token)
                         ->timeout(15)
                         ->get("{$baseUrl}/domains/prices", [
-                            'domain.name'      => $testLabel,
+                            'domain.name' => $testLabel,
                             'domain.extension' => $tld,
-                            'operation'        => $op,
-                            'period'           => 1,
+                            'operation' => $op,
+                            'period' => 1,
                         ]);
                 }
             }
         });
 
-        $defaultMargin = (float) \App\Models\Setting::get('domain_default_margin', 50);
+        $defaultMargin = (float) Setting::get('domain_default_margin', 50);
 
         $changes = [];
         foreach ($records as $record) {
             $tld = ltrim($record->tld, '.');
 
-            $opRegister = $this->parsePrice($responses["{$tld}__create"]  ?? null);
-            $opRenew    = $this->parsePrice($responses["{$tld}__renew"]   ?? null);
+            $opRegister = $this->parsePrice($responses["{$tld}__create"] ?? null);
+            $opRenew = $this->parsePrice($responses["{$tld}__renew"] ?? null);
             $opTransfer = $this->parsePrice($responses["{$tld}__transfer"] ?? null);
 
             $curRegister = (float) ($record->wholesale_register ?? 0);
-            $curRenew    = (float) ($record->wholesale_renew ?? 0);
+            $curRenew = (float) ($record->wholesale_renew ?? 0);
             $curTransfer = $record->wholesale_transfer !== null
                 ? (float) $record->wholesale_transfer
                 : null;
@@ -74,7 +76,7 @@ class FetchOpenproviderPricesAction
                 : $defaultMargin;
 
             $newRetailRegister = $opRegister !== null ? round($opRegister * (1 + $margin / 100), 2) : null;
-            $newRetailRenew    = $opRenew    !== null ? round($opRenew    * (1 + $margin / 100), 2) : null;
+            $newRetailRenew = $opRenew !== null ? round($opRenew * (1 + $margin / 100), 2) : null;
             $newRetailTransfer = $opTransfer !== null ? round($opTransfer * (1 + $margin / 100), 2) : null;
 
             $changed = $opRegister !== $curRegister
@@ -82,22 +84,22 @@ class FetchOpenproviderPricesAction
                 || $opTransfer !== $curTransfer;
 
             $changes[] = [
-                'id'                  => $record->id,
-                'tld'                 => $record->tld,
-                'op_register'         => $opRegister,
-                'op_renew'            => $opRenew,
-                'op_transfer'         => $opTransfer,
-                'cur_register'        => $curRegister,
-                'cur_renew'           => $curRenew,
-                'cur_transfer'        => $curTransfer,
+                'id' => $record->id,
+                'tld' => $record->tld,
+                'op_register' => $opRegister,
+                'op_renew' => $opRenew,
+                'op_transfer' => $opTransfer,
+                'cur_register' => $curRegister,
+                'cur_renew' => $curRenew,
+                'cur_transfer' => $curTransfer,
                 'cur_retail_register' => (float) ($record->register_price ?? 0),
-                'cur_retail_renew'    => (float) ($record->renew_price ?? 0),
+                'cur_retail_renew' => (float) ($record->renew_price ?? 0),
                 'cur_retail_transfer' => $record->transfer_price !== null ? (float) $record->transfer_price : null,
                 'new_retail_register' => $newRetailRegister,
-                'new_retail_renew'    => $newRetailRenew,
+                'new_retail_renew' => $newRetailRenew,
                 'new_retail_transfer' => $newRetailTransfer,
-                'changed'             => $changed,
-                'margin_percent'      => $margin,
+                'changed' => $changed,
+                'margin_percent' => $margin,
             ];
         }
 

@@ -3,6 +3,8 @@
 @section('title', 'Leads Report')
 
 @section('content')
+@php($money = app(\App\Services\Currency\MoneyFormatter::class))
+
 <div class="export-bar">
     <a href="{{ route('reports.leads.html') }}" class="active">HTML</a>
     <a href="{{ route('reports.leads.pdf') }}">PDF</a>
@@ -23,6 +25,7 @@
             <th>Status</th>
             <th>Stage</th>
             <th>Value</th>
+            <th>Currency</th>
             <th>Date</th>
         </tr>
     </thead>
@@ -36,7 +39,8 @@
             <td>{{ $lead->source }}</td>
             <td><span class="badge badge-{{ $lead->status }}">{{ $lead->status }}</span></td>
             <td>{{ $lead->stage?->name }}</td>
-            <td>{{ $lead->value ? '£' . number_format($lead->value, 0) : '—' }}</td>
+            <td>{{ $lead->value ? $money->format($lead->value, $lead->currency) : '—' }}</td>
+            <td>{{ $lead->currency ?? 'GBP' }}</td>
             <td>{{ $lead->created_at?->format('d M Y') }}</td>
         </tr>
         @endforeach

@@ -1,12 +1,10 @@
 import PortalLayout from '@/Layouts/PortalLayout';
+import useCurrency from '@/Hooks/useCurrency';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
-function fmt(amount, currency) {
-    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency ?? 'GBP' }).format(amount ?? 0);
-}
-
 export default function PayInvoice({ client, invoice, stripeEnabled, payuEnabled }) {
+    const { formatCurrency } = useCurrency();
     const [loading, setLoading] = useState(null);
     const [error, setError]     = useState(false);
 
@@ -48,7 +46,7 @@ export default function PayInvoice({ client, invoice, stripeEnabled, payuEnabled
                     <p className="mt-1 text-sm text-gray-500">
                         Amount due:{' '}
                         <span className="font-semibold text-gray-800">
-                            {fmt(amountDue, invoice.currency)}
+                            {formatCurrency(amountDue, invoice.currency)}
                         </span>
                     </p>
                 </div>

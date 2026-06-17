@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\Lead;
 use Filament\Actions\Action;
 use Filament\Tables;
@@ -15,8 +16,11 @@ use Filament\Widgets\TableWidget as BaseWidget;
 class StaleLeadsWidget extends BaseWidget
 {
     protected static ?int $sort = 10;
+
     protected int|string|array $columnSpan = 'full';
+
     protected static bool $isLazy = true;
+
     protected static ?string $heading = 'Stale Leads — No Activity in 7+ Days';
 
     public function table(Table $table): Table
@@ -50,7 +54,7 @@ class StaleLeadsWidget extends BaseWidget
                     ->color('info'),
 
                 Tables\Columns\TextColumn::make('value')
-                    ->money('GBP')
+                    ->money(fn (Lead $record) => FilamentCurrency::tableCurrency($record))
                     ->placeholder('—'),
 
                 Tables\Columns\TextColumn::make('updated_at')

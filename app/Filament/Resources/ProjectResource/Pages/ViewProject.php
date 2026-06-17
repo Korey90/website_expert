@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Resources\ContractResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\ProjectResource;
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\ProjectPhase;
@@ -24,6 +25,8 @@ use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
 class ViewProject extends ViewRecord
 {
@@ -45,8 +48,8 @@ class ViewProject extends ViewRecord
         $this->record->refresh();
 
         $messages = [
-            'active'    => ['title' => 'Project is now Active',     'color' => 'success'],
-            'on_hold'   => ['title' => 'Project put on hold',       'color' => 'warning'],
+            'active' => ['title' => 'Project is now Active',     'color' => 'success'],
+            'on_hold' => ['title' => 'Project put on hold',       'color' => 'warning'],
             'completed' => ['title' => 'Project marked as Completed 🎉', 'color' => 'success'],
             'cancelled' => ['title' => 'Project cancelled',         'color' => 'danger'],
         ];
@@ -74,35 +77,35 @@ class ViewProject extends ViewRecord
             ->send();
     }
 
-    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getHeading(): string|Htmlable
     {
         $title = e($this->record->title ?? '—');
 
         $serviceLabels = [
             'wizytowka' => 'Business Card',
-            'landing'   => 'Landing Page',
+            'landing' => 'Landing Page',
             'ecommerce' => 'E-Commerce',
             'aplikacja' => 'Web Application',
-            'seo'       => 'SEO',
+            'seo' => 'SEO',
         ];
         $serviceColors = [
             'wizytowka' => ['bg' => 'rgba(56,189,248,0.15)',  'text' => '#38bdf8', 'border' => 'rgba(56,189,248,0.3)'],
-            'landing'   => ['bg' => 'rgba(129,140,248,0.15)', 'text' => '#818cf8', 'border' => 'rgba(129,140,248,0.3)'],
+            'landing' => ['bg' => 'rgba(129,140,248,0.15)', 'text' => '#818cf8', 'border' => 'rgba(129,140,248,0.3)'],
             'ecommerce' => ['bg' => 'rgba(52,211,153,0.15)',  'text' => '#34d399', 'border' => 'rgba(52,211,153,0.3)'],
             'aplikacja' => ['bg' => 'rgba(251,191,36,0.15)',  'text' => '#fbbf24', 'border' => 'rgba(251,191,36,0.3)'],
-            'seo'       => ['bg' => 'rgba(167,139,250,0.15)', 'text' => '#a78bfa', 'border' => 'rgba(167,139,250,0.3)'],
+            'seo' => ['bg' => 'rgba(167,139,250,0.15)', 'text' => '#a78bfa', 'border' => 'rgba(167,139,250,0.3)'],
         ];
 
-        $type   = $this->record->service_type;
-        $label  = $serviceLabels[$type] ?? ($type ? ucfirst($type) : null);
+        $type = $this->record->service_type;
+        $label = $serviceLabels[$type] ?? ($type ? ucfirst($type) : null);
         $colors = $serviceColors[$type] ?? ['bg' => 'rgba(255,255,255,0.08)', 'text' => '#94a3b8', 'border' => 'rgba(255,255,255,0.15)'];
 
         $badge = $label
-            ? '<span style="display:inline-flex;align-items:center;vertical-align:middle;margin-left:10px;padding:3px 11px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.4px;background:' . $colors['bg'] . ';color:' . $colors['text'] . ';border:1px solid ' . $colors['border'] . ';">' . e($label) . '</span>'
+            ? '<span style="display:inline-flex;align-items:center;vertical-align:middle;margin-left:10px;padding:3px 11px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.4px;background:'.$colors['bg'].';color:'.$colors['text'].';border:1px solid '.$colors['border'].';">'.e($label).'</span>'
             : '';
 
-        return new \Illuminate\Support\HtmlString(
-            '<span style="vertical-align:middle;">' . $title . '</span>' . $badge
+        return new HtmlString(
+            '<span style="vertical-align:middle;">'.$title.'</span>'.$badge
         );
     }
 
@@ -119,16 +122,16 @@ class ViewProject extends ViewRecord
                 ->modalWidth('4xl')
                 ->modalSubmitActionLabel('Create Invoice')
                 ->form(function () {
-                    $project  = $this->record;
-                    $currency = $project->currency ?? 'GBP';
-                    $prefix   = match ($currency) { 'EUR' => '€', 'USD' => '$', 'PLN' => 'zł', default => '£' };
-                    $nextNum  = 'INV-' . date('Y') . '-' . str_pad(Invoice::withTrashed()->count() + 1, 3, '0', STR_PAD_LEFT);
+                    $project = $this->record;
+                    $currency = $project->currency ?? FilamentCurrency::default();
+                    $prefix = FilamentCurrency::symbol($currency);
+                    $nextNum = 'INV-'.date('Y').'-'.str_pad(Invoice::withTrashed()->count() + 1, 3, '0', STR_PAD_LEFT);
 
                     return [
                         Section::make('Invoice Details')->columns(3)->schema([
                             TextInput::make('number')->label('Invoice No.')->default($nextNum)->required()->columnSpan(1),
                             Select::make('status')->options(['draft' => 'Draft', 'sent' => 'Sent'])->default('draft')->required()->columnSpan(1),
-                            Select::make('currency')->options(['GBP' => '£ GBP', 'EUR' => '€ EUR', 'USD' => '$ USD', 'PLN' => 'zł PLN'])->default($currency)->required()->columnSpan(1),
+                            Select::make('currency')->options(fn () => FilamentCurrency::options())->default($currency)->required()->columnSpan(1),
                             DatePicker::make('issue_date')->label('Issue Date')->default(today())->required()->columnSpan(1),
                             DatePicker::make('due_date')->label('Due Date')->default(today()->addDays(30))->required()->columnSpan(1),
                             TextInput::make('vat_rate')->label('VAT %')->numeric()->default(20)->suffix('%')->columnSpan(1),
@@ -152,15 +155,15 @@ class ViewProject extends ViewRecord
                                                 'Consultation' => 'Consultation',
                                             ];
                                             $fromDb = InvoiceItem::whereNotNull('description')->distinct()->orderBy('description')->pluck('description', 'description')->toArray();
+
                                             return array_merge($static, $fromDb);
                                         })->columnSpan(4),
                                     TextInput::make('quantity')->numeric()->default(1)->minValue(0)->columnSpan(1),
                                     TextInput::make('unit_price')->label('Unit Price')->numeric()->default($project->budget ?? 0)->prefix($prefix)->minValue(0)->columnSpan(2),
                                 ])
                                 ->columns(7)->defaultItems(1)->addActionLabel('Add line item')
-                                ->itemLabel(fn (array $state): ?string =>
-                                    $state['description']
-                                        ? $state['description'] . ' × ' . ($state['quantity'] ?? 1) . ' — ' . $prefix . number_format((float) ($state['unit_price'] ?? 0) * (float) ($state['quantity'] ?? 1), 2)
+                                ->itemLabel(fn (array $state): ?string => $state['description']
+                                        ? $state['description'].' × '.($state['quantity'] ?? 1).' — '.FilamentCurrency::format((float) ($state['unit_price'] ?? 0) * (float) ($state['quantity'] ?? 1), $currency)
                                         : null
                                 )->collapsible(),
                         ]),
@@ -174,10 +177,10 @@ class ViewProject extends ViewRecord
 
                     $invoice = Invoice::create([
                         ...$data,
-                        'client_id'   => $this->record->client_id,
-                        'project_id'  => $this->record->id,
-                        'created_by'  => auth()->id(),
-                        'subtotal'    => 0, 'vat_amount' => 0, 'total' => 0, 'amount_paid' => 0, 'amount_due' => 0,
+                        'client_id' => $this->record->client_id,
+                        'project_id' => $this->record->id,
+                        'created_by' => auth()->id(),
+                        'subtotal' => 0, 'vat_amount' => 0, 'total' => 0, 'amount_paid' => 0, 'amount_due' => 0,
                     ]);
 
                     foreach ($items as $i => $item) {
@@ -193,7 +196,7 @@ class ViewProject extends ViewRecord
                 ->label('Create Contract')
                 ->icon('heroicon-o-document-check')
                 ->color('gray')
-                ->url(fn () => ContractResource::getUrl('create') . '?client_id=' . $this->record->client_id . '&project_id=' . $this->record->id),
+                ->url(fn () => ContractResource::getUrl('create').'?client_id='.$this->record->client_id.'&project_id='.$this->record->id),
 
             Action::make('applyTemplate')
                 ->label('Apply Template')
@@ -213,7 +216,11 @@ class ViewProject extends ViewRecord
                 ->modalSubmitActionLabel('Apply')
                 ->action(function (array $data) {
                     $template = ProjectTemplate::find($data['template_id']);
-                    if (! $template) { Notification::make()->title('Template not found')->danger()->send(); return; }
+                    if (! $template) {
+                        Notification::make()->title('Template not found')->danger()->send();
+
+                        return;
+                    }
 
                     if ($data['clear_existing']) {
                         ProjectTask::where('project_id', $this->record->id)->whereIn('phase_id', $this->record->phases()->pluck('id'))->delete();

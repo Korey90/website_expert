@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ContractResource\Pages;
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\Client;
 use App\Models\Contract;
 use App\Models\ContractTemplate;
@@ -14,24 +15,26 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Notifications\Notification;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ContractResource extends BaseResource
 {
     protected static ?string $model = Contract::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-check';
+
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
+
     protected static ?int $navigationSort = 3;
 
     public static function form(Schema $form): Schema
@@ -50,17 +53,21 @@ class ContractResource extends BaseResource
                                 ->mapWithKeys(fn ($t) => [$t->id => "[{$t->language}] {$t->name}"])
                         )
                         ->live()
-                        ->afterStateUpdated(function ($state, callable $set, \Filament\Schemas\Components\Utilities\Get $get) {
-                            if (!$state) return;
+                        ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                            if (! $state) {
+                                return;
+                            }
                             $template = ContractTemplate::find($state);
-                            if (!$template) return;
-                            $client  = Client::find($get('client_id'));
+                            if (! $template) {
+                                return;
+                            }
+                            $client = Client::find($get('client_id'));
                             $project = Project::find($get('project_id'));
                             $content = app(ContractInterpolationService::class)
                                 ->interpolate($template->content, $client, $project);
                             $set('terms', $content);
                             $set('contract_template_id', $state);
-                            if (!$get('title')) {
+                            if (! $get('title')) {
                                 $set('title', $template->name);
                             }
                         })
@@ -90,50 +97,52 @@ class ContractResource extends BaseResource
                         ->live(),
                     Forms\Components\Select::make('project_id')
                         ->label('Project')
-                        ->options(fn (\Filament\Schemas\Components\Utilities\Get $get) =>
-                            Project::withTrashed()->when($get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
-                                ->orderBy('title')
-                                ->pluck('title', 'id')
+                        ->options(fn (Get $get) => Project::withTrashed()->when($get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
+                            ->orderBy('title')
+                            ->pluck('title', 'id')
                         )
                         ->searchable()
                         ->nullable()
                         ->default(fn () => request('project_id'))
                         ->live()
                         ->afterStateUpdated(function ($state, callable $set) {
-                            if (!$state) return;
+                            if (! $state) {
+                                return;
+                            }
                             $project = Project::withTrashed()->find($state);
-                            if (!$project) return;
+                            if (! $project) {
+                                return;
+                            }
                             $set('value', $project->budget);
                             $set('currency', $project->currency);
                         }),
                     Forms\Components\Select::make('quote_id')
                         ->label('Quote')
-                        ->options(fn (\Filament\Schemas\Components\Utilities\Get $get) =>
-                            Quote::withTrashed()->when($get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
-                                ->orderBy('number')
-                                ->pluck('number', 'id')
+                        ->options(fn (Get $get) => Quote::withTrashed()->when($get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
+                            ->orderBy('number')
+                            ->pluck('number', 'id')
                         )
                         ->searchable()
                         ->nullable()
                         ->default(fn () => request('quote_id')),
                     Forms\Components\Select::make('status')
                         ->options([
-                            'draft'     => 'Draft',
-                            'sent'      => 'Sent',
-                            'signed'    => 'Signed',
-                            'expired'   => 'Expired',
+                            'draft' => 'Draft',
+                            'sent' => 'Sent',
+                            'signed' => 'Signed',
+                            'expired' => 'Expired',
                             'cancelled' => 'Cancelled',
                         ])
                         ->default('draft')
                         ->required(),
                     Forms\Components\Select::make('currency')
-                        ->options(['GBP' => '£ GBP', 'EUR' => '€ EUR', 'USD' => '$ USD', 'PLN' => 'zł PLN'])
-                        ->default(fn () => request('currency', 'GBP'))
+                        ->options(fn () => FilamentCurrency::options())
+                        ->default(fn () => request('currency', FilamentCurrency::default()))
                         ->required(),
                     Forms\Components\TextInput::make('value')
                         ->label('Contract Value')
                         ->numeric()
-                        ->prefix('£')
+                        ->prefix(fn () => FilamentCurrency::symbol())
                         ->default(fn () => request('value', 0)),
                 ]),
 
@@ -189,12 +198,12 @@ class ContractResource extends BaseResource
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn ($state) => match ($state) {
-                        'draft'     => 'gray',
-                        'sent'      => 'info',
-                        'signed'    => 'success',
-                        'expired'   => 'warning',
+                        'draft' => 'gray',
+                        'sent' => 'info',
+                        'signed' => 'success',
+                        'expired' => 'warning',
                         'cancelled' => 'danger',
-                        default     => 'gray',
+                        default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('value')
                     ->money(fn ($record) => strtolower($record->currency))
@@ -214,10 +223,10 @@ class ContractResource extends BaseResource
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        'draft'     => 'Draft',
-                        'sent'      => 'Sent',
-                        'signed'    => 'Signed',
-                        'expired'   => 'Expired',
+                        'draft' => 'Draft',
+                        'sent' => 'Sent',
+                        'signed' => 'Signed',
+                        'expired' => 'Expired',
                         'cancelled' => 'Cancelled',
                     ]),
                 Tables\Filters\SelectFilter::make('client_id')
@@ -264,14 +273,14 @@ class ContractResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListContracts::route('/'),
+            'index' => Pages\ListContracts::route('/'),
             'create' => Pages\CreateContract::route('/create'),
-            'view'   => Pages\ViewContract::route('/{record}'),
-            'edit'   => Pages\EditContract::route('/{record}/edit'),
+            'view' => Pages\ViewContract::route('/{record}'),
+            'edit' => Pages\EditContract::route('/{record}/edit'),
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->withTrashed();
     }

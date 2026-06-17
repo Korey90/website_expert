@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Portal;
 
-use App\Models\Business;
+use App\Models\PlanPrice;
 use App\Services\Billing\PlanService;
+use App\Services\Currency\CurrencyResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Stripe\BillingPortal\Session;
 use Stripe\Checkout\Session as StripeSession;
 use Stripe\Exception\ApiErrorException;
 use Stripe\Stripe;
@@ -23,44 +25,48 @@ class BillingController extends BasePortalController
      * GET /portal/billing
      * Show current plan, usage, and upgrade options.
      */
-    public function index(): Response|RedirectResponse
+    public function index(Request $request): Response|RedirectResponse
     {
-        $client   = $this->clientForUser();
+        $client = $this->clientForUser();
         $business = currentBusiness();
 
         if (! $business) {
             return $this->redirectWithoutWorkspace('Workspace access is required for billing and plan management.');
         }
 
-        $plans = collect(PlanService::getPlans())->map(fn ($limits, $key) => [
-            'key'           => $key,
-            'name'          => $limits['name'],
-            'price'         => (int) round(($limits['price'] ?? 0) / 100), // pence → pounds
-            'currency'      => 'GBP',
+        $currency = $this->resolveRequestCurrency($request);
+
+        $plans = collect(PlanService::getPlans($currency))->map(fn ($limits, $key) => [
+            'key' => $key,
+            'name' => $limits['name'],
+            'price' => $this->minorToMajor((int) ($limits['price_monthly'] ?? $limits['price'] ?? 0), $limits['currency'] ?? null),
+            'price_monthly' => $this->minorToMajor((int) ($limits['price_monthly'] ?? $limits['price'] ?? 0), $limits['currency'] ?? null),
+            'price_yearly' => $this->minorToMajor((int) ($limits['price_yearly'] ?? 0), $limits['currency'] ?? null),
+            'currency' => $limits['currency'] ?? PlanService::resolveCurrency(),
             'landing_pages' => ($limits['landing_pages'] ?? PHP_INT_MAX) >= PHP_INT_MAX ? null : $limits['landing_pages'],
-            'ai_per_month'  => ($limits['ai_per_month'] ?? PHP_INT_MAX) >= PHP_INT_MAX ? null : $limits['ai_per_month'],
+            'ai_per_month' => ($limits['ai_per_month'] ?? PHP_INT_MAX) >= PHP_INT_MAX ? null : $limits['ai_per_month'],
         ])->values()->all();
 
         return Inertia::render('Portal/Billing/Index', [
-            'client'   => $client?->only('id', 'company_name'),
+            'client' => $client?->only('id', 'company_name'),
             'business' => [
-                'id'              => $business->id,
-                'name'            => $business->name,
-                'plan'            => $business->plan,
-                'trial_ends_at'   => $business->trial_ends_at?->toIso8601String(),
+                'id' => $business->id,
+                'name' => $business->name,
+                'plan' => $business->plan,
+                'trial_ends_at' => $business->trial_ends_at?->toIso8601String(),
                 'trial_remaining' => $this->planService->getTrialDaysRemaining($business),
-                'on_trial'        => $this->planService->isOnTrial($business),
-                'effective_plan'  => $this->planService->getEffectivePlan($business),
-                'has_stripe'      => (bool) $business->stripe_customer_id,
+                'on_trial' => $this->planService->isOnTrial($business),
+                'effective_plan' => $this->planService->getEffectivePlan($business),
+                'has_stripe' => (bool) $business->stripe_customer_id,
             ],
-            'plans'                => $plans,
-            'ai_used'              => $this->planService->getCurrentMonthAiCount($business),
-            'ai_limit'             => $this->planService->getAiGenerationLimit($business),
-            'ai_remaining'         => $this->planService->getRemainingAiGenerations($business),
-            'lp_count'             => $this->planService->getCurrentLandingPageCount($business),
-            'lp_limit'             => $this->planService->getLandingPageLimit($business),
-            'can_create_lp'        => $this->planService->canCreateLandingPage($business),
-            'can_use_ai'           => $this->planService->canUseAiGenerator($business),
+            'plans' => $plans,
+            'ai_used' => $this->planService->getCurrentMonthAiCount($business),
+            'ai_limit' => $this->planService->getAiGenerationLimit($business),
+            'ai_remaining' => $this->planService->getRemainingAiGenerations($business),
+            'lp_count' => $this->planService->getCurrentLandingPageCount($business),
+            'lp_limit' => $this->planService->getLandingPageLimit($business),
+            'can_create_lp' => $this->planService->canCreateLandingPage($business),
+            'can_use_ai' => $this->planService->canUseAiGenerator($business),
         ]);
     }
 
@@ -76,14 +82,22 @@ class BillingController extends BasePortalController
             return $this->redirectWithoutWorkspace('Workspace access is required for billing and plan management.');
         }
 
-        $priceId = match ($plan) {
-            'pro'    => config('services.stripe.price_pro_monthly'),
-            'agency' => config('services.stripe.price_agency_monthly'),
-            default  => null,
-        };
+        $validated = $request->validate([
+            'interval' => ['nullable', 'in:monthly,yearly'],
+        ]);
+
+        $interval = $validated['interval'] ?? PlanPrice::INTERVAL_MONTHLY;
+        $currency = $this->resolveRequestCurrency($request);
+        $planPrice = PlanService::getCheckoutPrice($plan, $currency, $interval);
+
+        if (! $planPrice || $planPrice->amount_minor <= 0) {
+            return back()->withErrors(['plan' => 'Invalid plan selected.']);
+        }
+
+        $priceId = PlanService::stripePriceIdFor($planPrice);
 
         if (! $priceId) {
-            return back()->withErrors(['plan' => 'Invalid plan selected.']);
+            return back()->withErrors(['plan' => 'Stripe price is not configured for this plan and currency.']);
         }
 
         try {
@@ -91,26 +105,46 @@ class BillingController extends BasePortalController
 
             $session = StripeSession::create([
                 'payment_method_types' => ['card'],
-                'mode'                 => 'subscription',
-                'customer_email'       => auth()->user()->email,
-                'client_reference_id'  => $business->id,
-                'line_items'           => [[
-                    'price'    => $priceId,
+                'mode' => 'subscription',
+                'customer_email' => auth()->user()->email,
+                'client_reference_id' => $business->id,
+                'line_items' => [[
+                    'price' => $priceId,
                     'quantity' => 1,
                 ]],
                 'metadata' => [
                     'business_id' => $business->id,
-                    'plan'        => $plan,
+                    'plan' => $plan,
+                    'plan_price_id' => $planPrice->id,
+                    'currency' => $planPrice->currency,
+                    'interval' => $planPrice->interval,
                 ],
-                'success_url' => route('portal.billing.success') . '?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url'  => route('portal.billing'),
+                'success_url' => route('portal.billing.success').'?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('portal.billing'),
             ]);
 
             return redirect($session->url);
         } catch (ApiErrorException $e) {
-            Log::error('Stripe Checkout error: ' . $e->getMessage(), ['business_id' => $business->id]);
+            Log::error('Stripe Checkout error: '.$e->getMessage(), ['business_id' => $business->id]);
+
             return back()->withErrors(['stripe' => 'Payment provider error. Please try again.']);
         }
+    }
+
+    private function minorToMajor(int $amount, ?string $currency = null): float
+    {
+        $currency = app(CurrencyResolver::class)->normalize($currency);
+        $minorUnit = (int) (app(CurrencyResolver::class)->metadata($currency)['minor_unit'] ?? 100);
+
+        return round($amount / max(1, $minorUnit), 2);
+    }
+
+    private function resolveRequestCurrency(Request $request): string
+    {
+        $supported = array_keys(config('languages', ['en' => 'English']));
+        $locale = session('locale') ?? $request->getPreferredLanguage($supported) ?? app()->getLocale();
+
+        return app(CurrencyResolver::class)->resolve($request, $locale);
     }
 
     /**
@@ -119,7 +153,7 @@ class BillingController extends BasePortalController
      */
     public function success(Request $request): Response|RedirectResponse
     {
-        $client   = $this->clientForUser();
+        $client = $this->clientForUser();
         $business = currentBusiness();
 
         if (! $business) {
@@ -127,7 +161,7 @@ class BillingController extends BasePortalController
         }
 
         return Inertia::render('Portal/Billing/Success', [
-            'client'   => $client?->only('id', 'company_name'),
+            'client' => $client?->only('id', 'company_name'),
             'business' => $business->only('id', 'name', 'plan'),
         ]);
     }
@@ -151,16 +185,16 @@ class BillingController extends BasePortalController
         try {
             Stripe::setApiKey(config('services.stripe.secret'));
 
-            $session = \Stripe\BillingPortal\Session::create([
-                'customer'   => $business->stripe_customer_id,
+            $session = Session::create([
+                'customer' => $business->stripe_customer_id,
                 'return_url' => route('portal.billing'),
             ]);
 
             return redirect($session->url);
         } catch (ApiErrorException $e) {
-            Log::error('Stripe Portal error: ' . $e->getMessage());
+            Log::error('Stripe Portal error: '.$e->getMessage());
+
             return back()->withErrors(['stripe' => 'Could not open billing portal.']);
         }
     }
-
 }

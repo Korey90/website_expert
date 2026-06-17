@@ -12,7 +12,7 @@ class RenewDomainAction
 {
     public function __construct(
         private readonly DomainRegistrarInterface $registrar,
-        private readonly DomainPricingService     $pricing,
+        private readonly DomainPricingService $pricing,
     ) {}
 
     /**
@@ -27,7 +27,7 @@ class RenewDomainAction
 
         if (! $result->success) {
             throw new \RuntimeException(
-                "Renewal failed for {$domain->full_domain}: " . ($result->error ?? 'Unknown error')
+                "Renewal failed for {$domain->full_domain}: ".($result->error ?? 'Unknown error')
             );
         }
 
@@ -41,14 +41,18 @@ class RenewDomainAction
             ->update(['status' => 'completed', 'completed_at' => now()]);
 
         // Create the next renewal record
-        $price = $this->pricing->calculateRetailPrice($domain->tld, $years, 'renew') ?? 0.00;
+        $currency = $this->pricing->resolveCurrency($domain->domainOrder?->currency);
+        $snapshot = $this->pricing->getPriceForTld($domain->tld, $currency);
+        $currency = $snapshot?->currency ?? $currency;
+        $price = $this->pricing->calculateRetailPrice($domain->tld, $years, 'renew', $currency) ?? 0.00;
 
         $nextRenewal = DomainRenewal::create([
-            'domain_id'    => $domain->id,
-            'due_date'     => $newExpiry,
-            'years'        => $years,
-            'status'       => 'pending',
+            'domain_id' => $domain->id,
+            'due_date' => $newExpiry,
+            'years' => $years,
+            'status' => 'pending',
             'retail_price' => $price,
+            'currency' => $currency,
         ]);
 
         DomainEvent::log(
@@ -57,7 +61,7 @@ class RenewDomainAction
             type: 'renewed',
             description: "Domain {$domain->full_domain} renewed for {$years} year(s)",
             payload: [
-                'years'          => $years,
+                'years' => $years,
                 'new_expires_at' => $newExpiry?->toIso8601String(),
             ],
         );

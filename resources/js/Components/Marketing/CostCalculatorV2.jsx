@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import useCurrency from '@/Hooks/useCurrency';
 import { pushEvent } from '@/utils/dataLayer';
 
 /**
@@ -14,9 +15,6 @@ import { pushEvent } from '@/utils/dataLayer';
  * so this component does NOT import usePage() for text purposes.
  */
 
-const fmt = v =>
-    new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0 }).format(v);
-
 function calcEstimate(a, P) {
     if (!P) return null;
     const pt  = P.projectType?.[a.projectType];
@@ -26,7 +24,8 @@ function calcEstimate(a, P) {
     const dl  = P.deadline?.[a.deadline];
     const ho  = P.hosting?.[a.hosting];
     if (!pt || !des || !cms || !seo || !dl || !ho) return null;
-    const pagesAddon = Math.max(0, (a.pages - 5)) * 80;
+    const pagesAddonRate = P.pagesAddon?.additional_page?.cost ?? 80;
+    const pagesAddon = Math.max(0, (a.pages - 5)) * pagesAddonRate;
     const intTotal   = (a.integrations || []).reduce((sum, k) => sum + (P.integrations?.[k]?.cost || 0), 0);
     const base  = (pt.base + pagesAddon) * des.multiplier + cms.cost + intTotal + seo.cost;
     const total = base * dl.multiplier + ho.cost;
@@ -123,6 +122,13 @@ function NavBtns({ onBack, onNext, canNext, nextLabel, backLabel }) {
 
 export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [], pricing = null }) {
     const s = makeS(rawStrings);
+    const { currency, locale, formatCurrency } = useCurrency();
+    const pricingCurrency = pricing?._currency ?? currency;
+    const fmt = useCallback((value, overrideCurrency = pricingCurrency) => formatCurrency(
+        value,
+        overrideCurrency,
+        { minimumFractionDigits: 0, maximumFractionDigits: 0 },
+    ), [formatCurrency, pricingCurrency]);
 
     const TOTAL_STEPS = steps.length || 8;
 
@@ -243,7 +249,9 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
     const toQuoteLabel           = s('to_quote_label',        'to quote');
     const standardPricingLabel   = s('standard_pricing_label','standard pricing');
     const perYearLabel           = s('per_year',              '/year');
+    const perMonthLabel          = s('per_month',             locale === 'pl' ? '/mc' : locale === 'pt' ? '/mês' : '/mo');
     const selfManagedLabel       = s('self_managed',          'self-managed');
+    const pagesAddonCost         = pricing?.pagesAddon?.additional_page?.cost ?? 80;
 
     // Step question / hint helpers
     const sq = (i) => steps[i]?.question ?? '';
@@ -414,7 +422,9 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
                         <span>1</span><span>10</span><span>25</span><span>50+</span>
                     </div>
                     {a.pages > 5 && (
-                        <p className="text-xs text-neutral-500">{s('pages_addon', 'Each page above 5: +£80')}</p>
+                        <p className="text-xs text-neutral-500">
+                            {s('pages_addon_label', 'Each page above 5')}: +{fmt(pagesAddonCost)}
+                        </p>
                     )}
                 </div>
                 <NavBtns onBack={back} onNext={next} canNext nextLabel={nextLabel} backLabel={backLabel} />
@@ -547,7 +557,7 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
                             label={entryLabel(v)}
                             desc={entryDesc(v)}
                             sublabel={v.cost > 0
-                                ? `${fmt(v.cost)}${perYearLabel}`
+                                ? `${fmt(v.monthly > 0 ? v.monthly : v.cost)}${v.monthly > 0 ? perMonthLabel : perYearLabel}`
                                 : selfManagedLabel}
                         />
                     ))}
@@ -606,7 +616,7 @@ export default function CostCalculatorV2({ strings: rawStrings = {}, steps = [],
                                                                    'text-amber-500 dark:text-amber-400'
                                 }`}>
                                     {domainStatus === 'checking'  && ('⏳ ' + s('domain_checking', 'Checking availability…'))}
-                                    {domainStatus === 'available' && ('✅ ' + s('domain_available', 'Available') + (domainPrice ? ` — £${domainPrice}/yr` : ''))}
+                                    {domainStatus === 'available' && ('✅ ' + s('domain_available', 'Available') + (domainPrice ? ` — ${fmt(domainPrice)}${perYearLabel}` : ''))}
                                     {domainStatus === 'taken'     && ('❌ ' + s('domain_taken', 'Not available — try a different name or extension'))}
                                     {domainStatus === 'error'     && ('⚠️ ' + s('domain_check_error', 'Could not check availability'))}
                                 </p>

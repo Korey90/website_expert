@@ -3,62 +3,74 @@
 namespace App\Filament\Pages;
 
 use App\Models\Lead;
-use Filament\Pages\Page;
+use App\Services\Currency\CurrencySummaryFormatter;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class ConversionReportPage extends BasePage
 {
     protected string $view = 'filament.pages.conversion-report';
 
-    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-funnel';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Reports';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-funnel';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Reports';
+
     protected static ?string $navigationLabel = 'Conversion Report';
-    protected static ?int    $navigationSort  = 1;
-    protected static ?string $title           = 'Lead Conversion Report';
-    protected static ?string $slug            = 'conversion-report';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $title = 'Lead Conversion Report';
+
+    protected static ?string $slug = 'conversion-report';
 
     /** @return Collection<int, object> */
     public function getRows(): Collection
     {
-        $rows = Lead::withTrashed()
-            ->select([
-                DB::raw("COALESCE(NULLIF(source, ''), 'unknown') as source"),
-                DB::raw('COUNT(*) as total_leads'),
-                DB::raw('SUM(CASE WHEN won_at IS NOT NULL THEN 1 ELSE 0 END) as converted'),
-                DB::raw('SUM(CASE WHEN lost_at IS NOT NULL THEN 1 ELSE 0 END) as lost'),
-                DB::raw('SUM(CASE WHEN won_at IS NULL AND lost_at IS NULL THEN 1 ELSE 0 END) as in_progress'),
-                DB::raw('SUM(CASE WHEN won_at IS NOT NULL THEN COALESCE(value, 0) ELSE 0 END) as won_value'),
-            ])
-            ->groupByRaw("COALESCE(NULLIF(source, ''), 'unknown')")
-            ->orderByDesc('total_leads')
-            ->get();
+        $money = app(CurrencySummaryFormatter::class);
 
-        return $rows->map(function ($row) {
-            $row->conversion_rate = $row->total_leads > 0
-                ? round(($row->converted / $row->total_leads) * 100, 1)
-                : 0;
+        return Lead::withTrashed()
+            ->get(['source', 'won_at', 'lost_at', 'value', 'currency'])
+            ->groupBy(fn (Lead $lead): string => $this->sourceKey($lead))
+            ->map(function (Collection $leads, string $source) use ($money): object {
+                $converted = $leads->whereNotNull('won_at')->count();
+                $wonValue = $money->sumByCurrency($leads->whereNotNull('won_at'), 'value');
 
-            return $row;
-        });
+                return (object) [
+                    'source' => $source,
+                    'total_leads' => $leads->count(),
+                    'converted' => $converted,
+                    'lost' => $leads->whereNotNull('lost_at')->count(),
+                    'in_progress' => $leads->filter(fn (Lead $lead): bool => $lead->won_at === null && $lead->lost_at === null)->count(),
+                    'conversion_rate' => $leads->count() > 0 ? round(($converted / $leads->count()) * 100, 1) : 0,
+                    'won_value' => $wonValue->all(),
+                    'won_value_formatted' => $money->formatGrouped($wonValue),
+                ];
+            })
+            ->sortByDesc('total_leads')
+            ->values();
     }
 
     public function getTotals(): object
     {
-        $totals = Lead::withTrashed()
-            ->select([
-                DB::raw('COUNT(*) as total_leads'),
-                DB::raw('SUM(CASE WHEN won_at IS NOT NULL THEN 1 ELSE 0 END) as converted'),
-                DB::raw('SUM(CASE WHEN lost_at IS NOT NULL THEN 1 ELSE 0 END) as lost'),
-                DB::raw('SUM(CASE WHEN won_at IS NULL AND lost_at IS NULL THEN 1 ELSE 0 END) as in_progress'),
-                DB::raw('SUM(CASE WHEN won_at IS NOT NULL THEN COALESCE(value, 0) ELSE 0 END) as won_value'),
-            ])
-            ->first();
+        $money = app(CurrencySummaryFormatter::class);
+        $leads = Lead::withTrashed()->get(['won_at', 'lost_at', 'value', 'currency']);
+        $converted = $leads->whereNotNull('won_at')->count();
+        $wonValue = $money->sumByCurrency($leads->whereNotNull('won_at'), 'value');
 
-        $totals->conversion_rate = $totals->total_leads > 0
-            ? round(($totals->converted / $totals->total_leads) * 100, 1)
-            : 0;
+        return (object) [
+            'total_leads' => $leads->count(),
+            'converted' => $converted,
+            'lost' => $leads->whereNotNull('lost_at')->count(),
+            'in_progress' => $leads->filter(fn (Lead $lead): bool => $lead->won_at === null && $lead->lost_at === null)->count(),
+            'conversion_rate' => $leads->count() > 0 ? round(($converted / $leads->count()) * 100, 1) : 0,
+            'won_value' => $wonValue->all(),
+            'won_value_formatted' => $money->formatGrouped($wonValue),
+        ];
+    }
 
-        return $totals;
+    private function sourceKey(Lead $lead): string
+    {
+        $source = trim((string) $lead->source);
+
+        return $source !== '' ? $source : 'unknown';
     }
 }

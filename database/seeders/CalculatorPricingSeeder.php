@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\CalculatorPricing;
+use App\Services\Currency\CurrencyPriceCalculator;
 use Illuminate\Database\Seeder;
 
 class CalculatorPricingSeeder extends Seeder
@@ -19,6 +20,9 @@ class CalculatorPricingSeeder extends Seeder
             ['category' => 'project_type', 'key' => 'ecommerce', 'icon' => '🛒', 'label' => 'E-Commerce Store',    'label_pl' => 'Sklep e-commerce',         'label_pt' => 'Loja E-Commerce',      'description' => 'Products, cart, online payments and order management panel',             'desc_pl' => 'Produkty, koszyk, płatności online i panel zarządzania zamówieniami',      'desc_pt' => 'Produtos, carrinho, pagamentos online e painel de gestão de pedidos',      'base_cost' => 3000.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 3, 'is_active' => true],
             ['category' => 'project_type', 'key' => 'aplikacja', 'icon' => '⚙️', 'label' => 'Web Application',     'label_pl' => 'Aplikacja webowa',         'label_pt' => 'Aplicação Web',        'description' => 'Complex platform with business logic, user roles and API',               'desc_pl' => 'Złożona platforma z logiką biznesową, rolami użytkowników i API',          'desc_pt' => 'Plataforma complexa com lógica de negócio, funções de utilizador e API',   'base_cost' => 7500.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 4, 'is_active' => true],
             ['category' => 'project_type', 'key' => 'blog',      'icon' => '📰', 'label' => 'Blog / Portal',       'label_pl' => 'Blog / Portal',            'label_pt' => 'Blog / Portal',        'description' => 'Articles, categories, comments and SEO-friendly URLs',                   'desc_pl' => 'Artykuły, kategorie, komentarze i SEO-friendly URL-e',                    'desc_pt' => 'Artigos, categorias, comentários e URLs amigáveis para SEO',               'base_cost' => 2500.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 5, 'is_active' => true],
+
+            // pages_addon
+            ['category' => 'pages_addon', 'key' => 'additional_page', 'icon' => '+', 'label' => 'Additional Page', 'label_pl' => 'Dodatkowa strona', 'label_pt' => 'Página Adicional', 'description' => 'Cost for each page above the first five pages', 'desc_pl' => 'Koszt każdej strony powyżej pierwszych pięciu podstron', 'desc_pt' => 'Custo por cada página acima das primeiras cinco páginas', 'base_cost' => 80.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 1, 'is_active' => true],
 
             // design
             ['category' => 'design', 'key' => 'template', 'icon' => '📋', 'label' => 'Ready-made Template', 'label_pl' => 'Gotowy szablon',       'label_pt' => 'Template Pronto',       'description' => 'A proven layout — faster delivery at a lower price',              'desc_pl' => 'Sprawdzony układ graficzny – szybka realizacja w niższej cenie',   'desc_pt' => 'Layout comprovado — entrega mais rápida a preço mais baixo',        'base_cost' => 0.00, 'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 1, 'is_active' => true],
@@ -49,12 +53,29 @@ class CalculatorPricingSeeder extends Seeder
 
             // hosting
             ['category' => 'hosting', 'key' => 'none',  'icon' => '🏠',  'label' => 'Own Hosting',           'label_pl' => 'Własny hosting',         'label_pt' => 'Alojamento Próprio',    'description' => 'You already have a server or use a cloud provider (AWS, GCP, etc.)', 'desc_pl' => 'Masz już własny serwer lub korzystasz z dostawcy chmury (AWS, GCP itp.)', 'desc_pt' => 'Já tem servidor ou usa fornecedor de cloud (AWS, GCP, etc.)',             'base_cost' => 0.00,  'multiplier' => 1.000, 'monthly_cost' => 0.00, 'currency' => 'GBP', 'sort_order' => 1, 'is_active' => true],
-            ['category' => 'hosting', 'key' => 'basic', 'icon' => '💾',  'label' => 'Hosting Basic (£4/mo)', 'label_pl' => 'Hosting Basic (£4/mo.)', 'label_pt' => 'Hosting Basic (£4/mês)', 'description' => 'SSD, PHP 8.x, SSL certificate, 10 GB space — for small/medium sites',  'desc_pl' => 'SSD, PHP 8.x, certyfikat SSL, 10 GB przestrzeni – dla małych i średnich stron', 'desc_pt' => 'SSD, PHP 8.x, certificado SSL, 10 GB de espaço — para sites pequenos e médios', 'base_cost' => 48.00, 'multiplier' => 1.000, 'monthly_cost' => 4.00, 'currency' => 'GBP', 'sort_order' => 2, 'is_active' => true],
-            ['category' => 'hosting', 'key' => 'pro',   'icon' => '🖥️', 'label' => 'Hosting Pro (£8/mo)',   'label_pl' => 'Hosting Pro (£8/mo.)',   'label_pt' => 'Hosting Pro (£8/mês)',  'description' => 'Powerful VPS with daily backup, uptime monitoring and dedicated IP',    'desc_pl' => 'Wydajny VPS z codziennym backupem, monitoringiem uptime i dedykowanym IP', 'desc_pt' => 'VPS potente com backup diário, monitorização de uptime e IP dedicado',    'base_cost' => 96.00, 'multiplier' => 1.000, 'monthly_cost' => 8.00, 'currency' => 'GBP', 'sort_order' => 3, 'is_active' => true],
+            ['category' => 'hosting', 'key' => 'basic', 'icon' => '💾',  'label' => 'Hosting Basic', 'label_pl' => 'Hosting Basic', 'label_pt' => 'Hosting Basic', 'description' => 'SSD, PHP 8.x, SSL certificate, 10 GB space — for small/medium sites',  'desc_pl' => 'SSD, PHP 8.x, certyfikat SSL, 10 GB przestrzeni – dla małych i średnich stron', 'desc_pt' => 'SSD, PHP 8.x, certificado SSL, 10 GB de espaço — para sites pequenos e médios', 'base_cost' => 48.00, 'multiplier' => 1.000, 'monthly_cost' => 4.00, 'currency' => 'GBP', 'sort_order' => 2, 'is_active' => true],
+            ['category' => 'hosting', 'key' => 'pro',   'icon' => '🖥️', 'label' => 'Hosting Pro',   'label_pl' => 'Hosting Pro',   'label_pt' => 'Hosting Pro',  'description' => 'Powerful VPS with daily backup, uptime monitoring and dedicated IP',    'desc_pl' => 'Wydajny VPS z codziennym backupem, monitoringiem uptime i dedykowanym IP', 'desc_pt' => 'VPS potente com backup diário, monitorização de uptime e IP dedicado',    'base_cost' => 96.00, 'multiplier' => 1.000, 'monthly_cost' => 8.00, 'currency' => 'GBP', 'sort_order' => 3, 'is_active' => true],
+        ];
+
+        $calculator = app(CurrencyPriceCalculator::class);
+        $rates = [
+            'GBP' => 1.00,
+            'EUR' => 1.18,
+            'PLN' => 4.93,
         ];
 
         foreach ($items as $data) {
-            CalculatorPricing::create($data);
+            foreach ($rates as $currency => $rate) {
+                $row = $data;
+                $row['currency'] = $currency;
+
+                if ($currency !== 'GBP') {
+                    $row['base_cost'] = $calculator->convertFromBase((float) $data['base_cost'], $rate);
+                    $row['monthly_cost'] = $calculator->convertFromBase((float) $data['monthly_cost'], $rate);
+                }
+
+                CalculatorPricing::create($row);
+            }
         }
     }
 }

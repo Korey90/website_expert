@@ -8,7 +8,9 @@ use App\Actions\Domain\GenerateDomainInvoiceAction;
 use App\Actions\Domain\ProcessDomainPaymentAction;
 use App\Actions\Domain\RegisterDomainAction;
 use App\Data\Domain\DomainRegistrationResult;
+use App\Http\Controllers\StripeWebhookController;
 use App\Jobs\RegisterDomainJob;
+use App\Models\Business;
 use App\Models\Client;
 use App\Models\DomainOrder;
 use App\Models\DomainPriceList;
@@ -21,6 +23,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Mockery;
+use Stripe\Checkout\Session;
 use Tests\TestCase;
 
 /**
@@ -36,37 +39,49 @@ class DomainPurchaseFlowTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User   $admin;
+    private User $admin;
+
     private string $businessId;
 
     protected function setUp(): void
     {
         parent::setUp();
+        app()->setLocale('en');
         $this->artisan('db:seed', ['--class' => 'AdminSeeder']);
 
-        $this->admin      = User::where('email', '20noname22x@gmail.com')->firstOrFail();
-        $this->businessId = \App\Models\Business::where('is_active', true)->first()->id;
+        $this->admin = User::where('email', '20noname22x@gmail.com')->firstOrFail();
+        $this->businessId = Business::where('is_active', true)->first()->id;
 
         DomainPriceList::insert([
             [
-                'tld'            => '.com',
+                'tld' => '.com',
                 'register_price' => 10.00,
-                'renew_price'    => 12.00,
+                'renew_price' => 12.00,
                 'transfer_price' => 10.00,
-                'currency'       => 'GBP',
-                'is_active'      => true,
-                'created_at'     => now(),
-                'updated_at'     => now(),
+                'currency' => 'GBP',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'tld'            => '.co.uk',
+                'tld' => '.com',
+                'register_price' => 50.00,
+                'renew_price' => 60.00,
+                'transfer_price' => 50.00,
+                'currency' => 'PLN',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'tld' => '.co.uk',
                 'register_price' => 8.00,
-                'renew_price'    => 9.00,
+                'renew_price' => 9.00,
                 'transfer_price' => null,
-                'currency'       => 'GBP',
-                'is_active'      => true,
-                'created_at'     => now(),
-                'updated_at'     => now(),
+                'currency' => 'GBP',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
         ]);
     }
@@ -82,34 +97,34 @@ class DomainPurchaseFlowTest extends TestCase
     private function orderData(array $overrides = []): array
     {
         return array_merge([
-            'domain_name'   => 'testdomain',
-            'tld'           => '.com',
-            'action'        => 'register',
-            'years'         => 1,
-            'first_name'    => 'Jan',
-            'last_name'     => 'Kowalski',
-            'email'         => 'jan.kowalski@test.example',
-            'phone'         => '+44 7700 900123',
+            'domain_name' => 'testdomain',
+            'tld' => '.com',
+            'action' => 'register',
+            'years' => 1,
+            'first_name' => 'Jan',
+            'last_name' => 'Kowalski',
+            'email' => 'jan.kowalski@test.example',
+            'phone' => '+44 7700 900123',
             'address_line1' => '123 Test Street',
-            'city'          => 'London',
-            'postcode'      => 'SW1A 1AA',
-            'country_code'  => 'GB',
+            'city' => 'London',
+            'postcode' => 'SW1A 1AA',
+            'country_code' => 'GB',
         ], $overrides);
     }
 
     private function paidOrder(string $domain = 'testpaid', string $tld = '.com'): DomainOrder
     {
         return DomainOrder::create([
-            'business_id'  => $this->businessId,
-            'created_by'   => $this->admin->id,
-            'domain_name'  => $domain,
-            'tld'          => $tld,
-            'full_domain'  => $domain . $tld,
-            'years'        => 1,
-            'action'       => 'register',
-            'status'       => 'paid',
+            'business_id' => $this->businessId,
+            'created_by' => $this->admin->id,
+            'domain_name' => $domain,
+            'tld' => $tld,
+            'full_domain' => $domain.$tld,
+            'years' => 1,
+            'action' => 'register',
+            'status' => 'paid',
             'retail_price' => 10.00,
-            'currency'     => 'GBP',
+            'currency' => 'GBP',
         ]);
     }
 
@@ -124,10 +139,10 @@ class DomainPurchaseFlowTest extends TestCase
         $this->assertSame('pending_payment', $order->status);
         $this->assertDatabaseHas('domain_orders', [
             'domain_name' => 'testdomain',
-            'tld'         => '.com',
+            'tld' => '.com',
             'full_domain' => 'testdomain.com',
-            'status'      => 'pending_payment',
-            'years'       => 1,
+            'status' => 'pending_payment',
+            'years' => 1,
         ]);
     }
 
@@ -139,11 +154,11 @@ class DomainPurchaseFlowTest extends TestCase
 
         $this->assertDatabaseHas('domain_contacts', [
             'domain_order_id' => $order->id,
-            'type'            => 'registrant',
-            'first_name'      => 'Jan',
-            'last_name'       => 'Kowalski',
-            'email'           => 'jan.kowalski@test.example',
-            'country_code'    => 'GB',
+            'type' => 'registrant',
+            'first_name' => 'Jan',
+            'last_name' => 'Kowalski',
+            'email' => 'jan.kowalski@test.example',
+            'country_code' => 'GB',
         ]);
     }
 
@@ -157,6 +172,20 @@ class DomainPurchaseFlowTest extends TestCase
         );
 
         $this->assertSame('20.00', $order->retail_price);
+    }
+
+    public function test_create_order_uses_locale_currency_when_domain_price_exists(): void
+    {
+        app()->setLocale('pl');
+        $this->actingAs($this->admin);
+
+        $order = app(CreateDomainOrderAction::class)->execute(
+            $this->orderData(['tld' => '.com', 'years' => 2]),
+            null
+        );
+
+        $this->assertSame('PLN', $order->currency);
+        $this->assertSame('100.00', $order->retail_price);
     }
 
     public function test_create_order_calculates_multi_year_co_uk_price(): void
@@ -180,7 +209,7 @@ class DomainPurchaseFlowTest extends TestCase
 
         $this->assertDatabaseHas('domain_events', [
             'domain_order_id' => $order->id,
-            'type'            => 'order_created',
+            'type' => 'order_created',
         ]);
     }
 
@@ -234,13 +263,13 @@ class DomainPurchaseFlowTest extends TestCase
     {
         $this->actingAs($this->admin);
 
-        $order     = app(CreateDomainOrderAction::class)->execute($this->orderData(), null);
+        $order = app(CreateDomainOrderAction::class)->execute($this->orderData(), null);
         $cancelled = app(CancelDomainOrderAction::class)->execute($order, 'Customer request');
 
         $this->assertSame('cancelled', $cancelled->status);
         $this->assertDatabaseHas('domain_events', [
             'domain_order_id' => $order->id,
-            'type'            => 'order_cancelled',
+            'type' => 'order_cancelled',
         ]);
     }
 
@@ -248,7 +277,7 @@ class DomainPurchaseFlowTest extends TestCase
     {
         $this->actingAs($this->admin);
 
-        $order     = $this->paidOrder('cancelpaid');
+        $order = $this->paidOrder('cancelpaid');
         $cancelled = app(CancelDomainOrderAction::class)->execute($order, 'Admin cancellation');
 
         $this->assertSame('cancelled', $cancelled->status);
@@ -259,16 +288,16 @@ class DomainPurchaseFlowTest extends TestCase
         $this->actingAs($this->admin);
 
         $order = DomainOrder::create([
-            'business_id'  => $this->businessId,
-            'created_by'   => $this->admin->id,
-            'domain_name'  => 'completed',
-            'tld'          => '.com',
-            'full_domain'  => 'completed.com',
-            'years'        => 1,
-            'action'       => 'register',
-            'status'       => 'completed',
+            'business_id' => $this->businessId,
+            'created_by' => $this->admin->id,
+            'domain_name' => 'completed',
+            'tld' => '.com',
+            'full_domain' => 'completed.com',
+            'years' => 1,
+            'action' => 'register',
+            'status' => 'completed',
             'retail_price' => 10.00,
-            'currency'     => 'GBP',
+            'currency' => 'GBP',
         ]);
 
         $this->expectException(\InvalidArgumentException::class);
@@ -281,16 +310,16 @@ class DomainPurchaseFlowTest extends TestCase
         $this->actingAs($this->admin);
 
         $order = DomainOrder::create([
-            'business_id'  => $this->businessId,
-            'created_by'   => $this->admin->id,
-            'domain_name'  => 'registering',
-            'tld'          => '.com',
-            'full_domain'  => 'registering.com',
-            'years'        => 1,
-            'action'       => 'register',
-            'status'       => 'registering',
+            'business_id' => $this->businessId,
+            'created_by' => $this->admin->id,
+            'domain_name' => 'registering',
+            'tld' => '.com',
+            'full_domain' => 'registering.com',
+            'years' => 1,
+            'action' => 'register',
+            'status' => 'registering',
             'retail_price' => 10.00,
-            'currency'     => 'GBP',
+            'currency' => 'GBP',
         ]);
 
         $this->expectException(\InvalidArgumentException::class);
@@ -306,7 +335,7 @@ class DomainPurchaseFlowTest extends TestCase
         $this->actingAs($this->admin);
 
         $order = app(CreateDomainOrderAction::class)->execute($this->orderData(), null);
-        $paid  = app(DomainOrderService::class)->markAsPaid($order, 'pi_test_1234');
+        $paid = app(DomainOrderService::class)->markAsPaid($order, 'pi_test_1234');
 
         $this->assertSame('paid', $paid->status);
         $this->assertSame('pi_test_1234', $paid->stripe_payment_intent_id);
@@ -336,9 +365,9 @@ class DomainPurchaseFlowTest extends TestCase
         $mockRegistrar = Mockery::mock(DomainRegistrarInterface::class);
         $mockRegistrar->shouldReceive('register')->once()->andReturn(
             DomainRegistrationResult::success(
-                providerId:   '9876543',
+                providerId: '9876543',
                 registeredAt: now(),
-                expiresAt:    now()->addYear(),
+                expiresAt: now()->addYear(),
             )
         );
         $this->app->instance(DomainRegistrarInterface::class, $mockRegistrar);
@@ -351,11 +380,11 @@ class DomainPurchaseFlowTest extends TestCase
 
         $this->assertDatabaseHas('domain_orders', ['id' => $order->id, 'status' => 'completed']);
         $this->assertDatabaseHas('domains', [
-            'full_domain'        => 'testdomain.com',
-            'status'             => 'active',
+            'full_domain' => 'testdomain.com',
+            'status' => 'active',
             'provider_domain_id' => '9876543',
         ]);
-        $this->assertDatabaseHas('domain_renewals', ['status' => 'pending']);
+        $this->assertDatabaseHas('domain_renewals', ['status' => 'pending', 'currency' => 'GBP']);
         $this->assertDatabaseHas('domain_events', ['domain_order_id' => $order->id, 'type' => 'registered']);
     }
 
@@ -415,37 +444,37 @@ class DomainPurchaseFlowTest extends TestCase
 
         // Invoice requires a client — create one for this test
         $client = Client::create([
-            'business_id'           => $this->businessId,
-            'company_name'          => 'Webhook Test Ltd',
+            'business_id' => $this->businessId,
+            'company_name' => 'Webhook Test Ltd',
             'primary_contact_email' => 'webhook@test.example',
         ]);
 
-        $order   = app(CreateDomainOrderAction::class)->execute($this->orderData(), $client);
+        $order = app(CreateDomainOrderAction::class)->execute($this->orderData(), $client);
         $invoice = app(GenerateDomainInvoiceAction::class)->execute($order);
 
         $this->assertSame('draft', $invoice->status);
 
         // Build a fake Stripe Checkout Session object directly (no HTTP, no signature)
         $sessionData = [
-            'id'             => 'cs_test_123',
-            'object'         => 'checkout.session',
+            'id' => 'cs_test_123',
+            'object' => 'checkout.session',
             'payment_intent' => 'pi_test_webhook_123',
-            'amount_total'   => (int) round($order->retail_price * 1.2 * 100),
-            'currency'       => 'gbp',
+            'amount_total' => (int) round($order->retail_price * 1.2 * 100),
+            'currency' => 'gbp',
             'payment_status' => 'paid',
-            'metadata'       => ['domain_order_id' => (string) $order->id],
+            'metadata' => ['domain_order_id' => (string) $order->id],
         ];
-        $session = \Stripe\Checkout\Session::constructFrom($sessionData);
+        $session = Session::constructFrom($sessionData);
 
         // Call the private handler directly — bypasses HTTP routing and signature verification
-        $controller = app(\App\Http\Controllers\StripeWebhookController::class);
-        $reflection  = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
+        $controller = app(StripeWebhookController::class);
+        $reflection = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
         $reflection->setAccessible(true);
         $reflection->invoke($controller, $session);
 
         // Order should be paid
         $this->assertDatabaseHas('domain_orders', [
-            'id'     => $order->id,
+            'id' => $order->id,
             'status' => 'paid',
         ]);
 
@@ -456,8 +485,8 @@ class DomainPurchaseFlowTest extends TestCase
 
         // Payment record should exist
         $this->assertDatabaseHas('payments', [
-            'invoice_id'               => $invoice->id,
-            'status'                   => 'completed',
+            'invoice_id' => $invoice->id,
+            'status' => 'completed',
             'stripe_payment_intent_id' => 'pi_test_webhook_123',
         ]);
     }

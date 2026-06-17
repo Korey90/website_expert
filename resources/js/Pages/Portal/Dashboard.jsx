@@ -1,4 +1,5 @@
 import PortalLayout from '@/Layouts/PortalLayout';
+import useCurrency from '@/Hooks/useCurrency';
 import usePortalTrans from '@/Hooks/usePortalTrans';
 import { Link, usePage } from '@inertiajs/react';
 
@@ -76,6 +77,7 @@ function TimelineItem({ item }) {
 
 export default function Dashboard({ client, projects, invoices, quotes, timeline = [], domains = [], domainsExpiringCount = 0 }) {
     const t = usePortalTrans();
+    const { formatCurrency } = useCurrency();
     const { flash = {} } = usePage().props;
 
     const pendingInvoices = invoices.filter(i => ['sent', 'overdue'].includes(i.status));
@@ -280,7 +282,7 @@ export default function Dashboard({ client, projects, invoices, quotes, timeline
                                             <td className="px-5 py-3 text-sm font-medium text-gray-900">{inv.number}</td>
                                             <td className="px-5 py-3"><StatusBadge status={inv.status} /></td>
                                             <td className="px-5 py-3 text-sm text-gray-900">
-                                                £{parseFloat(inv.amount_due).toFixed(2)}
+                                                {formatCurrency(inv.amount_due, inv.currency)}
                                             </td>
                                             <td className="px-5 py-3 text-sm text-gray-600">{inv.due_date ?? '—'}</td>
                                         </tr>

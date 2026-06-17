@@ -8,8 +8,13 @@ use App\Models\ServicePage;
 use App\Models\ServicePageBlock;
 use App\Services\ServicePage\ServicePageTranslationService;
 use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -19,20 +24,22 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 
 class ServicePageResource extends BaseResource
 {
     protected static ?string $model = ServicePage::class;
-    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-paint-brush';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Marketing';
+
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-paint-brush';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
+
     protected static ?string $navigationLabel = 'Service Pages';
-    protected static ?string $label           = 'Service Page';
-    protected static ?string $pluralLabel     = 'Service Pages';
-    protected static ?int    $navigationSort  = 5;
+
+    protected static ?string $label = 'Service Page';
+
+    protected static ?string $pluralLabel = 'Service Pages';
+
+    protected static ?int $navigationSort = 5;
 
     // -------------------------------------------------------------------------
     // Form
@@ -92,26 +99,28 @@ class ServicePageResource extends BaseResource
                                         ->modalSubmitActionLabel('Generate')
                                         ->action(function (Get $get, Set $set): void {
                                             $source = [
-                                                'title'            => $get('title.pl') ?? '',
-                                                'meta_title'       => $get('meta_title.pl') ?? '',
+                                                'title' => $get('title.pl') ?? '',
+                                                'meta_title' => $get('meta_title.pl') ?? '',
                                                 'meta_description' => $get('meta_description.pl') ?? '',
-                                                'nav_label'        => $get('nav_label.pl') ?? '',
+                                                'nav_label' => $get('nav_label.pl') ?? '',
                                             ];
                                             if (empty(array_filter($source))) {
                                                 Notification::make()->title('Brak treści PL')->body('Uzupełnij pola w zakładce Polski przed tłumaczeniem.')->warning()->send();
+
                                                 return;
                                             }
                                             try {
                                                 $translations = app(ServicePageTranslationService::class)->translatePage($source);
                                             } catch (LandingPageGenerationException $e) {
                                                 Notification::make()->title('Translation failed')->body($e->getMessage())->danger()->send();
+
                                                 return;
                                             }
                                             foreach (['en', 'pt'] as $locale) {
-                                                $set("title.{$locale}",            $translations[$locale]['title']);
-                                                $set("meta_title.{$locale}",       $translations[$locale]['meta_title']);
+                                                $set("title.{$locale}", $translations[$locale]['title']);
+                                                $set("meta_title.{$locale}", $translations[$locale]['meta_title']);
                                                 $set("meta_description.{$locale}", $translations[$locale]['meta_description']);
-                                                $set("nav_label.{$locale}",        $translations[$locale]['nav_label']);
+                                                $set("nav_label.{$locale}", $translations[$locale]['nav_label']);
                                             }
                                             Notification::make()->title('Translations generated')->body('EN and PT fields updated. Save to persist.')->success()->send();
                                         })
@@ -160,10 +169,9 @@ class ServicePageResource extends BaseResource
                                 ->collapsible()
                                 ->cloneable()
                                 ->dehydrated(false)
-                                ->itemLabel(fn (array $state): string =>
-                                    (ServicePageBlock::TYPES[$state['type'] ?? ''] ?? 'Block')
-                                    . (isset($state['content']['heading_en']) && $state['content']['heading_en']
-                                        ? ' — ' . str($state['content']['heading_en'])->limit(40)
+                                ->itemLabel(fn (array $state): string => (ServicePageBlock::TYPES[$state['type'] ?? ''] ?? 'Block')
+                                    .(isset($state['content']['heading_en']) && $state['content']['heading_en']
+                                        ? ' — '.str($state['content']['heading_en'])->limit(40)
                                         : '')
                                 )
                                 ->schema([
@@ -199,8 +207,8 @@ class ServicePageResource extends BaseResource
                                                 ->label('Background')
                                                 ->options([
                                                     'white' => 'White',
-                                                    'gray'  => 'Light Gray',
-                                                    'dark'  => 'Dark',
+                                                    'gray' => 'Light Gray',
+                                                    'dark' => 'Dark',
                                                     'brand' => 'Brand Accent',
                                                 ])
                                                 ->default('white'),
@@ -343,6 +351,7 @@ class ServicePageResource extends BaseResource
                                                                     ->body('Uzupełnij pola title lub desc po polsku w kartach przed tłumaczeniem.')
                                                                     ->warning()
                                                                     ->send();
+
                                                                 return;
                                                             }
                                                             try {
@@ -350,6 +359,7 @@ class ServicePageResource extends BaseResource
                                                                     ->translateBlock('features_grid', ['items' => $items]);
                                                             } catch (LandingPageGenerationException $e) {
                                                                 Notification::make()->title('Translation failed')->body($e->getMessage())->danger()->send();
+
                                                                 return;
                                                             }
                                                             $set('content.items', $updated['items'] ?? $items);
@@ -367,8 +377,7 @@ class ServicePageResource extends BaseResource
                                                         ->addActionLabel('Add Card')
                                                         ->defaultItems(0)
                                                         ->collapsible()
-                                                        ->itemLabel(fn (array $state): string =>
-                                                            $state['title_en'] ?? $state['title_pl'] ?? $state['title_pt'] ?? 'Card'
+                                                        ->itemLabel(fn (array $state): string => $state['title_en'] ?? $state['title_pl'] ?? $state['title_pt'] ?? 'Card'
                                                         )
                                                         ->extraAttributes(fn ($component) => ['data-path' => $component->getStatePath()])
                                                         ->schema([
@@ -461,7 +470,10 @@ class ServicePageResource extends BaseResource
                                                             $hasPolish = false;
                                                             foreach ($packages as $pkg) {
                                                                 foreach (['badge_pl', 'name_pl', 'desc_pl', 'features_pl', 'cta_label_pl'] as $f) {
-                                                                    if (! empty($pkg[$f])) { $hasPolish = true; break 2; }
+                                                                    if (! empty($pkg[$f])) {
+                                                                        $hasPolish = true;
+                                                                        break 2;
+                                                                    }
                                                                 }
                                                             }
                                                             if (! $hasPolish) {
@@ -469,6 +481,7 @@ class ServicePageResource extends BaseResource
                                                                     ->title('Brak treści PL')
                                                                     ->body('Uzupełnij pola po polsku w pakietach przed tłumaczeniem.')
                                                                     ->warning()->send();
+
                                                                 return;
                                                             }
                                                             try {
@@ -476,6 +489,7 @@ class ServicePageResource extends BaseResource
                                                                     ->translateBlock('packages', ['packages' => $packages]);
                                                             } catch (LandingPageGenerationException $e) {
                                                                 Notification::make()->title('Translation failed')->body($e->getMessage())->danger()->send();
+
                                                                 return;
                                                             }
                                                             $set('content.packages', $updated['packages'] ?? $packages);
@@ -492,8 +506,7 @@ class ServicePageResource extends BaseResource
                                                         ->addActionLabel('Add Package')
                                                         ->defaultItems(0)
                                                         ->collapsible()
-                                                        ->itemLabel(fn (array $state): string =>
-                                                            $state['name_en'] ?? $state['name_pl'] ?? $state['name_pt'] ?? 'Package'
+                                                        ->itemLabel(fn (array $state): string => $state['name_en'] ?? $state['name_pl'] ?? $state['name_pt'] ?? 'Package'
                                                         )
                                                         ->extraAttributes(fn ($component) => ['data-path' => $component->getStatePath()])
                                                         ->schema([
@@ -510,7 +523,7 @@ class ServicePageResource extends BaseResource
                                                                 Forms\Components\TextInput::make('price')
                                                                     ->label('Price (display string)')
                                                                     ->maxLength(40)
-                                                                    ->placeholder('£799')
+                                                                    ->placeholder('799')
                                                                     ->nullable()
                                                                     ->columnSpan(2),
                                                                 Forms\Components\Select::make('settings.price_size')
@@ -627,10 +640,14 @@ class ServicePageResource extends BaseResource
                                                             $rows = (array) ($get('content.rows') ?? []);
                                                             $hasPolish = false;
                                                             foreach ($rows as $row) {
-                                                                if (! empty($row['label_pl']) || ! empty($row['note_pl'])) { $hasPolish = true; break; }
+                                                                if (! empty($row['label_pl']) || ! empty($row['note_pl'])) {
+                                                                    $hasPolish = true;
+                                                                    break;
+                                                                }
                                                             }
                                                             if (! $hasPolish) {
                                                                 Notification::make()->title('Brak treści PL')->body('Uzupełnij pola po polsku przed tłumaczeniem.')->warning()->send();
+
                                                                 return;
                                                             }
                                                             try {
@@ -638,6 +655,7 @@ class ServicePageResource extends BaseResource
                                                                     ->translateBlock('pricing_table', ['rows' => $rows]);
                                                             } catch (LandingPageGenerationException $e) {
                                                                 Notification::make()->title('Translation failed')->body($e->getMessage())->danger()->send();
+
                                                                 return;
                                                             }
                                                             $set('content.rows', $updated['rows'] ?? $rows);
@@ -651,8 +669,7 @@ class ServicePageResource extends BaseResource
                                                         ->addActionLabel('Add Row')
                                                         ->defaultItems(0)
                                                         ->collapsible()
-                                                        ->itemLabel(fn (array $state): string =>
-                                                            $state['label_en'] ?? $state['label_pl'] ?? $state['label_pt'] ?? 'Row'
+                                                        ->itemLabel(fn (array $state): string => $state['label_en'] ?? $state['label_pl'] ?? $state['label_pt'] ?? 'Row'
                                                         )
                                                         ->extraAttributes(fn ($component) => ['data-path' => $component->getStatePath()])
                                                         ->schema([
@@ -728,10 +745,14 @@ class ServicePageResource extends BaseResource
                                                             $items = (array) ($get('content.items') ?? []);
                                                             $hasPolish = false;
                                                             foreach ($items as $item) {
-                                                                if (! empty($item['q_pl']) || ! empty($item['a_pl'])) { $hasPolish = true; break; }
+                                                                if (! empty($item['q_pl']) || ! empty($item['a_pl'])) {
+                                                                    $hasPolish = true;
+                                                                    break;
+                                                                }
                                                             }
                                                             if (! $hasPolish) {
                                                                 Notification::make()->title('Brak treści PL')->body('Uzupełnij pytania i odpowiedzi po polsku przed tłumaczeniem.')->warning()->send();
+
                                                                 return;
                                                             }
                                                             try {
@@ -739,6 +760,7 @@ class ServicePageResource extends BaseResource
                                                                     ->translateBlock('faq', ['items' => $items]);
                                                             } catch (LandingPageGenerationException $e) {
                                                                 Notification::make()->title('Translation failed')->body($e->getMessage())->danger()->send();
+
                                                                 return;
                                                             }
                                                             $set('content.items', $updated['items'] ?? $items);
@@ -752,8 +774,7 @@ class ServicePageResource extends BaseResource
                                                         ->addActionLabel('Add Question')
                                                         ->defaultItems(0)
                                                         ->collapsible()
-                                                        ->itemLabel(fn (array $state): string =>
-                                                            $state['q_en'] ?? $state['q_pl'] ?? $state['q_pt'] ?? 'Question'
+                                                        ->itemLabel(fn (array $state): string => $state['q_en'] ?? $state['q_pl'] ?? $state['q_pt'] ?? 'Question'
                                                         )
                                                         ->extraAttributes(fn ($component) => ['data-path' => $component->getStatePath()])
                                                         ->schema([
@@ -887,10 +908,14 @@ class ServicePageResource extends BaseResource
                                                             $cols = (array) ($get('content.columns') ?? []);
                                                             $hasPolish = false;
                                                             foreach ($cols as $col) {
-                                                                if (! empty($col['label_pl'])) { $hasPolish = true; break; }
+                                                                if (! empty($col['label_pl'])) {
+                                                                    $hasPolish = true;
+                                                                    break;
+                                                                }
                                                             }
                                                             if (! $hasPolish) {
                                                                 Notification::make()->title('Brak treści PL')->body('Uzupełnij etykiety po polsku przed tłumaczeniem.')->warning()->send();
+
                                                                 return;
                                                             }
                                                             try {
@@ -898,6 +923,7 @@ class ServicePageResource extends BaseResource
                                                                     ->translateBlock('comparison_table', ['columns' => $cols]);
                                                             } catch (LandingPageGenerationException $e) {
                                                                 Notification::make()->title('Translation failed')->body($e->getMessage())->danger()->send();
+
                                                                 return;
                                                             }
                                                             $set('content.columns', $updated['columns'] ?? $cols);
@@ -911,8 +937,7 @@ class ServicePageResource extends BaseResource
                                                         ->addActionLabel('Add Column')
                                                         ->defaultItems(0)
                                                         ->collapsible()
-                                                        ->itemLabel(fn (array $state): string =>
-                                                            $state['label_en'] ?? $state['label_pl'] ?? $state['label_pt'] ?? 'Column'
+                                                        ->itemLabel(fn (array $state): string => $state['label_en'] ?? $state['label_pl'] ?? $state['label_pt'] ?? 'Column'
                                                         )
                                                         ->extraAttributes(fn ($component) => ['data-path' => $component->getStatePath()])
                                                         ->schema([
@@ -971,10 +996,14 @@ class ServicePageResource extends BaseResource
                                                             $rows = (array) ($get('content.rows') ?? []);
                                                             $hasPolish = false;
                                                             foreach ($rows as $row) {
-                                                                if (! empty($row['label_pl'])) { $hasPolish = true; break; }
+                                                                if (! empty($row['label_pl'])) {
+                                                                    $hasPolish = true;
+                                                                    break;
+                                                                }
                                                             }
                                                             if (! $hasPolish) {
                                                                 Notification::make()->title('Brak treści PL')->body('Uzupełnij etykiety po polsku przed tłumaczeniem.')->warning()->send();
+
                                                                 return;
                                                             }
                                                             try {
@@ -982,6 +1011,7 @@ class ServicePageResource extends BaseResource
                                                                     ->translateBlock('comparison_table', ['rows' => $rows]);
                                                             } catch (LandingPageGenerationException $e) {
                                                                 Notification::make()->title('Translation failed')->body($e->getMessage())->danger()->send();
+
                                                                 return;
                                                             }
                                                             $set('content.rows', $updated['rows'] ?? $rows);
@@ -995,8 +1025,7 @@ class ServicePageResource extends BaseResource
                                                         ->addActionLabel('Add Row')
                                                         ->defaultItems(0)
                                                         ->collapsible()
-                                                        ->itemLabel(fn (array $state): string =>
-                                                            $state['label_en'] ?? $state['label_pl'] ?? $state['label_pt'] ?? 'Row'
+                                                        ->itemLabel(fn (array $state): string => $state['label_en'] ?? $state['label_pl'] ?? $state['label_pt'] ?? 'Row'
                                                         )
                                                         ->extraAttributes(fn ($component) => ['data-path' => $component->getStatePath()])
                                                         ->schema([
@@ -1033,11 +1062,10 @@ class ServicePageResource extends BaseResource
      * Wraps a content field in a 5-column grid with inline size / color / align selects.
      * Settings keys: settings.{$key}_size, settings.{$key}_color, settings.{$key}_align
      *
-     * @param  \Filament\Schemas\Components\Component  $field
      * @param  string  $settingsKey  e.g. "heading", "badge", "subheading"
      */
     private static function fieldRow(
-        \Filament\Schemas\Components\Component $field,
+        Component $field,
         string $settingsKey
     ): Grid {
         return Grid::make(6)
@@ -1055,9 +1083,9 @@ class ServicePageResource extends BaseResource
                     ->label('Color')
                     ->options([
                         'neutral' => 'Default',
-                        'brand'   => 'Brand',
-                        'white'   => 'White',
-                        'muted'   => 'Muted',
+                        'brand' => 'Brand',
+                        'white' => 'White',
+                        'muted' => 'Muted',
                     ])
                     ->default('neutral')
                     ->columnSpan(1),
@@ -1092,8 +1120,8 @@ class ServicePageResource extends BaseResource
             ->modalDescription('AI wygeneruje tłumaczenia EN i PT dla wszystkich pól tego bloku na podstawie wartości po polsku (_pl). Istniejące EN/PT zostaną nadpisane.')
             ->modalSubmitActionLabel('Generate')
             ->action(function (Get $get, Set $set): void {
-                $type    = (string) ($get('type') ?? '');
-                $content = (array)  ($get('content') ?? []);
+                $type = (string) ($get('type') ?? '');
+                $content = (array) ($get('content') ?? []);
 
                 // Check we have at least one Polish field
                 $hasPolish = false;
@@ -1109,6 +1137,7 @@ class ServicePageResource extends BaseResource
                         ->body('Uzupełnij pola po polsku (_pl) w tym bloku przed tłumaczeniem.')
                         ->warning()
                         ->send();
+
                     return;
                 }
 
@@ -1116,6 +1145,7 @@ class ServicePageResource extends BaseResource
                     $updated = app(ServicePageTranslationService::class)->translateBlock($type, $content);
                 } catch (LandingPageGenerationException $e) {
                     Notification::make()->title('Translation failed')->body($e->getMessage())->danger()->send();
+
                     return;
                 }
 
@@ -1148,8 +1178,7 @@ class ServicePageResource extends BaseResource
                 Tables\Columns\TextColumn::make('title')
                     ->label('Title (EN)')
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', 'en', false) ?: '—')
-                    ->searchable(query: fn ($query, $search) =>
-                        $query->whereRaw("JSON_EXTRACT(title, '$.en') LIKE ?", ["%{$search}%"])
+                    ->searchable(query: fn ($query, $search) => $query->whereRaw("JSON_EXTRACT(title, '$.en') LIKE ?", ["%{$search}%"])
                     ),
 
                 Tables\Columns\IconColumn::make('is_published')
@@ -1195,9 +1224,9 @@ class ServicePageResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListServicePages::route('/'),
+            'index' => Pages\ListServicePages::route('/'),
             'create' => Pages\CreateServicePage::route('/create'),
-            'edit'   => Pages\EditServicePage::route('/{record}/edit'),
+            'edit' => Pages\EditServicePage::route('/{record}/edit'),
         ];
     }
 }

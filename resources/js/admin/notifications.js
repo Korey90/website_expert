@@ -57,7 +57,9 @@
                 ggPing(1050, t + 0.21, 0.22);
             };
             ctx.state === 'suspended' ? ctx.resume().then(run) : run();
-        } catch (e) {}
+        } catch (e) {
+            // Audio playback can be blocked by browser autoplay policies.
+        }
     }
 
     // ─── Echo subscription ────────────────────────────────────────────────────
@@ -79,7 +81,7 @@
         const el = document.querySelector('.fi-no-database');
         if (!el) return null;
         const wireId = el.getAttribute('wire:id');
-        return wireId ? Livewire.find(wireId) : null;
+        return wireId ? window.Livewire?.find(wireId) ?? null : null;
     }
 
     // ─── View click: mark as read + navigate, NEVER delete ───────────────────

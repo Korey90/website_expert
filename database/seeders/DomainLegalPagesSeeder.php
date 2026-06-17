@@ -16,15 +16,15 @@ class DomainLegalPagesSeeder extends Seeder
 
             // ─── Domain Registration Terms ────────────────────────────────────
             [
-                'slug'           => 'domain-registration-terms',
-                'status'         => 'published',
-                'type'           => 'policy',
+                'slug' => 'domain-registration-terms',
+                'status' => 'published',
+                'type' => 'policy',
                 'show_in_footer' => false,
-                'sort_order'     => 10,
-                'created_by'     => $admin?->id,
-                'published_at'   => now(),
+                'sort_order' => 10,
+                'created_by' => $admin?->id,
+                'published_at' => now(),
                 'effective_date' => '2026-05-29',
-                'version'        => '1.0',
+                'version' => '1.0',
 
                 'title' => [
                     'en' => 'Domain Registration Terms',
@@ -67,7 +67,7 @@ class DomainLegalPagesSeeder extends Seeder
 <p>Minimum registration period: <strong>1 year</strong>. Maximum: 10 years (where permitted by the registry).</p>
 
 <h2>4. Pricing &amp; Payment</h2>
-<p>All prices displayed are inclusive of our service fee and exclusive of VAT (where applicable). The price at the time of order confirmation is binding. Registration fees are charged in <strong>GBP</strong>.</p>
+<p>All prices displayed are inclusive of our service fee and exclusive of VAT (where applicable). The price at the time of order confirmation is binding. Registration fees are charged in the currency displayed at checkout.</p>
 <p>Payment is processed via <strong>Stripe</strong> (debit/credit card). Orders are processed only after successful payment authorisation. If payment fails, the domain will not be registered and no reservation is made.</p>
 
 <h2>5. No Refunds on Registered Domains</h2>
@@ -136,7 +136,7 @@ HTML,
 <p>Minimalny okres rejestracji: <strong>1 rok</strong>. Maksymalny: 10 lat (jeśli rejestr na to zezwala).</p>
 
 <h2>4. Ceny i płatności</h2>
-<p>Wszystkie wyświetlane ceny obejmują naszą opłatę za usługę i są cenami netto (bez VAT, tam gdzie ma to zastosowanie). Cena w momencie potwierdzenia zamówienia jest wiążąca. Opłaty rejestracyjne są pobierane w <strong>GBP</strong>.</p>
+<p>Wszystkie wyświetlane ceny obejmują naszą opłatę za usługę i są cenami netto (bez VAT, tam gdzie ma to zastosowanie). Cena w momencie potwierdzenia zamówienia jest wiążąca. Opłaty rejestracyjne są pobierane w walucie wyświetlonej przy zamówieniu.</p>
 <p>Płatność jest przetwarzana za pośrednictwem <strong>Stripe</strong> (karta debetowa/kredytowa). Zamówienia są realizowane wyłącznie po pomyślnej autoryzacji płatności. W przypadku niepowodzenia płatności domena nie zostanie zarejestrowana i nie dokonano żadnej rezerwacji.</p>
 
 <h2>5. Brak zwrotów za zarejestrowane domeny</h2>
@@ -205,7 +205,7 @@ HTML,
 <p>Período mínimo de registo: <strong>1 ano</strong>. Máximo: 10 anos (onde permitido pelo registo).</p>
 
 <h2>4. Preços e Pagamento</h2>
-<p>Todos os preços apresentados incluem a nossa taxa de serviço e são líquidos de IVA (onde aplicável). O preço no momento da confirmação do pedido é vinculativo. As taxas de registo são cobradas em <strong>GBP</strong>.</p>
+<p>Todos os preços apresentados incluem a nossa taxa de serviço e são líquidos de IVA (onde aplicável). O preço no momento da confirmação do pedido é vinculativo. As taxas de registo são cobradas na moeda apresentada no checkout.</p>
 <p>O pagamento é processado via <strong>Stripe</strong> (cartão de débito/crédito). Os pedidos só são processados após autorização de pagamento bem-sucedida. Se o pagamento falhar, o domínio não será registado e não é feita qualquer reserva.</p>
 
 <h2>5. Sem Reembolsos em Domínios Registados</h2>
@@ -253,15 +253,15 @@ HTML,
 
             // ─── Domain Renewal Policy ────────────────────────────────────────
             [
-                'slug'           => 'domain-renewal-policy',
-                'status'         => 'published',
-                'type'           => 'policy',
+                'slug' => 'domain-renewal-policy',
+                'status' => 'published',
+                'type' => 'policy',
                 'show_in_footer' => false,
-                'sort_order'     => 11,
-                'created_by'     => $admin?->id,
-                'published_at'   => now(),
+                'sort_order' => 11,
+                'created_by' => $admin?->id,
+                'published_at' => now(),
                 'effective_date' => '2026-05-29',
-                'version'        => '1.0',
+                'version' => '1.0',
 
                 'title' => [
                     'en' => 'Domain Renewal Policy',
@@ -295,7 +295,7 @@ HTML,
 <p>It is your responsibility to ensure your registered email address is current and that reminder emails are not filtered as spam. Failure to receive a reminder email does not relieve you of the obligation to renew your domain on time.</p>
 
 <h2>3. Renewal Window</h2>
-<p>You may renew your domain at any time during the final 90 days before the expiry date and for up to 30 days after expiry (the "Renewal Grace Period"), where the registry permits. Renewal prices are as displayed in your client portal at the time of renewal and are charged in GBP.</p>
+<p>You may renew your domain at any time during the final 90 days before the expiry date and for up to 30 days after expiry (the "Renewal Grace Period"), where the registry permits. Renewal prices are as displayed in your client portal at the time of renewal and are charged in the currency shown there.</p>
 
 <h2>4. Domain Expiry</h2>
 <p>If a domain is not renewed before its expiry date:</p>
@@ -337,7 +337,7 @@ HTML,
 <p>Twoją odpowiedzialnością jest zapewnienie aktualności zarejestrowanego adresu e-mail i tego, że wiadomości e-mail z przypomnieniami nie są filtrowane jako spam. Nieotrzymanie wiadomości z przypomnieniem nie zwalnia Cię z obowiązku terminowego odnowienia domeny.</p>
 
 <h2>3. Okno odnowienia</h2>
-<p>Możesz odnowić swoją domenę w dowolnym momencie w ciągu ostatnich 90 dni przed datą wygaśnięcia i do 30 dni po wygaśnięciu ("Okres karencji odnowienia"), tam gdzie rejestr na to pozwala. Ceny odnowień są takie, jak wyświetlane w Twoim portalu klienta w momencie odnowienia i są pobierane w GBP.</p>
+<p>Możesz odnowić swoją domenę w dowolnym momencie w ciągu ostatnich 90 dni przed datą wygaśnięcia i do 30 dni po wygaśnięciu ("Okres karencji odnowienia"), tam gdzie rejestr na to pozwala. Ceny odnowień są takie, jak wyświetlane w Twoim portalu klienta w momencie odnowienia i są pobierane w pokazanej tam walucie.</p>
 
 <h2>4. Wygaśnięcie domeny</h2>
 <p>Jeśli domena nie zostanie odnowiona przed datą wygaśnięcia:</p>
@@ -379,7 +379,7 @@ HTML,
 <p>É da sua responsabilidade garantir que o seu endereço de e-mail registado está atualizado e que os e-mails de lembrete não são filtrados como spam. O facto de não receber um e-mail de lembrete não o isenta da obrigação de renovar o seu domínio atempadamente.</p>
 
 <h2>3. Janela de Renovação</h2>
-<p>Pode renovar o seu domínio a qualquer momento durante os últimos 90 dias antes da data de expiração e até 30 dias após a expiração (o "Período de Carência de Renovação"), onde o registo o permitir. Os preços de renovação são os apresentados no seu portal de cliente no momento da renovação e são cobrados em GBP.</p>
+<p>Pode renovar o seu domínio a qualquer momento durante os últimos 90 dias antes da data de expiração e até 30 dias após a expiração (o "Período de Carência de Renovação"), onde o registo o permitir. Os preços de renovação são os apresentados no seu portal de cliente no momento da renovação e são cobrados na moeda aí indicada.</p>
 
 <h2>4. Expiração do Domínio</h2>
 <p>Se um domínio não for renovado antes da sua data de expiração:</p>
@@ -409,15 +409,15 @@ HTML,
 
             // ─── Domain Transfer Policy ───────────────────────────────────────
             [
-                'slug'           => 'domain-transfer-policy',
-                'status'         => 'published',
-                'type'           => 'policy',
+                'slug' => 'domain-transfer-policy',
+                'status' => 'published',
+                'type' => 'policy',
                 'show_in_footer' => false,
-                'sort_order'     => 12,
-                'created_by'     => $admin?->id,
-                'published_at'   => now(),
+                'sort_order' => 12,
+                'created_by' => $admin?->id,
+                'published_at' => now(),
                 'effective_date' => '2026-05-29',
-                'version'        => '1.0',
+                'version' => '1.0',
 
                 'title' => [
                     'en' => 'Domain Transfer Policy',
@@ -586,15 +586,15 @@ HTML,
 
             // ─── DNS Abuse Policy ─────────────────────────────────────────────
             [
-                'slug'           => 'dns-abuse-policy',
-                'status'         => 'published',
-                'type'           => 'policy',
+                'slug' => 'dns-abuse-policy',
+                'status' => 'published',
+                'type' => 'policy',
                 'show_in_footer' => false,
-                'sort_order'     => 13,
-                'created_by'     => $admin?->id,
-                'published_at'   => now(),
+                'sort_order' => 13,
+                'created_by' => $admin?->id,
+                'published_at' => now(),
                 'effective_date' => '2026-05-29',
-                'version'        => '1.0',
+                'version' => '1.0',
 
                 'title' => [
                     'en' => 'DNS Abuse Policy',

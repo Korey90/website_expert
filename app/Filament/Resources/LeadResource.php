@@ -3,8 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LeadResource\Pages;
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Filament\Support\FilamentPermissionRegistry;
-use App\Models\Briefing;
 use App\Models\BriefingTemplate;
 use App\Models\Client;
 use App\Models\Lead;
@@ -16,25 +16,28 @@ use App\Scopes\BusinessScope;
 use App\Services\BriefingService;
 use App\Services\SalesOfferService;
 use App\Support\PermissionHelper;
-use Filament\Forms;
-use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class LeadResource extends BaseResource
 {
     protected static ?string $model = Lead::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-funnel';
+
     protected static \UnitEnum|string|null $navigationGroup = 'CRM';
+
     protected static ?int $navigationSort = 2;
 
     public static function form(Schema $form): Schema
@@ -64,8 +67,8 @@ class LeadResource extends BaseResource
                     Forms\Components\Select::make('source')
                         ->options(['calculator' => 'Calculator', 'contact_form' => 'Contact Form', 'referral' => 'Referral', 'cold_outreach' => 'Cold Outreach', 'social_media' => 'Social Media', 'other' => 'Other'])
                         ->default('contact_form'),
-                    Forms\Components\TextInput::make('value')->numeric()->prefix('£'),
-                    Forms\Components\Select::make('currency')->options(['GBP' => '£ GBP', 'EUR' => '€ EUR', 'USD' => '$ USD'])->default('GBP'),
+                    Forms\Components\TextInput::make('value')->numeric()->prefix(fn () => FilamentCurrency::symbol()),
+                    Forms\Components\Select::make('currency')->options(fn () => FilamentCurrency::options())->default(fn () => FilamentCurrency::default()),
                     Forms\Components\DatePicker::make('expected_close_date'),
                 ]),
 
@@ -89,7 +92,7 @@ class LeadResource extends BaseResource
                 Tables\Columns\TextColumn::make('business.name')->label('Business')->searchable()->sortable()->placeholder('—'),
                 Tables\Columns\TextColumn::make('client.company_name')->label('Client')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('stage.name')->label('Stage')->badge(),
-                Tables\Columns\TextColumn::make('value')->money('GBP')->sortable(),
+                Tables\Columns\TextColumn::make('value')->money(fn (Lead $record) => FilamentCurrency::tableCurrency($record))->sortable(),
                 Tables\Columns\TextColumn::make('source')->badge(),
                 Tables\Columns\TextColumn::make('leadSource.type')
                     ->label('Source Type')
@@ -97,9 +100,9 @@ class LeadResource extends BaseResource
                     ->color(fn (string $state = ''): string => match ($state) {
                         'landing_page' => 'success',
                         'contact_form' => 'primary',
-                        'calculator'   => 'warning',
-                        'api'          => 'purple',
-                        default        => 'gray',
+                        'calculator' => 'warning',
+                        'api' => 'purple',
+                        default => 'gray',
                     })
                     ->placeholder('—'),
                 Tables\Columns\TextColumn::make('leadSource.landingPage.title')
@@ -148,7 +151,7 @@ class LeadResource extends BaseResource
                                     ->orderBy('title')
                                     ->get()
                                     ->mapWithKeys(fn (BriefingTemplate $t) => [
-                                        $t->id => "[{$t->type}] {$t->title}" . ($t->service_slug ? " ({$t->service_slug})" : ''),
+                                        $t->id => "[{$t->type}] {$t->title}".($t->service_slug ? " ({$t->service_slug})" : ''),
                                     ])
                                     ->toArray()
                             )
@@ -188,7 +191,7 @@ class LeadResource extends BaseResource
                                     ->orderBy('title')
                                     ->get()
                                     ->mapWithKeys(fn (SalesOfferTemplate $t) => [
-                                        $t->id => "[{$t->language}] {$t->title}" . ($t->service_slug ? " ({$t->service_slug})" : ''),
+                                        $t->id => "[{$t->language}] {$t->title}".($t->service_slug ? " ({$t->service_slug})" : ''),
                                     ])
                                     ->toArray()
                             )
@@ -197,7 +200,7 @@ class LeadResource extends BaseResource
                     ])
                     ->action(function (Lead $record, array $data) {
                         $template = SalesOfferTemplate::findOrFail($data['template_id']);
-                        $service  = app(SalesOfferService::class);
+                        $service = app(SalesOfferService::class);
 
                         $offer = $service->createFromTemplate($record, $template, auth()->user());
 
@@ -210,7 +213,7 @@ class LeadResource extends BaseResource
                                 ->send();
                         } catch (\RuntimeException $e) {
                             Notification::make()
-                                ->title('Oferta zapisana jako draft — ' . $e->getMessage())
+                                ->title('Oferta zapisana jako draft — '.$e->getMessage())
                                 ->warning()
                                 ->send();
                         }
@@ -238,7 +241,7 @@ class LeadResource extends BaseResource
                                     ->orderBy('title')
                                     ->get()
                                     ->mapWithKeys(fn (SalesOfferTemplate $t) => [
-                                        $t->id => "[{$t->language}] {$t->title}" . ($t->service_slug ? " ({$t->service_slug})" : ''),
+                                        $t->id => "[{$t->language}] {$t->title}".($t->service_slug ? " ({$t->service_slug})" : ''),
                                     ])
                                     ->toArray()
                             )
@@ -247,7 +250,7 @@ class LeadResource extends BaseResource
                     ])
                     ->action(function (Lead $record, array $data) {
                         $template = SalesOfferTemplate::findOrFail($data['template_id']);
-                        $offer    = app(SalesOfferService::class)
+                        $offer = app(SalesOfferService::class)
                             ->createFromTemplate($record, $template, auth()->user());
 
                         Notification::make()
@@ -275,14 +278,14 @@ class LeadResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListLeads::route('/'),
+            'index' => Pages\ListLeads::route('/'),
             'create' => Pages\CreateLead::route('/create'),
-            'view'   => Pages\ViewLead::route('/{record}'),
-            'edit'   => Pages\EditLead::route('/{record}/edit'),
+            'view' => Pages\ViewLead::route('/{record}'),
+            'edit' => Pages\EditLead::route('/{record}/edit'),
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $user = auth()->user();
 
@@ -295,4 +298,3 @@ class LeadResource extends BaseResource
         return parent::getEloquentQuery()->withTrashed();
     }
 }
-

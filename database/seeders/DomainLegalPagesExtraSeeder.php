@@ -23,15 +23,15 @@ class DomainLegalPagesExtraSeeder extends Seeder
 
             // ─── Cancellation & Refund Policy ────────────────────────────────
             [
-                'slug'           => 'domain-cancellation-policy',
-                'status'         => 'published',
-                'type'           => 'policy',
+                'slug' => 'domain-cancellation-policy',
+                'status' => 'published',
+                'type' => 'policy',
                 'show_in_footer' => false,
-                'sort_order'     => 14,
-                'created_by'     => $admin?->id,
-                'published_at'   => now(),
+                'sort_order' => 14,
+                'created_by' => $admin?->id,
+                'published_at' => now(),
                 'effective_date' => '2026-05-29',
-                'version'        => '1.0',
+                'version' => '1.0',
 
                 'title' => [
                     'en' => 'Domain Cancellation & Refund Policy',
@@ -165,15 +165,15 @@ HTML,
 
             // ─── GDPR / Privacy (Domains) ─────────────────────────────────────
             [
-                'slug'           => 'domain-privacy-gdpr',
-                'status'         => 'published',
-                'type'           => 'policy',
+                'slug' => 'domain-privacy-gdpr',
+                'status' => 'published',
+                'type' => 'policy',
                 'show_in_footer' => false,
-                'sort_order'     => 15,
-                'created_by'     => $admin?->id,
-                'published_at'   => now(),
+                'sort_order' => 15,
+                'created_by' => $admin?->id,
+                'published_at' => now(),
                 'effective_date' => '2026-05-29',
-                'version'        => '1.0',
+                'version' => '1.0',
 
                 'title' => [
                     'en' => 'Domain Services — Privacy & GDPR Notice',
@@ -310,15 +310,15 @@ HTML,
 
             // ─── Registrar Information (Openprovider) ────────────────────────
             [
-                'slug'           => 'domain-registrar-info',
-                'status'         => 'published',
-                'type'           => 'page',
+                'slug' => 'domain-registrar-info',
+                'status' => 'published',
+                'type' => 'page',
                 'show_in_footer' => false,
-                'sort_order'     => 16,
-                'created_by'     => $admin?->id,
-                'published_at'   => now(),
+                'sort_order' => 16,
+                'created_by' => $admin?->id,
+                'published_at' => now(),
                 'effective_date' => '2026-05-29',
-                'version'        => '1.0',
+                'version' => '1.0',
 
                 'title' => [
                     'en' => 'About Our Domain Registrar',
@@ -422,15 +422,15 @@ HTML,
 
             // ─── Domain Pricing Overview ──────────────────────────────────────
             [
-                'slug'           => 'domain-pricing',
-                'status'         => 'published',
-                'type'           => 'page',
+                'slug' => 'domain-pricing',
+                'status' => 'published',
+                'type' => 'page',
                 'show_in_footer' => false,
-                'sort_order'     => 17,
-                'created_by'     => $admin?->id,
-                'published_at'   => now(),
+                'sort_order' => 17,
+                'created_by' => $admin?->id,
+                'published_at' => now(),
                 'effective_date' => '2026-05-29',
-                'version'        => '1.0',
+                'version' => '1.0',
 
                 'title' => [
                     'en' => 'Domain Pricing',
@@ -468,7 +468,7 @@ HTML,
 <p>Registry fees can change. When a price change affects your domain's renewal price, we will notify you by email at least <strong>30 days in advance</strong>. The price in force at the time of your renewal order will apply.</p>
 
 <h2>Payment Currency</h2>
-<p>All prices are displayed and charged in <strong>GBP (£)</strong>. Payment is processed securely via Stripe.</p>
+<p>All prices are displayed and charged in the currency shown at checkout. Payment is processed securely via Stripe.</p>
 
 <h2>Promotional Prices</h2>
 <p>From time to time we may offer promotional registration prices for specific TLDs. Promotional prices apply only to the initial registration period. Renewals are billed at the standard renewal rate.</p>

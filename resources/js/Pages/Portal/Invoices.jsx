@@ -1,4 +1,5 @@
 import EmptyState from '@/Components/Shared/EmptyState';
+import useCurrency from '@/Hooks/useCurrency';
 import PortalLayout from '@/Layouts/PortalLayout';
 import { Link } from '@inertiajs/react';
 
@@ -20,18 +21,24 @@ function StatusBadge({ status }) {
 }
 
 export default function Invoices({ client, invoices }) {
-    const totalDue = invoices
+    const { currency, formatCurrency } = useCurrency();
+    const outstandingByCurrency = invoices
         .filter(i => ['sent', 'overdue'].includes(i.status))
-        .reduce((sum, i) => sum + parseFloat(i.amount_due), 0);
+        .reduce((totals, i) => {
+            const invoiceCurrency = i.currency ?? currency;
+            totals[invoiceCurrency] = (totals[invoiceCurrency] ?? 0) + parseFloat(i.amount_due ?? 0);
+            return totals;
+        }, {});
+    const outstandingEntries = Object.entries(outstandingByCurrency).filter(([, amount]) => amount > 0);
 
     return (
         <PortalLayout client={client}>
             <div className="max-w-5xl mx-auto space-y-6">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold text-gray-900">Invoices</h1>
-                    {totalDue > 0 && (
+                    {outstandingEntries.length > 0 && (
                         <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-medium px-4 py-2 rounded-lg">
-                            Outstanding: £{totalDue.toFixed(2)}
+                            Outstanding: {outstandingEntries.map(([entryCurrency, amount]) => formatCurrency(amount, entryCurrency)).join(' / ')}
                         </div>
                     )}
                 </div>
@@ -61,11 +68,11 @@ export default function Invoices({ client, invoices }) {
                                         <td className="px-5 py-3 text-sm font-medium text-gray-900">{inv.number}</td>
                                         <td className="px-5 py-3"><StatusBadge status={inv.status} /></td>
                                         <td className="px-5 py-3 text-sm text-gray-900">
-                                            {inv.currency ?? '£'}{parseFloat(inv.total).toFixed(2)}
+                                            {formatCurrency(inv.total, inv.currency)}
                                         </td>
                                         <td className="px-5 py-3 text-sm font-semibold text-gray-900">
                                             {parseFloat(inv.amount_due) > 0
-                                                ? `${inv.currency ?? '£'}${parseFloat(inv.amount_due).toFixed(2)}`
+                                                ? formatCurrency(inv.amount_due, inv.currency)
                                                 : <span className="text-green-600">Paid</span>}
                                         </td>
                                         <td className="px-5 py-3 text-sm text-gray-600">{inv.due_date ?? '—'}</td>

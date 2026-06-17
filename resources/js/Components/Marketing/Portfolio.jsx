@@ -20,7 +20,7 @@ const DEFAULTS = {
             tag_en: 'E-Commerce',                      tag_pl: 'E-Commerce',
             desc_en: 'Full B2B trade portal with 3,500+ SKUs, tiered pricing and ERP integration.',
             desc_pl: 'Portal handlowy B2B z 3 500+ produktami, cenami poziomowymi i integracją ERP.',
-            result_en: '£80k online sales in first month', result_pl: '80 tys. £ sprzedaży w pierwszym miesiącu',
+            result_en: '80k online sales in first month', result_pl: '80 tys. sprzedaży w pierwszym miesiącu',
             image: '/images/portfolio/nts-direct.svg',  link: '/portfolio/nts-direct',
         },
         {

@@ -5,6 +5,7 @@ import SourceBadge from '@/Components/Lead/SourceBadge';
 import ConsentBadge from '@/Components/Lead/ConsentBadge';
 import LeadTimeline from '@/Components/Lead/LeadTimeline';
 import SourceAttribution from '@/Components/Lead/SourceAttribution';
+import useCurrency from '@/Hooks/useCurrency';
 import { useLeads } from '@/Hooks/useLeads';
 
 const TABS = [
@@ -65,6 +66,7 @@ function LostBadge({ reason }) {
  */
 export default function Show({ lead, stages = [], users = [] }) {
     const { flash } = usePage().props;
+    const { formatCurrency } = useCurrency();
     const [activeTab, setActiveTab] = useState('details');
     const [lostReason, setLostReason] = useState('');
     const [showLostForm, setShowLostForm] = useState(false);
@@ -81,7 +83,7 @@ export default function Show({ lead, stages = [], users = [] }) {
     };
 
     const formattedValue = lead.value
-        ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: lead.currency ?? 'GBP' }).format(lead.value)
+        ? formatCurrency(lead.value, lead.currency)
         : null;
 
     return (

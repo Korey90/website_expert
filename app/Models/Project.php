@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DefaultsCurrency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Support\Str;
 
 class Project extends Model
 {
-    use HasFactory, SoftDeletes;
+    use DefaultsCurrency, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'title', 'client_id', 'lead_id', 'domain_order_id', 'template_id', 'assigned_to',
@@ -20,9 +21,9 @@ class Project extends Model
     ];
 
     protected $casts = [
-        'budget'       => 'decimal:2',
-        'start_date'   => 'date',
-        'deadline'     => 'date',
+        'budget' => 'decimal:2',
+        'start_date' => 'date',
+        'deadline' => 'date',
         'completed_at' => 'datetime',
     ];
 

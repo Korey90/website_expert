@@ -1,4 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import useCurrency from '@/Hooks/useCurrency';
 import MarketingLayout from '@/Layouts/MarketingLayout';
 import { useState } from 'react';
 import useScrollReveal from '@/Hooks/useScrollReveal';
@@ -26,7 +27,7 @@ const LABELS = {
         heroTitle1:       'Your domain.',
         heroTitle2:       'Your brand.',
         heroSubtitle:     'Professional domain registration with free WHOIS privacy, full DNS control, and expert support — fully managed for UK businesses.',
-        fromPrice:        (p) => `from £${p}/year · includes WHOIS privacy`,
+        fromPrice:        (p) => `from ${p}/year · includes WHOIS privacy`,
         searchBtn:        'Search Domain',
         searchPlaceholder:'yourname, yourcompany, yourbrand…',
         pricingLabel:     'Pricing',
@@ -67,7 +68,7 @@ const LABELS = {
         heroTitle1:       'Twoja domena.',
         heroTitle2:       'Twoja marka.',
         heroSubtitle:     'Profesjonalna rejestracja domen z darmową ochroną WHOIS, pełnym zarządzaniem DNS i pomocą ekspertów — całkowita obsługa dla firm w UK.',
-        fromPrice:        (p) => `od £${p}/rok · z ochroną WHOIS`,
+        fromPrice:        (p) => `od ${p}/rok · z ochroną WHOIS`,
         searchBtn:        'Szukaj domeny',
         searchPlaceholder:'twojanazwa, twojaFirma, twojaMarka…',
         pricingLabel:     'Cennik',
@@ -108,7 +109,7 @@ const LABELS = {
         heroTitle1:       'O seu domínio.',
         heroTitle2:       'A sua marca.',
         heroSubtitle:     'Registo profissional de domínios com privacidade WHOIS gratuita, controlo DNS completo e suporte especializado — totalmente gerido para empresas no Reino Unido.',
-        fromPrice:        (p) => `a partir de £${p}/ano · inclui privacidade WHOIS`,
+        fromPrice:        (p) => `a partir de ${p}/ano · inclui privacidade WHOIS`,
         searchBtn:        'Pesquisar Domínio',
         searchPlaceholder:'seunome, suaempresa, suamarca…',
         pricingLabel:     'Preços',
@@ -160,7 +161,7 @@ const BUNDLES = {
             key:       'starter',
             name:      'Domain Only',
             badge:     null,
-            price:     'from £9.99/yr',
+            price:     'priced by extension',
             desc:      'Just the domain — registered, managed, and renewed by our team.',
             features:  ['Domain registration', 'Free WHOIS privacy', 'Full DNS control', 'Renewal reminders'],
             cta:       'Search Domains',
@@ -172,7 +173,7 @@ const BUNDLES = {
             key:       'business',
             name:      'Domain + Email',
             badge:     'Popular',
-            price:     'from £24.99/yr',
+            price:     'quoted yearly',
             desc:      'A domain paired with a professional business email address.',
             features:  ['Everything in Domain Only', 'Business email (5 mailboxes)', 'SSL certificate', 'Anti-spam protection'],
             cta:       'Get a Quote',
@@ -184,7 +185,7 @@ const BUNDLES = {
             key:       'launch',
             name:      'Website Launch',
             badge:     'Best Value',
-            price:     'from £499 project',
+            price:     'fixed project quote',
             desc:      'Complete online presence — domain, site, email, SSL, and SEO, all managed.',
             features:  ['Everything in Domain + Email', 'Professional website', 'SEO setup', 'Google Analytics'],
             cta:       'Calculate Cost',
@@ -198,7 +199,7 @@ const BUNDLES = {
             key:       'starter',
             name:      'Tylko domena',
             badge:     null,
-            price:     'od £9,99/rok',
+            price:     'cena według rozszerzenia',
             desc:      'Sama domena — zarejestrowana, zarządzana i odnawiana przez nasz zespół.',
             features:  ['Rejestracja domeny', 'Darmowa ochrona WHOIS', 'Pełne zarządzanie DNS', 'Przypomnienia o odnowieniu'],
             cta:       'Szukaj domeny',
@@ -210,7 +211,7 @@ const BUNDLES = {
             key:       'business',
             name:      'Domena + Email',
             badge:     'Popularny',
-            price:     'od £24,99/rok',
+            price:     'wycena roczna',
             desc:      'Domena z profesjonalną firmową skrzynką pocztową.',
             features:  ['Wszystko z "Tylko domena"', 'Firmowy email (5 skrzynek)', 'Certyfikat SSL', 'Ochrona antyspamowa'],
             cta:       'Zapytaj o wycenę',
@@ -222,7 +223,7 @@ const BUNDLES = {
             key:       'launch',
             name:      'Website Launch',
             badge:     'Najlepsza wartość',
-            price:     'od £499 projekt',
+            price:     'wycena projektu',
             desc:      'Kompletna obecność online — domena, strona, email, SSL i SEO.',
             features:  ['Wszystko z "Domena + Email"', 'Profesjonalna strona', 'Konfiguracja SEO', 'Google Analytics'],
             cta:       'Oblicz koszt',
@@ -236,7 +237,7 @@ const BUNDLES = {
             key:       'starter',
             name:      'Domínio',
             badge:     null,
-            price:     'a partir de £9,99/ano',
+            price:     'preço por extensão',
             desc:      'Apenas o domínio — registado, gerido e renovado pela nossa equipa.',
             features:  ['Registo de domínio', 'Privacidade WHOIS gratuita', 'Controlo DNS completo', 'Lembretes de renovação'],
             cta:       'Pesquisar Domínio',
@@ -248,7 +249,7 @@ const BUNDLES = {
             key:       'business',
             name:      'Domínio + Email',
             badge:     'Popular',
-            price:     'a partir de £24,99/ano',
+            price:     'orçamento anual',
             desc:      'Domínio com email empresarial profissional.',
             features:  ['Tudo em Domínio', 'Email empresarial (5 caixas)', 'Certificado SSL', 'Proteção anti-spam'],
             cta:       'Pedir Orçamento',
@@ -260,7 +261,7 @@ const BUNDLES = {
             key:       'launch',
             name:      'Website Launch',
             badge:     'Melhor Valor',
-            price:     'a partir de £499 projeto',
+            price:     'orçamento de projeto',
             desc:      'Presença online completa — domínio, site, email, SSL e SEO.',
             features:  ['Tudo em Domínio + Email', 'Site profissional', 'Configuração SEO', 'Google Analytics'],
             cta:       'Calcular Custo',
@@ -308,17 +309,16 @@ function DomainSearchForm({ initialQuery = '', size = 'lg', l }) {
     );
 }
 
-function PriceCard({ tld, register_price, renew_price, currency, l }) {
-    const symbol = currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : '$';
+function PriceCard({ tld, register_price, renew_price, currency, l, formatCurrency }) {
     return (
         <div className="group flex flex-col items-center p-6 rounded-2xl border border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 hover:border-brand-500/60 hover:shadow-xl hover:shadow-brand-500/5 transition-all text-center">
             <div className="font-display text-xl font-bold text-neutral-900 dark:text-white">{tld}</div>
             <div className="mt-3 font-display text-3xl font-extrabold text-brand-500">
-                {symbol}{Number(register_price).toFixed(2)}
+                {formatCurrency(register_price, currency)}
                 <span className="text-sm font-normal text-neutral-400">/yr</span>
             </div>
             <div className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                {l?.renewLabel ?? 'Renew:'} {symbol}{Number(renew_price).toFixed(2)}/yr
+                {l?.renewLabel ?? 'Renew:'} {formatCurrency(renew_price, currency)}/yr
             </div>
             <Link
                 href={`${route('domains.check')}?q=${encodeURIComponent(tld)}`}
@@ -361,11 +361,13 @@ function FaqItem({ q, a }) {
 export default function DomainsIndex({ prices = [], auth }) {
     useScrollReveal('.reveal');
     const { footer, locale } = usePage().props;
+    const { formatCurrency } = useCurrency();
     const l = LABELS[locale] ?? LABELS.en;
     const popularPrices = (prices || []).filter(p => POPULAR_TLDS.includes(p.tld));
-    const minPrice = popularPrices.length
-        ? Math.min(...popularPrices.map(p => Number(p.register_price)))
-        : null;
+    const minPriceEntry = popularPrices.reduce((lowest, price) => {
+        if (!lowest) return price;
+        return Number(price.register_price) < Number(lowest.register_price) ? price : lowest;
+    }, null);
 
     return (
         <MarketingLayout auth={auth} footer={footer}>
@@ -393,9 +395,9 @@ export default function DomainsIndex({ prices = [], auth }) {
                         <p className="mt-6 text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed">
                             {l.heroSubtitle}
                         </p>
-                        {minPrice !== null && (
+                        {minPriceEntry && (
                             <p className="mt-2 text-sm text-neutral-400">
-                                {l.fromPrice(minPrice.toFixed(2))}
+                                {l.fromPrice(formatCurrency(minPriceEntry.register_price, minPriceEntry.currency))}
                             </p>
                         )}
                         <div className="mt-8 max-w-xl">
@@ -421,7 +423,7 @@ export default function DomainsIndex({ prices = [], auth }) {
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 reveal">
                             {POPULAR_TLDS.map(tld => {
                                 const p = popularPrices.find(x => x.tld === tld);
-                                return p ? <PriceCard key={tld} {...p} l={l} /> : null;
+                                return p ? <PriceCard key={tld} {...p} l={l} formatCurrency={formatCurrency} /> : null;
                             })}
                         </div>
                     </div>

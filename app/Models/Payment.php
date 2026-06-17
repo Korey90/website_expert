@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DefaultsCurrency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
-    use HasFactory;
+    use DefaultsCurrency, HasFactory;
 
     protected $fillable = [
         'invoice_id', 'amount', 'currency', 'method', 'status',
@@ -16,7 +17,7 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'amount'  => 'decimal:2',
+        'amount' => 'decimal:2',
         'paid_at' => 'datetime',
     ];
 

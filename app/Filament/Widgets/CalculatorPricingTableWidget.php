@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\CalculatorPricing;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -9,6 +10,7 @@ use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -18,6 +20,7 @@ class CalculatorPricingTableWidget extends BaseWidget
     protected static bool $isDiscoverable = false;
 
     protected static ?string $heading = 'Pricing — options, costs & multipliers';
+
     protected int|string|array $columnSpan = 'full';
 
     private function pricingForm(): array
@@ -29,12 +32,13 @@ class CalculatorPricingTableWidget extends BaseWidget
                     Forms\Components\Select::make('category')
                         ->options([
                             'project_type' => 'Project Type',
-                            'design'       => 'Design',
-                            'cms'          => 'CMS',
+                            'pages_addon' => 'Pages Add-on',
+                            'design' => 'Design',
+                            'cms' => 'CMS',
                             'integrations' => 'Integrations',
-                            'seo_package'  => 'SEO Package',
-                            'deadline'     => 'Deadline',
-                            'hosting'      => 'Hosting',
+                            'seo_package' => 'SEO Package',
+                            'deadline' => 'Deadline',
+                            'hosting' => 'Hosting',
                         ])
                         ->required()
                         ->columnSpan(1),
@@ -55,8 +59,8 @@ class CalculatorPricingTableWidget extends BaseWidget
                         ->default(true)
                         ->columnSpan(1),
                     Forms\Components\Select::make('currency')
-                        ->options(['GBP' => '£ GBP', 'EUR' => '€ EUR'])
-                        ->default('GBP')
+                        ->options(fn () => FilamentCurrency::options())
+                        ->default(fn () => FilamentCurrency::default())
                         ->columnSpan(1),
                 ]),
 
@@ -95,7 +99,7 @@ class CalculatorPricingTableWidget extends BaseWidget
                     Forms\Components\TextInput::make('base_cost')
                         ->label('Base / Fixed Cost')
                         ->numeric()
-                        ->prefix('£')
+                        ->prefix(fn (Get $get) => FilamentCurrency::symbol($get('currency')))
                         ->default(0)
                         ->helperText('One-time cost. For design/deadline: leave 0.')
                         ->columnSpan(1),
@@ -109,7 +113,7 @@ class CalculatorPricingTableWidget extends BaseWidget
                     Forms\Components\TextInput::make('monthly_cost')
                         ->label('Monthly Cost')
                         ->numeric()
-                        ->prefix('£')
+                        ->prefix(fn (Get $get) => FilamentCurrency::symbol($get('currency')))
                         ->default(0)
                         ->columnSpan(1),
                     Forms\Components\TextInput::make('cost_formula')
@@ -134,6 +138,9 @@ class CalculatorPricingTableWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('key')
                     ->fontFamily('mono')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('currency')
+                    ->badge()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('icon')
                     ->label('Icon'),
                 Tables\Columns\TextColumn::make('label')
@@ -146,7 +153,7 @@ class CalculatorPricingTableWidget extends BaseWidget
                     ->label('PT')
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('base_cost')
-                    ->money('GBP')
+                    ->money(fn (CalculatorPricing $record) => FilamentCurrency::tableCurrency($record))
                     ->label('Base Cost'),
                 Tables\Columns\TextColumn::make('multiplier')
                     ->label('×'),
@@ -161,12 +168,13 @@ class CalculatorPricingTableWidget extends BaseWidget
                 Tables\Filters\SelectFilter::make('category')
                     ->options([
                         'project_type' => 'Project Type',
-                        'design'       => 'Design',
-                        'cms'          => 'CMS',
+                        'pages_addon' => 'Pages Add-on',
+                        'design' => 'Design',
+                        'cms' => 'CMS',
                         'integrations' => 'Integrations',
-                        'seo_package'  => 'SEO Package',
-                        'deadline'     => 'Deadline',
-                        'hosting'      => 'Hosting',
+                        'seo_package' => 'SEO Package',
+                        'deadline' => 'Deadline',
+                        'hosting' => 'Hosting',
                     ]),
             ])
             ->headerActions([

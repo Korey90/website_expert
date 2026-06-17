@@ -1,4 +1,6 @@
 import { usePage } from '@inertiajs/react';
+import useCurrency from '@/Hooks/useCurrency';
+import { servicePriceLabel } from '@/utils/servicePrice';
 
 const ICON_PATHS = {
     'monitor': <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" />,
@@ -32,6 +34,7 @@ const DEFAULTS = {
 
 export default function Services({ data }) {
     const { locale = 'en' } = usePage().props;
+    const { currency, formatCurrency } = useCurrency();
 
     const t = (obj, key) =>
         obj?.[`${key}_${locale}`] ?? obj?.[`${key}_en`] ?? obj?.[key] ?? '';
@@ -65,6 +68,7 @@ export default function Services({ data }) {
                         const itemBody  = t(s, 'description') || s.description || '';
                         const iconPath  = ICON_PATHS[s.icon]  ?? ICON_PATHS['settings'];
                         const href      = s.is_active !== false ? (s.link ?? null) : null;
+                        const priceLabel = servicePriceLabel(s, locale, formatCurrency, currency);
 
                         return (
                             <div key={i} className="group p-6 rounded-2xl border border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 hover:border-brand-500/60 hover:shadow-lg hover:shadow-brand-500/5 transition-all cursor-default">
@@ -75,8 +79,8 @@ export default function Services({ data }) {
                                 </div>
                                 <div className="flex items-center gap-1.5 mb-2">
                                     <h3 className="font-semibold text-neutral-900 dark:text-white">{itemTitle}</h3>
-                                    {s.price_from && (
-                                        <span className="text-xs text-brand-500 font-medium ml-auto shrink-0">{s.price_from}</span>
+                                    {priceLabel && (
+                                        <span className="text-xs text-brand-500 font-medium ml-auto shrink-0">{priceLabel}</span>
                                     )}
                                 </div>
                                 <p className="text-sm text-neutral-500 dark:text-neutral-400">{itemBody}</p>

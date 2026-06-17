@@ -11,12 +11,12 @@
         $stageIsWon  = $record->stage?->is_won  ?? false;
         $stageIsLost = $record->stage?->is_lost ?? false;
 
-        $currencySymbol = match ($record->currency ?? 'GBP') {
-            'GBP'   => '£',
-            'EUR'   => '€',
-            'PLN'   => 'zł',
-            default => $record->currency ?? '',
-        };
+        $currencyResolver = app(\App\Services\Currency\CurrencyResolver::class);
+        $moneyFormatter = app(\App\Services\Currency\MoneyFormatter::class);
+        $recordCurrency = $currencyResolver->normalize($record->currency ?? $currencyResolver->resolve(request()));
+        $currencySymbol = $currencyResolver->metadata($recordCurrency)['symbol'] ?? $recordCurrency;
+        $currencyOptions = $currencyResolver->options();
+        $formatMoney = fn ($amount, ?string $currency = null) => $moneyFormatter->format($amount, $currency ?? $recordCurrency);
 
         $sourceLabel = match ($record->source ?? '') {
             'calculator'    => 'Cost Calculator',
@@ -70,7 +70,7 @@
                         <dt class="mb-1 text-xs text-gray-400 dark:text-gray-500">Deal Value</dt>
                         <dd class="text-2xl font-bold text-gray-900 dark:text-white">
                             @if($record->value)
-                                {{ $currencySymbol }}{{ number_format((float) $record->value, 0) }}
+                                {{ $formatMoney($record->value) }}
                             @else
                                 <span class="text-base font-normal text-gray-400">Not set</span>
                             @endif
@@ -639,7 +639,7 @@
                                 </div>
                                 <p class="mb-2.5 text-xs text-gray-500 dark:text-gray-400">
                                     Total: <strong class="text-gray-800 dark:text-gray-100">
-                                        {{ number_format((float) $existingQuote->total, 2) }} {{ $existingQuote->currency }}
+                                        {{ $formatMoney($existingQuote->total, $existingQuote->currency) }}
                                     </strong>
                                 </p>
                                 <div class="flex gap-2">
@@ -1447,9 +1447,9 @@
                 <label class="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Currency</label>
                 <select wire:model.live="proposalCurrency"
                         class="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white">
-                    <option value="GBP">£ GBP</option>
-                    <option value="EUR">€ EUR</option>
-                    <option value="USD">$ USD</option>
+                    @foreach($currencyOptions as $code => $label)
+                        <option value="{{ $code }}">{{ $label }}</option>
+                    @endforeach
                 </select>
             </div>
             <div>
@@ -1552,7 +1552,7 @@
                                                 <p x-show="s.description" class="truncate text-xs text-gray-400 mt-0.5" x-text="s.description"></p>
                                             </div>
                                             <span class="shrink-0 rounded bg-primary-50 px-1.5 py-0.5 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-400"
-                                                  x-text="'£' + Number(s.base_cost).toFixed(2)"></span>
+                                                  x-text="@js($currencySymbol) + Number(s.base_cost).toFixed(2)"></span>
                                         </button>
                                     </template>
                                 </div>
@@ -1620,7 +1620,7 @@
                     $pVatRate      = (float)($proposalVatRate ?: 0);
                     $pVat          = round(($pSubtotal - $pDiscount) * ($pVatRate / 100), 2);
                     $pTotal        = $pSubtotal - $pDiscount + $pVat;
-                    $pCurrSym      = match($proposalCurrency) { 'GBP' => '£', 'EUR' => '€', 'USD' => '$', default => $proposalCurrency . ' ' };
+                    $pMoney        = fn ($amount) => $formatMoney($amount, $proposalCurrency ?: $recordCurrency);
                 @endphp
 
                 <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Summary</p>
@@ -1628,24 +1628,24 @@
                 <div class="space-y-2 text-sm">
                     <div class="flex justify-between text-gray-600 dark:text-gray-300">
                         <span>Subtotal</span>
-                        <span>{{ $pCurrSym }}{{ number_format($pSubtotal, 2) }}</span>
+                        <span>{{ $pMoney($pSubtotal) }}</span>
                     </div>
                     @if($pDiscount > 0)
                         <div class="flex justify-between text-green-600 dark:text-green-400">
                             <span>Discount</span>
-                            <span>–{{ $pCurrSym }}{{ number_format($pDiscount, 2) }}</span>
+                            <span>–{{ $pMoney($pDiscount) }}</span>
                         </div>
                     @endif
                     @if($pVatRate > 0)
                         <div class="flex justify-between text-gray-500 dark:text-gray-400">
                             <span>VAT ({{ $pVatRate }}%)</span>
-                            <span>{{ $pCurrSym }}{{ number_format($pVat, 2) }}</span>
+                            <span>{{ $pMoney($pVat) }}</span>
                         </div>
                     @endif
                     <div class="mt-2 border-t border-gray-200 pt-2 dark:border-gray-600">
                         <div class="flex justify-between text-base font-bold text-gray-900 dark:text-white">
                             <span>Total</span>
-                            <span>{{ $pCurrSym }}{{ number_format($pTotal, 2) }}</span>
+                            <span>{{ $pMoney($pTotal) }}</span>
                         </div>
                     </div>
                 </div>
@@ -1739,7 +1739,7 @@
                     <div>
                         <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">Min Budget</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-400">£</span>
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-400">{{ $currencySymbol }}</span>
                             <input wire:model="modalBudgetMin"
                                    type="number" min="0" step="100" placeholder="0"
                                    class="w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-7 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
@@ -1748,7 +1748,7 @@
                     <div>
                         <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">Max Budget</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-400">£</span>
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-400">{{ $currencySymbol }}</span>
                             <input wire:model="modalBudgetMax"
                                    type="number" min="0" step="100" placeholder="0"
                                    class="w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-7 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white" />

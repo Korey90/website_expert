@@ -1,11 +1,7 @@
 <x-filament-panels::page>
     @php
-        $currencySymbol = match ($record->currency ?? 'GBP') {
-            'GBP'   => '£',
-            'EUR'   => '€',
-            'USD'   => '$',
-            default => $record->currency ?? '',
-        };
+        $moneyFormatter = app(\App\Services\Currency\MoneyFormatter::class);
+        $currency = $record->currency ?? app(\App\Services\Currency\CurrencyResolver::class)->resolve(request());
 
         $statusConfig = match ($record->status) {
             'draft'          => ['label' => 'Draft',          'bg' => 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',           'icon' => 'heroicon-m-pencil-square'],
@@ -27,7 +23,7 @@
         $amountDue  = (float) ($record->amount_due ?? $total);
         $paidPct    = $total > 0 ? min(100, round(($amountPaid / $total) * 100)) : 0;
 
-        $fmt = fn ($amount) => $currencySymbol . number_format((float) ($amount ?? 0), 2);
+        $fmt = fn ($amount) => $moneyFormatter->format($amount, $currency);
     @endphp
 
     {{-- ── Soft-delete warning ────────────────────────────────────────────── --}}
@@ -377,7 +373,7 @@
                                     {{ $payment->reference ?: '—' }}
                                 </td>
                                 <td class="px-4 py-2.5 text-right font-semibold tabular-nums text-gray-900 dark:text-gray-100">
-                                    {{ number_format($payment->amount, 2) }} {{ $payment->currency }}
+                                    {{ $moneyFormatter->format($payment->amount, $payment->currency ?? $currency) }}
                                 </td>
                             </tr>
                             @endforeach

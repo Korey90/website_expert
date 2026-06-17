@@ -3,23 +3,29 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CalculatorPricingResource\Pages;
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\CalculatorPricing;
-use Filament\Forms;
-use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables;
 use Filament\Tables\Table;
 
 class CalculatorPricingResource extends BaseResource
 {
     protected static ?string $model = CalculatorPricing::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-calculator';
+
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+
     protected static ?string $navigationLabel = 'Calculator Pricing';
+
     protected static ?int $navigationSort = 7;
+
     protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Schema $form): Schema
@@ -28,12 +34,13 @@ class CalculatorPricingResource extends BaseResource
             Forms\Components\Select::make('category')
                 ->options([
                     'project_type' => 'Project Type',
-                    'design'       => 'Design',
-                    'cms'          => 'CMS',
+                    'pages_addon' => 'Pages Add-on',
+                    'design' => 'Design',
+                    'cms' => 'CMS',
                     'integrations' => 'Integrations',
-                    'seo_package'  => 'SEO Package',
-                    'deadline'     => 'Deadline',
-                    'hosting'      => 'Hosting',
+                    'seo_package' => 'SEO Package',
+                    'deadline' => 'Deadline',
+                    'hosting' => 'Hosting',
                 ])
                 ->required(),
             Forms\Components\TextInput::make('key')
@@ -66,7 +73,7 @@ class CalculatorPricingResource extends BaseResource
             Forms\Components\TextInput::make('base_cost')
                 ->label('Base Cost / Fixed Cost (one-time)')
                 ->numeric()
-                ->prefix('£')
+                ->prefix(fn (Get $get) => FilamentCurrency::symbol($get('currency')))
                 ->default(0)
                 ->helperText('For project types: base price. For add-ons: fixed cost. For design/deadline: leave 0.'),
             Forms\Components\TextInput::make('multiplier')
@@ -78,15 +85,15 @@ class CalculatorPricingResource extends BaseResource
             Forms\Components\TextInput::make('monthly_cost')
                 ->label('Monthly Cost')
                 ->numeric()
-                ->prefix('£')
+                ->prefix(fn (Get $get) => FilamentCurrency::symbol($get('currency')))
                 ->default(0),
             Forms\Components\TextInput::make('cost_formula')
                 ->label('Dynamic Formula')
                 ->maxLength(500)
                 ->helperText('e.g. pages > 5 ? (pages-5)*80 : 0'),
             Forms\Components\Select::make('currency')
-                ->options(['GBP' => '£ GBP', 'EUR' => '€ EUR'])
-                ->default('GBP'),
+                ->options(fn () => FilamentCurrency::options())
+                ->default(fn () => FilamentCurrency::default()),
             Forms\Components\TextInput::make('sort_order')
                 ->numeric()
                 ->default(0),
@@ -101,11 +108,12 @@ class CalculatorPricingResource extends BaseResource
             ->columns([
                 Tables\Columns\TextColumn::make('category')->badge()->sortable(),
                 Tables\Columns\TextColumn::make('key')->searchable(),
+                Tables\Columns\TextColumn::make('currency')->badge()->sortable(),
                 Tables\Columns\TextColumn::make('icon')->label('Icon'),
                 Tables\Columns\TextColumn::make('label')->searchable()->label('Label (EN)'),
-                Tables\Columns\TextColumn::make('base_cost')->money('GBP')->label('Base Cost'),
+                Tables\Columns\TextColumn::make('base_cost')->money(fn (CalculatorPricing $record) => FilamentCurrency::tableCurrency($record))->label('Base Cost'),
                 Tables\Columns\TextColumn::make('multiplier')->label('Multiplier'),
-                Tables\Columns\TextColumn::make('monthly_cost')->money('GBP'),
+                Tables\Columns\TextColumn::make('monthly_cost')->money(fn (CalculatorPricing $record) => FilamentCurrency::tableCurrency($record)),
                 Tables\Columns\IconColumn::make('is_active')->boolean(),
                 Tables\Columns\TextColumn::make('sort_order')->sortable(),
             ])
@@ -113,12 +121,13 @@ class CalculatorPricingResource extends BaseResource
                 Tables\Filters\SelectFilter::make('category')
                     ->options([
                         'project_type' => 'Project Type',
-                        'design'       => 'Design',
-                        'cms'          => 'CMS',
+                        'pages_addon' => 'Pages Add-on',
+                        'design' => 'Design',
+                        'cms' => 'CMS',
                         'integrations' => 'Integrations',
-                        'seo_package'  => 'SEO Package',
-                        'deadline'     => 'Deadline',
-                        'hosting'      => 'Hosting',
+                        'seo_package' => 'SEO Package',
+                        'deadline' => 'Deadline',
+                        'hosting' => 'Hosting',
                     ]),
             ])
             ->actions([ViewAction::make(), EditAction::make(), DeleteAction::make()])
@@ -129,10 +138,10 @@ class CalculatorPricingResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListCalculatorPricings::route('/'),
+            'index' => Pages\ListCalculatorPricings::route('/'),
             'create' => Pages\CreateCalculatorPricing::route('/create'),
-            'view'   => Pages\ViewCalculatorPricing::route('/{record}'),
-            'edit'   => Pages\EditCalculatorPricing::route('/{record}/edit'),
+            'view' => Pages\ViewCalculatorPricing::route('/{record}'),
+            'edit' => Pages\EditCalculatorPricing::route('/{record}/edit'),
         ];
     }
 }

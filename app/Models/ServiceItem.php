@@ -11,7 +11,7 @@ use Spatie\Translatable\HasTranslations;
 
 class ServiceItem extends Model
 {
-    use HasFactory, SoftDeletes, HasTranslations;
+    use HasFactory, HasTranslations, SoftDeletes;
 
     public array $translatable = [
         'title',
@@ -30,6 +30,8 @@ class ServiceItem extends Model
         'badge_text',
         'icon',
         'price_from',
+        'price_from_prices',
+        'price_from_period',
         'link',
         'slug',
         'image_path',
@@ -46,9 +48,10 @@ class ServiceItem extends Model
 
     protected $casts = [
         'is_featured' => 'boolean',
-        'is_active'   => 'boolean',
-        'features'    => 'array',
-        'faq'         => 'array',
+        'is_active' => 'boolean',
+        'features' => 'array',
+        'faq' => 'array',
+        'price_from_prices' => 'array',
     ];
 
     public function scopeFeatured(Builder $query): Builder

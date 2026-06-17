@@ -1,4 +1,5 @@
 import PortalLayout from '@/Layouts/PortalLayout';
+import useCurrency from '@/Hooks/useCurrency';
 import { Link, usePage } from '@inertiajs/react';
 
 const statusConfig = {
@@ -9,16 +10,14 @@ const statusConfig = {
     cancelled:      { color: 'bg-gray-100 text-gray-600',     label: 'Cancelled' },
 };
 
-function fmt(amount, currency) {
-    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency ?? 'GBP' }).format(amount ?? 0);
-}
-
 function fmtDate(d) {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export default function Invoice({ client, invoice }) {
+    const { formatCurrency } = useCurrency();
+    const fmt = (amount, currency) => formatCurrency(amount, currency);
     const cfg = statusConfig[invoice.status] ?? { color: 'bg-gray-100 text-gray-700', label: invoice.status };
     const { url } = usePage();
     const paymentSuccess = new URLSearchParams(url.split('?')[1] ?? '').get('payment') === 'success';

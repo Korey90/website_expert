@@ -9,39 +9,54 @@ use App\Models\LeadActivity;
 use App\Models\LeadNote;
 use App\Models\PipelineStage;
 use App\Models\Project;
+use App\Services\Currency\CurrencySummaryFormatter;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
-use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 class PipelinePage extends BasePage
 {
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-funnel';
+
     protected static \UnitEnum|string|null $navigationGroup = 'CRM';
+
     protected static ?string $navigationLabel = 'Sales Pipeline';
+
     protected static ?int $navigationSort = 3;
+
     protected string $view = 'filament.pages.pipeline';
 
     // ── Email modal ───────────────────────────────────────────────────────
-    public bool $showEmailModal       = false;
-    public ?int $emailLeadId          = null;
+    public bool $showEmailModal = false;
+
+    public ?int $emailLeadId = null;
+
     public string|int|null $emailTemplateId = null;
-    public string $emailSubject       = '';
-    public string $emailBody          = '';
+
+    public string $emailSubject = '';
+
+    public string $emailBody = '';
 
     // ── Note modal ────────────────────────────────────────────────────────
-    public bool   $showNoteModal   = false;
-    public ?int   $noteLeadId      = null;
-    public string $noteLeadTitle   = '';
-    public string $newNoteText     = '';
-    public ?int   $editNoteId      = null;
-    public string $editNoteText    = '';
+    public bool $showNoteModal = false;
+
+    public ?int $noteLeadId = null;
+
+    public string $noteLeadTitle = '';
+
+    public string $newNoteText = '';
+
+    public ?int $editNoteId = null;
+
+    public string $editNoteText = '';
 
     // ── History modal ─────────────────────────────────────────────────────
-    public bool $showHistoryModal    = false;
-    public ?int $historyLeadId       = null;
-    public string $historyLeadTitle  = '';
+    public bool $showHistoryModal = false;
+
+    public ?int $historyLeadId = null;
+
+    public string $historyLeadTitle = '';
 
     // ─────────────────────────────────────────────────────────────────────
 
@@ -83,12 +98,19 @@ class PipelinePage extends BasePage
             ->get()
             ->groupBy('pipeline_stage_id');
 
+        $money = app(CurrencySummaryFormatter::class);
         $totals = Lead::withoutTrashed()
-            ->selectRaw('pipeline_stage_id, COUNT(*) as count, SUM(value) as total_value')
+            ->get(['pipeline_stage_id', 'value', 'currency'])
             ->groupBy('pipeline_stage_id')
-            ->get()
-            ->keyBy('pipeline_stage_id')
-            ->map(fn ($r) => ['count' => $r->count, 'total' => $r->total_value ?? 0]);
+            ->map(function ($stageLeads) use ($money): array {
+                $totalsByCurrency = $money->sumByCurrency($stageLeads, 'value');
+
+                return [
+                    'count' => $stageLeads->count(),
+                    'totals' => $totalsByCurrency->all(),
+                    'formatted_total' => $money->formatGrouped($totalsByCurrency),
+                ];
+            });
 
         $emailTemplates = EmailTemplate::where('is_active', true)
             ->orderBy('name')
@@ -110,12 +132,12 @@ class PipelinePage extends BasePage
             : collect();
 
         return [
-            'stages'            => $stages,
-            'leads'             => $leads,
-            'totals'            => $totals,
-            'emailTemplates'    => $emailTemplates,
+            'stages' => $stages,
+            'leads' => $leads,
+            'totals' => $totals,
+            'emailTemplates' => $emailTemplates,
             'historyActivities' => $historyActivities,
-            'leadNotes'         => $leadNotes,
+            'leadNotes' => $leadNotes,
         ];
     }
 
@@ -123,10 +145,10 @@ class PipelinePage extends BasePage
 
     public function moveStage(int $leadId, string $direction): void
     {
-        $lead   = Lead::findOrFail($leadId);
+        $lead = Lead::findOrFail($leadId);
         $stages = PipelineStage::orderBy('order')->get()->keyBy('id');
-        $ids    = $stages->keys()->toArray();
-        $idx    = array_search($lead->pipeline_stage_id, $ids);
+        $ids = $stages->keys()->toArray();
+        $idx = array_search($lead->pipeline_stage_id, $ids);
         $newIdx = $direction === 'forward' ? $idx + 1 : $idx - 1;
 
         if ($newIdx < 0 || $newIdx >= count($ids)) {
@@ -135,13 +157,13 @@ class PipelinePage extends BasePage
 
         $fromStage = $stages[$lead->pipeline_stage_id]?->name ?? '?';
         $toStageId = $ids[$newIdx];
-        $toStage   = $stages[$toStageId]?->name ?? '?';
+        $toStage = $stages[$toStageId]?->name ?? '?';
 
         $lead->update(['pipeline_stage_id' => $toStageId]);
 
         LeadActivity::log($leadId, 'stage_moved', "Stage changed: {$fromStage} → {$toStage}", [
             'from_stage' => $fromStage,
-            'to_stage'   => $toStage,
+            'to_stage' => $toStage,
         ]);
 
         Notification::make()->title("Moved to: {$toStage}")->success()->send();
@@ -154,11 +176,12 @@ class PipelinePage extends BasePage
         $stage = PipelineStage::where('is_won', true)->first();
         if (! $stage) {
             Notification::make()->title('No "Won" stage configured')->warning()->send();
+
             return;
         }
         Lead::findOrFail($leadId)->update([
             'pipeline_stage_id' => $stage->id,
-            'won_at'            => now(),
+            'won_at' => now(),
         ]);
 
         LeadActivity::log($leadId, 'marked_won', 'Lead marked as Won 🎉');
@@ -171,11 +194,12 @@ class PipelinePage extends BasePage
         $stage = PipelineStage::where('is_lost', true)->first();
         if (! $stage) {
             Notification::make()->title('No "Lost" stage configured')->warning()->send();
+
             return;
         }
         Lead::findOrFail($leadId)->update([
             'pipeline_stage_id' => $stage->id,
-            'lost_at'           => now(),
+            'lost_at' => now(),
         ]);
 
         LeadActivity::log($leadId, 'marked_lost', 'Lead marked as Lost');
@@ -191,18 +215,19 @@ class PipelinePage extends BasePage
 
         if ($lead->project()->exists()) {
             Notification::make()->title('Project already exists for this lead')->warning()->send();
+
             return;
         }
 
         $project = Project::create([
-            'title'        => $lead->title,
-            'client_id'    => $lead->client_id,
-            'lead_id'      => $lead->id,
-            'assigned_to'  => $lead->assigned_to,
+            'title' => $lead->title,
+            'client_id' => $lead->client_id,
+            'lead_id' => $lead->id,
+            'assigned_to' => $lead->assigned_to,
             'service_type' => $lead->calculator_data['project_type'] ?? null,
-            'status'       => 'draft',
-            'budget'       => $lead->value,
-            'currency'     => $lead->currency ?? 'GBP',
+            'status' => 'draft',
+            'budget' => $lead->value,
+            'currency' => $lead->currency ?? 'GBP',
         ]);
 
         LeadActivity::log($leadId, 'project_created', "Project created: \"{$project->title}\"", [
@@ -216,11 +241,11 @@ class PipelinePage extends BasePage
 
     public function openEmailModal(int $leadId): void
     {
-        $this->emailLeadId     = $leadId;
+        $this->emailLeadId = $leadId;
         $this->emailTemplateId = null;
-        $this->emailSubject    = '';
-        $this->emailBody       = '';
-        $this->showEmailModal  = true;
+        $this->emailSubject = '';
+        $this->emailBody = '';
+        $this->showEmailModal = true;
     }
 
     public function updatedEmailTemplateId(string|int|null $value): void
@@ -229,7 +254,8 @@ class PipelinePage extends BasePage
 
         if (! $id) {
             $this->emailSubject = '';
-            $this->emailBody    = '';
+            $this->emailBody = '';
+
             return;
         }
 
@@ -239,45 +265,46 @@ class PipelinePage extends BasePage
         }
 
         $resolved = $tpl->getForLocale(app()->getLocale());
-        $subject  = $resolved['subject']   ?? '';
-        $body     = $resolved['body_html'] ?? '';
+        $subject = $resolved['subject'] ?? '';
+        $body = $resolved['body_html'] ?? '';
 
         if ($this->emailLeadId) {
             $lead = Lead::with('client')->find($this->emailLeadId);
             if ($lead) {
                 $vars = [
-                    '{{client_name}}'  => $lead->client?->primary_contact_name ?? '',
-                    '{{company_name}}' => $lead->client?->company_name         ?? '',
-                    '{{lead_title}}'   => $lead->title,
+                    '{{client_name}}' => $lead->client?->primary_contact_name ?? '',
+                    '{{company_name}}' => $lead->client?->company_name ?? '',
+                    '{{lead_title}}' => $lead->title,
                 ];
                 $subject = str_replace(array_keys($vars), array_values($vars), $subject);
-                $body    = str_replace(array_keys($vars), array_values($vars), $body);
+                $body = str_replace(array_keys($vars), array_values($vars), $body);
             }
         }
 
         $this->emailSubject = $subject;
-        $this->emailBody    = strip_tags($body);
+        $this->emailBody = strip_tags($body);
     }
 
     public function sendEmail(): void
     {
         $this->validate([
             'emailSubject' => ['required', 'string', 'max:255'],
-            'emailBody'    => ['required', 'string'],
+            'emailBody' => ['required', 'string'],
         ]);
 
-        $lead    = Lead::with('client')->findOrFail($this->emailLeadId);
+        $lead = Lead::with('client')->findOrFail($this->emailLeadId);
         $toEmail = $lead->client?->primary_contact_email;
 
         if (! $toEmail) {
             Notification::make()->title('No email address on file for this client')->danger()->send();
+
             return;
         }
 
         Mail::to($toEmail)->queue(new ClientEmailMail($this->emailSubject, $this->emailBody));
 
         LeadActivity::log($this->emailLeadId, 'email_sent', "Email sent to {$toEmail}: \"{$this->emailSubject}\"", [
-            'to'      => $toEmail,
+            'to' => $toEmail,
             'subject' => $this->emailSubject,
         ]);
 
@@ -289,11 +316,11 @@ class PipelinePage extends BasePage
 
     public function openNoteModal(int $leadId, string $title): void
     {
-        $this->noteLeadId    = $leadId;
+        $this->noteLeadId = $leadId;
         $this->noteLeadTitle = $title;
-        $this->newNoteText   = '';
-        $this->editNoteId    = null;
-        $this->editNoteText  = '';
+        $this->newNoteText = '';
+        $this->editNoteId = null;
+        $this->editNoteText = '';
         $this->showNoteModal = true;
     }
 
@@ -318,7 +345,7 @@ class PipelinePage extends BasePage
     public function startEditNote(int $noteId): void
     {
         $note = LeadNote::findOrFail($noteId);
-        $this->editNoteId   = $noteId;
+        $this->editNoteId = $noteId;
         $this->editNoteText = $note->content;
     }
 
@@ -328,14 +355,14 @@ class PipelinePage extends BasePage
 
         LeadNote::findOrFail($this->editNoteId)->update(['content' => $this->editNoteText]);
 
-        $this->editNoteId   = null;
+        $this->editNoteId = null;
         $this->editNoteText = '';
         Notification::make()->title('Note updated')->success()->send();
     }
 
     public function cancelEditNote(): void
     {
-        $this->editNoteId   = null;
+        $this->editNoteId = null;
         $this->editNoteText = '';
     }
 
@@ -359,7 +386,7 @@ class PipelinePage extends BasePage
         Lead::findOrFail($leadId)->update(['assigned_to' => $user->id]);
 
         LeadActivity::log($leadId, 'assigned', "Assigned to {$user->name}", [
-            'user_id'   => $user->id,
+            'user_id' => $user->id,
             'user_name' => $user->name,
         ]);
 
@@ -380,9 +407,8 @@ class PipelinePage extends BasePage
 
     public function openHistoryModal(int $leadId, string $title): void
     {
-        $this->historyLeadId    = $leadId;
+        $this->historyLeadId = $leadId;
         $this->historyLeadTitle = $title;
         $this->showHistoryModal = true;
     }
 }
-

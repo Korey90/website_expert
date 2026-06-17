@@ -226,6 +226,10 @@
     </style>
 </head>
 <body>
+@php
+    $money = app(\App\Services\Currency\MoneyFormatter::class);
+    $currency = $invoice->currency ?? 'GBP';
+@endphp
 
 {{-- ── Header ────────────────────────────────────────────── --}}
 <div class="header">
@@ -307,7 +311,7 @@
     </div>
     <div class="date-cell">
         <div class="date-cell-label">Currency</div>
-        <div class="date-cell-value">{{ $invoice->currency }}</div>
+        <div class="date-cell-value">{{ $currency }}</div>
     </div>
 </div>
 
@@ -329,8 +333,8 @@
                     {{ $item->description }}
                 </td>
                 <td class="right">{{ rtrim(rtrim(number_format((float)$item->quantity, 2), '0'), '.') }}</td>
-                <td class="right">{{ number_format($item->unit_price, 2) }}</td>
-                <td class="right">{{ number_format($item->amount, 2) }}</td>
+                <td class="right">{{ $money->format($item->unit_price, $currency) }}</td>
+                <td class="right">{{ $money->format($item->amount, $currency) }}</td>
             </tr>
             @endforeach
         </tbody>
@@ -342,34 +346,34 @@
     <table class="totals-table">
         <tr>
             <td class="label">Subtotal</td>
-            <td class="value">{{ $invoice->currency }} {{ number_format($invoice->subtotal, 2) }}</td>
+            <td class="value">{{ $money->format($invoice->subtotal, $currency) }}</td>
         </tr>
         @if($invoice->discount_amount > 0)
         <tr>
             <td class="label">Discount</td>
-            <td class="value">− {{ $invoice->currency }} {{ number_format($invoice->discount_amount, 2) }}</td>
+            <td class="value">− {{ $money->format($invoice->discount_amount, $currency) }}</td>
         </tr>
         @endif
         @if($invoice->vat_rate > 0)
         <tr>
             <td class="label">VAT ({{ rtrim(rtrim(number_format($invoice->vat_rate, 2), '0'), '.') }}%)</td>
-            <td class="value">{{ $invoice->currency }} {{ number_format($invoice->vat_amount, 2) }}</td>
+            <td class="value">{{ $money->format($invoice->vat_amount, $currency) }}</td>
         </tr>
         @endif
         <tr class="totals-divider">
             <td class="label" style="font-weight:700;color:#1e293b">Total</td>
-            <td class="value" style="color:#6366f1;font-size:15px">{{ $invoice->currency }} {{ number_format($invoice->total, 2) }}</td>
+            <td class="value" style="color:#6366f1;font-size:15px">{{ $money->format($invoice->total, $currency) }}</td>
         </tr>
         @if($invoice->amount_paid > 0)
         <tr>
             <td class="label">Amount Paid</td>
-            <td class="value">− {{ $invoice->currency }} {{ number_format($invoice->amount_paid, 2) }}</td>
+            <td class="value">− {{ $money->format($invoice->amount_paid, $currency) }}</td>
         </tr>
         @endif
         <tr><td colspan="2" style="padding:6px 0"></td></tr>
         <tr class="totals-due">
             <td class="label">Amount Due</td>
-            <td class="value" style="color:#fff;text-align:right">{{ $invoice->currency }} {{ number_format($invoice->amount_due, 2) }}</td>
+            <td class="value" style="color:#fff;text-align:right">{{ $money->format($invoice->amount_due, $currency) }}</td>
         </tr>
     </table>
 </div>

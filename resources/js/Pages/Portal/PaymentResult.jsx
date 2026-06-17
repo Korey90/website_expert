@@ -1,9 +1,6 @@
 import PortalLayout from '@/Layouts/PortalLayout';
+import useCurrency from '@/Hooks/useCurrency';
 import { Link } from '@inertiajs/react';
-
-function fmt(amount, currency) {
-    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency ?? 'GBP' }).format(amount ?? 0);
-}
 
 const errorMessages = {
     CANCELED:      'Payment was cancelled.',
@@ -13,6 +10,8 @@ const errorMessages = {
 };
 
 export default function PaymentResult({ client, invoice, success, errorCode }) {
+    const { formatCurrency } = useCurrency();
+
     return (
         <PortalLayout client={client}>
             <div className="max-w-lg mx-auto py-8">
@@ -25,7 +24,7 @@ export default function PaymentResult({ client, invoice, success, errorCode }) {
                             <p className="text-sm text-gray-600">
                                 Thank you! Your payment for invoice{' '}
                                 <span className="font-semibold">{invoice.number}</span>{' '}
-                                ({fmt(invoice.total, invoice.currency)}) has been received.
+                                ({formatCurrency(invoice.total, invoice.currency)}) has been received.
                                 We will send a confirmation shortly.
                             </p>
                         </>

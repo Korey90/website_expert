@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+
 class Business extends Model
 {
     use HasFactory, HasUlids, SoftDeletes;
@@ -22,20 +24,23 @@ class Business extends Model
         'logo_path',
         'primary_color',
         'plan',
+        'plan_price_id',
         'is_active',
         'trial_ends_at',
         'stripe_customer_id',
         'stripe_subscription_id',
         'stripe_subscription_status',
+        'stripe_subscription_currency',
+        'stripe_subscription_interval',
         'settings',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_active'      => 'boolean',
-            'trial_ends_at'  => 'datetime',
-            'settings'       => 'array',
+            'is_active' => 'boolean',
+            'trial_ends_at' => 'datetime',
+            'settings' => 'array',
         ];
     }
 
@@ -58,6 +63,11 @@ class Business extends Model
     public function profile(): HasOne
     {
         return $this->hasOne(BusinessProfile::class);
+    }
+
+    public function planPrice(): BelongsTo
+    {
+        return $this->belongsTo(PlanPrice::class);
     }
 
     public function landingPages(): HasMany

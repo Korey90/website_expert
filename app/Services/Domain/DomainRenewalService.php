@@ -21,8 +21,8 @@ class DomainRenewalService
     private const THRESHOLDS = [
         30 => 'notified_30d',
         14 => 'notified_14d',
-        7  => 'notified_7d',
-        1  => 'notified_1d',
+        7 => 'notified_7d',
+        1 => 'notified_1d',
     ];
 
     public function __construct(private readonly DomainPricingService $pricing) {}
@@ -32,7 +32,7 @@ class DomainRenewalService
      * SendDomainRenewalReminderJob for every threshold that has not yet
      * been notified (idempotent — job itself checks the flag again).
      *
-     * @return int  number of reminder jobs dispatched
+     * @return int number of reminder jobs dispatched
      */
     public function sendReminders(): int
     {
@@ -64,7 +64,7 @@ class DomainRenewalService
     /**
      * Mark all pending renewals whose due_date has passed as overdue.
      *
-     * @return int  number of records updated
+     * @return int number of records updated
      */
     public function markOverdue(): int
     {
@@ -85,14 +85,18 @@ class DomainRenewalService
      */
     public function createRenewal(Domain $domain, int $years = 1): DomainRenewal
     {
-        $price = $this->pricing->calculateRetailPrice($domain->tld, $years, 'renew') ?? 0.00;
+        $currency = $this->pricing->resolveCurrency($domain->domainOrder?->currency);
+        $snapshot = $this->pricing->getPriceForTld($domain->tld, $currency);
+        $currency = $snapshot?->currency ?? $currency;
+        $price = $this->pricing->calculateRetailPrice($domain->tld, $years, 'renew', $currency) ?? 0.00;
 
         return DomainRenewal::create([
-            'domain_id'    => $domain->id,
-            'due_date'     => $domain->expires_at,
-            'years'        => $years,
-            'status'       => 'pending',
+            'domain_id' => $domain->id,
+            'due_date' => $domain->expires_at,
+            'years' => $years,
+            'status' => 'pending',
             'retail_price' => $price,
+            'currency' => $currency,
         ]);
     }
 }

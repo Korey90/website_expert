@@ -1,4 +1,5 @@
 import EmptyState from '@/Components/Shared/EmptyState';
+import useCurrency from '@/Hooks/useCurrency';
 import PortalLayout from '@/Layouts/PortalLayout';
 import { Link } from '@inertiajs/react';
 
@@ -19,16 +20,14 @@ function StatusBadge({ status }) {
     );
 }
 
-function fmt(amount, currency) {
-    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency ?? 'GBP' }).format(amount ?? 0);
-}
-
 function fmtDate(d) {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export default function Quotes({ client, quotes }) {
+    const { formatCurrency } = useCurrency();
+
     return (
         <PortalLayout client={client}>
             <div className="max-w-5xl mx-auto space-y-6">
@@ -58,7 +57,7 @@ export default function Quotes({ client, quotes }) {
                                     <tr key={q.id} className="hover:bg-gray-50">
                                         <td className="px-5 py-3 text-sm font-medium text-gray-900">{q.number}</td>
                                         <td className="px-5 py-3"><StatusBadge status={q.status} /></td>
-                                        <td className="px-5 py-3 text-sm text-gray-900">{fmt(q.total, q.currency)}</td>
+                                        <td className="px-5 py-3 text-sm text-gray-900">{formatCurrency(q.total, q.currency)}</td>
                                         <td className="px-5 py-3 text-sm text-gray-600">{fmtDate(q.valid_until)}</td>
                                         <td className="px-5 py-3 text-sm text-gray-600">{fmtDate(q.accepted_at)}</td>
                                         <td className="px-5 py-3 text-right">

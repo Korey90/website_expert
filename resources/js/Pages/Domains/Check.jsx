@@ -1,4 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import useCurrency from '@/Hooks/useCurrency';
 import MarketingLayout from '@/Layouts/MarketingLayout';
 import { useState } from 'react';
 
@@ -108,8 +109,7 @@ function SearchBar({ initialQuery, l }) {
     );
 }
 
-function ResultRow({ result, auth, l, isExact = false }) {
-    const symbol = result.currency === 'GBP' ? '£' : result.currency === 'EUR' ? '€' : '$';
+function ResultRow({ result, auth, l, formatCurrency, isExact = false }) {
     const orderUrl = auth
         ? route('domains.order') + `?domain=${encodeURIComponent(result.name)}&tld=${encodeURIComponent(result.tld)}`
         : route('login');
@@ -167,12 +167,12 @@ function ResultRow({ result, auth, l, isExact = false }) {
                 {result.is_available && result.register_price != null && (
                     <div className="text-right">
                         <div className="font-display text-lg font-bold text-neutral-900 dark:text-white">
-                            {symbol}{Number(result.register_price).toFixed(2)}
+                            {formatCurrency(result.register_price, result.currency)}
                             <span className="text-xs font-normal text-neutral-400">/yr</span>
                         </div>
                         {result.renew_price != null && (
                             <div className="text-xs text-neutral-400">
-                                {l.renewLabel} {symbol}{Number(result.renew_price).toFixed(2)}/yr
+                                {l.renewLabel} {formatCurrency(result.renew_price, result.currency)}/yr
                             </div>
                         )}
                     </div>
@@ -198,6 +198,7 @@ function ResultRow({ result, auth, l, isExact = false }) {
 
 export default function DomainsCheck({ query = '', results = [], auth }) {
     const { footer, locale } = usePage().props;
+    const { formatCurrency } = useCurrency();
     const l = LABELS[locale] ?? LABELS.en;
     const exactMatch  = results.find(r => r.domain === query);
     const available   = [
@@ -253,7 +254,7 @@ export default function DomainsCheck({ query = '', results = [], auth }) {
                             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-green-600 dark:text-green-400 mb-3">
                                 {l.availableCount(available.length)}
                             </p>
-                            {available.map(r => <ResultRow key={r.domain} result={r} auth={auth} l={l} isExact={r.domain === query} />)}
+                            {available.map(r => <ResultRow key={r.domain} result={r} auth={auth} l={l} formatCurrency={formatCurrency} isExact={r.domain === query} />)}
                         </div>
                     )}
 
@@ -262,7 +263,7 @@ export default function DomainsCheck({ query = '', results = [], auth }) {
                             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 dark:text-neutral-500 mb-3">
                                 {l.notAvailableHeader}
                             </p>
-                            {unavailable.map(r => <ResultRow key={r.domain} result={r} auth={auth} l={l} />)}
+                            {unavailable.map(r => <ResultRow key={r.domain} result={r} auth={auth} l={l} formatCurrency={formatCurrency} />)}
                         </div>
                     )}
 

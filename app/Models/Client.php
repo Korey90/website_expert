@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DefaultsCurrency;
 use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Client extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, DefaultsCurrency, HasFactory, SoftDeletes;
 
     protected static function booted(): void
     {
@@ -26,7 +27,7 @@ class Client extends Model
         });
     }
 
-    protected $fillable = [ 'business_id', 'op_handle', 'company_name', 'trading_name', 'companies_house_number', 'vat_number',
+    protected $fillable = ['business_id', 'op_handle', 'company_name', 'trading_name', 'companies_house_number', 'vat_number',
         'website', 'status', 'source', 'industry',
         'address_line1', 'address_line2', 'city', 'county', 'postcode', 'country',
         'primary_contact_name', 'primary_contact_email', 'primary_contact_phone',
@@ -36,12 +37,12 @@ class Client extends Model
     ];
 
     protected $casts = [
-        'lifetime_value'                => 'decimal:2',
-        'notify_email_transactional'    => 'boolean',
-        'notify_email_projects'         => 'boolean',
-        'notify_email_marketing'        => 'boolean',
-        'notify_sms'                    => 'boolean',
-        'communication_prefs_updated_at'=> 'datetime',
+        'lifetime_value' => 'decimal:2',
+        'notify_email_transactional' => 'boolean',
+        'notify_email_projects' => 'boolean',
+        'notify_email_marketing' => 'boolean',
+        'notify_sms' => 'boolean',
+        'communication_prefs_updated_at' => 'datetime',
     ];
 
     public function assignedTo(): BelongsTo

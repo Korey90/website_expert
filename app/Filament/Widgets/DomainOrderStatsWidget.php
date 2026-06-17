@@ -5,12 +5,14 @@ namespace App\Filament\Widgets;
 use App\Models\Domain;
 use App\Models\DomainOrder;
 use App\Scopes\BusinessScope;
+use App\Services\Currency\CurrencySummaryFormatter;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class DomainOrderStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 10;
+
     protected int|string|array $columnSpan = 'full';
 
     protected function getStats(): array
@@ -25,11 +27,12 @@ class DomainOrderStatsWidget extends BaseWidget
             ->where('status', 'active')
             ->count();
 
-        $monthRevenue = DomainOrder::withoutGlobalScope(BusinessScope::class)
+        $money = app(CurrencySummaryFormatter::class);
+        $monthRevenue = $money->sumByCurrency(DomainOrder::withoutGlobalScope(BusinessScope::class)
             ->where('status', 'completed')
             ->whereMonth('completed_at', now()->month)
             ->whereYear('completed_at', now()->year)
-            ->sum('retail_price');
+            ->get(['currency', 'retail_price']), 'retail_price');
 
         $expiringSoon = Domain::withoutGlobalScope(BusinessScope::class)
             ->where('status', 'active')
@@ -52,8 +55,8 @@ class DomainOrderStatsWidget extends BaseWidget
                 ->icon('heroicon-o-globe-alt')
                 ->color('success'),
 
-            Stat::make('Revenue This Month', '£' . number_format((float) $monthRevenue, 2))
-                ->description('Completed orders in ' . now()->format('F'))
+            Stat::make('Revenue This Month', $money->formatGrouped($monthRevenue))
+                ->description('Completed orders in '.now()->format('F').', grouped per currency')
                 ->icon('heroicon-o-banknotes')
                 ->color('success'),
 

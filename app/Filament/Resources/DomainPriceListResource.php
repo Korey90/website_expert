@@ -3,26 +3,31 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\DomainPriceListResource\Pages;
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\DomainPriceList;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
 use Filament\Forms;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Validation\Rules\Unique;
 
 class DomainPriceListResource extends BaseResource
 {
     protected static ?string $model = DomainPriceList::class;
-    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-tag';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Domains';
+
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-tag';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Domains';
+
     protected static ?string $navigationLabel = 'TLD Price List';
-    protected static ?int    $navigationSort  = 1;
+
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $form): Schema
     {
@@ -34,11 +39,20 @@ class DomainPriceListResource extends BaseResource
                         ->label('TLD (e.g. .co.uk)')
                         ->required()
                         ->maxLength(20)
-                        ->unique(ignoreRecord: true),
+                        ->unique(
+                            table: DomainPriceList::class,
+                            column: 'tld',
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule, Get $get) => $rule->where(
+                                'currency',
+                                strtoupper((string) ($get('currency') ?: FilamentCurrency::default()))
+                            ),
+                        ),
 
                     Forms\Components\Select::make('currency')
-                        ->options(['GBP' => '£ GBP', 'EUR' => '€ EUR', 'USD' => '$ USD'])
-                        ->default('GBP')
+                        ->options(fn () => FilamentCurrency::options())
+                        ->default(fn () => FilamentCurrency::default())
+                        ->live()
                         ->required(),
 
                     Forms\Components\TextInput::make('margin_percent')
@@ -63,21 +77,21 @@ class DomainPriceListResource extends BaseResource
                     Forms\Components\TextInput::make('register_price')
                         ->label('Register /yr')
                         ->numeric()
-                        ->prefix('£')
+                        ->prefix(fn (Get $get) => FilamentCurrency::symbol($get('currency')))
                         ->step('0.01')
                         ->required(),
 
                     Forms\Components\TextInput::make('renew_price')
                         ->label('Renewal /yr')
                         ->numeric()
-                        ->prefix('£')
+                        ->prefix(fn (Get $get) => FilamentCurrency::symbol($get('currency')))
                         ->step('0.01')
                         ->required(),
 
                     Forms\Components\TextInput::make('transfer_price')
                         ->label('Transfer')
                         ->numeric()
-                        ->prefix('£')
+                        ->prefix(fn (Get $get) => FilamentCurrency::symbol($get('currency')))
                         ->step('0.01')
                         ->nullable(),
                 ]),
@@ -90,21 +104,21 @@ class DomainPriceListResource extends BaseResource
                     Forms\Components\TextInput::make('wholesale_register')
                         ->label('Wholesale Register /yr')
                         ->numeric()
-                        ->prefix('£')
+                        ->prefix(fn (Get $get) => FilamentCurrency::symbol($get('currency')))
                         ->step('0.01')
                         ->nullable(),
 
                     Forms\Components\TextInput::make('wholesale_renew')
                         ->label('Wholesale Renewal /yr')
                         ->numeric()
-                        ->prefix('£')
+                        ->prefix(fn (Get $get) => FilamentCurrency::symbol($get('currency')))
                         ->step('0.01')
                         ->nullable(),
 
                     Forms\Components\TextInput::make('wholesale_transfer')
                         ->label('Wholesale Transfer')
                         ->numeric()
-                        ->prefix('£')
+                        ->prefix(fn (Get $get) => FilamentCurrency::symbol($get('currency')))
                         ->step('0.01')
                         ->nullable(),
                 ]),
@@ -132,43 +146,43 @@ class DomainPriceListResource extends BaseResource
 
                 Tables\Columns\TextColumn::make('register_price')
                     ->label('Register /yr (retail)')
-                    ->money('GBP')
+                    ->money(fn (DomainPriceList $record) => FilamentCurrency::tableCurrency($record))
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('renew_price')
                     ->label('Renew /yr (retail)')
-                    ->money('GBP')
+                    ->money(fn (DomainPriceList $record) => FilamentCurrency::tableCurrency($record))
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('transfer_price')
                     ->label('Transfer (retail)')
-                    ->money('GBP')
+                    ->money(fn (DomainPriceList $record) => FilamentCurrency::tableCurrency($record))
                     ->placeholder('—')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('wholesale_register')
                     ->label('Register /yr (wholesale)')
-                    ->money('GBP')
+                    ->money(fn (DomainPriceList $record) => FilamentCurrency::tableCurrency($record))
                     ->placeholder('—')
                     ->sortable()
                     ->toggleable(),
 
                 Tables\Columns\TextColumn::make('wholesale_renew')
                     ->label('Renew /yr (wholesale)')
-                    ->money('GBP')
+                    ->money(fn (DomainPriceList $record) => FilamentCurrency::tableCurrency($record))
                     ->placeholder('—')
                     ->sortable()
                     ->toggleable(),
 
                 Tables\Columns\TextColumn::make('wholesale_transfer')
                     ->label('Transfer (wholesale)')
-                    ->money('GBP')
+                    ->money(fn (DomainPriceList $record) => FilamentCurrency::tableCurrency($record))
                     ->placeholder('—')
                     ->toggleable(),
 
                 Tables\Columns\TextColumn::make('margin_percent')
                     ->label('Margin')
-                    ->formatStateUsing(fn ($state) => $state . '%')
+                    ->formatStateUsing(fn ($state) => $state.'%')
                     ->badge()
                     ->color('info')
                     ->sortable()
@@ -207,9 +221,9 @@ class DomainPriceListResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListDomainPriceLists::route('/'),
+            'index' => Pages\ListDomainPriceLists::route('/'),
             'create' => Pages\CreateDomainPriceList::route('/create'),
-            'edit'   => Pages\EditDomainPriceList::route('/{record}/edit'),
+            'edit' => Pages\EditDomainPriceList::route('/{record}/edit'),
         ];
     }
 }

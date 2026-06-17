@@ -1,9 +1,7 @@
 import { useState, useCallback } from 'react';
 import { usePage } from '@inertiajs/react';
+import useCurrency from '@/Hooks/useCurrency';
 import { pushEvent } from '@/utils/dataLayer';
-
-const fmt = v =>
-    new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0 }).format(v);
 
 const PRICING = {
     projectType: {
@@ -42,8 +40,8 @@ const PRICING = {
     },
     hosting: {
         none:  { label_en: 'Own Hosting',           label_pl: 'Własny hosting',         icon: '🏠', cost: 0,  desc_en: 'You already have a server or use a cloud provider (AWS, GCP, etc.)',          desc_pl: 'Masz już własny serwer lub korzystasz z dostawcy chmury (AWS, GCP itp.)' },
-        basic: { label_en: 'Hosting Basic (£4/mo)', label_pl: 'Hosting Basic (£4/mo.)', icon: '💾', cost: 48, desc_en: 'SSD, PHP 8.x, SSL certificate, 10 GB space — for small/medium sites',          desc_pl: 'SSD, PHP 8.x, certyfikat SSL, 10 GB przestrzeni – dla małych i średnich stron' },
-        pro:   { label_en: 'Hosting Pro (£8/mo)',   label_pl: 'Hosting Pro (£8/mo.)',   icon: '🖥️', cost: 96, desc_en: 'Powerful VPS with daily backup, uptime monitoring and dedicated IP',             desc_pl: 'Wydajny VPS z codziennym backupem, monitoringiem uptime i dedykowanym IP' },
+        basic: { label_en: 'Hosting Basic', label_pl: 'Hosting Basic', icon: '💾', cost: 48, desc_en: 'SSD, PHP 8.x, SSL certificate, 10 GB space — for small/medium sites',          desc_pl: 'SSD, PHP 8.x, certyfikat SSL, 10 GB przestrzeni – dla małych i średnich stron' },
+        pro:   { label_en: 'Hosting Pro',   label_pl: 'Hosting Pro',   icon: '🖥️', cost: 96, desc_en: 'Powerful VPS with daily backup, uptime monitoring and dedicated IP',             desc_pl: 'Wydajny VPS z codziennym backupem, monitoringiem uptime i dedykowanym IP' },
     },
 };
 
@@ -75,7 +73,8 @@ function calcEstimate(a, P) {
     const dl  = P.deadline[a.deadline];
     const ho  = P.hosting[a.hosting];
     if (!pt || !des || !cms || !seo || !dl || !ho) return null;
-    const pagesAddon = Math.max(0, (a.pages - 5)) * 80;
+    const pagesAddonRate = P.pagesAddon?.additional_page?.cost ?? 80;
+    const pagesAddon = Math.max(0, (a.pages - 5)) * pagesAddonRate;
     const intTotal   = (a.integrations || []).reduce((s, k) => s + (P.integrations[k]?.cost || 0), 0);
     const base  = (pt.base + pagesAddon) * des.multiplier + cms.cost + intTotal + seo.cost;
     const total = base * dl.multiplier + ho.cost;
@@ -145,7 +144,14 @@ function NavBtns({ onBack, onNext, canNext, nextLabel, backLabel }) {
 
 export default function CostCalculator({ data = null, pricing: pricingProp = null }) {
     const { locale = 'en' } = usePage().props;
+    const { currency, formatCurrency } = useCurrency();
     const PRICING_DATA = pricingProp ?? PRICING;
+    const pricingCurrency = PRICING_DATA?._currency ?? currency;
+    const fmt = useCallback((value, overrideCurrency = pricingCurrency) => formatCurrency(
+        value,
+        overrideCurrency,
+        { minimumFractionDigits: 0, maximumFractionDigits: 0 },
+    ), [formatCurrency, pricingCurrency]);
 
     const t  = (obj, key) => obj?.[`${key}_${locale}`] ?? obj?.[`${key}_en`] ?? obj?.[key] ?? '';
     const tx = useCallback((key, fallback = '') =>
@@ -219,6 +225,8 @@ export default function CostCalculator({ data = null, pricing: pricingProp = nul
     const toQuoteLabel        = locale === 'pl' ? 'do wyceny'          : locale === 'pt' ? 'do orçamento'     : 'to quote';
     const standardPricingLabel = locale === 'pl' ? 'standardowa wycena' : locale === 'pt' ? 'preço padrão'   : 'standard pricing';
     const fromLabel           = locale === 'pl' ? 'od'                 : locale === 'pt' ? 'a partir de'      : 'from';
+    const perMonthLabel       = locale === 'pl' ? '/mc'                : locale === 'pt' ? '/mês'             : '/mo';
+    const pagesAddonCost      = PRICING_DATA?.pagesAddon?.additional_page?.cost ?? 80;
 
     // Result screen
     if (step > TOTAL_STEPS && estimate) {
@@ -347,7 +355,11 @@ export default function CostCalculator({ data = null, pricing: pricingProp = nul
                     <div className="flex justify-between w-full max-w-xs text-xs text-neutral-400">
                         <span>1</span><span>10</span><span>25</span><span>50+</span>
                     </div>
-                    {a.pages > 5 && <p className="text-xs text-neutral-500">{tx('pages_addon', 'Each page above 5: +£80')}</p>}
+                    {a.pages > 5 && (
+                        <p className="text-xs text-neutral-500">
+                            {tx('pages_addon_label', 'Each page above 5')}: +{fmt(pagesAddonCost)}
+                        </p>
+                    )}
                 </div>
                 <NavBtns onBack={back} onNext={next} canNext nextLabel={nextLabel} backLabel={backLabel} />
             </>
@@ -436,7 +448,7 @@ export default function CostCalculator({ data = null, pricing: pricingProp = nul
                     {Object.entries(PRICING_DATA.hosting).map(([k, v]) => (
                         <OptionBtn key={k} value={k} selected={a.hosting === k} onClick={val => set('hosting', val)}
                             icon={v.icon} label={t(v, 'label')} desc={t(v, 'desc')}
-                            sublabel={v.cost > 0 ? `${fmt(v.cost)}${tx('per_year', '/year')}` : 'self-managed'} />
+                            sublabel={v.cost > 0 ? `${fmt(v.monthly > 0 ? v.monthly : v.cost)}${v.monthly > 0 ? perMonthLabel : tx('per_year', '/year')}` : 'self-managed'} />
                     ))}
                 </div>
                 <NavBtns onBack={back} onNext={next} canNext={!!a.hosting} nextLabel={calcLabel} backLabel={backLabel} />

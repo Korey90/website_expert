@@ -13,14 +13,15 @@ class ReportInvoicesTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private Client $client;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->user   = User::factory()->create();
+        $this->user = User::factory()->create();
         $this->client = Client::create([
-            'company_name'          => 'Test Corp',
+            'company_name' => 'Test Corp',
             'primary_contact_email' => 'test@example.com',
         ]);
     }
@@ -30,15 +31,15 @@ class ReportInvoicesTest extends TestCase
         static $seq = 1;
 
         return Invoice::create(array_merge([
-            'number'     => 'INV-' . str_pad($seq++, 3, '0', STR_PAD_LEFT),
-            'client_id'  => $this->client->id,
+            'number' => 'INV-'.str_pad($seq++, 3, '0', STR_PAD_LEFT),
+            'client_id' => $this->client->id,
             'created_by' => $this->user->id,
-            'status'     => 'sent',
-            'subtotal'   => 1000.00,
+            'status' => 'sent',
+            'subtotal' => 1000.00,
             'vat_amount' => 200.00,
-            'total'      => 1200.00,
+            'total' => 1200.00,
             'issue_date' => now()->toDateString(),
-            'due_date'   => now()->addDays(30)->toDateString(),
+            'due_date' => now()->addDays(30)->toDateString(),
         ], $override));
     }
 
@@ -115,5 +116,18 @@ class ReportInvoicesTest extends TestCase
             ->get(route('reports.invoices.html'))
             ->assertOk()
             ->assertSee('Paid');
+    }
+
+    public function test_invoice_report_totals_are_grouped_by_currency(): void
+    {
+        $this->makeInvoice(['status' => 'paid', 'currency' => 'GBP', 'total' => 1200.00]);
+        $this->makeInvoice(['status' => 'paid', 'currency' => 'PLN', 'total' => 6000.00]);
+
+        $this->actingAs($this->user)
+            ->get(route('reports.invoices.html'))
+            ->assertOk()
+            ->assertSee('GBP ', false)
+            ->assertSee('PLN ', false)
+            ->assertDontSee('£7,200', false);
     }
 }

@@ -19,6 +19,10 @@
     </style>
 </head>
 <body>
+    @php
+        $money = app(\App\Services\Currency\MoneyFormatter::class);
+        $currency = $lead->currency ?? 'GBP';
+    @endphp
     <div class="wrapper">
         <div class="header">
             <h1>👋 New lead assigned to you</h1>
@@ -66,9 +70,9 @@
             @if($lead->budget_min || $lead->budget_max)
             <p class="label">Budget</p>
             <p class="value">
-                {{ $lead->budget_min ? '£'.number_format($lead->budget_min) : '' }}
+                {{ $lead->budget_min ? $money->format($lead->budget_min, $currency) : '' }}
                 {{ ($lead->budget_min && $lead->budget_max) ? '–' : '' }}
-                {{ $lead->budget_max ? '£'.number_format($lead->budget_max) : '' }}
+                {{ $lead->budget_max ? $money->format($lead->budget_max, $currency) : '' }}
             </p>
             @endif
 

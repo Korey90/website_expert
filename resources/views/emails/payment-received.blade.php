@@ -31,6 +31,7 @@
         @php
             $invoice = $payment->invoice;
             $client  = $invoice?->client;
+            $money = app(\App\Services\Currency\MoneyFormatter::class);
             $methodMap = ['stripe' => 'Stripe', 'payu' => 'PayU', 'bank_transfer' => 'Bank Transfer', 'cash' => 'Cash', 'cheque' => 'Cheque', 'other' => 'Other'];
         @endphp
 
@@ -38,7 +39,7 @@
         <p>We have received your payment. Thank you!</p>
 
         <div class="amount">
-            {{ strtoupper($payment->currency ?? 'GBP') }} {{ number_format($payment->amount, 2) }}
+            {{ $money->format($payment->amount, $payment->currency) }}
         </div>
         <p style="font-size:13px;color:#6b7280;margin-top:0;">Payment confirmed <span class="badge">&#10003; Paid</span></p>
 
@@ -60,7 +61,7 @@
         @if($invoice && $invoice->amount_due > 0)
         <p style="background:#fef9c3;border:1px solid #fef08a;border-radius:6px;padding:12px 16px;font-size:13px;color:#713f12;">
             <strong>Remaining balance:</strong>
-            {{ strtoupper($invoice->currency ?? 'GBP') }} {{ number_format($invoice->amount_due, 2) }}
+            {{ $money->format($invoice->amount_due, $invoice->currency) }}
         </p>
         @endif
 

@@ -1,4 +1,5 @@
 import Modal from '@/Components/Modal';
+import useCurrency from '@/Hooks/useCurrency';
 import PortalLayout from '@/Layouts/PortalLayout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
@@ -59,13 +60,13 @@ function Row({ label, children }) {
 
 export default function DomainsShow({ client, domain, renewals }) {
     const { locale, flash } = usePage().props;
+    const { formatCurrency } = useCurrency();
     const t = (key) => T[key]?.[locale] ?? T[key]?.en ?? key;
 
     const days = domain.expires_at
         ? Math.ceil((new Date(domain.expires_at) - Date.now()) / 86_400_000)
         : null;
     const expiringSoon = days !== null && days <= 30 && days >= 0 && domain.status === 'active';
-    const symbol = '£';
 
     // ── Nameserver modal ──────────────────────────────────────────────────────
     const [showNsModal, setShowNsModal] = useState(false);
@@ -231,7 +232,7 @@ export default function DomainsShow({ client, domain, renewals }) {
                                     <tr key={r.id}>
                                         <td className="py-2 text-gray-700">{r.due_date ?? '—'}</td>
                                         <td className="py-2 text-gray-700">{r.years}</td>
-                                        <td className="py-2 text-gray-700">{symbol}{r.amount.toFixed(2)}</td>
+                                        <td className="py-2 text-gray-700">{formatCurrency(r.amount, r.currency)}</td>
                                         <td className="py-2">
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${RENEWAL_STATUS_COLORS[r.status] ?? 'bg-gray-100 text-gray-700'}`}>
                                                 {r.status}

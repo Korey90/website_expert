@@ -11,7 +11,6 @@ export default function useMetaPixel() {
         if (!consent.marketing) return;
         if (window.fbq) return;
 
-        /* eslint-disable */
         !function(f,b,e,v,n,t,s){
             if(f.fbq)return;n=f.fbq=function(){n.callMethod?
             n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -20,7 +19,6 @@ export default function useMetaPixel() {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)
         }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-        /* eslint-enable */
 
         window.fbq('init', tracking.pixel_id);
         window.fbq('track', 'PageView');

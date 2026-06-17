@@ -1,14 +1,19 @@
 <x-filament-panels::page>
+    @php
+        $money = app(\App\Services\Currency\MoneyFormatter::class);
+        $summaryMoney = app(\App\Services\Currency\CurrencySummaryFormatter::class);
+    @endphp
+
     <div class="space-y-4">
 
         {{-- Summary bar --}}
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             @foreach($stages as $stage)
-                @php $t = $totals[$stage->id] ?? ['count' => 0, 'total' => 0]; @endphp
+                @php $t = $totals[$stage->id] ?? ['count' => 0, 'formatted_total' => $summaryMoney->formatGrouped([])]; @endphp
                 <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
                     <p class="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">{{ $stage->name }}</p>
                     <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ $t['count'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">£{{ number_format($t['total'] ?? 0, 0) }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t['formatted_total'] }}</p>
                 </div>
             @endforeach
         </div>
@@ -68,7 +73,7 @@
                                     <div class="mt-2 flex items-center justify-between">
                                         @if($lead->value)
                                             <span class="text-xs font-bold text-green-600 dark:text-green-400">
-                                                £{{ number_format($lead->value, 0) }}
+                                                {{ $money->format($lead->value, $lead->currency) }}
                                             </span>
                                         @else
                                             <span></span>

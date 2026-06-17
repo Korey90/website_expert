@@ -21,6 +21,8 @@
     </style>
 </head>
 <body>
+@php($money = app(\App\Services\Currency\MoneyFormatter::class))
+
 <div class="wrapper">
     <div class="header">
         <h1>WebsiteExpert</h1>
@@ -46,7 +48,7 @@
         </table>
 
         <div class="amount">
-            {{ strtoupper($invoice->currency ?? 'GBP') }} {{ number_format($invoice->total, 2) }}
+            {{ $money->format($invoice->total, $invoice->currency) }}
         </div>
         <p style="font-size:13px;color:#6b7280;">Total including VAT</p>
 

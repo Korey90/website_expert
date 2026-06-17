@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Setting;
 use App\Services\ClientNotificationGate;
+use App\Services\Currency\MoneyFormatter;
 use App\Services\PayuService;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
@@ -24,10 +25,10 @@ class PayuWebhookController extends Controller
      */
     public function notify(Request $request): Response
     {
-        $body            = $request->getContent();
+        $body = $request->getContent();
         $signatureHeader = $request->header('OpenPayU-Signature', '');
 
-        $payu = new PayuService();
+        $payu = new PayuService;
 
         if ($signatureHeader && ! $payu->verifySignature($signatureHeader, $body)) {
             return response('Invalid signature', 400);
@@ -39,7 +40,7 @@ class PayuWebhookController extends Controller
             return response('Invalid JSON payload', 400);
         }
 
-        $order  = $payload['order'] ?? null;
+        $order = $payload['order'] ?? null;
         $status = $order['status'] ?? null;
 
         if (! $order || ! $status) {
@@ -48,7 +49,7 @@ class PayuWebhookController extends Controller
 
         // extOrderId format: inv-{invoice_id}-{timestamp}
         $extOrderId = $order['extOrderId'] ?? '';
-        $invoiceId  = null;
+        $invoiceId = null;
         if (preg_match('/^inv-(\d+)-/', $extOrderId, $m)) {
             $invoiceId = (int) $m[1];
         }
@@ -60,21 +61,22 @@ class PayuWebhookController extends Controller
         $invoice = Invoice::find($invoiceId);
         if (! $invoice) {
             Log::warning("PayU IPN: Invoice #{$invoiceId} not found");
+
             return response('OK', 200);
         }
 
         if ($status === 'COMPLETED') {
-            $amount   = isset($order['totalAmount']) ? $order['totalAmount'] / 100 : 0;
+            $amount = isset($order['totalAmount']) ? $order['totalAmount'] / 100 : 0;
             $currency = strtoupper($order['currencyCode'] ?? 'GBP');
 
             $payment = Payment::create([
                 'invoice_id' => $invoice->id,
-                'amount'     => $amount,
-                'currency'   => $currency,
-                'method'     => 'payu',
-                'status'     => 'completed',
-                'reference'  => $order['orderId'] ?? $extOrderId,
-                'paid_at'    => now(),
+                'amount' => $amount,
+                'currency' => $currency,
+                'method' => 'payu',
+                'status' => 'completed',
+                'reference' => $order['orderId'] ?? $extOrderId,
+                'paid_at' => now(),
             ]);
 
             $invoice->recalculate();
@@ -95,12 +97,12 @@ class PayuWebhookController extends Controller
 
                 $phone = $payuClient?->primary_contact_phone;
                 if ($phone && Setting::get('twilio_enabled') && $payuClient && ClientNotificationGate::canSendSms($payuClient)) {
-                    $sms = new SmsService();
-                    $amountStr = strtoupper($payment->currency) . ' ' . number_format($payment->amount, 2);
+                    $sms = new SmsService;
+                    $amountStr = app(MoneyFormatter::class)->format($payment->amount, $payment->currency);
                     $sms->send($phone, "WebsiteExpert: Payment of {$amountStr} received for invoice {$invoice->number}. Thank you!");
                 }
             } catch (\Throwable $e) {
-                Log::error('PayU: Failed to send payment notification: ' . $e->getMessage());
+                Log::error('PayU: Failed to send payment notification: '.$e->getMessage());
             }
 
             Log::info("PayU IPN: Order {$extOrderId} COMPLETED — Invoice #{$invoice->id} paid");

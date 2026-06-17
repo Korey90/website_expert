@@ -1,4 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import useCurrency from '@/Hooks/useCurrency';
 import PortalLayout from '@/Layouts/PortalLayout';
 
 const COUNTRIES = [
@@ -29,8 +30,8 @@ function FormField({ label, error, required, children }) {
     );
 }
 
-export default function DomainsOrder({ client, domain_name, tld, full_domain, action, prices, prefill = {} }) {
-    const symbol = '£';
+export default function DomainsOrder({ client, domain_name, tld, full_domain, action, prices, currency = 'GBP', prefill = {} }) {
+    const { formatCurrency } = useCurrency();
 
     const { data, setData, post, processing, errors } = useForm({
         domain_name:    domain_name,
@@ -88,7 +89,7 @@ export default function DomainsOrder({ client, domain_name, tld, full_domain, ac
                             >
                                 {[1, 2, 3, 5].map(y => (
                                     <option key={y} value={y}>
-                                        {y} {y === 1 ? 'year' : 'years'} — {symbol}{(prices[y] ?? 0).toFixed(2)}
+                                        {y} {y === 1 ? 'year' : 'years'} — {formatCurrency(prices[y] ?? 0, currency)}
                                     </option>
                                 ))}
                             </select>
@@ -96,7 +97,7 @@ export default function DomainsOrder({ client, domain_name, tld, full_domain, ac
 
                         <div className="rounded-lg bg-gray-50 border border-gray-200 px-4 py-3 flex justify-between items-center">
                             <span className="text-sm text-gray-600">Total Price</span>
-                            <span className="text-xl font-bold text-gray-900">{symbol}{currentPrice.toFixed(2)}</span>
+                            <span className="text-xl font-bold text-gray-900">{formatCurrency(currentPrice, currency)}</span>
                         </div>
                     </div>
 
@@ -239,7 +240,7 @@ export default function DomainsOrder({ client, domain_name, tld, full_domain, ac
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            <span className="text-2xl font-black text-gray-900">{symbol}{currentPrice.toFixed(2)}</span>
+                            <span className="text-2xl font-black text-gray-900">{formatCurrency(currentPrice, currency)}</span>
                             <button
                                 type="submit"
                                 disabled={processing}

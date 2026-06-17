@@ -18,10 +18,9 @@
             default         => ucwords(str_replace('_', ' ', $record->source ?? '')),
         };
 
-        $currencySymbol = match ($record->currency ?? 'GBP') {
-            'GBP' => '£', 'EUR' => '€', 'USD' => '$',
-            default => $record->currency ?? '',
-        };
+        $moneyFormatter = app(\App\Services\Currency\MoneyFormatter::class);
+        $currency = $record->currency ?? app(\App\Services\Currency\CurrencyResolver::class)->resolve(request());
+        $fmt = fn ($amount) => $moneyFormatter->format($amount, $currency);
 
         $hasAddress = collect([
             $record->address_line1, $record->address_line2,
@@ -277,7 +276,7 @@
                         <dt class="mb-1 text-xs text-gray-400 dark:text-gray-500">Lifetime Value</dt>
                         <dd class="text-2xl font-bold text-gray-900 dark:text-white">
                             @if($record->lifetime_value)
-                                {{ $currencySymbol }}{{ number_format((float) $record->lifetime_value, 2) }}
+                                {{ $fmt($record->lifetime_value) }}
                             @else
                                 <span class="text-base font-normal text-gray-400">Not set</span>
                             @endif

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\Project;
 use Filament\Actions\Action;
 use Filament\Tables;
@@ -15,8 +16,11 @@ use Filament\Widgets\TableWidget as BaseWidget;
 class ProjectDeadlinesWidget extends BaseWidget
 {
     protected static ?int $sort = 9;
+
     protected int|string|array $columnSpan = 'full';
+
     protected static bool $isLazy = true;
+
     protected static ?string $heading = 'Upcoming & Overdue Deadlines';
 
     public function table(Table $table): Table
@@ -40,22 +44,22 @@ class ProjectDeadlinesWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn ($state) => match ($state) {
-                        'active'  => 'success',
+                        'active' => 'success',
                         'on_hold' => 'warning',
-                        default   => 'gray',
+                        default => 'gray',
                     }),
 
                 Tables\Columns\TextColumn::make('deadline')
                     ->date('d M Y')
                     ->color(fn ($record) => match (true) {
-                        $record->deadline < now()                => 'danger',
-                        $record->deadline <= now()->addDays(7)   => 'warning',
-                        default                                  => 'primary',
+                        $record->deadline < now() => 'danger',
+                        $record->deadline <= now()->addDays(7) => 'warning',
+                        default => 'primary',
                     })
                     ->description(fn ($record) => match (true) {
-                        $record->deadline < now()              => 'Overdue by ' . now()->diffInDays($record->deadline) . ' day(s)',
-                        $record->deadline <= now()->addDays(7) => 'Due in ' . now()->diffInDays($record->deadline) . ' day(s)',
-                        default                                => 'Due in ' . now()->diffInDays($record->deadline) . ' day(s)',
+                        $record->deadline < now() => 'Overdue by '.now()->diffInDays($record->deadline).' day(s)',
+                        $record->deadline <= now()->addDays(7) => 'Due in '.now()->diffInDays($record->deadline).' day(s)',
+                        default => 'Due in '.now()->diffInDays($record->deadline).' day(s)',
                     }),
 
                 Tables\Columns\TextColumn::make('assignedTo.name')
@@ -63,7 +67,7 @@ class ProjectDeadlinesWidget extends BaseWidget
                     ->placeholder('—'),
 
                 Tables\Columns\TextColumn::make('budget')
-                    ->money('GBP')
+                    ->money(fn (Project $record) => FilamentCurrency::tableCurrency($record))
                     ->placeholder('—'),
             ])
             ->actions([

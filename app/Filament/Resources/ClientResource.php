@@ -3,34 +3,36 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClientResource\Pages;
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\Client;
+use App\Models\User;
 use App\Scopes\BusinessScope;
 use App\Support\PermissionHelper;
-use App\Models\User;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\BulkActionGroup;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ClientResource extends BaseResource
 {
     protected static ?string $model = Client::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-building-office-2';
+
     protected static \UnitEnum|string|null $navigationGroup = 'CRM';
+
     protected static ?int $navigationSort = 1;
 
     public static function infolist(Schema $schema): Schema
@@ -50,10 +52,10 @@ class ClientResource extends BaseResource
                         ->badge()
                         ->color(fn ($state) => match ($state) {
                             'prospect' => 'gray',
-                            'active'   => 'success',
+                            'active' => 'success',
                             'inactive' => 'warning',
                             'archived' => 'danger',
-                            default    => 'gray',
+                            default => 'gray',
                         }),
 
                     TextEntry::make('trading_name')
@@ -120,7 +122,7 @@ class ClientResource extends BaseResource
                 ->schema([
                     TextEntry::make('lifetime_value')
                         ->label('Lifetime Value')
-                        ->money('GBP')
+                        ->money(fn (Client $record) => FilamentCurrency::tableCurrency($record))
                         ->placeholder('—'),
 
                     TextEntry::make('currency')
@@ -231,7 +233,7 @@ class ClientResource extends BaseResource
                     Forms\Components\TextInput::make('city'),
                     Forms\Components\TextInput::make('county'),
                     Forms\Components\TextInput::make('postcode')->maxLength(20),
-                    Forms\Components\Select::make('country')->options(['GB' => 'United Kingdom', 'IE' => 'Ireland', 'US' => 'United States'])->default('GB'),
+                    Forms\Components\Select::make('country')->options(['GB' => 'United Kingdom', 'PL' => 'Poland', 'PT' => 'Portugal', 'IE' => 'Ireland', 'US' => 'United States'])->default(fn () => config('currencies.locale_country_map.'.app()->getLocale(), 'GB')),
                 ]),
 
             Section::make('Primary Contact')
@@ -245,8 +247,8 @@ class ClientResource extends BaseResource
             Section::make('Financial')
                 ->columns(2)
                 ->schema([
-                    Forms\Components\Select::make('currency')->options(['GBP' => '£ GBP', 'EUR' => '€ EUR', 'USD' => '$ USD'])->default('GBP'),
-                    Forms\Components\TextInput::make('lifetime_value')->label('Lifetime Value (£)')->numeric()->prefix('£')->disabled(),
+                    Forms\Components\Select::make('currency')->options(fn () => FilamentCurrency::options())->default(fn () => FilamentCurrency::default()),
+                    Forms\Components\TextInput::make('lifetime_value')->label('Lifetime Value')->numeric()->prefix(fn () => FilamentCurrency::symbol())->disabled(),
                 ]),
 
             Forms\Components\Textarea::make('notes')->columnSpanFull()->rows(3),
@@ -288,13 +290,15 @@ class ClientResource extends BaseResource
                 Tables\Columns\TextColumn::make('primary_contact_email')->label('Email')->searchable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->color(fn ($state) => match($state) { 'prospect' => 'gray', 'active' => 'success', 'inactive' => 'warning', 'archived' => 'danger', default => 'gray' }),
+                    ->color(fn ($state) => match ($state) {
+                        'prospect' => 'gray', 'active' => 'success', 'inactive' => 'warning', 'archived' => 'danger', default => 'gray'
+                    }),
                 Tables\Columns\ToggleColumn::make('portal_access')
                     ->label('Portal Access')
                     ->getStateUsing(fn (Client $record): bool => $record->portalAccesses()->exists())
                     ->disabled(),
                 Tables\Columns\TextColumn::make('city')->sortable(),
-                Tables\Columns\TextColumn::make('lifetime_value')->label('LTV')->money('GBP')->sortable(),
+                Tables\Columns\TextColumn::make('lifetime_value')->label('LTV')->money(fn (Client $record) => FilamentCurrency::tableCurrency($record))->sortable(),
                 Tables\Columns\TextColumn::make('assignedTo.name')->label('Assigned')->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->label('Added')->date()->sortable(),
             ])
@@ -326,14 +330,14 @@ class ClientResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListClients::route('/'),
+            'index' => Pages\ListClients::route('/'),
             'create' => Pages\CreateClient::route('/create'),
-            'view'   => Pages\ViewClient::route('/{record}'),
-            'edit'   => Pages\EditClient::route('/{record}/edit'),
+            'view' => Pages\ViewClient::route('/{record}'),
+            'edit' => Pages\EditClient::route('/{record}/edit'),
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $user = auth()->user();
 
@@ -346,4 +350,3 @@ class ClientResource extends BaseResource
         return parent::getEloquentQuery()->withTrashed();
     }
 }
-

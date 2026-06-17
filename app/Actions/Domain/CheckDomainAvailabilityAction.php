@@ -2,7 +2,6 @@
 
 namespace App\Actions\Domain;
 
-use App\Data\Domain\DomainAvailabilityResult;
 use App\Services\Domain\DomainPricingService;
 use App\Services\Domain\DomainRegistrarInterface;
 use App\Services\Domain\ManualDomainRegistrarService;
@@ -10,9 +9,9 @@ use App\Services\Domain\ManualDomainRegistrarService;
 class CheckDomainAvailabilityAction
 {
     public function __construct(
-        private readonly DomainRegistrarInterface    $registrar,
+        private readonly DomainRegistrarInterface $registrar,
         private readonly ManualDomainRegistrarService $manual,
-        private readonly DomainPricingService         $pricing,
+        private readonly DomainPricingService $pricing,
     ) {}
 
     /**
@@ -42,35 +41,33 @@ class CheckDomainAvailabilityAction
 
         if ($allErrors) {
             $searchResult = $this->manual->search($query);
-            $usingFallback = true;
-        } else {
-            $usingFallback = false;
         }
 
+        $currency = $this->pricing->resolveCurrency();
         $rows = [];
         foreach ($searchResult->results as $availability) {
             // Derive TLD: strip base name from the full domain string
             $tld = substr($availability->domain, strlen($query));
 
             $row = [
-                'domain'         => $availability->domain,
-                'name'           => $query,
-                'tld'            => $tld,
-                'is_available'   => $availability->isAvailable,
-                'is_premium'     => $availability->isPremium,
+                'domain' => $availability->domain,
+                'name' => $query,
+                'tld' => $tld,
+                'is_available' => $availability->isAvailable,
+                'is_premium' => $availability->isPremium,
                 'register_price' => null,
-                'renew_price'    => null,
-                'currency'       => 'GBP',
-                'error'          => $availability->error,
+                'renew_price' => null,
+                'currency' => $currency,
+                'error' => $availability->error,
             ];
 
             if ($availability->isAvailable) {
                 try {
-                    $snapshot = $this->pricing->getPriceForTld($tld);
+                    $snapshot = $this->pricing->getPriceForTld($tld, $currency);
                     if ($snapshot !== null) {
                         $row['register_price'] = $snapshot->registerPrice;
-                        $row['renew_price']    = $snapshot->renewPrice;
-                        $row['currency']       = $snapshot->currency;
+                        $row['renew_price'] = $snapshot->renewPrice;
+                        $row['currency'] = $snapshot->currency;
                     }
                 } catch (\Throwable) {
                     // Price not found — show as available without price
@@ -88,6 +85,7 @@ class CheckDomainAvailabilityAction
             }
             $aIdx = array_search($a['tld'], $preferred, true);
             $bIdx = array_search($b['tld'], $preferred, true);
+
             return ($aIdx === false ? 99 : $aIdx) <=> ($bIdx === false ? 99 : $bIdx);
         });
 

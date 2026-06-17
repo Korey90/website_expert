@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\Project;
 use Filament\Actions\Action;
 use Filament\Tables;
@@ -11,8 +12,11 @@ use Filament\Widgets\TableWidget as BaseWidget;
 class ActiveProjectsWidget extends BaseWidget
 {
     protected static bool $isDiscoverable = false;
+
     protected static ?int $sort = 4;
+
     protected int|string|array $columnSpan = 'full';
+
     protected static ?string $heading = 'Active Projects';
 
     public function table(Table $table): Table
@@ -31,16 +35,16 @@ class ActiveProjectsWidget extends BaseWidget
                     ->label('Client'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->color(fn ($state) => match($state) {
-                        'active'  => 'success',
+                    ->color(fn ($state) => match ($state) {
+                        'active' => 'success',
                         'on_hold' => 'warning',
-                        default   => 'gray',
+                        default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('service_type')
                     ->badge()
                     ->color('gray'),
                 Tables\Columns\TextColumn::make('budget')
-                    ->money('GBP'),
+                    ->money(fn (Project $record) => FilamentCurrency::tableCurrency($record)),
                 Tables\Columns\TextColumn::make('deadline')
                     ->date()
                     ->color(fn ($record) => $record->deadline && $record->deadline < now() ? 'danger' : null),

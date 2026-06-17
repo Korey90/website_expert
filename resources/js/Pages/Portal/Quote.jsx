@@ -1,4 +1,5 @@
 import PortalLayout from '@/Layouts/PortalLayout';
+import useCurrency from '@/Hooks/useCurrency';
 import { Link, router, usePage } from '@inertiajs/react';
 
 const statusConfig = {
@@ -9,16 +10,13 @@ const statusConfig = {
     expired:  { color: 'bg-orange-100 text-orange-800', label: 'Expired' },
 };
 
-function fmt(amount, currency) {
-    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency ?? 'GBP' }).format(amount ?? 0);
-}
-
 function fmtDate(d) {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export default function Quote({ client, quote }) {
+    const { formatCurrency } = useCurrency();
     const { props } = usePage();
     const flash = props.flash ?? {};
     const cfg = statusConfig[quote.status] ?? statusConfig.draft;
@@ -85,7 +83,7 @@ export default function Quote({ client, quote }) {
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
                         <div>
                             <p className="text-xs text-gray-500 uppercase tracking-wide">Total Value</p>
-                            <p className="mt-1 text-2xl font-bold text-gray-900">{fmt(quote.total, quote.currency)}</p>
+                            <p className="mt-1 text-2xl font-bold text-gray-900">{formatCurrency(quote.total, quote.currency)}</p>
                         </div>
                         <div>
                             <p className="text-xs text-gray-500 uppercase tracking-wide">Valid Until</p>
@@ -132,29 +130,29 @@ export default function Quote({ client, quote }) {
                                         {item.details && <p className="text-xs text-gray-500 mt-0.5">{item.details}</p>}
                                     </td>
                                     <td className="px-6 py-4 text-right text-sm text-gray-700">{item.quantity}</td>
-                                    <td className="px-6 py-4 text-right text-sm text-gray-700">{fmt(item.unit_price, quote.currency)}</td>
-                                    <td className="px-6 py-4 text-right text-sm font-medium text-gray-900">{fmt(item.amount, quote.currency)}</td>
+                                    <td className="px-6 py-4 text-right text-sm text-gray-700">{formatCurrency(item.unit_price, quote.currency)}</td>
+                                    <td className="px-6 py-4 text-right text-sm font-medium text-gray-900">{formatCurrency(item.amount, quote.currency)}</td>
                                 </tr>
                             ))}
                         </tbody>
                         <tfoot className="bg-gray-50">
                             <tr>
                                 <td colSpan={3} className="px-6 py-3 text-right text-sm text-gray-500">Subtotal</td>
-                                <td className="px-6 py-3 text-right text-sm text-gray-700">{fmt(quote.subtotal, quote.currency)}</td>
+                                <td className="px-6 py-3 text-right text-sm text-gray-700">{formatCurrency(quote.subtotal, quote.currency)}</td>
                             </tr>
                             {parseFloat(quote.discount_amount) > 0 && (
                                 <tr>
                                     <td colSpan={3} className="px-6 py-3 text-right text-sm text-gray-500">Discount</td>
-                                    <td className="px-6 py-3 text-right text-sm text-red-600">−{fmt(quote.discount_amount, quote.currency)}</td>
+                                    <td className="px-6 py-3 text-right text-sm text-red-600">−{formatCurrency(quote.discount_amount, quote.currency)}</td>
                                 </tr>
                             )}
                             <tr>
                                 <td colSpan={3} className="px-6 py-3 text-right text-sm text-gray-500">VAT ({quote.vat_rate}%)</td>
-                                <td className="px-6 py-3 text-right text-sm text-gray-700">{fmt(quote.vat_amount, quote.currency)}</td>
+                                <td className="px-6 py-3 text-right text-sm text-gray-700">{formatCurrency(quote.vat_amount, quote.currency)}</td>
                             </tr>
                             <tr className="border-t border-gray-200">
                                 <td colSpan={3} className="px-6 py-4 text-right text-sm font-bold text-gray-900">Total</td>
-                                <td className="px-6 py-4 text-right text-sm font-bold text-gray-900">{fmt(quote.total, quote.currency)}</td>
+                                <td className="px-6 py-4 text-right text-sm font-bold text-gray-900">{formatCurrency(quote.total, quote.currency)}</td>
                             </tr>
                         </tfoot>
                     </table>

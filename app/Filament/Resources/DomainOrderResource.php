@@ -3,29 +3,32 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\DomainOrderResource\Pages;
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\DomainOrder;
 use App\Scopes\BusinessScope;
 use App\Support\PermissionHelper;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\ViewAction;
-use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class DomainOrderResource extends BaseResource
 {
     protected static ?string $model = DomainOrder::class;
-    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-shopping-cart';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Domains';
+
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-shopping-cart';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Domains';
+
     protected static ?string $navigationLabel = 'Domain Orders';
-    protected static ?int    $navigationSort  = 2;
+
+    protected static ?int $navigationSort = 2;
 
     public static function infolist(Schema $schema): Schema
     {
@@ -44,12 +47,12 @@ class DomainOrderResource extends BaseResource
                         ->badge()
                         ->color(fn ($state) => match ($state) {
                             'pending_payment' => 'warning',
-                            'paid'            => 'info',
-                            'registering'     => 'info',
-                            'completed'       => 'success',
-                            'failed'          => 'danger',
-                            'cancelled'       => 'gray',
-                            default           => 'gray',
+                            'paid' => 'info',
+                            'registering' => 'info',
+                            'completed' => 'success',
+                            'failed' => 'danger',
+                            'cancelled' => 'gray',
+                            default => 'gray',
                         }),
 
                     TextEntry::make('action')
@@ -57,9 +60,9 @@ class DomainOrderResource extends BaseResource
                         ->badge()
                         ->color(fn ($state) => match ($state) {
                             'register' => 'primary',
-                            'renew'    => 'info',
+                            'renew' => 'info',
                             'transfer' => 'warning',
-                            default    => 'gray',
+                            default => 'gray',
                         }),
 
                     TextEntry::make('years')
@@ -71,11 +74,11 @@ class DomainOrderResource extends BaseResource
 
                     TextEntry::make('retail_price')
                         ->label('Retail Price')
-                        ->money('GBP'),
+                        ->money(fn ($record) => FilamentCurrency::tableCurrency($record)),
 
                     TextEntry::make('wholesale_price')
                         ->label('Wholesale Price')
-                        ->money('GBP')
+                        ->money(fn ($record) => FilamentCurrency::tableCurrency($record))
                         ->placeholder('—'),
 
                     TextEntry::make('currency')
@@ -126,12 +129,12 @@ class DomainOrderResource extends BaseResource
                         ->label('Domain Status')
                         ->badge()
                         ->color(fn ($state) => match ($state) {
-                            'active'      => 'success',
-                            'pending'     => 'warning',
-                            'expired'     => 'danger',
+                            'active' => 'success',
+                            'pending' => 'warning',
+                            'expired' => 'danger',
                             'transferred' => 'info',
-                            'cancelled'   => 'gray',
-                            default       => 'gray',
+                            'cancelled' => 'gray',
+                            default => 'gray',
                         })
                         ->placeholder('Not yet registered'),
 
@@ -210,23 +213,23 @@ class DomainOrderResource extends BaseResource
                                 ->label('Invoice No.')
                                 ->weight('bold')
                                 ->url(fn ($record) => $record
-                                    ? \App\Filament\Resources\InvoiceResource::getUrl('view', ['record' => $record->id])
+                                    ? InvoiceResource::getUrl('view', ['record' => $record->id])
                                     : null),
                             TextEntry::make('status')
                                 ->label('Status')
                                 ->badge()
                                 ->color(fn ($state) => match ($state) {
-                                    'draft'          => 'gray',
-                                    'sent'           => 'info',
+                                    'draft' => 'gray',
+                                    'sent' => 'info',
                                     'partially_paid' => 'warning',
-                                    'paid'           => 'success',
-                                    'overdue'        => 'danger',
-                                    'cancelled'      => 'danger',
-                                    default          => 'gray',
+                                    'paid' => 'success',
+                                    'overdue' => 'danger',
+                                    'cancelled' => 'danger',
+                                    default => 'gray',
                                 }),
                             TextEntry::make('total')
                                 ->label('Total')
-                                ->money('GBP'),
+                                ->money(fn ($record) => FilamentCurrency::tableCurrency($record)),
                             TextEntry::make('due_date')
                                 ->label('Due')
                                 ->date(),
@@ -241,22 +244,22 @@ class DomainOrderResource extends BaseResource
                                 ->label('Quote No.')
                                 ->weight('bold')
                                 ->url(fn ($record) => $record
-                                    ? \App\Filament\Resources\QuoteResource::getUrl('view', ['record' => $record->id])
+                                    ? QuoteResource::getUrl('view', ['record' => $record->id])
                                     : null),
                             TextEntry::make('status')
                                 ->label('Status')
                                 ->badge()
                                 ->color(fn ($state) => match ($state) {
-                                    'draft'    => 'gray',
-                                    'sent'     => 'info',
+                                    'draft' => 'gray',
+                                    'sent' => 'info',
                                     'accepted' => 'success',
                                     'rejected' => 'danger',
-                                    'expired'  => 'warning',
-                                    default    => 'gray',
+                                    'expired' => 'warning',
+                                    default => 'gray',
                                 }),
                             TextEntry::make('total')
                                 ->label('Total')
-                                ->money('GBP'),
+                                ->money(fn ($record) => FilamentCurrency::tableCurrency($record)),
                             TextEntry::make('valid_until')
                                 ->label('Valid Until')
                                 ->date(),
@@ -271,18 +274,18 @@ class DomainOrderResource extends BaseResource
                                 ->label('Title')
                                 ->weight('bold')
                                 ->url(fn ($record) => $record
-                                    ? \App\Filament\Resources\ProjectResource::getUrl('view', ['record' => $record->id])
+                                    ? ProjectResource::getUrl('view', ['record' => $record->id])
                                     : null),
                             TextEntry::make('status')
                                 ->label('Status')
                                 ->badge()
                                 ->color(fn ($state) => match ($state) {
-                                    'draft'     => 'gray',
-                                    'active'    => 'success',
-                                    'on_hold'   => 'warning',
+                                    'draft' => 'gray',
+                                    'active' => 'success',
+                                    'on_hold' => 'warning',
                                     'completed' => 'info',
                                     'cancelled' => 'danger',
-                                    default     => 'gray',
+                                    default => 'gray',
                                 }),
                             TextEntry::make('service_type')
                                 ->label('Service')
@@ -319,26 +322,26 @@ class DomainOrderResource extends BaseResource
                     ->badge()
                     ->color(fn ($state) => match ($state) {
                         'register' => 'primary',
-                        'renew'    => 'info',
+                        'renew' => 'info',
                         'transfer' => 'warning',
-                        default    => 'gray',
+                        default => 'gray',
                     }),
 
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn ($state) => match ($state) {
                         'pending_payment' => 'warning',
-                        'paid'            => 'info',
-                        'registering'     => 'info',
-                        'completed'       => 'success',
-                        'failed'          => 'danger',
-                        'cancelled'       => 'gray',
-                        default           => 'gray',
+                        'paid' => 'info',
+                        'registering' => 'info',
+                        'completed' => 'success',
+                        'failed' => 'danger',
+                        'cancelled' => 'gray',
+                        default => 'gray',
                     }),
 
                 Tables\Columns\TextColumn::make('retail_price')
                     ->label('Price')
-                    ->money('GBP')
+                    ->money(fn ($record) => FilamentCurrency::tableCurrency($record))
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('years')
@@ -359,17 +362,17 @@ class DomainOrderResource extends BaseResource
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'pending_payment' => 'Pending Payment',
-                        'paid'            => 'Paid',
-                        'registering'     => 'Registering',
-                        'completed'       => 'Completed',
-                        'failed'          => 'Failed',
-                        'cancelled'       => 'Cancelled',
+                        'paid' => 'Paid',
+                        'registering' => 'Registering',
+                        'completed' => 'Completed',
+                        'failed' => 'Failed',
+                        'cancelled' => 'Cancelled',
                     ]),
 
                 Tables\Filters\SelectFilter::make('action')
                     ->options([
                         'register' => 'Register',
-                        'renew'    => 'Renew',
+                        'renew' => 'Renew',
                         'transfer' => 'Transfer',
                     ]),
             ])
@@ -386,11 +389,11 @@ class DomainOrderResource extends BaseResource
     {
         return [
             'index' => Pages\ListDomainOrders::route('/'),
-            'view'  => Pages\ViewDomainOrder::route('/{record}'),
+            'view' => Pages\ViewDomainOrder::route('/{record}'),
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $user = auth()->user();
 

@@ -1,4 +1,5 @@
 import PortalLayout from '@/Layouts/PortalLayout';
+import useCurrency from '@/Hooks/useCurrency';
 import { Link, router, usePage } from '@inertiajs/react';
 import { useRef, useState, useEffect, useCallback } from 'react';
 
@@ -8,10 +9,6 @@ const statusConfig = {
     expired:   { color: 'bg-orange-100 text-orange-800', label: 'Expired' },
     cancelled: { color: 'bg-red-100 text-red-800',       label: 'Cancelled' },
 };
-
-function fmt(amount, currency) {
-    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency ?? 'GBP' }).format(amount ?? 0);
-}
 
 function fmtDate(d) {
     if (!d) return '—';
@@ -116,6 +113,7 @@ function SignaturePad({ onChange }) {
 
 /* ── Main Page ───────────────────────────────────────────────── */
 export default function Contract({ client, contract }) {
+    const { formatCurrency } = useCurrency();
     const { props } = usePage();
     const flash = props.flash ?? {};
     const cfg = statusConfig[contract.status] ?? { color: 'bg-gray-100 text-gray-700', label: contract.status };
@@ -184,7 +182,7 @@ export default function Contract({ client, contract }) {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                         <div>
                             <p className="text-xs text-gray-500 uppercase tracking-wide">Contract Value</p>
-                            <p className="mt-1 text-xl font-bold text-gray-900">{fmt(contract.value, contract.currency)}</p>
+                            <p className="mt-1 text-xl font-bold text-gray-900">{formatCurrency(contract.value, contract.currency)}</p>
                         </div>
                         <div>
                             <p className="text-xs text-gray-500 uppercase tracking-wide">Start Date</p>

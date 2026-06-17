@@ -27,14 +27,14 @@ class DomainPriceList extends Model
     ];
 
     protected $casts = [
-        'register_price'      => 'decimal:2',
-        'renew_price'         => 'decimal:2',
-        'transfer_price'      => 'decimal:2',
-        'wholesale_register'  => 'decimal:2',
-        'wholesale_renew'     => 'decimal:2',
-        'wholesale_transfer'  => 'decimal:2',
-        'margin_percent'      => 'decimal:2',
-        'is_active'           => 'boolean',
+        'register_price' => 'decimal:2',
+        'renew_price' => 'decimal:2',
+        'transfer_price' => 'decimal:2',
+        'wholesale_register' => 'decimal:2',
+        'wholesale_renew' => 'decimal:2',
+        'wholesale_transfer' => 'decimal:2',
+        'margin_percent' => 'decimal:2',
+        'is_active' => 'boolean',
     ];
 
     public function scopeActive(Builder $query): Builder
@@ -42,8 +42,38 @@ class DomainPriceList extends Model
         return $query->where('is_active', true);
     }
 
-    public static function forTld(string $tld): ?self
+    public static function forTld(string $tld, ?string $currency = null): ?self
     {
-        return static::where('tld', $tld)->where('is_active', true)->first();
+        $tld = strtolower(trim($tld));
+
+        if ($currency !== null) {
+            return static::active()
+                ->where('tld', $tld)
+                ->where('currency', strtoupper(trim($currency)))
+                ->first();
+        }
+
+        $defaultCurrency = strtoupper((string) config('currencies.default', 'GBP'));
+
+        return static::active()
+            ->where('tld', $tld)
+            ->where('currency', $defaultCurrency)
+            ->first()
+            ?? static::active()
+                ->where('tld', $tld)
+                ->orderBy('currency')
+                ->first();
+    }
+
+    public function setTldAttribute(mixed $value): void
+    {
+        $this->attributes['tld'] = strtolower(trim((string) $value));
+    }
+
+    public function setCurrencyAttribute(mixed $value): void
+    {
+        $currency = $value ?: config('currencies.default', 'GBP');
+
+        $this->attributes['currency'] = strtoupper(trim((string) $currency));
     }
 }

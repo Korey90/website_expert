@@ -1,6 +1,8 @@
 import { Head, usePage } from '@inertiajs/react';
 import MarketingLayout from '@/Layouts/MarketingLayout';
 import useScrollReveal from '@/Hooks/useScrollReveal';
+import useCurrency from '@/Hooks/useCurrency';
+import { servicePriceLabel } from '@/utils/servicePrice';
 
 const ICON_PATHS = {
     'monitor':       <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" />,
@@ -52,6 +54,7 @@ export default function ServicesIndex({ locale: localeProp, items, auth }) {
     useScrollReveal('.reveal');
 
     const { footer } = usePage().props;
+    const { currency, formatCurrency } = useCurrency();
     const locale = localeProp ?? 'en';
     const l = labels[locale] ?? labels.en;
 
@@ -85,6 +88,7 @@ export default function ServicesIndex({ locale: localeProp, items, auth }) {
                             const desc  = t(s, 'description');
                             const iconPath = ICON_PATHS[s.icon] ?? ICON_PATHS['settings'];
                             const href  = s.is_active ? `/services/${s.slug}` : null;
+                            const priceLabel = servicePriceLabel(s, locale, formatCurrency, currency);
 
                             return (
                                 <article
@@ -101,9 +105,9 @@ export default function ServicesIndex({ locale: localeProp, items, auth }) {
                                     {/* Title + price */}
                                     <div className="flex items-start justify-between gap-2 mb-2">
                                         <h2 className="font-semibold text-lg text-neutral-900 dark:text-white leading-snug">{title}</h2>
-                                        {s.price_from && (
+                                        {priceLabel && (
                                             <span className="text-xs text-brand-500 font-semibold whitespace-nowrap mt-0.5 shrink-0">
-                                                {locale === 'en' ? 'from ' : locale === 'pl' ? 'od ' : 'a partir de '}{s.price_from}
+                                                {locale === 'en' ? 'from ' : locale === 'pl' ? 'od ' : 'a partir de '}{priceLabel}
                                             </span>
                                         )}
                                     </div>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DefaultsCurrency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Quote extends Model
 {
-    use HasFactory, SoftDeletes;
+    use DefaultsCurrency, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'number', 'client_id', 'lead_id', 'domain_order_id', 'created_by',
@@ -20,15 +21,15 @@ class Quote extends Model
     ];
 
     protected $casts = [
-        'subtotal'        => 'decimal:2',
+        'subtotal' => 'decimal:2',
         'discount_amount' => 'decimal:2',
-        'vat_rate'        => 'decimal:2',
-        'vat_amount'      => 'decimal:2',
-        'total'           => 'decimal:2',
-        'valid_until'     => 'date',
-        'sent_at'         => 'datetime',
-        'accepted_at'     => 'datetime',
-        'rejected_at'     => 'datetime',
+        'vat_rate' => 'decimal:2',
+        'vat_amount' => 'decimal:2',
+        'total' => 'decimal:2',
+        'valid_until' => 'date',
+        'sent_at' => 'datetime',
+        'accepted_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     public function client(): BelongsTo
@@ -61,9 +62,9 @@ class Quote extends Model
         $subtotal = $this->items()->sum('amount');
         $vat = round(($subtotal - $this->discount_amount) * ($this->vat_rate / 100), 2);
         $this->update([
-            'subtotal'   => $subtotal,
+            'subtotal' => $subtotal,
             'vat_amount' => $vat,
-            'total'      => $subtotal - $this->discount_amount + $vat,
+            'total' => $subtotal - $this->discount_amount + $vat,
         ]);
     }
 }

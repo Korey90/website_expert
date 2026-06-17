@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DefaultsCurrency;
 use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Lead extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, DefaultsCurrency, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'title', 'client_id', 'contact_id', 'pipeline_stage_id',
@@ -27,14 +28,14 @@ class Lead extends Model
     ];
 
     protected $casts = [
-        'calculator_data'      => 'array',
-        'form_data'            => 'array',
-        'value'                => 'decimal:2',
-        'budget_min'           => 'decimal:2',
-        'budget_max'           => 'decimal:2',
-        'expected_close_date'  => 'date',
-        'won_at'               => 'datetime',
-        'lost_at'              => 'datetime',
+        'calculator_data' => 'array',
+        'form_data' => 'array',
+        'value' => 'decimal:2',
+        'budget_min' => 'decimal:2',
+        'budget_max' => 'decimal:2',
+        'expected_close_date' => 'date',
+        'won_at' => 'datetime',
+        'lost_at' => 'datetime',
     ];
 
     public function client(): BelongsTo
@@ -82,12 +83,12 @@ class Lead extends Model
         return $this->belongsTo(Business::class);
     }
 
-    public function leadSource(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function leadSource(): HasOne
     {
         return $this->hasOne(LeadSource::class);
     }
 
-    public function consent(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function consent(): HasOne
     {
         return $this->hasOne(LeadConsent::class);
     }

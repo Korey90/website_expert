@@ -2,22 +2,27 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\Setting;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Notifications\Notification;
-use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Stripe\Balance;
+use Stripe\Stripe;
 
 class PaymentSettingsPage extends BasePage
 {
     protected string $view = 'filament.pages.payment-settings';
 
-    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-credit-card';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Settings';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-credit-card';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+
     protected static ?string $navigationLabel = 'Payment Settings';
-    protected static ?int    $navigationSort  = 10;
+
+    protected static ?int $navigationSort = 10;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];
@@ -25,21 +30,21 @@ class PaymentSettingsPage extends BasePage
     public function mount(): void
     {
         $this->form->fill([
-            'payment_currency'       => Setting::get('payment_currency', 'GBP'),
+            'payment_currency' => Setting::get('payment_currency', 'GBP'),
 
             // Stripe
-            'stripe_enabled'         => (bool) Setting::get('stripe_enabled', false),
-            'stripe_pk'              => Setting::get('stripe_pk', ''),
-            'stripe_sk'              => '',
-            'stripe_webhook_secret'  => '',
+            'stripe_enabled' => (bool) Setting::get('stripe_enabled', false),
+            'stripe_pk' => Setting::get('stripe_pk', ''),
+            'stripe_sk' => '',
+            'stripe_webhook_secret' => '',
 
             // PayU
-            'payu_enabled'           => (bool) Setting::get('payu_enabled', false),
-            'payu_sandbox'           => (bool) Setting::get('payu_sandbox', true),
-            'payu_pos_id'            => Setting::get('payu_pos_id', ''),
-            'payu_client_id'         => Setting::get('payu_client_id', ''),
-            'payu_md5_key'           => '',
-            'payu_client_secret'     => '',
+            'payu_enabled' => (bool) Setting::get('payu_enabled', false),
+            'payu_sandbox' => (bool) Setting::get('payu_sandbox', true),
+            'payu_pos_id' => Setting::get('payu_pos_id', ''),
+            'payu_client_id' => Setting::get('payu_client_id', ''),
+            'payu_md5_key' => '',
+            'payu_client_secret' => '',
         ]);
     }
 
@@ -51,12 +56,7 @@ class PaymentSettingsPage extends BasePage
                     ->schema([
                         Forms\Components\Select::make('payment_currency')
                             ->label('Default currency')
-                            ->options([
-                                'GBP' => 'GBP — British Pound',
-                                'EUR' => 'EUR — Euro',
-                                'USD' => 'USD — US Dollar',
-                                'PLN' => 'PLN — Polish Złoty',
-                            ])
+                            ->options(fn () => FilamentCurrency::options())
                             ->required(),
                     ]),
 
@@ -130,7 +130,7 @@ class PaymentSettingsPage extends BasePage
 
         // Stripe
         Setting::set('stripe_enabled', $data['stripe_enabled'] ? '1' : '0', 'payments');
-        Setting::set('stripe_pk',       $data['stripe_pk'] ?? '',             'payments');
+        Setting::set('stripe_pk', $data['stripe_pk'] ?? '', 'payments');
 
         if (! empty($data['stripe_sk'])) {
             Setting::set('stripe_sk', $data['stripe_sk'], 'payments');
@@ -140,10 +140,10 @@ class PaymentSettingsPage extends BasePage
         }
 
         // PayU
-        Setting::set('payu_enabled',   $data['payu_enabled'] ? '1' : '0', 'payments');
-        Setting::set('payu_sandbox',   $data['payu_sandbox'] ? '1' : '0', 'payments');
-        Setting::set('payu_pos_id',    $data['payu_pos_id'] ?? '',         'payments');
-        Setting::set('payu_client_id', $data['payu_client_id'] ?? '',      'payments');
+        Setting::set('payu_enabled', $data['payu_enabled'] ? '1' : '0', 'payments');
+        Setting::set('payu_sandbox', $data['payu_sandbox'] ? '1' : '0', 'payments');
+        Setting::set('payu_pos_id', $data['payu_pos_id'] ?? '', 'payments');
+        Setting::set('payu_client_id', $data['payu_client_id'] ?? '', 'payments');
 
         if (! empty($data['payu_md5_key'])) {
             Setting::set('payu_md5_key', $data['payu_md5_key'], 'payments');
@@ -167,12 +167,13 @@ class PaymentSettingsPage extends BasePage
                 ->body('Enter and save the Secret Key first.')
                 ->danger()
                 ->send();
+
             return;
         }
 
         try {
-            \Stripe\Stripe::setApiKey($sk);
-            \Stripe\Balance::retrieve();
+            Stripe::setApiKey($sk);
+            Balance::retrieve();
             Notification::make()
                 ->title('Stripe connection successful')
                 ->success()

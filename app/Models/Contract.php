@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DefaultsCurrency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Contract extends Model
 {
-    use HasFactory, SoftDeletes;
+    use DefaultsCurrency, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'number', 'title', 'client_id', 'project_id', 'quote_id', 'contract_template_id', 'created_by',
@@ -19,10 +20,10 @@ class Contract extends Model
     ];
 
     protected $casts = [
-        'value'     => 'decimal:2',
+        'value' => 'decimal:2',
         'starts_at' => 'date',
         'expires_at' => 'date',
-        'sent_at'   => 'datetime',
+        'sent_at' => 'datetime',
         'signed_at' => 'datetime',
     ];
 
@@ -50,21 +51,23 @@ class Contract extends Model
     {
         return $this->belongsTo(ContractTemplate::class);
     }
+
     public function statusColor(): string
     {
         return match ($this->status) {
-            'draft'     => 'gray',
-            'sent'      => 'info',
-            'signed'    => 'success',
-            'expired'   => 'warning',
+            'draft' => 'gray',
+            'sent' => 'info',
+            'signed' => 'success',
+            'expired' => 'warning',
             'cancelled' => 'danger',
-            default     => 'gray',
+            default => 'gray',
         };
     }
 
     public static function nextNumber(): string
     {
         $count = self::withTrashed()->whereYear('created_at', date('Y'))->count() + 1;
-        return 'CNT-' . date('Y') . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
+
+        return 'CNT-'.date('Y').'-'.str_pad($count, 3, '0', STR_PAD_LEFT);
     }
 }

@@ -91,10 +91,17 @@
         <!-- End Google Tag Manager -->
         @endif
 
+        @php
+            $componentBase = "resources/js/Pages/{$page['component']}";
+            $componentPath = file_exists(resource_path("js/Pages/{$page['component']}.tsx"))
+                ? "{$componentBase}.tsx"
+                : "{$componentBase}.jsx";
+        @endphp
+
         <!-- Scripts -->
         @routes
         @viteReactRefresh
-        @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
+        @vite(['resources/js/app.jsx', $componentPath])
         @inertiaHead
     </head>
     <body class="font-sans antialiased">

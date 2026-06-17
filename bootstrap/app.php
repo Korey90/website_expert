@@ -1,9 +1,19 @@
 <?php
 
+use App\Http\Middleware\ApiTokenAuthentication;
+use App\Http\Middleware\DetectGeoCurrency;
+use App\Http\Middleware\EnsureHasBusiness;
+use App\Http\Middleware\EnsureLandingPageTenantAccess;
+use App\Http\Middleware\EnsurePortalClientAccess;
+use App\Http\Middleware\EnsurePortalWorkspaceAccess;
+use App\Http\Middleware\HandleInertiaRequests;
+use App\Jobs\CheckDomainExpiryJob;
+use App\Jobs\CleanLeadSourcePiiJob;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,16 +25,23 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'has.business' => \App\Http\Middleware\EnsureHasBusiness::class,
-            'api.token'    => \App\Http\Middleware\ApiTokenAuthentication::class,
-            'landing-page.tenant' => \App\Http\Middleware\EnsureLandingPageTenantAccess::class,
-            'portal.client' => \App\Http\Middleware\EnsurePortalClientAccess::class,
-            'portal.workspace' => \App\Http\Middleware\EnsurePortalWorkspaceAccess::class,
+            'has.business' => EnsureHasBusiness::class,
+            'api.token' => ApiTokenAuthentication::class,
+            'landing-page.tenant' => EnsureLandingPageTenantAccess::class,
+            'portal.client' => EnsurePortalClientAccess::class,
+            'portal.workspace' => EnsurePortalWorkspaceAccess::class,
+        ]);
+
+        // geo_currency cookie stores only a plain-text currency code (GBP / EUR / PLN).
+        // Excluding it from encryption simplifies testing and avoids decryption issues.
+        $middleware->encryptCookies(except: [
+            DetectGeoCurrency::COOKIE_NAME,
         ]);
 
         $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
-            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            DetectGeoCurrency::class,
+            HandleInertiaRequests::class,
+            AddLinkHeadersForPreloadedAssets::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
@@ -41,7 +58,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('leads:check-stale')->dailyAt('08:00')->onOneServer();
 
         // Daily: remove raw IP addresses from lead_sources older than 30 days (GDPR)
-        $schedule->job(new \App\Jobs\CleanLeadSourcePiiJob)->dailyAt('02:00')->withoutOverlapping();
+        $schedule->job(new CleanLeadSourcePiiJob)->dailyAt('02:00')->withoutOverlapping();
 
         // Daily: remind clients about invoices due within 3 days → triggers invoice.due_soon automation
         $schedule->command('invoices:check-due-soon')->dailyAt('09:00')->onOneServer();
@@ -50,6 +67,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('automation:prune-logs')->dailyAt('03:00')->onOneServer();
 
         // Daily: check domain expiry and dispatch renewal reminder emails (30/14/7/1 days)
-        $schedule->job(new \App\Jobs\CheckDomainExpiryJob)->dailyAt('08:30')->withoutOverlapping()->onOneServer();
+        $schedule->job(new CheckDomainExpiryJob)->dailyAt('08:30')->withoutOverlapping()->onOneServer();
     })
     ->create();

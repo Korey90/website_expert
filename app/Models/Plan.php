@@ -26,16 +26,21 @@ class Plan extends Model
     ];
 
     protected $casts = [
-        'features'       => 'array',
-        'multi_user'     => 'boolean',
-        'custom_domain'  => 'boolean',
-        'ab_testing'     => 'boolean',
-        'is_active'      => 'boolean',
+        'features' => 'array',
+        'multi_user' => 'boolean',
+        'custom_domain' => 'boolean',
+        'ab_testing' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     public function businesses(): HasMany
     {
         return $this->hasMany(Business::class, 'plan', 'slug');
+    }
+
+    public function planPrices(): HasMany
+    {
+        return $this->hasMany(PlanPrice::class);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
@@ -50,12 +55,12 @@ class Plan extends Model
         return $this->price_yearly / 100;
     }
 
-    public function getLandingPageLimitAttribute(): int|null
+    public function getLandingPageLimitAttribute(): ?int
     {
         return $this->max_landing_pages; // null = unlimited
     }
 
-    public function getAiLimitAttribute(): int|null
+    public function getAiLimitAttribute(): ?int
     {
         return $this->max_ai_per_month; // null = unlimited
     }

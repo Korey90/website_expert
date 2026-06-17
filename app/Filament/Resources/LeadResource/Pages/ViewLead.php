@@ -3,11 +3,13 @@
 namespace App\Filament\Resources\LeadResource\Pages;
 
 use App\Filament\Resources\LeadResource;
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Mail\ClientEmailMail;
-use App\Mail\QuoteSentMail;
 use App\Mail\ContractSentMail;
+use App\Mail\QuoteSentMail;
 use App\Models\BriefingTemplate;
 use App\Models\CalculatorPricing;
+use App\Models\CalendarEvent;
 use App\Models\Contract;
 use App\Models\EmailTemplate;
 use App\Models\Lead;
@@ -20,6 +22,7 @@ use App\Models\Quote;
 use App\Models\QuoteItem;
 use App\Models\SalesOfferTemplate;
 use App\Models\SmsTemplate;
+use App\Models\User;
 use App\Services\BriefingService;
 use App\Services\SalesOfferService;
 use App\Services\SmsService;
@@ -31,71 +34,104 @@ use Filament\Actions\RestoreAction;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
-use App\Models\CalendarEvent;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 class ViewLead extends ViewRecord
 {
     use WithFileUploads;
+
     protected static string $resource = LeadResource::class;
 
     protected string $view = 'filament.pages.view-lead';
 
     // ── Email modal ───────────────────────────────────────────────────────────
-    public bool            $showEmailModal  = false;
+    public bool $showEmailModal = false;
+
     public string|int|null $emailTemplateId = null;
-    public string          $emailSubject    = '';
-    public string          $emailBody       = '';
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
-    public array           $emailAttachments = [];
+
+    public string $emailSubject = '';
+
+    public string $emailBody = '';
+
+    /** @var array<int, TemporaryUploadedFile> */
+    public array $emailAttachments = [];
 
     // ── Notes ─────────────────────────────────────────────────────────────
-    public string $newNoteText  = '';
-    public ?int   $editNoteId   = null;
+    public string $newNoteText = '';
+
+    public ?int $editNoteId = null;
+
     public string $editNoteText = '';
 
     // ── Checklist item modal ─────────────────────────────────────────────
-    public bool   $showChecklistModal      = false;
-    public ?int   $checklistModalIndex     = null;
+    public bool $showChecklistModal = false;
+
+    public ?int $checklistModalIndex = null;
+
     public string $checklistModalCondition = '';
-    public string $checklistModalLabel     = '';
-    public string $modalBudgetMin          = '';
-    public string $modalBudgetMax          = '';
-    public ?int   $modalAssignedTo         = null;
-    public string $modalExpectedClose      = '';
-    public string $modalNoteText           = '';
-    public string $modalPhone              = '';
-    public string $modalEmail              = '';
+
+    public string $checklistModalLabel = '';
+
+    public string $modalBudgetMin = '';
+
+    public string $modalBudgetMax = '';
+
+    public ?int $modalAssignedTo = null;
+
+    public string $modalExpectedClose = '';
+
+    public string $modalNoteText = '';
+
+    public string $modalPhone = '';
+
+    public string $modalEmail = '';
 
     // ── SMS modal ─────────────────────────────────────────────────────────
-    public bool            $showSmsModal   = false;
-    public string|int|null $smsTemplateId  = null;
-    public string          $smsMessage     = '';
+    public bool $showSmsModal = false;
+
+    public string|int|null $smsTemplateId = null;
+
+    public string $smsMessage = '';
+
     // ── Calendar / event widget ────────────────────────────────────────
-    public bool   $showEventModal = false;
-    public string $evTitle        = '';
-    public string $evType         = 'meeting';
-    public string $evDate         = '';
-    public bool   $evAllDay       = false;
+    public bool $showEventModal = false;
+
+    public string $evTitle = '';
+
+    public string $evType = 'meeting';
+
+    public string $evDate = '';
+
+    public bool $evAllDay = false;
+
     // ── Proposal builder ─────────────────────────────────────────────────
-    public bool   $showProposalModal  = false;
-    public ?int   $proposalQuoteId    = null;
-    public string $proposalCurrency   = 'GBP';
-    public string $proposalVatRate    = '20';
-    public string $proposalDiscount   = '0';
+    public bool $showProposalModal = false;
+
+    public ?int $proposalQuoteId = null;
+
+    public string $proposalCurrency = '';
+
+    public string $proposalVatRate = '20';
+
+    public string $proposalDiscount = '0';
+
     public string $proposalValidUntil = '';
-    public string $proposalNotes      = '';
-    public string $proposalTerms      = '';
-    public array  $proposalItems      = [];
+
+    public string $proposalNotes = '';
+
+    public string $proposalTerms = '';
+
+    public array $proposalItems = [];
 
     protected function getHeaderActions(): array
     {
         $lead = $this->record;
+
         return [
             Action::make('conduct_briefing')
                 ->label('Conduct Briefing')
@@ -112,7 +148,7 @@ class ViewLead extends ViewRecord
                                 ->orderBy('title')
                                 ->get()
                                 ->mapWithKeys(fn (BriefingTemplate $t) => [
-                                    $t->id => "[{$t->type}] {$t->title}" . ($t->service_slug ? " ({$t->service_slug})" : ''),
+                                    $t->id => "[{$t->type}] {$t->title}".($t->service_slug ? " ({$t->service_slug})" : ''),
                                 ])
                                 ->toArray()
                         )
@@ -149,7 +185,7 @@ class ViewLead extends ViewRecord
                                 ->orderBy('title')
                                 ->get()
                                 ->mapWithKeys(fn (SalesOfferTemplate $t) => [
-                                    $t->id => "[{$t->language}] {$t->title}" . ($t->service_slug ? " ({$t->service_slug})" : ''),
+                                    $t->id => "[{$t->language}] {$t->title}".($t->service_slug ? " ({$t->service_slug})" : ''),
                                 ])
                                 ->toArray()
                         )
@@ -158,7 +194,7 @@ class ViewLead extends ViewRecord
                 ])
                 ->action(function (array $data) use ($lead) {
                     $template = SalesOfferTemplate::findOrFail($data['template_id']);
-                    $service  = app(SalesOfferService::class);
+                    $service = app(SalesOfferService::class);
 
                     $offer = $service->createFromTemplate($lead, $template, auth()->user());
 
@@ -171,7 +207,7 @@ class ViewLead extends ViewRecord
                             ->send();
                     } catch (\RuntimeException $e) {
                         Notification::make()
-                            ->title('Oferta zapisana jako draft — ' . $e->getMessage())
+                            ->title('Oferta zapisana jako draft — '.$e->getMessage())
                             ->warning()
                             ->send();
                     }
@@ -196,7 +232,7 @@ class ViewLead extends ViewRecord
                                 ->orderBy('title')
                                 ->get()
                                 ->mapWithKeys(fn (SalesOfferTemplate $t) => [
-                                    $t->id => "[{$t->language}] {$t->title}" . ($t->service_slug ? " ({$t->service_slug})" : ''),
+                                    $t->id => "[{$t->language}] {$t->title}".($t->service_slug ? " ({$t->service_slug})" : ''),
                                 ])
                                 ->toArray()
                         )
@@ -205,7 +241,7 @@ class ViewLead extends ViewRecord
                 ])
                 ->action(function (array $data) use ($lead) {
                     $template = SalesOfferTemplate::findOrFail($data['template_id']);
-                    $offer    = app(SalesOfferService::class)
+                    $offer = app(SalesOfferService::class)
                         ->createFromTemplate($lead, $template, auth()->user());
 
                     Notification::make()
@@ -253,12 +289,12 @@ class ViewLead extends ViewRecord
                 ->label('Create Contract')
                 ->icon('heroicon-o-document-check')
                 ->color('success')
-                ->visible(fn () => $lead->stage?->is_won && !Contract::where('client_id', $lead->client_id)->where('project_id', $lead->project?->id)->exists())
+                ->visible(fn () => $lead->stage?->is_won && ! Contract::where('client_id', $lead->client_id)->where('project_id', $lead->project?->id)->exists())
                 ->url(fn () => route('filament.admin.resources.contracts.create', [
-                    'client_id'  => $lead->client_id,
+                    'client_id' => $lead->client_id,
                     'project_id' => $lead->project?->id,
-                    'value'      => $lead->value,
-                    'currency'   => $lead->currency,
+                    'value' => $lead->value,
+                    'currency' => $lead->currency,
                 ])),
             EditAction::make(),
             DeleteAction::make(),
@@ -282,10 +318,10 @@ class ViewLead extends ViewRecord
             ->latest()
             ->get();
 
-        $allStages      = PipelineStage::orderBy('order')->get();
-        $hasProject     = $this->record->project !== null;
+        $allStages = PipelineStage::orderBy('order')->get();
+        $hasProject = $this->record->project !== null;
         $emailTemplates = EmailTemplate::where('is_active', true)->orderBy('name')->get();
-        $smsTemplates   = SmsTemplate::where('is_active', true)->orderBy('name')->get();
+        $smsTemplates = SmsTemplate::where('is_active', true)->orderBy('name')->get();
 
         $stageChecklist = $this->record->stage?->checklist ?? [];
         $completedItems = LeadChecklistItem::where('lead_id', $this->record->id)
@@ -321,18 +357,18 @@ class ViewLead extends ViewRecord
 
     public function openEventModal(string $type = 'meeting'): void
     {
-        $validType      = in_array($type, ['meeting', 'call', 'deadline', 'reminder', 'task']) ? $type : 'meeting';
-        $lead           = $this->record->title ?? '';
-        $this->evTitle  = match ($validType) {
-            'call'     => 'Discovery call' . ($lead ? " — {$lead}" : ''),
-            'meeting'  => 'Meeting'        . ($lead ? " — {$lead}" : ''),
-            'deadline' => 'Deadline'       . ($lead ? " — {$lead}" : ''),
-            'reminder' => 'Reminder'       . ($lead ? " — {$lead}" : ''),
-            'task'     => 'Task'           . ($lead ? " — {$lead}" : ''),
-            default    => '',
+        $validType = in_array($type, ['meeting', 'call', 'deadline', 'reminder', 'task']) ? $type : 'meeting';
+        $lead = $this->record->title ?? '';
+        $this->evTitle = match ($validType) {
+            'call' => 'Discovery call'.($lead ? " — {$lead}" : ''),
+            'meeting' => 'Meeting'.($lead ? " — {$lead}" : ''),
+            'deadline' => 'Deadline'.($lead ? " — {$lead}" : ''),
+            'reminder' => 'Reminder'.($lead ? " — {$lead}" : ''),
+            'task' => 'Task'.($lead ? " — {$lead}" : ''),
+            default => '',
         };
-        $this->evType   = $validType;
-        $this->evDate   = now()->format('Y-m-d\TH:i');
+        $this->evType = $validType;
+        $this->evDate = now()->format('Y-m-d\TH:i');
         $this->evAllDay = false;
         $this->showEventModal = true;
     }
@@ -343,34 +379,35 @@ class ViewLead extends ViewRecord
             ['title' => $this->evTitle, 'type' => $this->evType, 'date' => $this->evDate],
             [
                 'title' => ['required', 'string', 'max:255'],
-                'type'  => ['required', 'in:meeting,call,deadline,reminder,task'],
-                'date'  => ['required', 'string'],
+                'type' => ['required', 'in:meeting,call,deadline,reminder,task'],
+                'date' => ['required', 'string'],
             ]
         );
 
         if ($v->fails()) {
             Notification::make()->title($v->errors()->first())->danger()->send();
+
             return;
         }
 
         CalendarEvent::create([
-            'business_id'  => $this->record->business_id,
-            'user_id'      => auth()->id(),
-            'title'        => strip_tags($this->evTitle),
-            'type'         => $this->evType,
-            'starts_at'    => $this->evDate,
-            'all_day'      => $this->evAllDay,
-            'status'       => 'scheduled',
+            'business_id' => $this->record->business_id,
+            'user_id' => auth()->id(),
+            'title' => strip_tags($this->evTitle),
+            'type' => $this->evType,
+            'starts_at' => $this->evDate,
+            'all_day' => $this->evAllDay,
+            'status' => 'scheduled',
             'related_type' => Lead::class,
-            'related_id'   => $this->record->id,
+            'related_id' => $this->record->id,
         ]);
 
         $this->showEventModal = false;
 
         LeadActivity::log($this->record->id, 'event_scheduled', "Event scheduled: {$this->evTitle}", [
-            'type'      => $this->evType,
+            'type' => $this->evType,
             'starts_at' => $this->evDate,
-            'all_day'   => $this->evAllDay,
+            'all_day' => $this->evAllDay,
         ]);
 
         Notification::make()->title('Event scheduled')->success()->send();
@@ -407,11 +444,11 @@ class ViewLead extends ViewRecord
 
     public function openEmailModal(): void
     {
-        $this->emailTemplateId  = null;
-        $this->emailSubject     = '';
-        $this->emailBody        = '';
+        $this->emailTemplateId = null;
+        $this->emailSubject = '';
+        $this->emailBody = '';
         $this->emailAttachments = [];
-        $this->showEmailModal   = true;
+        $this->showEmailModal = true;
     }
 
     public function updatedEmailTemplateId(string|int|null $value): void
@@ -420,7 +457,8 @@ class ViewLead extends ViewRecord
 
         if (! $id) {
             $this->emailSubject = '';
-            $this->emailBody    = '';
+            $this->emailBody = '';
+
             return;
         }
 
@@ -430,38 +468,39 @@ class ViewLead extends ViewRecord
         }
 
         $resolved = $tpl->getForLocale(app()->getLocale());
-        $subject  = $resolved['subject']   ?? '';
-        $body     = $resolved['body_html'] ?? '';
+        $subject = $resolved['subject'] ?? '';
+        $body = $resolved['body_html'] ?? '';
 
         $lead = Lead::with('client')->find($this->record->id);
         if ($lead) {
             $vars = [
-                '{{client_name}}'  => $lead->client?->primary_contact_name ?? '',
-                '{{company_name}}' => $lead->client?->company_name         ?? '',
-                '{{lead_title}}'   => $lead->title,
+                '{{client_name}}' => $lead->client?->primary_contact_name ?? '',
+                '{{company_name}}' => $lead->client?->company_name ?? '',
+                '{{lead_title}}' => $lead->title,
             ];
             $subject = str_replace(array_keys($vars), array_values($vars), $subject);
-            $body    = str_replace(array_keys($vars), array_values($vars), $body);
+            $body = str_replace(array_keys($vars), array_values($vars), $body);
         }
 
         $this->emailSubject = $subject;
-        $this->emailBody    = $body;
+        $this->emailBody = $body;
     }
 
     public function sendEmail(): void
     {
         $this->validate([
-            'emailSubject'    => ['required', 'string', 'max:255'],
-            'emailBody'       => ['required', 'string'],
-            'emailAttachments'   => ['array', 'max:5'],
+            'emailSubject' => ['required', 'string', 'max:255'],
+            'emailBody' => ['required', 'string'],
+            'emailAttachments' => ['array', 'max:5'],
             'emailAttachments.*' => ['file', 'max:10240'],
         ]);
 
-        $lead    = Lead::with('client')->findOrFail($this->record->id);
+        $lead = Lead::with('client')->findOrFail($this->record->id);
         $toEmail = $lead->client?->primary_contact_email;
 
         if (! $toEmail) {
             Notification::make()->title('No email address on file for this client')->danger()->send();
+
             return;
         }
 
@@ -470,7 +509,7 @@ class ViewLead extends ViewRecord
         foreach ($this->emailAttachments as $file) {
             $stored = $file->storeAs(
                 'email-attachments/tmp',
-                uniqid('att_', true) . '_' . $file->getClientOriginalName(),
+                uniqid('att_', true).'_'.$file->getClientOriginalName(),
                 'local',
             );
             $attachmentPaths[] = Storage::disk('local')->path($stored);
@@ -479,12 +518,12 @@ class ViewLead extends ViewRecord
         Mail::to($toEmail)->queue(new ClientEmailMail($this->emailSubject, $this->emailBody, $attachmentPaths));
 
         LeadActivity::log($this->record->id, 'email_sent', "Email sent to {$toEmail}: \"{$this->emailSubject}\"", [
-            'to'          => $toEmail,
-            'subject'     => $this->emailSubject,
+            'to' => $toEmail,
+            'subject' => $this->emailSubject,
             'attachments' => count($attachmentPaths),
         ]);
 
-        $this->showEmailModal   = false;
+        $this->showEmailModal = false;
         $this->emailAttachments = [];
         Notification::make()->title("Email queued for {$toEmail}")->success()->send();
     }
@@ -503,8 +542,8 @@ class ViewLead extends ViewRecord
     public function openSmsModal(): void
     {
         $this->smsTemplateId = null;
-        $this->smsMessage    = '';
-        $this->showSmsModal  = true;
+        $this->smsMessage = '';
+        $this->showSmsModal = true;
     }
 
     public function updatedSmsTemplateId(string|int|null $value): void
@@ -512,6 +551,7 @@ class ViewLead extends ViewRecord
         $id = $value ? (int) $value : null;
         if (! $id) {
             $this->smsMessage = '';
+
             return;
         }
 
@@ -522,13 +562,13 @@ class ViewLead extends ViewRecord
 
         $lead = Lead::with(['client', 'stage', 'assignedTo'])->find($this->record->id);
         $vars = [
-            'client_name'   => $lead?->client?->primary_contact_name ?? '',
-            'company_name'  => $lead?->client?->company_name         ?? '',
-            'lead_title'    => $lead?->title                         ?? '',
-            'stage_name'    => $lead?->stage?->name                  ?? '',
-            'assigned_name' => $lead?->assignedTo?->name             ?? '',
-            'project_name'  => $lead?->project?->name                ?? '',
-            'today'         => now()->format('d M Y'),
+            'client_name' => $lead?->client?->primary_contact_name ?? '',
+            'company_name' => $lead?->client?->company_name ?? '',
+            'lead_title' => $lead?->title ?? '',
+            'stage_name' => $lead?->stage?->name ?? '',
+            'assigned_name' => $lead?->assignedTo?->name ?? '',
+            'project_name' => $lead?->project?->name ?? '',
+            'today' => now()->format('d M Y'),
         ];
 
         $this->smsMessage = $tpl->render($vars);
@@ -540,11 +580,12 @@ class ViewLead extends ViewRecord
             'smsMessage' => ['required', 'string', 'max:1600'],
         ]);
 
-        $lead  = Lead::with('client')->findOrFail($this->record->id);
+        $lead = Lead::with('client')->findOrFail($this->record->id);
         $phone = $lead->client?->primary_contact_phone;
 
         if (! $phone) {
             Notification::make()->title('No phone number on file for this client')->danger()->send();
+
             return;
         }
 
@@ -552,16 +593,17 @@ class ViewLead extends ViewRecord
 
         if (! $sent) {
             Notification::make()->title('SMS failed — check logs')->danger()->send();
+
             return;
         }
 
-        LeadActivity::log($this->record->id, 'sms_sent', 'SMS sent to ' . $phone . ': "' . mb_substr($this->smsMessage, 0, 80) . (mb_strlen($this->smsMessage) > 80 ? '…' : '') . '"');
+        LeadActivity::log($this->record->id, 'sms_sent', 'SMS sent to '.$phone.': "'.mb_substr($this->smsMessage, 0, 80).(mb_strlen($this->smsMessage) > 80 ? '…' : '').'"');
 
-        $this->showSmsModal  = false;
+        $this->showSmsModal = false;
         $this->smsTemplateId = null;
-        $this->smsMessage    = '';
+        $this->smsMessage = '';
 
-        Notification::make()->title('SMS sent to ' . $phone)->success()->send();
+        Notification::make()->title('SMS sent to '.$phone)->success()->send();
     }
 
     public function addNote(): void
@@ -585,7 +627,7 @@ class ViewLead extends ViewRecord
     public function startEditNote(int $noteId): void
     {
         $note = LeadNote::findOrFail($noteId);
-        $this->editNoteId   = $noteId;
+        $this->editNoteId = $noteId;
         $this->editNoteText = $note->content;
     }
 
@@ -595,14 +637,14 @@ class ViewLead extends ViewRecord
 
         LeadNote::findOrFail($this->editNoteId)->update(['content' => $this->editNoteText]);
 
-        $this->editNoteId   = null;
+        $this->editNoteId = null;
         $this->editNoteText = '';
         Notification::make()->title('Note updated')->success()->send();
     }
 
     public function cancelEditNote(): void
     {
-        $this->editNoteId   = null;
+        $this->editNoteId = null;
         $this->editNoteText = '';
     }
 
@@ -625,23 +667,23 @@ class ViewLead extends ViewRecord
         $lead = $this->record;
 
         return match ($condition) {
-            'has_assignee'        => $lead->assigned_to !== null,
-            'has_value'           => $lead->value !== null && (float) $lead->value > 0,
-            'has_client'          => $lead->client_id !== null,
-            'has_contact'         => $lead->contact_id !== null,
-            'has_expected_close'  => $lead->expected_close_date !== null,
-            'has_phone'           => ! empty($lead->client?->primary_contact_phone),
-            'has_email'           => ! empty($lead->client?->primary_contact_email),
-            'email_sent'          => $lead->activities()->where('type', 'email_sent')->exists(),
-            'call_scheduled'      => CalendarEvent::where('related_type', Lead::class)
-                                        ->where('related_id', $lead->id)
-                                        ->where('type', 'call')
-                                        ->where('status', '!=', 'cancelled')
-                                        ->exists(),
-            'has_project'         => $lead->project()->exists(),
-            'has_notes'           => $lead->notes()->exists(),
+            'has_assignee' => $lead->assigned_to !== null,
+            'has_value' => $lead->value !== null && (float) $lead->value > 0,
+            'has_client' => $lead->client_id !== null,
+            'has_contact' => $lead->contact_id !== null,
+            'has_expected_close' => $lead->expected_close_date !== null,
+            'has_phone' => ! empty($lead->client?->primary_contact_phone),
+            'has_email' => ! empty($lead->client?->primary_contact_email),
+            'email_sent' => $lead->activities()->where('type', 'email_sent')->exists(),
+            'call_scheduled' => CalendarEvent::where('related_type', Lead::class)
+                ->where('related_id', $lead->id)
+                ->where('type', 'call')
+                ->where('status', '!=', 'cancelled')
+                ->exists(),
+            'has_project' => $lead->project()->exists(),
+            'has_notes' => $lead->notes()->exists(),
             'has_calculator_data' => ! empty($lead->calculator_data),
-            default               => false,
+            default => false,
         };
     }
 
@@ -654,20 +696,20 @@ class ViewLead extends ViewRecord
             return;
         }
         $existing = LeadChecklistItem::where([
-            'lead_id'           => $this->record->id,
+            'lead_id' => $this->record->id,
             'pipeline_stage_id' => $this->record->pipeline_stage_id,
-            'item_index'        => $index,
+            'item_index' => $index,
         ])->first();
 
         if ($existing) {
             $existing->delete();
         } else {
             LeadChecklistItem::create([
-                'lead_id'           => $this->record->id,
+                'lead_id' => $this->record->id,
                 'pipeline_stage_id' => $this->record->pipeline_stage_id,
-                'item_index'        => $index,
-                'completed_by'      => Auth::id(),
-                'completed_at'      => now(),
+                'item_index' => $index,
+                'completed_by' => Auth::id(),
+                'completed_at' => now(),
             ]);
         }
     }
@@ -676,16 +718,16 @@ class ViewLead extends ViewRecord
 
     public function openChecklistItemModal(int $index): void
     {
-        $lead      = $this->record;
+        $lead = $this->record;
         $checklist = $lead->stage?->checklist ?? [];
-        $item      = $checklist[$index] ?? null;
+        $item = $checklist[$index] ?? null;
         if (! $item) {
             return;
         }
 
-        $this->checklistModalIndex     = $index;
+        $this->checklistModalIndex = $index;
         $this->checklistModalCondition = $item['condition'] ?? '';
-        $this->checklistModalLabel     = $item['label'] ?? '';
+        $this->checklistModalLabel = $item['label'] ?? '';
 
         // Pre-fill current values
         switch ($this->checklistModalCondition) {
@@ -726,7 +768,7 @@ class ViewLead extends ViewRecord
                 $lead->update([
                     'budget_min' => $this->modalBudgetMin !== '' ? $this->modalBudgetMin : null,
                     'budget_max' => $this->modalBudgetMax !== '' ? $this->modalBudgetMax : null,
-                    'value'      => $this->modalBudgetMax !== '' ? $this->modalBudgetMax
+                    'value' => $this->modalBudgetMax !== '' ? $this->modalBudgetMax
                                     : ($this->modalBudgetMin !== '' ? $this->modalBudgetMin : $lead->value),
                 ]);
                 LeadActivity::log($lead->id, 'updated', 'Budget range updated', [
@@ -777,6 +819,7 @@ class ViewLead extends ViewRecord
 
             default:
                 $this->showChecklistModal = false;
+
                 return;
         }
 
@@ -797,28 +840,28 @@ class ViewLead extends ViewRecord
             ->first();
 
         if ($existing) {
-            $this->proposalQuoteId    = $existing->id;
-            $this->proposalCurrency   = $existing->currency;
-            $this->proposalVatRate    = (string) $existing->vat_rate;
-            $this->proposalDiscount   = (string) $existing->discount_amount;
+            $this->proposalQuoteId = $existing->id;
+            $this->proposalCurrency = $existing->currency;
+            $this->proposalVatRate = (string) $existing->vat_rate;
+            $this->proposalDiscount = (string) $existing->discount_amount;
             $this->proposalValidUntil = $existing->valid_until?->format('Y-m-d') ?? today()->addDays(30)->format('Y-m-d');
-            $this->proposalNotes      = $existing->notes ?? '';
-            $this->proposalTerms      = $existing->terms ?? 'This quote is valid for 30 days from the date of issue.';
-            $this->proposalItems      = $existing->items->map(fn ($item) => [
+            $this->proposalNotes = $existing->notes ?? '';
+            $this->proposalTerms = $existing->terms ?? 'This quote is valid for 30 days from the date of issue.';
+            $this->proposalItems = $existing->items->map(fn ($item) => [
                 'description' => $item->description,
-                'details'     => $item->details ?? '',
-                'quantity'    => (string) $item->quantity,
-                'unit_price'  => (string) $item->unit_price,
+                'details' => $item->details ?? '',
+                'quantity' => (string) $item->quantity,
+                'unit_price' => (string) $item->unit_price,
             ])->toArray();
         } else {
-            $this->proposalQuoteId    = null;
-            $this->proposalCurrency   = $this->record->currency ?? 'GBP';
-            $this->proposalVatRate    = '20';
-            $this->proposalDiscount   = '0';
+            $this->proposalQuoteId = null;
+            $this->proposalCurrency = $this->record->currency ?? FilamentCurrency::default();
+            $this->proposalVatRate = '20';
+            $this->proposalDiscount = '0';
             $this->proposalValidUntil = today()->addDays(30)->format('Y-m-d');
-            $this->proposalNotes      = '';
-            $this->proposalTerms      = 'This quote is valid for 30 days from the date of issue.';
-            $this->proposalItems      = [
+            $this->proposalNotes = '';
+            $this->proposalTerms = 'This quote is valid for 30 days from the date of issue.';
+            $this->proposalItems = [
                 ['description' => '', 'details' => '', 'quantity' => '1', 'unit_price' => ''],
             ];
         }
@@ -845,8 +888,8 @@ class ViewLead extends ViewRecord
         if (trim($search) !== '') {
             $q->where(function ($query) use ($search) {
                 $query->where('label', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%")
-                      ->orWhere('category', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%");
             });
         }
 
@@ -860,27 +903,27 @@ class ViewLead extends ViewRecord
     public function saveProposalDraft(bool $sendNow = false): void
     {
         $this->validate([
-            'proposalItems'               => ['required', 'array', 'min:1'],
+            'proposalItems' => ['required', 'array', 'min:1'],
             'proposalItems.*.description' => ['required', 'string', 'max:500'],
-            'proposalItems.*.quantity'    => ['required', 'numeric', 'min:0.01'],
-            'proposalItems.*.unit_price'  => ['required', 'numeric', 'min:0'],
-            'proposalVatRate'             => ['required', 'numeric', 'min:0', 'max:100'],
-            'proposalDiscount'            => ['nullable', 'numeric', 'min:0'],
-            'proposalValidUntil'          => ['nullable', 'date'],
+            'proposalItems.*.quantity' => ['required', 'numeric', 'min:0.01'],
+            'proposalItems.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'proposalVatRate' => ['required', 'numeric', 'min:0', 'max:100'],
+            'proposalDiscount' => ['nullable', 'numeric', 'min:0'],
+            'proposalValidUntil' => ['nullable', 'date'],
         ]);
 
-        $lead      = $this->record;
+        $lead = $this->record;
         $quoteData = [
-            'client_id'       => $lead->client_id,
-            'lead_id'         => $lead->id,
-            'created_by'      => Auth::id(),
-            'status'          => 'draft',
-            'currency'        => $this->proposalCurrency,
-            'vat_rate'        => (float) $this->proposalVatRate,
+            'client_id' => $lead->client_id,
+            'lead_id' => $lead->id,
+            'created_by' => Auth::id(),
+            'status' => 'draft',
+            'currency' => $this->proposalCurrency ?: FilamentCurrency::default(),
+            'vat_rate' => (float) $this->proposalVatRate,
             'discount_amount' => (float) ($this->proposalDiscount ?: 0),
-            'valid_until'     => $this->proposalValidUntil ?: null,
-            'notes'           => $this->proposalNotes ?: null,
-            'terms'           => $this->proposalTerms ?: null,
+            'valid_until' => $this->proposalValidUntil ?: null,
+            'notes' => $this->proposalNotes ?: null,
+            'terms' => $this->proposalTerms ?: null,
         ];
 
         if ($this->proposalQuoteId) {
@@ -888,19 +931,19 @@ class ViewLead extends ViewRecord
             $quote->update($quoteData);
             $quote->items()->delete();
         } else {
-            $number = 'QUOT-' . date('Y') . '-' . str_pad(Quote::withTrashed()->count() + 1, 3, '0', STR_PAD_LEFT);
-            $quote  = Quote::create(array_merge($quoteData, ['number' => $number]));
+            $number = 'QUOT-'.date('Y').'-'.str_pad(Quote::withTrashed()->count() + 1, 3, '0', STR_PAD_LEFT);
+            $quote = Quote::create(array_merge($quoteData, ['number' => $number]));
             $this->proposalQuoteId = $quote->id;
         }
 
         foreach ($this->proposalItems as $i => $item) {
             QuoteItem::create([
-                'quote_id'    => $quote->id,
+                'quote_id' => $quote->id,
                 'description' => $item['description'],
-                'details'     => $item['details'] ?: null,
-                'quantity'    => (float) ($item['quantity'] ?: 1),
-                'unit_price'  => (float) ($item['unit_price'] ?: 0),
-                'order'       => $i,
+                'details' => $item['details'] ?: null,
+                'quantity' => (float) ($item['quantity'] ?: 1),
+                'unit_price' => (float) ($item['unit_price'] ?: 0),
+                'order' => $i,
             ]);
         }
 
@@ -911,7 +954,7 @@ class ViewLead extends ViewRecord
         } else {
             $this->record->refresh();
             $this->showProposalModal = false;
-            Notification::make()->title('Draft saved — ' . $quote->number)->success()->send();
+            Notification::make()->title('Draft saved — '.$quote->number)->success()->send();
         }
     }
 
@@ -929,11 +972,13 @@ class ViewLead extends ViewRecord
 
         if (! $quote) {
             Notification::make()->title('No draft quote found')->danger()->send();
+
             return;
         }
 
         if ($quote->items()->count() === 0) {
             Notification::make()->title('Quote has no items — open the builder first')->warning()->send();
+
             return;
         }
 
@@ -947,6 +992,7 @@ class ViewLead extends ViewRecord
 
         if (! $toEmail) {
             Notification::make()->title('No email on file for this client')->danger()->send();
+
             return;
         }
 
@@ -963,9 +1009,9 @@ class ViewLead extends ViewRecord
         }
 
         LeadActivity::log($this->record->id, 'email_sent', "Proposal {$quote->number} sent to {$toEmail}", [
-            'quote_id'     => $quote->id,
+            'quote_id' => $quote->id,
             'quote_number' => $quote->number,
-            'to'           => $toEmail,
+            'to' => $toEmail,
         ]);
 
         $this->showProposalModal = false;
@@ -976,25 +1022,26 @@ class ViewLead extends ViewRecord
     public function moveStage(string $direction): void
     {
         $stages = PipelineStage::orderBy('order')->get()->keyBy('id');
-        $ids    = $stages->keys()->toArray();
-        $idx    = array_search($this->record->pipeline_stage_id, $ids);
+        $ids = $stages->keys()->toArray();
+        $idx = array_search($this->record->pipeline_stage_id, $ids);
         $newIdx = $direction === 'forward' ? $idx + 1 : $idx - 1;
 
         if ($newIdx < 0 || $newIdx >= count($ids)) {
             Notification::make()->title('Already at boundary stage')->warning()->send();
+
             return;
         }
 
         $fromStage = $stages[$this->record->pipeline_stage_id]?->name ?? '?';
         $toStageId = $ids[$newIdx];
-        $toStage   = $stages[$toStageId]?->name ?? '?';
+        $toStage = $stages[$toStageId]?->name ?? '?';
 
         $this->record->update(['pipeline_stage_id' => $toStageId]);
         $this->record->refresh();
 
         LeadActivity::log($this->record->id, 'stage_moved', "Stage moved: {$fromStage} → {$toStage}", [
             'from' => $fromStage,
-            'to'   => $toStage,
+            'to' => $toStage,
         ]);
 
         Notification::make()->title("Moved to: {$toStage}")->success()->send();
@@ -1005,6 +1052,7 @@ class ViewLead extends ViewRecord
         $stage = PipelineStage::where('is_won', true)->first();
         if (! $stage) {
             Notification::make()->title('No "Won" stage configured')->warning()->send();
+
             return;
         }
         $this->record->update(['pipeline_stage_id' => $stage->id, 'won_at' => now()]);
@@ -1018,6 +1066,7 @@ class ViewLead extends ViewRecord
         $stage = PipelineStage::where('is_lost', true)->first();
         if (! $stage) {
             Notification::make()->title('No "Lost" stage configured')->warning()->send();
+
             return;
         }
         $this->record->update(['pipeline_stage_id' => $stage->id, 'lost_at' => now()]);
@@ -1030,18 +1079,19 @@ class ViewLead extends ViewRecord
     {
         if ($this->record->project()->exists()) {
             Notification::make()->title('Project already exists for this lead')->warning()->send();
+
             return;
         }
 
         $project = Project::create([
-            'title'        => $this->record->title,
-            'client_id'    => $this->record->client_id,
-            'lead_id'      => $this->record->id,
-            'assigned_to'  => $this->record->assigned_to,
+            'title' => $this->record->title,
+            'client_id' => $this->record->client_id,
+            'lead_id' => $this->record->id,
+            'assigned_to' => $this->record->assigned_to,
             'service_type' => $this->record->calculator_data['project_type'] ?? null,
-            'status'       => 'draft',
-            'budget'       => $this->record->value,
-            'currency'     => $this->record->currency ?? 'GBP',
+            'status' => 'draft',
+            'budget' => $this->record->value,
+            'currency' => $this->record->currency ?? FilamentCurrency::default(),
         ]);
 
         LeadActivity::log($this->record->id, 'project_created', 'Converted to project', [
@@ -1058,7 +1108,7 @@ class ViewLead extends ViewRecord
         $this->record->update(['assigned_to' => $user->id]);
         $this->record->refresh();
         LeadActivity::log($this->record->id, 'assigned', "Assigned to {$user->name}", [
-            'user_id'   => $user->id,
+            'user_id' => $user->id,
             'user_name' => $user->name,
         ]);
         Notification::make()->title('Lead assigned to you')->success()->send();

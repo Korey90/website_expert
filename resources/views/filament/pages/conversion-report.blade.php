@@ -74,7 +74,7 @@
                                         <span class="{{ $color }} font-semibold">{{ $rate }}%</span>
                                     </td>
                                     <td class="px-6 py-3 text-sm text-right text-gray-700 dark:text-gray-300">
-                                        £{{ number_format($row->won_value, 2) }}
+                                        {{ $row->won_value_formatted }}
                                     </td>
                                 </tr>
                             @endforeach
@@ -87,7 +87,7 @@
                                 <td class="px-6 py-3 text-sm text-right text-red-500">{{ $totals->lost }}</td>
                                 <td class="px-6 py-3 text-sm text-right text-gray-500">{{ $totals->in_progress }}</td>
                                 <td class="px-6 py-3 text-sm text-right text-blue-600">{{ $totals->conversion_rate }}%</td>
-                                <td class="px-6 py-3 text-sm text-right text-gray-900 dark:text-white">£{{ number_format($totals->won_value, 2) }}</td>
+                                <td class="px-6 py-3 text-sm text-right text-gray-900 dark:text-white">{{ $totals->won_value_formatted }}</td>
                             </tr>
                         </tfoot>
                     </table>

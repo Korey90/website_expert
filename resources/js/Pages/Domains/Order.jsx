@@ -1,4 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import useCurrency from '@/Hooks/useCurrency';
 import MarketingLayout from '@/Layouts/MarketingLayout';
 
 const COUNTRIES = [
@@ -31,9 +32,9 @@ function FormField({ label, error, required, children }) {
 
 const INPUT_CLS = 'w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-2.5 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition';
 
-export default function DomainsOrder({ domain_name, tld, full_domain, action, prices, prefill = {}, auth }) {
+export default function DomainsOrder({ domain_name, tld, full_domain, action, prices, currency = 'GBP', prefill = {}, auth }) {
     const { footer } = usePage().props;
-    const symbol = '£';
+    const { formatCurrency } = useCurrency();
 
     const { data, setData, post, processing, errors } = useForm({
         domain_name:    domain_name,
@@ -97,7 +98,7 @@ export default function DomainsOrder({ domain_name, tld, full_domain, action, pr
                             >
                                 {[1, 2, 3, 5].map(y => (
                                     <option key={y} value={y}>
-                                        {y} {y === 1 ? 'year' : 'years'} — {symbol}{(prices[y] ?? 0).toFixed(2)}
+                                        {y} {y === 1 ? 'year' : 'years'} — {formatCurrency(prices[y] ?? 0, currency)}
                                     </option>
                                 ))}
                             </select>
@@ -105,7 +106,7 @@ export default function DomainsOrder({ domain_name, tld, full_domain, action, pr
 
                         <div className="rounded-xl bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 px-4 py-3 flex justify-between items-center">
                             <span className="text-sm text-neutral-600 dark:text-neutral-300">Total Price</span>
-                            <span className="text-xl font-bold text-neutral-900 dark:text-white">{symbol}{currentPrice.toFixed(2)}</span>
+                            <span className="text-xl font-bold text-neutral-900 dark:text-white">{formatCurrency(currentPrice, currency)}</span>
                         </div>
                     </div>
 
@@ -188,7 +189,7 @@ export default function DomainsOrder({ domain_name, tld, full_domain, action, pr
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            <span className="text-2xl font-black text-neutral-900 dark:text-white">{symbol}{currentPrice.toFixed(2)}</span>
+                            <span className="text-2xl font-black text-neutral-900 dark:text-white">{formatCurrency(currentPrice, currency)}</span>
                             <button
                                 type="submit"
                                 disabled={processing}

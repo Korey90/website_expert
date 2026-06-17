@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DefaultsCurrency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Invoice extends Model
 {
-    use HasFactory, SoftDeletes;
+    use DefaultsCurrency, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'number', 'client_id', 'project_id', 'quote_id', 'domain_order_id', 'created_by',
@@ -21,17 +22,17 @@ class Invoice extends Model
     ];
 
     protected $casts = [
-        'subtotal'        => 'decimal:2',
+        'subtotal' => 'decimal:2',
         'discount_amount' => 'decimal:2',
-        'vat_rate'        => 'decimal:2',
-        'vat_amount'      => 'decimal:2',
-        'total'           => 'decimal:2',
-        'amount_paid'     => 'decimal:2',
-        'amount_due'      => 'decimal:2',
-        'issue_date'      => 'date',
-        'due_date'        => 'date',
-        'sent_at'         => 'datetime',
-        'paid_at'         => 'datetime',
+        'vat_rate' => 'decimal:2',
+        'vat_amount' => 'decimal:2',
+        'total' => 'decimal:2',
+        'amount_paid' => 'decimal:2',
+        'amount_due' => 'decimal:2',
+        'issue_date' => 'date',
+        'due_date' => 'date',
+        'sent_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     public function client(): BelongsTo
@@ -83,11 +84,11 @@ class Invoice extends Model
         $total = $subtotal - $this->discount_amount + $vat;
         $amountPaid = $this->payments()->where('status', 'completed')->sum('amount');
         $this->update([
-            'subtotal'    => $subtotal,
-            'vat_amount'  => $vat,
-            'total'       => $total,
+            'subtotal' => $subtotal,
+            'vat_amount' => $vat,
+            'total' => $total,
             'amount_paid' => $amountPaid,
-            'amount_due'  => max(0, $total - $amountPaid),
+            'amount_due' => max(0, $total - $amountPaid),
         ]);
     }
 }

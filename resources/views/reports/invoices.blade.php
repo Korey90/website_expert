@@ -3,6 +3,8 @@
 @section('title', 'Invoices Report')
 
 @section('content')
+@php($money = app(\App\Services\Currency\CurrencySummaryFormatter::class))
+
 <div class="export-bar">
     <a href="{{ route('reports.invoices.html') }}" class="active">HTML</a>
     <a href="{{ route('reports.invoices.pdf') }}">PDF</a>
@@ -11,11 +13,11 @@
 </div>
 
 <div class="totals">
-    <div class="total-box"><div class="label">Paid</div><div class="value">£{{ number_format($totals['paid'], 0) }}</div></div>
-    <div class="total-box"><div class="label">Sent</div><div class="value">£{{ number_format($totals['sent'], 0) }}</div></div>
-    <div class="total-box"><div class="label">Overdue</div><div class="value">£{{ number_format($totals['overdue'], 0) }}</div></div>
-    <div class="total-box"><div class="label">Draft</div><div class="value">£{{ number_format($totals['draft'], 0) }}</div></div>
-    <div class="total-box"><div class="label">Total Invoices</div><div class="value">{{ collect($totals)->count() > 0 ? $invoices->count() : 0 }}</div></div>
+    <div class="total-box"><div class="label">Paid</div><div class="value">{{ $money->formatGrouped($totals['paid'] ?? []) }}</div></div>
+    <div class="total-box"><div class="label">Sent</div><div class="value">{{ $money->formatGrouped($totals['sent'] ?? []) }}</div></div>
+    <div class="total-box"><div class="label">Overdue</div><div class="value">{{ $money->formatGrouped($totals['overdue'] ?? []) }}</div></div>
+    <div class="total-box"><div class="label">Draft</div><div class="value">{{ $money->formatGrouped($totals['draft'] ?? []) }}</div></div>
+    <div class="total-box"><div class="label">Total Invoices</div><div class="value">{{ $invoices->count() }}</div></div>
 </div>
 
 <table>
@@ -40,8 +42,8 @@
             <td>{{ $invoice->project?->title }}</td>
             <td><span class="badge badge-{{ $invoice->status }}">{{ $invoice->status }}</span></td>
             <td>{{ $invoice->currency ?? 'GBP' }}</td>
-            <td>{{ number_format($invoice->subtotal, 2) }}</td>
-            <td><strong>{{ number_format($invoice->total, 2) }}</strong></td>
+            <td>{{ $money->format($invoice->subtotal, $invoice->currency) }}</td>
+            <td><strong>{{ $money->format($invoice->total, $invoice->currency) }}</strong></td>
             <td>{{ $invoice->due_date?->format('d M Y') }}</td>
             <td>{{ $invoice->created_at?->format('d M Y') }}</td>
         </tr>

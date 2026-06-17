@@ -1,10 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
+import useCurrency from '@/Hooks/useCurrency';
 import PortalLayout from '@/Layouts/PortalLayout';
 
 export default function DomainsResult({ client, order, payment }) {
+    const { formatCurrency } = useCurrency();
     const isSuccess   = payment === 'success';
     const isCancelled = payment === 'cancelled';
-    const symbol      = order.currency === 'GBP' ? '£' : order.currency === 'EUR' ? '€' : '$';
 
     return (
         <PortalLayout client={client}>
@@ -35,7 +36,7 @@ export default function DomainsResult({ client, order, payment }) {
                             </div>
                             <div className="flex justify-between text-sm font-semibold border-t border-green-200 pt-2">
                                 <span>Amount Paid</span>
-                                <span>{symbol}{Number(order.retail_price).toFixed(2)}</span>
+                                <span>{formatCurrency(order.retail_price, order.currency)}</span>
                             </div>
                         </div>
 

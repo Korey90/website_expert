@@ -3,7 +3,9 @@
 namespace App\Notifications;
 
 use App\Models\DomainOrder;
+use App\Services\Currency\MoneyFormatter;
 use Filament\Actions\Action as NotificationAction;
+use Filament\Notifications\DatabaseNotification;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -28,10 +30,11 @@ class DomainOrderAdminNotification extends Notification
             'filament.admin.resources.domain-orders.view',
             ['record' => $this->order->id]
         );
+        $price = app(MoneyFormatter::class)->format($this->order->retail_price, $this->order->currency);
 
         $notification = FilamentNotification::make()
             ->title('🌐 New Domain Order')
-            ->body("{$this->order->full_domain} ({$this->order->action}, {$this->order->years}yr) — £{$this->order->retail_price}")
+            ->body("{$this->order->full_domain} ({$this->order->action}, {$this->order->years}yr) — {$price}")
             ->icon('heroicon-o-globe-alt')
             ->iconColor('info')
             ->actions([
@@ -40,8 +43,8 @@ class DomainOrderAdminNotification extends Notification
                     ->url($orderRoute),
             ]);
 
-        $data             = $notification->toArray();
-        $data['format']   = 'filament';
+        $data = $notification->toArray();
+        $data['format'] = 'filament';
         $data['duration'] = 'persistent';
         unset($data['id']);
 
@@ -50,6 +53,6 @@ class DomainOrderAdminNotification extends Notification
 
     public function databaseType(mixed $notifiable): string
     {
-        return \Filament\Notifications\DatabaseNotification::class;
+        return DatabaseNotification::class;
     }
 }

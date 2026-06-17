@@ -21,6 +21,8 @@
     </style>
 </head>
 <body>
+@php($money = app(\App\Services\Currency\MoneyFormatter::class))
+
 <div class="wrapper">
     <div class="header">
         <h1>✅ Wycena zaakceptowana</h1>
@@ -45,7 +47,7 @@
             <dd>{{ $quote->number }}</dd>
 
             <dt>Wartość</dt>
-            <dd>{{ strtoupper($quote->currency ?? 'GBP') }} {{ number_format($quote->total, 2) }}</dd>
+            <dd>{{ $money->format($quote->total, $quote->currency) }}</dd>
 
             <dt>Data akceptacji</dt>
             <dd>{{ $quote->accepted_at?->format('d M Y, H:i') ?? now()->format('d M Y, H:i') }}</dd>

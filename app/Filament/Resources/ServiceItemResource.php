@@ -3,28 +3,34 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ServiceItemResource\Pages;
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\ServiceItem;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Notifications\Notification;
 
 class ServiceItemResource extends BaseResource
 {
     protected static ?string $model = ServiceItem::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-wrench-screwdriver';
+
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
+
     protected static ?string $navigationLabel = 'Services';
+
     protected static ?string $label = 'Service';
+
     protected static ?string $pluralLabel = 'Services';
+
     protected static ?int $navigationSort = 4;
 
     // -------------------------------------------------------------------------
@@ -170,10 +176,50 @@ class ServiceItemResource extends BaseResource
                                 ->required(),
 
                             Forms\Components\TextInput::make('price_from')
-                                ->label('Price From')
+                                ->label('Legacy Price Label')
                                 ->maxLength(30)
                                 ->nullable()
-                                ->helperText('e.g. £799 or £149/mo'),
+                                ->helperText('Fallback only for legacy free-text labels. Public pages prefer the structured price book below.'),
+
+                            Section::make('Structured Price Book')
+                                ->description('Amounts are stored as major units and resolved by visitor locale: EN=GBP, PL=PLN, PT=EUR.')
+                                ->columns(4)
+                                ->schema([
+                                    Forms\Components\Select::make('price_from_period')
+                                        ->label('Billing Period')
+                                        ->options([
+                                            'one_time' => 'One-time',
+                                            'monthly' => 'Monthly',
+                                            'yearly' => 'Yearly',
+                                        ])
+                                        ->nullable()
+                                        ->native(false),
+
+                                    Forms\Components\TextInput::make('price_from_prices.GBP')
+                                        ->label('GBP')
+                                        ->numeric()
+                                        ->step('0.01')
+                                        ->minValue(0)
+                                        ->prefix(FilamentCurrency::symbol('GBP'))
+                                        ->nullable(),
+
+                                    Forms\Components\TextInput::make('price_from_prices.EUR')
+                                        ->label('EUR')
+                                        ->numeric()
+                                        ->step('0.01')
+                                        ->minValue(0)
+                                        ->prefix(FilamentCurrency::symbol('EUR'))
+                                        ->nullable(),
+
+                                    Forms\Components\TextInput::make('price_from_prices.PLN')
+                                        ->label('PLN')
+                                        ->numeric()
+                                        ->step('0.01')
+                                        ->minValue(0)
+                                        ->prefix(FilamentCurrency::symbol('PLN'))
+                                        ->nullable(),
+                                ])
+                                ->columnSpanFull(),
 
                             Forms\Components\TextInput::make('link')
                                 ->label('Link URL')
@@ -241,14 +287,19 @@ class ServiceItemResource extends BaseResource
                     })
                     ->limit(45),
 
+                Tables\Columns\TextColumn::make('price_book_display')
+                    ->label('Price Book')
+                    ->getStateUsing(fn (ServiceItem $item): string => self::formatPriceBook($item))
+                    ->wrap(),
+
                 Tables\Columns\TextInputColumn::make('price_from')
-                    ->label('Price From')
+                    ->label('Legacy Price')
                     ->sortable()
                     ->afterStateUpdated(function (ServiceItem $record, ?string $state): void {
                         $record->save();
                         Notification::make()
                             ->title('Price updated')
-                            ->body(($record->getTranslation('title', 'en') ?: $record->slug) . ': ' . ($state ?? '—'))
+                            ->body(($record->getTranslation('title', 'en') ?: $record->slug).': '.($state ?? '—'))
                             ->success()
                             ->send();
                     }),
@@ -292,9 +343,29 @@ class ServiceItemResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListServiceItems::route('/'),
+            'index' => Pages\ListServiceItems::route('/'),
             'create' => Pages\CreateServiceItem::route('/create'),
-            'edit'   => Pages\EditServiceItem::route('/{record}/edit'),
+            'edit' => Pages\EditServiceItem::route('/{record}/edit'),
         ];
+    }
+
+    private static function formatPriceBook(ServiceItem $item): string
+    {
+        $prices = is_array($item->price_from_prices) ? $item->price_from_prices : [];
+        $period = match ($item->price_from_period) {
+            'monthly' => '/mo',
+            'yearly' => '/yr',
+            default => '',
+        };
+
+        $labels = [];
+        foreach (['GBP', 'EUR', 'PLN'] as $currency) {
+            $amount = $prices[$currency] ?? null;
+            if (is_numeric($amount)) {
+                $labels[] = FilamentCurrency::format((float) $amount, $currency).$period;
+            }
+        }
+
+        return $labels === [] ? ($item->price_from ?: '—') : implode(' / ', $labels);
     }
 }

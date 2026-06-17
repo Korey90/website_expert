@@ -50,7 +50,7 @@ export default function PortfolioShow({ locale: localeProp, project, auth }) {
                                 className="w-full h-full object-cover object-top"
                                 loading="eager"
                                 decoding="async"
-                                fetchpriority="high"
+                                fetchPriority="high"
                             />
                         </div>
                     )}

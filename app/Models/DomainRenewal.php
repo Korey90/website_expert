@@ -17,6 +17,7 @@ class DomainRenewal extends Model
         'years',
         'status',
         'retail_price',
+        'currency',
         'stripe_payment_intent_id',
         'notified_30d',
         'notified_14d',
@@ -26,14 +27,14 @@ class DomainRenewal extends Model
     ];
 
     protected $casts = [
-        'due_date'      => 'date',
-        'years'         => 'integer',
-        'retail_price'  => 'decimal:2',
-        'notified_30d'  => 'boolean',
-        'notified_14d'  => 'boolean',
-        'notified_7d'   => 'boolean',
-        'notified_1d'   => 'boolean',
-        'completed_at'  => 'datetime',
+        'due_date' => 'date',
+        'years' => 'integer',
+        'retail_price' => 'decimal:2',
+        'notified_30d' => 'boolean',
+        'notified_14d' => 'boolean',
+        'notified_7d' => 'boolean',
+        'notified_1d' => 'boolean',
+        'completed_at' => 'datetime',
     ];
 
     // ── Relationships ──────────────────────────────────────────────────────────

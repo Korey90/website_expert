@@ -21,6 +21,8 @@
     </style>
 </head>
 <body>
+@php($money = app(\App\Services\Currency\MoneyFormatter::class))
+
 <div class="wrapper">
     <div class="header">
         <h1>{{ config('app.name', 'Website Expert') }}</h1>
@@ -39,7 +41,7 @@
 
             @if($contract->value)
                 <dt>Wartość</dt>
-                <dd>{{ strtoupper($contract->currency ?? 'GBP') }} {{ number_format($contract->value, 2) }}</dd>
+                <dd>{{ $money->format($contract->value, $contract->currency) }}</dd>
             @endif
 
             @if($contract->expires_at)

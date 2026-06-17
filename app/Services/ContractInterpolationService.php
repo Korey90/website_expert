@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Contract;
 use App\Models\Project;
 use App\Models\Setting;
+use App\Services\Currency\MoneyFormatter;
 
 class ContractInterpolationService
 {
@@ -67,18 +68,18 @@ class ContractInterpolationService
         ]));
 
         $map = [
-            '{{client.company_name}}'           => $client->company_name ?? '',
-            '{{client.trading_name}}'           => $client->trading_name ?? $client->company_name ?? '',
+            '{{client.company_name}}' => $client->company_name ?? '',
+            '{{client.trading_name}}' => $client->trading_name ?? $client->company_name ?? '',
             '{{client.companies_house_number}}' => $client->companies_house_number ?? '',
-            '{{client.vat_number}}'             => $client->vat_number ?? '',
-            '{{client.address}}'                => $address,
-            '{{client.city}}'                   => $client->city ?? '',
-            '{{client.postcode}}'               => $client->postcode ?? '',
-            '{{client.country}}'                => $client->country ?? '',
-            '{{client.primary_contact_name}}'   => $client->primary_contact_name ?? '',
-            '{{client.primary_contact_email}}'  => $client->primary_contact_email ?? '',
-            '{{client.primary_contact_phone}}'  => $client->primary_contact_phone ?? '',
-            '{{client.website}}'                => $client->website ?? '',
+            '{{client.vat_number}}' => $client->vat_number ?? '',
+            '{{client.address}}' => $address,
+            '{{client.city}}' => $client->city ?? '',
+            '{{client.postcode}}' => $client->postcode ?? '',
+            '{{client.country}}' => $client->country ?? '',
+            '{{client.primary_contact_name}}' => $client->primary_contact_name ?? '',
+            '{{client.primary_contact_email}}' => $client->primary_contact_email ?? '',
+            '{{client.primary_contact_phone}}' => $client->primary_contact_phone ?? '',
+            '{{client.website}}' => $client->website ?? '',
         ];
 
         return str_replace(array_keys($map), array_values($map), $content);
@@ -86,9 +87,11 @@ class ContractInterpolationService
 
     private function replaceProject(string $content, Project $project): string
     {
+        $money = app(MoneyFormatter::class);
+
         $map = [
-            '{{project.title}}'    => $project->title ?? '',
-            '{{project.budget}}'   => $project->budget ? number_format($project->budget, 2) : '',
+            '{{project.title}}' => $project->title ?? '',
+            '{{project.budget}}' => $project->budget ? $money->format($project->budget, $project->currency) : '',
             '{{project.currency}}' => $project->currency ?? '',
             '{{project.deadline}}' => $project->deadline?->format('d/m/Y') ?? '',
             '{{project.start_date}}' => $project->start_date?->format('d/m/Y') ?? '',
@@ -99,11 +102,13 @@ class ContractInterpolationService
 
     private function replaceContract(string $content, Contract $contract): string
     {
+        $money = app(MoneyFormatter::class);
+
         $map = [
             '{{contract.number}}' => $contract->number ?? '',
-            '{{contract.title}}'  => $contract->title ?? '',
-            '{{contract.date}}'   => $contract->starts_at?->format('d/m/Y') ?? now()->format('d/m/Y'),
-            '{{contract.value}}'  => $contract->value ? number_format($contract->value, 2) : '',
+            '{{contract.title}}' => $contract->title ?? '',
+            '{{contract.date}}' => $contract->starts_at?->format('d/m/Y') ?? now()->format('d/m/Y'),
+            '{{contract.value}}' => $contract->value ? $money->format($contract->value, $contract->currency) : '',
             '{{contract.currency}}' => $contract->currency ?? '',
         ];
 

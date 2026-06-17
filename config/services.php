@@ -36,14 +36,58 @@ return [
     ],
 
     'stripe' => [
-        'key'                         => env('STRIPE_KEY'),
-        'secret'                      => env('STRIPE_SECRET'),
-        'webhook_secret'              => env('STRIPE_WEBHOOK_SECRET'),
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
         // SaaS subscription webhooks (separate endpoint)
         'subscription_webhook_secret' => env('STRIPE_SUBSCRIPTION_WEBHOOK_SECRET'),
         // Stripe Price IDs for SaaS plans (set in Stripe Dashboard)
-        'price_pro_monthly'           => env('STRIPE_PRICE_PRO_MONTHLY'),
-        'price_agency_monthly'        => env('STRIPE_PRICE_AGENCY_MONTHLY'),
+        'price_pro_monthly' => env('STRIPE_PRICE_PRO_MONTHLY'),
+        'price_agency_monthly' => env('STRIPE_PRICE_AGENCY_MONTHLY'),
+        'prices' => [
+            'basic' => [
+                'GBP' => [
+                    'monthly' => env('STRIPE_PRICE_BASIC_GBP_MONTHLY'),
+                    'yearly' => env('STRIPE_PRICE_BASIC_GBP_YEARLY'),
+                ],
+                'EUR' => [
+                    'monthly' => env('STRIPE_PRICE_BASIC_EUR_MONTHLY'),
+                    'yearly' => env('STRIPE_PRICE_BASIC_EUR_YEARLY'),
+                ],
+                'PLN' => [
+                    'monthly' => env('STRIPE_PRICE_BASIC_PLN_MONTHLY'),
+                    'yearly' => env('STRIPE_PRICE_BASIC_PLN_YEARLY'),
+                ],
+            ],
+            'pro' => [
+                'GBP' => [
+                    'monthly' => env('STRIPE_PRICE_PRO_GBP_MONTHLY', env('STRIPE_PRICE_PRO_MONTHLY')),
+                    'yearly' => env('STRIPE_PRICE_PRO_GBP_YEARLY'),
+                ],
+                'EUR' => [
+                    'monthly' => env('STRIPE_PRICE_PRO_EUR_MONTHLY'),
+                    'yearly' => env('STRIPE_PRICE_PRO_EUR_YEARLY'),
+                ],
+                'PLN' => [
+                    'monthly' => env('STRIPE_PRICE_PRO_PLN_MONTHLY'),
+                    'yearly' => env('STRIPE_PRICE_PRO_PLN_YEARLY'),
+                ],
+            ],
+            'agency' => [
+                'GBP' => [
+                    'monthly' => env('STRIPE_PRICE_AGENCY_GBP_MONTHLY', env('STRIPE_PRICE_AGENCY_MONTHLY')),
+                    'yearly' => env('STRIPE_PRICE_AGENCY_GBP_YEARLY'),
+                ],
+                'EUR' => [
+                    'monthly' => env('STRIPE_PRICE_AGENCY_EUR_MONTHLY'),
+                    'yearly' => env('STRIPE_PRICE_AGENCY_EUR_YEARLY'),
+                ],
+                'PLN' => [
+                    'monthly' => env('STRIPE_PRICE_AGENCY_PLN_MONTHLY'),
+                    'yearly' => env('STRIPE_PRICE_AGENCY_PLN_YEARLY'),
+                ],
+            ],
+        ],
     ],
 
     'tinymce' => [
@@ -51,21 +95,21 @@ return [
     ],
 
     'twilio' => [
-        'sid'   => env('TWILIO_ACCOUNT_SID'),
+        'sid' => env('TWILIO_ACCOUNT_SID'),
         'token' => env('TWILIO_AUTH_TOKEN'),
-        'from'  => env('TWILIO_FROM_NUMBER'),
+        'from' => env('TWILIO_FROM_NUMBER'),
     ],
 
     'google' => [
-        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect'      => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
 
     'facebook' => [
-        'client_id'     => env('FACEBOOK_APP_ID'),
+        'client_id' => env('FACEBOOK_APP_ID'),
         'client_secret' => env('FACEBOOK_APP_SECRET'),
-        'redirect'      => env('FACEBOOK_REDIRECT_URI', '/auth/facebook/callback'),
+        'redirect' => env('FACEBOOK_REDIRECT_URI', '/auth/facebook/callback'),
     ],
 
     'openai' => [
@@ -78,7 +122,7 @@ return [
     ],
 
     'recaptcha' => [
-        'site_key'   => env('RECAPTCHA_SITE_KEY'),
+        'site_key' => env('RECAPTCHA_SITE_KEY'),
         'secret_key' => env('RECAPTCHA_SECRET_KEY'),
     ],
 
@@ -88,17 +132,17 @@ return [
         'provider' => env('DOMAIN_REGISTRAR_PROVIDER', 'manual'),
 
         'opensrs' => [
-            'username'   => env('OPENSRS_USERNAME'),
-            'api_key'    => env('OPENSRS_API_KEY'),
-            'reseller_id'=> env('OPENSRS_RESELLER_ID'),
-            'sandbox'    => env('OPENSRS_SANDBOX', true),
+            'username' => env('OPENSRS_USERNAME'),
+            'api_key' => env('OPENSRS_API_KEY'),
+            'reseller_id' => env('OPENSRS_RESELLER_ID'),
+            'sandbox' => env('OPENSRS_SANDBOX', true),
         ],
 
         'openprovider' => [
-            'username'    => env('OPENPROVIDER_USERNAME'),
-            'password'    => env('OPENPROVIDER_PASSWORD'),
+            'username' => env('OPENPROVIDER_USERNAME'),
+            'password' => env('OPENPROVIDER_PASSWORD'),
             'reseller_id' => env('OPENPROVIDER_RESELLER_ID'),
-            'sandbox'     => env('OPENPROVIDER_SANDBOX', true),
+            'sandbox' => env('OPENPROVIDER_SANDBOX', true),
         ],
     ],
 

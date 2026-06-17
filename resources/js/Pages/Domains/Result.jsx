@@ -1,9 +1,10 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import useCurrency from '@/Hooks/useCurrency';
 import MarketingLayout from '@/Layouts/MarketingLayout';
 
 export default function DomainsResult({ order, payment, auth }) {
     const { footer } = usePage().props;
-    const symbol  = order.currency === 'GBP' ? '£' : order.currency === 'EUR' ? '€' : '$';
+    const { formatCurrency } = useCurrency();
     const success  = payment === 'success' || order.status === 'completed';
     const cancelled = payment === 'cancelled';
 
@@ -73,7 +74,7 @@ export default function DomainsResult({ order, payment, auth }) {
                         <div className="border-t border-neutral-100 dark:border-neutral-800 pt-3 flex justify-between">
                             <span className="font-semibold text-neutral-900 dark:text-white">Total Paid</span>
                             <span className="text-xl font-black text-neutral-900 dark:text-white">
-                                {symbol}{Number(order.retail_price).toFixed(2)}
+                                {formatCurrency(order.retail_price, order.currency)}
                             </span>
                         </div>
                     </div>

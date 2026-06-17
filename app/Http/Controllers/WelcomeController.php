@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CalculatorPricing;
 use App\Models\CalculatorStep;
 use App\Models\CalculatorString;
 use App\Models\SiteSection;
+use App\Services\Marketing\CalculatorPricingPayloadService;
 use App\Services\Marketing\ServiceItemService;
 use App\Services\Portfolio\PortfolioProjectService;
 use Illuminate\Support\Facades\App;
@@ -18,7 +18,7 @@ class WelcomeController extends Controller
     public function __invoke(): Response
     {
         $supported = array_keys(config('languages'));
-        $locale    = session('locale');
+        $locale = session('locale');
 
         if (! $locale || ! in_array($locale, $supported)) {
             $locale = in_array(request()->getPreferredLanguage($supported), $supported)
@@ -35,98 +35,103 @@ class WelcomeController extends Controller
             ->keyBy('key');
 
         $hero = ($s = $sections->get('hero')) ? [
-            'title'       => $s->title,
-            'subtitle'    => $s->subtitle,
+            'title' => $s->title,
+            'subtitle' => $s->subtitle,
             'button_text' => $s->button_text,
-            'button_url'  => $s->button_url,
-            'image_path'  => $s->image_path,
-            'extra'       => $s->extra,
+            'button_url' => $s->button_url,
+            'image_path' => $s->image_path,
+            'extra' => $s->extra,
         ] : null;
 
         $about = ($s = $sections->get('about')) ? [
-            'title'       => $s->title,
-            'subtitle'    => $s->subtitle,
-            'body'        => $s->body,
+            'title' => $s->title,
+            'subtitle' => $s->subtitle,
+            'body' => $s->body,
             'button_text' => $s->button_text,
-            'button_url'  => $s->button_url,
-            'extra'       => $s->extra,
+            'button_url' => $s->button_url,
+            'extra' => $s->extra,
         ] : null;
 
         $saas_landing = ($s = $sections->get('saas_landing')) ? [
-            'title'       => $s->title,
-            'subtitle'    => $s->subtitle,
+            'title' => $s->title,
+            'subtitle' => $s->subtitle,
             'button_text' => $s->button_text,
-            'button_url'  => $s->button_url,
-            'extra'       => $s->extra,
+            'button_url' => $s->button_url,
+            'extra' => $s->extra,
         ] : null;
 
         $cta_banner = ($s = $sections->get('cta_banner')) ? [
-            'title'       => $s->title,
-            'subtitle'    => $s->subtitle,
+            'title' => $s->title,
+            'subtitle' => $s->subtitle,
             'button_text' => $s->button_text,
-            'button_url'  => $s->button_url,
-            'extra'       => $s->extra,
+            'button_url' => $s->button_url,
+            'extra' => $s->extra,
         ] : null;
 
         $serviceItems = app(ServiceItemService::class)->getFeatured();
-        $serviceItemsArray = app(ServiceItemService::class)->mapToArray($serviceItems);
+        $serviceItemsArray = app(ServiceItemService::class)->mapToArray($serviceItems, $locale);
 
         $services = ($s = $sections->get('services')) ? [
-            'title'       => $s->title,
-            'subtitle'    => $s->subtitle,
+            'title' => $s->title,
+            'subtitle' => $s->subtitle,
             'button_text' => $s->button_text,
-            'button_url'  => $s->button_url,
-            'extra'       => array_merge($s->extra ?? [], ['services' => $serviceItemsArray]),
+            'button_url' => $s->button_url,
+            'extra' => array_merge($s->extra ?? [], ['services' => $serviceItemsArray]),
         ] : null;
 
         $portfolioProjects = app(PortfolioProjectService::class)
             ->getFeatured(limit: 3)
             ->map(fn ($p) => [
-                'client'    => $p->client_name,
-                'slug'      => $p->slug,
+                'client' => $p->client_name,
+                'slug' => $p->slug,
                 'is_active' => (bool) $p->is_active,
-                'title_en'  => $p->getTranslation('title', 'en'),
-                'title_pl'  => $p->getTranslation('title', 'pl'),
-                'title_pt'  => $p->getTranslation('title', 'pt'),
-                'tag_en'    => $p->getTranslation('tag', 'en'),
-                'tag_pl'    => $p->getTranslation('tag', 'pl'),
-                'tag_pt'    => $p->getTranslation('tag', 'pt'),
-                'desc_en'   => $p->getTranslation('description', 'en'),
-                'desc_pl'   => $p->getTranslation('description', 'pl'),
-                'desc_pt'   => $p->getTranslation('description', 'pt'),
+                'title_en' => $p->getTranslation('title', 'en'),
+                'title_pl' => $p->getTranslation('title', 'pl'),
+                'title_pt' => $p->getTranslation('title', 'pt'),
+                'tag_en' => $p->getTranslation('tag', 'en'),
+                'tag_pl' => $p->getTranslation('tag', 'pl'),
+                'tag_pt' => $p->getTranslation('tag', 'pt'),
+                'desc_en' => $p->getTranslation('description', 'en'),
+                'desc_pl' => $p->getTranslation('description', 'pl'),
+                'desc_pt' => $p->getTranslation('description', 'pt'),
                 'result_en' => $p->getTranslation('result', 'en'),
                 'result_pl' => $p->getTranslation('result', 'pl'),
                 'result_pt' => $p->getTranslation('result', 'pt'),
-                'image'     => (function (?string $path): ?string {
-                    if (! $path) return null;
-                    if (str_starts_with($path, '/') || str_starts_with($path, 'http')) return $path;
+                'image' => (function (?string $path): ?string {
+                    if (! $path) {
+                        return null;
+                    }
+                    if (str_starts_with($path, '/') || str_starts_with($path, 'http')) {
+                        return $path;
+                    }
+
                     return Storage::disk('public')->url($path);
                 })($p->image_path),
-                'link'      => $p->link,
-                'tags'      => array_values((array) (is_array($p->tags) ? $p->tags : json_decode($p->tags ?? '[]', true))),
+                'link' => $p->link,
+                'tags' => array_values((array) (is_array($p->tags) ? $p->tags : json_decode($p->tags ?? '[]', true))),
             ])
             ->toArray();
 
         $portfolio = ($s = $sections->get('portfolio')) ? [
-            'title'       => $s->title,
-            'subtitle'    => $s->subtitle,
+            'title' => $s->title,
+            'subtitle' => $s->subtitle,
             'button_text' => $s->button_text,
-            'button_url'  => $s->button_url,
-            'extra'       => array_merge($s->extra ?? [], ['items' => $portfolioProjects]),
+            'button_url' => $s->button_url,
+            'extra' => array_merge($s->extra ?? [], ['items' => $portfolioProjects]),
         ] : null;
 
         $process = ($s = $sections->get('process')) ? [
-            'title'    => $s->title,
+            'title' => $s->title,
             'subtitle' => $s->subtitle,
-            'extra'    => $s->extra,
+            'extra' => $s->extra,
         ] : null;
 
         $faq = ($s = $sections->get('faq')) ? [
-            'title'       => $s->title,
-            'subtitle'    => $s->subtitle,
+            'title' => $s->title,
+            'subtitle' => $s->subtitle,
             'button_text' => $s->button_text,
-            'button_url'  => $s->button_url,
-            'extra'       => $s->extra,
+            'button_url' => $s->button_url,
+            'extra' => $s->extra,
         ] : null;
 
         $trust_strip = ($s = $sections->get('trust_strip')) ? [
@@ -142,9 +147,9 @@ class WelcomeController extends Controller
         $cost_calculator_v2 = $sections->has('cost_calculator') ? true : null;
 
         $contact = ($s = $sections->get('contact')) ? [
-            'title'    => $s->title,
+            'title' => $s->title,
             'subtitle' => $s->subtitle,
-            'extra'    => $s->extra,
+            'extra' => $s->extra,
         ] : null;
 
         $footer = ($s = $sections->get('footer')) ? [
@@ -152,50 +157,11 @@ class WelcomeController extends Controller
         ] : null;
 
         // Pricing, strings and steps for CostCalculatorV2
-        $categoryMap = [
-            'project_type' => 'projectType',
-            'design'       => 'design',
-            'cms'          => 'cms',
-            'integrations' => 'integrations',
-            'seo_package'  => 'seoPackage',
-            'deadline'     => 'deadline',
-            'hosting'      => 'hosting',
-        ];
-        $multiplierCategories = ['design', 'deadline'];
-
-        $pricing = [];
-        CalculatorPricing::where('is_active', true)
-            ->orderBy('sort_order')
-            ->each(function ($row) use (&$pricing, $categoryMap, $multiplierCategories, $locale) {
-                $frontendKey = $categoryMap[$row->category] ?? null;
-                if (!$frontendKey) return;
-
-                $entry = [
-                    'label_en'  => $row->label,
-                    'label_pl'  => $row->label_pl ?? $row->label,
-                    'label_pt'  => $row->label_pt ?? $row->label,
-                    'label_loc' => $row->{"label_$locale"} ?? $row->label,
-                    'icon'      => $row->icon ?? '',
-                    'desc_en'   => $row->description ?? '',
-                    'desc_pl'   => $row->desc_pl ?? $row->description ?? '',
-                    'desc_pt'   => $row->desc_pt ?? $row->description ?? '',
-                    'desc_loc'  => $row->{"desc_$locale"} ?? $row->description ?? '',
-                ];
-
-                if ($row->category === 'project_type') {
-                    $entry['base'] = (float) $row->base_cost;
-                } elseif (in_array($row->category, $multiplierCategories)) {
-                    $entry['multiplier'] = (float) $row->multiplier;
-                } else {
-                    $entry['cost'] = (float) $row->base_cost;
-                }
-
-                $pricing[$frontendKey][$row->key] = $entry;
-            });
+        $pricing = app(CalculatorPricingPayloadService::class)->forLocale($locale);
 
         $strings = CalculatorString::orderBy('sort_order')
             ->get()
-            ->mapWithKeys(fn($s) => [
+            ->mapWithKeys(fn ($s) => [
                 $s->key => ($s->{"value_$locale"} ?: $s->value_en) ?? $s->value_en,
             ])
             ->all();
@@ -203,26 +169,26 @@ class WelcomeController extends Controller
         $steps = CalculatorStep::where('is_active', true)
             ->orderBy('sort_order')
             ->get()
-            ->map(fn($s) => [
+            ->map(fn ($s) => [
                 'question' => ($s->{"question_$locale"} ?: $s->question_en) ?? $s->question_en,
-                'hint'     => ($s->{"hint_$locale"}     ?: $s->hint_en)     ?? '',
+                'hint' => ($s->{"hint_$locale"} ?: $s->hint_en) ?? '',
             ])
             ->values()
             ->all();
 
         // Sekcje spoza znanych kluczy — dostępne na froncie jako extra_sections[key]
         $extra_sections = $sections
-            ->filter(fn($s) => !in_array($s->key, $knownKeys))
-            ->map(fn($s) => [
-                'key'         => $s->key,
-                'label'       => $s->label,
-                'title'       => $s->title,
-                'subtitle'    => $s->subtitle,
-                'body'        => $s->body,
+            ->filter(fn ($s) => ! in_array($s->key, $knownKeys))
+            ->map(fn ($s) => [
+                'key' => $s->key,
+                'label' => $s->label,
+                'title' => $s->title,
+                'subtitle' => $s->subtitle,
+                'body' => $s->body,
                 'button_text' => $s->button_text,
-                'button_url'  => $s->button_url,
-                'extra'       => $s->extra,
-                'sort_order'  => $s->sort_order,
+                'button_url' => $s->button_url,
+                'extra' => $s->extra,
+                'sort_order' => $s->sort_order,
             ])
             ->sortBy('sort_order')
             ->values()

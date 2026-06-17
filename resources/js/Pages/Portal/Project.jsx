@@ -1,4 +1,5 @@
 import PortalLayout from '@/Layouts/PortalLayout';
+import useCurrency from '@/Hooks/useCurrency';
 import { useForm } from '@inertiajs/react';
 
 const projectStatusColors = {
@@ -43,6 +44,7 @@ function MessageBubble({ message, clientId }) {
 }
 
 export default function Project({ client, project }) {
+    const { formatCurrency } = useCurrency();
     const { data, setData, post, processing, reset, errors } = useForm({ content: '' });
 
     const handleSubmit = (e) => {
@@ -59,7 +61,6 @@ export default function Project({ client, project }) {
     const totalPhases = phases.length;
     const donePhases  = phases.filter(p => p.status === 'completed').length;
     const overallPct  = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
-    const currency    = project.currency === 'EUR' ? '€' : project.currency === 'USD' ? '$' : project.currency === 'PLN' ? 'zł' : '£';
 
     return (
         <PortalLayout client={client}>
@@ -121,7 +122,7 @@ export default function Project({ client, project }) {
                             <div>
                                 <dt className="text-gray-500">Budget</dt>
                                 <dd className="text-gray-900 font-medium">
-                                    {currency}{parseFloat(project.budget).toLocaleString()}
+                                    {formatCurrency(project.budget, project.currency)}
                                 </dd>
                             </div>
                         )}

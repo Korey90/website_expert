@@ -3,25 +3,29 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentResource\Pages;
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\Invoice;
 use App\Models\Payment;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ViewAction;
 
 class PaymentResource extends BaseResource
 {
     protected static ?string $model = Payment::class;
-    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-credit-card';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Finance';
+
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-credit-card';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Finance';
+
     protected static ?string $navigationLabel = 'Payments';
-    protected static ?int    $navigationSort  = 5;
+
+    protected static ?int $navigationSort = 5;
 
     public static function form(Schema $form): Schema
     {
@@ -37,36 +41,31 @@ class PaymentResource extends BaseResource
 
                     Forms\Components\Select::make('method')
                         ->options([
-                            'stripe'        => 'Stripe',
-                            'payu'          => 'PayU',
+                            'stripe' => 'Stripe',
+                            'payu' => 'PayU',
                             'bank_transfer' => 'Bank Transfer',
-                            'cash'          => 'Cash',
-                            'cheque'        => 'Cheque',
-                            'other'         => 'Other',
+                            'cash' => 'Cash',
+                            'cheque' => 'Cheque',
+                            'other' => 'Other',
                         ])
                         ->required(),
 
                     Forms\Components\TextInput::make('amount')
                         ->numeric()
-                        ->prefix('£')
+                        ->prefix(fn () => FilamentCurrency::symbol())
                         ->required(),
 
                     Forms\Components\Select::make('currency')
-                        ->options([
-                            'GBP' => 'GBP',
-                            'EUR' => 'EUR',
-                            'USD' => 'USD',
-                            'PLN' => 'PLN',
-                        ])
-                        ->default('GBP')
+                        ->options(fn () => FilamentCurrency::options())
+                        ->default(fn () => FilamentCurrency::default())
                         ->required(),
 
                     Forms\Components\Select::make('status')
                         ->options([
-                            'pending'   => 'Pending',
+                            'pending' => 'Pending',
                             'completed' => 'Completed',
-                            'failed'    => 'Failed',
-                            'refunded'  => 'Refunded',
+                            'failed' => 'Failed',
+                            'refunded' => 'Refunded',
                         ])
                         ->default('completed')
                         ->required(),
@@ -115,25 +114,25 @@ class PaymentResource extends BaseResource
                     ->colors([
                         'primary' => 'stripe',
                         'warning' => 'payu',
-                        'info'    => 'bank_transfer',
+                        'info' => 'bank_transfer',
                         'success' => 'cash',
-                        'gray'    => ['cheque', 'other'],
+                        'gray' => ['cheque', 'other'],
                     ])
                     ->formatStateUsing(fn (string $state) => match ($state) {
-                        'stripe'        => 'Stripe',
-                        'payu'          => 'PayU',
+                        'stripe' => 'Stripe',
+                        'payu' => 'PayU',
                         'bank_transfer' => 'Bank Transfer',
-                        'cash'          => 'Cash',
-                        'cheque'        => 'Cheque',
-                        default         => ucfirst($state),
+                        'cash' => 'Cash',
+                        'cheque' => 'Cheque',
+                        default => ucfirst($state),
                     }),
 
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
                         'success' => 'completed',
                         'warning' => 'pending',
-                        'danger'  => 'failed',
-                        'gray'    => 'refunded',
+                        'danger' => 'failed',
+                        'gray' => 'refunded',
                     ])
                     ->formatStateUsing(fn (string $state) => ucfirst($state)),
 
@@ -152,19 +151,19 @@ class PaymentResource extends BaseResource
             ->filters([
                 Tables\Filters\SelectFilter::make('method')
                     ->options([
-                        'stripe'        => 'Stripe',
-                        'payu'          => 'PayU',
+                        'stripe' => 'Stripe',
+                        'payu' => 'PayU',
                         'bank_transfer' => 'Bank Transfer',
-                        'cash'          => 'Cash',
-                        'cheque'        => 'Cheque',
-                        'other'         => 'Other',
+                        'cash' => 'Cash',
+                        'cheque' => 'Cheque',
+                        'other' => 'Other',
                     ]),
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        'pending'   => 'Pending',
+                        'pending' => 'Pending',
                         'completed' => 'Completed',
-                        'failed'    => 'Failed',
-                        'refunded'  => 'Refunded',
+                        'failed' => 'Failed',
+                        'refunded' => 'Refunded',
                     ]),
             ])
             ->headerActions([])
@@ -185,10 +184,10 @@ class PaymentResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListPayments::route('/'),
+            'index' => Pages\ListPayments::route('/'),
             'create' => Pages\CreatePayment::route('/create'),
-            'view'   => Pages\ViewPayment::route('/{record}'),
-            'edit'   => Pages\EditPayment::route('/{record}/edit'),
+            'view' => Pages\ViewPayment::route('/{record}'),
+            'edit' => Pages\EditPayment::route('/{record}/edit'),
         ];
     }
 }

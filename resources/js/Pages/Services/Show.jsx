@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import MarketingLayout from '@/Layouts/MarketingLayout';
 import useScrollReveal from '@/Hooks/useScrollReveal';
+import useCurrency from '@/Hooks/useCurrency';
+import { servicePriceLabel } from '@/utils/servicePrice';
 
 const ICON_PATHS = {
     'monitor':       <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" />,
@@ -133,7 +135,7 @@ const labelClass = 'block text-sm font-medium text-neutral-700 dark:text-neutral
 function detectContactType(value) {
     if (!value) return 'unknown';
     if (/@/.test(value)) return 'email';
-    if (/^[\+\d\s\(\)\-]{3,}$/.test(value.trim())) return 'phone';
+    if (/^[+\d\s()-]{3,}$/.test(value.trim())) return 'phone';
     return 'unknown';
 }
 
@@ -351,6 +353,7 @@ export default function ServicesShow({ locale: localeProp, item, auth }) {
     useScrollReveal('.reveal');
 
     const { footer } = usePage().props;
+    const { currency, formatCurrency } = useCurrency();
     const locale = localeProp ?? 'en';
     const l = labels[locale] ?? labels.en;
 
@@ -368,6 +371,7 @@ export default function ServicesShow({ locale: localeProp, item, auth }) {
     const iconPath    = ICON_PATHS[item?.icon] ?? ICON_PATHS['settings'];
     const features    = Array.isArray(item?.features) ? item.features : [];
     const faqItems    = Array.isArray(item?.faq) ? item.faq : [];
+    const priceLabel  = servicePriceLabel(item, locale, formatCurrency, currency);
 
     const featureText = (f) => f?.[`text_${locale}`] ?? f?.text_en ?? '';
 
@@ -405,9 +409,9 @@ export default function ServicesShow({ locale: localeProp, item, auth }) {
                             <h1 className="font-display text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-white leading-tight mb-2">
                                 {title}
                             </h1>
-                            {item?.price_from && (
+                            {priceLabel && (
                                 <p className="text-sm font-semibold text-brand-500">
-                                    {l.priceFrom} <span className="text-base">{item.price_from}</span>
+                                    {l.priceFrom} <span className="text-base">{priceLabel}</span>
                                 </p>
                             )}
                         </div>

@@ -2,7 +2,6 @@
 
 namespace App\Services\Domain;
 
-use App\Data\Domain\DnsRecord;
 use App\Data\Domain\DomainAvailabilityResult;
 use App\Data\Domain\DomainInfoResult;
 use App\Data\Domain\DomainPriceSnapshot;
@@ -11,7 +10,7 @@ use App\Data\Domain\DomainRegistrationResult;
 use App\Data\Domain\DomainRenewalResult;
 use App\Data\Domain\DomainSearchResult;
 use App\Data\Domain\DomainTransferResult;
-use App\Models\DomainPriceList;
+use App\Services\Currency\CurrencyResolver;
 
 /**
  * Fallback service — used when no live registrar API is configured or the
@@ -50,7 +49,7 @@ class ManualDomainRegistrarService implements DomainRegistrarInterface
         try {
             // NS records exist on virtually every registered domain.
             // Suppress warnings in case the DNS resolver times out.
-            $isTaken = @checkdnsrr($domain . '.', 'NS') || @checkdnsrr($domain . '.', 'A');
+            $isTaken = @checkdnsrr($domain.'.', 'NS') || @checkdnsrr($domain.'.', 'A');
 
             return $isTaken
                 ? DomainAvailabilityResult::unavailable($domain)
@@ -66,7 +65,7 @@ class ManualDomainRegistrarService implements DomainRegistrarInterface
         // MVP: return a pending result — admin registers manually
         // The RegisterDomainJob will mark the order as "registering" and create the domain record
         return DomainRegistrationResult::success(
-            providerId: 'manual-' . now()->format('YmdHis'),
+            providerId: 'manual-'.now()->format('YmdHis'),
             registeredAt: now(),
             expiresAt: now()->addYears($payload->years),
         );
@@ -81,7 +80,7 @@ class ManualDomainRegistrarService implements DomainRegistrarInterface
 
     public function transfer(string $domain, string $authCode): DomainTransferResult
     {
-        return DomainTransferResult::success(providerId: 'manual-transfer-' . now()->format('YmdHis'));
+        return DomainTransferResult::success(providerId: 'manual-transfer-'.now()->format('YmdHis'));
     }
 
     public function updateNameservers(string $domain, array $nameservers): bool
@@ -117,25 +116,31 @@ class ManualDomainRegistrarService implements DomainRegistrarInterface
 
     public function getPrice(string $tld): DomainPriceSnapshot
     {
-        $price = DomainPriceList::forTld($tld);
+        $price = app(DomainPricingService::class)->getPriceForTld($tld);
 
-        if ($price === null) {
-            // Fallback default price when TLD not in price list
-            return DomainPriceSnapshot::fromPriceList(
-                tld: $tld,
-                registerPrice: 0.0,
-                renewPrice: 0.0,
-                transferPrice: null,
-                currency: 'GBP',
-            );
+        if ($price !== null) {
+            return $price;
         }
 
+        $resolver = app(CurrencyResolver::class);
+
+        try {
+            $currency = $resolver->resolve(request());
+        } catch (\Throwable) {
+            $currency = (string) config('currencies.default', 'GBP');
+        }
+
+        if (! $resolver->isSupported($currency)) {
+            $currency = $resolver->defaultCurrency();
+        }
+
+        // Fallback default price when TLD is not in the price list.
         return DomainPriceSnapshot::fromPriceList(
             tld: $tld,
-            registerPrice: (float) $price->register_price,
-            renewPrice: (float) $price->renew_price,
-            transferPrice: $price->transfer_price !== null ? (float) $price->transfer_price : null,
-            currency: $price->currency,
+            registerPrice: 0.0,
+            renewPrice: 0.0,
+            transferPrice: null,
+            currency: $currency,
         );
     }
 }

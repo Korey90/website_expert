@@ -3,14 +3,17 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PlanResource\Pages;
+use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\Plan;
+use App\Models\PlanPrice;
+use App\Services\Billing\PlanService;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -19,10 +22,15 @@ use Filament\Tables\Table;
 class PlanResource extends BaseResource
 {
     protected static ?string $model = Plan::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-tag';
+
     protected static \UnitEnum|string|null $navigationGroup = 'SaaS Billing';
+
     protected static ?int $navigationSort = 1;
+
     protected static ?string $label = 'Plan';
+
     protected static ?string $pluralLabel = 'Plans';
 
     // -------------------------------------------------------------------------
@@ -64,8 +72,10 @@ class PlanResource extends BaseResource
                         ->minValue(0),
                 ]),
 
-            Section::make('Pricing (in pence, e.g. 2900 = £29.00)')
+            Section::make('Legacy GBP Pricing')
+                ->description('Fallback values kept for existing installs. New checkout uses the price book below.')
                 ->columns(2)
+                ->collapsed()
                 ->schema([
                     Forms\Components\TextInput::make('price_monthly')
                         ->label('Monthly Price (pence)')
@@ -92,6 +102,45 @@ class PlanResource extends BaseResource
                         ->nullable()
                         ->maxLength(255)
                         ->placeholder('price_xxxxx'),
+                ]),
+
+            Section::make('Price Book')
+                ->description('Create one monthly/yearly price per supported currency. Stripe subscriptions require a Price ID for each paid currency.')
+                ->schema([
+                    Forms\Components\Repeater::make('planPrices')
+                        ->relationship()
+                        ->schema([
+                            Forms\Components\Select::make('currency')
+                                ->options(fn () => FilamentCurrency::options())
+                                ->required(),
+
+                            Forms\Components\Select::make('interval')
+                                ->options([
+                                    PlanPrice::INTERVAL_MONTHLY => 'Monthly',
+                                    PlanPrice::INTERVAL_YEARLY => 'Yearly',
+                                ])
+                                ->required(),
+
+                            Forms\Components\TextInput::make('amount_minor')
+                                ->label('Amount (minor units)')
+                                ->numeric()
+                                ->minValue(0)
+                                ->required()
+                                ->helperText('Example: 2900 = 29.00 for GBP/EUR/PLN.'),
+
+                            Forms\Components\TextInput::make('stripe_price_id')
+                                ->label('Stripe Price ID')
+                                ->nullable()
+                                ->maxLength(255)
+                                ->placeholder('price_xxxxx'),
+
+                            Forms\Components\Toggle::make('is_active')
+                                ->label('Active')
+                                ->default(true),
+                        ])
+                        ->columns(5)
+                        ->defaultItems(0)
+                        ->addActionLabel('Add price'),
                 ]),
 
             Section::make('Limits')
@@ -166,25 +215,34 @@ class PlanResource extends BaseResource
                 ]),
 
             Section::make('Pricing')
-                ->columns(2)
+                ->columns(1)
                 ->schema([
-                    TextEntry::make('price_monthly')
-                        ->label('Monthly')
-                        ->formatStateUsing(fn ($state) => $state ? '£' . number_format($state / 100, 2) : 'Free'),
+                    RepeatableEntry::make('planPrices')
+                        ->label('Price Book')
+                        ->schema([
+                            TextEntry::make('currency')
+                                ->badge()
+                                ->color('gray'),
 
-                    TextEntry::make('price_yearly')
-                        ->label('Yearly')
-                        ->formatStateUsing(fn ($state) => $state ? '£' . number_format($state / 100, 2) : 'Free'),
+                            TextEntry::make('interval')
+                                ->badge()
+                                ->color('info'),
 
-                    TextEntry::make('stripe_price_id_monthly')
-                        ->label('Stripe Monthly Price ID')
-                        ->placeholder('—')
-                        ->copyable(),
+                            TextEntry::make('amount_minor')
+                                ->label('Amount')
+                                ->formatStateUsing(fn ($state, $record) => self::formatMinorAmount((int) $state, $record?->currency)),
 
-                    TextEntry::make('stripe_price_id_yearly')
-                        ->label('Stripe Yearly Price ID')
-                        ->placeholder('—')
-                        ->copyable(),
+                            TextEntry::make('stripe_price_id')
+                                ->label('Stripe Price ID')
+                                ->placeholder('—')
+                                ->copyable(),
+
+                            IconEntry::make('is_active')
+                                ->label('Active')
+                                ->boolean(),
+                        ])
+                        ->columns(5)
+                        ->placeholder('No plan prices configured.'),
                 ]),
 
             Section::make('Limits & Features')
@@ -244,10 +302,9 @@ class PlanResource extends BaseResource
                     ->badge()
                     ->color('gray'),
 
-                Tables\Columns\TextColumn::make('price_monthly')
+                Tables\Columns\TextColumn::make('monthly_price')
                     ->label('Monthly')
-                    ->formatStateUsing(fn ($state) => $state ? '£' . number_format($state / 100, 2) : 'Free')
-                    ->sortable(),
+                    ->state(fn (Plan $record) => self::formatPlanPrice($record, PlanPrice::INTERVAL_MONTHLY)),
 
                 Tables\Columns\TextColumn::make('max_landing_pages')
                     ->label('Max LPs')
@@ -297,10 +354,36 @@ class PlanResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListPlans::route('/'),
+            'index' => Pages\ListPlans::route('/'),
             'create' => Pages\CreatePlan::route('/create'),
-            'view'   => Pages\ViewPlan::route('/{record}'),
-            'edit'   => Pages\EditPlan::route('/{record}/edit'),
+            'view' => Pages\ViewPlan::route('/{record}'),
+            'edit' => Pages\EditPlan::route('/{record}/edit'),
         ];
+    }
+
+    private static function formatPlanPrice(Plan $plan, string $interval): string
+    {
+        $price = PlanService::priceForPlan($plan, FilamentCurrency::default(), $interval);
+        $currency = $price?->currency ?? FilamentCurrency::default();
+        $amount = $price?->amount_minor ?? (
+            $interval === PlanPrice::INTERVAL_MONTHLY
+                ? (int) $plan->price_monthly
+                : (int) $plan->price_yearly
+        );
+
+        return self::formatMinorAmount($amount, $currency);
+    }
+
+    private static function formatMinorAmount(int $amount, ?string $currency = null): string
+    {
+        $currency = $currency ?: FilamentCurrency::default();
+
+        if ($amount <= 0) {
+            return 'Free';
+        }
+
+        $minorUnit = (int) (config("currencies.supported.{$currency}.minor_unit", 100));
+
+        return FilamentCurrency::format($amount / max(1, $minorUnit), $currency);
     }
 }
