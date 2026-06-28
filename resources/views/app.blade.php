@@ -12,7 +12,7 @@
                 'login', 'register', 'password.request', 'password.reset',
                 'verification.notice', 'profile.edit', 'profile.update', 'profile.destroy',
                 'profile.social.unlink', 'profile.social.connect',
-                'invoice.pdf', 'lead-notes.unpin',
+                'invoice.pdf', 'briefing-template.pdf', 'lead-notes.unpin',
                 'business.edit', 'business.update', 'business.logo.upload', 'business.logo.delete',
                 'business.profile.edit', 'business.profile.update', 'business.profile.completion',
                 'business.api-tokens.index', 'business.api-tokens.store', 'business.api-tokens.destroy',

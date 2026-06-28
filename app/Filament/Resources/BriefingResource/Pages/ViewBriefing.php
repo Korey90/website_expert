@@ -5,6 +5,7 @@ namespace App\Filament\Resources\BriefingResource\Pages;
 use App\Filament\Resources\BriefingResource;
 use App\Models\Briefing;
 use App\Services\BriefingService;
+use App\Services\CalculatorBriefingMapper;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -23,6 +24,15 @@ class ViewBriefing extends ViewRecord
     /** @var string|null */
     public ?string $notes = null;
 
+    /**
+     * Flat list of 'sectionKey.questionKey' strings whose current value
+     * matches what the lead's calculator/form data provided.
+     * Recomputed live — badge disappears as soon as user edits the value.
+     *
+     * @var array<string>
+     */
+    public array $calculatorPrefilled = [];
+
     public function mount(int|string $record): void
     {
         parent::mount($record);
@@ -32,11 +42,99 @@ class ViewBriefing extends ViewRecord
 
         $this->answers = $briefing->answers ?? [];
         $this->notes   = $briefing->notes;
+
+        $this->prefillFromLead($briefing);
     }
 
     public function updatedAnswers(): void
     {
+        $this->recomputeCalculatorPrefilled();
         $this->autosave();
+    }
+
+    /**
+     * Prefill empty answers from lead's calculator_data / form_data,
+     * then compute which current values still match the source data.
+     */
+    private function prefillFromLead(Briefing $briefing): void
+    {
+        $lead = $briefing->lead;
+
+        if (!$lead) {
+            return;
+        }
+
+        $sourceData = array_merge(
+            $lead->calculator_data ?? [],
+            $lead->form_data       ?? [],
+        );
+
+        if (empty($sourceData)) {
+            return;
+        }
+
+        $sections = $briefing->template?->sections ?? [];
+        $mapper   = app(CalculatorBriefingMapper::class);
+        $result   = $mapper->map($sourceData, $sections);
+
+        // Fill only empty / null answer slots
+        foreach ($result['answers'] as $sectionKey => $questions) {
+            foreach ($questions as $qKey => $value) {
+                $existing = $this->answers[$sectionKey][$qKey] ?? null;
+                if ($existing === null || $existing === '') {
+                    $this->answers[$sectionKey][$qKey] = $value;
+                }
+            }
+        }
+
+        $this->recomputeCalculatorPrefilled($result['answers']);
+    }
+
+    /**
+     * Rebuild $calculatorPrefilled: keys whose current answer still matches
+     * what the lead's source data provides (so badge disappears on user edit).
+     *
+     * @param  array<string, array<string, string>>|null $calcAnswers
+     */
+    private function recomputeCalculatorPrefilled(?array $calcAnswers = null): void
+    {
+        if ($calcAnswers === null) {
+            // Re-derive from lead
+            $briefing = $this->getRecord();
+            $lead     = $briefing->lead;
+
+            if (!$lead) {
+                return;
+            }
+
+            $sourceData = array_merge(
+                $lead->calculator_data ?? [],
+                $lead->form_data       ?? [],
+            );
+
+            if (empty($sourceData)) {
+                return;
+            }
+
+            $sections   = $briefing->template?->sections ?? [];
+            $mapper     = app(CalculatorBriefingMapper::class);
+            $result     = $mapper->map($sourceData, $sections);
+            $calcAnswers = $result['answers'];
+        }
+
+        $prefilled = [];
+
+        foreach ($calcAnswers as $sectionKey => $questions) {
+            foreach ($questions as $qKey => $calcValue) {
+                $current = $this->answers[$sectionKey][$qKey] ?? null;
+                // Show badge when current value still matches what calculator gave
+                if ((string) $current === (string) $calcValue && $calcValue !== '') {
+                    $prefilled[] = "{$sectionKey}.{$qKey}";
+                }
+            }
+        }
+
+        $this->calculatorPrefilled = $prefilled;
     }
 
     public function autosave(): void
