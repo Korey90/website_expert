@@ -28,6 +28,10 @@ class WelcomeController extends Controller
 
         App::setLocale($locale);
 
+        $seo = [
+            'description' => trans('seo.home.description'),
+        ];
+
         $knownKeys = ['hero', 'about', 'saas_landing', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator', 'contact', 'footer'];
 
         $sections = SiteSection::where('is_active', true)
@@ -202,6 +206,6 @@ class WelcomeController extends Controller
             ->values()
             ->all();
 
-        return Inertia::render('Welcome', compact('hero', 'about', 'saas_landing', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator_v2', 'contact', 'footer', 'pricing', 'strings', 'steps', 'extra_sections', 'section_order'));
+        return Inertia::render('Welcome', compact('seo', 'hero', 'about', 'saas_landing', 'cta_banner', 'trust_strip', 'testimonials', 'services', 'process', 'portfolio', 'faq', 'cost_calculator_v2', 'contact', 'footer', 'pricing', 'strings', 'steps', 'extra_sections', 'section_order'));
     }
 }

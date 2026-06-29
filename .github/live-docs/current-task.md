@@ -2,10 +2,10 @@
 
 **Status:** Brak aktywnego zadania
 
-**Last Updated:** 2026-06-13
+**Last Updated:** 2026-06-29
 
 ---
 
-Aktualny task multi-currency zostal zakonczony i przeniesiony do:
+Zadanie wielojęzycznego `meta description` strony głównej zostało zakończone i opisane w:
 
-- `completed-tasks/2026-06-13-multi-currency-locale.md`
+- `completed-tasks/2026-06-29 - Przywrócenie meta description strony głównej.md`

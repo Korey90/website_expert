@@ -28,6 +28,9 @@
         @if($isNoIndex)
             <meta name="robots" content="noindex, nofollow">
         @endif
+        @if($currentName === 'home')
+            <meta inertia="description" name="description" content="{{ $page['props']['seo']['description'] }}">
+        @endif
         <link rel="canonical" href="{{ url()->current() }}">
 
         @php

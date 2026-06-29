@@ -1,17 +1,19 @@
 # WebsiteExpert - Project Status Dashboard
 
 **Last Full Validation:** 2026-06-14
+**Last Targeted Validation:** 2026-06-29 — multilingual homepage `meta description` PL/EN/PT (PHPUnit, Vitest, Pint, ESLint, Vite build, raw HTML, Inertia Head)
 
 ## Health Checks
 - **Code Quality (Pint + ESLint):** ✅ Passed
-- **Translations (pl/en/pt):** ✅ Inline w JSX (EN/PL/PT)
-- **Tests:** 64 passed (200 assertions) — Currency/Domain/Billing ✅
+- **Translations (pl/en/pt):** ✅ Homepage SEO w `lang/{locale}/seo.php`; pozostały frontend inline EN/PL/PT
+- **Tests:** SEO: PHPUnit 3/3 (51 asercji), Vitest 3/3 ✅; pełny Vitest: 12 passed, 4 `CostCalculatorV2` failed ⚠️
 - **Multi-Tenancy Compliance:** 100% ✅
 - **Security Review:** ✅ OK
 - **Build (Vite):** ✅ Brak błędów TS/JS
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-06-29 — Przywrócono wielojęzyczny `meta description` strony głównej (PL/EN/PT); jedno źródło w `lang/{locale}/seo.php`, fallback tylko `home`, deduplikacja Inertia i testy locale ✅
 - 2026-06-13 — Multi-currency end-to-end (Fazy 1–8): GBP/EUR/PLN ✅
   - `config/currencies.php`, `CurrencyResolver`, `MoneyFormatter`, `CurrencyPriceCalculator`
   - `useCurrency()` hook, `formatCurrency()` util, `servicePrice.js`
@@ -36,6 +38,7 @@
 | Sandbox integration tests (OpenProvider) | ✅ |
 
 ## Open Technical Debt
-**Brak otwartego długu technicznego. Backlog czysty.**
+
+- Test harness `CostCalculatorV2`: 4 istniejące testy Vitest wymagają kontekstu Inertia po dodaniu `useCurrency` (`usePage must be used within the Inertia component`).
 
 **Agent Instructions:** Update this file after every major task completion.

@@ -45,7 +45,7 @@ const CostCalculatorV2   = lazy(() => import('@/Components/Marketing/CostCalcula
 const Faq                = lazy(() => import('@/Components/Marketing/Faq'));
 const Contact            = lazy(() => import('@/Components/Marketing/Contact'));
 
-export default function Welcome({ auth, hero, about, saas_landing, cta_banner, trust_strip, testimonials, services, process, portfolio, faq, cost_calculator_v2, contact, footer, pricing, strings, steps, extra_sections = [], section_order = [] }) {
+export default function Welcome({ auth, seo, hero, about, saas_landing, cta_banner, trust_strip, testimonials, services, process, portfolio, faq, cost_calculator_v2, contact, footer, pricing, strings, steps, extra_sections = [], section_order = [] }) {
     useScrollReveal('.reveal');
 
     const extraByKey = Object.fromEntries(extra_sections.map(s => [s.key, s]));
@@ -82,7 +82,8 @@ export default function Welcome({ auth, hero, about, saas_landing, cta_banner, t
         <MarketingLayout auth={auth} footer={footer}>
             <Head>
                 <title>Website Expert – Web Design & SEO Belfast, Northern Ireland</title>
-                <meta name="description" content="Professional web design, e-commerce and SEO services in Belfast and across Northern Ireland. Fixed price, delivered in 2–6 weeks. Free quote in 24 hours — website-expert.uk" />
+                {/* eslint-disable-next-line react/no-unknown-property -- Inertia uses head-key to de-duplicate managed tags. */}
+                <meta head-key="description" name="description" content={seo.description} />
                 <meta name="robots" content="index, follow" />
                 <link rel="canonical" href="https://website-expert.uk/" />
                 <meta property="og:title" content="Website Expert – Web Design Belfast, Northern Ireland" />
