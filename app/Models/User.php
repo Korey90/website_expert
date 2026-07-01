@@ -4,8 +4,6 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Filament\Support\FilamentPermissionRegistry;
-use App\Models\Business;
-use App\Models\BusinessUser;
 use App\Support\PermissionHelper;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
@@ -13,20 +11,19 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
-use App\Models\SocialAccount;
 
-#[Fillable(['name', 'email', 'password', 'phone', 'locale', 'is_active', 'avatar_url'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'locale', 'is_active', 'avatar_url', 'google_2fa_secret', 'two_factor_enabled'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     public function businessMemberships(): HasMany
     {
@@ -71,9 +68,11 @@ class User extends Authenticatable implements FilamentUser
     {
         return [
             'email_verified_at' => 'datetime',
-            'last_login_at'     => 'datetime',
-            'is_active'         => 'boolean',
-            'password'          => 'hashed',
+            'last_login_at' => 'datetime',
+            'is_active' => 'boolean',
+            'password' => 'hashed',
+            'google_2fa_secret' => 'encrypted',
+            'two_factor_enabled' => 'boolean',
         ];
     }
 }

@@ -1,7 +1,7 @@
 # WebsiteExpert - Project Status Dashboard
 
 **Last Full Validation:** 2026-06-14
-**Last Targeted Validation:** 2026-06-29 — repo-wide ESLint scope (`npx eslint .`, npm lint, Vitest, Vite build)
+**Last Targeted Validation:** 2026-07-01 — Admin Account Profile module (migration, Actions, Filament Page, 2FA)
 
 ## Health Checks
 - **Code Quality (Pint + ESLint):** ✅ `npx eslint .` i `npm run lint` przechodzą; vendor/generated wyłączone jawnie
@@ -13,6 +13,7 @@
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-07-01 — Moduł konta admina `/admin/account-profile-page`: UpdateAdminProfileAction, ChangePasswordAction, EnableTwoFactorAction (TOTP QR), DisableTwoFactorAction; migracja `two_factor_enabled`/`google_2fa_secret` (encrypted); 3-sekcyjna strona Filament; tłumaczenia PL/EN/PT; 10 testów PHPUnit ✅
 - 2026-06-29 — Naprawiono zakres flat config ESLint: 11 809 fałszywych błędów z `vendor` i assetów Filament usunięto przez precyzyjne ignore; reguły React ograniczono do frontendu, skrypty lint ujednolicono, kod aplikacji bez autofixu ✅
 - 2026-06-29 — Przywrócono wielojęzyczny `meta description` strony głównej (PL/EN/PT); jedno źródło w `lang/{locale}/seo.php`, fallback tylko `home`, deduplikacja Inertia i testy locale ✅
 - 2026-06-13 — Multi-currency end-to-end (Fazy 1–8): GBP/EUR/PLN ✅
