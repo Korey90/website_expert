@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Route;
 // Order matters: catch-all must be registered last.
 // -----------------------------------------------------------------------
 
+// Auth routes first — must beat any /{slug} catch-all
+require __DIR__.'/auth.php';
+
 require __DIR__.'/web/portal.php';
 
 require __DIR__.'/web/notifications.php';
@@ -23,7 +26,8 @@ require __DIR__.'/web/business.php';
 require __DIR__.'/web/calendar.php';
 require __DIR__.'/web/admin.php';
 
-require __DIR__.'/auth.php';
+// Dashboard redirect — required by RedirectIfAuthenticated (guest middleware)
+Route::redirect('/dashboard', '/admin')->name('dashboard');
 
 // -----------------------------------------------------------------------
 // Service Pages catch-all — must be registered LAST.

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
 
 const DEFAULTS = {
@@ -46,27 +47,73 @@ export default function Hero({ data }) {
     const mockupTimelineLabel = t(extra, 'mockup_timeline_label') || 'Delivery time';
     const mockupTimelineValue = t(extra, 'mockup_timeline_value') || 'from 2 weeks';
 
+    const mockupSlides = [
+        // Slide 1: hero / landing
+        <div key="slide-1" className="p-5 space-y-3">
+            <div className="h-4 w-3/4 rounded bg-brand-500/20" />
+            <div className="h-3 w-full rounded bg-neutral-100 dark:bg-neutral-700" />
+            <div className="h-3 w-5/6 rounded bg-neutral-100 dark:bg-neutral-700" />
+            <div className="h-8 w-32 rounded-lg bg-brand-500/80 mt-4" />
+            <div className="grid grid-cols-3 gap-2 mt-4">
+                <div className="h-16 rounded-lg bg-neutral-100 dark:bg-neutral-700" />
+                <div className="h-16 rounded-lg bg-neutral-100 dark:bg-neutral-700" />
+                <div className="h-16 rounded-lg bg-neutral-100 dark:bg-neutral-700" />
+            </div>
+        </div>,
+        // Slide 2: portfolio / cards
+        <div key="slide-2" className="p-5 space-y-3">
+            <div className="h-3 w-1/2 rounded bg-brand-500/30" />
+            <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="h-20 rounded-lg bg-neutral-100 dark:bg-neutral-700" />
+                <div className="h-20 rounded-lg bg-brand-500/10" />
+                <div className="h-20 rounded-lg bg-brand-500/10" />
+                <div className="h-20 rounded-lg bg-neutral-100 dark:bg-neutral-700" />
+            </div>
+            <div className="h-3 w-2/3 rounded bg-neutral-100 dark:bg-neutral-700 mt-1" />
+        </div>,
+        // Slide 3: contact / form
+        <div key="slide-3" className="p-5 space-y-2.5">
+            <div className="h-3 w-2/5 rounded bg-brand-500/30" />
+            <div className="h-7 w-full rounded-lg bg-neutral-100 dark:bg-neutral-700" />
+            <div className="h-7 w-full rounded-lg bg-neutral-100 dark:bg-neutral-700" />
+            <div className="h-14 w-full rounded-lg bg-neutral-100 dark:bg-neutral-700" />
+            <div className="h-8 w-24 rounded-lg bg-brand-500/80" />
+        </div>,
+    ];
+
+    const [slideIndex, setSlideIndex] = useState(0);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setSlideIndex(prev => (prev + 1) % mockupSlides.length);
+        }, 3000);
+        return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     // Title may contain \n for line breaks
     const titleLines = (d.title ?? DEFAULTS.title).split('\n');
 
+    console.log('titleLines:', titleLines);
+
     return (
-        <section id="hero" className="relative min-h-screen flex items-center overflow-hidden pt-4 md:pt-10">
+        <section id="hero" className="relative min-h-screen flex items-center overflow-hidden pt-4 md:pt-6">
             {/* Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-neutral-50 via-white to-brand-50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950" aria-hidden="true" />
             <div className="absolute top-1/4 right-0 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none hidden md:block" aria-hidden="true" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-500/5 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
 
-            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 md:py-28 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-18 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                 {/* Text */}
                 <div>
                     {badgeText && (
-                        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-600 dark:text-brand-400 mb-6">
+                        <span className="inline-flex items-center gap-2 px-3 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-600 dark:text-brand-400 mb-6">
                             <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
                             {badgeText}
                         </span>
                     )}
 
-                    <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-neutral-900 dark:text-white">
+                    <h1 className="font-display text-4xl sm:text-5xl lg:text-5xl font-extrabold leading-tight tracking-tight text-neutral-900 dark:text-white">
                         {titleLines.map((line, i) => (
                             <span key={i}>
                                 {i === 1
@@ -129,16 +176,31 @@ export default function Hero({ data }) {
                                     <span className="text-xs text-neutral-500 dark:text-neutral-300">{mockupDomain}</span>
                                 </div>
                             </div>
-                            {/* Mock content */}
-                            <div className="p-5 space-y-3">
-                                <div className="h-4 w-3/4 rounded bg-brand-500/20" />
-                                <div className="h-3 w-full rounded bg-neutral-100 dark:bg-neutral-700" />
-                                <div className="h-3 w-5/6 rounded bg-neutral-100 dark:bg-neutral-700" />
-                                <div className="h-8 w-32 rounded-lg bg-brand-500/80 mt-4" />
-                                <div className="grid grid-cols-3 gap-2 mt-4">
-                                    <div className="h-16 rounded-lg bg-neutral-100 dark:bg-neutral-700" />
-                                    <div className="h-16 rounded-lg bg-neutral-100 dark:bg-neutral-700" />
-                                    <div className="h-16 rounded-lg bg-neutral-100 dark:bg-neutral-700" />
+                            {/* Mock content — slider */}
+                            <div className="relative overflow-hidden" style={{ minHeight: '10.5rem' }}>
+                                <div
+                                    className="flex transition-transform duration-700 ease-in-out"
+                                    style={{ transform: `translateX(-${slideIndex * 100}%)` }}
+                                >
+                                    {mockupSlides.map((slide, i) => (
+                                        <div key={i} className="min-w-full flex-shrink-0">
+                                            {slide}
+                                        </div>
+                                    ))}
+                                </div>
+                                {/* Dots */}
+                                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5" aria-hidden="true">
+                                    {mockupSlides.map((_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setSlideIndex(i)}
+                                            className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
+                                                i === slideIndex
+                                                    ? 'bg-brand-500'
+                                                    : 'bg-neutral-300 dark:bg-neutral-600'
+                                            }`}
+                                        />
+                                    ))}
                                 </div>
                             </div>
                         </div>

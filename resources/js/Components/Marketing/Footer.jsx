@@ -71,6 +71,12 @@ export default function Footer({ data = null }) {
         return href;
     };
 
+    const resolveSocial = (url) => {
+        if (!url || url === '#') return '#';
+        if (/^https?:\/\//i.test(url)) return url;
+        return 'https://' + url;
+    };
+
     const brandName   = extra.brand_name || 'WebsiteExpert';
     const tagline     = t('tagline',    locale === 'pl' ? 'Tworzymy strony i aplikacje internetowe, które pracują na Twój biznes.' : 'We create websites and web apps that work for your business.');
     const copyright   = t('copyright',  locale === 'pl' ? 'Wszelkie prawa zastrzeżone.' : 'All rights reserved.');
@@ -111,7 +117,7 @@ export default function Footer({ data = null }) {
                                 const isStroke = SOCIAL_STROKE.has(s.key);
                                 if (!icon) return null;
                                 return (
-                                    <a key={s.key} href={s.url || '#'} aria-label={s.label}
+                                    <a key={s.key} href={resolveSocial(s.url)} aria-label={s.label} target="_blank" rel="noopener noreferrer"
                                         className="w-9 h-9 rounded-lg bg-neutral-800 flex items-center justify-center hover:bg-brand-500 transition-colors">
                                         <svg className="w-4 h-4"
                                             fill={isStroke ? 'none' : 'currentColor'}

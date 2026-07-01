@@ -106,11 +106,9 @@ class SocialAuthController extends Controller
         $isNewUser = false;
 
         if (! $user) {
-            if ($intent !== 'register') {
-                return redirect()->route('login')
-                    ->withErrors(['email' => __('auth.social_account_not_registered')]);
-            }
-
+            // Both 'login' and 'register' intents auto-create on first OAuth sign-in.
+            // There is no password to guess, so requiring a prior registration adds
+            // friction without security benefit.
             $user = new User([
                 'email'             => $socialUser->getEmail(),
                 'name'              => $socialUser->getName() ?? $socialUser->getNickname() ?? 'User',
