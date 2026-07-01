@@ -1,10 +1,10 @@
 # WebsiteExpert - Project Status Dashboard
 
 **Last Full Validation:** 2026-06-14
-**Last Targeted Validation:** 2026-06-29 — multilingual homepage `meta description` PL/EN/PT (PHPUnit, Vitest, Pint, ESLint, Vite build, raw HTML, Inertia Head)
+**Last Targeted Validation:** 2026-06-29 — repo-wide ESLint scope (`npx eslint .`, npm lint, Vitest, Vite build)
 
 ## Health Checks
-- **Code Quality (Pint + ESLint):** ✅ Passed
+- **Code Quality (Pint + ESLint):** ✅ `npx eslint .` i `npm run lint` przechodzą; vendor/generated wyłączone jawnie
 - **Translations (pl/en/pt):** ✅ Homepage SEO w `lang/{locale}/seo.php`; pozostały frontend inline EN/PL/PT
 - **Tests:** SEO: PHPUnit 3/3 (51 asercji), Vitest 3/3 ✅; pełny Vitest: 12 passed, 4 `CostCalculatorV2` failed ⚠️
 - **Multi-Tenancy Compliance:** 100% ✅
@@ -13,6 +13,7 @@
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-06-29 — Naprawiono zakres flat config ESLint: 11 809 fałszywych błędów z `vendor` i assetów Filament usunięto przez precyzyjne ignore; reguły React ograniczono do frontendu, skrypty lint ujednolicono, kod aplikacji bez autofixu ✅
 - 2026-06-29 — Przywrócono wielojęzyczny `meta description` strony głównej (PL/EN/PT); jedno źródło w `lang/{locale}/seo.php`, fallback tylko `home`, deduplikacja Inertia i testy locale ✅
 - 2026-06-13 — Multi-currency end-to-end (Fazy 1–8): GBP/EUR/PLN ✅
   - `config/currencies.php`, `CurrencyResolver`, `MoneyFormatter`, `CurrencyPriceCalculator`
@@ -40,5 +41,6 @@
 ## Open Technical Debt
 
 - Test harness `CostCalculatorV2`: 4 istniejące testy Vitest wymagają kontekstu Inertia po dodaniu `useCurrency` (`usePage must be used within the Inertia component`).
+- Lint TypeScript: `resources/js/Pages/Services/ServicePage.tsx` nie jest jeszcze objęty parserem ani skryptem ESLint.
 
 **Agent Instructions:** Update this file after every major task completion.

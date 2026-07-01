@@ -33,18 +33,28 @@ const browserGlobals = {
     window: 'readonly',
 };
 
+const frontendFiles = ['resources/js/**/*.{js,jsx}'];
+
 export default [
     {
         ignores: [
             'public/build/**',
+            'public/js/filament/**',
             'resources/js/ziggy.js',
+            'vendor/**',
         ],
     },
     js.configs.recommended,
-    react.configs.flat.recommended,
-    react.configs.flat['jsx-runtime'],
     {
-        files: ['resources/js/**/*.{js,jsx}'],
+        ...react.configs.flat.recommended,
+        files: frontendFiles,
+    },
+    {
+        ...react.configs.flat['jsx-runtime'],
+        files: frontendFiles,
+    },
+    {
+        files: frontendFiles,
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: 'module',

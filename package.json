@@ -8,8 +8,8 @@
         "dev:all": "concurrently --names \"vite,serve,reverb,queue,stripe\" --prefix-colors \"cyan,green,yellow,magenta,blue\" \"npm run dev\" \"php artisan serve\" \"php artisan reverb:start\" \"php artisan queue:work --queue=notifications,default\" \"stripe listen --forward-to localhost:8000/stripe/webhook\"",
         "test": "vitest run",
         "test:watch": "vitest",
-        "lint": "eslint resources/js --ext .js,.jsx --max-warnings 0",
-        "lint:fix": "eslint resources/js --ext .js,.jsx --fix",
+        "lint": "eslint . --max-warnings 0",
+        "lint:fix": "eslint . --fix",
         "format": "prettier --write resources/js",
         "format:check": "prettier --check resources/js"
     },

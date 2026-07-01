@@ -6,6 +6,6 @@
 
 ---
 
-Zadanie wielojęzycznego `meta description` strony głównej zostało zakończone i opisane w:
+Zadanie korekty zakresu ESLint zostało zakończone i opisane w:
 
-- `completed-tasks/2026-06-29 - Przywrócenie meta description strony głównej.md`
+- `completed-tasks/2026-06-29 - Korekta zakresu ESLint.md`
