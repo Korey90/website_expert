@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 class GeoIpService
 {
     private const CACHE_TTL = 86400; // 24 hours
+    private const CACHE_TTL_FAILURE = 3600; // 1 hour for failed lookups (rate-limit protection)
 
     /**
      * Resolve a 2-letter ISO country code from the request.
@@ -49,7 +50,7 @@ class GeoIpService
         $cacheKey = 'geoip_country_'.md5($ip);
 
         try {
-            $store = Cache::store('file');
+            $store = Cache::store('redis');
 
             if ($store->has($cacheKey)) {
                 return $store->get($cacheKey);
@@ -57,9 +58,8 @@ class GeoIpService
 
             $country = $this->fetchCountryFromApi($ip);
 
-            if ($country !== null) {
-                $store->put($cacheKey, $country, self::CACHE_TTL);
-            }
+            $ttl = $country !== null ? self::CACHE_TTL : self::CACHE_TTL_FAILURE;
+            $store->put($cacheKey, $country, $ttl);
 
             return $country;
         } catch (\Throwable $e) {
@@ -72,7 +72,7 @@ class GeoIpService
     private function fetchCountryFromApi(string $ip): ?string
     {
         try {
-            $response = Http::timeout(3)
+            $response = Http::timeout(2)
                 ->withUserAgent('WebsiteExpert/1.0 (GeoIP lookup)')
                 ->get("http://ip-api.com/json/{$ip}", ['fields' => 'status,countryCode']);
 

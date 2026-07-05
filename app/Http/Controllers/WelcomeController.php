@@ -9,6 +9,7 @@ use App\Services\Marketing\CalculatorPricingPayloadService;
 use App\Services\Marketing\ServiceItemService;
 use App\Services\Portfolio\PortfolioProjectService;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -37,6 +38,7 @@ class WelcomeController extends Controller
         $sections = SiteSection::where('is_active', true)
             ->get()
             ->keyBy('key');
+
 
         $hero = ($s = $sections->get('hero')) ? [
             'title' => $s->title,
@@ -163,14 +165,14 @@ class WelcomeController extends Controller
         // Pricing, strings and steps for CostCalculatorV2
         $pricing = app(CalculatorPricingPayloadService::class)->forLocale($locale);
 
-        $strings = CalculatorString::orderBy('sort_order')
+        $strings = Cache::remember("welcome_strings_{$locale}", 300, fn () => CalculatorString::orderBy('sort_order')
             ->get()
             ->mapWithKeys(fn ($s) => [
                 $s->key => ($s->{"value_$locale"} ?: $s->value_en) ?? $s->value_en,
             ])
-            ->all();
+            ->all());
 
-        $steps = CalculatorStep::where('is_active', true)
+        $steps = Cache::remember("welcome_steps_{$locale}", 300, fn () => CalculatorStep::where('is_active', true)
             ->orderBy('sort_order')
             ->get()
             ->map(fn ($s) => [
@@ -178,7 +180,7 @@ class WelcomeController extends Controller
                 'hint' => ($s->{"hint_$locale"} ?: $s->hint_en) ?? '',
             ])
             ->values()
-            ->all();
+            ->all());
 
         // Sekcje spoza znanych kluczy — dostępne na froncie jako extra_sections[key]
         $extra_sections = $sections
