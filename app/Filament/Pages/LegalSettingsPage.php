@@ -115,6 +115,7 @@ class LegalSettingsPage extends BasePage
                         Forms\Components\TextInput::make('ico_registration_url')
                             ->label('ICO register entry URL')
                             ->url()
+                            ->nullable()
                             ->placeholder('https://ico.org.uk/ESDWebPages/Entry/ZB…')
                             ->columnSpanFull(),
                         Forms\Components\TextInput::make('privacy_email')

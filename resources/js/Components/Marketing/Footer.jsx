@@ -1,4 +1,4 @@
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useConsentContext } from '@/Contexts/ConsentContext';
 
 const SOCIAL_ICONS = {
@@ -71,6 +71,16 @@ export default function Footer({ data = null }) {
         return href;
     };
 
+    const isExternal = (href) => /^https?:\/\//i.test(href ?? '');
+    const isPureHash = (href) => !href || href === '#';
+
+    const NavLink = ({ href, children, className }) => {
+        const resolved = resolveHref(href);
+        if (isPureHash(resolved)) return <a href={resolved} className={className}>{children}</a>;
+        if (isExternal(resolved)) return <a href={resolved} className={className} target="_blank" rel="noopener noreferrer">{children}</a>;
+        return <Link href={resolved} className={className}>{children}</Link>;
+    };
+
     const resolveSocial = (url) => {
         if (!url || url === '#') return '#';
         if (/^https?:\/\//i.test(url)) return url;
@@ -101,7 +111,7 @@ export default function Footer({ data = null }) {
 
                     {/* Brand — takes 2 of 4 columns on desktop */}
                     <div className="col-span-2 md:col-span-2">
-                        <a href="/" className="inline-flex items-center gap-2 mb-5" aria-label={brandName}>
+                        <Link href="/" className="inline-flex items-center gap-2 mb-5" aria-label={brandName}>
                             <svg width="32" height="32" viewBox="0 0 36 36" fill="none" aria-hidden="true">
                                 <rect width="36" height="36" rx="8" className="fill-brand-500" />
                                 <path d="M13 18L16.5 21.5L23 14.5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -109,7 +119,7 @@ export default function Footer({ data = null }) {
                             <span className="font-display font-bold text-lg text-white">
                                 {brandPrefix}<span className="text-brand-500">{brandSuffix}</span>
                             </span>
-                        </a>
+                        </Link>
                         <p className="text-sm leading-relaxed text-neutral-300 max-w-xs">{tagline}</p>
                         <div className="flex gap-3 mt-6">
                             {socialLinks.map(s => {
@@ -141,9 +151,9 @@ export default function Footer({ data = null }) {
                             <ul className="space-y-2.5 text-sm">
                                 {(group.links || []).map((l, j) => (
                                     <li key={j}>
-                                        <a href={resolveHref(l.href)} className="text-neutral-300 hover:text-brand-400 transition-colors">
+                                        <NavLink href={l.href} className="text-neutral-300 hover:text-brand-400 transition-colors">
                                             {l[`label_${locale}`] ?? l.label_en ?? ''}
-                                        </a>
+                                        </NavLink>
                                     </li>
                                 ))}
                             </ul>
@@ -159,10 +169,10 @@ export default function Footer({ data = null }) {
                         </p>
                         <div className="flex flex-wrap gap-x-5 gap-y-2">
                             {footer_pages.map((page, i) => (
-                                <a key={i} href={page.href}
+                                <Link key={i} href={page.href}
                                     className="text-xs text-neutral-400 hover:text-brand-400 transition-colors">
                                     {page.title[locale] ?? page.title.en ?? page.title.pl ?? ''}
-                                </a>
+                                </Link>
                             ))}
                         </div>
                     </div>

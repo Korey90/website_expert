@@ -1,4 +1,4 @@
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import useCurrency from '@/Hooks/useCurrency';
 import { servicePriceLabel } from '@/utils/servicePrice';
 
@@ -85,7 +85,7 @@ export default function Services({ data }) {
                                 </div>
                                 <p className="text-sm text-neutral-500 dark:text-neutral-400">{itemBody}</p>
                                 {href ? (
-                                    <a
+                                    <Link
                                         href={href}
                                         aria-label={locale === 'pl' ? `Dowiedz się więcej o ${itemTitle}` : locale === 'pt' ? `Saiba mais sobre ${itemTitle}` : `Learn more about ${itemTitle}`}
                                         className="mt-3 inline-flex items-center gap-1 text-xs text-brand-500 font-medium hover:underline"
@@ -94,7 +94,7 @@ export default function Services({ data }) {
                                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                                         </svg>
-                                    </a>
+                                    </Link>
                                 ) : s.link ? (
                                     <span className="mt-3 inline-block text-xs text-neutral-400 dark:text-neutral-600 italic">
                                         {locale === 'pl' ? 'Wkrótce' : locale === 'pt' ? 'Em breve' : 'Coming soon'}
@@ -106,7 +106,7 @@ export default function Services({ data }) {
                 </div>
 
                 <div className="text-center mt-10 reveal">
-                    <a
+                    <Link
                         href={buttonUrl}
                         className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/20"
                     >
@@ -114,7 +114,7 @@ export default function Services({ data }) {
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
-                    </a>
+                    </Link>
                 </div>
             </div>
         </section>

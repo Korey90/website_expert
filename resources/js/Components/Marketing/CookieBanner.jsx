@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useConsentContext } from '@/Contexts/ConsentContext';
 
 const CATEGORIES = [
@@ -28,9 +28,9 @@ export default function CookieBanner() {
                         ? 'Używamy plików cookies, aby poprawić działanie serwisu i prowadzić analizę ruchu. Możesz zaakceptować wszystkie lub wybrać kategorie.'
                         : 'We use cookies to improve performance and analyse traffic. You can accept all or choose categories.'
                     }{' '}
-                    <a href="/cookies" className="text-brand-400 hover:text-brand-600 tracking-wide font-semibold" target="_blank" rel="noopener noreferrer">
+                    <Link href="/cookies" className="text-brand-400 hover:text-brand-600 tracking-wide font-semibold" target="_blank" rel="noopener noreferrer">
                         {pl ? 'Polityka cookies' : 'Cookie policy'}
-                    </a>
+                    </Link>
                 </p>
 
                 {showDetails && (

@@ -26,9 +26,11 @@ class BriefingTemplateResource extends BaseResource
 
     public static function form(Schema $form): Schema
     {
-        return $form->schema([
+        return $form->columns(1)->schema([
             Section::make('Template Details')
-                ->columns(2)
+                ->columns(1)
+                ->collapsible()
+                ->collapsed()
                 ->schema([
                     Forms\Components\TextInput::make('title')
                         ->required()
@@ -74,6 +76,8 @@ class BriefingTemplateResource extends BaseResource
 
             Section::make('Sections & Questions')
                 ->description('Define sections and questions for this briefing template.')
+                ->collapsible()
+                ->collapsed()
                 ->schema([
                     Forms\Components\Repeater::make('sections')
                         ->schema([

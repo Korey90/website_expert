@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import MarketingLayout from '@/Layouts/MarketingLayout';
 import useScrollReveal from '@/Hooks/useScrollReveal';
 import useCurrency from '@/Hooks/useCurrency';
@@ -322,7 +322,7 @@ function InlineContactForm({ l, locale, serviceTitle, serviceSlug }) {
                         />
                         <span className="text-xs text-neutral-500 dark:text-neutral-400">
                             {l.gdprText}{' '}
-                            <a href="/privacy-policy" className="text-brand-500 hover:underline">{l.gdprLink}</a>.
+                            <Link href="/privacy-policy" className="text-brand-500 hover:underline">{l.gdprLink}</Link>.
                         </span>
                     </label>
                 </div>
@@ -385,12 +385,12 @@ export default function ServicesShow({ locale: localeProp, item, auth }) {
             {/* ── Hero ────────────────────────────────────────────── */}
             <section className="py-20 md:py-28 bg-white dark:bg-neutral-950">
                 <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                    <a
+                    <Link
                         href="/services"
                         className="inline-flex items-center text-sm text-neutral-500 dark:text-neutral-400 hover:text-brand-500 mb-10 transition-colors"
                     >
                         {l.back}
-                    </a>
+                    </Link>
 
                     <div className="flex flex-col sm:flex-row items-start gap-6 mb-6 reveal">
                         {/* Icon */}

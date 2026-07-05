@@ -49,8 +49,12 @@ Route::get('/sitemap.xml', function () {
 })->name('sitemap');
 
 Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');
-Route::get('/{slug}', [PageController::class, 'show'])->name('page.show.clean')
-    ->where('slug', 'privacy-policy|terms-and-conditions|cookies|accessibility');
+
+// Explicit routes for legal/CMS pages — avoids conflict with the /{slug} catch-all in web.php
+Route::get('/privacy-policy',       [PageController::class, 'show'])->defaults('slug', 'privacy-policy')->name('page.privacy_policy');
+Route::get('/terms-and-conditions', [PageController::class, 'show'])->defaults('slug', 'terms-and-conditions')->name('page.terms_and_conditions');
+Route::get('/cookies',              [PageController::class, 'show'])->defaults('slug', 'cookies')->name('page.cookies');
+Route::get('/accessibility',        [PageController::class, 'show'])->defaults('slug', 'accessibility')->name('page.accessibility');
 
 Route::get('/lang/{locale}', function (string $locale) {
     $supported = array_keys(config('languages'));

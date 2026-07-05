@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { pushEvent } from '@/utils/dataLayer';
 
 const inputClass = 'w-full px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition';
@@ -36,14 +36,14 @@ export default function Contact({ data = null }) {
     const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
 
     const extra = data?.extra ?? {};
-    console.log('Contact extra data:', extra);
+  
     const t     = (key, fallback = '') => extra[`${key}_${locale}`] ?? extra[`${key}_en`] ?? fallback;
 
     const title        = (locale === 'pl' ? data?.title?.pl : data?.title?.en) || data?.title || DEFAULTS.title[locale];
     const subtitle     = (locale === 'pl' ? data?.subtitle?.pl : data?.subtitle?.en) || data?.subtitle || DEFAULTS.subtitle[locale];
     const sectionLabel = t('section_label') || DEFAULTS.section_label[locale];
 
-    const email       = extra.email      || 'hto-ello@websiteexpert.co.uk';
+    const email       = extra.email      || 'sales@websiteexpert.co.uk';
     const phone       = extra.phone      || '+44 000 000 200';
     const phoneHref   = extra.phone_href || 'tel:+44000000000';
     const privacyUrl  = extra.privacy_url || '#';
@@ -109,7 +109,7 @@ export default function Contact({ data = null }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                 </svg>
                             </span>
-                            <a href={phoneHref} className="hover:text-brand-500 transition-colors">{phone}</a>
+                            <Link href={phoneHref} className="hover:text-brand-500 transition-colors">{phone}</Link>
                         </li>
                     </ul>
                 </div>
@@ -202,9 +202,9 @@ export default function Contact({ data = null }) {
                                         ? 'Wyrażam zgodę na przetwarzanie moich danych osobowych w celu odpowiedzi na zapytanie, zgodnie z'
                                         : 'I agree to the processing of my personal data for the purpose of responding to this enquiry, in accordance with the'
                                     )}{' '}
-                                    <a href={privacyUrl} className="text-brand-500 hover:underline">
+                                    <Link href={privacyUrl} className="text-brand-500 hover:underline">
                                         {t('gdpr_link_text', locale === 'pl' ? 'polityką prywatności' : 'privacy policy')}
-                                    </a>.
+                                    </Link>.
                                 </span>
                             </label>
                         </div>

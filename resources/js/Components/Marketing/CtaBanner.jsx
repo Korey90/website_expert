@@ -1,4 +1,4 @@
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 const DEFAULTS = {
     title:    { en: 'Ready to Get Started?',                                                          pl: 'Gotowy, aby zacząć?' },
@@ -42,7 +42,7 @@ export default function CtaBanner({ data }) {
                     {subtitle}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <a
+                    <Link
                         href={primaryUrl}
                         className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-brand-500 text-white font-bold text-base hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/25"
                     >
@@ -50,14 +50,14 @@ export default function CtaBanner({ data }) {
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
-                    </a>
+                    </Link>
                     {secondaryText && secondaryUrl && (
-                        <a
+                        <Link
                             href={secondaryUrl}
                             className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-neutral-300 text-neutral-700 font-bold text-base hover:border-brand-500 hover:text-brand-500 active:scale-95 transition-all dark:border-neutral-700 dark:text-neutral-300"
                         >
                             {secondaryText}
-                        </a>
+                        </Link>
                     )}
                 </div>
             </div>

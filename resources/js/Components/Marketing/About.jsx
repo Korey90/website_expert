@@ -1,4 +1,4 @@
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 const ICONS = [
     <svg key="speed" className="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -82,12 +82,12 @@ export default function About({ data }) {
 
                         {d.button_text && d.button_url && (
                             <div className="mt-8">
-                                <a
+                                <Link
                                     href={d.button_url}
                                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 transition-colors"
                                 >
                                     {d.button_text}
-                                </a>
+                                </Link>
                             </div>
                         )}
                     </div>

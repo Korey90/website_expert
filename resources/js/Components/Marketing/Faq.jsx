@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 const DEFAULTS = {
     title:       { en: 'Frequently Asked Questions', pl: 'Najczęściej zadawane pytania', pt: 'Perguntas Frequentes' },
@@ -82,7 +82,7 @@ export default function Faq({ data }) {
                             </p>
                         )}
                         {buttonText && buttonUrl && (
-                            <a
+                            <Link
                                 href={buttonUrl}
                                 className="inline-flex items-center gap-2 mt-8 px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors"
                             >
@@ -90,7 +90,7 @@ export default function Faq({ data }) {
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
-                            </a>
+                            </Link>
                         )}
                     </div>
 

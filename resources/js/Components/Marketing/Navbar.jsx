@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { usePage, router } from '@inertiajs/react';
+import { usePage, router, Link } from '@inertiajs/react';
 
 // Flag emoji map – add more as needed
 const FLAG = { en: '🇬🇧', pl: '🇵🇱', de: '🇩🇪', fr: '🇫🇷', es: '🇪🇸', pt: '🇵🇹', uk: '🇺🇦' };
@@ -147,7 +147,7 @@ export default function Navbar({ auth }) {
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 md:h-20">
 
                 {/* Logo */}
-                <a href={resolveHref('/#hero')} className="flex items-center gap-2 shrink-0 group" aria-label="Website Expert – strona główna">
+                <Link href={resolveHref('/#hero')} className="flex items-center gap-2 shrink-0 group" aria-label="Website Expert – strona główna">
                     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="shrink-0" aria-hidden="true">
                         <rect width="36" height="36" rx="8" className="fill-brand-500" />
                         <path d="M9 12L18 8L27 12V18C27 23.1 22.8 27.7 18 29C13.2 27.7 9 23.1 9 18V12Z" fill="white" opacity="0.2" />
@@ -156,20 +156,29 @@ export default function Navbar({ auth }) {
                     <span className="font-display font-bold text-xl tracking-tight text-neutral-900 dark:text-white group-hover:text-brand-500 transition-colors">
                         {brandName}
                     </span>
-                </a>
+                </Link>
 
                 {/* Desktop menu */}
                 <ul className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-600 dark:text-neutral-300">
                     {navLinks.map(l => (
                         <li key={l.href}>
-                            <a
-                                href={l.href}
-                                target={l.newTab ? '_blank' : undefined}
-                                rel={l.newTab ? 'noopener noreferrer' : undefined}
-                                className={`hover:text-brand-500 transition-colors ${l.isActive ? 'text-brand-500 font-semibold' : ''}`}
-                            >
-                                {l.label}
-                            </a>
+                            {l.newTab ? (
+                                <a
+                                    href={l.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`hover:text-brand-500 transition-colors ${l.isActive ? 'text-brand-500 font-semibold' : ''}`}
+                                >
+                                    {l.label}
+                                </a>
+                            ) : (
+                                <Link
+                                    href={l.href}
+                                    className={`hover:text-brand-500 transition-colors ${l.isActive ? 'text-brand-500 font-semibold' : ''}`}
+                                >
+                                    {l.label}
+                                </Link>
+                            )}
                         </li>
                     ))}
                 </ul>
@@ -243,7 +252,7 @@ export default function Navbar({ auth }) {
 
                     {/* Client Portal */}
                     {showClientPortal && (
-                    <a
+                    <Link
                         href="/portal"
                         className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 text-sm font-semibold text-neutral-600 dark:text-neutral-200 hover:border-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-50 transition-colors"
                     >
@@ -251,17 +260,17 @@ export default function Navbar({ auth }) {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         {locale === 'pl' ? 'Portal Klienta' : locale === 'pt' ? 'Portal do Cliente' : 'Client Portal'}
-                    </a>
+                    </Link>
                     )}
 
                     {/* CTA button */}
                     {showCtaButton && (
-                    <a
+                    <Link
                         href={ctaHref}
                         className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg shadow-brand-400/25 hover:shadow-brand-400/50 shadow-md text-brand-400 border border-brand-400 text-sm font-semibold hover:bg-brand-400 hover:text-neutral-100 active:scale-95 transition-all"
                     >
                         {ctaText}
-                    </a>
+                    </Link>
                     )}
 
                     {/* Mobile hamburger */}
@@ -297,15 +306,25 @@ export default function Navbar({ auth }) {
                     <ul className="flex flex-col gap-1 pt-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                         {navLinks.map(l => (
                             <li key={l.href}>
-                                <a
-                                    href={l.href}
-                                    target={l.newTab ? '_blank' : undefined}
-                                    rel={l.newTab ? 'noopener noreferrer' : undefined}
-                                    onClick={() => setMobileOpen(false)}
-                                    className={`block py-2.5 hover:text-brand-500 transition-colors ${l.isActive ? 'text-brand-500 font-semibold' : ''}`}
-                                >
-                                    {l.label}
-                                </a>
+                                {l.newTab ? (
+                                    <a
+                                        href={l.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={() => setMobileOpen(false)}
+                                        className={`block py-2.5 hover:text-brand-500 transition-colors ${l.isActive ? 'text-brand-500 font-semibold' : ''}`}
+                                    >
+                                        {l.label}
+                                    </a>
+                                ) : (
+                                    <Link
+                                        href={l.href}
+                                        onClick={() => setMobileOpen(false)}
+                                        className={`block py-2.5 hover:text-brand-500 transition-colors ${l.isActive ? 'text-brand-500 font-semibold' : ''}`}
+                                    >
+                                        {l.label}
+                                    </Link>
+                                )}
                             </li>
                         ))}
 
@@ -333,24 +352,24 @@ export default function Navbar({ auth }) {
 
                         {showClientPortal && (
                         <li className="pt-2">
-                            <a
+                            <Link
                                 href="/portal"
                                 onClick={() => setMobileOpen(false)}
                                 className="block text-center px-4 py-3 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-200 font-semibold hover:text-brand-500 hover:border-brand-500 transition-colors"
                             >
                                 {locale === 'pl' ? '🔒 Portal Klienta' : locale === 'pt' ? '🔒 Portal do Cliente' : '🔒 Client Portal'}
-                            </a>
+                            </Link>
                         </li>
                         )}
                         {showCtaButton && (
                         <li className="pt-2">
-                            <a
+                            <Link
                                 href={ctaHref}
                                 onClick={() => setMobileOpen(false)}
                                 className="block text-center px-4 py-3 rounded-lg bg-brand-500 text-white font-semibold hover:bg-brand-600 transition-colors"
                             >
                                 {ctaText}
-                            </a>
+                            </Link>
                         </li>
                         )}
                     </ul>

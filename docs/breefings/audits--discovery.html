@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>audits--discovery.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="-audyty-bezpieczeństwa-i-wydajności--brief-discovery">🔍 Audyty Bezpieczeństwa i Wydajności — Brief Discovery</h1>
+<blockquote>
+<p><strong>Typ:</strong> Brief Discovery<br>
+<strong>Usługa:</strong> audits<br>
+<strong>Język:</strong> PL<br>
+<strong>Aktywny:</strong> Tak<br>
+<strong>ID w bazie:</strong> 46</p>
+</blockquote>
+<h2 id="opis">Opis</h2>
+<p>Rozpoznanie sytuacji technicznej klienta, motywacji zlecenia audytu oraz zakresu środowiska do zbadania.</p>
+<hr>
+<h2 id="1-kontekst-klienta">1. Kontekst Klienta</h2>
+<h3 id="11-nazwa-firmy-wymagane">1.1 Nazwa firmy <em>(wymagane)</em></h3>
+<h3 id="12-branża--nisza-wymagane">1.2 Branża / nisza <em>(wymagane)</em></h3>
+<h3 id="13-url-strony--aplikacji-do-audytu-wymagane">1.3 URL strony / aplikacji do audytu <em>(wymagane)</em></h3>
+<h3 id="14-termin-decyzji">1.4 Termin decyzji</h3>
+<h3 id="15-orientacyjny-budżet">1.5 Orientacyjny budżet</h3>
+<h2 id="2-motywacja-audytu">2. Motywacja Audytu</h2>
+<h3 id="21-co-jest-bezpośrednią-przyczyną-zlecenia-audytu-wymagane">2.1 Co jest bezpośrednią przyczyną zlecenia audytu? <em>(wymagane)</em></h3>
+<blockquote>
+<p><em>Podpowiedź: incydent bezpieczeństwa, wymóg inwestora/klienta, compliance, proaktywne działanie, przed wdrożeniem.</em></p>
+</blockquote>
+<h3 id="22-czy-w-ostatnim-czasie-wystąpiły-incydenty-bezpieczeństwa-lub-awarie">2.2 Czy w ostatnim czasie wystąpiły incydenty bezpieczeństwa lub awarie?</h3>
+<h3 id="23-czy-obowiązują-wymagania-compliance-lub-regulacyjne">2.3 Czy obowiązują wymagania compliance lub regulacyjne?</h3>
+<blockquote>
+<p><em>Podpowiedź: GDPR/RODO, PCI-DSS (płatności), ISO 27001, NIS2, wymogi branżowe (fintech, medtech).</em></p>
+</blockquote>
+<h2 id="3-zakres-techniczny">3. Zakres Techniczny</h2>
+<h3 id="31-platforma--cms--framework-i-wersja-wymagane">3.1 Platforma / CMS / framework i wersja <em>(wymagane)</em></h3>
+<blockquote>
+<p><em>Np. WordPress 6.5 + WooCommerce, Laravel 11, Next.js 14, Magento 2.4.</em></p>
+</blockquote>
+<h3 id="32-typ-środowiska-hostingowego">3.2 Typ środowiska hostingowego</h3>
+<blockquote>
+<p><em>Np. shared hosting, VPS, AWS/GCP/Azure, serwer dedykowany, on-premise.</em></p>
+</blockquote>
+<h3 id="33-liczba-subdomen--powiązanych-aplikacji">3.3 Liczba subdomen / powiązanych aplikacji</h3>
+<h3 id="34-priorytet-audytu-wymagane">3.4 Priorytet audytu <em>(wymagane)</em></h3>
+<blockquote>
+<p><em>Bezpieczeństwo, wydajność (Core Web Vitals / czas ładowania), czy pełny zakres?</em></p>
+</blockquote>
+<h3 id="35-szacowany-ruch-wizytymiesiąc">3.5 Szacowany ruch (wizyty/miesiąc)</h3>
+<blockquote>
+<p><em>Kontekst do audytu wydajności — czy serwer radzi sobie z obecnym obciążeniem?</em></p>
+</blockquote>
+<h2 id="4-stan-obecny">4. Stan Obecny</h2>
+<h3 id="41-kiedy-ostatnio-aktualizowano-cms--wtyczki--zależności">4.1 Kiedy ostatnio aktualizowano CMS / wtyczki / zależności?</h3>
+<h3 id="42-czy-przeprowadzano-wcześniej-audyt-lub-testy-penetracyjne">4.2 Czy przeprowadzano wcześniej audyt lub testy penetracyjne?</h3>
+<blockquote>
+<p><em>Jeśli tak: kiedy, przez kogo, jakie były wnioski?</em></p>
+</blockquote>
+<h3 id="43-czy-działa-monitoring-uptime-błędy-wydajność">4.3 Czy działa monitoring (uptime, błędy, wydajność)?</h3>
+<blockquote>
+<p><em>Np. UptimeRobot, Sentry, New Relic, Grafana, Google Search Console.</em></p>
+</blockquote>
+<h3 id="44-znane-problemy-bezpieczeństwa-lub-wąskie-gardła-wydajności">4.4 Znane problemy bezpieczeństwa lub wąskie gardła wydajności?</h3>
+<h2 id="5-dostępy-i-następne-kroki">5. Dostępy i Następne Kroki</h2>
+<h3 id="51-jakie-dostępy-będą-potrzebne-do-przeprowadzenia-audytu">5.1 Jakie dostępy będą potrzebne do przeprowadzenia audytu?</h3>
+<blockquote>
+<p><em>Np. panel hostingu (cPanel/Plesk), wp-admin/backend CMS, Google Analytics 4, Search Console, Cloudflare.</em></p>
+</blockquote>
+<h3 id="52-kto-odbierze-raport-właściciel-cto-it-manager-zarząd">5.2 Kto odbierze raport? (właściciel, CTO, IT manager, zarząd)</h3>
+<h3 id="53-notatki-i-obserwacje-handlowca">5.3 Notatki i obserwacje handlowca</h3>
+<h3 id="54-uzgodniony-następny-krok">5.4 Uzgodniony następny krok</h3>
+<hr>
+<p><em>Eksportowano: 2026-07-04 10:25 | Źródło: tabela <code>briefing_templates</code>, id=46</em></p>
+
+</body>
+</html>

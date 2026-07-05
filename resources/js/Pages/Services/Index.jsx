@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import MarketingLayout from '@/Layouts/MarketingLayout';
 import useScrollReveal from '@/Hooks/useScrollReveal';
 import useCurrency from '@/Hooks/useCurrency';
@@ -117,7 +117,7 @@ export default function ServicesIndex({ locale: localeProp, items, auth }) {
 
                                     {/* CTA */}
                                     {href ? (
-                                        <a
+                                        <Link
                                             href={href}
                                             className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-500 hover:text-brand-600 transition-colors group/link"
                                         >
@@ -125,7 +125,7 @@ export default function ServicesIndex({ locale: localeProp, items, auth }) {
                                             <svg className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                             </svg>
-                                        </a>
+                                        </Link>
                                     ) : (
                                         <span className="text-sm text-neutral-400 dark:text-neutral-600 italic">{l.comingSoon}</span>
                                     )}
@@ -142,7 +142,7 @@ export default function ServicesIndex({ locale: localeProp, items, auth }) {
                         <p className="text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto mb-7 text-sm sm:text-base">
                             {l.ctaDesc}
                         </p>
-                        <a
+                        <Link
                             href="/contact"
                             className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600 active:scale-95 transition-all shadow-lg shadow-brand-500/20"
                         >
@@ -150,7 +150,7 @@ export default function ServicesIndex({ locale: localeProp, items, auth }) {
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </section>

@@ -1,4 +1,4 @@
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 const DEFAULTS = {
     title:         { en: "Recent Work We're Proud Of",                          pl: 'Ostatnie projekty, z których jesteśmy dumni' },
@@ -127,7 +127,7 @@ export default function Portfolio({ data }) {
                                             </span>
                                         )}
                                         {href ? (
-                                            <a
+                                            <Link
                                                 href={href}
                                                 className="ml-auto text-sm font-semibold text-brand-500 hover:text-brand-600 inline-flex items-center gap-1 group/link"
                                             >
@@ -135,7 +135,7 @@ export default function Portfolio({ data }) {
                                                 <svg className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                                 </svg>
-                                            </a>
+                                            </Link>
                                         ) : (
                                             <span className="ml-auto text-sm text-neutral-400 dark:text-neutral-600 italic">
                                                 {locale === 'pl' ? 'Wkrótce' : 'Coming soon'}
@@ -152,7 +152,7 @@ export default function Portfolio({ data }) {
                 {/* CTA Button /portfolio*/}
                 {buttonText && buttonUrl && (
                     <div className="text-center mt-10 reveal">
-                        <a
+                        <Link
                             href={buttonUrl}
                             className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 font-semibold hover:border-brand-500 hover:text-brand-500 active:scale-95 transition-all"
                         >
@@ -160,7 +160,7 @@ export default function Portfolio({ data }) {
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
-                        </a>
+                        </Link>
                     </div>
                 )}
             </div>

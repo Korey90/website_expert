@@ -1,4 +1,4 @@
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 const DEFAULTS = {
     badge: {
@@ -174,7 +174,7 @@ export default function SaasLandingSection({ data = null }) {
                         </p>
 
                         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                            <a
+                            <Link
                                 href={primaryHref}
                                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-500 px-7 py-4 text-sm font-bold text-white shadow-xl shadow-brand-500/25 transition-all hover:-translate-y-0.5 hover:bg-brand-600"
                             >
@@ -182,14 +182,14 @@ export default function SaasLandingSection({ data = null }) {
                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
-                            </a>
+                            </Link>
 
-                            <a
+                            <Link
                                 href={secondaryCtaUrl}
                                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-300 bg-neutral-100 px-7 py-4 text-sm font-bold text-neutral-700 transition-all hover:border-brand-500/60 hover:bg-neutral-200 dark:border-white/15 dark:bg-white/5 dark:text-white/86 dark:hover:bg-white/8"
                             >
                                 {secondaryCtaText}
-                            </a>
+                            </Link>
                         </div>
 
                         <div className="mt-10 grid gap-3 sm:grid-cols-3">

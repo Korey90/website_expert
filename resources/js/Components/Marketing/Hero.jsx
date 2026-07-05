@@ -88,13 +88,10 @@ export default function Hero({ data }) {
             setSlideIndex(prev => (prev + 1) % mockupSlides.length);
         }, 3000);
         return () => clearInterval(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Title may contain \n for line breaks
     const titleLines = (d.title ?? DEFAULTS.title).split('\n');
-
-    console.log('titleLines:', titleLines);
 
     return (
         <section id="hero" className="relative min-h-screen flex items-center overflow-hidden pt-4 md:pt-6">
