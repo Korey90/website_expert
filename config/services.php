@@ -146,4 +146,12 @@ return [
         ],
     ],
 
+    'abuseipdb' => [
+        'key' => env('ABUSEIPDB_API_KEY'),
+    ],
+
+    'security' => [
+        'webhook_secret' => env('SECURITY_WEBHOOK_SECRET'),
+    ],
+
 ];

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\LeadCaptureController;
+use App\Http\Controllers\Api\SecurityWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,3 +25,11 @@ Route::prefix('v1')
             ->name('api.leads.store')
             ->middleware('throttle:60,1');
     });
+
+// -----------------------------------------------------------------------
+// Security Webhook — fail2ban events
+// Requires: X-Security-Secret header
+// -----------------------------------------------------------------------
+Route::post('/security/webhook', SecurityWebhookController::class)
+    ->name('api.security.webhook')
+    ->middleware('throttle:120,1');
