@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EmailTemplatePreviewController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\Domain\DomainPriceListCsvController;
 use Illuminate\Support\Facades\Route;
 
 // -----------------------------------------------------------------------
@@ -28,4 +29,11 @@ Route::middleware('auth')->group(function () {
             Route::get("projects/{$format}", [ReportController::class, 'projects'])->defaults('format', $format)->name("projects.{$format}");
         }
     });
+
+    // Domain price list CSV export
+    Route::get('/admin/domain-price-lists/export', [DomainPriceListCsvController::class, 'export'])
+        ->name('admin.domain-price-list.export');
+
+    Route::get('/admin/domain-price-lists/export-template', [DomainPriceListCsvController::class, 'exportTemplate'])
+        ->name('admin.domain-price-list.export-template');
 });
