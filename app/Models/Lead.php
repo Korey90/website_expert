@@ -25,6 +25,8 @@ class Lead extends Model
         'business_id',
         'landing_page_id',
         'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+        'gclid', 'gbraid', 'wbraid',
+        'source_type', 'device_type', 'locale', 'audience', 'landing_page_slug',
     ];
 
     protected $casts = [

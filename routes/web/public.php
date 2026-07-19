@@ -34,10 +34,12 @@ Route::get('/sitemap.xml', function () {
 
         return view('sitemap', [
             'staticUrls' => [
-                ['loc' => url('/'),           'priority' => '1.0', 'changefreq' => 'weekly'],
-                ['loc' => url('/calculate'),  'priority' => '0.8', 'changefreq' => 'monthly'],
-                ['loc' => url('/portfolio'),  'priority' => '0.8', 'changefreq' => 'weekly'],
-                ['loc' => url('/services'),   'priority' => '0.8', 'changefreq' => 'monthly'],
+                ['loc' => url('/'),                                    'priority' => '1.0', 'changefreq' => 'weekly'],
+                ['loc' => url('/en/web-design-northern-ireland'),      'priority' => '0.9', 'changefreq' => 'monthly'],
+                ['loc' => url('/pl/strony-internetowe-uk'),            'priority' => '0.9', 'changefreq' => 'monthly'],
+                ['loc' => url('/calculate'),                           'priority' => '0.8', 'changefreq' => 'monthly'],
+                ['loc' => url('/portfolio'),                           'priority' => '0.8', 'changefreq' => 'weekly'],
+                ['loc' => url('/services'),                            'priority' => '0.8', 'changefreq' => 'monthly'],
             ],
             'pages'     => $pages,
             'portfolio' => $portfolio,
@@ -63,6 +65,31 @@ Route::get('/lang/{locale}', function (string $locale) {
     }
     return redirect()->back(302, [], route('home'));
 })->where('locale', '[a-z]{2}')->name('lang.switch');
+
+// -----------------------------------------------------------------------
+// Static Landing Pages (hardcoded, locale-prefixed, not CMS-managed)
+// -----------------------------------------------------------------------
+Route::prefix('pl')->name('pl.')->group(function () {
+    Route::get('/strony-internetowe-uk',
+        [\App\Http\Controllers\Landing\PlLandingController::class, 'show'])
+        ->name('strony-internetowe-uk');
+
+    Route::post('/strony-internetowe-uk/wyslij',
+        [\App\Http\Controllers\Landing\PlLandingController::class, 'submit'])
+        ->name('strony-internetowe-uk.submit')
+        ->middleware('throttle:5,60');
+});
+
+Route::prefix('en')->name('en.')->group(function () {
+    Route::get('/web-design-northern-ireland',
+        [\App\Http\Controllers\Landing\EnLandingController::class, 'show'])
+        ->name('web-design-northern-ireland');
+
+    Route::post('/web-design-northern-ireland/submit',
+        [\App\Http\Controllers\Landing\EnLandingController::class, 'submit'])
+        ->name('web-design-northern-ireland.submit')
+        ->middleware('throttle:5,60');
+});
 
 // -----------------------------------------------------------------------
 // Public Landing Pages

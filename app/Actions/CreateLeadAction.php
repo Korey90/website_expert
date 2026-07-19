@@ -103,6 +103,14 @@ class CreateLeadAction
             'utm_campaign' => $data['utm_campaign'] ?? null,
             'utm_content' => $data['utm_content'] ?? null,
             'utm_term' => $data['utm_term'] ?? null,
+            'gclid' => $data['gclid'] ?? null,
+            'gbraid' => $data['gbraid'] ?? null,
+            'wbraid' => $data['wbraid'] ?? null,
+            'source_type' => $data['source_type'] ?? null,
+            'device_type' => $data['device_type'] ?? null,
+            'locale' => $data['locale'] ?? null,
+            'audience' => $data['audience'] ?? null,
+            'landing_page_slug' => $data['landing_page_slug'] ?? null,
         ]);
 
         // ── Activity log ──────────────────────────────────────────────────────────
