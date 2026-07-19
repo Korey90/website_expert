@@ -4,7 +4,7 @@ import { usePage, router, Link } from '@inertiajs/react';
 // Flag emoji map – add more as needed
 const FLAG = { en: '🇬🇧', pl: '🇵🇱', de: '🇩🇪', fr: '🇫🇷', es: '🇪🇸', pt: '🇵🇹', uk: '🇺🇦' };
 
-export default function Navbar({ auth }) {
+export default function Navbar({ auth, topOffset = 0 }) {
     const page = usePage();
     const { locale, available_locales, nav_items, nav_settings } = page.props;
     const isHome = page.url === '/' || page.url.startsWith('/?');
@@ -138,11 +138,12 @@ export default function Navbar({ auth }) {
         <header
             id="navbar"
             ref={headerRef}
-            className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+            className={`fixed inset-x-0 z-50 transition-all duration-300 ${
                 scrolled || mobileOpen
                     ? 'bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm shadow-sm'
                     : 'bg-transparent'
             }`}
+            style={{ top: topOffset }}
         >
             <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 md:h-20">
 

@@ -79,7 +79,21 @@ export default function Welcome({ auth, seo, hero, about, saas_landing, cta_bann
     const belowFold  = section_order.filter(k => !ABOVE_FOLD.includes(k));
 
     return (
-        <MarketingLayout auth={auth} footer={footer}>
+        <MarketingLayout
+            auth={auth}
+            footer={footer}
+            topBanner={
+                <div className="bg-neutral-950 text-white/80 text-xs py-2 px-4 text-center h-full flex items-center justify-center border-b border-white/10">
+                    🇵🇱 Prowadzisz firmę w UK?{' '}
+                    <a
+                        href="/pl/strony-internetowe-uk"
+                        className="text-brand-400 font-semibold hover:underline ml-1"
+                    >
+                        Obsługa po polsku →
+                    </a>
+                </div>
+            }
+        >
             <Head>
                 <title>Website Expert – Web Design & SEO Belfast, Northern Ireland</title>
                 {/* eslint-disable-next-line react/no-unknown-property -- Inertia uses head-key to de-duplicate managed tags. */}
@@ -97,17 +111,6 @@ export default function Welcome({ auth, seo, hero, about, saas_landing, cta_bann
                 <meta name="geo.region" content="GB-NIR" />
                 <meta name="geo.placename" content="Belfast, Northern Ireland" />
             </Head>
-
-            {/* Polish-business notice — unobtrusive banner above the fold */}
-            <div className="bg-neutral-950 text-white/80 text-xs py-2 px-4 text-center border-b border-white/10">
-                🇵🇱 Prowadzisz firmę w UK?{' '}
-                <a
-                    href="/pl/strony-internetowe-uk"
-                    className="text-brand-400 font-semibold hover:underline"
-                >
-                    Obsługa po polsku →
-                </a>
-            </div>
 
             {/* Above-fold: renderowane natychmiast, bez Suspense */}
             {aboveFold.map(renderSection)}

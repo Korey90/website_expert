@@ -1,22 +1,17 @@
 # Current Task
 
-**Status:** Planowanie — Front Redesign (plik.md + update segment PL w UK)
+**Status:** Sprinty 1–4 ukończone. Oczekiwanie na decyzję co do Sprintu 5.
 
 **Last Updated:** 2026-07-19
 
-**Źródło:** `docs/plik.md` — dwa lejki sprzedażowe: polski LP (priorytet 1) + angielski LP (priorytet 4)
+**Pozostałe sprinty (z planu):**
+- Sprint 5 — URL-e językowe + hreflang (routes `/en/*`, `/pl/*`, `/pt/*`)
+- Sprint 6 — Testy pre-launch + accessibility
 
-**Priorytety (zaktualizowane po sekcji od linii 810):**
-1. Polski LP `/pl/strony-internetowe-uk` ← START
-2. Polski formularz + CRM (locale=pl, audience=polish_business_uk)
-3. Polskie e-mail + follow-up
-4. Angielski LP `/en/web-design-northern-ireland`
-5. Przebudowa strony głównej
-6. Polskie podstrony usług + SEO
-
----
-
-## Aktywny krok
-Oczekiwanie na potwierdzenie zaktualizowanego planu przez użytkownika.
+**Zrealizowane:**
+- ✅ Sprint 1 — PL LP `/pl/strony-internetowe-uk` (backend + 10 sekcji frontend + testy)
+- ✅ Sprint 2 — EN LP `/en/web-design-northern-ireland` (backend + 9 sekcji frontend + testy)
+- ✅ Sprint 3 — Follow-up automation (24h/72h), sitemap update, SQLite migration fix
+- ✅ Sprint 4 — Homepage: PL banner, 3 kategorie usług + "Ongoing support"
 
 ---
