@@ -98,6 +98,17 @@ export default function Welcome({ auth, seo, hero, about, saas_landing, cta_bann
                 <meta name="geo.placename" content="Belfast, Northern Ireland" />
             </Head>
 
+            {/* Polish-business notice — unobtrusive banner above the fold */}
+            <div className="bg-neutral-950 text-white/80 text-xs py-2 px-4 text-center border-b border-white/10">
+                🇵🇱 Prowadzisz firmę w UK?{' '}
+                <a
+                    href="/pl/strony-internetowe-uk"
+                    className="text-brand-400 font-semibold hover:underline"
+                >
+                    Obsługa po polsku →
+                </a>
+            </div>
+
             {/* Above-fold: renderowane natychmiast, bez Suspense */}
             {aboveFold.map(renderSection)}
 

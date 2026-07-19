@@ -16,19 +16,61 @@ const ICON_PATHS = {
 };
 
 const DEFAULTS = {
-    title:         { en: 'Everything You Need to Succeed Online',    pl: 'Wszystko, czego potrzebujesz do sukcesu online' },
-    subtitle:      { en: 'From your first website to a full digital transformation — we have the expertise to make it happen.',
-                     pl: 'Od prostej wizytówki po rozbudowaną aplikację – każde rozwiązanie budujemy z myślą o realnych wynikach.' },
-    button_text:   { en: 'Calculate Project Cost',                   pl: 'Oblicz koszt projektu' },
-    button_url:    '#calculate',
-    section_label: { en: 'Services',                                  pl: 'Oferta' },
+    title:         { en: 'What We Build',                                               pl: 'Co tworzymy' },
+    subtitle:      { en: 'From your first business website to a custom web system — clear scope, fixed price, delivered on time.',
+                     pl: 'Od pierwszej strony firmowej po dedykowaną aplikację – ustalony zakres, stała cena, termin.' },
+    button_text:   { en: 'Get a fixed-price proposal',                                  pl: 'Otrzymaj bezpłatną wycenę' },
+    button_url:    '#contact',
+    section_label: { en: 'Services',                                                     pl: 'Oferta' },
     services: [
-        { icon: 'monitor',        title_en: 'Brochure Websites',     title_pl: 'Strony wizytówkowe',     description_en: 'Professional, mobile-first websites that create the right first impression.', description_pl: 'Profesjonalne strony firmowe, które budują zaufanie i generują zapytania.' },
-        { icon: 'shopping-cart',  title_en: 'E-Commerce Stores',     title_pl: 'Sklepy e-commerce',      description_en: 'Sell online with confidence. WooCommerce and headless solutions.',            description_pl: 'Szybkie, bezpieczne sklepy online z integracją płatności.' },
-        { icon: 'code',           title_en: 'Web Applications',      title_pl: 'Aplikacje internetowe',  description_en: 'Bespoke Laravel and React applications. Portals, SaaS, booking systems.',     description_pl: 'Dedykowane aplikacje Laravel i React. Portale, SaaS, rezerwacje.' },
-        { icon: 'search',         title_en: 'SEO & Marketing',       title_pl: 'SEO i Marketing',        description_en: 'Rank higher, attract more visitors, convert them into customers.',              description_pl: 'Zaistniej w Google. Audyty SEO, optymalizacja on-page, content.' },
-        { icon: 'bar-chart',      title_en: 'Google Ads (PPC)',      title_pl: 'Google Ads (PPC)',       description_en: 'Targeted pay-per-click campaigns that deliver measurable ROI.',                description_pl: 'Kampanie płatne z realnym ROI – konfiguracja i optymalizacja.' },
-        { icon: 'settings',       title_en: 'Website Maintenance',   title_pl: 'Opieka nad stroną',      description_en: 'Keep your site fast, secure, and up to date with our care plans.',             description_pl: 'Szybki hosting z SSL, backupami i opieką techniczną.' },
+        {
+            icon: 'monitor',
+            title_en: 'Business Websites',
+            title_pl: 'Strony firmowe',
+            description_en: 'Professional, mobile-first websites designed to build trust and generate enquiries. Fixed price from £799.',
+            description_pl: 'Profesjonalne strony mobile-first budujące zaufanie i generujące zapytania. Od £799.',
+            group: 'main',
+        },
+        {
+            icon: 'shopping-cart',
+            title_en: 'E-Commerce',
+            title_pl: 'E-Commerce',
+            description_en: 'Online stores with payments, order management and required integrations. From £2,999.',
+            description_pl: 'Sklepy internetowe z płatnościami, zarządzaniem zamówieniami i integracjami. Od £2 999.',
+            group: 'main',
+        },
+        {
+            icon: 'code',
+            title_en: 'Custom Web Systems',
+            title_pl: 'Systemy webowe',
+            description_en: 'Laravel-based portals, booking systems and business applications. From £5,999.',
+            description_pl: 'Portale, systemy rezerwacji i aplikacje biznesowe na Laravel. Od £5 999.',
+            group: 'main',
+        },
+        {
+            icon: 'search',
+            title_en: 'SEO & Content',
+            title_pl: 'SEO i Content',
+            description_en: 'Rank higher in local search, attract more visitors, convert them into customers.',
+            description_pl: 'Wyższe pozycje w lokalnym Google, więcej odwiedzin, więcej klientów.',
+            group: 'support',
+        },
+        {
+            icon: 'bar-chart',
+            title_en: 'Google Ads',
+            title_pl: 'Google Ads',
+            description_en: 'Targeted pay-per-click campaigns that deliver measurable ROI.',
+            description_pl: 'Kampanie PPC z realnym ROI – konfiguracja i optymalizacja.',
+            group: 'support',
+        },
+        {
+            icon: 'settings',
+            title_en: 'Hosting & Support',
+            title_pl: 'Hosting i Opieka',
+            description_en: 'Fast hosting, SSL, backups, security updates and ongoing technical support.',
+            description_pl: 'Szybki hosting, SSL, backupy, aktualizacje bezpieczeństwa i opieka techniczna.',
+            group: 'support',
+        },
     ],
 };
 
@@ -47,7 +89,51 @@ export default function Services({ data }) {
     const buttonText   = d.button_text || DEFAULTS.button_text[locale] || DEFAULTS.button_text.en;
     const buttonUrl    = d.button_url  || DEFAULTS.button_url;
     const sectionLabel = t(extra, 'section_label') || DEFAULTS.section_label[locale];
-    const items        = (extra.services ?? DEFAULTS.services).filter(s => s.is_featured !== false);
+    const allItems     = (extra.services ?? DEFAULTS.services).filter(s => s.is_featured !== false);
+
+    const mainItems    = allItems.filter(s => !s.group || s.group === 'main');
+    const supportItems = allItems.filter(s => s.group === 'support');
+
+    const renderCard = (s, i) => {
+        const itemTitle  = t(s, 'title')       || s.title       || '';
+        const itemBody   = t(s, 'description') || s.description || '';
+        const iconPath   = ICON_PATHS[s.icon]  ?? ICON_PATHS['settings'];
+        const href       = s.is_active !== false ? (s.link ?? null) : null;
+        const priceLabel = servicePriceLabel(s, locale, formatCurrency, currency);
+
+        return (
+            <div key={i} className="group p-6 rounded-2xl border border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 hover:border-brand-500/60 hover:shadow-lg hover:shadow-brand-500/5 transition-all cursor-default">
+                <div className="w-12 h-12 rounded-2xl bg-brand-500/10 flex items-center justify-center mb-4 group-hover:bg-brand-500/20 transition-colors">
+                    <svg className="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        {iconPath}
+                    </svg>
+                </div>
+                <div className="flex items-center gap-1.5 mb-2">
+                    <h3 className="font-semibold text-neutral-900 dark:text-white">{itemTitle}</h3>
+                    {priceLabel && (
+                        <span className="text-xs text-brand-500 font-medium ml-auto shrink-0">{priceLabel}</span>
+                    )}
+                </div>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">{itemBody}</p>
+                {href ? (
+                    <Link
+                        href={href}
+                        aria-label={locale === 'pl' ? `Dowiedz się więcej o ${itemTitle}` : locale === 'pt' ? `Saiba mais sobre ${itemTitle}` : `Learn more about ${itemTitle}`}
+                        className="mt-3 inline-flex items-center gap-1 text-xs text-brand-500 font-medium hover:underline"
+                    >
+                        {locale === 'pl' ? `Więcej o ${itemTitle}` : locale === 'pt' ? `Mais Sobre ${itemTitle}` : `More About ${itemTitle}`}
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </Link>
+                ) : s.link ? (
+                    <span className="mt-3 inline-block text-xs text-neutral-400 dark:text-neutral-600 italic">
+                        {locale === 'pl' ? 'Wkrótce' : locale === 'pt' ? 'Em breve' : 'Coming soon'}
+                    </span>
+                ) : null}
+            </div>
+        );
+    };
 
     return (
         <section id="services" className="py-20 md:py-28 bg-white dark:bg-neutral-950">
@@ -62,48 +148,22 @@ export default function Services({ data }) {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 reveal">
-                    {items.map((s, i) => {
-                        const itemTitle = t(s, 'title')       || s.title       || '';
-                        const itemBody  = t(s, 'description') || s.description || '';
-                        const iconPath  = ICON_PATHS[s.icon]  ?? ICON_PATHS['settings'];
-                        const href      = s.is_active !== false ? (s.link ?? null) : null;
-                        const priceLabel = servicePriceLabel(s, locale, formatCurrency, currency);
-
-                        return (
-                            <div key={i} className="group p-6 rounded-2xl border border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 hover:border-brand-500/60 hover:shadow-lg hover:shadow-brand-500/5 transition-all cursor-default">
-                                <div className="w-12 h-12 rounded-2xl bg-brand-500/10 flex items-center justify-center mb-4 group-hover:bg-brand-500/20 transition-colors">
-                                    <svg className="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                                        {iconPath}
-                                    </svg>
-                                </div>
-                                <div className="flex items-center gap-1.5 mb-2">
-                                    <h3 className="font-semibold text-neutral-900 dark:text-white">{itemTitle}</h3>
-                                    {priceLabel && (
-                                        <span className="text-xs text-brand-500 font-medium ml-auto shrink-0">{priceLabel}</span>
-                                    )}
-                                </div>
-                                <p className="text-sm text-neutral-500 dark:text-neutral-400">{itemBody}</p>
-                                {href ? (
-                                    <Link
-                                        href={href}
-                                        aria-label={locale === 'pl' ? `Dowiedz się więcej o ${itemTitle}` : locale === 'pt' ? `Saiba mais sobre ${itemTitle}` : `Learn more about ${itemTitle}`}
-                                        className="mt-3 inline-flex items-center gap-1 text-xs text-brand-500 font-medium hover:underline"
-                                    >
-                                        {locale === 'pl' ? `Więcej o ${itemTitle}` : locale === 'pt' ? `Mais Sobre ${itemTitle}` : `More About ${itemTitle}`}
-                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </Link>
-                                ) : s.link ? (
-                                    <span className="mt-3 inline-block text-xs text-neutral-400 dark:text-neutral-600 italic">
-                                        {locale === 'pl' ? 'Wkrótce' : locale === 'pt' ? 'Em breve' : 'Coming soon'}
-                                    </span>
-                                ) : null}
-                            </div>
-                        );
-                    })}
+                {/* Main services — 3 cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 reveal">
+                    {mainItems.map(renderCard)}
                 </div>
+
+                {/* Ongoing support group */}
+                {supportItems.length > 0 && (
+                    <div className="mt-10 reveal">
+                        <p className="text-xs font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest mb-4">
+                            {locale === 'pl' ? 'Rozwój i wsparcie' : locale === 'pt' ? 'Crescimento e suporte' : 'Ongoing growth and support'}
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                            {supportItems.map((s, i) => renderCard(s, `sup-${i}`))}
+                        </div>
+                    </div>
+                )}
 
                 <div className="text-center mt-10 reveal">
                     <Link
@@ -120,4 +180,3 @@ export default function Services({ data }) {
         </section>
     );
 }
-
