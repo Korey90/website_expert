@@ -341,12 +341,89 @@ function StickyMobileCta({ onQuoteClick }: { onQuoteClick: () => void }) {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-interface Props {
-    footer?: { extra?: Record<string, unknown> } | null;
+interface CmsExtra {
+    hero_price_label?: string;
+    hero_delivery_label?: string;
+    hero_cta_secondary?: string;
+    trust_items?: Array<{ icon: string; text: string }>;
+    package_from?: string;
+    package_scope?: string[];
+    package_excluded?: string[];
+    no_hidden_fees_note?: string;
+    founder_name?: string;
+    founder_bio?: string;
+    founder_photo_url?: string;
+    founder_linkedin_url?: string;
+    founder_location?: string;
+    founder_experience?: string;
+    founder_career_stat?: string;
+    testimonials?: Array<{ quote: string; name: string; role: string; photo_url?: string; verify_url?: string }>;
+    faq_items?: Array<{ q: string; a: string }>;
+    form_title?: string;
+    form_note?: string;
+    contact_phone?: string;
+    success_heading?: string;
+    success_body?: string;
 }
 
-export default function EnWebDesign({ footer }: Props) {
+interface Props {
+    footer?: { extra?: Record<string, unknown> } | null;
+    cms?: { title?: string; subtitle?: string; extra?: CmsExtra } | null;
+}
+
+export default function EnWebDesign({ footer, cms }: Props) {
     const formRef = useRef<HTMLElement | null>(null);
+
+    const c = <T,>(key: keyof CmsExtra, fallback: T): T =>
+        (cms?.extra?.[key] as T | undefined) ?? fallback;
+
+    const heroTitle      = cms?.title || 'Professional Websites for Northern Ireland Businesses';
+    const heroSubtitle   = cms?.subtitle || 'Get a fast, mobile-first website designed to build trust and generate more enquiries — with fixed pricing and direct contact with the developer.';
+    const heroPriceLabel    = c('hero_price_label', 'Websites from £799');
+    const heroDeliveryLabel = c('hero_delivery_label', 'Delivered in 3–5 weeks');
+    const heroCtaSecondary  = c('hero_cta_secondary', 'View recent projects');
+    const trustItems        = c('trust_items', [
+        { icon: '📍', text: 'Based in Northern Ireland' },
+        { icon: '⭐', text: '10+ years of commercial experience' },
+        { icon: '📱', text: 'Mobile-first development' },
+        { icon: '💷', text: 'Clear fixed pricing' },
+    ]);
+    const packageFrom       = c('package_from', '£799');
+    const packageScope      = c('package_scope', [
+        'Up to five core pages', 'Custom layout tailored to your business',
+        'Mobile-first design', 'Contact form', 'Basic technical SEO',
+        'Google Analytics and Search Console setup', 'SSL and form security',
+        'CMS for editing your own content', 'Two rounds of revisions',
+        'Deployment', 'Short handover training',
+    ]);
+    const packageExcluded   = c('package_excluded', [
+        'Complex e-commerce functionality', 'Custom web applications',
+        'Professional photography', 'Unlimited revisions',
+        'Ongoing monthly SEO', 'Large numbers of integrations',
+    ]);
+    const noHiddenFees      = c('no_hidden_fees_note', 'No hidden fees. The final scope and price are confirmed in writing before work begins.');
+    const founderBio        = c('founder_bio', 'Website Expert is a founder-led web studio based in Northern Ireland. You speak directly with the person responsible for planning, designing, building and launching your project. No account managers. No outsourced communication. No unclear responsibility.');
+    const founderName       = c('founder_name', '');
+    const founderPhoto      = c('founder_photo_url', '');
+    const founderLinkedin   = c('founder_linkedin_url', '');
+    const founderLocation   = c('founder_location', 'Northern Ireland');
+    const founderExp        = c('founder_experience', '10+ years experience');
+    const founderCareerStat = c('founder_career_stat', '200+ projects contributed to');
+    const testimonials      = c('testimonials', [
+        { quote: 'The new website made our services much easier to understand and significantly increased the number of enquiries received through the contact form.', name: '', role: '', photo_url: '', verify_url: '' },
+        { quote: 'Working directly with the developer made a huge difference. Every decision was made quickly and everything was delivered as promised.', name: '', role: '', photo_url: '', verify_url: '' },
+        { quote: 'The fixed price and clear timeline meant there were no surprises. The whole process was straightforward from start to finish.', name: '', role: '', photo_url: '', verify_url: '' },
+    ]);
+    const faqItems          = c('faq_items', [
+        { q: 'How much does a business website cost?', a: 'The basic package (up to 5 pages, contact form, technical SEO, CMS) starts from £799. The final price depends on the project scope and is confirmed in writing before work begins.' },
+        { q: 'How long will the project take?', a: 'Typical delivery for the basic package is 3–5 weeks from scope confirmation and initial payment.' },
+        { q: 'What do I need to provide?', a: 'Basic information about your business, a description of your services, contact details, and a few photos. I help gather and structure content during the project.' },
+        { q: 'Will I own the website and domain?', a: 'Once the project has been fully paid, you receive ownership of the agreed website deliverables. The domain should always be registered in your name or business.' },
+        { q: 'Can I update the website myself?', a: 'Yes. The website includes a CMS that allows you to edit content without any technical knowledge. Training is included in the basic package price.' },
+        { q: 'What happens after launch?', a: 'I provide handover training and remain available for technical questions. Additional support, updates or expansion can be discussed separately.' },
+    ]);
+    const formTitle         = c('form_title', 'Get a fixed-price proposal');
+    const formNote          = c('form_note', 'No obligation and no sales pressure. You will receive a personal response within one business day.');
 
     const scrollToForm = () => {
         formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -383,20 +460,19 @@ export default function EnWebDesign({ footer }: Props) {
                         </div>
 
                         <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight mb-6">
-                            Professional Websites for{' '}
-                            <span className="text-brand-400">Northern Ireland</span>{' '}
-                            Businesses
+                            {heroTitle.includes('Northern Ireland') ? (
+                                <>Professional Websites for{' '}<span className="text-brand-400">Northern Ireland</span>{' '}Businesses</>
+                            ) : heroTitle}
                         </h1>
 
                         <p className="text-lg text-white/80 leading-relaxed mb-8 max-w-2xl">
-                            Get a fast, mobile-first website designed to build trust and generate
-                            more enquiries — with fixed pricing and direct contact with the developer.
+                            {heroSubtitle}
                         </p>
 
                         <div className="flex flex-wrap gap-3 mb-8 text-sm font-medium text-white/70">
-                            <span>Websites from <strong className="text-white">£799</strong></span>
+                            <span>{heroPriceLabel}</span>
                             <span className="text-white/30">·</span>
-                            <span>Delivered in <strong className="text-white">3–5 weeks</strong></span>
+                            <span>{heroDeliveryLabel}</span>
                             <span className="text-white/30">·</span>
                             <span>No agency middlemen</span>
                         </div>
@@ -417,10 +493,9 @@ export default function EnWebDesign({ footer }: Props) {
                         </div>
 
                         <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
-                            <TrustItem icon="📍" text="Based in Northern Ireland" />
-                            <TrustItem icon="⭐" text="10+ years of commercial experience" />
-                            <TrustItem icon="📱" text="Mobile-first development" />
-                            <TrustItem icon="💷" text="Clear fixed pricing" />
+                            {trustItems.map((item, i) => (
+                                <TrustItem key={i} icon={item.icon} text={item.text} />
+                            ))}
                         </div>
                     </div>
                 </div>
@@ -516,9 +591,7 @@ export default function EnWebDesign({ footer }: Props) {
                             </div>
                             <div className="rounded-2xl bg-brand-500/10 border border-brand-500/30 p-5">
                                 <p className="font-bold text-neutral-900 dark:text-white mb-1">No hidden fees</p>
-                                <p className="text-sm text-neutral-600 dark:text-white/70">
-                                    The final scope and price are confirmed in writing before work begins.
-                                </p>
+                                <p className="text-sm text-neutral-600 dark:text-white/70">{noHiddenFees}</p>
                             </div>
                         </div>
                     </div>
@@ -589,24 +662,29 @@ export default function EnWebDesign({ footer }: Props) {
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                     <div className="lg:grid lg:grid-cols-2 gap-12 items-center">
                         <div>
-                            <div className="w-48 h-48 rounded-2xl bg-neutral-200 dark:bg-neutral-700 mb-6 flex items-center justify-center text-neutral-400 dark:text-neutral-500 text-sm text-center px-4">
-                                Founder photo<br/>placeholder
-                            </div>
+                            {founderPhoto ? (
+                                <img src={founderPhoto} alt={founderName || 'Founder'} className="w-48 h-48 rounded-2xl object-cover mb-6" />
+                            ) : (
+                                <div className="w-48 h-48 rounded-2xl bg-neutral-200 dark:bg-neutral-700 mb-6 flex items-center justify-center text-neutral-400 dark:text-neutral-500 text-sm text-center px-4">
+                                    Founder photo<br/>placeholder
+                                </div>
+                            )}
                             <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-neutral-900 dark:text-white mb-4">
                                 Work directly with the developer building your website
                             </h2>
                             <p className="text-neutral-600 dark:text-white/70 leading-relaxed mb-4">
-                                Website Expert is a founder-led web studio based in Northern Ireland.
-                                You speak directly with the person responsible for planning, designing,
-                                building and launching your project.
+                                {founderBio}
                             </p>
                             <p className="text-neutral-600 dark:text-white/70 leading-relaxed mb-6">
                                 No account managers. No outsourced communication. No unclear responsibility.
                             </p>
                             <div className="flex flex-wrap gap-3">
-                                <span className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-white/70">10+ years experience</span>
-                                <span className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-white/70">Northern Ireland</span>
-                                <span className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-white/70">200+ projects contributed to</span>
+                                <span className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-white/70">{founderExp}</span>
+                                <span className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-white/70">{founderLocation}</span>
+                                <span className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-white/70">{founderCareerStat}</span>
+                                {founderLinkedin && (
+                                    <a href={founderLinkedin} target="_blank" rel="noopener noreferrer" className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-brand-500 hover:underline">LinkedIn</a>
+                                )}
                             </div>
                         </div>
                         <div className="mt-8 lg:mt-0">
@@ -658,46 +736,31 @@ export default function EnWebDesign({ footer }: Props) {
                         What clients say
                     </h2>
                     <div className="grid md:grid-cols-3 gap-6">
-                        {[
-                            {
-                                quote: 'The new website made our services much easier to understand and significantly increased the number of enquiries received through the contact form.',
-                                name: 'Client name',
-                                role: 'Business owner',
-                                placeholder: true,
-                            },
-                            {
-                                quote: 'Working directly with the developer made a huge difference. Every decision was made quickly and everything was delivered as promised.',
-                                name: 'Client name',
-                                role: 'Director',
-                                placeholder: true,
-                            },
-                            {
-                                quote: 'The fixed price and clear timeline meant there were no surprises. The whole process was straightforward from start to finish.',
-                                name: 'Client name',
-                                role: 'Managing Director',
-                                placeholder: true,
-                            },
-                        ].map((t, i) => (
+                        {testimonials.map((t, i) => (
                             <div key={i} className="rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 p-6 flex flex-col">
                                 <div className="flex gap-0.5 mb-4">
-                                    {[1,2,3,4,5].map(s => (
-                                        <span key={s} className="text-yellow-400 text-sm">★</span>
-                                    ))}
+                                    {[1,2,3,4,5].map(s => <span key={s} className="text-yellow-400 text-sm">★</span>)}
                                 </div>
                                 <p className="text-neutral-700 dark:text-white/80 text-sm leading-relaxed flex-1 mb-4 italic">
                                     "{t.quote}"
                                 </p>
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-600 flex-shrink-0" />
+                                    {t.photo_url ? (
+                                        <img src={t.photo_url} alt={t.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                                    ) : (
+                                        <div className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-600 flex-shrink-0" />
+                                    )}
                                     <div>
-                                        <p className="text-sm font-semibold text-neutral-900 dark:text-white">{t.name}</p>
-                                        <p className="text-xs text-neutral-500 dark:text-white/50">{t.role}</p>
+                                        {t.name ? (
+                                            <p className="text-sm font-semibold text-neutral-900 dark:text-white">{t.name}</p>
+                                        ) : (
+                                            <p className="text-sm font-semibold text-neutral-400 dark:text-white/40 italic">Name — add before launch</p>
+                                        )}
+                                        {t.role && <p className="text-xs text-neutral-500 dark:text-white/50">{t.role}</p>}
                                     </div>
                                 </div>
-                                {t.placeholder && (
-                                    <p className="mt-3 text-xs text-neutral-400 dark:text-white/30 italic">
-                                        — add real testimonial with name, role and verifiable link before launch
-                                    </p>
+                                {t.verify_url && (
+                                    <a href={t.verify_url} target="_blank" rel="noopener noreferrer" className="mt-2 text-xs text-brand-500 hover:underline">Verify ↗</a>
                                 )}
                             </div>
                         ))}
@@ -712,33 +775,8 @@ export default function EnWebDesign({ footer }: Props) {
                         Frequently asked questions
                     </h2>
                     <div>
-                        {[
-                            {
-                                q: 'How much does a business website cost?',
-                                a: 'The basic package (up to 5 pages, contact form, technical SEO, CMS) starts from £799. The final price depends on the project scope and is confirmed in writing before work begins.',
-                            },
-                            {
-                                q: 'How long will the project take?',
-                                a: 'Typical delivery for the basic package is 3–5 weeks from scope confirmation and initial payment. Timeline varies depending on project complexity and how quickly content is provided.',
-                            },
-                            {
-                                q: 'What do I need to provide?',
-                                a: 'Basic information about your business, a description of your services, contact details, and a few photos (or permission to use stock images). I help gather and structure content during the project.',
-                            },
-                            {
-                                q: 'Will I own the website and domain?',
-                                a: 'Once the project has been fully paid, you receive ownership of the agreed website deliverables. The domain should always be registered in your name or business — not the agency or developer.',
-                            },
-                            {
-                                q: 'Can I update the website myself?',
-                                a: 'Yes. The website includes a CMS that allows you to edit content without any technical knowledge. Training is included in the basic package price.',
-                            },
-                            {
-                                q: 'What happens after launch?',
-                                a: 'I provide handover training and remain available for technical questions. Additional support, updates or expansion can be discussed separately on a project or retainer basis.',
-                            },
-                        ].map(item => (
-                            <FaqItem key={item.q} q={item.q} a={item.a} />
+                        {faqItems.map((item, i) => (
+                            <FaqItem key={i} q={item.q} a={item.a} />
                         ))}
                     </div>
                 </div>
@@ -754,10 +792,10 @@ export default function EnWebDesign({ footer }: Props) {
                     <div className="text-center mb-8">
                         <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-neutral-900 dark:text-white">
                             Get a{' '}
-                            <span className="text-brand-500">fixed-price proposal</span>
+                            <span className="text-brand-500">{formTitle.replace('Get a ', '').replace('fixed-price proposal', '') ? formTitle : 'fixed-price proposal'}</span>
                         </h2>
                         <p className="mt-4 text-neutral-600 dark:text-white/70">
-                            No obligation and no sales pressure. You will receive a personal response within one business day.
+                            {formNote}
                         </p>
                     </div>
                     <div className="rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 p-6 sm:p-8">

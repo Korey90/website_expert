@@ -382,12 +382,85 @@ function StickyMobileCta({ onQuoteClick }: { onQuoteClick: () => void }) {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-interface Props {
-    footer?: { extra?: Record<string, unknown> } | null;
+interface CmsExtra {
+    hero_price_label?: string;
+    hero_delivery_label?: string;
+    hero_cta_secondary?: string;
+    trust_items?: Array<{ icon: string; text: string }>;
+    package_from?: string;
+    package_scope?: string[];
+    package_excluded?: string[];
+    no_hidden_fees_note?: string;
+    founder_name?: string;
+    founder_bio?: string;
+    founder_photo_url?: string;
+    founder_linkedin_url?: string;
+    founder_location?: string;
+    founder_experience?: string;
+    testimonials?: Array<{ quote: string; name: string; role: string; photo_url?: string; verify_url?: string }>;
+    faq_items?: Array<{ q: string; a: string }>;
+    form_title?: string;
+    form_note?: string;
+    contact_phone?: string;
+    success_heading?: string;
+    success_body?: string;
 }
 
-export default function PlStronyInternetowe({ footer }: Props) {
+interface Props {
+    footer?: { extra?: Record<string, unknown> } | null;
+    cms?: { title?: string; subtitle?: string; extra?: CmsExtra } | null;
+}
+
+export default function PlStronyInternetowe({ footer, cms }: Props) {
     const formRef = useRef<HTMLElement | null>(null);
+
+    // CMS helper — returns CMS value if set, otherwise fallback
+    const c = <T,>(key: keyof CmsExtra, fallback: T): T =>
+        (cms?.extra?.[key] as T | undefined) ?? fallback;
+
+    const heroTitle     = cms?.title || 'Strony internetowe dla polskich firm w Wielkiej Brytanii';
+    const heroSubtitle  = cms?.subtitle || 'Stworzę profesjonalną stronę, która wzbudza zaufanie brytyjskich klientów i pomaga zdobywać nowe zapytania. Cały projekt omawiamy po polsku.';
+    const heroPriceLabel    = c('hero_price_label', 'Strony od £799');
+    const heroDeliveryLabel = c('hero_delivery_label', 'Realizacja 3–5 tygodni');
+    const heroCtaSecondary  = c('hero_cta_secondary', 'Zobacz realizacje');
+    const trustItems        = c('trust_items', [
+        { icon: '📍', text: 'Baza w Północnej Irlandii' },
+        { icon: '🇵🇱', text: 'Obsługa po polsku' },
+        { icon: '📱', text: 'Mobile-first' },
+        { icon: '💷', text: 'Ustalona cena z góry' },
+    ]);
+    const packageFrom       = c('package_from', '£799');
+    const packageScope      = c('package_scope', [
+        'Do pięciu głównych podstron', 'Projekt dopasowany do branży',
+        'Mobile-first (telefony i tablety)', 'Formularz kontaktowy',
+        'Podstawowe SEO techniczne', 'Google Analytics i Search Console',
+        'SSL i zabezpieczenie formularzy', 'Panel do samodzielnej edycji treści',
+        'Dwie rundy poprawek', 'Wdrożenie i szkolenie po polsku',
+    ]);
+    const packageExcluded   = c('package_excluded', [
+        'Rozbudowany sklep e-commerce', 'Niestandardowe aplikacje',
+        'Profesjonalna sesja zdjęciowa', 'Nieograniczone poprawki', 'Miesięczne SEO',
+    ]);
+    const noHiddenFees      = c('no_hidden_fees_note', 'Brak ukrytych kosztów. Ostateczny zakres i cena są ustalane przed rozpoczęciem prac.');
+    const founderBio        = c('founder_bio', 'Website Expert to pracownia założona przez developera z siedzibą w Północnej Irlandii. Rozmawiasz bezpośrednio z osobą odpowiedzialną za planowanie, projektowanie, budowanie i uruchamianie Twojego projektu.');
+    const founderName       = c('founder_name', '');
+    const founderPhoto      = c('founder_photo_url', '');
+    const founderLinkedin   = c('founder_linkedin_url', '');
+    const founderLocation   = c('founder_location', 'Północna Irlandia');
+    const founderExp        = c('founder_experience', '10+ lat doświadczenia');
+    const faqItems          = c('faq_items', [
+        { q: 'Ile kosztuje strona internetowa dla firmy?', a: 'Podstawowy pakiet (do 5 podstron, formularz kontaktowy, SEO techniczne, CMS) zaczyna się od £799. Ostateczna cena zależy od zakresu projektu i jest ustalana przed rozpoczęciem prac.' },
+        { q: 'Jak długo trwa realizacja projektu?', a: 'Typowy czas realizacji podstawowego pakietu to 3–5 tygodni od potwierdzenia zakresu i pierwszej wpłaty.' },
+        { q: 'Co muszę przygotować ze swojej strony?', a: 'Podstawowe informacje o firmie, opis usług, kontakt, kilka zdjęć. Pomagam w zbieraniu treści podczas procesu.' },
+        { q: 'Czy będę właścicielem strony i domeny?', a: 'Tak. Po zakończeniu projektu i opłaceniu faktury otrzymujesz pełny dostęp do strony. Domenę rejestruj zawsze na siebie lub swoją firmę.' },
+        { q: 'Czy będę mógł samodzielnie aktualizować treści?', a: 'Tak. Strona jest wyposażona w panel CMS umożliwiający edycję treści bez znajomości programowania. Szkolenie wchodzi w cenę.' },
+        { q: 'Co się dzieje po uruchomieniu strony?', a: 'Przeprowadzam szkolenie z panelu administracyjnego i pozostaję dostępny w przypadku pytań technicznych.' },
+    ]);
+    const formTitle         = c('form_title', 'Omów projekt i otrzymaj bezpłatną wycenę');
+    const formNote          = c('form_note', 'Bez zobowiązań i bez presji sprzedażowej. Odpowiedź w ciągu jednego dnia roboczego.');
+    const contactPhone      = c('contact_phone', '');
+    const successHeading    = c('success_heading', 'Dziękujemy — zapytanie zostało wysłane!');
+    const successBody       = c('success_body', 'Zapoznam się z Twoim zapytaniem i odpiszę w ciągu jednego dnia roboczego.');
 
     const scrollToForm = () => {
         formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -425,21 +498,20 @@ export default function PlStronyInternetowe({ footer }: Props) {
 
                         {/* H1 */}
                         <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight mb-6">
-                            Strony internetowe dla{' '}
-                            <span className="text-brand-400">polskich firm</span>{' '}
-                            w Wielkiej Brytanii
+                            {heroTitle.includes('polskich') ? (
+                                <>Strony internetowe dla{' '}<span className="text-brand-400">polskich firm</span>{' '}w Wielkiej Brytanii</>
+                            ) : heroTitle}
                         </h1>
 
                         <p className="text-lg text-white/80 leading-relaxed mb-8 max-w-2xl">
-                            Stworzę profesjonalną stronę, która wzbudza zaufanie brytyjskich klientów
-                            i pomaga zdobywać nowe zapytania. Cały projekt omawiamy po polsku.
+                            {heroSubtitle}
                         </p>
 
                         {/* Price strip */}
                         <div className="flex flex-wrap gap-3 mb-8 text-sm font-medium text-white/70">
-                            <span>Strony od <strong className="text-white">£799</strong></span>
+                            <span dangerouslySetInnerHTML={{ __html: heroPriceLabel.replace('£', '<strong class="text-white">£').replace(/(\d+)/, '$1</strong>') }} />
                             <span className="text-white/30">·</span>
-                            <span>Realizacja <strong className="text-white">3–5 tygodni</strong></span>
+                            <span>{heroDeliveryLabel}</span>
                             <span className="text-white/30">·</span>
                             <span>Bez ukrytych kosztów</span>
                         </div>
@@ -456,16 +528,15 @@ export default function PlStronyInternetowe({ footer }: Props) {
                                 onClick={scrollToPortfolio}
                                 className="inline-flex items-center justify-center rounded-2xl border border-white/30 hover:border-white/60 text-white font-bold px-8 py-4 text-base transition-colors"
                             >
-                                Zobacz realizacje
+                                {heroCtaSecondary}
                             </button>
                         </div>
 
                         {/* Trust strip */}
                         <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
-                            <TrustItem icon="📍" text="Baza w Północnej Irlandii" />
-                            <TrustItem icon="🇵🇱" text="Obsługa po polsku" />
-                            <TrustItem icon="📱" text="Mobile-first" />
-                            <TrustItem icon="💷" text="Ustalona cena z góry" />
+                            {trustItems.map((item, i) => (
+                                <TrustItem key={i} icon={item.icon} text={item.text} />
+                            ))}
                         </div>
                     </div>
                 </div>
@@ -536,7 +607,7 @@ export default function PlStronyInternetowe({ footer }: Props) {
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-10">
                         <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-neutral-900 dark:text-white">
-                            Strona firmowa od <span className="text-brand-500">£799</span>
+                            Strona firmowa od <span className="text-brand-500">{packageFrom}</span>
                         </h2>
                         <p className="mt-4 text-neutral-600 dark:text-white/70">
                             Ustalony zakres. Ustalona cena. Bez niespodzianek.
@@ -573,14 +644,8 @@ export default function PlStronyInternetowe({ footer }: Props) {
                             <div className="rounded-2xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-900 p-6">
                                 <h3 className="font-bold text-neutral-900 dark:text-white mb-4">Czego nie obejmuje pakiet podstawowy</h3>
                                 <ul className="space-y-2">
-                                    {[
-                                        'Rozbudowany sklep e-commerce',
-                                        'Niestandardowe aplikacje',
-                                        'Profesjonalna sesja zdjęciowa',
-                                        'Nieograniczone poprawki',
-                                        'Miesięczne SEO',
-                                    ].map(item => (
-                                        <li key={item} className="flex items-start gap-2 text-sm text-neutral-500 dark:text-white/50">
+                                    {packageExcluded.map((item, i) => (
+                                        <li key={i} className="flex items-start gap-2 text-sm text-neutral-500 dark:text-white/50">
                                             <span className="flex-shrink-0 mt-0.5">—</span>
                                             {item}
                                         </li>
@@ -591,9 +656,7 @@ export default function PlStronyInternetowe({ footer }: Props) {
                             <div className="rounded-2xl bg-brand-500/10 border border-brand-500/30 p-6">
                                 <p className="font-bold text-neutral-900 dark:text-white mb-1">Brak ukrytych kosztów</p>
                                 <p className="text-sm text-neutral-600 dark:text-white/70">
-                                    Ostateczny zakres i cena są ustalane przed rozpoczęciem prac.
-                                    Cena obejmuje przygotowanie strony w jednym języku.
-                                    Wersję dwujęzyczną wyceniam osobno.
+                                    {noHiddenFees}
                                 </p>
                             </div>
                         </div>
@@ -706,24 +769,29 @@ export default function PlStronyInternetowe({ footer }: Props) {
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                     <div className="lg:grid lg:grid-cols-2 gap-12 items-center">
                         <div>
-                            {/* Placeholder foto */}
-                            <div className="w-48 h-48 rounded-2xl bg-neutral-200 dark:bg-neutral-700 mb-6 flex items-center justify-center text-neutral-400 dark:text-neutral-500 text-sm">
-                                Zdjęcie<br/>założyciela
-                            </div>
+                            {/* Placeholder lub zdjęcie z CMS */}
+                            {founderPhoto ? (
+                                <img src={founderPhoto} alt={founderName || 'Założyciel'} className="w-48 h-48 rounded-2xl object-cover mb-6" />
+                            ) : (
+                                <div className="w-48 h-48 rounded-2xl bg-neutral-200 dark:bg-neutral-700 mb-6 flex items-center justify-center text-neutral-400 dark:text-neutral-500 text-sm">
+                                    Zdjęcie<br/>założyciela
+                                </div>
+                            )}
                             <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-neutral-900 dark:text-white mb-4">
                                 Porozmawiasz bezpośrednio z osobą, która tworzy Twoją stronę
                             </h2>
                             <p className="text-neutral-600 dark:text-white/70 leading-relaxed mb-4">
-                                Website Expert to pracownia założona przez developera z siedzibą w Północnej Irlandii.
-                                Rozmawiasz bezpośrednio z osobą odpowiedzialną za planowanie, projektowanie,
-                                budowanie i uruchamianie Twojego projektu.
+                                {founderBio}
                             </p>
                             <p className="text-neutral-600 dark:text-white/70 leading-relaxed mb-6">
                                 Bez account managerów. Bez outsourcowanej komunikacji. Bez niejasnej odpowiedzialności.
                             </p>
                             <div className="flex flex-wrap gap-3">
-                                <span className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-white/70">10+ lat doświadczenia</span>
-                                <span className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-white/70">Północna Irlandia</span>
+                                <span className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-white/70">{founderExp}</span>
+                                <span className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-white/70">{founderLocation}</span>
+                                {founderLinkedin && (
+                                    <a href={founderLinkedin} target="_blank" rel="noopener noreferrer" className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-brand-500 hover:underline">LinkedIn</a>
+                                )}
                                 <span className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-white/70">Obsługa PL</span>
                             </div>
                         </div>
@@ -774,33 +842,8 @@ export default function PlStronyInternetowe({ footer }: Props) {
                         Najczęstsze pytania
                     </h2>
                     <div>
-                        {[
-                            {
-                                q: 'Ile kosztuje strona internetowa dla firmy?',
-                                a: 'Podstawowy pakiet (do 5 podstron, formularz kontaktowy, SEO techniczne, CMS) zaczyna się od £799. Ostateczna cena zależy od zakresu projektu i jest ustalana przed rozpoczęciem prac.',
-                            },
-                            {
-                                q: 'Jak długo trwa realizacja projektu?',
-                                a: 'Typowy czas realizacji podstawowego pakietu to 3–5 tygodni od potwierdzenia zakresu i pierwszej wpłaty. Czas może się różnić w zależności od złożoności projektu i sprawności przekazywania treści.',
-                            },
-                            {
-                                q: 'Co muszę przygotować ze swojej strony?',
-                                a: 'Podstawowe informacje o firmie, opis usług, kontakt, kilka zdjęć (lub zgoda na użycie stockowych) oraz dostęp do domeny. Pomagam w zbieraniu treści podczas procesu.',
-                            },
-                            {
-                                q: 'Czy będę właścicielem strony i domeny?',
-                                a: 'Tak. Po zakończeniu projektu i opłaceniu faktury otrzymujesz pełny dostęp do strony. Domenę rejestruj zawsze na siebie lub swoją firmę — nie na agencję.',
-                            },
-                            {
-                                q: 'Czy będę mógł samodzielnie aktualizować treści?',
-                                a: 'Tak. Strona jest wyposażona w panel CMS umożliwiający edycję treści bez znajomości programowania. Szkolenie z jego obsługi wchodzi w cenę podstawowego pakietu.',
-                            },
-                            {
-                                q: 'Co się dzieje po uruchomieniu strony?',
-                                a: 'Przeprowadzam szkolenie z panelu administracyjnego i pozostaję dostępny w przypadku pytań technicznych. Dodatkowe wsparcie, aktualizacje lub rozbudowę możemy omówić osobno.',
-                            },
-                        ].map(item => (
-                            <FaqItem key={item.q} q={item.q} a={item.a} />
+                        {faqItems.map((item, i) => (
+                            <FaqItem key={i} q={item.q} a={item.a} />
                         ))}
                     </div>
                 </div>
@@ -815,11 +858,12 @@ export default function PlStronyInternetowe({ footer }: Props) {
                 <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-8">
                         <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-neutral-900 dark:text-white">
-                            Omów projekt i otrzymaj{' '}
-                            <span className="text-brand-500">bezpłatną wycenę</span>
+                            {formTitle.includes('bezpłatną') ? (
+                                <>Omów projekt i otrzymaj{' '}<span className="text-brand-500">bezpłatną wycenę</span></>
+                            ) : formTitle}
                         </h2>
                         <p className="mt-4 text-neutral-600 dark:text-white/70">
-                            Bez zobowiązań i bez presji sprzedażowej. Odpowiedź w ciągu jednego dnia roboczego.
+                            {formNote}
                         </p>
                     </div>
                     <div className="rounded-2xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 p-6 sm:p-8">

@@ -28,12 +28,20 @@ class EnLandingController extends Controller
     {
         App::setLocale('en');
 
-        $footer = ($s = SiteSection::where('key', 'footer')->where('is_active', true)->first())
+        $section = SiteSection::where('key', 'landing_en')->where('is_active', true)->first();
+        $footer  = ($s = SiteSection::where('key', 'footer')->where('is_active', true)->first())
             ? ['extra' => $s->extra]
             : null;
 
+        $cms = $section ? [
+            'title'    => $section->getTranslation('title', 'en'),
+            'subtitle' => $section->getTranslation('subtitle', 'en'),
+            'extra'    => $section->extra ?? [],
+        ] : null;
+
         return Inertia::render('Landing/EnWebDesign', [
             'footer' => $footer,
+            'cms'    => $cms,
         ]);
     }
 

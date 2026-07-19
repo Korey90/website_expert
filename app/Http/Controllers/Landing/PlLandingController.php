@@ -28,12 +28,20 @@ class PlLandingController extends Controller
     {
         App::setLocale('pl');
 
-        $footer = ($s = SiteSection::where('key', 'footer')->where('is_active', true)->first())
+        $section = SiteSection::where('key', 'landing_pl')->where('is_active', true)->first();
+        $footer  = ($s = SiteSection::where('key', 'footer')->where('is_active', true)->first())
             ? ['extra' => $s->extra]
             : null;
 
+        $cms = $section ? [
+            'title'    => $section->getTranslation('title', 'pl') ?: $section->getTranslation('title', 'en'),
+            'subtitle' => $section->getTranslation('subtitle', 'pl') ?: $section->getTranslation('subtitle', 'en'),
+            'extra'    => $section->extra ?? [],
+        ] : null;
+
         return Inertia::render('Landing/PlStronyInternetowe', [
             'footer' => $footer,
+            'cms'    => $cms,
         ]);
     }
 
