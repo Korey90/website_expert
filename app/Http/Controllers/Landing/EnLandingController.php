@@ -12,6 +12,7 @@ use App\Services\Leads\LeadService;
 use App\Services\Leads\LeadConsentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -25,6 +26,8 @@ class EnLandingController extends Controller
 
     public function show(): Response
     {
+        App::setLocale('en');
+
         $footer = ($s = SiteSection::where('key', 'footer')->where('is_active', true)->first())
             ? ['extra' => $s->extra]
             : null;

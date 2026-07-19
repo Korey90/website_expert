@@ -34,18 +34,34 @@
         <link rel="canonical" href="{{ url()->current() }}">
 
         @php
-            $locale = app()->getLocale();
-            $hreflangs = [
-                'en' => 'https://website-expert.uk/',
-                'pl' => 'https://website-expert.uk/',
-                'pt' => 'https://website-expert.uk/',
+            $locale      = app()->getLocale();
+            $currentName = Route::currentRouteName() ?? '';
+
+            $hreflangMap = [
+                'home' => [
+                    'en'        => 'https://website-expert.uk/',
+                    'pl'        => 'https://website-expert.uk/',
+                    'pt'        => 'https://website-expert.uk/',
+                    'x-default' => 'https://website-expert.uk/',
+                ],
+                'en.web-design-northern-ireland' => [
+                    'en'        => 'https://website-expert.uk/en/web-design-northern-ireland',
+                    'pl'        => 'https://website-expert.uk/pl/strony-internetowe-uk',
+                    'x-default' => 'https://website-expert.uk/en/web-design-northern-ireland',
+                ],
+                'pl.strony-internetowe-uk' => [
+                    'en'        => 'https://website-expert.uk/en/web-design-northern-ireland',
+                    'pl'        => 'https://website-expert.uk/pl/strony-internetowe-uk',
+                    'x-default' => 'https://website-expert.uk/en/web-design-northern-ireland',
+                ],
             ];
+
+            $hreflangs = $hreflangMap[$currentName] ?? null;
         @endphp
-        @if(in_array($currentName, ['home']))
-            <link rel="alternate" hreflang="en" href="{{ $hreflangs['en'] }}">
-            <link rel="alternate" hreflang="pl" href="{{ $hreflangs['pl'] }}">
-            <link rel="alternate" hreflang="pt" href="{{ $hreflangs['pt'] }}">
-            <link rel="alternate" hreflang="x-default" href="{{ $hreflangs['en'] }}">
+        @if($hreflangs)
+            @foreach($hreflangs as $hl => $href)
+                <link rel="alternate" hreflang="{{ $hl }}" href="{{ $href }}">
+            @endforeach
         @endif
 
         <!-- Fonts (self-hosted via Vite/fontsource) -->

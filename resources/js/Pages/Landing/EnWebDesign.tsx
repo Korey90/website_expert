@@ -165,7 +165,7 @@ function ContactForm({ formRef }: { formRef: React.RefObject<HTMLElement | null>
 
     if (status === 'success') {
         return (
-            <div className="rounded-2xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 p-8 text-center">
+            <div role="alert" aria-live="polite" className="rounded-2xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 p-8 text-center">
                 <div className="text-4xl mb-4">✅</div>
                 <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-3">
                     Thanks — your enquiry has been received.
@@ -181,7 +181,7 @@ function ContactForm({ formRef }: { formRef: React.RefObject<HTMLElement | null>
     }
 
     return (
-        <form onSubmit={handleSubmit} noValidate className="space-y-5">
+        <form onSubmit={handleSubmit} noValidate className="space-y-5" aria-label="Website proposal request form">
             {/* Name */}
             <div>
                 <label htmlFor="en-name" className="block text-sm font-medium text-neutral-700 dark:text-white/80 mb-1">
@@ -190,10 +190,12 @@ function ContactForm({ formRef }: { formRef: React.RefObject<HTMLElement | null>
                 <input
                     id="en-name" name="name" type="text" autoComplete="name"
                     value={form.name} onChange={handleChange} required
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? 'en-err-name' : undefined}
                     className={`w-full rounded-xl border px-4 py-3 text-sm bg-white dark:bg-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 ${errors.name ? 'border-red-500' : 'border-neutral-300 dark:border-white/20'}`}
                     placeholder="Jane Smith"
                 />
-                {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
+                {errors.name && <p id="en-err-name" role="alert" className="mt-1 text-xs text-red-500">{errors.name}</p>}
             </div>
 
             {/* Email */}
@@ -204,10 +206,12 @@ function ContactForm({ formRef }: { formRef: React.RefObject<HTMLElement | null>
                 <input
                     id="en-email" name="email" type="email" autoComplete="email"
                     value={form.email} onChange={handleChange} required
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? 'en-err-email' : undefined}
                     className={`w-full rounded-xl border px-4 py-3 text-sm bg-white dark:bg-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 ${errors.email ? 'border-red-500' : 'border-neutral-300 dark:border-white/20'}`}
                     placeholder="jane@yourbusiness.co.uk"
                 />
-                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+                {errors.email && <p id="en-err-email" role="alert" className="mt-1 text-xs text-red-500">{errors.email}</p>}
             </div>
 
             {/* Phone */}
@@ -231,10 +235,12 @@ function ContactForm({ formRef }: { formRef: React.RefObject<HTMLElement | null>
                 <input
                     id="en-current-website" name="current_website" type="url"
                     value={form.current_website} onChange={handleChange}
+                    aria-invalid={!!errors.current_website}
+                    aria-describedby={errors.current_website ? 'en-err-current-website' : undefined}
                     className={`w-full rounded-xl border px-4 py-3 text-sm bg-white dark:bg-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 ${errors.current_website ? 'border-red-500' : 'border-neutral-300 dark:border-white/20'}`}
                     placeholder="https://yourbusiness.co.uk (optional)"
                 />
-                {errors.current_website && <p className="mt-1 text-xs text-red-500">{errors.current_website}</p>}
+                {errors.current_website && <p id="en-err-current-website" role="alert" className="mt-1 text-xs text-red-500">{errors.current_website}</p>}
             </div>
 
             {/* Message */}
@@ -245,10 +251,12 @@ function ContactForm({ formRef }: { formRef: React.RefObject<HTMLElement | null>
                 <textarea
                     id="en-message" name="message" rows={4}
                     value={form.message} onChange={handleChange} required
+                    aria-invalid={!!errors.message}
+                    aria-describedby={errors.message ? 'en-err-message' : undefined}
                     className={`w-full rounded-xl border px-4 py-3 text-sm bg-white dark:bg-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none ${errors.message ? 'border-red-500' : 'border-neutral-300 dark:border-white/20'}`}
                     placeholder="e.g. I run a plumbing company in Belfast and need a new website to get more local enquiries..."
                 />
-                {errors.message && <p className="mt-1 text-xs text-red-500">{errors.message}</p>}
+                {errors.message && <p id="en-err-message" role="alert" className="mt-1 text-xs text-red-500">{errors.message}</p>}
             </div>
 
             {/* GDPR */}
@@ -264,10 +272,10 @@ function ContactForm({ formRef }: { formRef: React.RefObject<HTMLElement | null>
                     <a href="/privacy-policy" target="_blank" className="underline hover:text-brand-500">Privacy Policy</a>
                 </label>
             </div>
-            {errors.gdpr_consent && <p className="text-xs text-red-500">{errors.gdpr_consent}</p>}
+            {errors.gdpr_consent && <p id="en-err-gdpr" role="alert" className="text-xs text-red-500">{errors.gdpr_consent}</p>}
 
             {status === 'error' && (
-                <p className="text-sm text-red-500 text-center">
+                <p role="alert" className="text-sm text-red-500 text-center">
                     Something went wrong. Please try again or send an email directly.
                 </p>
             )}
@@ -362,7 +370,7 @@ export default function EnWebDesign({ footer }: Props) {
                 <link rel="alternate" hrefLang="en" href="https://website-expert.uk/en/web-design-northern-ireland" />
                 <link rel="alternate" hrefLang="pl" href="https://website-expert.uk/pl/strony-internetowe-uk" />
                 <link rel="alternate" hrefLang="x-default" href="https://website-expert.uk/en/web-design-northern-ireland" />
-                <html lang="en" />
+
             </Head>
 
             {/* ── SECTION 1: HERO ───────────────────────────────────────────── */}
