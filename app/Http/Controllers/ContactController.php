@@ -9,11 +9,25 @@ use App\Services\Leads\LeadService;
 use App\Services\Leads\LeadConsentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ContactController extends Controller
 {
+    private function resolveImageUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+        // Absolute path (/images/...) or full URL — use as-is
+        if (str_starts_with($path, '/') || str_starts_with($path, 'http')) {
+            return $path;
+        }
+        // Relative path from Filament FileUpload — stored in storage/app/public
+        return Storage::disk('public')->url($path);
+    }
+
     public function index(): Response
     {
         $supported = array_keys(config('languages'));
@@ -63,6 +77,7 @@ class ContactController extends Controller
             'body'        => $s->body,
             'button_text' => $s->button_text,
             'button_url'  => $s->button_url,
+            'image_path'  => $this->resolveImageUrl($s->image_path),
             'extra'       => $s->extra,
         ] : null;
 
@@ -77,13 +92,14 @@ class ContactController extends Controller
     {
         $data = $request->validated();
 
+        // The form has a single smart "contact" field — detect whether it's an email or a phone number.
+        $isEmail = filter_var($data['contact'], FILTER_VALIDATE_EMAIL) !== false;
+
         $leadService->createFromSource(
             leadData: [
-                'email'        => $data['email'],
+                'email'        => $isEmail ? $data['contact'] : null,
+                'phone'        => $isEmail ? null : $data['contact'],
                 'name'         => $data['name'] ?? null,
-                'company'      => $data['company'] ?? null,
-                'phone'        => $data['phone'] ?? null,
-                'nip'          => $data['nip'] ?? null,
                 'project_type' => $data['project_type'] ?? null,
                 'source'       => 'contact_form',
                 'notes'        => $data['message'] ?? null,

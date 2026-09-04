@@ -217,9 +217,21 @@ class SiteSectionResource extends BaseResource
                     Forms\Components\FileUpload::make('image_path')
                         ->label('Section Image')
                         ->image()
+                        ->disk('public')
+                        ->visibility('public')
                         ->directory('site-sections')
                         ->imageResizeMode('cover')
                         ->imageCropAspectRatio('16:9'),
+                    Forms\Components\Toggle::make('extra.stats_visible')
+                        ->label('Show stat boxes')
+                        ->helperText('Toggle visibility of the "200+ / 98% / 10+" stat boxes on the front-end.')
+                        ->default(true)
+                        ->visible(fn ($record) => ($record?->key ?? '') === 'about'),
+                    Forms\Components\Toggle::make('extra.highlights_visible')
+                        ->label('Show highlight cards')
+                        ->helperText('Toggle visibility of the highlight cards grid on the front-end.')
+                        ->default(true)
+                        ->visible(fn ($record) => ($record?->key ?? '') === 'about'),
                 ]),
 
             // ── 4. ABOUT US ───────────────────────────────────────────────
@@ -240,6 +252,10 @@ class SiteSectionResource extends BaseResource
                                 Forms\Components\TextInput::make('extra.section_label_pl')
                                     ->label('Etykieta sekcji')->placeholder('O nas')->maxLength(40),
                             ]),
+                            Tab::make('Português')->schema([
+                                Forms\Components\TextInput::make('extra.section_label_pt')
+                                    ->label('Etiqueta da secção')->placeholder('Sobre Nós')->maxLength(40),
+                            ]),
                         ]),
                     Forms\Components\Repeater::make('extra.stats')
                         ->label('Stat Boxes')
@@ -247,31 +263,54 @@ class SiteSectionResource extends BaseResource
                         ->schema([
                             Forms\Components\TextInput::make('value')
                                 ->label('Value')->placeholder('200+')->required()->maxLength(20),
-                            Forms\Components\TextInput::make('label_en')
-                                ->label('Label (EN)')->required()->maxLength(60),
-                            Forms\Components\TextInput::make('label_pl')
-                                ->label('Label (PL)')->required()->maxLength(60),
+                            Tabs::make('Translations')
+                                ->tabs([
+                                    Tab::make('English')->schema([
+                                        Forms\Components\TextInput::make('label_en')->label('Label (EN)')->required()->maxLength(60),
+                                    ]),
+                                    Tab::make('Polski')->schema([
+                                        Forms\Components\TextInput::make('label_pl')->label('Label (PL)')->required()->maxLength(60),
+                                    ]),
+                                    Tab::make('Português')->schema([
+                                        Forms\Components\TextInput::make('label_pt')->label('Label (PT)')->maxLength(60),
+                                    ]),
+                                ])
+                                ->columnSpanFull(),
                         ])
-                        ->columns(3)
+                        ->columns(1)
                         ->defaultItems(3)
                         ->reorderable()
                         ->collapsible()
                         ->collapsed()
+                        ->itemLabel(fn (array $state): ?string => $state['label_en'] ?? $state['value'] ?? null)
                         ->columnSpanFull(),
                     Forms\Components\Repeater::make('extra.highlights')
                         ->label('Highlight Cards')
                         ->helperText('Feature cards shown on the right side of the section.')
                         ->schema([
-                            Forms\Components\TextInput::make('title_en')->label('Title (EN)')->required()->maxLength(60),
-                            Forms\Components\TextInput::make('title_pl')->label('Title (PL)')->required()->maxLength(60),
-                            Forms\Components\Textarea::make('body_en')->label('Description (EN)')->required()->rows(2)->maxLength(200),
-                            Forms\Components\Textarea::make('body_pl')->label('Description (PL)')->required()->rows(2)->maxLength(200),
+                            Tabs::make('Translations')
+                                ->tabs([
+                                    Tab::make('English')->schema([
+                                        Forms\Components\TextInput::make('title_en')->label('Title (EN)')->required()->maxLength(60),
+                                        Forms\Components\Textarea::make('body_en')->label('Description (EN)')->required()->rows(2)->maxLength(200),
+                                    ]),
+                                    Tab::make('Polski')->schema([
+                                        Forms\Components\TextInput::make('title_pl')->label('Title (PL)')->required()->maxLength(60),
+                                        Forms\Components\Textarea::make('body_pl')->label('Description (PL)')->required()->rows(2)->maxLength(200),
+                                    ]),
+                                    Tab::make('Português')->schema([
+                                        Forms\Components\TextInput::make('title_pt')->label('Title (PT)')->maxLength(60),
+                                        Forms\Components\Textarea::make('body_pt')->label('Description (PT)')->rows(2)->maxLength(200),
+                                    ]),
+                                ])
+                                ->columnSpanFull(),
                         ])
-                        ->columns(2)
+                        ->columns(1)
                         ->defaultItems(4)
                         ->reorderable()
                         ->collapsible()
                         ->collapsed()
+                        ->itemLabel(fn (array $state): ?string => $state['title_en'] ?? null)
                         ->columnSpanFull(),
                 ]),
 
@@ -394,7 +433,43 @@ class SiteSectionResource extends BaseResource
                         ->columnSpanFull(),
                 ]),
 
-            // ── 9. COST CALCULATOR ────────────────────────────────────────
+            // ── 9. FAQ ────────────────────────────────────────────────────
+            Section::make('FAQ')
+                ->icon('heroicon-o-question-mark-circle')
+                ->description('Questions and answers shown in the FAQ accordion.')
+                ->columns(1)
+                ->collapsed()
+                ->visible(fn ($record) => ($record?->key ?? '') === 'faq')
+                ->schema([
+                    Forms\Components\Repeater::make('extra.items')
+                        ->label('Questions & Answers')
+                        ->schema([
+                            Tabs::make('Translations')
+                                ->tabs([
+                                    Tab::make('English')->schema([
+                                        Forms\Components\TextInput::make('question_en')->label('Question (EN)')->required()->maxLength(200),
+                                        Forms\Components\Textarea::make('answer_en')->label('Answer (EN)')->required()->rows(3)->maxLength(600),
+                                    ]),
+                                    Tab::make('Polski')->schema([
+                                        Forms\Components\TextInput::make('question_pl')->label('Question (PL)')->maxLength(200),
+                                        Forms\Components\Textarea::make('answer_pl')->label('Answer (PL)')->rows(3)->maxLength(600),
+                                    ]),
+                                    Tab::make('Português')->schema([
+                                        Forms\Components\TextInput::make('question_pt')->label('Question (PT)')->maxLength(200),
+                                        Forms\Components\Textarea::make('answer_pt')->label('Answer (PT)')->rows(3)->maxLength(600),
+                                    ]),
+                                ])
+                                ->columnSpanFull(),
+                        ])
+                        ->defaultItems(1)
+                        ->reorderable()
+                        ->collapsible()
+                        ->collapsed()
+                        ->itemLabel(fn (array $state): ?string => $state['question_en'] ?? null)
+                        ->columnSpanFull(),
+                ]),
+
+            // ── 10. COST CALCULATOR ───────────────────────────────────────
             Section::make('Cost Calculator')
                 ->icon('heroicon-o-calculator')
                 ->description('Section header and all UI strings for the cost calculator wizard.')
@@ -450,7 +525,7 @@ class SiteSectionResource extends BaseResource
                         ->columnSpanFull(),
                 ]),
 
-            // ── 10. CONTACT ───────────────────────────────────────────────
+            // ── 11. CONTACT ───────────────────────────────────────────────
             Section::make('Contact – Info & Form Texts')
                 ->icon('heroicon-o-envelope')
                 ->description('Contact details, field labels, and all UI strings for the contact form.')
@@ -540,7 +615,7 @@ class SiteSectionResource extends BaseResource
                         ]),
                 ]),
 
-            // ── 11. FOOTER ────────────────────────────────────────────────
+            // ── 12. FOOTER ────────────────────────────────────────────────
             Section::make('Footer')
                 ->icon('heroicon-o-rectangle-stack')
                 ->description('Brand, tagline, copyright, social links and navigation columns.')
@@ -607,12 +682,12 @@ class SiteSectionResource extends BaseResource
                         ->columnSpanFull(),
                 ]),
 
-            // ── 12. RAW EXTRA (fallback for sections without dedicated UI) ─
+            // ── 13. RAW EXTRA (fallback for sections without dedicated UI) ─
             Section::make('Extra Data (JSON)')
                 ->icon('heroicon-o-code-bracket')
                 ->description('Raw key-value pairs passed to the React component. Only visible for sections without a dedicated editor above.')
                 ->collapsed()
-                ->hidden(fn ($record) => in_array($record?->key ?? '', ['about', 'trust_strip', 'testimonials', 'services', 'portfolio', 'cost_calculator', 'contact', 'footer']))
+                ->hidden(fn ($record) => in_array($record?->key ?? '', ['about', 'trust_strip', 'testimonials', 'services', 'portfolio', 'cost_calculator', 'contact', 'footer', 'faq']))
                 ->schema([
                     Forms\Components\KeyValue::make('extra_kv')
                         ->label('Custom Key-Value Pairs')

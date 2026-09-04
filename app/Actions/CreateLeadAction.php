@@ -134,7 +134,17 @@ class CreateLeadAction
      */
     private function findOrCreateClient(array $data, ?string $businessId, string $currency): Client
     {
-        $query = Client::where('primary_contact_email', $data['email']);
+        $query = Client::query();
+
+        // Dedupe by whichever identifier is available — avoids matching unrelated
+        // clients that also happen to have a null email (e.g. phone-only leads).
+        if (! empty($data['email'])) {
+            $query->where('primary_contact_email', $data['email']);
+        } elseif (! empty($data['phone'])) {
+            $query->where('primary_contact_phone', $data['phone']);
+        } else {
+            $query->whereRaw('1 = 0');
+        }
 
         if ($businessId) {
             $query->where('business_id', $businessId);
@@ -174,9 +184,17 @@ class CreateLeadAction
             return null;
         }
 
-        $existing = Contact::where('client_id', $client->id)
-            ->where('email', $data['email'])
-            ->first();
+        $query = Contact::where('client_id', $client->id);
+
+        if (! empty($data['email'])) {
+            $query->where('email', $data['email']);
+        } elseif (! empty($data['phone'])) {
+            $query->where('phone', $data['phone']);
+        } else {
+            $query->whereRaw('1 = 0');
+        }
+
+        $existing = $query->first();
 
         if ($existing) {
             return $existing;

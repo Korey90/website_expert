@@ -64,6 +64,71 @@ export default function Faq({ data }) {
     const buttonText = d.button_text || DEFAULTS.button_text[locale] || DEFAULTS.button_text.en;
     const buttonUrl  = d.button_url  || DEFAULTS.button_url;
     const items      = extra.items?.length ? extra.items : DEFAULTS.items;
+    const imageUrl   = d.image_path || null;
+
+    const header = (
+        <>
+            <span className="section-label">{badge}</span>
+            <h2 className="font-display text-3xl sm:text-4xl font-bold mt-3 text-neutral-900 dark:text-white">
+                {title}
+            </h2>
+            {subtitle && (
+                <p className="mt-4 text-neutral-500 dark:text-neutral-400">
+                    {subtitle}
+                </p>
+            )}
+        </>
+    );
+
+    const button = buttonText && buttonUrl && (
+        <Link
+            href={buttonUrl}
+            className="inline-flex items-center gap-2 mt-8 px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors"
+        >
+            {buttonText}
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+        </Link>
+    );
+
+    const accordion = (
+        <div>
+            {items.map((item, i) => (
+                <FaqItem
+                    key={i}
+                    question={t(item, 'question')}
+                    answer={t(item, 'answer')}
+                />
+            ))}
+        </div>
+    );
+
+    // With an image, use a two-column layout: text + accordion on the left, image on the right.
+    if (imageUrl) {
+        return (
+            <section id="faq" className="py-20 md:py-28 bg-white dark:bg-neutral-950">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+                        <div className="reveal">
+                            {header}
+                            {accordion}
+                            {button}
+                        </div>
+
+                        <div className="reveal lg:sticky lg:top-28">
+                            <img
+                                src={imageUrl}
+                                alt=""
+                                className="w-full h-full rounded-2xl object-cover"
+                                loading="lazy"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section id="faq" className="py-20 md:py-28 bg-white dark:bg-neutral-950">
@@ -72,37 +137,13 @@ export default function Faq({ data }) {
 
                     {/* Left column — sticky header */}
                     <div className="reveal lg:sticky lg:top-28 lg:self-start">
-                        <span className="section-label">{badge}</span>
-                        <h2 className="font-display text-3xl sm:text-4xl font-bold mt-3 text-neutral-900 dark:text-white">
-                            {title}
-                        </h2>
-                        {subtitle && (
-                            <p className="mt-4 text-neutral-500 dark:text-neutral-400">
-                                {subtitle}
-                            </p>
-                        )}
-                        {buttonText && buttonUrl && (
-                            <Link
-                                href={buttonUrl}
-                                className="inline-flex items-center gap-2 mt-8 px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors"
-                            >
-                                {buttonText}
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                </svg>
-                            </Link>
-                        )}
+                        {header}
+                        {button}
                     </div>
 
                     {/* Right column — accordion */}
                     <div className="lg:col-span-2 reveal">
-                        {items.map((item, i) => (
-                            <FaqItem
-                                key={i}
-                                question={t(item, 'question')}
-                                answer={t(item, 'answer')}
-                            />
-                        ))}
+                        {accordion}
                     </div>
                 </div>
             </div>

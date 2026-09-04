@@ -16,6 +16,19 @@ use Inertia\Response;
 
 class WelcomeController extends Controller
 {
+    private function resolveImageUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+        // Absolute path (/images/...) or full URL — use as-is
+        if (str_starts_with($path, '/') || str_starts_with($path, 'http')) {
+            return $path;
+        }
+        // Relative path from Filament FileUpload — stored in storage/app/public
+        return Storage::disk('public')->url($path);
+    }
+
     public function __invoke(): Response
     {
         $supported = array_keys(config('languages'));
@@ -45,7 +58,7 @@ class WelcomeController extends Controller
             'subtitle' => $s->subtitle,
             'button_text' => $s->button_text,
             'button_url' => $s->button_url,
-            'image_path' => $s->image_path,
+            'image_path' => $this->resolveImageUrl($s->image_path),
             'extra' => $s->extra,
         ] : null;
 
@@ -55,6 +68,7 @@ class WelcomeController extends Controller
             'body' => $s->body,
             'button_text' => $s->button_text,
             'button_url' => $s->button_url,
+            'image_path' => $this->resolveImageUrl($s->image_path),
             'extra' => $s->extra,
         ] : null;
 
@@ -137,6 +151,7 @@ class WelcomeController extends Controller
             'subtitle' => $s->subtitle,
             'button_text' => $s->button_text,
             'button_url' => $s->button_url,
+            'image_path' => $this->resolveImageUrl($s->image_path),
             'extra' => $s->extra,
         ] : null;
 

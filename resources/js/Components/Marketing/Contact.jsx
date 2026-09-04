@@ -14,14 +14,6 @@ const PROJECT_TYPE_DEFAULTS = [
     { value: 'inne',      label_en: 'Other',                label_pl: 'Inne' },
 ];
 
-const CONTACT_PREF_DEFAULTS = [
-    { value: '',        label_en: '– Any method –',  label_pl: '– Dowolna forma –' },
-    { value: 'email',   label_en: 'Email',           label_pl: 'Email' },
-    { value: 'telefon', label_en: 'Phone',           label_pl: 'Telefon' },
-    { value: 'teams',   label_en: 'Microsoft Teams', label_pl: 'Microsoft Teams' },
-    { value: 'meet',    label_en: 'Google Meet',     label_pl: 'Google Meet' },
-];
-
 const DEFAULTS = {
     title:         { en: "Let's talk about your project",                                                   pl: 'Porozmawiajmy o Twoim projekcie' },
     subtitle:      { en: "Get in touch and we'll reply within 24 business hours. First 30 min is free.",    pl: 'Napisz do nas, a odezwiemy się w ciągu 24 godzin roboczych. Pierwsze 30 minut konsultacji jest bezpłatne.' },
@@ -30,7 +22,7 @@ const DEFAULTS = {
 
 export default function Contact({ data = null }) {
     const { locale = 'en' } = usePage().props;
-    const [form, setForm]     = useState({ name: '', company: '', email: '', phone: '', nip: '', project_type: '', contact_preference: '', message: '', gdpr_consent: false });
+    const [form, setForm]     = useState({ name: '', contact: '', project_type: '', message: '', gdpr_consent: false });
     const [status, setStatus] = useState('idle');
 
     const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
@@ -49,13 +41,14 @@ export default function Contact({ data = null }) {
     const privacyUrl  = extra.privacy_url || '#';
 
     const projectTypes  = extra.project_types  || PROJECT_TYPE_DEFAULTS;
-    const contactPrefs  = extra.contact_prefs  || CONTACT_PREF_DEFAULTS;
 
-    const chooseLabel = locale === 'pl' ? 'Wybierz' : 'Choose';
+    const chooseLabel        = locale === 'pl' ? 'Wybierz' : locale === 'pt' ? 'Escolher' : 'Choose';
+    const contactLabel       = locale === 'pl' ? 'Email lub telefon' : locale === 'pt' ? 'Email ou telefone' : 'Email or phone';
+    const contactPlaceholder = locale === 'pl' ? 'jan@firma.pl lub +48 000 000 000' : locale === 'pt' ? 'joao@empresa.pt ou +351 000 000 000' : 'info@yourcompany.co.uk or +44 7700 000000';
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.name || !form.email || !form.message || !form.gdpr_consent) {
+        if (!form.name || !form.contact || !form.message || !form.gdpr_consent) {
             setStatus('error');
             return;
         }
@@ -127,57 +120,24 @@ export default function Contact({ data = null }) {
                                     className={inputClass} placeholder={t('placeholder_name', 'John Smith')} />
                             </div>
                             <div>
-                                <label htmlFor="cf-company" className={labelClass}>{t('label_company', 'Company')}</label>
-                                <input type="text" id="cf-company" name="company" autoComplete="organization"
-                                    value={form.company} onChange={e => set('company', e.target.value)}
-                                    className={inputClass} placeholder={t('placeholder_company', 'Company name')} />
-                            </div>
-                        </div>
-
-                        <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label htmlFor="cf-email" className={labelClass}>
-                                    {t('label_email', 'Email')} <span className="text-brand-500" aria-hidden="true">*</span>
+                                <label htmlFor="cf-contact" className={labelClass}>
+                                    {t('label_contact', contactLabel)} <span className="text-brand-500" aria-hidden="true">*</span>
                                 </label>
-                                <input type="email" id="cf-email" name="email" required autoComplete="email"
-                                    value={form.email} onChange={e => set('email', e.target.value)}
-                                    className={inputClass} placeholder={t('placeholder_email', 'info@yourcompany.co.uk')} />
-                            </div>
-                            <div>
-                                <label htmlFor="cf-phone" className={labelClass}>{t('label_phone', 'Phone')}</label>
-                                <input type="tel" id="cf-phone" name="phone" autoComplete="tel"
-                                    value={form.phone} onChange={e => set('phone', e.target.value)}
-                                    className={inputClass} placeholder="+44 7700 000000" />
-                            </div>
-                        </div>
-
-                        <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label htmlFor="cf-nip" className={labelClass}>{t('label_nip', 'VAT Number')}</label>
-                                <input type="text" id="cf-nip" name="nip" autoComplete="off"
-                                    value={form.nip} onChange={e => set('nip', e.target.value)}
-                                    className={inputClass} placeholder={t('placeholder_nip', 'GB123456789')} />
-                            </div>
-                            <div>
-                                <label htmlFor="cf-project-type" className={labelClass}>{t('label_project_type', 'Project type')}</label>
-                                <select id="cf-project-type" name="project_type" value={form.project_type}
-                                    onChange={e => set('project_type', e.target.value)} className={inputClass}>
-                                    <option value="">– {chooseLabel} –</option>
-                                    {projectTypes.map(pt => (
-                                        <option key={pt.value} value={pt.value}>
-                                            {pt[`label_${locale}`] ?? pt.label_en}
-                                        </option>
-                                    ))}
-                                </select>
+                                <input type="text" id="cf-contact" name="contact" required autoComplete="email"
+                                    value={form.contact} onChange={e => set('contact', e.target.value)}
+                                    className={inputClass} placeholder={t('placeholder_contact', contactPlaceholder)} />
                             </div>
                         </div>
 
                         <div className="mb-4">
-                            <label htmlFor="cf-contact-pref" className={labelClass}>{t('label_contact_pref', 'Preferred contact')}</label>
-                            <select id="cf-contact-pref" name="contact_preference" value={form.contact_preference}
-                                onChange={e => set('contact_preference', e.target.value)} className={inputClass}>
-                                {contactPrefs.map((cp, i) => (
-                                    <option key={i} value={cp.value}>{cp[`label_${locale}`] ?? cp.label_en}</option>
+                            <label htmlFor="cf-project-type" className={labelClass}>{t('label_project_type', 'Project type')}</label>
+                            <select id="cf-project-type" name="project_type" value={form.project_type}
+                                onChange={e => set('project_type', e.target.value)} className={inputClass}>
+                                <option value="">– {chooseLabel} –</option>
+                                {projectTypes.map(pt => (
+                                    <option key={pt.value} value={pt.value}>
+                                        {pt[`label_${locale}`] ?? pt.label_en}
+                                    </option>
                                 ))}
                             </select>
                         </div>
