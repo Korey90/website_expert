@@ -403,8 +403,8 @@ export default function EnWebDesign({ footer, cms }: Props) {
     ]);
     const noHiddenFees      = c('no_hidden_fees_note', 'No hidden fees. The final scope and price are confirmed in writing before work begins.');
     const founderBio        = c('founder_bio', 'Website Expert is a founder-led web studio based in Northern Ireland. You speak directly with the person responsible for planning, designing, building and launching your project. No account managers. No outsourced communication. No unclear responsibility.');
-    const founderName       = c('founder_name', '');
-    const founderPhoto      = c('founder_photo_url', '');
+    const founderName       = c('founder_name', 'Konrad');
+    const founderPhoto      = c('founder_photo_url', '../storage/2342452345234.png');
     const founderLinkedin   = c('founder_linkedin_url', '');
     const founderLocation   = c('founder_location', 'Northern Ireland');
     const founderExp        = c('founder_experience', '10+ years experience');

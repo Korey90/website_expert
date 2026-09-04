@@ -444,7 +444,7 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
     const noHiddenFees      = c('no_hidden_fees_note', 'Brak ukrytych kosztów. Ostateczny zakres i cena są ustalane przed rozpoczęciem prac.');
     const founderBio        = c('founder_bio', 'Website Expert to pracownia założona przez developera z siedzibą w Północnej Irlandii. Rozmawiasz bezpośrednio z osobą odpowiedzialną za planowanie, projektowanie, budowanie i uruchamianie Twojego projektu.');
     const founderName       = c('founder_name', '');
-    const founderPhoto      = c('founder_photo_url', '');
+    const founderPhoto      = c('founder_photo_url', '../storage/2342452345234.png');
     const founderLinkedin   = c('founder_linkedin_url', '');
     const founderLocation   = c('founder_location', 'Północna Irlandia');
     const founderExp        = c('founder_experience', '10+ lat doświadczenia');

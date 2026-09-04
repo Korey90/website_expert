@@ -94,17 +94,17 @@ export default function Hero({ data }) {
     const titleLines = (d.title ?? DEFAULTS.title).split('\n');
 
     return (
-        <section id="hero" className="relative min-h-screen flex items-center overflow-hidden pt-4 md:pt-6">
+        <section id="hero" className="relative min-h-screen flex sm:items-center overflow-hidden pt-4 md:pt-6">
             {/* Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-neutral-50 via-white to-brand-50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950" aria-hidden="true" />
             <div className="absolute top-1/4 right-0 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none hidden md:block" aria-hidden="true" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-500/5 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
 
-            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-18 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-1 md:py-0 grid lg:grid-cols-2 gap-12 lg:gap-16 -mt-24 sm:mt-18 items-center">
                 {/* Text */}
-                <div>
+                <div className=''>
                     {badgeText && (
-                        <span className="inline-flex items-center gap-2 px-3 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-600 dark:text-brand-400 mb-6">
+                        <span className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-600 dark:text-brand-400">
                             <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
                             {badgeText}
                         </span>
@@ -149,7 +149,7 @@ export default function Hero({ data }) {
 
                     {/* Stats from backend */}
                     {extra.stats && extra.stats.length > 0 && (
-                        <div className="mt-10 flex flex-wrap gap-8">
+                        <div className="mt-10 flex-wrap gap-8 hidden sm:flex">
                             {extra.stats.map((stat, i) => (
                                 <div key={i}>
                                     <p className="text-2xl font-extrabold text-neutral-900 dark:text-white">{stat.value}</p>
