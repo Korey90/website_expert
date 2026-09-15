@@ -73,7 +73,15 @@ class ServiceController extends Controller
             return redirect()->route('services.index');
         }
 
-        return Inertia::render('Services/Show', array_merge($this->sharedSections(), [
+        $rankChecker = $slug === 'seo' ? [
+            'rankCheckerLocations' => array_column(config('seo.rank_checker.locations', []), 'name'),
+            'rankCheckerDefaults' => [
+                'location' => config('seo.rank_checker.default_location'),
+                'device' => config('seo.rank_checker.default_device'),
+            ],
+        ] : [];
+
+        return Inertia::render('Services/Show', array_merge($this->sharedSections(), $rankChecker, [
             'locale' => $locale,
             'item' => $this->mapItem($item, $locale),
         ]));

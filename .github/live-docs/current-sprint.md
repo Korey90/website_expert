@@ -1,6 +1,28 @@
 # Current Sprint
 
-**Sprint Name:** Front Redesign — Dwa lejki sprzedażowe (PL + EN) + CRM + Mobile + Homepage
+**Sprint Name:** Moduł SEO — Google Rank Checker
+**Date:** 2026-09-06 (ukończony jednodniowy sprint)
+**Goal:** Publiczne narzędzie `/tools/google-rank-checker` + fundament domeny biznesowej "Search Ranking" pod przyszły monitoring pozycji klientów.
+**Źródło planu:** `docs/plans/seo-module-tool-plan.md`
+**Status:** ✅ DONE — pełny raport: `.github/completed-tasks/2026-09-06 - Modul SEO Google Rank Checker.md`
+
+- [x] Migracja `search_ranking_checks` + model + factory
+- [x] `SerpProviderInterface` + `ManualSerpProviderService` (domyślny stub) + `DataForSeoProviderService`
+- [x] `DomainNormalizer` (normalizacja + matching subdomen), pokryty testami
+- [x] `CheckGoogleRankingAction` (jedna reużywalna funkcja biznesowa: cache → provider → matching → zapis)
+- [x] `GoogleRankCheckerController` + trasy (`throttle:10,60`) + sitemap
+- [x] Frontend: `Pages/Tools/GoogleRankChecker.tsx`, `Components/Tools/{GoogleRankCheckerForm,GoogleRankResult}.tsx`
+- [x] Tłumaczenia `lang/{en,pl,pt}/rank_checker.php` + `rank_checker_translations` w `HandleInertiaRequests`
+- [x] Filament `SearchRankingCheckResource` (tylko odczyt, grupa "SEO")
+- [x] Testy: `DomainNormalizerTest` (4), `GoogleRankCheckerTest` (8) — 12/12 ✅
+- [x] `phpunit.xml`: izolacja reCAPTCHA w testach (`RECAPTCHA_SECRET_KEY=""`)
+- [x] Adnotacje ✅/⚠️/⏳ przy wszystkich 50 sekcjach `docs/plans/seo-module-tool-plan.md`
+
+**Poza zakresem MVP (świadomie, sekcja 45 planu):** historia pozycji, wykresy, konkurenci, plany/limity billingowe, harmonogram automatyczny, Cloudflare Turnstile, autocomplete lokalizacji.
+
+---
+
+# Poprzedni Sprint — Front Redesign (2026-07-19)
 **Date:** 2026-07-19 → ongoing
 **Goal:** Dwie oddzielne ścieżki sprzedażowe: polski LP dla polskich przedsiębiorców w UK (PRIORYTET 1) i angielski LP dla klientów anglojęzycznych (PRIORYTET 2). Integracja CRM z locale/audience/GCLID/UTM, follow-up automation, mobile UX, przebudowa strony głównej.
 **Źródło planu:** `docs/plik.md` (sekcje 1–8 + update od lini 810: segment polski w UK)

@@ -132,6 +132,10 @@ class ContactController extends Controller
     {
         $data = $request->validated();
 
+        $formData = array_filter([
+            'current_website' => $data['current_website'] ?? null,
+        ], fn ($v) => $v !== null && $v !== '');
+
         $leadService->createFromSource(
             leadData: [
                 'email'        => $data['email'] ?? null,
@@ -140,6 +144,7 @@ class ContactController extends Controller
                 'source'       => 'service_cta',
                 'notes'        => $data['message'],
                 'project_type' => $data['service_slug'] ?? null,
+                'form_data'    => $formData !== [] ? $formData : null,
             ],
             sourceData: [
                 'type'         => 'service_cta',

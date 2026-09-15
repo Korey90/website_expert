@@ -140,6 +140,23 @@ class LandingPageController extends Controller
         ]);
     }
 
+    /**
+     * Render the page exactly as visitors would see it (any status, including draft),
+     * for the owning business only. Does not count as a real view and disables lead submission.
+     */
+    public function preview(LandingPage $landingPage): Response
+    {
+        $this->authorize('view', $landingPage);
+
+        $landingPage->load('sections');
+
+        return Inertia::render('LandingPage/Show', [
+            'landingPage' => $landingPage->append(['conversion_rate']),
+            'sections'    => $landingPage->sections,
+            'isPreview'   => true,
+        ]);
+    }
+
     public function edit(LandingPage $landingPage): Response
     {
         $this->authorize('update', $landingPage);

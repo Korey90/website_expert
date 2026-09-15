@@ -46,6 +46,14 @@ export default function Show({ page, recentLeads = [], client }) {
                             <p className="text-xs text-gray-400 dark:text-gray-500">/lp/{page.slug}</p>
                         </div>
                         <div className="ml-auto flex items-center gap-2">
+                            <a
+                                href={route('landing-pages.preview', page.id)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold text-sm px-4 py-2 transition"
+                            >
+                                Preview
+                            </a>
                             <Link
                                 href={route('landing-pages.edit', page.id)}
                                 className="rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold text-sm px-4 py-2 transition"

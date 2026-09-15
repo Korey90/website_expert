@@ -37,7 +37,7 @@ function normalizeSection(section) {
     };
 }
 
-export default function LandingPageSectionRenderer({ sections = [], slug }) {
+export default function LandingPageSectionRenderer({ sections = [], slug, isPreview = false }) {
     return sections
         .map(normalizeSection)
         .filter((section) => section.is_visible !== false && section.settings.visible !== false)
@@ -54,6 +54,7 @@ export default function LandingPageSectionRenderer({ sections = [], slug }) {
                     content={section.content}
                     settings={section.settings}
                     slug={slug}
+                    isPreview={isPreview}
                 />
             );
         });

@@ -1,11 +1,20 @@
 <?php
 
+use App\Http\Controllers\ClientBriefingController;
+use App\Http\Controllers\ClientSalesOfferController;
 use App\Http\Controllers\KalkulatorController;
+use App\Http\Controllers\Landing\EnLandingController;
+use App\Http\Controllers\Landing\PlLandingController;
 use App\Http\Controllers\LandingPage\PublicLandingPageController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PortfolioController;
+use App\Http\Controllers\Seo\GoogleRankCheckerController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\WelcomeController;
+use App\Models\Page;
+use App\Models\PortfolioProject;
+use App\Models\ServiceItem;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 // -----------------------------------------------------------------------
@@ -15,21 +24,31 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', WelcomeController::class)->name('home');
 Route::get('/calculate', KalkulatorController::class)->name('kalkulator');
 
-Route::get('/portfolio',        [PortfolioController::class, 'index'])->name('portfolio.index');
+Route::get('/portfolio', [PortfolioController::class, 'index'])->name('portfolio.index');
 Route::get('/portfolio/{slug}', [PortfolioController::class, 'show'])->name('portfolio.show')
     ->where('slug', '[a-z0-9\-]+');
 
-Route::get('/services',         [ServiceController::class, 'index'])->name('services.index');
-Route::get('/services/{slug}',  [ServiceController::class, 'show'])->name('services.show')
+Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+Route::get('/services/{slug}', [ServiceController::class, 'show'])->name('services.show')
     ->where('slug', '[a-z0-9\-]+');
+
+// -----------------------------------------------------------------------
+// Free tools — no auth required
+// -----------------------------------------------------------------------
+Route::prefix('tools')->name('tools.')->group(function () {
+    Route::get('/google-rank-checker', [GoogleRankCheckerController::class, 'show'])->name('google-rank-checker');
+    Route::post('/google-rank-checker/check', [GoogleRankCheckerController::class, 'check'])
+        ->name('google-rank-checker.check')
+        ->middleware('throttle:10,60');
+});
 
 // Sitemap XML
 Route::get('/sitemap.xml', function () {
-    $content = \Illuminate\Support\Facades\Cache::remember('sitemap.xml', 3600, function () {
-        $pages     = \App\Models\Page::select('slug', 'updated_at')->get();
-        $portfolio = \App\Models\PortfolioProject::select('slug', 'updated_at')
+    $content = Cache::remember('sitemap.xml', 3600, function () {
+        $pages = Page::select('slug', 'updated_at')->get();
+        $portfolio = PortfolioProject::select('slug', 'updated_at')
             ->where('is_active', true)->where('is_featured', true)->orderBy('sort_order')->get();
-        $services  = \App\Models\ServiceItem::select('slug', 'updated_at')
+        $services = ServiceItem::select('slug', 'updated_at')
             ->where('is_active', true)->orderBy('sort_order')->get();
 
         return view('sitemap', [
@@ -38,12 +57,13 @@ Route::get('/sitemap.xml', function () {
                 ['loc' => url('/en/web-design-northern-ireland'),      'priority' => '0.9', 'changefreq' => 'monthly'],
                 ['loc' => url('/pl/strony-internetowe-uk'),            'priority' => '0.9', 'changefreq' => 'monthly'],
                 ['loc' => url('/calculate'),                           'priority' => '0.8', 'changefreq' => 'monthly'],
+                ['loc' => url('/tools/google-rank-checker'),           'priority' => '0.8', 'changefreq' => 'monthly'],
                 ['loc' => url('/portfolio'),                           'priority' => '0.8', 'changefreq' => 'weekly'],
                 ['loc' => url('/services'),                            'priority' => '0.8', 'changefreq' => 'monthly'],
             ],
-            'pages'     => $pages,
+            'pages' => $pages,
             'portfolio' => $portfolio,
-            'services'  => $services,
+            'services' => $services,
         ])->render();
     });
 
@@ -53,16 +73,17 @@ Route::get('/sitemap.xml', function () {
 Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');
 
 // Explicit routes for legal/CMS pages — avoids conflict with the /{slug} catch-all in web.php
-Route::get('/privacy-policy',       [PageController::class, 'show'])->defaults('slug', 'privacy-policy')->name('page.privacy_policy');
+Route::get('/privacy-policy', [PageController::class, 'show'])->defaults('slug', 'privacy-policy')->name('page.privacy_policy');
 Route::get('/terms-and-conditions', [PageController::class, 'show'])->defaults('slug', 'terms-and-conditions')->name('page.terms_and_conditions');
-Route::get('/cookies',              [PageController::class, 'show'])->defaults('slug', 'cookies')->name('page.cookies');
-Route::get('/accessibility',        [PageController::class, 'show'])->defaults('slug', 'accessibility')->name('page.accessibility');
+Route::get('/cookies', [PageController::class, 'show'])->defaults('slug', 'cookies')->name('page.cookies');
+Route::get('/accessibility', [PageController::class, 'show'])->defaults('slug', 'accessibility')->name('page.accessibility');
 
 Route::get('/lang/{locale}', function (string $locale) {
     $supported = array_keys(config('languages'));
     if (in_array($locale, $supported)) {
         session(['locale' => $locale]);
     }
+
     return redirect()->back(302, [], route('home'));
 })->where('locale', '[a-z]{2}')->name('lang.switch');
 
@@ -71,22 +92,22 @@ Route::get('/lang/{locale}', function (string $locale) {
 // -----------------------------------------------------------------------
 Route::prefix('pl')->name('pl.')->group(function () {
     Route::get('/strony-internetowe-uk',
-        [\App\Http\Controllers\Landing\PlLandingController::class, 'show'])
+        [PlLandingController::class, 'show'])
         ->name('strony-internetowe-uk');
 
     Route::post('/strony-internetowe-uk/wyslij',
-        [\App\Http\Controllers\Landing\PlLandingController::class, 'submit'])
+        [PlLandingController::class, 'submit'])
         ->name('strony-internetowe-uk.submit')
         ->middleware('throttle:5,60');
 });
 
 Route::prefix('en')->name('en.')->group(function () {
     Route::get('/web-design-northern-ireland',
-        [\App\Http\Controllers\Landing\EnLandingController::class, 'show'])
+        [EnLandingController::class, 'show'])
         ->name('web-design-northern-ireland');
 
     Route::post('/web-design-northern-ireland/submit',
-        [\App\Http\Controllers\Landing\EnLandingController::class, 'submit'])
+        [EnLandingController::class, 'submit'])
         ->name('web-design-northern-ireland.submit')
         ->middleware('throttle:5,60');
 });
@@ -95,7 +116,7 @@ Route::prefix('en')->name('en.')->group(function () {
 // Public Landing Pages
 // -----------------------------------------------------------------------
 Route::prefix('lp')->name('lp.')->group(function () {
-    Route::get('/{slug}',        [PublicLandingPageController::class, 'show'])->name('show');
+    Route::get('/{slug}', [PublicLandingPageController::class, 'show'])->name('show');
     Route::post('/{slug}/submit', [PublicLandingPageController::class, 'submit'])
         ->name('submit')
         ->middleware('throttle:3,60');
@@ -105,9 +126,9 @@ Route::prefix('lp')->name('lp.')->group(function () {
 // Client Briefings — token-based, no auth required
 // -----------------------------------------------------------------------
 Route::prefix('client/briefings')->name('client.briefings.')->group(function () {
-    Route::get('/{token}',         [\App\Http\Controllers\ClientBriefingController::class, 'show'])->name('show');
-    Route::patch('/{token}/save',  [\App\Http\Controllers\ClientBriefingController::class, 'autosave'])->name('autosave');
-    Route::post('/{token}/submit', [\App\Http\Controllers\ClientBriefingController::class, 'submit'])
+    Route::get('/{token}', [ClientBriefingController::class, 'show'])->name('show');
+    Route::patch('/{token}/save', [ClientBriefingController::class, 'autosave'])->name('autosave');
+    Route::post('/{token}/submit', [ClientBriefingController::class, 'submit'])
         ->name('submit')
         ->middleware('throttle:10,60');
 });
@@ -116,6 +137,6 @@ Route::prefix('client/briefings')->name('client.briefings.')->group(function () 
 // Client Sales Offers — token-based, no auth required
 // -----------------------------------------------------------------------
 Route::prefix('offers')->name('offers.')->group(function () {
-    Route::get('/{token}',         [\App\Http\Controllers\ClientSalesOfferController::class, 'show'])->name('show');
-    Route::post('/{token}/accept', [\App\Http\Controllers\ClientSalesOfferController::class, 'accept'])->name('accept');
+    Route::get('/{token}', [ClientSalesOfferController::class, 'show'])->name('show');
+    Route::post('/{token}/accept', [ClientSalesOfferController::class, 'accept'])->name('accept');
 });

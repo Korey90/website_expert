@@ -20,6 +20,7 @@ class QuickContactRequest extends FormRequest
             'message'      => ['required', 'string', 'min:10', 'max:5000'],
             'gdpr_consent' => ['required', 'accepted'],
             'service_slug' => ['nullable', 'string', 'max:100'],
+            'current_website' => ['nullable', 'string', 'max:255'],
         ];
     }
 

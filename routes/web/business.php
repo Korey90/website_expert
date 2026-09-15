@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified', 'has.business'])->group(function () {
             Route::get('/ai/create',          [LandingPageController::class, 'createWithAi'])->name('ai.create');
             Route::post('/',                  [LandingPageController::class, 'store'])->name('store');
             Route::get('/{landingPage}',      [LandingPageController::class, 'show'])->name('show');
+            Route::get('/{landingPage}/preview', [LandingPageController::class, 'preview'])->name('preview');
             Route::get('/{landingPage}/edit', [LandingPageController::class, 'edit'])->name('edit');
             Route::patch('/{landingPage}',    [LandingPageController::class, 'update'])->name('update');
             Route::delete('/{landingPage}',   [LandingPageController::class, 'destroy'])->name('destroy');

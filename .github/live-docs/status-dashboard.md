@@ -1,20 +1,22 @@
 # WebsiteExpert - Project Status Dashboard
 
-**Last Full Validation:** 2026-06-14
-**Last Targeted Validation:** 2026-07-18 — Admin panel documentation report (`docs/admin-panel-report.md`)
+**Last Full Validation:** 2026-09-06
+**Last Targeted Validation:** 2026-09-06 — Moduł SEO: Google Rank Checker
 
 ## Health Checks
-- **Code Quality (Pint + ESLint):** ✅ `npx eslint .` i `npm run lint` przechodzą; vendor/generated wyłączone jawnie
-- **Translations (pl/en/pt):** ✅ Homepage SEO w `lang/{locale}/seo.php`; pozostały frontend inline EN/PL/PT
-- **Tests:** SEO: PHPUnit 3/3 (51 asercji), Vitest 3/3 ✅; pełny Vitest: 12 passed, 4 `CostCalculatorV2` failed ⚠️
-- **Multi-Tenancy Compliance:** 100% ✅
-- **Security Review:** ✅ OK
+- **Code Quality (Pint + ESLint):** ✅ `vendor/bin/pint --dirty` i `npm run lint` przechodzą (1 niezwiązany pre-existing błąd w `docs/python tests/load-test.js`)
+- **Translations (pl/en/pt):** ✅ Homepage SEO w `lang/{locale}/seo.php`; Google Rank Checker w `lang/{locale}/rank_checker.php`; pozostały frontend inline EN/PL/PT
+- **Tests:** PHPUnit 478 passed / 3 pre-existing failures (Auth/Billing/ServicePage, niezwiązane); nowy moduł SEO: 12/12 ✅
+- **Multi-Tenancy Compliance:** 100% ✅ (wyjątek celowy: `search_ranking_checks.business_id` nullable — narzędzie publiczne/anonimowe, przygotowane pod przyszłe powiązanie z klientem)
+- **Security Review:** ✅ OK — throttle + reCAPTCHA v3 na endpointach publicznych, `ip_hash` zamiast surowego IP, brak sekretów w logach
 - **Build (Vite):** ✅ Brak błędów TS/JS
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-09-15 — Naprawiono krytyczną lukę: 2FA nie było egzekwowane przy logowaniu (login przechodził mimo aktywnego 2FA). Migracja z custom TOTP (`google_2fa_secret`/`two_factor_enabled`) na natywny `Filament\Auth\MultiFactor\App\AppAuthentication` (kolumny `app_authentication_secret`/`app_authentication_recovery_codes`), zarejestrowany w `AdminPanelProvider::multiFactorAuthentication()` — Filament teraz wymusza TOTP challenge w `Login` page. `AccountProfilePage` deleguje zarządzanie 2FA do natywnego providera (usunięto `EnableTwoFactorAction`/`DisableTwoFactorAction`); 10 testów PHPUnit (w tym regresja logowania z/bez 2FA) ✅
+- 2026-09-06 — Moduł SEO: Google Rank Checker (`/tools/google-rank-checker`) — provider abstraction (`SerpProviderInterface`, manual stub + DataForSEO), `CheckGoogleRankingAction`, `DomainNormalizer`, Filament read-only wgląd, tłumaczenia pl/en/pt, 12 testów PHPUnit; pełny raport: `.github/completed-tasks/2026-09-06 - Modul SEO Google Rank Checker.md` ✅
 - 2026-07-18 — Utworzono raport faktycznego panelu administratora Filament w `docs/admin-panel-report.md`; zrodla: `app/Filament`, `AdminPanelProvider`, trasy admin/calendar, User access i permission registry ✅
-- 2026-07-01 — Moduł konta admina `/admin/account-profile-page`: UpdateAdminProfileAction, ChangePasswordAction, EnableTwoFactorAction (TOTP QR), DisableTwoFactorAction; migracja `two_factor_enabled`/`google_2fa_secret` (encrypted); 3-sekcyjna strona Filament; tłumaczenia PL/EN/PT; 10 testów PHPUnit ✅
+- 2026-07-01 — Moduł konta admina `/admin/account-profile-page`: UpdateAdminProfileAction, ChangePasswordAction, 3-sekcyjna strona Filament; tłumaczenia PL/EN/PT (2FA sekcja przebudowana 2026-09-15, patrz wyżej) ✅
 - 2026-06-29 — Naprawiono zakres flat config ESLint: 11 809 fałszywych błędów z `vendor` i assetów Filament usunięto przez precyzyjne ignore; reguły React ograniczono do frontendu, skrypty lint ujednolicono, kod aplikacji bez autofixu ✅
 - 2026-06-29 — Przywrócono wielojęzyczny `meta description` strony głównej (PL/EN/PT); jedno źródło w `lang/{locale}/seo.php`, fallback tylko `home`, deduplikacja Inertia i testy locale ✅
 - 2026-06-13 — Multi-currency end-to-end (Fazy 1–8): GBP/EUR/PLN ✅

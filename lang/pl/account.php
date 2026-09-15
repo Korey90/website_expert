@@ -18,26 +18,10 @@ return [
     'current_password' => 'Aktualne hasło',
     'new_password'     => 'Nowe hasło',
     'confirm_password' => 'Powtórz nowe hasło',
-    'totp_code'        => 'Kod z aplikacji TOTP (6 cyfr)',
-    'totp_code_disable'=> 'Kod TOTP potwierdzający wyłączenie',
 
     // Buttons
     'save_profile'    => 'Zapisz profil',
     'change_password' => 'Zmień hasło',
-    'cancel'          => 'Anuluj',
-
-    // 2FA
-    '2fa_active'           => '2FA aktywne',
-    '2fa_inactive'         => '2FA nieaktywne',
-    '2fa_enable'           => 'Włącz 2FA',
-    '2fa_disable'          => 'Wyłącz 2FA',
-    '2fa_confirm'          => 'Potwierdź i aktywuj',
-    '2fa_scan_instruction' => 'Zeskanuj poniższy kod QR aplikacją TOTP, a następnie wpisz wygenerowany kod 6-cyfrowy.',
-    '2fa_manual_key'       => 'Klucz ręczny',
-    '2fa_enabled'          => '2FA zostało włączone.',
-    '2fa_disabled'         => '2FA zostało wyłączone.',
-    '2fa_code_invalid'     => 'Nieprawidłowy kod TOTP. Sprawdź czas w urządzeniu i spróbuj ponownie.',
-    '2fa_secret_missing'   => 'Brakuje sekretu 2FA. Zacznij proces od nowa.',
 
     // Notifications
     'profile_saved'       => 'Profil został zapisany.',

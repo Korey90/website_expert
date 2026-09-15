@@ -3,15 +3,15 @@
 namespace Tests\Feature\Filament;
 
 use App\Actions\Account\ChangePasswordAction;
-use App\Actions\Account\DisableTwoFactorAction;
-use App\Actions\Account\EnableTwoFactorAction;
 use App\Actions\Account\UpdateAdminProfileAction;
 use App\Models\User;
+use Filament\Auth\Pages\Login;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use PragmaRX\Google2FA\Google2FA;
+use Livewire\Livewire;
+use PragmaRX\Google2FAQRCode\Google2FA;
 use Tests\TestCase;
 
 class AccountProfileTest extends TestCase
@@ -117,90 +117,77 @@ class AccountProfileTest extends TestCase
         ]);
     }
 
-    // ─── EnableTwoFactorAction ────────────────────────────────────────
+    // ─── App authentication (native Filament multi-factor) ────────────
 
-    public function test_enable_two_factor_generates_secret_and_qr(): void
+    public function test_user_can_store_and_retrieve_app_authentication_secret(): void
     {
-        $action = app(EnableTwoFactorAction::class);
+        $this->assertNull($this->user->getAppAuthenticationSecret());
 
-        $result = $action->generateSecret($this->user);
-
-        $this->assertArrayHasKey('secret', $result);
-        $this->assertArrayHasKey('qr_svg', $result);
-        $this->assertNotEmpty($result['secret']);
-        $this->assertNotEmpty($result['qr_svg']);
-
+        $this->user->saveAppAuthenticationSecret('SECRETKEY123456');
         $this->user->refresh();
 
-        $this->assertNotNull($this->user->google_2fa_secret);
-        $this->assertFalse($this->user->two_factor_enabled);
+        $this->assertSame('SECRETKEY123456', $this->user->getAppAuthenticationSecret());
     }
 
-    public function test_confirm_two_factor_enables_with_valid_code(): void
+    public function test_login_without_two_factor_logs_in_directly(): void
+    {
+        Livewire::test(Login::class)
+            ->set('data.email', $this->user->email)
+            ->set('data.password', 'OldPassword1')
+            ->call('authenticate');
+
+        $this->assertAuthenticatedAs($this->user);
+    }
+
+    public function test_login_with_two_factor_enabled_requires_totp_challenge(): void
+    {
+        $google2fa = app(Google2FA::class);
+        $this->user->saveAppAuthenticationSecret($google2fa->generateSecretKey());
+
+        Livewire::test(Login::class)
+            ->set('data.email', $this->user->email)
+            ->set('data.password', 'OldPassword1')
+            ->call('authenticate');
+
+        // Credentials alone must NOT be enough to establish a session.
+        $this->assertGuest();
+    }
+
+    public function test_login_with_two_factor_succeeds_with_valid_totp_code(): void
     {
         $google2fa = app(Google2FA::class);
         $secret = $google2fa->generateSecretKey();
+        $this->user->saveAppAuthenticationSecret($secret);
 
-        $this->user->google_2fa_secret = $secret;
-        $this->user->two_factor_enabled = false;
-        $this->user->save();
+        $component = Livewire::test(Login::class)
+            ->set('data.email', $this->user->email)
+            ->set('data.password', 'OldPassword1')
+            ->call('authenticate');
 
-        $code = $google2fa->getCurrentOtp($secret);
-        $action = app(EnableTwoFactorAction::class);
-        $action->confirm($this->user, $code);
+        $this->assertGuest();
 
-        $this->user->refresh();
+        $component
+            ->set('data.multiFactor.app.code', $google2fa->getCurrentOtp($secret))
+            ->call('authenticate');
 
-        $this->assertTrue($this->user->two_factor_enabled);
+        $this->assertAuthenticatedAs($this->user);
     }
 
-    public function test_confirm_two_factor_throws_on_invalid_code(): void
-    {
-        $this->expectException(ValidationException::class);
-
-        $google2fa = app(Google2FA::class);
-        $secret = $google2fa->generateSecretKey();
-
-        $this->user->google_2fa_secret = $secret;
-        $this->user->save();
-
-        $action = app(EnableTwoFactorAction::class);
-        $action->confirm($this->user, '000000');
-    }
-
-    // ─── DisableTwoFactorAction ───────────────────────────────────────
-
-    public function test_disable_two_factor_succeeds_with_valid_code(): void
+    public function test_login_with_two_factor_rejects_invalid_totp_code(): void
     {
         $google2fa = app(Google2FA::class);
-        $secret = $google2fa->generateSecretKey();
+        $this->user->saveAppAuthenticationSecret($google2fa->generateSecretKey());
 
-        $this->user->google_2fa_secret = $secret;
-        $this->user->two_factor_enabled = true;
-        $this->user->save();
+        $component = Livewire::test(Login::class)
+            ->set('data.email', $this->user->email)
+            ->set('data.password', 'OldPassword1')
+            ->call('authenticate');
 
-        $code = $google2fa->getCurrentOtp($secret);
-        $action = app(DisableTwoFactorAction::class);
-        $action->execute($this->user, $code);
+        $component
+            ->set('data.multiFactor.app.code', '000000')
+            ->call('authenticate')
+            ->assertHasErrors();
 
-        $this->user->refresh();
-
-        $this->assertFalse($this->user->two_factor_enabled);
-        $this->assertNull($this->user->google_2fa_secret);
-    }
-
-    public function test_disable_two_factor_throws_on_invalid_code(): void
-    {
-        $this->expectException(ValidationException::class);
-
-        $google2fa = app(Google2FA::class);
-        $secret = $google2fa->generateSecretKey();
-
-        $this->user->google_2fa_secret = $secret;
-        $this->user->two_factor_enabled = true;
-        $this->user->save();
-
-        $action = app(DisableTwoFactorAction::class);
-        $action->execute($this->user, '000000');
+        $this->assertGuest();
     }
 }

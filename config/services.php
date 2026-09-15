@@ -150,6 +150,13 @@ return [
         'key' => env('ABUSEIPDB_API_KEY'),
     ],
 
+    'dataforseo' => [
+        'login' => env('DATAFORSEO_LOGIN'),
+        'password' => env('DATAFORSEO_PASSWORD'),
+        'base_url' => env('DATAFORSEO_BASE_URL', 'https://api.dataforseo.com'),
+        'timeout' => (int) env('DATAFORSEO_TIMEOUT', 20),
+    ],
+
     'security' => [
         'webhook_secret' => env('SECURITY_WEBHOOK_SECRET'),
     ],

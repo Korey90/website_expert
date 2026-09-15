@@ -2,24 +2,27 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\AdminDashboard;
+use App\Models\LeadNote;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use App\Filament\Pages\AdminDashboard;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
-use Illuminate\Support\Facades\Vite;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\View\View;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -31,21 +34,27 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
+            ->multiFactorAuthentication([
+                AppAuthentication::make()
+                    ->recoverable()
+                    ->brandName('WebsiteExpert'),
+            ])
             ->brandName('WebsiteExpert')
             ->favicon(asset('favicon.ico'))
             ->colors([
-                'primary'  => Color::hex('#ff2b17'),
-                'gray'     => Color::Zinc,
+                'primary' => Color::hex('#ff2b17'),
+                'gray' => Color::Zinc,
             ])
             ->sidebarCollapsibleOnDesktop()
             ->renderHook(
                 PanelsRenderHook::TOPBAR_END,
-                function (): \Illuminate\View\View {
-                    $pinnedNotes = \App\Models\LeadNote::where('is_pinned', true)
+                function (): View {
+                    $pinnedNotes = LeadNote::where('is_pinned', true)
                         ->with('lead')
                         ->orderByDesc('created_at')
                         ->limit(15)
                         ->get();
+
                     return view('filament.components.pinned-notes', compact('pinnedNotes'));
                 },
             )
@@ -72,10 +81,10 @@ class AdminPanelProvider extends PanelProvider
                     }
 
                     $config = json_encode(['userId' => $userId]);
-                    $src    = Vite::asset('resources/js/admin/notifications.js');
+                    $src = Vite::asset('resources/js/admin/notifications.js');
 
                     return new HtmlString(
-                        "<script data-navigate-once>window.AdminPanelConfig = {$config};</script>" .
+                        "<script data-navigate-once>window.AdminPanelConfig = {$config};</script>".
                         "<script data-navigate-once src=\"{$src}\"></script>"
                     );
                 },
@@ -100,4 +109,3 @@ class AdminPanelProvider extends PanelProvider
             ]);
     }
 }
-

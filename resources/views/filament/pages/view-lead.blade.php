@@ -885,6 +885,36 @@
                 </div>
             @endif
 
+            {{-- ── Form Data ──────────────────────────────────────── --}}
+            @if(!empty($record->form_data) && is_array($record->form_data) && count($record->form_data) > 0)
+                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+                    <div class="border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+                        <h2 class="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            <x-heroicon-m-clipboard-document class="h-4 w-4" />
+                            Form Data
+                        </h2>
+                    </div>
+                    <div class="divide-y divide-gray-100 dark:divide-gray-800">
+                        @foreach($record->form_data as $key => $value)
+                            @if($value !== null && $value !== '' && $value !== false)
+                                <div class="flex items-start justify-between gap-3 px-5 py-2.5">
+                                    <span class="shrink-0 text-xs capitalize text-gray-500 dark:text-gray-400">{{ str_replace('_', ' ', $key) }}</span>
+                                    <span class="max-w-[60%] break-words text-right text-xs font-medium text-gray-900 dark:text-white">
+                                        @if(is_array($value))
+                                            {{ implode(', ', $value) }}
+                                        @elseif(is_bool($value))
+                                            {{ $value ? 'Yes' : 'No' }}
+                                        @else
+                                            {{ $value }}
+                                        @endif
+                                    </span>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
         </div>{{-- end right column --}}
 
     </div>

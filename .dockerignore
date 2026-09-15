@@ -1,0 +1,14 @@
+.git
+.github
+.vscode
+node_modules
+vendor
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+docs
+zapisane_strony
+szablon
+public/build
+*.log

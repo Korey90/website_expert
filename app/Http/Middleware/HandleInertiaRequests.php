@@ -63,6 +63,7 @@ class HandleInertiaRequests extends Middleware
             'tracking' => $this->resolveTrackingSettings(),
             'portal_translations' => $this->resolvePortalTranslations($locale),
             'landing_page_translations' => $this->resolveTranslations('landing_pages', $locale),
+            'rank_checker_translations' => $this->resolveTranslations('rank_checker', $locale),
             'footer_pages' => $this->resolveFooterPages(),
         ];
     }

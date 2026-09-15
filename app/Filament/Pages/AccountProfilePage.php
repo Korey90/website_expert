@@ -3,12 +3,12 @@
 namespace App\Filament\Pages;
 
 use App\Actions\Account\ChangePasswordAction;
-use App\Actions\Account\DisableTwoFactorAction;
-use App\Actions\Account\EnableTwoFactorAction;
 use App\Actions\Account\UpdateAdminProfileAction;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rules\Password;
@@ -32,16 +32,6 @@ class AccountProfilePage extends Page
     /** @var array<string, mixed>|null */
     public ?array $passwordData = [];
 
-    // ─── 2FA state ─────────────────────────────────────────────────────
-    /** @var array<string, mixed>|null */
-    public ?array $twoFactorData = [];
-
-    public string $twoFactorQrSvg = '';
-
-    public string $twoFactorSecret = '';
-
-    public bool $showQrStep = false;
-
     public function mount(): void
     {
         $user = auth()->user();
@@ -52,11 +42,6 @@ class AccountProfilePage extends Page
             'phone' => $user->phone,
             'locale' => $user->locale ?? 'en',
             'avatar' => $user->avatar_url,
-        ]);
-
-        $this->twoFactorForm->fill([
-            'totp_code' => '',
-            'disable_totp_code' => '',
         ]);
     }
 
@@ -144,27 +129,19 @@ class AccountProfilePage extends Page
             ->statePath('passwordData');
     }
 
-    // ─── 2FA schema ────────────────────────────────────────────────────
+    // ─── Security (2FA) schema ─────────────────────────────────────────
+    // Delegates entirely to Filament's native multi-factor authentication providers
+    // registered on the panel (see AdminPanelProvider), so the same setup is enforced at login.
 
-    public function twoFactorForm(Schema $form): Schema
+    public function securityForm(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Section::make(__('account.section_2fa'))
-                    ->description(__('account.section_2fa_desc'))
-                    ->schema([
-                        Forms\Components\TextInput::make('totp_code')
-                            ->label(__('account.totp_code'))
-                            ->visible(fn () => $this->showQrStep)
-                            ->maxLength(6),
-
-                        Forms\Components\TextInput::make('disable_totp_code')
-                            ->label(__('account.totp_code_disable'))
-                            ->visible(fn () => auth()->user()->two_factor_enabled && ! $this->showQrStep)
-                            ->maxLength(6),
-                    ]),
-            ])
-            ->statePath('twoFactorData');
+        return $schema
+            ->components(
+                collect(Filament::getMultiFactorAuthenticationProviders())
+                    ->map(fn ($provider) => Group::make($provider->getManagementSchemaComponents())
+                        ->statePath($provider->getId()))
+                    ->all()
+            );
     }
 
     // ─── Actions ───────────────────────────────────────────────────────
@@ -205,59 +182,8 @@ class AccountProfilePage extends Page
             ->send();
     }
 
-    public function initiate2fa(EnableTwoFactorAction $action): void
-    {
-        $result = $action->generateSecret(auth()->user());
-
-        $this->twoFactorQrSvg = $result['qr_svg'];
-        $this->twoFactorSecret = $result['secret'];
-        $this->showQrStep = true;
-    }
-
-    public function confirm2fa(EnableTwoFactorAction $action): void
-    {
-        $data = $this->twoFactorForm->getState();
-        $code = trim($data['totp_code'] ?? '');
-
-        try {
-            $action->confirm(auth()->user(), $code);
-        } catch (ValidationException $e) {
-            $this->addError('twoFactorData.totp_code', $e->errors()['totp_code'][0] ?? '');
-
-            return;
-        }
-
-        $this->showQrStep = false;
-        $this->twoFactorQrSvg = '';
-        $this->twoFactorSecret = '';
-
-        Notification::make()
-            ->title(__('account.2fa_enabled'))
-            ->success()
-            ->send();
-    }
-
-    public function disable2fa(DisableTwoFactorAction $action): void
-    {
-        $data = $this->twoFactorForm->getState();
-        $code = trim($data['disable_totp_code'] ?? '');
-
-        try {
-            $action->execute(auth()->user(), $code);
-        } catch (ValidationException $e) {
-            $this->addError('twoFactorData.disable_totp_code', $e->errors()['disable_totp_code'][0] ?? '');
-
-            return;
-        }
-
-        Notification::make()
-            ->title(__('account.2fa_disabled'))
-            ->success()
-            ->send();
-    }
-
     protected function getForms(): array
     {
-        return ['profileForm', 'passwordForm', 'twoFactorForm'];
+        return ['profileForm', 'passwordForm', 'securityForm'];
     }
 }
