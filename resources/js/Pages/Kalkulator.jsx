@@ -9,7 +9,7 @@ export default function Kalkulator({ auth, footer, pricing, strings, steps }) {
     return (
         <MarketingLayout auth={auth} footer={footer}>
             <Head>
-                <title>Website Cost Calculator – Website Expert</title>
+                <title>Website Cost Calculator</title>
                 <meta name="description" content="Estimate the cost of your website, e-commerce store or web application. Fast, free and no sign-up required. Get a full quote in 24 hours." />
                 <meta name="robots" content="index, follow" />
                 <link rel="canonical" href="https://website-expert.uk/calculate" />

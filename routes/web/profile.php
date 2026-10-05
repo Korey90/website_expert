@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\BriefingTemplatePdfController;
 use App\Http\Controllers\InvoicePdfController;
 use App\Http\Controllers\ProfileController;
@@ -11,14 +12,14 @@ use Illuminate\Support\Facades\Route;
 // -----------------------------------------------------------------------
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile',    [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile',  [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('portal/settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::delete('/profile/social/{provider}', [SocialAccountController::class, 'destroy'])
         ->name('profile.social.unlink');
 
-    Route::get('/profile/social/{provider}/connect', [\App\Http\Controllers\Auth\SocialAuthController::class, 'connect'])
+    Route::get('/profile/social/{provider}/connect', [SocialAuthController::class, 'connect'])
         ->name('profile.social.connect')
         ->where('provider', 'google|facebook');
 

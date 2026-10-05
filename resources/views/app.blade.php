@@ -44,16 +44,8 @@
                     'pt'        => 'https://website-expert.uk/',
                     'x-default' => 'https://website-expert.uk/',
                 ],
-                'en.web-design-northern-ireland' => [
-                    'en'        => 'https://website-expert.uk/en/web-design-northern-ireland',
-                    'pl'        => 'https://website-expert.uk/pl/strony-internetowe-uk',
-                    'x-default' => 'https://website-expert.uk/en/web-design-northern-ireland',
-                ],
-                'pl.strony-internetowe-uk' => [
-                    'en'        => 'https://website-expert.uk/en/web-design-northern-ireland',
-                    'pl'        => 'https://website-expert.uk/pl/strony-internetowe-uk',
-                    'x-default' => 'https://website-expert.uk/en/web-design-northern-ireland',
-                ],
+                // No hreflang between the PL and EN landing pages: they target different
+                // markets (all of the UK vs. Northern Ireland) and are not translations of each other.
             ];
 
             $hreflangs = $hreflangMap[$currentName] ?? null;

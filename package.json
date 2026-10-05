@@ -4,6 +4,7 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
+        "build:ssr": "vite build --ssr",
         "dev": "vite",
         "dev:all": "concurrently --names \"vite,serve,reverb,queue,stripe\" --prefix-colors \"cyan,green,yellow,magenta,blue\" \"npm run dev\" \"php artisan serve\" \"php artisan reverb:start\" \"php artisan queue:work --queue=notifications,default\" \"stripe listen --forward-to localhost:8000/stripe/webhook\"",
         "test": "vitest run",

@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Business;
+use App\Models\BusinessProfile;
+use App\Models\BusinessUser;
 use App\Models\PipelineStage;
 use App\Models\ProjectTemplate;
 use App\Models\User;
-use App\Models\Business;
-use App\Models\BusinessUser;
-use App\Models\BusinessProfile;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -19,10 +19,10 @@ class AdminSeeder extends Seeder
         // ---------------------------------------------------
         // Roles
         // ---------------------------------------------------
-        $admin     = Role::firstOrCreate(['name' => 'admin',     'guard_name' => 'web']);
-        $manager   = Role::firstOrCreate(['name' => 'manager',   'guard_name' => 'web']);
+        $admin = Role::firstOrCreate(['name' => 'admin',     'guard_name' => 'web']);
+        $manager = Role::firstOrCreate(['name' => 'manager',   'guard_name' => 'web']);
         $developer = Role::firstOrCreate(['name' => 'developer', 'guard_name' => 'web']);
-        $client    = Role::firstOrCreate(['name' => 'client',    'guard_name' => 'web']);
+        $client = Role::firstOrCreate(['name' => 'client',    'guard_name' => 'web']);
 
         // ---------------------------------------------------
         // Permissions
@@ -49,6 +49,8 @@ class AdminSeeder extends Seeder
             'view_projects', 'create_projects', 'edit_projects', 'delete_projects',
             'view_portfolio_projects', 'create_portfolio_projects', 'edit_portfolio_projects', 'delete_portfolio_projects',
             'view_services', 'create_services', 'edit_services', 'delete_services',
+            // Marketing — ArticleResource
+            'view_articles', 'create_articles', 'edit_articles', 'delete_articles',
             // Templates — ContractTemplateResource
             'view_contract_templates', 'create_contract_templates', 'edit_contract_templates', 'delete_contract_templates',
             // Templates — EmailTemplateResource
@@ -88,6 +90,8 @@ class AdminSeeder extends Seeder
             'view_plans', 'create_plans', 'edit_plans', 'delete_plans',
             'view_subscriptions',
             'view_sessions', 'revoke_sessions',
+            // System — SecurityEventResource (fail2ban log/actions)
+            'view_security_events', 'manage_security_events',
             // Landing Pages
             'view_landing_pages',
             'manage_landing_pages',
@@ -109,7 +113,7 @@ class AdminSeeder extends Seeder
         $admin->syncPermissions($permissions);
 
         // Manager: full CRM/Finance/Projects access; no role/user admin
-        $managerExclude = ['manage_roles', 'manage_permissions', 'delete_users', 'manage_pipeline', 'manage_project_templates', 'export_leads'];
+        $managerExclude = ['manage_roles', 'manage_permissions', 'delete_users', 'manage_pipeline', 'manage_project_templates', 'export_leads', 'view_security_events', 'manage_security_events'];
         $manager->syncPermissions(array_values(array_filter($permissions, fn ($p) => ! in_array($p, $managerExclude))));
 
         // Developer: read-only on CRM/Finance + edit projects/contracts
@@ -142,12 +146,12 @@ class AdminSeeder extends Seeder
         // Default admin user
         // ---------------------------------------------------
         $adminUser = User::firstOrCreate(
-            ['email' => '20noname22x@gmail.com'],//admin@websiteexpert.co.uk
+            ['email' => '20noname22x@gmail.com'],// admin@websiteexpert.co.uk
             [
-                'name'      => 'Admin WebsiteExpert',
-                'password'  => bcrypt('password'), // Change this to a secure password in production!
+                'name' => 'Admin WebsiteExpert',
+                'password' => bcrypt('password'), // Change this to a secure password in production!
                 'is_active' => true,
-                'locale'    => 'en',
+                'locale' => 'en',
             ]
         );
         $adminUser->assignRole('admin');
@@ -158,10 +162,10 @@ class AdminSeeder extends Seeder
         $business = Business::firstOrCreate(
             ['slug' => 'website-expert'],
             [
-                'name'      => 'WebsiteExpert Ltd',
-                'locale'    => 'en',
-                'timezone'  => 'Europe/London',
-                'plan'      => 'pro',
+                'name' => 'WebsiteExpert Ltd',
+                'locale' => 'en',
+                'timezone' => 'Europe/London',
+                'plan' => 'pro',
                 'is_active' => true,
             ]
         );
@@ -194,10 +198,10 @@ class AdminSeeder extends Seeder
         // ---------------------------------------------------
         $templates = [
             [
-                'name'         => 'Business Card Website',
+                'name' => 'Business Card Website',
                 'service_type' => 'wizytowka',
-                'description'  => '5-page brochure site',
-                'phases'       => [
+                'description' => '5-page brochure site',
+                'phases' => [
                     ['name' => 'Discovery & Brief', 'order' => 1, 'tasks' => [
                         ['title' => 'Send client questionnaire',        'priority' => 'high'],
                         ['title' => 'Gather brand assets (logo, fonts, colours)', 'priority' => 'high'],
@@ -241,10 +245,10 @@ class AdminSeeder extends Seeder
                 ],
             ],
             [
-                'name'         => 'E-Commerce Store',
+                'name' => 'E-Commerce Store',
                 'service_type' => 'ecommerce',
-                'description'  => 'Full WooCommerce / Shopify store',
-                'phases'       => [
+                'description' => 'Full WooCommerce / Shopify store',
+                'phases' => [
                     ['name' => 'Discovery & Strategy', 'order' => 1, 'tasks' => [
                         ['title' => 'Define product catalogue & categories', 'priority' => 'high'],
                         ['title' => 'Agree platform (WooCommerce / Shopify)', 'priority' => 'high'],
@@ -306,10 +310,10 @@ class AdminSeeder extends Seeder
                 ],
             ],
             [
-                'name'         => 'Web Application',
+                'name' => 'Web Application',
                 'service_type' => 'aplikacja',
-                'description'  => 'Custom SPA / Laravel app',
-                'phases'       => [
+                'description' => 'Custom SPA / Laravel app',
+                'phases' => [
                     ['name' => 'Discovery & Requirements', 'order' => 1, 'tasks' => [
                         ['title' => 'Collect & document functional requirements', 'priority' => 'high'],
                         ['title' => 'Write user stories',               'priority' => 'high'],

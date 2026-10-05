@@ -95,18 +95,18 @@ export default function Welcome({ auth, seo, hero, about, saas_landing, cta_bann
             }
         >
             <Head>
-                <title>Website Expert – Web Design & SEO Belfast, Northern Ireland</title>
+                <title>Web Development & SEO Companies, Northern Ireland</title>
                 {/* eslint-disable-next-line react/no-unknown-property -- Inertia uses head-key to de-duplicate managed tags. */}
                 <meta head-key="description" name="description" content={seo.description} />
                 <meta name="robots" content="index, follow" />
                 <link rel="canonical" href="https://website-expert.uk/" />
-                <meta property="og:title" content="Website Expert – Web Design Belfast, Northern Ireland" />
+                <meta property="og:title" content="Website Expert - Web Development & SEO Companies, Northern Ireland" />
                 <meta property="og:description" content="Bespoke websites, e-commerce, SEO and Google Ads for Northern Ireland businesses. Fast delivery, fixed prices. Free quote today." />
                 <meta property="og:url" content="https://website-expert.uk/" />
                 <meta property="og:type" content="website" />
                 <meta property="og:locale" content="en_GB" />
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Website Expert – Web Design Belfast" />
+                <meta name="twitter:title" content="Website Expert - Web Development & SEO Companies, Northern Ireland" />
                 <meta name="twitter:description" content="Bespoke web design, SEO and digital marketing for Northern Ireland businesses. Free quote in 24 hours." />
                 <meta name="geo.region" content="GB-NIR" />
                 <meta name="geo.placename" content="Belfast, Northern Ireland" />

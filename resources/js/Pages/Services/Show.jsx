@@ -22,7 +22,8 @@ const ICON_PATHS = {
 
 const labels = {
     en: {
-        back:           '← Back to Services',
+        home:           'Home',
+        servicesNav:    'Services',
         priceFrom:      'Starting from',
         whatsIncluded:  "What's Included",
         faqTitle:       'Frequently Asked Questions',
@@ -49,7 +50,8 @@ const labels = {
         rankCheckerDesc: 'Curious how your website performs in Google? Enter a keyword below and see your exact position — free, instant, no sign-up required.',
     },
     pl: {
-        back:           '← Powrót do usług',
+        home:           'Strona główna',
+        servicesNav:    'Usługi',
         priceFrom:      'Cena od',
         whatsIncluded:  'Co otrzymujesz',
         faqTitle:       'Najczęściej zadawane pytania',
@@ -76,7 +78,8 @@ const labels = {
         rankCheckerDesc: 'Zastanawiasz się, jak Twoja strona wypada w Google? Podaj frazę poniżej i sprawdź swoją dokładną pozycję — za darmo, natychmiast, bez rejestracji.',
     },
     pt: {
-        back:           '← Voltar aos Serviços',
+        home:           'Início',
+        servicesNav:    'Serviços',
         priceFrom:      'A partir de',
         whatsIncluded:  'O Que Está Incluído',
         faqTitle:       'Perguntas Frequentes',
@@ -206,12 +209,19 @@ export default function ServicesShow({ locale: localeProp, item, auth, rankCheck
             {/* ── Hero ────────────────────────────────────────────── */}
             <section className="py-20 md:py-28 bg-white dark:bg-neutral-950">
                 <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                    <Link
-                        href="/services"
-                        className="inline-flex items-center text-sm text-neutral-500 dark:text-neutral-400 hover:text-brand-500 mb-10 transition-colors"
-                    >
-                        {l.back}
-                    </Link>
+                    <nav className="mb-10 text-sm text-neutral-500 dark:text-neutral-400" aria-label="Breadcrumb">
+                        <ol className="flex items-center gap-1.5 flex-wrap">
+                            <li>
+                                <Link href="/" className="hover:text-brand-500 transition-colors">{l.home}</Link>
+                            </li>
+                            <li aria-hidden="true">›</li>
+                            <li>
+                                <Link href="/services" className="hover:text-brand-500 transition-colors">{l.servicesNav}</Link>
+                            </li>
+                            <li aria-hidden="true">›</li>
+                            <li className="text-neutral-700 dark:text-neutral-300" aria-current="page">{title}</li>
+                        </ol>
+                    </nav>
 
                     <div className="flex flex-col sm:flex-row items-start gap-6 mb-6 reveal">
                         {/* Icon */}

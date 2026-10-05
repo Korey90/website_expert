@@ -656,7 +656,7 @@
                                         </button>
                                     @else
                                         @php
-                                            try { $quoteUrl = \App\Filament\Resources\QuoteResource::getUrl('edit', ['record' => $existingQuote]); }
+                                            try { $quoteUrl = \App\Filament\Resources\QuoteResource::getUrl('view', ['record' => $existingQuote]); }
                                             catch (\Exception $e) { $quoteUrl = '#'; }
                                         @endphp
                                         <a href="{{ $quoteUrl }}"

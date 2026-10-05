@@ -125,9 +125,9 @@ export default function PortalLayout({ client, children }) {
                             </Link>
                         )}
                         <Link
-                            href={route('profile.edit')}
+                            href={route('portal.settings.profile')}
                             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
-                                ${isActive(route('profile.edit'))
+                                ${isActive(route('portal.settings.profile'))
                                     ? 'bg-red-50 text-red-700 font-medium'
                                     : 'text-gray-600 hover:bg-gray-100'}`}
                         >

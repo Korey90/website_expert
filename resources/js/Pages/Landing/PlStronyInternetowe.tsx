@@ -57,9 +57,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
                 <span className="font-semibold text-neutral-900 dark:text-white">{q}</span>
                 <span className="flex-shrink-0 text-brand-500 font-bold text-lg">{open ? '−' : '+'}</span>
             </button>
-            {open && (
-                <p className="mt-3 text-neutral-600 dark:text-white/70 text-sm leading-relaxed">{a}</p>
-            )}
+            <p className={`mt-3 text-neutral-600 dark:text-white/70 text-sm leading-relaxed ${open ? 'block' : 'hidden'}`}>{a}</p>
         </div>
     );
 }
@@ -338,7 +336,7 @@ function ContactForm({ formRef }: { formRef: React.RefObject<HTMLElement | null>
 
 // ─── Sticky Mobile CTA ────────────────────────────────────────────────────────
 
-function StickyMobileCta({ onQuoteClick }: { onQuoteClick: () => void }) {
+function StickyMobileCta({ onQuoteClick, contactPhone }: { onQuoteClick: () => void; contactPhone: string }) {
     const [hidden, setHidden] = useState(false);
     const lastScroll = useRef(0);
 
@@ -369,7 +367,7 @@ function StickyMobileCta({ onQuoteClick }: { onQuoteClick: () => void }) {
                     Bezpłatna wycena
                 </button>
                 <a
-                    href={`tel:${getQueryParam('phone') || ''}`}
+                    href={`tel:${contactPhone}`}
                     onClick={() => pushEvent('phone_click', { landing_page: 'strony-internetowe-uk' })}
                     className="flex-shrink-0 rounded-xl border border-neutral-300 dark:border-white/20 px-4 py-3 text-sm font-bold text-neutral-700 dark:text-white"
                 >
@@ -404,6 +402,7 @@ interface CmsExtra {
     contact_phone?: string;
     success_heading?: string;
     success_body?: string;
+    og_image_url?: string;
 }
 
 interface Props {
@@ -458,9 +457,10 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
     ]);
     const formTitle         = c('form_title', 'Omów projekt i otrzymaj bezpłatną wycenę');
     const formNote          = c('form_note', 'Bez zobowiązań i bez presji sprzedażowej. Odpowiedź w ciągu jednego dnia roboczego.');
-    const contactPhone      = c('contact_phone', '');
+    const contactPhone      = c('contact_phone', '+447882799050');
     const successHeading    = c('success_heading', 'Dziękujemy — zapytanie zostało wysłane!');
     const successBody       = c('success_body', 'Zapoznam się z Twoim zapytaniem i odpiszę w ciągu jednego dnia roboczego.');
+    const ogImage           = c('og_image_url', 'https://website-expert.uk/images/og/strony-internetowe-uk-pl.png');
 
     const scrollToForm = () => {
         formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -471,25 +471,68 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
         document.getElementById('portfolio')?.scrollIntoView({ behavior: 'smooth' });
     };
 
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {
+                '@type': 'Service',
+                name: 'Projektowanie stron internetowych dla polskich firm w UK',
+                url: 'https://website-expert.uk/pl/strony-internetowe-uk',
+                areaServed: { '@type': 'Country', name: 'United Kingdom' },
+                provider: { '@type': 'ProfessionalService', name: 'Website Expert', url: 'https://website-expert.uk/' },
+                offers: { '@type': 'Offer', priceCurrency: 'GBP', price: '799', description: 'Strony firmowe od £799' },
+            },
+            {
+                '@type': 'FAQPage',
+                mainEntity: faqItems.map(item => ({
+                    '@type': 'Question',
+                    name: item.q,
+                    acceptedAnswer: { '@type': 'Answer', text: item.a },
+                })),
+            },
+            {
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                    { '@type': 'ListItem', position: 1, name: 'Strona główna', item: 'https://website-expert.uk/' },
+                    { '@type': 'ListItem', position: 2, name: 'Strony internetowe UK', item: 'https://website-expert.uk/pl/strony-internetowe-uk' },
+                ],
+            },
+        ],
+    };
+
     return (
         <MarketingLayout auth={null} footer={footer}>
             <Head>
-                <title>Strony internetowe dla polskich firm w UK — Website Expert</title>
-                <meta name="description" content="Profesjonalna strona internetowa dla polskiej firmy działającej w Wielkiej Brytanii. Obsługa po polsku, projekt pod rynek brytyjski. Od £799. Bez ukrytych kosztów." />
-                <link rel="canonical" href="https://website-expert.uk/pl/strony-internetowe-uk" />
+                <title>Strony internetowe UK dla polskich firm</title>
+                <meta name="description" content="Profesjonalne strony internetowe dla polskich firm w UK. Obsługa po polsku, projekt pod rynek brytyjski, SEO i responsywny design. Od £799." />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://website-expert.uk/pl/strony-internetowe-uk" />
                 <meta property="og:title" content="Strony internetowe dla polskich firm w UK" />
                 <meta property="og:description" content="Obsługa po polsku, strona pod rynek brytyjski. Od £799." />
                 <meta property="og:locale" content="pl_PL" />
-                <link rel="alternate" hrefLang="pl" href="https://website-expert.uk/pl/strony-internetowe-uk" />
-                <link rel="alternate" hrefLang="en" href="https://website-expert.uk/en/web-design-northern-ireland" />
-                <link rel="alternate" hrefLang="x-default" href="https://website-expert.uk/en/web-design-northern-ireland" />
-
+                {ogImage && <meta property="og:image" content={ogImage} />}
+                <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+                <meta name="twitter:title" content="Strony internetowe dla polskich firm w UK" />
+                <meta name="twitter:description" content="Obsługa po polsku, strona pod rynek brytyjski. Od £799." />
+                {ogImage && <meta name="twitter:image" content={ogImage} />}
+                <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
             </Head>
 
             {/* ── SEKCJA 1: HERO ─────────────────────────────────────────────── */}
             <section className="relative bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-800 text-white pt-20 pb-16 md:pt-28 md:pb-24">
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                     <div className="max-w-3xl">
+                        {/* Breadcrumb — matches the BreadcrumbList JSON-LD in <Head> */}
+                        <nav className="mb-4 text-sm text-white/50" aria-label="Breadcrumb">
+                            <ol className="flex items-center gap-1.5">
+                                <li>
+                                    <a href="/" className="hover:text-white transition-colors">Strona główna</a>
+                                </li>
+                                <li aria-hidden="true">›</li>
+                                <li className="text-white/80" aria-current="page">Strony internetowe UK</li>
+                            </ol>
+                        </nav>
+
                         {/* Badge */}
                         <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-xs font-medium text-white/80 mb-6">
                             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
@@ -670,6 +713,47 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
                 </div>
             </section>
 
+            {/* ── SEKCJA 4B: ZAKRES, SEO I LOKALIZACJE ─────────────────────── */}
+            <section className="py-16 md:py-24 bg-neutral-50 dark:bg-neutral-900">
+                <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-10">
+                    <div>
+                        <h2 className="font-display text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 dark:text-white mb-3">
+                            Projektowanie stron internetowych w UK — co obejmuje usługa?
+                        </h2>
+                        <p className="text-neutral-600 dark:text-white/70 leading-relaxed">
+                            Każdy projekt to indywidualnie zaprojektowana strona (nie szablon), dopasowana do branży i grupy docelowej —
+                            od firm budowlanych i gabinetów kosmetycznych po kancelarie i firmy transportowe. W cenę wchodzi projekt
+                            mobile-first, formularz kontaktowy, podstawowe SEO techniczne oraz panel CMS do samodzielnej edycji treści
+                            po zakończeniu współpracy — pełny zakres znajdziesz w sekcji „Strona firmowa od {packageFrom}” powyżej.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h2 className="font-display text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 dark:text-white mb-3">
+                            SEO dla firm w UK
+                        </h2>
+                        <p className="text-neutral-600 dark:text-white/70 leading-relaxed">
+                            Podstawowe SEO techniczne (struktura nagłówków, szybkość ładowania, Google Analytics i Search Console) jest
+                            wliczone w każdy projekt. Jeśli szukasz regularnego pozycjonowania i budowania widoczności w Google
+                            miesiąc po miesiącu, sprawdź naszą{' '}
+                            <a href="/services/seo" className="text-brand-500 font-medium hover:underline">osobną usługę SEO</a>{' '}
+                            — możesz ją dodać teraz albo wrócić do tego po uruchomieniu strony.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h2 className="font-display text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 dark:text-white mb-3">
+                            Obsługiwane lokalizacje w Wielkiej Brytanii
+                        </h2>
+                        <p className="text-neutral-600 dark:text-white/70 leading-relaxed">
+                            Współpracuję z polskimi przedsiębiorcami w całej Wielkiej Brytanii — Anglii, Szkocji, Walii i Irlandii
+                            Północnej. Cała komunikacja odbywa się zdalnie i po polsku, więc lokalizacja Twojej firmy nie ma
+                            znaczenia dla jakości czy tempa realizacji projektu.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
             {/* ── SEKCJA 5: PORTFOLIO ──────────────────────────────────────── */}
             <section id="portfolio" className="py-16 md:py-24 bg-neutral-50 dark:bg-neutral-900">
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -771,7 +855,15 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
                         <div>
                             {/* Placeholder lub zdjęcie z CMS */}
                             {founderPhoto ? (
-                                <img src={founderPhoto} alt={founderName || 'Założyciel'} className="w-48 h-48 rounded-2xl object-cover mb-6" />
+                                <img
+                                    src={founderPhoto}
+                                    alt={founderName ? `${founderName}, web developer Website Expert` : 'Założyciel Website Expert'}
+                                    width={192}
+                                    height={192}
+                                    loading="lazy"
+                                    decoding="async"
+                                    className="w-48 h-48 rounded-2xl object-cover mb-6"
+                                />
                             ) : (
                                 <div className="w-48 h-48 rounded-2xl bg-neutral-200 dark:bg-neutral-700 mb-6 flex items-center justify-center text-neutral-400 dark:text-neutral-500 text-sm">
                                     Zdjęcie<br/>założyciela
@@ -873,7 +965,7 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
             </section>
 
             {/* Sticky mobile CTA */}
-            <StickyMobileCta onQuoteClick={scrollToForm} />
+            <StickyMobileCta onQuoteClick={scrollToForm} contactPhone={contactPhone} />
 
             {/* Mobile spacer so sticky bar doesn't overlap last section */}
             <div className="h-16 md:hidden" />

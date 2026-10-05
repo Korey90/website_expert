@@ -115,6 +115,11 @@ class LeadResource extends BaseResource
                 Tables\Columns\TextColumn::make('created_at')->date()->sortable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('client_id')
+                    ->label('Client')
+                    ->relationship('client', 'company_name')
+                    ->searchable()
+                    ->preload(),
                 Tables\Filters\SelectFilter::make('pipeline_stage_id')
                     ->label('Stage')
                     ->options(PipelineStage::orderBy('order')->pluck('name', 'id')),

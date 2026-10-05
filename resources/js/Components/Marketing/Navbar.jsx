@@ -28,7 +28,10 @@ export default function Navbar({ auth, topOffset = 0 }) {
 
     const [mobileOpen, setMobileOpen]   = useState(false);
     const [scrolled, setScrolled]       = useState(false);
-    const [dark, setDark]               = useState(() => (localStorage.getItem('theme') || 'dark') === 'dark');
+    const [dark, setDark]               = useState(() => {
+        if (typeof window === 'undefined') return true;
+        return (localStorage.getItem('theme') || 'dark') === 'dark';
+    });
     const [langOpen, setLangOpen]       = useState(false);
     const [activeSection, setActiveSection] = useState(() =>
         typeof window !== 'undefined' ? window.location.hash.replace('#', '') || null : null
@@ -199,7 +202,7 @@ export default function Navbar({ auth, topOffset = 0 }) {
                         >
                             <span aria-hidden="true">{currentLang.flag}</span>
                             <span className="hidden sm:inline">{currentLang.code.toUpperCase()}</span>
-                            <svg className="w-3.5 h-3.5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                            <svg width="14" height="14" className="w-3.5 h-3.5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
@@ -237,14 +240,14 @@ export default function Navbar({ auth, topOffset = 0 }) {
                         className="p-2 rounded-lg text-neutral-500 dark:text-neutral-400 hover:text-brand-500 dark:hover:text-brand-400 transition-colors"
                     >
                         {dark ? (
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                            <svg width="20" height="20" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
                                 <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
                                 <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
                                 <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
                             </svg>
                         ) : (
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                            <svg width="20" height="20" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                             </svg>
                         )}
@@ -257,7 +260,7 @@ export default function Navbar({ auth, topOffset = 0 }) {
                         href="/portal"
                         className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 text-sm font-semibold text-neutral-600 dark:text-neutral-200 hover:border-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-50 transition-colors"
                     >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <svg width="16" height="16" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         {locale === 'pl' ? 'Portal Klienta' : locale === 'pt' ? 'Portal do Cliente' : 'Client Portal'}
@@ -283,11 +286,11 @@ export default function Navbar({ auth, topOffset = 0 }) {
                         className="md:hidden p-2 rounded-lg text-neutral-600 dark:text-neutral-300 hover:text-brand-500 transition-colors"
                     >
                         {mobileOpen ? (
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                            <svg width="24" height="24" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         ) : (
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                            <svg width="24" height="24" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         )}

@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
         $this->call(NavItemSeeder::class);
         $this->call(PortfolioProjectSeeder::class);
         $this->call(ServiceItemSeeder::class);
+        $this->call(ArticleSeeder::class);
         $this->call(CalculatorPricingSeeder::class);
         $this->call(CalculatorStringsSeeder::class);
         $this->call(CalculatorStepsSeeder::class);
@@ -42,7 +43,7 @@ class DatabaseSeeder extends Seeder
         $this->call(SmsTemplateSeeder::class);
         $this->call(ContractTemplateSeeder::class);
 
-        //pipeline stages todo checklists
+        // pipeline stages todo checklists
         $this->call(PipelineStageChecklistSeeder::class);
 
         // Briefing templates (global, business_id=null)
@@ -58,8 +59,8 @@ class DatabaseSeeder extends Seeder
         // $this->call(ProjectSeeder::class);
         // $this->call(QuoteSeeder::class);
         // $this->call(InvoiceSeeder::class);
-         $this->call(AutomationRuleSeeder::class);
-         $this->call(AutomationTriggerSeeder::class);
-         $this->call(DeployConfigSeeder::class);
+        $this->call(AutomationRuleSeeder::class);
+        $this->call(AutomationTriggerSeeder::class);
+        $this->call(DeployConfigSeeder::class);
     }
 }

@@ -40,6 +40,7 @@ export default [
         ignores: [
             'public/build/**',
             'public/js/filament/**',
+            'bootstrap/ssr/**',
             'resources/js/ziggy.js',
             'vendor/**',
         ],

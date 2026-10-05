@@ -112,6 +112,11 @@ class InvoiceResource extends BaseResource
                 Tables\Columns\IconColumn::make('sent_at')->label('Sent')->boolean(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('client_id')
+                    ->label('Client')
+                    ->relationship('client', 'company_name')
+                    ->searchable()
+                    ->preload(),
                 Tables\Filters\SelectFilter::make('status')
                     ->options(['draft' => 'Draft', 'sent' => 'Sent', 'partially_paid' => 'Partially Paid', 'paid' => 'Paid', 'overdue' => 'Overdue']),
                 Tables\Filters\TrashedFilter::make(),

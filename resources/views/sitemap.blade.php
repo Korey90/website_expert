@@ -3,6 +3,9 @@
     @foreach($staticUrls as $url)
     <url>
         <loc>{{ $url['loc'] }}</loc>
+        @if(!empty($url['lastmod']))
+        <lastmod>{{ $url['lastmod'] }}</lastmod>
+        @endif
         <changefreq>{{ $url['changefreq'] }}</changefreq>
         <priority>{{ $url['priority'] }}</priority>
     </url>
@@ -30,6 +33,14 @@
         <lastmod>{{ $service->updated_at->toAtomString() }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+    </url>
+    @endforeach
+    @foreach($articles as $article)
+    <url>
+        <loc>{{ url('/blog/' . $article->slug) }}</loc>
+        <lastmod>{{ $article->updated_at->toAtomString() }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
     </url>
     @endforeach
 </urlset>

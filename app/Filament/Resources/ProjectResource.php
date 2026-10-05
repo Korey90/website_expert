@@ -299,6 +299,11 @@ class ProjectResource extends BaseResource
                 Tables\Columns\TextColumn::make('assignedTo.name')->label('Developer'),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('client_id')
+                    ->label('Client')
+                    ->relationship('client', 'company_name')
+                    ->searchable()
+                    ->preload(),
                 Tables\Filters\SelectFilter::make('status')
                     ->options(['draft' => 'Draft', 'active' => 'Active', 'on_hold' => 'On Hold', 'completed' => 'Completed', 'cancelled' => 'Cancelled']),
                 Tables\Filters\SelectFilter::make('service_type')

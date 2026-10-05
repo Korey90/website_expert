@@ -57,9 +57,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
                 <span className="font-semibold text-neutral-900 dark:text-white">{q}</span>
                 <span className="flex-shrink-0 text-brand-500 font-bold text-lg">{open ? '−' : '+'}</span>
             </button>
-            {open && (
-                <p className="mt-3 text-neutral-600 dark:text-white/70 text-sm leading-relaxed">{a}</p>
-            )}
+            <p className={`mt-3 text-neutral-600 dark:text-white/70 text-sm leading-relaxed ${open ? 'block' : 'hidden'}`}>{a}</p>
         </div>
     );
 }
@@ -298,7 +296,7 @@ function ContactForm({ formRef }: { formRef: React.RefObject<HTMLElement | null>
 
 // ─── Sticky Mobile CTA ────────────────────────────────────────────────────────
 
-function StickyMobileCta({ onQuoteClick }: { onQuoteClick: () => void }) {
+function StickyMobileCta({ onQuoteClick, contactPhone }: { onQuoteClick: () => void; contactPhone: string }) {
     const [hidden, setHidden] = useState(false);
     const lastScroll = useRef(0);
 
@@ -328,7 +326,7 @@ function StickyMobileCta({ onQuoteClick }: { onQuoteClick: () => void }) {
                     Get a quote
                 </button>
                 <a
-                    href="tel:"
+                    href={`tel:${contactPhone}`}
                     onClick={() => pushEvent('phone_click', { landing_page: 'web-design-northern-ireland' })}
                     className="flex-shrink-0 rounded-xl border border-neutral-300 dark:border-white/20 px-4 py-3 text-sm font-bold text-neutral-700 dark:text-white"
                 >
@@ -364,6 +362,7 @@ interface CmsExtra {
     contact_phone?: string;
     success_heading?: string;
     success_body?: string;
+    og_image_url?: string;
 }
 
 interface Props {
@@ -402,6 +401,7 @@ export default function EnWebDesign({ footer, cms }: Props) {
         'Ongoing monthly SEO', 'Large numbers of integrations',
     ]);
     const noHiddenFees      = c('no_hidden_fees_note', 'No hidden fees. The final scope and price are confirmed in writing before work begins.');
+    const contactPhone      = c('contact_phone', '+447882799050');
     const founderBio        = c('founder_bio', 'Website Expert is a founder-led web studio based in Northern Ireland. You speak directly with the person responsible for planning, designing, building and launching your project. No account managers. No outsourced communication. No unclear responsibility.');
     const founderName       = c('founder_name', 'Konrad');
     const founderPhoto      = c('founder_photo_url', '../storage/2342452345234.png');
@@ -424,6 +424,7 @@ export default function EnWebDesign({ footer, cms }: Props) {
     ]);
     const formTitle         = c('form_title', 'Get a fixed-price proposal');
     const formNote          = c('form_note', 'No obligation and no sales pressure. You will receive a personal response within one business day.');
+    const ogImage           = c('og_image_url', '');
 
     const scrollToForm = () => {
         formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -435,19 +436,51 @@ export default function EnWebDesign({ footer, cms }: Props) {
         pushEvent('portfolio_view', { landing_page: 'web-design-northern-ireland' });
     };
 
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {
+                '@type': 'Service',
+                name: 'Professional Web Design for Northern Ireland Businesses',
+                url: 'https://website-expert.uk/en/web-design-northern-ireland',
+                areaServed: { '@type': 'AdministrativeArea', name: 'Northern Ireland' },
+                provider: { '@type': 'ProfessionalService', name: 'Website Expert', url: 'https://website-expert.uk/' },
+                offers: { '@type': 'Offer', priceCurrency: 'GBP', price: '799', description: 'Business websites from £799' },
+            },
+            {
+                '@type': 'FAQPage',
+                mainEntity: faqItems.map(item => ({
+                    '@type': 'Question',
+                    name: item.q,
+                    acceptedAnswer: { '@type': 'Answer', text: item.a },
+                })),
+            },
+            {
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://website-expert.uk/' },
+                    { '@type': 'ListItem', position: 2, name: 'Web Design Northern Ireland', item: 'https://website-expert.uk/en/web-design-northern-ireland' },
+                ],
+            },
+        ],
+    };
+
     return (
         <MarketingLayout auth={null} footer={footer}>
             <Head>
-                <title>Professional Web Design Northern Ireland — Website Expert</title>
+                <title>Professional Web Design Northern Ireland</title>
                 <meta name="description" content="Get a fast, mobile-first website designed to build trust and generate more enquiries. Fixed pricing, direct contact with the developer. Websites from £799." />
-                <link rel="canonical" href="https://website-expert.uk/en/web-design-northern-ireland" />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://website-expert.uk/en/web-design-northern-ireland" />
                 <meta property="og:title" content="Professional Web Design Northern Ireland — Website Expert" />
                 <meta property="og:description" content="Websites from £799. Delivered in 3–5 weeks. No agency middlemen." />
                 <meta property="og:locale" content="en_GB" />
-                <link rel="alternate" hrefLang="en" href="https://website-expert.uk/en/web-design-northern-ireland" />
-                <link rel="alternate" hrefLang="pl" href="https://website-expert.uk/pl/strony-internetowe-uk" />
-                <link rel="alternate" hrefLang="x-default" href="https://website-expert.uk/en/web-design-northern-ireland" />
-
+                {ogImage && <meta property="og:image" content={ogImage} />}
+                <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+                <meta name="twitter:title" content="Professional Web Design Northern Ireland — Website Expert" />
+                <meta name="twitter:description" content="Websites from £799. Delivered in 3–5 weeks. No agency middlemen." />
+                {ogImage && <meta name="twitter:image" content={ogImage} />}
+                <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
             </Head>
 
             {/* ── SECTION 1: HERO ───────────────────────────────────────────── */}
@@ -663,7 +696,15 @@ export default function EnWebDesign({ footer, cms }: Props) {
                     <div className="lg:grid lg:grid-cols-2 gap-12 items-center">
                         <div>
                             {founderPhoto ? (
-                                <img src={founderPhoto} alt={founderName || 'Founder'} className="w-48 h-48 rounded-2xl object-cover mb-6" />
+                                <img
+                                    src={founderPhoto}
+                                    alt={founderName ? `${founderName}, web developer at Website Expert` : 'Website Expert founder'}
+                                    width={192}
+                                    height={192}
+                                    loading="lazy"
+                                    decoding="async"
+                                    className="w-48 h-48 rounded-2xl object-cover mb-6"
+                                />
                             ) : (
                                 <div className="w-48 h-48 rounded-2xl bg-neutral-200 dark:bg-neutral-700 mb-6 flex items-center justify-center text-neutral-400 dark:text-neutral-500 text-sm text-center px-4">
                                     Founder photo<br/>placeholder
@@ -813,7 +854,7 @@ export default function EnWebDesign({ footer, cms }: Props) {
             </section>
 
             {/* Sticky mobile CTA */}
-            <StickyMobileCta onQuoteClick={scrollToForm} />
+            <StickyMobileCta onQuoteClick={scrollToForm} contactPhone={contactPhone} />
 
             {/* Mobile spacer */}
             <div className="h-16 md:hidden" />

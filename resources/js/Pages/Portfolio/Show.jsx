@@ -27,7 +27,7 @@ export default function PortfolioShow({ locale: localeProp, project, auth }) {
     return (
         <MarketingLayout auth={auth} footer={footer}>
             <Head>
-                <title>{`${title} – Website Expert Portfolio`}</title>
+                <title>{`${title} – Portfolio`}</title>
                 <meta name="description" content={desc} />
             </Head>
 

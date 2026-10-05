@@ -46,7 +46,7 @@ export default function PortfolioIndex({ locale: localeProp, projects, auth }) {
     return (
         <MarketingLayout auth={auth} footer={footer}>
             <Head>
-                <title>Portfolio – Website Expert</title>
+                <title>Portfolio</title>
                 <meta name="description" content="Browse our portfolio of web design, e-commerce and digital marketing projects delivered for businesses across Northern Ireland and the UK." />
             </Head>
 

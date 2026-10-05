@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\ApiTokenAuthentication;
+use App\Http\Middleware\CacheMarketingResponse;
 use App\Http\Middleware\DetectGeoCurrency;
 use App\Http\Middleware\EnsureHasBusiness;
 use App\Http\Middleware\EnsureLandingPageTenantAccess;
@@ -30,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'landing-page.tenant' => EnsureLandingPageTenantAccess::class,
             'portal.client' => EnsurePortalClientAccess::class,
             'portal.workspace' => EnsurePortalWorkspaceAccess::class,
+            'cache.marketing' => CacheMarketingResponse::class,
         ]);
 
         // geo_currency cookie stores only a plain-text currency code (GBP / EUR / PLN).

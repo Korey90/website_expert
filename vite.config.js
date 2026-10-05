@@ -19,6 +19,7 @@ export default defineConfig({
                 'resources/js/admin/notifications.js',
                 'resources/css/filament/admin/theme.css',
             ],
+            ssr: 'resources/js/ssr.jsx',
             refresh: true,
         }),
         react(),

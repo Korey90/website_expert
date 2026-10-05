@@ -6,21 +6,25 @@ use App\Filament\Resources\SecurityEventResource\Pages\ListSecurityEvents;
 use App\Models\SecurityEvent;
 use App\Services\Security\AbuseIpdbService;
 use App\Services\Security\Fail2banService;
+use App\Support\PermissionHelper;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Notifications\Notification;
-use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class SecurityEventResource extends Resource
+class SecurityEventResource extends BaseResource
 {
     protected static ?string $model = SecurityEvent::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-exclamation';
+
     protected static \UnitEnum|string|null $navigationGroup = 'System';
+
     protected static ?string $navigationLabel = 'Security Events';
+
     protected static ?int $navigationSort = 99;
 
     public static function form(Schema $form): Schema
@@ -43,14 +47,14 @@ class SecurityEventResource extends Resource
                     ->label('Status')
                     ->badge()
                     ->color(fn (string $state) => match ($state) {
-                        'banned'   => 'danger',
+                        'banned' => 'danger',
                         'unbanned' => 'success',
-                        default    => 'gray',
+                        default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state) => match ($state) {
-                        'banned'   => 'Zbanowany',
+                        'banned' => 'Zbanowany',
                         'unbanned' => 'Odbanowany',
-                        default    => $state,
+                        default => $state,
                     }),
 
                 Tables\Columns\TextColumn::make('attack_type')
@@ -96,7 +100,7 @@ class SecurityEventResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('action')
                     ->options([
-                        'banned'   => 'Zbanowany',
+                        'banned' => 'Zbanowany',
                         'unbanned' => 'Odbanowany',
                     ]),
                 Tables\Filters\SelectFilter::make('jail')
@@ -110,7 +114,8 @@ class SecurityEventResource extends Resource
                     ->label('Odbanuj')
                     ->icon('heroicon-o-lock-open')
                     ->color('success')
-                    ->visible(fn (SecurityEvent $record) => $record->action === 'banned' && ! $record->isUnbanned())
+                    ->visible(fn (SecurityEvent $record) => $record->action === 'banned' && ! $record->isUnbanned()
+                        && PermissionHelper::allows(auth()->user(), 'manage_security_events'))
                     ->requiresConfirmation()
                     ->action(function (SecurityEvent $record) {
                         $success = app(Fail2banService::class)->unban($record->ip, $record->jail);
@@ -126,7 +131,8 @@ class SecurityEventResource extends Resource
                     ->label('Zgłoś AbuseIPDB')
                     ->icon('heroicon-o-flag')
                     ->color('warning')
-                    ->visible(fn (SecurityEvent $record) => ! $record->isReported())
+                    ->visible(fn (SecurityEvent $record) => ! $record->isReported()
+                        && PermissionHelper::allows(auth()->user(), 'manage_security_events'))
                     ->requiresConfirmation()
                     ->action(function (SecurityEvent $record) {
                         $success = app(AbuseIpdbService::class)->report(
@@ -146,7 +152,8 @@ class SecurityEventResource extends Resource
                     ->label('Zbanuj ponownie')
                     ->icon('heroicon-o-lock-closed')
                     ->color('danger')
-                    ->visible(fn (SecurityEvent $record) => $record->isUnbanned())
+                    ->visible(fn (SecurityEvent $record) => $record->isUnbanned()
+                        && PermissionHelper::allows(auth()->user(), 'manage_security_events'))
                     ->requiresConfirmation()
                     ->action(function (SecurityEvent $record) {
                         $success = app(Fail2banService::class)->ban($record->ip, $record->jail);
@@ -163,9 +170,10 @@ class SecurityEventResource extends Resource
                     BulkAction::make('bulk_report_abuseipdb')
                         ->label('Zgłoś zaznaczone do AbuseIPDB')
                         ->icon('heroicon-o-flag')
+                        ->visible(fn () => PermissionHelper::allows(auth()->user(), 'manage_security_events'))
                         ->requiresConfirmation()
                         ->action(function ($records) {
-                            $service  = app(AbuseIpdbService::class);
+                            $service = app(AbuseIpdbService::class);
                             $reported = 0;
                             foreach ($records as $record) {
                                 if ($record->isReported()) {

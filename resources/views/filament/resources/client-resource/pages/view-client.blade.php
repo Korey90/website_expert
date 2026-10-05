@@ -32,6 +32,12 @@
         $quotesCount   = $record->quotes()->count();
         $projectsCount = $record->projects()->count();
         $invoicesCount = $record->invoices()->count();
+
+        $clientFilter = fn (string $routeName) => route($routeName, ['filters' => ['client_id' => ['value' => $record->id]]]);
+        $leadsUrl    = $clientFilter('filament.admin.resources.leads.index');
+        $quotesUrl   = $clientFilter('filament.admin.resources.quotes.index');
+        $projectsUrl = $clientFilter('filament.admin.resources.projects.index');
+        $invoicesUrl = $clientFilter('filament.admin.resources.invoices.index');
     @endphp
 
     {{-- ── Soft-delete warning ────────────────────────────────────────────── --}}
@@ -285,25 +291,25 @@
 
                     {{-- Stat grid --}}
                     <div class="grid grid-cols-2 gap-3">
-                        <a href="{{ route('filament.admin.resources.leads.index') }}"
+                        <a href="{{ $leadsUrl }}"
                            class="group flex flex-col items-center rounded-lg border border-gray-100 bg-gray-50 px-3 py-3 transition hover:border-indigo-200 hover:bg-indigo-50 dark:border-gray-800 dark:bg-gray-800/40 dark:hover:border-indigo-700 dark:hover:bg-indigo-900/20">
                             <x-heroicon-o-funnel class="mb-1 h-5 w-5 text-yellow-500" />
                             <span class="text-lg font-bold text-gray-900 dark:text-white">{{ $leadsCount }}</span>
                             <span class="text-xs text-gray-500 dark:text-gray-400">Leads</span>
                         </a>
-                        <a href="{{ route('filament.admin.resources.quotes.index') }}"
+                        <a href="{{ $quotesUrl }}"
                            class="group flex flex-col items-center rounded-lg border border-gray-100 bg-gray-50 px-3 py-3 transition hover:border-indigo-200 hover:bg-indigo-50 dark:border-gray-800 dark:bg-gray-800/40 dark:hover:border-indigo-700 dark:hover:bg-indigo-900/20">
                             <x-heroicon-o-clipboard-document-list class="mb-1 h-5 w-5 text-blue-500" />
                             <span class="text-lg font-bold text-gray-900 dark:text-white">{{ $quotesCount }}</span>
                             <span class="text-xs text-gray-500 dark:text-gray-400">Quotes</span>
                         </a>
-                        <a href="{{ route('filament.admin.resources.projects.index') }}"
+                        <a href="{{ $projectsUrl }}"
                            class="group flex flex-col items-center rounded-lg border border-gray-100 bg-gray-50 px-3 py-3 transition hover:border-indigo-200 hover:bg-indigo-50 dark:border-gray-800 dark:bg-gray-800/40 dark:hover:border-indigo-700 dark:hover:bg-indigo-900/20">
                             <x-heroicon-o-briefcase class="mb-1 h-5 w-5 text-green-500" />
                             <span class="text-lg font-bold text-gray-900 dark:text-white">{{ $projectsCount }}</span>
                             <span class="text-xs text-gray-500 dark:text-gray-400">Projects</span>
                         </a>
-                        <a href="{{ route('filament.admin.resources.invoices.index') }}"
+                        <a href="{{ $invoicesUrl }}"
                            class="group flex flex-col items-center rounded-lg border border-gray-100 bg-gray-50 px-3 py-3 transition hover:border-indigo-200 hover:bg-indigo-50 dark:border-gray-800 dark:bg-gray-800/40 dark:hover:border-indigo-700 dark:hover:bg-indigo-900/20">
                             <x-heroicon-o-banknotes class="mb-1 h-5 w-5 text-purple-500" />
                             <span class="text-lg font-bold text-gray-900 dark:text-white">{{ $invoicesCount }}</span>

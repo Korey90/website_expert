@@ -64,7 +64,7 @@ export default function ServicesIndex({ locale: localeProp, items, auth }) {
     return (
         <MarketingLayout auth={auth} footer={footer}>
             <Head>
-                <title>Services – Website Expert</title>
+                <title>Services</title>
                 <meta name="description" content="Professional web design, e-commerce, SEO, Google Ads, Meta Ads, content creation and website maintenance services." />
             </Head>
 

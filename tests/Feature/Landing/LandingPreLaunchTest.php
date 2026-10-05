@@ -17,7 +17,7 @@ use Tests\TestCase;
  *  - EN page has correct html lang="en"
  *  - Sitemap.xml contains both LP URLs
  *  - Canonical tags present in app.blade.php for LP routes
- *  - hreflang tags correct for both LP pages
+ *  - No hreflang tags between PL and EN LP (different target markets, not translations of each other)
  *  - Form endpoints not accessible via GET (405 / redirect)
  *  - Throttle: 6th submission in 60s returns 429
  */
@@ -66,40 +66,34 @@ class LandingPreLaunchTest extends TestCase
         $this->assertStringContainsString('lang="en"', $response->getContent());
     }
 
-    // ── hreflang tags (rendered by app.blade.php) ─────────────────────────────
+    // ── no hreflang between PL/EN LP (different target markets) ──────────────
 
-    public function test_pl_lp_has_hreflang_tags(): void
+    public function test_pl_lp_has_no_hreflang_tags(): void
     {
         $html = $this->get('/pl/strony-internetowe-uk')->getContent();
 
-        $this->assertStringContainsString('hreflang="pl"', $html);
-        $this->assertStringContainsString('hreflang="en"', $html);
-        $this->assertStringContainsString('hreflang="x-default"', $html);
+        $this->assertStringNotContainsString('rel="alternate" hreflang', $html);
     }
 
-    public function test_en_lp_has_hreflang_tags(): void
+    public function test_en_lp_has_no_hreflang_tags(): void
     {
         $html = $this->get('/en/web-design-northern-ireland')->getContent();
 
-        $this->assertStringContainsString('hreflang="en"', $html);
-        $this->assertStringContainsString('hreflang="pl"', $html);
-        $this->assertStringContainsString('hreflang="x-default"', $html);
+        $this->assertStringNotContainsString('rel="alternate" hreflang', $html);
     }
 
-    public function test_pl_lp_hreflang_points_to_correct_urls(): void
+    public function test_pl_lp_canonical_points_to_self(): void
     {
         $html = $this->get('/pl/strony-internetowe-uk')->getContent();
 
-        $this->assertStringContainsString('href="https://website-expert.uk/pl/strony-internetowe-uk"', $html);
-        $this->assertStringContainsString('href="https://website-expert.uk/en/web-design-northern-ireland"', $html);
+        $this->assertStringContainsString('href="'.url('/pl/strony-internetowe-uk').'"', $html);
     }
 
-    public function test_en_lp_hreflang_points_to_correct_urls(): void
+    public function test_en_lp_canonical_points_to_self(): void
     {
         $html = $this->get('/en/web-design-northern-ireland')->getContent();
 
-        $this->assertStringContainsString('href="https://website-expert.uk/en/web-design-northern-ireland"', $html);
-        $this->assertStringContainsString('href="https://website-expert.uk/pl/strony-internetowe-uk"', $html);
+        $this->assertStringContainsString('href="'.url('/en/web-design-northern-ireland').'"', $html);
     }
 
     // ── Sitemap ───────────────────────────────────────────────────────────────
