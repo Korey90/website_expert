@@ -135,7 +135,10 @@ export default function Navbar({ auth, topOffset = 0 }) {
         };
     }, []);
 
-    const currentLang = langOptions.find(l => l.code === locale) ?? langOptions[0];
+    const currentLang = langOptions.find(l => l.code === locale)
+        ?? langOptions[0]
+        // available_locales can be empty for some requests -- avoid crashing SSR/render on a missing entry
+        ?? { code: locale || 'en', label: '', flag: FLAG[locale] ?? '🌐' };
 
     return (
         <header
