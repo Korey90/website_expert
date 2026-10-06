@@ -11,6 +11,9 @@ const GRADIENTS = [
     'from-brand-200 to-neutral-600',
 ];
 
+// Cards must stay a consistent size even with many tags / long copy on real data
+const MAX_VISIBLE_TAGS = 6;
+
 export default function PortfolioIndex({ locale: localeProp, projects, auth }) {
     useScrollReveal('.reveal');
 
@@ -74,7 +77,7 @@ export default function PortfolioIndex({ locale: localeProp, projects, auth }) {
                             const tags       = Array.isArray(p.tags) ? p.tags : [];
 
                             return (
-                                <article key={i} className="group rounded-2xl overflow-hidden border border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-950 hover:shadow-xl dark:hover:shadow-neutral-900 transition-all">
+                                <article key={i} className="group h-full flex flex-col rounded-2xl overflow-hidden border border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-950 hover:shadow-xl dark:hover:shadow-neutral-900 transition-all">
                                     {/* Thumbnail */}
                                     <div className={`aspect-video relative overflow-hidden ${!p.image ? `bg-linear-to-br ${GRADIENTS[i % GRADIENTS.length]}` : 'bg-neutral-200 dark:bg-neutral-800'}`}>
                                         {p.image ? (
@@ -94,42 +97,49 @@ export default function PortfolioIndex({ locale: localeProp, projects, auth }) {
                                     </div>
 
                                     {/* Body */}
-                                    <div className="p-5">
+                                    <div className="p-5 flex flex-col flex-1">
                                         {p.client && (
-                                            <p className="text-xs text-brand-500 font-semibold uppercase tracking-wide mb-1">{p.client}</p>
+                                            <p className="text-xs text-brand-500 font-semibold uppercase tracking-wide mb-1 truncate">{p.client}</p>
                                         )}
-                                        <h2 className="font-semibold text-neutral-900 dark:text-white mb-2 leading-snug">{itemTitle}</h2>
-                                        <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-3 leading-relaxed">{itemDesc}</p>
+                                        <h2 className="font-semibold text-neutral-900 dark:text-white mb-2 leading-snug line-clamp-2">{itemTitle}</h2>
+                                        <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-3 leading-relaxed line-clamp-3">{itemDesc}</p>
 
                                         {tags.length > 0 && (
                                             <div className="flex flex-wrap gap-1.5 mb-4">
-                                                {tags.map((tag, ti) => (
+                                                {tags.slice(0, MAX_VISIBLE_TAGS).map((tag, ti) => (
                                                     <span key={ti} className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
                                                         {tag}
                                                     </span>
                                                 ))}
+                                                {tags.length > MAX_VISIBLE_TAGS && (
+                                                    <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500">
+                                                        +{tags.length - MAX_VISIBLE_TAGS}
+                                                    </span>
+                                                )}
                                             </div>
                                         )}
 
-                                        <div className="flex items-center justify-between">
+                                        <div className="mt-auto pt-1">
                                             {itemResult && (
-                                                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full">
+                                                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1.5 rounded-lg mb-3 line-clamp-2">
                                                     {itemResult}
-                                                </span>
+                                                </p>
                                             )}
-                                            {href ? (
-                                                <a
-                                                    href={href}
-                                                    className="ml-auto text-sm font-semibold text-brand-500 hover:text-brand-600 inline-flex items-center gap-1 group/link"
-                                                >
-                                                    {l.viewCase}
-                                                    <svg className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                                    </svg>
-                                                </a>
-                                            ) : (
-                                                <span className="ml-auto text-sm text-neutral-400 dark:text-neutral-600 italic">{l.comingSoon}</span>
-                                            )}
+                                            <div className="flex items-center justify-end">
+                                                {href ? (
+                                                    <a
+                                                        href={href}
+                                                        className="text-sm font-semibold text-brand-500 hover:text-brand-600 inline-flex items-center gap-1 group/link"
+                                                    >
+                                                        {l.viewCase}
+                                                        <svg className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                        </svg>
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-sm text-neutral-400 dark:text-neutral-600 italic">{l.comingSoon}</span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </article>

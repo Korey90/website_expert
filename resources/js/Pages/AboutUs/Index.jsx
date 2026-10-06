@@ -8,16 +8,16 @@ export default function AboutUsPage({ about = null, footer = null, locale = 'en'
 
     const meta = {
         en: {
-            title:       'About Us – Website Expert',
-            description: '10+ years building websites for businesses across Northern Ireland & the UK. Fixed price, direct developer contact. Learn about our team and approach.',
+            title:       'About Website Expert | Web Development in Northern Ireland',
+            description: 'Meet Website Expert - a Dungannon web development studio with 10+ years experience creating websites and web apps across Northern Ireland and the UK.',
         },
         pl: {
-            title:       'O nas – Website Expert',
-            description: 'Ponad 10 lat tworzenia stron internetowych dla firm z całego UK. Stała cena, bezpośredni kontakt z deweloperem. Poznaj nasz zespół i podejście do pracy.',
+            title:       'O nas | Tworzenie stron internetowych w UK',
+            description: 'Poznaj Website Expert - tworzymy strony internetowe i aplikacje webowe dla firm w Irlandii Północnej i całym UK. Ponad 10 lat doświadczenia.',
         },
         pt: {
-            title:       'Sobre Nós – Website Expert',
-            description: 'Mais de 10 anos a criar sites para empresas em todo o Reino Unido. Preço fixo, contacto direto com o programador. Conheça a nossa equipa.',
+            title:       'Sobre Nós | Criação de Sites no Reino Unido',
+            description: 'Conheça a Website Expert - criamos websites e aplicações web para empresas na Irlanda do Norte e em todo o Reino Unido há mais de 10 anos.',
         },
     };
 

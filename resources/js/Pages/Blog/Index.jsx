@@ -4,19 +4,19 @@ import useScrollReveal from '@/Hooks/useScrollReveal';
 
 const labels = {
     en: {
-        pageTitle: 'Blog',
+        pageTitle: 'Blog about websites, SEO and digital marketing',
         subtitle: 'Guides and advice on websites, SEO and digital marketing for UK businesses.',
         readMore: 'Read more →',
         empty: 'No articles yet — check back soon.',
     },
     pl: {
-        pageTitle: 'Blog',
+        pageTitle: 'Blog o stronach internetowych i SEO w UK',
         subtitle: 'Poradniki i porady dotyczące stron internetowych, SEO i marketingu cyfrowego dla firm w UK.',
         readMore: 'Czytaj dalej →',
         empty: 'Jeszcze brak artykułów — zajrzyj tu wkrótce.',
     },
     pt: {
-        pageTitle: 'Blog',
+        pageTitle: 'Blog sobre websites, SEO e marketing digital',
         subtitle: 'Guias e conselhos sobre sites, SEO e marketing digital para empresas no Reino Unido.',
         readMore: 'Ler mais →',
         empty: 'Ainda sem artigos — volte em breve.',
