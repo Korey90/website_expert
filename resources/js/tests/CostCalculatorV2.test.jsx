@@ -2,6 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CostCalculatorV2 from '@/Components/Marketing/CostCalculatorV2';
 
+// Mock @inertiajs/react's usePage (used internally by useCurrency) before importing the component
+vi.mock('@inertiajs/react', () => ({
+    usePage: () => ({
+        props: {
+            currency: 'GBP',
+            available_currencies: {},
+            currency_settings: {},
+        },
+    }),
+}));
+
 // Mock Inertia route helper (globally used via window.route or direct import)
 globalThis.route = vi.fn((name) => `/${name}`);
 
