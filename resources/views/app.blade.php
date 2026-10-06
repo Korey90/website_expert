@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'Website Expert') }}</title>
+        <title data-inertia>{{ config('app.name', 'Website Expert') }}</title>
 
         @php
             $noIndexPrefixes = ['portal.', 'onboarding.', 'reports.', 'admin.'];
@@ -29,7 +29,7 @@
             <meta name="robots" content="noindex, nofollow">
         @endif
         @if($currentName === 'home')
-            <meta inertia="description" name="description" content="{{ $page['props']['seo']['description'] }}">
+            <meta data-inertia="description" name="description" content="{{ $page['props']['seo']['description'] }}">
         @endif
         <link rel="canonical" href="{{ url()->current() }}">
 

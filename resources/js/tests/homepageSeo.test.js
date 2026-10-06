@@ -9,13 +9,13 @@ const descriptions = {
 
 describe.each(Object.entries(descriptions))('homepage SEO for %s', (locale, description) => {
     it('keeps exactly one localized description after Inertia updates the head', async () => {
-        document.head.innerHTML = `<meta inertia="description" name="description" content="${description}">`;
+        document.head.innerHTML = `<meta data-inertia="description" name="description" content="${description}">`;
 
         const manager = createHeadManager(false, (title) => title, () => {});
         const provider = manager.createProvider();
 
         provider.update([
-            `<meta inertia="description" name="description" content="${description}">`,
+            `<meta data-inertia="description" name="description" content="${description}">`,
         ]);
 
         await new Promise((resolve) => setTimeout(resolve, 10));
