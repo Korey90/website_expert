@@ -10,6 +10,43 @@ return [
         'exchange_rate_date' => 'Data kursu',
         'vat_amount_gbp' => 'Kwota VAT w GBP',
     ],
+    'credit_notes' => [
+        'navigation' => 'Noty kredytowe', 'singular' => 'nota kredytowa', 'plural' => 'noty kredytowe',
+        'sections' => ['details' => 'Dane noty kredytowej', 'items' => 'Korygowane pozycje', 'totals' => 'Podsumowanie'],
+        'fields' => [
+            'number' => 'Numer noty', 'status' => 'Status', 'invoice' => 'Faktura źródłowa',
+            'client' => 'Klient', 'issue_date' => 'Data wystawienia', 'currency' => 'Waluta',
+            'created_by' => 'Utworzył', 'reason' => 'Powód korekty', 'description' => 'Opis',
+            'quantity' => 'Ilość', 'vat_rate' => 'Stawka VAT', 'net' => 'Netto', 'vat' => 'VAT',
+            'total' => 'Łączna korekta', 'allocated' => 'Rozliczono', 'allocation_amount' => 'Kwota do rozliczenia',
+            'invoice_item' => 'Pozycja faktury',
+        ],
+        'statuses' => [
+            'draft' => 'Szkic', 'issued' => 'Wystawiona', 'partially_allocated' => 'Częściowo rozliczona',
+            'allocated' => 'Rozliczona', 'void' => 'Unieważniona',
+        ],
+        'actions' => [
+            'create' => 'Utwórz notę kredytową', 'issue' => 'Wystaw', 'allocate' => 'Rozlicz',
+            'void' => 'Unieważnij', 'pdf' => 'Pobierz PDF',
+        ],
+        'notifications' => [
+            'created' => 'Nota kredytowa została utworzona.', 'issued' => 'Nota kredytowa została wystawiona.',
+            'allocated' => 'Nota kredytowa została rozliczona.', 'voided' => 'Nota kredytowa została unieważniona.',
+        ],
+    ],
+    'suppliers' => [
+        'navigation' => 'Dostawcy', 'singular' => 'dostawca', 'plural' => 'dostawcy',
+        'sections' => ['company' => 'Dane dostawcy', 'contact' => 'Główny kontakt', 'address' => 'Adres', 'payment' => 'Ustawienia płatności'],
+        'fields' => [
+            'name' => 'Nazwa prawna', 'trading_name' => 'Nazwa handlowa', 'company_number' => 'Numer Companies House',
+            'vat_number' => 'Numer VAT', 'status' => 'Status', 'contact_name' => 'Osoba kontaktowa',
+            'contact_email' => 'E-mail', 'contact_phone' => 'Telefon', 'address_line1' => 'Adres — wiersz 1',
+            'address_line2' => 'Adres — wiersz 2', 'city' => 'Miejscowość', 'county' => 'Hrabstwo', 'postcode' => 'Kod pocztowy',
+            'country' => 'Kraj', 'default_currency' => 'Domyślna waluta', 'payment_terms_days' => 'Termin płatności',
+            'days' => 'dni', 'notes' => 'Notatki',
+        ],
+        'statuses' => ['active' => 'Aktywny', 'archived' => 'Zarchiwizowany'],
+    ],
     'accounting' => [
         'title' => 'Profil księgowy',
         'subtitle' => 'Skonfiguruj dane brytyjskiej firmy, okres księgowy, VAT i PAYE używane w dokumentach finansowych.',

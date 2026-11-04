@@ -23,6 +23,18 @@ class CreditNote extends Model
 
     public const STATUS_VOID = 'void';
 
+    /** @return list<string> */
+    public static function statuses(): array
+    {
+        return [
+            self::STATUS_DRAFT,
+            self::STATUS_ISSUED,
+            self::STATUS_PARTIALLY_ALLOCATED,
+            self::STATUS_ALLOCATED,
+            self::STATUS_VOID,
+        ];
+    }
+
     protected $fillable = [
         'business_id', 'number', 'invoice_id', 'client_id', 'created_by', 'issued_by', 'allocated_by', 'voided_by',
         'status', 'currency', 'reason', 'issue_date', 'tax_point',

@@ -152,6 +152,51 @@ class DocumentTaxCalculatorTest extends TestCase
         $this->assertNull($item->fresh()->vat_amount_gbp);
     }
 
+    public function test_vat_is_rounded_to_pennies_per_line(): void
+    {
+        $invoice = $this->createInvoice();
+        $threePenceItem = $this->createInvoiceItem($invoice, 'Three pence line', 'S20', 0.03);
+        $twoPenceItem = $this->createInvoiceItem($invoice, 'Two pence line', 'S20', 0.02);
+
+        $invoice->recalculate();
+
+        $this->assertSame('0.01', $threePenceItem->fresh()->vat_amount);
+        $this->assertSame('0.00', $twoPenceItem->fresh()->vat_amount);
+        $this->assertSame('0.01', $invoice->fresh()->vat_amount);
+        $this->assertSame('0.06', $invoice->fresh()->total);
+    }
+
+    public function test_zero_exempt_and_outside_scope_codes_remain_distinct_without_charging_vat(): void
+    {
+        $invoice = $this->createInvoice();
+        $zeroItem = $this->createInvoiceItem($invoice, 'Zero rated', 'Z0', 100);
+        $exemptItem = $this->createInvoiceItem($invoice, 'Exempt', 'EXEMPT', 100);
+        $outsideItem = $this->createInvoiceItem($invoice, 'Outside scope', 'OUTSIDE', 100);
+
+        $invoice->recalculate();
+
+        $this->assertSame('0.00', $invoice->fresh()->vat_amount);
+        $this->assertSame('300.00', $invoice->fresh()->total);
+        $this->assertSame('zero', $zeroItem->taxCode->type);
+        $this->assertSame('exempt', $exemptItem->taxCode->type);
+        $this->assertSame('outside_scope', $outsideItem->taxCode->type);
+        $this->assertSame(['net_sales' => [6], 'net_purchases' => [7]], $zeroItem->taxCode->vat_return_mapping);
+        $this->assertSame([], $outsideItem->taxCode->vat_return_mapping);
+    }
+
+    public function test_reverse_charge_keeps_the_rate_snapshot_without_adding_vat_to_amount_due(): void
+    {
+        $invoice = $this->createInvoice();
+        $item = $this->createInvoiceItem($invoice, 'Reverse charge service', 'RC20', 100);
+
+        $invoice->recalculate();
+
+        $this->assertSame('20.00', $item->fresh()->vat_rate_snapshot);
+        $this->assertSame('0.00', $item->fresh()->vat_amount);
+        $this->assertSame('100.00', $item->fresh()->gross_amount);
+        $this->assertSame('100.00', $invoice->fresh()->total);
+    }
+
     /**
      * @param  array<string, mixed>  $overrides
      */

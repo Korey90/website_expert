@@ -10,6 +10,43 @@ return [
         'exchange_rate_date' => 'Exchange rate date',
         'vat_amount_gbp' => 'VAT amount in GBP',
     ],
+    'credit_notes' => [
+        'navigation' => 'Credit notes', 'singular' => 'credit note', 'plural' => 'credit notes',
+        'sections' => ['details' => 'Credit note details', 'items' => 'Credited items', 'totals' => 'Totals'],
+        'fields' => [
+            'number' => 'Credit note no.', 'status' => 'Status', 'invoice' => 'Original invoice',
+            'client' => 'Client', 'issue_date' => 'Issue date', 'currency' => 'Currency',
+            'created_by' => 'Created by', 'reason' => 'Reason for credit', 'description' => 'Description',
+            'quantity' => 'Quantity', 'vat_rate' => 'VAT rate', 'net' => 'Net', 'vat' => 'VAT',
+            'total' => 'Total credit', 'allocated' => 'Allocated', 'allocation_amount' => 'Amount to allocate',
+            'invoice_item' => 'Invoice item',
+        ],
+        'statuses' => [
+            'draft' => 'Draft', 'issued' => 'Issued', 'partially_allocated' => 'Partially allocated',
+            'allocated' => 'Allocated', 'void' => 'Void',
+        ],
+        'actions' => [
+            'create' => 'Create credit note', 'issue' => 'Issue', 'allocate' => 'Allocate',
+            'void' => 'Void', 'pdf' => 'Download PDF',
+        ],
+        'notifications' => [
+            'created' => 'Credit note created.', 'issued' => 'Credit note issued.',
+            'allocated' => 'Credit note allocated.', 'voided' => 'Credit note voided.',
+        ],
+    ],
+    'suppliers' => [
+        'navigation' => 'Suppliers', 'singular' => 'supplier', 'plural' => 'suppliers',
+        'sections' => ['company' => 'Supplier details', 'contact' => 'Primary contact', 'address' => 'Address', 'payment' => 'Payment settings'],
+        'fields' => [
+            'name' => 'Legal name', 'trading_name' => 'Trading name', 'company_number' => 'Companies House number',
+            'vat_number' => 'VAT number', 'status' => 'Status', 'contact_name' => 'Contact name',
+            'contact_email' => 'Email', 'contact_phone' => 'Phone', 'address_line1' => 'Address line 1',
+            'address_line2' => 'Address line 2', 'city' => 'City', 'county' => 'County', 'postcode' => 'Postcode',
+            'country' => 'Country', 'default_currency' => 'Default currency', 'payment_terms_days' => 'Payment terms',
+            'days' => 'days', 'notes' => 'Notes',
+        ],
+        'statuses' => ['active' => 'Active', 'archived' => 'Archived'],
+    ],
     'accounting' => [
         'title' => 'Accounting profile',
         'subtitle' => 'Configure the UK company, accounting period, VAT and PAYE details used on financial documents.',

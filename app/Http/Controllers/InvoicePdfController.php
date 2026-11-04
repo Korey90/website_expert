@@ -10,7 +10,13 @@ class InvoicePdfController extends Controller
 {
     public function __invoke(Invoice $invoice): Response
     {
-        $invoice->load(['client', 'project', 'items', 'createdBy']);
+        $invoice->load([
+            'business.accountingProfile',
+            'client',
+            'project',
+            'items.taxCode',
+            'createdBy',
+        ]);
 
         $pdf = Pdf::loadView('pdf.invoice', compact('invoice'))
             ->setPaper('a4', 'portrait');

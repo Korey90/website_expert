@@ -20,6 +20,7 @@ class FilamentPermissionRegistry
         'ClientResource' => ['view' => 'view_clients', 'create' => 'create_clients', 'update' => 'edit_clients', 'delete' => 'delete_clients'],
         'ContractResource' => ['view' => 'view_contracts', 'create' => 'create_contracts', 'update' => 'edit_contracts', 'delete' => 'delete_contracts'],
         'ContractTemplateResource' => ['view' => 'view_contract_templates', 'create' => 'create_contract_templates', 'update' => 'edit_contract_templates', 'delete' => 'delete_contract_templates'],
+        'CreditNoteResource' => ['view' => 'view_invoices', 'update' => 'edit_invoices'],
         'EmailTemplateResource' => ['view' => 'view_email_templates', 'create' => 'create_email_templates', 'update' => 'edit_email_templates', 'delete' => 'delete_email_templates'],
         'InvoiceResource' => ['view' => 'view_invoices', 'create' => 'create_invoices', 'update' => 'edit_invoices', 'delete' => 'delete_invoices'],
         'LandingPageResource' => ['view' => 'view_landing_pages', 'create' => 'manage_landing_pages', 'update' => 'manage_landing_pages', 'delete' => 'manage_landing_pages'],
@@ -43,6 +44,7 @@ class FilamentPermissionRegistry
         'SiteSectionResource' => ['view' => 'view_site_sections', 'create' => 'create_site_sections', 'update' => 'edit_site_sections', 'delete' => 'delete_site_sections'],
         'SmsTemplateResource' => ['view' => 'view_sms_templates', 'create' => 'create_sms_templates', 'update' => 'edit_sms_templates', 'delete' => 'delete_sms_templates'],
         'SubscriptionResource' => ['view' => 'view_subscriptions'],
+        'SupplierResource' => ['view' => 'view_finance', 'create' => 'manage_finance', 'update' => 'manage_finance', 'delete' => 'manage_finance'],
         'UserResource' => ['view' => 'view_users', 'create' => 'create_users', 'update' => 'edit_users', 'delete' => 'delete_users'],
     ];
 

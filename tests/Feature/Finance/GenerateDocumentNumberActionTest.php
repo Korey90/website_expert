@@ -9,6 +9,8 @@ use App\Models\Invoice;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Concurrency;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Tests\TestCase;
 
@@ -79,6 +81,30 @@ class GenerateDocumentNumberActionTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         app(GenerateDocumentNumberAction::class)->execute($business->id, 'receipt');
+    }
+
+    public function test_concurrent_requests_receive_unique_numbers_on_a_database_with_row_locks(): void
+    {
+        if (DB::getDriverName() === 'sqlite') {
+            $this->markTestSkipped('SQLite does not support SELECT ... FOR UPDATE; run this test on MySQL/PostgreSQL in integration CI.');
+        }
+
+        $business = $this->business('Concurrent Ltd', 'concurrent');
+        $businessId = $business->id;
+
+        $numbers = Concurrency::driver('process')->run(
+            collect(range(1, 8))->map(fn (): \Closure => fn (): string => app(GenerateDocumentNumberAction::class)->execute(
+                $businessId,
+                'invoice',
+                CarbonImmutable::parse('2026-11-04'),
+            ))->all(),
+        );
+        sort($numbers);
+
+        $this->assertSame([
+            'INV-2026-001', 'INV-2026-002', 'INV-2026-003', 'INV-2026-004',
+            'INV-2026-005', 'INV-2026-006', 'INV-2026-007', 'INV-2026-008',
+        ], $numbers);
     }
 
     private function business(string $name, string $slug): Business

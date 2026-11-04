@@ -4,6 +4,7 @@ namespace App\Services\Finance;
 
 use App\Models\InvoiceItem;
 use App\Models\QuoteItem;
+use App\Models\TaxCode;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -42,11 +43,19 @@ class DocumentTaxCalculator
         foreach ($items->values() as $index => $item) {
             $amount = $lineAmounts[$index];
             $netAmount = $amount - $discountAllocations[$index];
+            $taxCode = $item->tax_code_id
+                ? TaxCode::withoutGlobalScopes()
+                    ->whereKey($item->tax_code_id)
+                    ->where('business_id', $item->business_id)
+                    ->first()
+                : null;
             $vatRate = $item->tax_code_id
                 ? (float) ($item->vat_rate_snapshot ?? 0)
                 : $fallbackVatRate;
             $vatRateBasisPoints = (int) round($vatRate * 100);
-            $vatAmount = (int) round(($netAmount * $vatRateBasisPoints) / 10000);
+            $vatAmount = $taxCode?->type === 'reverse_charge'
+                ? 0
+                : (int) round(($netAmount * $vatRateBasisPoints) / 10000);
             $grossAmount = $netAmount + $vatAmount;
             $netAmountGbp = $this->convertMinorUnitsToGbp($netAmount, $gbpRate);
             $vatAmountGbp = $this->convertMinorUnitsToGbp($vatAmount, $gbpRate);

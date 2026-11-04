@@ -10,6 +10,43 @@ return [
         'exchange_rate_date' => 'Data da taxa de câmbio',
         'vat_amount_gbp' => 'Montante de IVA em GBP',
     ],
+    'credit_notes' => [
+        'navigation' => 'Notas de crédito', 'singular' => 'nota de crédito', 'plural' => 'notas de crédito',
+        'sections' => ['details' => 'Detalhes da nota de crédito', 'items' => 'Itens creditados', 'totals' => 'Totais'],
+        'fields' => [
+            'number' => 'N.º da nota', 'status' => 'Estado', 'invoice' => 'Fatura original',
+            'client' => 'Cliente', 'issue_date' => 'Data de emissão', 'currency' => 'Moeda',
+            'created_by' => 'Criado por', 'reason' => 'Motivo do crédito', 'description' => 'Descrição',
+            'quantity' => 'Quantidade', 'vat_rate' => 'Taxa de IVA', 'net' => 'Líquido', 'vat' => 'IVA',
+            'total' => 'Crédito total', 'allocated' => 'Alocado', 'allocation_amount' => 'Montante a alocar',
+            'invoice_item' => 'Item da fatura',
+        ],
+        'statuses' => [
+            'draft' => 'Rascunho', 'issued' => 'Emitida', 'partially_allocated' => 'Parcialmente alocada',
+            'allocated' => 'Alocada', 'void' => 'Anulada',
+        ],
+        'actions' => [
+            'create' => 'Criar nota de crédito', 'issue' => 'Emitir', 'allocate' => 'Alocar',
+            'void' => 'Anular', 'pdf' => 'Descarregar PDF',
+        ],
+        'notifications' => [
+            'created' => 'Nota de crédito criada.', 'issued' => 'Nota de crédito emitida.',
+            'allocated' => 'Nota de crédito alocada.', 'voided' => 'Nota de crédito anulada.',
+        ],
+    ],
+    'suppliers' => [
+        'navigation' => 'Fornecedores', 'singular' => 'fornecedor', 'plural' => 'fornecedores',
+        'sections' => ['company' => 'Dados do fornecedor', 'contact' => 'Contacto principal', 'address' => 'Morada', 'payment' => 'Definições de pagamento'],
+        'fields' => [
+            'name' => 'Nome legal', 'trading_name' => 'Nome comercial', 'company_number' => 'Número da Companies House',
+            'vat_number' => 'Número de IVA', 'status' => 'Estado', 'contact_name' => 'Nome do contacto',
+            'contact_email' => 'E-mail', 'contact_phone' => 'Telefone', 'address_line1' => 'Morada — linha 1',
+            'address_line2' => 'Morada — linha 2', 'city' => 'Cidade', 'county' => 'Condado', 'postcode' => 'Código postal',
+            'country' => 'País', 'default_currency' => 'Moeda predefinida', 'payment_terms_days' => 'Prazo de pagamento',
+            'days' => 'dias', 'notes' => 'Notas',
+        ],
+        'statuses' => ['active' => 'Ativo', 'archived' => 'Arquivado'],
+    ],
     'accounting' => [
         'title' => 'Perfil contabilístico',
         'subtitle' => 'Configure a empresa britânica, o período contabilístico, o IVA e os dados PAYE usados nos documentos financeiros.',

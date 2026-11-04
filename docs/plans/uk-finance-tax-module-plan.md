@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** IMPLEMENTACJA W TOKU — Faza 0 ukończona, Faza 1 w realizacji
+**Status:** IMPLEMENTACJA W TOKU — Fazy 0–1 zaimplementowane, Faza 2 rozpoczęta; gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -371,9 +371,9 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-105` [M] Supply date/tax point i VAT amount in GBP. *(snapshot kursu, źródła i daty; kwoty GBP per pozycja i dokument; PDF)*
 - [x] `UKFIN-106` [M] Sekwencje numeracji per tenant i document type z blokadą race condition. *(transakcja + `lockForUpdate`, osobna sekwencja roczna, backfill)*
 - [x] `UKFIN-107` [M] CreditNote + items + lifecycle. *(snapshot z faktury, partial credit, issue/allocate/void, audit metadata i tenant scope)*
-- [ ] `UKFIN-108` [M] Aktualizacja InvoiceResource, QuoteResource i PDF.
+- [x] `UKFIN-108` [M] Aktualizacja InvoiceResource, QuoteResource i PDF. *(formularze tax point/tax code/FX, panel Credit Notes z lifecycle, PDF faktury i noty z danymi sprzedawcy, stawkami VAT i odwołaniem do dokumentu źródłowego)*
 - [x] `UKFIN-109` [S] Walidacja pól zależnie od VAT registered/entity type. *(Form Request + normalizacja pól nieaktywnych)*
-- [ ] `UKFIN-110` [M] Testy: mixed rates, rounding, FX, zero/exempt, credit note, concurrent numbering.
+- [x] `UKFIN-110` [M] Testy: mixed rates, rounding, FX, zero/exempt, credit note, concurrent numbering. *(test współbieżny uruchamiany na MySQL/PostgreSQL; lokalne SQLite nie obsługuje `SELECT ... FOR UPDATE`; dodatkowo pokryto reverse charge bez doliczania VAT do należności)*
 
 **Gate:** przykładowe faktury i credit notes zaakceptowane przez księgowego UK.
 
@@ -381,7 +381,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 
 **Cel:** użytkownik rejestruje każdy zakup i ma dowód źródłowy.
 
-- [ ] `UKFIN-201` [M] Supplier model, policy, factory i Filament Resource.
+- [x] `UKFIN-201` [M] Supplier model, policy, factory i Filament Resource. *(tenant scope, soft archive, dane UK/VAT, warunki płatności, RBAC `view_finance`/`manage_finance`, PL/EN/PT)*
 - [ ] `UKFIN-202` [M] Expense + ExpenseItem schema i status workflow.
 - [ ] `UKFIN-203` [M] Actions: Create/Update/Approve/Post/VoidExpense.
 - [ ] `UKFIN-204` [M] Form Requests i walidacja duplikatu supplier invoice.

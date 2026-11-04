@@ -106,7 +106,7 @@
         }
         .date-cell {
             display: table-cell;
-            width: 33.33%;
+            width: 25%;
             text-align: center;
         }
         .date-cell-label {
@@ -156,6 +156,27 @@
         }
         .items-table td.right { text-align: right; }
         .item-desc { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+
+        .vat-breakdown {
+            width: 440px;
+            margin: 0 40px 24px auto;
+            border-collapse: collapse;
+        }
+        .vat-breakdown caption {
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #7C7072;
+            padding-bottom: 6px;
+        }
+        .vat-breakdown th, .vat-breakdown td {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 6px 8px;
+            font-size: 11px;
+            text-align: right;
+        }
+        .vat-breakdown th:first-child, .vat-breakdown td:first-child { text-align: left; }
 
         /* ── Totals ──────────────────────────────────────── */
         .totals-wrapper {
@@ -229,15 +250,31 @@
 @php
     $money = app(\App\Services\Currency\MoneyFormatter::class);
     $currency = $invoice->currency ?? 'GBP';
+    $profile = $invoice->business?->accountingProfile;
+    $sellerName = $profile?->legal_name ?: $invoice->business?->name ?: config('app.name');
+    $sellerAddress = $profile?->registered_address ?? [];
+    $hasReverseCharge = $invoice->items->contains(fn ($item) => $item->taxCode?->type === 'reverse_charge');
+    $vatBreakdown = $invoice->items
+        ->groupBy(fn ($item) => ($item->taxCode?->code ?? 'VAT').'|'.number_format((float) $item->vat_rate_snapshot, 2, '.', ''))
+        ->map(function ($items, $key) {
+            [$code, $rate] = explode('|', $key, 2);
+
+            return [
+                'code' => $code,
+                'rate' => $rate,
+                'net' => $items->sum('net_amount'),
+                'vat' => $items->sum('vat_amount'),
+            ];
+        });
 @endphp
 
 {{-- ── Header ────────────────────────────────────────────── --}}
 <div class="header">
     <div class="header-left">
-        <div class="company-name">Website Expert NI</div>
+        <div class="company-name">{{ $sellerName }}</div>
         <div class="company-meta">
-            sales@website-expert.uk<br>
-            www.website-expert.uk
+            @if($profile?->company_number)Company no: {{ $profile->company_number }}<br>@endif
+            @if($profile?->vat_registered && $profile?->vat_number)VAT registration no: {{ $profile->vat_number }}@endif
         </div>
     </div>
     <div class="header-right">
@@ -260,9 +297,9 @@
 <div class="addresses">
     <div class="address-block">
         <div class="address-label">Bill To</div>
-        <div class="address-name">{{ $invoice->client->company_name }}</div>
+        <div class="address-name">{{ $invoice->client?->company_name }}</div>
         <div class="address-detail">
-            @if($invoice->client->primary_contact_name)
+            @if($invoice->client?->primary_contact_name)
                 {{ $invoice->client->primary_contact_name }}<br>
             @endif
             @if($invoice->client->address_line1)
@@ -287,11 +324,14 @@
     </div>
     <div class="address-block right">
         <div class="address-label">Issued By</div>
-        <div class="address-name">Website Expert NI</div>
+        <div class="address-name">{{ $sellerName }}</div>
         <div class="address-detail">
-            @if($invoice->createdBy)
-                {{ $invoice->createdBy->name }}<br>
+            @if($sellerAddress['line_1'] ?? null){{ $sellerAddress['line_1'] }}<br>@endif
+            @if($sellerAddress['line_2'] ?? null){{ $sellerAddress['line_2'] }}<br>@endif
+            @if(($sellerAddress['city'] ?? null) || ($sellerAddress['postcode'] ?? null))
+                {{ implode(', ', array_filter([$sellerAddress['city'] ?? null, $sellerAddress['postcode'] ?? null])) }}<br>
             @endif
+            @if($sellerAddress['country'] ?? null){{ $sellerAddress['country'] }}<br>@endif
             @if($invoice->project)
                 Project: {{ $invoice->project->title }}<br>
             @endif
@@ -324,10 +364,12 @@
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width:50%">Description</th>
-                <th class="right" style="width:12%">Qty</th>
-                <th class="right" style="width:18%">Unit Price</th>
-                <th class="right" style="width:20%">Amount</th>
+                <th style="width:34%">Description</th>
+                <th class="right" style="width:9%">Qty</th>
+                <th class="right" style="width:15%">Unit</th>
+                <th class="right" style="width:14%">Net</th>
+                <th class="right" style="width:12%">VAT</th>
+                <th class="right" style="width:16%">Gross</th>
             </tr>
         </thead>
         <tbody>
@@ -335,15 +377,39 @@
             <tr>
                 <td>
                     {{ $item->description }}
+                    <div class="item-desc">
+                        {{ $item->taxCode?->code ?? 'VAT' }} · {{ number_format((float) $item->vat_rate_snapshot, 2) }}%
+                        @if($item->supply_date) · Supply: {{ $item->supply_date->format('d M Y') }}@endif
+                    </div>
                 </td>
                 <td class="right">{{ rtrim(rtrim(number_format((float)$item->quantity, 2), '0'), '.') }}</td>
                 <td class="right">{{ $money->format($item->unit_price, $currency) }}</td>
-                <td class="right">{{ $money->format($item->amount, $currency) }}</td>
+                <td class="right">{{ $money->format($item->net_amount, $currency) }}</td>
+                <td class="right">{{ $money->format($item->vat_amount, $currency) }}</td>
+                <td class="right">{{ $money->format($item->gross_amount, $currency) }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
 </div>
+
+@if($vatBreakdown->isNotEmpty())
+<table class="vat-breakdown">
+    <caption>VAT breakdown</caption>
+    <thead>
+        <tr><th>Tax code / rate</th><th>Taxable net</th><th>VAT</th></tr>
+    </thead>
+    <tbody>
+        @foreach($vatBreakdown as $vatRow)
+        <tr>
+            <td>{{ $vatRow['code'] }} · {{ number_format((float) $vatRow['rate'], 2) }}%</td>
+            <td>{{ $money->format($vatRow['net'], $currency) }}</td>
+            <td>{{ $money->format($vatRow['vat'], $currency) }}</td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+@endif
 
 {{-- ── Totals ───────────────────────────────────────────────── --}}
 <div class="totals-wrapper">
@@ -389,8 +455,14 @@
 </div>
 
 {{-- ── Notes & Terms ────────────────────────────────────────── --}}
-@if($invoice->notes || $invoice->terms)
+@if($hasReverseCharge || $invoice->notes || $invoice->terms)
 <div class="notes-section">
+    @if($hasReverseCharge)
+    <div class="notes-block">
+        <div class="notes-block-title">Reverse charge</div>
+        <div class="notes-block-body">Customer to account to HMRC for the VAT due under the domestic reverse charge.</div>
+    </div>
+    @endif
     @if($invoice->notes)
     <div class="notes-block">
         <div class="notes-block-title">Notes</div>
@@ -408,7 +480,9 @@
 
 {{-- ── Footer ───────────────────────────────────────────────── --}}
 <div class="footer">
-    Website Expert NI &nbsp;·&nbsp; sales@website-expert.uk &nbsp;·&nbsp; www.website-expert.uk
+    {{ $sellerName }}
+    @if($profile?->company_number)&nbsp;·&nbsp; Company no: {{ $profile->company_number }}@endif
+    @if($profile?->vat_registered && $profile?->vat_number)&nbsp;·&nbsp; VAT: {{ $profile->vat_number }}@endif
     &nbsp;·&nbsp; Invoice {{ $invoice->number }}
 </div>
 

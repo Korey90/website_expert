@@ -13,12 +13,14 @@ use App\Models\Lead;
 use App\Models\SalesOffer;
 use App\Models\SalesOfferTemplate;
 use App\Models\Setting;
+use App\Models\Supplier;
 use App\Policies\BriefingPolicy;
 use App\Policies\BriefingTemplatePolicy;
 use App\Policies\LandingPagePolicy;
 use App\Policies\LeadPolicy;
 use App\Policies\SalesOfferPolicy;
 use App\Policies\SalesOfferTemplatePolicy;
+use App\Policies\SupplierPolicy;
 use App\Events\LeadCaptured;
 use App\Events\LeadAssigned;
 use App\Notifications\LeadAssignedNotification;
@@ -62,6 +64,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(BriefingTemplate::class, BriefingTemplatePolicy::class);
         Gate::policy(SalesOffer::class, SalesOfferPolicy::class);
         Gate::policy(SalesOfferTemplate::class, SalesOfferTemplatePolicy::class);
+        Gate::policy(Supplier::class, SupplierPolicy::class);
 
         $this->applyIntegrationSettings();
     }

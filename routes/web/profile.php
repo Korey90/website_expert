@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\BriefingTemplatePdfController;
+use App\Http\Controllers\CreditNotePdfController;
 use App\Http\Controllers\InvoicePdfController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SocialAccountController;
@@ -24,6 +25,7 @@ Route::middleware('auth')->group(function () {
         ->where('provider', 'google|facebook');
 
     Route::get('/invoices/{invoice}/pdf', InvoicePdfController::class)->name('invoice.pdf');
+    Route::get('/credit-notes/{creditNote}/pdf', CreditNotePdfController::class)->name('credit-note.pdf');
 
     Route::get('/briefing-templates/{briefingTemplate}/pdf', BriefingTemplatePdfController::class)
         ->name('briefing-template.pdf');
