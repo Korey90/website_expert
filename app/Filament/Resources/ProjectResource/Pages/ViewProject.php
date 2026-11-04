@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ProjectResource\Pages;
 
+use App\Actions\Finance\GenerateDocumentNumberAction;
 use App\Filament\Resources\ContractResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\ProjectResource;
@@ -125,11 +126,15 @@ class ViewProject extends ViewRecord
                     $project = $this->record;
                     $currency = $project->currency ?? FilamentCurrency::default();
                     $prefix = FilamentCurrency::symbol($currency);
-                    $nextNum = 'INV-'.date('Y').'-'.str_pad(Invoice::withTrashed()->count() + 1, 3, '0', STR_PAD_LEFT);
 
                     return [
                         Section::make('Invoice Details')->columns(3)->schema([
-                            TextInput::make('number')->label('Invoice No.')->default($nextNum)->required()->columnSpan(1),
+                            TextInput::make('number')
+                                ->label('Invoice No.')
+                                ->placeholder('Assigned when the invoice is saved')
+                                ->disabled()
+                                ->dehydrated(false)
+                                ->columnSpan(1),
                             Select::make('status')->options(['draft' => 'Draft', 'sent' => 'Sent'])->default('draft')->required()->columnSpan(1),
                             Select::make('currency')->options(fn () => FilamentCurrency::options())->default($currency)->required()->columnSpan(1),
                             DatePicker::make('issue_date')->label('Issue Date')->default(today())->required()->columnSpan(1),
@@ -177,6 +182,9 @@ class ViewProject extends ViewRecord
 
                     $invoice = Invoice::create([
                         ...$data,
+                        'business_id' => $this->record->business_id,
+                        'number' => app(GenerateDocumentNumberAction::class)
+                            ->execute($this->record->business_id, 'invoice'),
                         'client_id' => $this->record->client_id,
                         'project_id' => $this->record->id,
                         'created_by' => auth()->id(),
@@ -184,7 +192,7 @@ class ViewProject extends ViewRecord
                     ]);
 
                     foreach ($items as $i => $item) {
-                        InvoiceItem::create(['invoice_id' => $invoice->id, 'description' => $item['description'], 'quantity' => $item['quantity'] ?? 1, 'unit_price' => $item['unit_price'] ?? 0, 'order' => $i + 1]);
+                        InvoiceItem::create(['business_id' => $invoice->business_id, 'invoice_id' => $invoice->id, 'description' => $item['description'], 'quantity' => $item['quantity'] ?? 1, 'unit_price' => $item['unit_price'] ?? 0, 'order' => $i + 1]);
                     }
 
                     $invoice->recalculate();

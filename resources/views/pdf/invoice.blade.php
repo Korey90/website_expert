@@ -310,6 +310,10 @@
         <div class="date-cell-value">{{ $invoice->due_date ? $invoice->due_date->format('d M Y') : '—' }}</div>
     </div>
     <div class="date-cell">
+        <div class="date-cell-label">Tax Point</div>
+        <div class="date-cell-value">{{ $invoice->tax_point ? $invoice->tax_point->format('d M Y') : '—' }}</div>
+    </div>
+    <div class="date-cell">
         <div class="date-cell-label">Currency</div>
         <div class="date-cell-value">{{ $currency }}</div>
     </div>
@@ -354,11 +358,17 @@
             <td class="value">− {{ $money->format($invoice->discount_amount, $currency) }}</td>
         </tr>
         @endif
-        @if($invoice->vat_rate > 0)
+        @if($invoice->vat_amount > 0)
         <tr>
-            <td class="label">VAT ({{ rtrim(rtrim(number_format($invoice->vat_rate, 2), '0'), '.') }}%)</td>
+            <td class="label">VAT</td>
             <td class="value">{{ $money->format($invoice->vat_amount, $currency) }}</td>
         </tr>
+        @if($currency !== 'GBP' && $invoice->vat_amount_gbp !== null)
+        <tr>
+            <td class="label">VAT in GBP</td>
+            <td class="value">{{ $money->format($invoice->vat_amount_gbp, 'GBP') }}</td>
+        </tr>
+        @endif
         @endif
         <tr class="totals-divider">
             <td class="label" style="font-weight:700;color:#1e293b">Total</td>

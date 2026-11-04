@@ -201,6 +201,7 @@ class CreateLeadAction
         }
 
         return Contact::create([
+            'business_id' => $client->business_id,
             'client_id' => $client->id,
             'first_name' => $firstName,
             'last_name' => $lastName ?? '',

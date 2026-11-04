@@ -65,6 +65,26 @@ class Business extends Model
         return $this->hasOne(BusinessProfile::class);
     }
 
+    public function accountingProfile(): HasOne
+    {
+        return $this->hasOne(AccountingProfile::class);
+    }
+
+    public function taxCodes(): HasMany
+    {
+        return $this->hasMany(TaxCode::class);
+    }
+
+    public function documentSequences(): HasMany
+    {
+        return $this->hasMany(DocumentSequence::class);
+    }
+
+    public function creditNotes(): HasMany
+    {
+        return $this->hasMany(CreditNote::class);
+    }
+
     public function planPrice(): BelongsTo
     {
         return $this->belongsTo(PlanPrice::class);

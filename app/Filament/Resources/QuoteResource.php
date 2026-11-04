@@ -6,6 +6,7 @@ use App\Filament\Resources\QuoteResource\Pages;
 use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\Client;
 use App\Models\Quote;
+use App\Models\TaxCode;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -46,8 +47,9 @@ class QuoteResource extends BaseResource
                                 ->schema([
                                     Forms\Components\TextInput::make('number')
                                         ->label('Quote No.')
-                                        ->default(fn () => 'QUOT-'.date('Y').'-'.str_pad(Quote::count() + 1, 3, '0', STR_PAD_LEFT))
-                                        ->required(),
+                                        ->placeholder('Assigned when the quote is saved')
+                                        ->disabled()
+                                        ->dehydrated(false),
                                     Forms\Components\Select::make('client_id')
                                         ->label('Client')
                                         ->options(Client::withTrashed()->orderBy('company_name')->pluck('company_name', 'id'))
@@ -69,6 +71,16 @@ class QuoteResource extends BaseResource
                                         ->options(fn () => FilamentCurrency::options())
                                         ->default(fn () => FilamentCurrency::default())
                                         ->live()
+                                        ->afterStateUpdated(function (?string $state, Set $set): void {
+                                            if (strtoupper((string) $state) === 'GBP') {
+                                                $set('gbp_exchange_rate', 1);
+                                                $set('exchange_rate_source', 'identity');
+                                                $set('exchange_rate_date', today()->toDateString());
+                                            } else {
+                                                $set('gbp_exchange_rate', null);
+                                                $set('exchange_rate_source', 'manual');
+                                            }
+                                        })
                                         ->required(),
                                     Forms\Components\TextInput::make('vat_rate')
                                         ->label('VAT rate')
@@ -80,6 +92,24 @@ class QuoteResource extends BaseResource
                                     Forms\Components\DatePicker::make('valid_until')
                                         ->label('Valid until')
                                         ->default(today()->addDays(30)),
+                                    Forms\Components\TextInput::make('gbp_exchange_rate')
+                                        ->label(__('finance.fields.gbp_exchange_rate'))
+                                        ->numeric()
+                                        ->minValue(0.00000001)
+                                        ->helperText('GBP for one unit of the document currency.')
+                                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
+                                        ->visible(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP'),
+                                    Forms\Components\Select::make('exchange_rate_source')
+                                        ->label(__('finance.fields.exchange_rate_source'))
+                                        ->options(['manual' => 'Manual', 'bank_of_england' => 'Bank of England', 'other' => 'Other'])
+                                        ->default('manual')
+                                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
+                                        ->visible(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP'),
+                                    Forms\Components\DatePicker::make('exchange_rate_date')
+                                        ->label(__('finance.fields.exchange_rate_date'))
+                                        ->default(today())
+                                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
+                                        ->visible(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP'),
                                 ]),
                         ]),
 
@@ -105,6 +135,30 @@ class QuoteResource extends BaseResource
                                                 ->rows(1)
                                                 ->autosize()
                                                 ->columnSpanFull(),
+                                            Forms\Components\DatePicker::make('supply_date')
+                                                ->label(__('finance.fields.tax_point'))
+                                                ->columnSpan(4),
+                                            Forms\Components\Select::make('tax_code_id')
+                                                ->label(__('finance.fields.tax_code'))
+                                                ->options(fn () => TaxCode::effectiveOn(today())
+                                                    ->orderBy('code')
+                                                    ->get()
+                                                    ->mapWithKeys(fn (TaxCode $taxCode): array => [
+                                                        $taxCode->id => "{$taxCode->code} — {$taxCode->label} ({$taxCode->rate}%)",
+                                                    ]))
+                                                ->searchable()
+                                                ->preload()
+                                                ->live()
+                                                ->afterStateUpdated(function ($state, Get $get, Set $set): void {
+                                                    $rate = $state
+                                                        ? TaxCode::find($state)?->rate
+                                                        : null;
+
+                                                    $set('vat_rate_snapshot', $rate);
+                                                    static::recalculateTotals($get, $set, '../../');
+                                                })
+                                                ->columnSpan(4),
+                                            Forms\Components\Hidden::make('vat_rate_snapshot'),
                                             Forms\Components\TextInput::make('quantity')
                                                 ->numeric()
                                                 ->default(1)
@@ -177,6 +231,12 @@ class QuoteResource extends BaseResource
                                         ->prefix(fn (Get $get) => FilamentCurrency::symbol($get('currency')))
                                         ->disabled()
                                         ->dehydrated(false),
+                                    Forms\Components\TextInput::make('vat_amount_gbp')
+                                        ->label(__('finance.fields.vat_amount_gbp'))
+                                        ->numeric()
+                                        ->prefix('£')
+                                        ->disabled()
+                                        ->dehydrated(false),
                                 ]),
                         ]),
 
@@ -209,8 +269,17 @@ class QuoteResource extends BaseResource
             2
         );
         $discount = (float) ($get($prefix.'discount_amount') ?? 0);
-        $vatRate = (float) ($get($prefix.'vat_rate') ?? 0);
-        $vatAmount = round(($subtotal - $discount) * ($vatRate / 100), 2);
+        $fallbackVatRate = (float) ($get($prefix.'vat_rate') ?? 0);
+        $taxableSubtotal = max(0, $subtotal - $discount);
+        $vatAmount = round(collect($get($prefix.'items') ?? [])->sum(function (array $item) use ($subtotal, $taxableSubtotal, $fallbackVatRate): float {
+            $lineAmount = (float) ($item['quantity'] ?? 0) * (float) ($item['unit_price'] ?? 0);
+            $discountedLineAmount = $subtotal > 0
+                ? $lineAmount * ($taxableSubtotal / $subtotal)
+                : 0;
+            $vatRate = (float) ($item['vat_rate_snapshot'] ?? $fallbackVatRate);
+
+            return round($discountedLineAmount * ($vatRate / 100), 2);
+        }), 2);
 
         $set($prefix.'subtotal', $subtotal);
         $set($prefix.'vat_amount', $vatAmount);

@@ -83,6 +83,7 @@ class RegisterDomainJob implements ShouldQueue
                 Payment::firstOrCreate(
                     ['stripe_payment_intent_id' => $freshOrder->stripe_payment_intent_id],
                     [
+                        'business_id' => $invoice->business_id,
                         'invoice_id' => $invoice->id,
                         'amount' => $grossAmount,
                         'currency' => strtoupper($freshOrder->currency ?? 'GBP'),

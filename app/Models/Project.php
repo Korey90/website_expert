@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\DefaultsCurrency;
+use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,10 +13,10 @@ use Illuminate\Support\Str;
 
 class Project extends Model
 {
-    use DefaultsCurrency, HasFactory, SoftDeletes;
+    use BelongsToTenant, DefaultsCurrency, HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'title', 'client_id', 'lead_id', 'domain_order_id', 'template_id', 'assigned_to',
+        'business_id', 'title', 'client_id', 'lead_id', 'domain_order_id', 'template_id', 'assigned_to',
         'service_type', 'status', 'description', 'budget', 'currency',
         'start_date', 'deadline', 'completed_at', 'portal_token',
     ];
@@ -39,6 +40,11 @@ class Project extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class)->withTrashed();
+    }
+
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
     }
 
     public function lead(): BelongsTo

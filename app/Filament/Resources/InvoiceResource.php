@@ -7,6 +7,7 @@ use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Project;
+use App\Models\TaxCode;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -15,6 +16,8 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -38,8 +41,9 @@ class InvoiceResource extends BaseResource
                 ->schema([
                     Forms\Components\TextInput::make('number')
                         ->label('Invoice No.')
-                        ->default(fn () => 'INV-'.date('Y').'-'.str_pad(Invoice::count() + 1, 3, '0', STR_PAD_LEFT))
-                        ->required(),
+                        ->placeholder('Assigned when the invoice is saved')
+                        ->disabled()
+                        ->dehydrated(false),
                     Forms\Components\Select::make('client_id')
                         ->label('Client')
                         ->options(Client::withTrashed()->pluck('company_name', 'id'))
@@ -61,10 +65,44 @@ class InvoiceResource extends BaseResource
                         ->default('draft')->required(),
                     Forms\Components\Select::make('currency')
                         ->options(fn () => FilamentCurrency::options())
-                        ->default(fn () => FilamentCurrency::default())->required(),
+                        ->default(fn () => FilamentCurrency::default())
+                        ->live()
+                        ->afterStateUpdated(function (?string $state, Set $set): void {
+                            if (strtoupper((string) $state) === 'GBP') {
+                                $set('gbp_exchange_rate', 1);
+                                $set('exchange_rate_source', 'identity');
+                                $set('exchange_rate_date', today()->toDateString());
+                            } else {
+                                $set('gbp_exchange_rate', null);
+                                $set('exchange_rate_source', 'manual');
+                            }
+                        })
+                        ->required(),
                     Forms\Components\TextInput::make('vat_rate')->numeric()->default(20)->suffix('%'),
                     Forms\Components\DatePicker::make('issue_date')->default(today())->required(),
+                    Forms\Components\DatePicker::make('tax_point')
+                        ->label(__('finance.fields.tax_point'))
+                        ->default(today())
+                        ->required(),
                     Forms\Components\DatePicker::make('due_date')->default(today()->addDays(30))->required(),
+                    Forms\Components\TextInput::make('gbp_exchange_rate')
+                        ->label(__('finance.fields.gbp_exchange_rate'))
+                        ->numeric()
+                        ->minValue(0.00000001)
+                        ->helperText('GBP for one unit of the document currency.')
+                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
+                        ->visible(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP'),
+                    Forms\Components\Select::make('exchange_rate_source')
+                        ->label(__('finance.fields.exchange_rate_source'))
+                        ->options(['manual' => 'Manual', 'bank_of_england' => 'Bank of England', 'other' => 'Other'])
+                        ->default('manual')
+                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
+                        ->visible(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP'),
+                    Forms\Components\DatePicker::make('exchange_rate_date')
+                        ->label(__('finance.fields.exchange_rate_date'))
+                        ->default(today())
+                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
+                        ->visible(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP'),
                 ]),
 
             Section::make('Line Items')
@@ -73,6 +111,20 @@ class InvoiceResource extends BaseResource
                         ->relationship()
                         ->schema([
                             Forms\Components\TextInput::make('description')->required()->columnSpan(3),
+                            Forms\Components\DatePicker::make('supply_date')
+                                ->label(__('finance.fields.tax_point'))
+                                ->columnSpan(2),
+                            Forms\Components\Select::make('tax_code_id')
+                                ->label(__('finance.fields.tax_code'))
+                                ->options(fn () => TaxCode::effectiveOn(today())
+                                    ->orderBy('code')
+                                    ->get()
+                                    ->mapWithKeys(fn (TaxCode $taxCode): array => [
+                                        $taxCode->id => "{$taxCode->code} — {$taxCode->label} ({$taxCode->rate}%)",
+                                    ]))
+                                ->searchable()
+                                ->preload()
+                                ->columnSpan(2),
                             Forms\Components\TextInput::make('quantity')->numeric()->default(1)->columnSpan(1),
                             Forms\Components\TextInput::make('unit_price')->numeric()->prefix(fn () => FilamentCurrency::symbol())->columnSpan(2),
                             Forms\Components\TextInput::make('amount')->numeric()->prefix(fn () => FilamentCurrency::symbol())->disabled()->columnSpan(2),
@@ -88,6 +140,11 @@ class InvoiceResource extends BaseResource
                     Forms\Components\TextInput::make('discount_amount')->numeric()->prefix(fn () => FilamentCurrency::symbol())->default(0),
                     Forms\Components\TextInput::make('vat_amount')->numeric()->prefix(fn () => FilamentCurrency::symbol())->disabled(),
                     Forms\Components\TextInput::make('total')->numeric()->prefix(fn () => FilamentCurrency::symbol())->disabled(),
+                    Forms\Components\TextInput::make('vat_amount_gbp')
+                        ->label(__('finance.fields.vat_amount_gbp'))
+                        ->numeric()
+                        ->prefix('£')
+                        ->disabled(),
                 ]),
 
             Forms\Components\Textarea::make('notes')->rows(3)->columnSpanFull(),

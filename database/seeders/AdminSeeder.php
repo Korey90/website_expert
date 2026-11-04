@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Actions\Finance\InitializeAccountingSetupAction;
 use App\Models\Business;
 use App\Models\BusinessProfile;
 use App\Models\BusinessUser;
@@ -45,6 +46,9 @@ class AdminSeeder extends Seeder
             'view_invoices', 'create_invoices', 'edit_invoices', 'delete_invoices',
             // Finance — PaymentResource
             'view_payments', 'create_payments', 'edit_payments', 'delete_payments',
+            // Finance — accounting and tax workflows
+            'view_finance', 'manage_finance', 'approve_finance', 'post_finance',
+            'close_finance_periods', 'submit_tax_returns',
             // Projects — ProjectResource
             'view_projects', 'create_projects', 'edit_projects', 'delete_projects',
             'view_portfolio_projects', 'create_portfolio_projects', 'edit_portfolio_projects', 'delete_portfolio_projects',
@@ -113,7 +117,7 @@ class AdminSeeder extends Seeder
         $admin->syncPermissions($permissions);
 
         // Manager: full CRM/Finance/Projects access; no role/user admin
-        $managerExclude = ['manage_roles', 'manage_permissions', 'delete_users', 'manage_pipeline', 'manage_project_templates', 'export_leads', 'view_security_events', 'manage_security_events'];
+        $managerExclude = ['manage_roles', 'manage_permissions', 'delete_users', 'manage_pipeline', 'manage_project_templates', 'export_leads', 'view_security_events', 'manage_security_events', 'close_finance_periods', 'submit_tax_returns'];
         $manager->syncPermissions(array_values(array_filter($permissions, fn ($p) => ! in_array($p, $managerExclude))));
 
         // Developer: read-only on CRM/Finance + edit projects/contracts
@@ -127,6 +131,7 @@ class AdminSeeder extends Seeder
             'view_quotes',
             'view_invoices',
             'view_payments',
+            'view_finance',
             'view_contracts',
             'view_projects', 'edit_projects',
             'view_business_settings',
@@ -176,6 +181,7 @@ class AdminSeeder extends Seeder
         );
 
         BusinessProfile::firstOrCreate(['business_id' => $business->id]);
+        app(InitializeAccountingSetupAction::class)->execute($business, $adminUser);
 
         // ---------------------------------------------------
         // Default pipeline stages

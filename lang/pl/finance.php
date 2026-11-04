@@ -1,0 +1,56 @@
+<?php
+
+return [
+    'navigation' => ['accounting' => 'Księgowość'],
+    'fields' => [
+        'tax_code' => 'Kod podatkowy',
+        'tax_point' => 'Tax point / data dostawy',
+        'gbp_exchange_rate' => 'Kurs do GBP',
+        'exchange_rate_source' => 'Źródło kursu',
+        'exchange_rate_date' => 'Data kursu',
+        'vat_amount_gbp' => 'Kwota VAT w GBP',
+    ],
+    'accounting' => [
+        'title' => 'Profil księgowy',
+        'subtitle' => 'Skonfiguruj dane brytyjskiej firmy, okres księgowy, VAT i PAYE używane w dokumentach finansowych.',
+        'saved' => 'Profil księgowy został zapisany.',
+        'save' => 'Zapisz profil księgowy',
+        'saving' => 'Zapisywanie…',
+        'back_to_settings' => 'Ustawienia firmy',
+        'sections' => [
+            'entity' => 'Podmiot prawny',
+            'entity_description' => 'Oficjalne dane firmy używane w ewidencji księgowej i podatkowej.',
+            'address' => 'Adres rejestrowy',
+            'address_description' => 'Adres firmy zarejestrowany w Wielkiej Brytanii.',
+            'accounting' => 'Okres księgowy',
+            'accounting_description' => 'Waluta bazowa, metoda księgowania i rok finansowy.',
+            'vat' => 'Rejestracja VAT',
+            'vat_description' => 'Status VAT, wybrany schemat i daty obowiązywania.',
+            'payroll' => 'Identyfikatory PAYE',
+            'payroll_description' => 'Opcjonalne identyfikatory płacowe. Są szyfrowane i nie są wyświetlane po zapisaniu.',
+        ],
+        'fields' => [
+            'entity_type' => 'Rodzaj podmiotu', 'legal_name' => 'Nazwa prawna',
+            'company_number' => 'Numer Companies House', 'company_utr' => 'Company UTR',
+            'line_1' => 'Adres — wiersz 1', 'line_2' => 'Adres — wiersz 2', 'city' => 'Miejscowość',
+            'county' => 'Hrabstwo', 'postcode' => 'Kod pocztowy', 'country' => 'Kraj',
+            'functional_currency' => 'Waluta funkcjonalna', 'accounting_basis' => 'Metoda księgowania',
+            'financial_year_start' => 'Początek roku finansowego', 'financial_year_end' => 'Koniec roku finansowego',
+            'vat_registered' => 'Firma jest zarejestrowana do VAT', 'vat_number' => 'Numer VAT',
+            'vat_scheme' => 'Schemat VAT', 'vat_effective_from' => 'VAT obowiązuje od',
+            'vat_effective_to' => 'VAT obowiązuje do', 'paye_reference' => 'Employer PAYE reference',
+            'accounts_office_reference' => 'Accounts Office reference',
+        ],
+        'options' => [
+            'limited_company' => 'Limited company', 'sole_trader' => 'Sole trader', 'partnership' => 'Partnership',
+            'accrual' => 'Metoda memoriałowa', 'cash' => 'Metoda kasowa', 'standard' => 'Standard accounting',
+            'cash_vat' => 'Cash accounting', 'annual' => 'Annual accounting', 'flat_rate' => 'Flat Rate Scheme',
+        ],
+        'hints' => [
+            'secret_blank' => 'Pozostaw puste, aby zachować zapisaną wartość.',
+            'secret_saved' => 'Wartość jest już bezpiecznie zapisana.',
+            'utr' => 'Wpisz 10-cyfrowy Unique Taxpayer Reference.',
+            'gbp_only' => 'Brytyjska księga rachunkowa używa obecnie GBP.',
+        ],
+    ],
+];

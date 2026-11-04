@@ -1,0 +1,57 @@
+<?php
+
+return [
+    'navigation' => ['accounting' => 'Contabilidade'],
+    'fields' => [
+        'tax_code' => 'Código fiscal',
+        'tax_point' => 'Ponto fiscal / data de fornecimento',
+        'gbp_exchange_rate' => 'Taxa de câmbio para GBP',
+        'exchange_rate_source' => 'Fonte da taxa de câmbio',
+        'exchange_rate_date' => 'Data da taxa de câmbio',
+        'vat_amount_gbp' => 'Montante de IVA em GBP',
+    ],
+    'accounting' => [
+        'title' => 'Perfil contabilístico',
+        'subtitle' => 'Configure a empresa britânica, o período contabilístico, o IVA e os dados PAYE usados nos documentos financeiros.',
+        'saved' => 'Perfil contabilístico guardado.',
+        'save' => 'Guardar perfil contabilístico',
+        'saving' => 'A guardar…',
+        'back_to_settings' => 'Definições da empresa',
+        'sections' => [
+            'entity' => 'Entidade jurídica',
+            'entity_description' => 'Dados oficiais da empresa usados nos registos contabilísticos e fiscais.',
+            'address' => 'Morada registada',
+            'address_description' => 'A morada da empresa registada no Reino Unido.',
+            'accounting' => 'Período contabilístico',
+            'accounting_description' => 'Moeda base, regime contabilístico e exercício financeiro.',
+            'vat' => 'Registo de IVA',
+            'vat_description' => 'Estado, regime e datas de registo de IVA.',
+            'payroll' => 'Referências PAYE',
+            'payroll_description' => 'Identificadores de salários opcionais. São encriptados e nunca apresentados após guardar.',
+        ],
+        'fields' => [
+            'entity_type' => 'Tipo de entidade', 'legal_name' => 'Nome legal',
+            'company_number' => 'Número da Companies House', 'company_utr' => 'UTR da empresa',
+            'line_1' => 'Morada — linha 1', 'line_2' => 'Morada — linha 2', 'city' => 'Cidade',
+            'county' => 'Condado', 'postcode' => 'Código postal', 'country' => 'País',
+            'functional_currency' => 'Moeda funcional', 'accounting_basis' => 'Regime contabilístico',
+            'financial_year_start' => 'Início do exercício', 'financial_year_end' => 'Fim do exercício',
+            'vat_registered' => 'A empresa está registada para IVA', 'vat_number' => 'Número de IVA',
+            'vat_scheme' => 'Regime de IVA', 'vat_effective_from' => 'IVA válido desde',
+            'vat_effective_to' => 'IVA válido até', 'paye_reference' => 'Referência PAYE do empregador',
+            'accounts_office_reference' => 'Referência do Accounts Office',
+        ],
+        'options' => [
+            'limited_company' => 'Sociedade limitada', 'sole_trader' => 'Empresário em nome individual',
+            'partnership' => 'Parceria', 'accrual' => 'Regime de competência', 'cash' => 'Regime de caixa',
+            'standard' => 'Regime normal', 'cash_vat' => 'Regime de caixa',
+            'annual' => 'Contabilidade anual', 'flat_rate' => 'Flat Rate Scheme',
+        ],
+        'hints' => [
+            'secret_blank' => 'Deixe em branco para manter o valor guardado.',
+            'secret_saved' => 'Já existe um valor guardado em segurança.',
+            'utr' => 'Introduza a Unique Taxpayer Reference de 10 dígitos.',
+            'gbp_only' => 'O livro contabilístico britânico utiliza atualmente GBP.',
+        ],
+    ],
+];

@@ -220,6 +220,7 @@ class PipelinePage extends BasePage
         }
 
         $project = Project::create([
+            'business_id' => $lead->business_id,
             'title' => $lead->title,
             'client_id' => $lead->client_id,
             'lead_id' => $lead->id,

@@ -64,6 +64,7 @@ class HandleInertiaRequests extends Middleware
             'portal_translations' => $this->resolvePortalTranslations($locale),
             'landing_page_translations' => $this->resolveTranslations('landing_pages', $locale),
             'rank_checker_translations' => $this->resolveTranslations('rank_checker', $locale),
+            'finance_translations' => $this->resolveTranslations('finance', $locale),
             'footer_pages' => $this->resolveFooterPages(),
         ];
     }
@@ -76,12 +77,20 @@ class HandleInertiaRequests extends Middleware
             return [
                 'can_access_client_portal' => false,
                 'can_access_workspace' => false,
+                'can_manage_finance' => false,
                 'mode' => 'guest',
             ];
         }
 
-        $canAccessWorkspace = $user->currentBusiness() !== null;
+        $business = $user->currentBusiness();
+        $canAccessWorkspace = $business !== null;
         $canAccessClientPortal = ClientPortalAccess::where('user_id', $user->id)->exists();
+        $canManageFinance = $business !== null
+            && $user->businessMemberships()
+                ->where('business_id', $business->id)
+                ->where('is_active', true)
+                ->whereIn('role', ['owner', 'admin'])
+                ->exists();
 
         $mode = match (true) {
             $canAccessWorkspace && $canAccessClientPortal => 'hybrid',
@@ -93,6 +102,7 @@ class HandleInertiaRequests extends Middleware
         return [
             'can_access_client_portal' => $canAccessClientPortal,
             'can_access_workspace' => $canAccessWorkspace,
+            'can_manage_finance' => $canManageFinance,
             'mode' => $mode,
         ];
     }

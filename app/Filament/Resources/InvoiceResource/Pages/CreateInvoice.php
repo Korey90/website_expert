@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
+use App\Actions\Finance\GenerateDocumentNumberAction;
 use App\Filament\Resources\InvoiceResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,8 @@ class CreateInvoice extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['created_by'] = Auth::id();
+        $data['number'] = app(GenerateDocumentNumberAction::class)->execute(currentBusiness()->id, 'invoice');
+
         return $data;
     }
 

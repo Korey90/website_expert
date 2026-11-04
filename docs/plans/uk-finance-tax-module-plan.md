@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** DRAFT — plan do akceptacji, bez rozpoczętej implementacji  
+**Status:** IMPLEMENTACJA W TOKU — Faza 0 ukończona, Faza 1 w realizacji
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -350,13 +350,13 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 
 - [ ] `UKFIN-001` [S] Potwierdzić grupę użytkowników: limited company, sole trader, partnership.
 - [ ] `UKFIN-002` [M] Warsztat z księgowym UK: plan kont, tax codes, VAT schemes, raporty i przykładowe dokumenty.
-- [ ] `UKFIN-003` [M] Audyt wszystkich finansowych queries, policies i tenant boundaries.
-- [ ] `UKFIN-004` [M] Migracja `business_id` do quotes/invoices/payments/projects i tabel pochodnych.
-- [ ] `UKFIN-005` [M] Bezpieczny backfill + raport rekordów bez jednoznacznego tenanta.
-- [ ] `UKFIN-006` [M] Dodanie `BelongsToTenant`/jawnego scope i indeksów złożonych.
-- [ ] `UKFIN-007` [M] Testy izolacji dla invoices, payments, quotes, reports i Filament selects.
-- [ ] `UKFIN-008` [S] Rejestr uprawnień: view/manage/approve/post/close/submit-tax.
-- [ ] `UKFIN-009` [S] Threat model: HMRC tokens, bank data, attachments, UTR/PAYE refs.
+- [x] `UKFIN-003` [M] Audyt wszystkich finansowych queries, policies i tenant boundaries. *(2026-11-04: ścieżki zapisu + regresja reports/portal/workflow; kolejne modele obowiązkowo dopisywane do audytu)*
+- [x] `UKFIN-004` [M] Migracja `business_id` do quotes/invoices/payments/projects i tabel pochodnych. *(objęto również contacts)*
+- [x] `UKFIN-005` [M] Bezpieczny backfill + raport rekordów bez jednoznacznego tenanta. *(`finance:audit-tenants`)*
+- [x] `UKFIN-006` [M] Dodanie `BelongsToTenant`/jawnego scope i indeksów złożonych.
+- [x] `UKFIN-007` [M] Testy izolacji dla invoices, payments, quotes, reports i Filament selects.
+- [x] `UKFIN-008` [S] Rejestr uprawnień: view/manage/approve/post/close/submit-tax.
+- [x] `UKFIN-009` [S] Threat model: HMRC tokens, bank data, attachments, UTR/PAYE refs. *(`docs/security/uk-finance-threat-model.md`)*
 
 **Gate:** nie rozpoczynać kosztów ani HMRC, dopóki testy cross-tenant nie są zielone.
 
@@ -364,15 +364,15 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 
 **Cel:** faktury i credit notes zawierają wymagane dane oraz obsługują mixed VAT.
 
-- [ ] `UKFIN-101` [M] AccountingProfile + konfiguracja entity/VAT/year-end.
-- [ ] `UKFIN-102` [M] TaxCode model, migracja i seed standard/reduced/zero/exempt/outside scope/reverse charge.
-- [ ] `UKFIN-103` [M] Tax code i tax snapshot na invoice/quote items.
-- [ ] `UKFIN-104` [M] Refaktor kalkulacji VAT z poziomu faktury na pozycje.
-- [ ] `UKFIN-105` [M] Supply date/tax point i VAT amount in GBP.
-- [ ] `UKFIN-106` [M] Sekwencje numeracji per tenant i document type z blokadą race condition.
-- [ ] `UKFIN-107` [M] CreditNote + items + lifecycle.
+- [x] `UKFIN-101` [M] AccountingProfile + konfiguracja entity/VAT/year-end. *(schema, szyfrowanie, Action, Inertia UI, role owner/admin i PL/EN/PT)*
+- [x] `UKFIN-102` [M] TaxCode model, migracja i seed standard/reduced/zero/exempt/outside scope/reverse charge.
+- [x] `UKFIN-103` [M] Tax code i tax snapshot na invoice/quote items.
+- [x] `UKFIN-104` [M] Refaktor kalkulacji VAT z poziomu faktury na pozycje.
+- [x] `UKFIN-105` [M] Supply date/tax point i VAT amount in GBP. *(snapshot kursu, źródła i daty; kwoty GBP per pozycja i dokument; PDF)*
+- [x] `UKFIN-106` [M] Sekwencje numeracji per tenant i document type z blokadą race condition. *(transakcja + `lockForUpdate`, osobna sekwencja roczna, backfill)*
+- [x] `UKFIN-107` [M] CreditNote + items + lifecycle. *(snapshot z faktury, partial credit, issue/allocate/void, audit metadata i tenant scope)*
 - [ ] `UKFIN-108` [M] Aktualizacja InvoiceResource, QuoteResource i PDF.
-- [ ] `UKFIN-109` [S] Walidacja pól zależnie od VAT registered/entity type.
+- [x] `UKFIN-109` [S] Walidacja pól zależnie od VAT registered/entity type. *(Form Request + normalizacja pól nieaktywnych)*
 - [ ] `UKFIN-110` [M] Testy: mixed rates, rounding, FX, zero/exempt, credit note, concurrent numbering.
 
 **Gate:** przykładowe faktury i credit notes zaakceptowane przez księgowego UK.

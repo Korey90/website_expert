@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\QuoteResource\Pages;
 
+use App\Actions\Finance\GenerateDocumentNumberAction;
 use App\Filament\Resources\QuoteResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,8 @@ class CreateQuote extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['created_by'] = Auth::id();
+        $data['number'] = app(GenerateDocumentNumberAction::class)->execute(currentBusiness()->id, 'quote');
+
         return $data;
     }
 

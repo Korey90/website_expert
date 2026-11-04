@@ -14,34 +14,34 @@ class ProjectSeeder extends Seeder
 {
     public function run(): void
     {
-        $manager   = User::where('email', 'manager@websiteexpert.co.uk')->first();
+        $manager = User::where('email', 'manager@websiteexpert.co.uk')->first();
         $developer = User::where('email', 'developer@websiteexpert.co.uk')->first();
         $developer2 = User::where('email', 'developer2@websiteexpert.co.uk')->first();
 
         $hargreaves = Client::where('company_name', 'Hargreaves & Sons Solicitors')->first();
-        $oakfield   = Client::where('company_name', 'Oakfield Dental Practice')->first();
-        $nts        = Client::where('company_name', 'Northern Trade Supplies Ltd')->first();
-        $bloom      = Client::where('company_name', 'Bloom & Grow Garden Centre')->first();
-        $coastal    = Client::where('company_name', 'Coastal Escapes Holiday Rentals')->first();
+        $oakfield = Client::where('company_name', 'Oakfield Dental Practice')->first();
+        $nts = Client::where('company_name', 'Northern Trade Supplies Ltd')->first();
+        $bloom = Client::where('company_name', 'Bloom & Grow Garden Centre')->first();
+        $coastal = Client::where('company_name', 'Coastal Escapes Holiday Rentals')->first();
 
         $leadHargreaves = Lead::where('title', 'Website Redesign – Hargreaves Solicitors')->first();
-        $leadNts        = Lead::where('title', 'E-Commerce Platform – Northern Trade Supplies')->first();
-        $leadOakfield   = Lead::where('title', 'Dental Practice Website – Oakfield')->first();
+        $leadNts = Lead::where('title', 'E-Commerce Platform – Northern Trade Supplies')->first();
+        $leadOakfield = Lead::where('title', 'Dental Practice Website – Oakfield')->first();
 
         $projects = [
             // --- Completed ---
             [
-                'title'        => 'Hargreaves Solicitors – Website Redesign',
-                'client_id'    => $hargreaves?->id,
-                'lead_id'      => $leadHargreaves?->id,
-                'assigned_to'  => $developer?->id,
+                'title' => 'Hargreaves Solicitors – Website Redesign',
+                'client_id' => $hargreaves?->id,
+                'lead_id' => $leadHargreaves?->id,
+                'assigned_to' => $developer?->id,
                 'service_type' => 'wizytowka',
-                'status'       => 'completed',
-                'description'  => '12-page redesign of the solicitors website. Migrated from WordPress to Laravel. Fully responsive, WCAG 2.1 AA accessible.',
-                'budget'       => 3800.00,
-                'currency'     => 'GBP',
-                'start_date'   => now()->subMonths(5)->toDateString(),
-                'deadline'     => now()->subMonths(3)->toDateString(),
+                'status' => 'completed',
+                'description' => '12-page redesign of the solicitors website. Migrated from WordPress to Laravel. Fully responsive, WCAG 2.1 AA accessible.',
+                'budget' => 3800.00,
+                'currency' => 'GBP',
+                'start_date' => now()->subMonths(5)->toDateString(),
+                'deadline' => now()->subMonths(3)->toDateString(),
                 'completed_at' => now()->subMonths(3)->addDays(5),
                 'phases' => [
                     ['name' => 'Discovery & Brief',   'order' => 1, 'status' => 'completed', 'tasks' => [
@@ -78,17 +78,17 @@ class ProjectSeeder extends Seeder
             ],
             // --- Active / In-Progress ---
             [
-                'title'        => 'NTS Direct – E-Commerce Platform',
-                'client_id'    => $nts?->id,
-                'lead_id'      => $leadNts?->id,
-                'assigned_to'  => $developer?->id,
+                'title' => 'NTS Direct – E-Commerce Platform',
+                'client_id' => $nts?->id,
+                'lead_id' => $leadNts?->id,
+                'assigned_to' => $developer?->id,
                 'service_type' => 'ecommerce',
-                'status'       => 'active',
-                'description'  => 'Full WooCommerce build with B2B pricing tiers, trade account portal, and product import from 3PL system.',
-                'budget'       => 12500.00,
-                'currency'     => 'GBP',
-                'start_date'   => now()->subMonths(2)->toDateString(),
-                'deadline'     => now()->addMonths(2)->toDateString(),
+                'status' => 'active',
+                'description' => 'Full WooCommerce build with B2B pricing tiers, trade account portal, and product import from 3PL system.',
+                'budget' => 12500.00,
+                'currency' => 'GBP',
+                'start_date' => now()->subMonths(2)->toDateString(),
+                'deadline' => now()->addMonths(2)->toDateString(),
                 'phases' => [
                     ['name' => 'Discovery & Strategy',  'order' => 1, 'status' => 'completed', 'tasks' => [
                         ['title' => 'Requirements workshop', 'status' => 'completed'],
@@ -134,17 +134,17 @@ class ProjectSeeder extends Seeder
             ],
             // --- Active ---
             [
-                'title'        => 'Oakfield Dental – Practice Website',
-                'client_id'    => $oakfield?->id,
-                'lead_id'      => $leadOakfield?->id,
-                'assigned_to'  => $developer2?->id,
+                'title' => 'Oakfield Dental – Practice Website',
+                'client_id' => $oakfield?->id,
+                'lead_id' => $leadOakfield?->id,
+                'assigned_to' => $developer2?->id,
                 'service_type' => 'wizytowka',
-                'status'       => 'active',
-                'description'  => 'Brochure site with NHS & private patient info, online booking via Doctify, and CQC compliance statement.',
-                'budget'       => 2200.00,
-                'currency'     => 'GBP',
-                'start_date'   => now()->subWeeks(5)->toDateString(),
-                'deadline'     => now()->addWeeks(3)->toDateString(),
+                'status' => 'active',
+                'description' => 'Brochure site with NHS & private patient info, online booking via Doctify, and CQC compliance statement.',
+                'budget' => 2200.00,
+                'currency' => 'GBP',
+                'start_date' => now()->subWeeks(5)->toDateString(),
+                'deadline' => now()->addWeeks(3)->toDateString(),
                 'phases' => [
                     ['name' => 'Discovery & Brief',   'order' => 1, 'status' => 'completed', 'tasks' => [
                         ['title' => 'Gather all compliance docs', 'status' => 'completed'],
@@ -175,17 +175,17 @@ class ProjectSeeder extends Seeder
             ],
             // --- On Hold ---
             [
-                'title'        => 'Coastal Escapes – Static Brochure Site',
-                'client_id'    => $coastal?->id,
-                'lead_id'      => null,
-                'assigned_to'  => $developer?->id,
+                'title' => 'Coastal Escapes – Static Brochure Site',
+                'client_id' => $coastal?->id,
+                'lead_id' => null,
+                'assigned_to' => $developer?->id,
                 'service_type' => 'wizytowka',
-                'status'       => 'on_hold',
-                'description'  => 'Simple 5-page holiday rental brochure site. On hold pending client content delivery.',
-                'budget'       => 1800.00,
-                'currency'     => 'GBP',
-                'start_date'   => now()->subMonths(3)->toDateString(),
-                'deadline'     => now()->subMonths(1)->toDateString(),
+                'status' => 'on_hold',
+                'description' => 'Simple 5-page holiday rental brochure site. On hold pending client content delivery.',
+                'budget' => 1800.00,
+                'currency' => 'GBP',
+                'start_date' => now()->subMonths(3)->toDateString(),
+                'deadline' => now()->subMonths(1)->toDateString(),
                 'phases' => [
                     ['name' => 'Discovery & Brief',   'order' => 1, 'status' => 'completed', 'tasks' => [
                         ['title' => 'Brief received and confirmed', 'status' => 'completed'],
@@ -211,6 +211,9 @@ class ProjectSeeder extends Seeder
             unset($projectData['phases']);
 
             // Map project status (on_hold is valid for projects)
+            $projectData['business_id'] = Client::withoutGlobalScopes()
+                ->find($projectData['client_id'])?->business_id;
+
             $project = Project::firstOrCreate(
                 ['title' => $projectData['title'], 'client_id' => $projectData['client_id']],
                 $projectData
@@ -219,13 +222,13 @@ class ProjectSeeder extends Seeder
             // Phase status enum: pending | active | completed
             $phaseStatusMap = ['in_progress' => 'active', 'on_hold' => 'pending'];
             // Task status enum: todo | in_progress | review | done
-            $taskStatusMap  = ['completed' => 'done', 'pending' => 'todo', 'on_hold' => 'todo'];
+            $taskStatusMap = ['completed' => 'done', 'pending' => 'todo', 'on_hold' => 'todo'];
 
             foreach ($phases as $phaseData) {
                 $tasks = $phaseData['tasks'] ?? [];
                 unset($phaseData['tasks']);
                 $phaseData['project_id'] = $project->id;
-                $phaseData['status']     = $phaseStatusMap[$phaseData['status']] ?? $phaseData['status'];
+                $phaseData['status'] = $phaseStatusMap[$phaseData['status']] ?? $phaseData['status'];
 
                 $phase = ProjectPhase::firstOrCreate(
                     ['project_id' => $project->id, 'name' => $phaseData['name']],
@@ -234,8 +237,8 @@ class ProjectSeeder extends Seeder
 
                 foreach ($tasks as $taskData) {
                     $taskData['project_id'] = $project->id;
-                    $taskData['phase_id']   = $phase->id;
-                    $taskData['status']     = $taskStatusMap[$taskData['status']] ?? $taskData['status'];
+                    $taskData['phase_id'] = $phase->id;
+                    $taskData['status'] = $taskStatusMap[$taskData['status']] ?? $taskData['status'];
                     $taskData['assigned_to'] = $projectData['assigned_to'] ?? null;
 
                     ProjectTask::firstOrCreate(

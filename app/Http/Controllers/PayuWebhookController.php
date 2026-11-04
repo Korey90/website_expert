@@ -70,6 +70,7 @@ class PayuWebhookController extends Controller
             $currency = strtoupper($order['currencyCode'] ?? 'GBP');
 
             $payment = Payment::create([
+                'business_id' => $invoice->business_id,
                 'invoice_id' => $invoice->id,
                 'amount' => $amount,
                 'currency' => $currency,

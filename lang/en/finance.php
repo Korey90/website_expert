@@ -1,0 +1,56 @@
+<?php
+
+return [
+    'navigation' => ['accounting' => 'Accounting'],
+    'fields' => [
+        'tax_code' => 'Tax code',
+        'tax_point' => 'Tax point / supply date',
+        'gbp_exchange_rate' => 'GBP exchange rate',
+        'exchange_rate_source' => 'Exchange rate source',
+        'exchange_rate_date' => 'Exchange rate date',
+        'vat_amount_gbp' => 'VAT amount in GBP',
+    ],
+    'accounting' => [
+        'title' => 'Accounting profile',
+        'subtitle' => 'Configure the UK company, accounting period, VAT and PAYE details used on financial documents.',
+        'saved' => 'Accounting profile saved.',
+        'save' => 'Save accounting profile',
+        'saving' => 'Saving…',
+        'back_to_settings' => 'Business settings',
+        'sections' => [
+            'entity' => 'Legal entity',
+            'entity_description' => 'Official company details used for accounting and tax records.',
+            'address' => 'Registered address',
+            'address_description' => 'The address registered for the business in the United Kingdom.',
+            'accounting' => 'Accounting period',
+            'accounting_description' => 'Base currency, accounting basis and financial year.',
+            'vat' => 'VAT registration',
+            'vat_description' => 'VAT status, scheme and registration dates.',
+            'payroll' => 'PAYE references',
+            'payroll_description' => 'Optional payroll identifiers. Stored encrypted and never displayed after saving.',
+        ],
+        'fields' => [
+            'entity_type' => 'Entity type', 'legal_name' => 'Legal name',
+            'company_number' => 'Companies House number', 'company_utr' => 'Company UTR',
+            'line_1' => 'Address line 1', 'line_2' => 'Address line 2', 'city' => 'City',
+            'county' => 'County', 'postcode' => 'Postcode', 'country' => 'Country',
+            'functional_currency' => 'Functional currency', 'accounting_basis' => 'Accounting basis',
+            'financial_year_start' => 'Financial year start', 'financial_year_end' => 'Financial year end',
+            'vat_registered' => 'Business is VAT registered', 'vat_number' => 'VAT number',
+            'vat_scheme' => 'VAT scheme', 'vat_effective_from' => 'VAT effective from',
+            'vat_effective_to' => 'VAT effective to', 'paye_reference' => 'Employer PAYE reference',
+            'accounts_office_reference' => 'Accounts Office reference',
+        ],
+        'options' => [
+            'limited_company' => 'Limited company', 'sole_trader' => 'Sole trader', 'partnership' => 'Partnership',
+            'accrual' => 'Accrual accounting', 'cash' => 'Cash basis', 'standard' => 'Standard accounting',
+            'cash_vat' => 'Cash accounting', 'annual' => 'Annual accounting', 'flat_rate' => 'Flat Rate Scheme',
+        ],
+        'hints' => [
+            'secret_blank' => 'Leave blank to keep the saved value.',
+            'secret_saved' => 'A value is already stored securely.',
+            'utr' => 'Enter the 10-digit Unique Taxpayer Reference.',
+            'gbp_only' => 'The UK accounting ledger currently uses GBP.',
+        ],
+    ],
+];

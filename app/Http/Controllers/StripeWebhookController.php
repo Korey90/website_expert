@@ -139,6 +139,7 @@ class StripeWebhookController extends Controller
                 $invoice = Invoice::where('domain_order_id', $order->id)->first();
                 if ($invoice && $invoice->status !== 'paid') {
                     $payment = Payment::create([
+                        'business_id' => $invoice->business_id,
                         'invoice_id' => $invoice->id,
                         'amount' => ($session->amount_total ?? 0) / 100,
                         'currency' => strtoupper($session->currency ?? $order->currency ?? 'GBP'),
@@ -173,6 +174,7 @@ class StripeWebhookController extends Controller
         }
 
         Payment::create([
+            'business_id' => $invoice->business_id,
             'invoice_id' => $invoice->id,
             'amount' => ($session->amount_total ?? 0) / 100,
             'currency' => strtoupper($session->currency ?? 'gbp'),

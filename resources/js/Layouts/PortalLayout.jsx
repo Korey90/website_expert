@@ -32,6 +32,8 @@ export default function PortalLayout({ client, children }) {
     const capabilities = props.auth?.portal_capabilities ?? {};
     const canAccessClientPortal = !!capabilities.can_access_client_portal;
     const canAccessWorkspace = !!capabilities.can_access_workspace;
+    const canManageFinance = !!capabilities.can_manage_finance;
+    const accountingLabel = props.finance_translations?.navigation?.accounting ?? 'Accounting';
 
     const sections = [
         canAccessClientPortal ? {
@@ -60,6 +62,7 @@ export default function PortalLayout({ client, children }) {
             items: [
                 { href: route('business.profile.edit'),    label: t('bizProfile'),  icon: '🎨' },
                 { href: route('business.edit'),            label: t('bizSettings'), icon: '🏢' },
+                ...(canManageFinance ? [{ href: route('business.accounting.edit'), label: accountingLabel, icon: '📊' }] : []),
                 { href: route('business.api-tokens.index'),label: t('apiTokens'),   icon: '🔑' },
                 { href: route('portal.billing'),            label: t('billing'),     icon: '💳' },
             ],

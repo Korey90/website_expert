@@ -2,6 +2,7 @@
 
 namespace App\Services\Business;
 
+use App\Actions\Finance\InitializeAccountingSetupAction;
 use App\Events\BusinessCreated;
 use App\Models\Business;
 use App\Models\BusinessProfile;
@@ -13,6 +14,10 @@ use Illuminate\Support\Str;
 
 class BusinessService
 {
+    public function __construct(
+        private readonly InitializeAccountingSetupAction $initializeAccountingSetup,
+    ) {}
+
     /**
      * Create a new Business for the given user and make them the owner.
      */
@@ -21,24 +26,25 @@ class BusinessService
         $slug = $this->generateUniqueSlug($data['name']);
 
         $business = Business::create([
-            'name'     => $data['name'],
-            'slug'     => $slug,
-            'locale'   => $data['locale'] ?? 'en',
+            'name' => $data['name'],
+            'slug' => $slug,
+            'locale' => $data['locale'] ?? 'en',
             'timezone' => $data['timezone'] ?? 'Europe/London',
-            'plan'     => 'free',
+            'plan' => 'free',
             'is_active' => true,
         ]);
 
         BusinessUser::create([
             'business_id' => $business->id,
-            'user_id'     => $user->id,
-            'role'        => 'owner',
-            'is_active'   => true,
-            'joined_at'   => now(),
+            'user_id' => $user->id,
+            'role' => 'owner',
+            'is_active' => true,
+            'joined_at' => now(),
         ]);
 
         // Always create an empty profile so other modules can rely on it existing
         BusinessProfile::create(['business_id' => $business->id]);
+        $this->initializeAccountingSetup->execute($business, $user);
 
         event(new BusinessCreated($business));
 
@@ -51,8 +57,8 @@ class BusinessService
     public function update(Business $business, array $data): Business
     {
         $updateData = array_filter([
-            'locale'        => $data['locale'] ?? null,
-            'timezone'      => $data['timezone'] ?? null,
+            'locale' => $data['locale'] ?? null,
+            'timezone' => $data['timezone'] ?? null,
             'primary_color' => $data['primary_color'] ?? null,
         ], fn ($v) => $v !== null);
 
@@ -84,7 +90,7 @@ class BusinessService
 
         $path = $file->storeAs(
             "businesses/{$business->id}",
-            'logo.' . $file->getClientOriginalExtension(),
+            'logo.'.$file->getClientOriginalExtension(),
             'public'
         );
 

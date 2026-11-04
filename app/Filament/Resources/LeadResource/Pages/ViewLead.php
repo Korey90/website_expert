@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\LeadResource\Pages;
 
+use App\Actions\Finance\GenerateDocumentNumberAction;
 use App\Filament\Resources\LeadResource;
 use App\Filament\Support\Currency as FilamentCurrency;
 use App\Mail\ClientEmailMail;
@@ -914,6 +915,7 @@ class ViewLead extends ViewRecord
 
         $lead = $this->record;
         $quoteData = [
+            'business_id' => $lead->business_id,
             'client_id' => $lead->client_id,
             'lead_id' => $lead->id,
             'created_by' => Auth::id(),
@@ -931,13 +933,15 @@ class ViewLead extends ViewRecord
             $quote->update($quoteData);
             $quote->items()->delete();
         } else {
-            $number = 'QUOT-'.date('Y').'-'.str_pad(Quote::withTrashed()->count() + 1, 3, '0', STR_PAD_LEFT);
+            $number = app(GenerateDocumentNumberAction::class)
+                ->execute($lead->business_id, 'quote');
             $quote = Quote::create(array_merge($quoteData, ['number' => $number]));
             $this->proposalQuoteId = $quote->id;
         }
 
         foreach ($this->proposalItems as $i => $item) {
             QuoteItem::create([
+                'business_id' => $quote->business_id,
                 'quote_id' => $quote->id,
                 'description' => $item['description'],
                 'details' => $item['details'] ?: null,
@@ -1084,6 +1088,7 @@ class ViewLead extends ViewRecord
         }
 
         $project = Project::create([
+            'business_id' => $this->record->business_id,
             'title' => $this->record->title,
             'client_id' => $this->record->client_id,
             'lead_id' => $this->record->id,

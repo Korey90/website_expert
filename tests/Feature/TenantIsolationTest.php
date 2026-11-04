@@ -7,8 +7,15 @@ use App\Models\Briefing;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\Client;
+use App\Models\Contact;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Models\Lead;
+use App\Models\Payment;
 use App\Models\PipelineStage;
+use App\Models\Project;
+use App\Models\Quote;
+use App\Models\QuoteItem;
 use App\Models\SalesOffer;
 use App\Models\User;
 use App\Scopes\BusinessScope;
@@ -27,10 +34,14 @@ class TenantIsolationTest extends TestCase
 {
     use RefreshDatabase;
 
-    private Business      $businessA;
-    private Business      $businessB;
-    private User          $userA;
-    private User          $userB;
+    private Business $businessA;
+
+    private Business $businessB;
+
+    private User $userA;
+
+    private User $userB;
+
     private PipelineStage $stage;
 
     protected function setUp(): void
@@ -46,15 +57,15 @@ class TenantIsolationTest extends TestCase
 
         // Business A
         $this->businessA = Business::create([
-            'name'      => 'Agency Alpha',
-            'slug'      => 'agency-alpha',
+            'name' => 'Agency Alpha',
+            'slug' => 'agency-alpha',
             'is_active' => true,
         ]);
 
         // Business B
         $this->businessB = Business::create([
-            'name'      => 'Agency Beta',
-            'slug'      => 'agency-beta',
+            'name' => 'Agency Beta',
+            'slug' => 'agency-beta',
             'is_active' => true,
         ]);
 
@@ -62,18 +73,18 @@ class TenantIsolationTest extends TestCase
         $this->userA = User::factory()->create(['email' => 'user.a@test.local']);
         BusinessUser::create([
             'business_id' => $this->businessA->id,
-            'user_id'     => $this->userA->id,
-            'role'        => 'owner',
-            'is_active'   => true,
+            'user_id' => $this->userA->id,
+            'role' => 'owner',
+            'is_active' => true,
         ]);
 
         // User B — member of Business B
         $this->userB = User::factory()->create(['email' => 'user.b@test.local']);
         BusinessUser::create([
             'business_id' => $this->businessB->id,
-            'user_id'     => $this->userB->id,
-            'role'        => 'owner',
-            'is_active'   => true,
+            'user_id' => $this->userB->id,
+            'role' => 'owner',
+            'is_active' => true,
         ]);
     }
 
@@ -84,10 +95,10 @@ class TenantIsolationTest extends TestCase
     private function createRawLead(Business $business, string $title = 'Test Lead'): Lead
     {
         return Lead::withoutGlobalScope(BusinessScope::class)->create([
-            'title'              => $title,
-            'source'             => 'manual',
-            'business_id'        => $business->id,
-            'pipeline_stage_id'  => $this->stage->id,
+            'title' => $title,
+            'source' => 'manual',
+            'business_id' => $business->id,
+            'pipeline_stage_id' => $this->stage->id,
         ]);
     }
 
@@ -100,8 +111,8 @@ class TenantIsolationTest extends TestCase
         $this->actingAs($this->userA);
 
         $lead = Lead::create([
-            'title'             => 'Auto-fill Lead',
-            'source'            => 'manual',
+            'title' => 'Auto-fill Lead',
+            'source' => 'manual',
             'pipeline_stage_id' => $this->stage->id,
         ]);
 
@@ -144,7 +155,7 @@ class TenantIsolationTest extends TestCase
 
         $client = Client::create([
             'company_name' => 'Auto Corp',
-            'status'       => 'prospect',
+            'status' => 'prospect',
         ]);
 
         $this->assertSame($this->businessA->id, $client->business_id);
@@ -154,13 +165,44 @@ class TenantIsolationTest extends TestCase
     {
         Client::withoutGlobalScope(BusinessScope::class)->create([
             'company_name' => 'Client A',
-            'status'       => 'prospect',
-            'business_id'  => $this->businessA->id,
+            'status' => 'prospect',
+            'business_id' => $this->businessA->id,
         ]);
 
         $this->actingAs($this->userB);
 
         $this->assertSame(0, Client::count());
+    }
+
+    // -------------------------------------------------------------------------
+    // Financial records isolation
+    // -------------------------------------------------------------------------
+
+    public function test_financial_records_are_auto_filled_with_business_id(): void
+    {
+        $this->actingAs($this->userA);
+
+        [$contact, $project, $quote, $quoteItem, $invoice, $invoiceItem, $payment] = $this->createFinancialRecords();
+
+        foreach ([$contact, $project, $quote, $quoteItem, $invoice, $invoiceItem, $payment] as $record) {
+            $this->assertSame($this->businessA->id, $record->business_id);
+        }
+    }
+
+    public function test_user_cannot_see_another_tenants_financial_records(): void
+    {
+        $this->actingAs($this->userA);
+        $this->createFinancialRecords();
+
+        $this->actingAs($this->userB);
+
+        $this->assertSame(0, Contact::count());
+        $this->assertSame(0, Project::count());
+        $this->assertSame(0, Quote::count());
+        $this->assertSame(0, QuoteItem::count());
+        $this->assertSame(0, Invoice::count());
+        $this->assertSame(0, InvoiceItem::count());
+        $this->assertSame(0, Payment::count());
     }
 
     // -------------------------------------------------------------------------
@@ -174,9 +216,9 @@ class TenantIsolationTest extends TestCase
         $this->actingAs($this->userA);
 
         $briefing = Briefing::create([
-            'title'   => 'Discovery Call',
-            'type'    => 'discovery',
-            'status'  => 'draft',
+            'title' => 'Discovery Call',
+            'type' => 'discovery',
+            'status' => 'draft',
             'lead_id' => $leadA->id,
         ]);
 
@@ -188,10 +230,10 @@ class TenantIsolationTest extends TestCase
         $leadA = $this->createRawLead($this->businessA);
 
         Briefing::withoutGlobalScope(BusinessScope::class)->create([
-            'title'       => 'Briefing A',
-            'type'        => 'discovery',
-            'status'      => 'draft',
-            'lead_id'     => $leadA->id,
+            'title' => 'Briefing A',
+            'type' => 'discovery',
+            'status' => 'draft',
+            'lead_id' => $leadA->id,
             'business_id' => $this->businessA->id,
         ]);
 
@@ -211,11 +253,11 @@ class TenantIsolationTest extends TestCase
         $this->actingAs($this->userA);
 
         $offer = SalesOffer::create([
-            'title'    => 'Offer A',
+            'title' => 'Offer A',
             'language' => 'en',
-            'status'   => 'draft',
-            'body'     => '<p>Test</p>',
-            'lead_id'  => $leadA->id,
+            'status' => 'draft',
+            'body' => '<p>Test</p>',
+            'lead_id' => $leadA->id,
         ]);
 
         $this->assertSame($this->businessA->id, $offer->business_id);
@@ -226,11 +268,11 @@ class TenantIsolationTest extends TestCase
         $leadA = $this->createRawLead($this->businessA);
 
         SalesOffer::withoutGlobalScope(BusinessScope::class)->create([
-            'title'       => 'Offer A',
-            'language'    => 'en',
-            'status'      => 'draft',
-            'body'        => '<p>Test</p>',
-            'lead_id'     => $leadA->id,
+            'title' => 'Offer A',
+            'language' => 'en',
+            'status' => 'draft',
+            'body' => '<p>Test</p>',
+            'lead_id' => $leadA->id,
             'business_id' => $this->businessA->id,
         ]);
 
@@ -248,9 +290,9 @@ class TenantIsolationTest extends TestCase
         $this->actingAs($this->userA);
 
         $token = ApiToken::create([
-            'name'       => 'CI Token',
+            'name' => 'CI Token',
             'token_hash' => hash('sha256', 'test-token-value'),
-            'is_active'  => true,
+            'is_active' => true,
             'created_by' => $this->userA->id,
         ]);
 
@@ -260,11 +302,11 @@ class TenantIsolationTest extends TestCase
     public function test_user_only_sees_api_tokens_from_their_own_tenant(): void
     {
         ApiToken::withoutGlobalScope(BusinessScope::class)->create([
-            'name'        => 'Token A',
-            'token_hash'  => hash('sha256', 'secret-a'),
-            'is_active'   => true,
+            'name' => 'Token A',
+            'token_hash' => hash('sha256', 'secret-a'),
+            'is_active' => true,
             'business_id' => $this->businessA->id,
-            'created_by'  => $this->userA->id,
+            'created_by' => $this->userA->id,
         ]);
 
         $this->actingAs($this->userB);
@@ -299,5 +341,71 @@ class TenantIsolationTest extends TestCase
         $this->actingAs($this->userB);
 
         $this->assertNull(Lead::find($lead->id));
+    }
+
+    /**
+     * @return array{Contact, Project, Quote, QuoteItem, Invoice, InvoiceItem, Payment}
+     */
+    private function createFinancialRecords(): array
+    {
+        $client = Client::create([
+            'company_name' => 'Finance Test Ltd',
+            'status' => 'active',
+        ]);
+
+        $contact = Contact::create([
+            'client_id' => $client->id,
+            'first_name' => 'Alex',
+            'last_name' => 'Smith',
+            'email' => 'alex@example.test',
+        ]);
+
+        $project = Project::create([
+            'title' => 'Tenant project',
+            'client_id' => $client->id,
+            'status' => 'draft',
+        ]);
+
+        $quote = Quote::create([
+            'number' => 'QUOT-TENANT-001',
+            'client_id' => $client->id,
+            'created_by' => $this->userA->id,
+            'status' => 'draft',
+        ]);
+
+        $quoteItem = QuoteItem::create([
+            'quote_id' => $quote->id,
+            'description' => 'Quoted service',
+            'quantity' => 1,
+            'unit_price' => 100,
+        ]);
+
+        $invoice = Invoice::create([
+            'number' => 'INV-TENANT-001',
+            'client_id' => $client->id,
+            'project_id' => $project->id,
+            'quote_id' => $quote->id,
+            'created_by' => $this->userA->id,
+            'status' => 'sent',
+            'issue_date' => now()->toDateString(),
+            'due_date' => now()->addDays(30)->toDateString(),
+        ]);
+
+        $invoiceItem = InvoiceItem::create([
+            'invoice_id' => $invoice->id,
+            'description' => 'Invoiced service',
+            'quantity' => 1,
+            'unit_price' => 100,
+        ]);
+
+        $payment = Payment::create([
+            'invoice_id' => $invoice->id,
+            'amount' => 100,
+            'currency' => 'GBP',
+            'method' => 'bank_transfer',
+            'status' => 'completed',
+        ]);
+
+        return [$contact, $project, $quote, $quoteItem, $invoice, $invoiceItem, $payment];
     }
 }
