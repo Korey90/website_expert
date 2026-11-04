@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Events\LeadAssigned;
+use App\Events\LeadCaptured;
 use App\Listeners\AutomationEventListener;
 use App\Listeners\ClientActivityListener;
 use App\Listeners\NotifyLeadOwnerListener;
@@ -12,24 +14,28 @@ use App\Models\Expense;
 use App\Models\FinancialAttachment;
 use App\Models\LandingPage;
 use App\Models\Lead;
+use App\Models\LedgerAccount;
+use App\Models\Payment;
 use App\Models\PurchaseCreditNote;
+use App\Models\RecurringExpenseTemplate;
 use App\Models\SalesOffer;
 use App\Models\SalesOfferTemplate;
 use App\Models\Setting;
 use App\Models\Supplier;
+use App\Notifications\LeadAssignedNotification;
+use App\Observers\PaymentObserver;
 use App\Policies\BriefingPolicy;
 use App\Policies\BriefingTemplatePolicy;
 use App\Policies\ExpensePolicy;
 use App\Policies\FinancialAttachmentPolicy;
 use App\Policies\LandingPagePolicy;
 use App\Policies\LeadPolicy;
+use App\Policies\LedgerAccountPolicy;
 use App\Policies\PurchaseCreditNotePolicy;
+use App\Policies\RecurringExpenseTemplatePolicy;
 use App\Policies\SalesOfferPolicy;
 use App\Policies\SalesOfferTemplatePolicy;
 use App\Policies\SupplierPolicy;
-use App\Events\LeadCaptured;
-use App\Events\LeadAssigned;
-use App\Notifications\LeadAssignedNotification;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -65,8 +71,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::policy(LandingPage::class, LandingPagePolicy::class);
+        Gate::policy(LedgerAccount::class, LedgerAccountPolicy::class);
         Gate::policy(Lead::class, LeadPolicy::class);
         Gate::policy(PurchaseCreditNote::class, PurchaseCreditNotePolicy::class);
+        Gate::policy(RecurringExpenseTemplate::class, RecurringExpenseTemplatePolicy::class);
         Gate::policy(Briefing::class, BriefingPolicy::class);
         Gate::policy(BriefingTemplate::class, BriefingTemplatePolicy::class);
         Gate::policy(Expense::class, ExpensePolicy::class);
@@ -74,6 +82,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(SalesOffer::class, SalesOfferPolicy::class);
         Gate::policy(SalesOfferTemplate::class, SalesOfferTemplatePolicy::class);
         Gate::policy(Supplier::class, SupplierPolicy::class);
+
+        Payment::observe(PaymentObserver::class);
 
         $this->applyIntegrationSettings();
     }
@@ -92,21 +102,35 @@ class AppServiceProvider extends ServiceProvider
 
             Config::set('mail.default', $mailer);
 
-            $host       = Setting::get('mail_host');
-            $port       = Setting::get('mail_port');
+            $host = Setting::get('mail_host');
+            $port = Setting::get('mail_port');
             $encryption = Setting::get('mail_encryption');
-            $username   = Setting::get('mail_username');
-            $password   = Setting::get('mail_password');
-            $from       = Setting::get('mail_from');
-            $fromName   = Setting::get('mail_from_name');
+            $username = Setting::get('mail_username');
+            $password = Setting::get('mail_password');
+            $from = Setting::get('mail_from');
+            $fromName = Setting::get('mail_from_name');
 
-            if ($host)       Config::set('mail.mailers.smtp.host',       $host);
-            if ($port)       Config::set('mail.mailers.smtp.port',       (int) $port);
-            if ($encryption !== null) Config::set('mail.mailers.smtp.encryption', $encryption ?: null);
-            if ($username)   Config::set('mail.mailers.smtp.username',   $username);
-            if ($password)   Config::set('mail.mailers.smtp.password',   $password);
-            if ($from)       Config::set('mail.from.address',            $from);
-            if ($fromName)   Config::set('mail.from.name',               $fromName);
+            if ($host) {
+                Config::set('mail.mailers.smtp.host', $host);
+            }
+            if ($port) {
+                Config::set('mail.mailers.smtp.port', (int) $port);
+            }
+            if ($encryption !== null) {
+                Config::set('mail.mailers.smtp.encryption', $encryption ?: null);
+            }
+            if ($username) {
+                Config::set('mail.mailers.smtp.username', $username);
+            }
+            if ($password) {
+                Config::set('mail.mailers.smtp.password', $password);
+            }
+            if ($from) {
+                Config::set('mail.from.address', $from);
+            }
+            if ($fromName) {
+                Config::set('mail.from.name', $fromName);
+            }
 
             // Apply to the named mailer that matches the chosen driver
             if (in_array($mailer, ['postmark', 'resend', 'mailgun', 'ses'], true)) {
@@ -117,17 +141,27 @@ class AppServiceProvider extends ServiceProvider
             }
 
             // Openprovider domain registrar settings
-            $opProvider   = Setting::get('op_provider');
-            $opUsername   = Setting::get('op_username');
-            $opPassword   = Setting::get('op_password');
+            $opProvider = Setting::get('op_provider');
+            $opUsername = Setting::get('op_username');
+            $opPassword = Setting::get('op_password');
             $opResellerId = Setting::get('op_reseller_id');
-            $opSandbox    = Setting::get('op_sandbox');
+            $opSandbox = Setting::get('op_sandbox');
 
-            if ($opProvider)   Config::set('services.domain_registrar.provider',                   $opProvider);
-            if ($opUsername)   Config::set('services.domain_registrar.openprovider.username',       $opUsername);
-            if ($opPassword)   Config::set('services.domain_registrar.openprovider.password',       $opPassword);
-            if ($opResellerId) Config::set('services.domain_registrar.openprovider.reseller_id',    $opResellerId);
-            if ($opSandbox !== null) Config::set('services.domain_registrar.openprovider.sandbox',  $opSandbox !== '0');
+            if ($opProvider) {
+                Config::set('services.domain_registrar.provider', $opProvider);
+            }
+            if ($opUsername) {
+                Config::set('services.domain_registrar.openprovider.username', $opUsername);
+            }
+            if ($opPassword) {
+                Config::set('services.domain_registrar.openprovider.password', $opPassword);
+            }
+            if ($opResellerId) {
+                Config::set('services.domain_registrar.openprovider.reseller_id', $opResellerId);
+            }
+            if ($opSandbox !== null) {
+                Config::set('services.domain_registrar.openprovider.sandbox', $opSandbox !== '0');
+            }
         } catch (\Throwable) {
             // DB unavailable (e.g. first deploy) — silently fall back to .env
         }

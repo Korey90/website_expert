@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\Expense;
 use App\Models\ExpenseItem;
 use App\Models\FinancialAttachment;
+use App\Models\LedgerAccount;
 use App\Models\Project;
 use App\Models\PurchaseCreditNote;
 use App\Models\Supplier;
@@ -177,6 +178,20 @@ class ExpenseResource extends BaseResource
                                 ->searchable()
                                 ->preload()
                                 ->required()
+                                ->columnSpan(2),
+                            Forms\Components\Select::make('category')
+                                ->label(__('finance.expenses.fields.category'))
+                                ->options(collect(config('finance.expense_categories', []))->mapWithKeys(fn (string $category): array => [
+                                    $category => __('finance.expense_categories.'.$category),
+                                ])->all())
+                                ->default('other')
+                                ->required()
+                                ->columnSpan(2),
+                            Forms\Components\Select::make('ledger_account_id')
+                                ->label(__('finance.expenses.fields.ledger_account'))
+                                ->options(fn (): array => LedgerAccount::activePostable()->where('type', 'expense')->orderBy('code')->get()->mapWithKeys(fn (LedgerAccount $account): array => [$account->id => "{$account->code} — {$account->name}"])->all())
+                                ->searchable()
+                                ->preload()
                                 ->columnSpan(2),
                             Forms\Components\TextInput::make('quantity')
                                 ->label(__('finance.expenses.fields.quantity'))

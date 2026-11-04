@@ -12,7 +12,7 @@ class ExpenseItem extends Model
     use BelongsToTenant, HasFactory;
 
     protected $fillable = [
-        'business_id', 'expense_id', 'tax_code_id', 'ledger_account_id', 'client_id', 'project_id',
+        'business_id', 'expense_id', 'tax_code_id', 'ledger_account_id', 'category', 'client_id', 'project_id',
         'description', 'quantity', 'unit_price', 'supply_date',
         'net_amount', 'net_amount_gbp', 'vat_rate_snapshot',
         'vat_amount', 'vat_amount_gbp', 'gross_amount', 'gross_amount_gbp',
@@ -52,6 +52,11 @@ class ExpenseItem extends Model
     public function taxCode(): BelongsTo
     {
         return $this->belongsTo(TaxCode::class);
+    }
+
+    public function ledgerAccount(): BelongsTo
+    {
+        return $this->belongsTo(LedgerAccount::class);
     }
 
     public function client(): BelongsTo

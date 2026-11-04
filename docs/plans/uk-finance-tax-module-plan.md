@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** IMPLEMENTACJA W TOKU — Fazy 0–1 zaimplementowane, Faza 2 w toku (`UKFIN-201`–`UKFIN-207` ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
+**Status:** IMPLEMENTACJA W TOKU — Fazy 0–2 zaimplementowane, Faza 3 w toku (`UKFIN-301` ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -388,9 +388,9 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-205` [M] Private FinancialAttachment service z SHA-256. *(prywatny dysk, tenant scope, MIME/limit 10 MB, deduplikacja hash, 6-letnia retencja, kwarantanna `pending`, relacje do invoice/expense/payment/credit note)*
 - [x] `UKFIN-206` [M] Podgląd PDF/obrazu i kontrolowany download. *(RBAC `view_finance`, brak publicznych URL-i, tylko status `clean`, kontrola SHA-256 przy każdym odczycie, `no-store`/`nosniff`, ochrona cross-tenant; integracja z silnikiem malware scan musi ustawiać wynik `clean`/`rejected`)*
 - [x] `UKFIN-207` [M] Purchase credit notes i refundy kosztowe. *(osobne dokumenty `PCN`, snapshoty VAT/FX z expense items, kontrola maksymalnej ilości, issue/allocate/refund/void, redukcja salda kosztu, rejestr zwrotów gotówkowych do wysokości zapłaty, tenant/RBAC i panel PL/EN/PT)*
-- [ ] `UKFIN-208` [M] Recurring expenses jako template + scheduled draft generation.
-- [ ] `UKFIN-209` [M] Raport kosztów per category/supplier/project/VAT code.
-- [ ] `UKFIN-210` [M] Testy auth, tenant, upload security, VAT, partial payments i duplicates.
+- [x] `UKFIN-208` [M] Recurring expenses jako template + scheduled draft generation. *(weekly/monthly/quarterly/yearly, pauza i wznowienie, idempotentne szkice z unikalnym occurrence, catch-up zaległych okresów, poprawna kotwica końca miesiąca, dzienna komenda scheduler, tenant/RBAC i panel PL/EN/PT; generowanie ograniczone do GBP, aby nie utrwalać nieaktualnych kursów FX)*
+- [x] `UKFIN-209` [M] Raport kosztów per category/supplier/project/VAT code. *(standardowe kategorie kosztowe, sumy netto/VAT/brutto w GBP, filtry okresu, grupowanie po kategorii/dostawcy/projekcie/kodzie VAT, wydane purchase credits jako wartości ujemne, CSV, tenant/RBAC oraz panel PL/EN/PT)*
+- [x] `UKFIN-210` [M] Testy auth, tenant, upload security, VAT, partial payments i duplicates. *(regresja RBAC i cross-tenant, prywatne pliki/MIME/limit/hash, mixed VAT/FX/rounding/reverse charge, duplikaty numerów i załączników, automatyczna synchronizacja faktury `partially_paid`/`paid` po zmianach płatności; pełny pakiet Finance na SQLite, z testem blokad współbieżnych przeznaczonym dla MySQL/PostgreSQL)*
 
 **Gate:** kompletna ścieżka receipt → approval → payment → audit export.
 
@@ -398,7 +398,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 
 **Cel:** każda operacja finansowa ma zbilansowany, audytowalny zapis księgowy.
 
-- [ ] `UKFIN-301` [M] LedgerAccount i UK chart template.
+- [x] `UKFIN-301` [M] LedgerAccount i UK chart template. *(35 tenantowych kont UK z hierarchią, typem/podtypem, saldem normalnym, flagami system/postable/active i nazwami PL/EN/PT; idempotentna inicjalizacja i migracja istniejących firm, panel Filament/RBAC, domyślne konto dostawcy, automatyczne mapowanie kategorii kosztu oraz audyt referencji cross-tenant)*
 - [ ] `UKFIN-302` [M] AccountingPeriod + open/close/lock workflow.
 - [ ] `UKFIN-303` [M] JournalEntry/JournalLine schema i constraints.
 - [ ] `UKFIN-304` [M] Posting engine z transaction + idempotency.

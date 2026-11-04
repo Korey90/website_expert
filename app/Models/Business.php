@@ -75,6 +75,11 @@ class Business extends Model
         return $this->hasMany(TaxCode::class);
     }
 
+    public function ledgerAccounts(): HasMany
+    {
+        return $this->hasMany(LedgerAccount::class);
+    }
+
     public function documentSequences(): HasMany
     {
         return $this->hasMany(DocumentSequence::class);
@@ -108,6 +113,11 @@ class Business extends Model
     public function purchaseCreditRefunds(): HasMany
     {
         return $this->hasMany(PurchaseCreditRefund::class);
+    }
+
+    public function recurringExpenseTemplates(): HasMany
+    {
+        return $this->hasMany(RecurringExpenseTemplate::class);
     }
 
     public function planPrice(): BelongsTo

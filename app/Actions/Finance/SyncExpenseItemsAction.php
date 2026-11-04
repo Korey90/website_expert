@@ -5,6 +5,7 @@ namespace App\Actions\Finance;
 use App\Models\Client;
 use App\Models\Expense;
 use App\Models\ExpenseItem;
+use App\Models\LedgerAccount;
 use App\Models\Project;
 use App\Models\TaxCode;
 use DomainException;
@@ -37,6 +38,10 @@ class SyncExpenseItemsAction
             }
 
             $taxCodeId = $this->tenantModelId(TaxCode::class, $itemData['tax_code_id'] ?? null, $expense->business_id);
+            $category = in_array($itemData['category'] ?? null, config('finance.expense_categories', []), true)
+                ? $itemData['category']
+                : 'other';
+            $ledgerAccountId = $this->resolveLedgerAccountId($expense, $itemData['ledger_account_id'] ?? null, $category);
             $clientId = $this->tenantModelId(Client::class, $itemData['client_id'] ?? null, $expense->business_id);
             $projectId = $this->tenantModelId(Project::class, $itemData['project_id'] ?? null, $expense->business_id);
             $billable = (bool) ($itemData['billable'] ?? false);
@@ -49,7 +54,8 @@ class SyncExpenseItemsAction
                 'business_id' => $expense->business_id,
                 'expense_id' => $expense->id,
                 'tax_code_id' => $taxCodeId,
-                'ledger_account_id' => $itemData['ledger_account_id'] ?? null,
+                'ledger_account_id' => $ledgerAccountId,
+                'category' => $category,
                 'client_id' => $clientId,
                 'project_id' => $projectId,
                 'description' => $description,
@@ -73,10 +79,26 @@ class SyncExpenseItemsAction
             ->where('business_id', $businessId)
             ->find($id);
 
-        if (! $record) {
+        if (! $record || ($record instanceof LedgerAccount && (! $record->is_active || ! $record->is_postable))) {
             throw new DomainException('An expense reference does not belong to the current business.');
         }
 
         return (int) $record->getKey();
+    }
+
+    private function resolveLedgerAccountId(Expense $expense, mixed $providedId, string $category): ?int
+    {
+        $candidateId = $providedId ?: $expense->supplier?->default_ledger_account_id;
+
+        if ($candidateId) {
+            return $this->tenantModelId(LedgerAccount::class, $candidateId, $expense->business_id);
+        }
+
+        return LedgerAccount::withoutGlobalScopes()
+            ->where('business_id', $expense->business_id)
+            ->activePostable()
+            ->where('type', 'expense')
+            ->where('subtype', $category)
+            ->value('id');
     }
 }

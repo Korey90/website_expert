@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SupplierResource\Pages;
 use App\Filament\Support\Currency as FilamentCurrency;
+use App\Models\LedgerAccount;
 use App\Models\Supplier;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -113,6 +114,11 @@ class SupplierResource extends BaseResource
                         ->default(30)
                         ->suffix(__('finance.suppliers.fields.days'))
                         ->required(),
+                    Forms\Components\Select::make('default_ledger_account_id')
+                        ->label(__('finance.suppliers.fields.default_ledger_account'))
+                        ->options(fn (): array => LedgerAccount::activePostable()->where('type', 'expense')->orderBy('code')->get()->mapWithKeys(fn (LedgerAccount $account): array => [$account->id => "{$account->code} — {$account->name}"])->all())
+                        ->searchable()
+                        ->preload(),
                     Forms\Components\Textarea::make('notes')
                         ->label(__('finance.suppliers.fields.notes'))
                         ->rows(3)
@@ -162,6 +168,9 @@ class SupplierResource extends BaseResource
                     TextEntry::make('payment_terms_days')
                         ->label(__('finance.suppliers.fields.payment_terms_days'))
                         ->suffix(' '.__('finance.suppliers.fields.days')),
+                    TextEntry::make('defaultLedgerAccount.code')
+                        ->label(__('finance.suppliers.fields.default_ledger_account'))
+                        ->placeholder('—'),
                     TextEntry::make('notes')->label(__('finance.suppliers.fields.notes'))->placeholder('—')->columnSpanFull(),
                 ]),
         ]);

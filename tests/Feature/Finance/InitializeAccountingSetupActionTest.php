@@ -6,6 +6,7 @@ use App\Actions\Finance\InitializeAccountingSetupAction;
 use App\Models\AccountingProfile;
 use App\Models\Business;
 use App\Models\BusinessUser;
+use App\Models\LedgerAccount;
 use App\Models\TaxCode;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -31,8 +32,10 @@ class InitializeAccountingSetupActionTest extends TestCase
 
         $this->assertSame($first['profile']->id, $second['profile']->id);
         $this->assertCount(6, $first['tax_codes']);
+        $this->assertCount(35, $first['ledger_accounts']);
         $this->assertSame(1, AccountingProfile::withoutGlobalScopes()->where('business_id', $business->id)->count());
         $this->assertSame(6, TaxCode::withoutGlobalScopes()->where('business_id', $business->id)->count());
+        $this->assertSame(35, LedgerAccount::withoutGlobalScopes()->where('business_id', $business->id)->count());
         $this->assertSame('GBP', $first['profile']->functional_currency);
         $this->assertSame('20.00', $first['tax_codes']->firstWhere('code', 'S20')?->rate);
         $this->assertSame('Stawka standardowa 20%', $first['tax_codes']->firstWhere('code', 'S20')?->getTranslation('label', 'pl'));
@@ -83,7 +86,9 @@ class InitializeAccountingSetupActionTest extends TestCase
 
         $this->assertSame(1, AccountingProfile::count());
         $this->assertSame(6, TaxCode::count());
+        $this->assertSame(35, LedgerAccount::count());
         $this->assertTrue(AccountingProfile::first()->is($businessA->accountingProfile));
         $this->assertSame(0, TaxCode::where('business_id', $businessB->id)->count());
+        $this->assertSame(0, LedgerAccount::where('business_id', $businessB->id)->count());
     }
 }

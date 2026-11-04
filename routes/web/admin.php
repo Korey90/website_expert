@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Domain\DomainPriceListCsvController;
 use App\Http\Controllers\EmailTemplatePreviewController;
+use App\Http\Controllers\Finance\ExpenseReportExportController;
 use App\Http\Controllers\Finance\FinancialAttachmentController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\Domain\DomainPriceListCsvController;
+use App\Models\LeadNote;
 use Illuminate\Support\Facades\Route;
 
 // -----------------------------------------------------------------------
@@ -13,8 +15,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth')->group(function () {
 
     // Lead note unpin (quick inline action)
-    Route::patch('/lead-notes/{note}/unpin', function (\App\Models\LeadNote $note) {
+    Route::patch('/lead-notes/{note}/unpin', function (LeadNote $note) {
         $note->update(['is_pinned' => false]);
+
         return back();
     })->name('lead-notes.unpin');
 
@@ -29,10 +32,13 @@ Route::middleware('auth')->group(function () {
             ->name('download');
     });
 
+    Route::get('/admin/finance/expense-report.csv', ExpenseReportExportController::class)
+        ->name('admin.finance.expense-report.csv');
+
     // Reports — admin only
     Route::prefix('reports')->name('reports.')->group(function () {
         foreach (['html', 'pdf', 'xlsx', 'csv'] as $format) {
-            Route::get("leads/{$format}",    [ReportController::class, 'leads'])->defaults('format', $format)->name("leads.{$format}");
+            Route::get("leads/{$format}", [ReportController::class, 'leads'])->defaults('format', $format)->name("leads.{$format}");
             Route::get("invoices/{$format}", [ReportController::class, 'invoices'])->defaults('format', $format)->name("invoices.{$format}");
             Route::get("projects/{$format}", [ReportController::class, 'projects'])->defaults('format', $format)->name("projects.{$format}");
         }

@@ -21,7 +21,7 @@ class Supplier extends Model
         'business_id', 'name', 'trading_name', 'company_number', 'vat_number',
         'contact_name', 'contact_email', 'contact_phone',
         'address_line1', 'address_line2', 'city', 'county', 'postcode', 'country',
-        'default_currency', 'payment_terms_days', 'status', 'notes',
+        'default_currency', 'default_ledger_account_id', 'payment_terms_days', 'status', 'notes',
     ];
 
     protected function casts(): array
@@ -34,6 +34,11 @@ class Supplier extends Model
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function defaultLedgerAccount(): BelongsTo
+    {
+        return $this->belongsTo(LedgerAccount::class, 'default_ledger_account_id');
     }
 
     public function expenses(): HasMany

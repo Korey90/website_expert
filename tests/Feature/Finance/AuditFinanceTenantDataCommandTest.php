@@ -2,10 +2,12 @@
 
 namespace Tests\Feature\Finance;
 
+use App\Actions\Finance\InitializeAccountingSetupAction;
 use App\Models\Business;
 use App\Models\Client;
 use App\Models\Contact;
 use App\Models\Expense;
+use App\Models\LedgerAccount;
 use App\Models\Supplier;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -83,6 +85,22 @@ class AuditFinanceTenantDataCommandTest extends TestCase
             'issue_date' => '2026-11-01',
             'tax_point' => '2026-11-01',
         ]);
+
+        $this->artisan('finance:audit-tenants')
+            ->expectsOutputToContain('Finance tenant audit failed: 1 invalid record(s).')
+            ->assertExitCode(1);
+    }
+
+    public function test_cross_tenant_ledger_parent_is_reported(): void
+    {
+        $business = Business::create(['name' => 'Ledger Audit', 'slug' => 'ledger-audit', 'is_active' => true]);
+        $otherBusiness = Business::create(['name' => 'Other Ledger Audit', 'slug' => 'other-ledger-audit', 'is_active' => true]);
+        app(InitializeAccountingSetupAction::class)->execute($business);
+        app(InitializeAccountingSetupAction::class)->execute($otherBusiness);
+        $account = LedgerAccount::withoutGlobalScopes()->where('business_id', $business->id)->where('code', '6200')->firstOrFail();
+        $foreignParent = LedgerAccount::withoutGlobalScopes()->where('business_id', $otherBusiness->id)->where('code', '5000')->firstOrFail();
+
+        $account->update(['parent_id' => $foreignParent->id]);
 
         $this->artisan('finance:audit-tenants')
             ->expectsOutputToContain('Finance tenant audit failed: 1 invalid record(s).')

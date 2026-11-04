@@ -70,5 +70,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Daily: check domain expiry and dispatch renewal reminder emails (30/14/7/1 days)
         $schedule->job(new CheckDomainExpiryJob)->dailyAt('08:30')->withoutOverlapping()->onOneServer();
+
+        // Daily: create idempotent draft expenses from active recurring templates
+        $schedule->command('finance:generate-recurring-expenses')->dailyAt('01:30')->withoutOverlapping()->onOneServer();
     })
     ->create();

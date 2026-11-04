@@ -41,7 +41,7 @@ class Expense extends Model
     }
 
     protected $fillable = [
-        'business_id', 'supplier_id', 'client_id', 'project_id',
+        'business_id', 'supplier_id', 'client_id', 'project_id', 'recurring_expense_template_id', 'recurrence_date',
         'created_by', 'approved_by', 'posted_by', 'voided_by',
         'supplier_invoice_number', 'status', 'currency',
         'gbp_exchange_rate', 'exchange_rate_source', 'exchange_rate_date',
@@ -58,7 +58,7 @@ class Expense extends Model
             'subtotal' => 'decimal:2', 'vat_amount' => 'decimal:2', 'total' => 'decimal:2',
             'subtotal_gbp' => 'decimal:2', 'vat_amount_gbp' => 'decimal:2', 'total_gbp' => 'decimal:2',
             'amount_paid' => 'decimal:2', 'amount_due' => 'decimal:2',
-            'issue_date' => 'date', 'tax_point' => 'date', 'due_date' => 'date',
+            'issue_date' => 'date', 'tax_point' => 'date', 'due_date' => 'date', 'recurrence_date' => 'date',
             'received_date' => 'date', 'exchange_rate_date' => 'date',
             'approved_at' => 'datetime', 'posted_at' => 'datetime', 'voided_at' => 'datetime',
         ];
@@ -82,6 +82,11 @@ class Expense extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class)->withTrashed();
+    }
+
+    public function recurringTemplate(): BelongsTo
+    {
+        return $this->belongsTo(RecurringExpenseTemplate::class, 'recurring_expense_template_id')->withTrashed();
     }
 
     public function createdBy(): BelongsTo

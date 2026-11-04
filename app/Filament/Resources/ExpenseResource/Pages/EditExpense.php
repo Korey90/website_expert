@@ -28,6 +28,7 @@ class EditExpense extends EditRecord
             'supply_date' => $item->supply_date?->toDateString(),
             'tax_code_id' => $item->tax_code_id,
             'ledger_account_id' => $item->ledger_account_id,
+            'category' => $item->category,
             'client_id' => $item->client_id,
             'project_id' => $item->project_id,
             'billable' => $item->billable,

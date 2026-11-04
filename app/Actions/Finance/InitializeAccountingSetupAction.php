@@ -4,8 +4,10 @@ namespace App\Actions\Finance;
 
 use App\Models\AccountingProfile;
 use App\Models\Business;
+use App\Models\LedgerAccount;
 use App\Models\TaxCode;
 use App\Models\User;
+use App\Support\Finance\DefaultUkChartAccounts;
 use App\Support\Finance\DefaultUkTaxCodes;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 class InitializeAccountingSetupAction
 {
     /**
-     * @return array{profile: AccountingProfile, tax_codes: Collection<int, TaxCode>}
+     * @return array{profile: AccountingProfile, tax_codes: Collection<int, TaxCode>, ledger_accounts: Collection<int, LedgerAccount>}
      */
     public function execute(Business $business, ?User $actor = null): array
     {
@@ -43,9 +45,33 @@ class InitializeAccountingSetupAction
                 ]));
             }
 
+            $ledgerAccounts = new Collection;
+            $accountsByCode = [];
+
+            foreach (DefaultUkChartAccounts::all() as $attributes) {
+                $parentCode = $attributes['parent_code'];
+                unset($attributes['parent_code']);
+
+                $account = LedgerAccount::withoutGlobalScopes()->firstOrCreate(
+                    [
+                        'business_id' => $business->id,
+                        'code' => $attributes['code'],
+                    ],
+                    [
+                        ...$attributes,
+                        'parent_id' => $parentCode ? $accountsByCode[$parentCode]->id : null,
+                        'is_system' => true,
+                    ],
+                );
+
+                $accountsByCode[$account->code] = $account;
+                $ledgerAccounts->push($account);
+            }
+
             return [
                 'profile' => $profile,
                 'tax_codes' => $taxCodes,
+                'ledger_accounts' => $ledgerAccounts,
             ];
         });
     }

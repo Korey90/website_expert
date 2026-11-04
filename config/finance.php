@@ -1,6 +1,19 @@
 <?php
 
 return [
+    'expense_categories' => [
+        'cost_of_sales',
+        'software',
+        'office',
+        'travel',
+        'professional_fees',
+        'marketing',
+        'utilities',
+        'insurance',
+        'rent',
+        'bank_fees',
+        'other',
+    ],
     'attachments' => [
         'disk' => env('FINANCE_ATTACHMENTS_DISK', 'financial'),
         'max_bytes' => 10 * 1024 * 1024,

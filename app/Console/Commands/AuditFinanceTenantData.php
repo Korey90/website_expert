@@ -29,6 +29,15 @@ class AuditFinanceTenantData extends Command
         'purchase_credit_notes' => ['parent' => 'expenses', 'foreign_key' => 'expense_id'],
         'purchase_credit_note_items' => ['parent' => 'purchase_credit_notes', 'foreign_key' => 'purchase_credit_note_id'],
         'purchase_credit_refunds' => ['parent' => 'purchase_credit_notes', 'foreign_key' => 'purchase_credit_note_id'],
+        'recurring_expense_templates' => ['parent' => 'suppliers', 'foreign_key' => 'supplier_id', 'nullable_parent' => true],
+        'recurring_expense_template_items' => ['parent' => 'recurring_expense_templates', 'foreign_key' => 'recurring_expense_template_id'],
+    ];
+
+    /** @var array<string, array{table: string, parent: string, foreign_key: string}> */
+    private const OPTIONAL_TENANT_RELATIONS = [
+        'suppliers.default_ledger_account_id' => ['table' => 'suppliers', 'parent' => 'ledger_accounts', 'foreign_key' => 'default_ledger_account_id'],
+        'expense_items.ledger_account_id' => ['table' => 'expense_items', 'parent' => 'ledger_accounts', 'foreign_key' => 'ledger_account_id'],
+        'recurring_expense_template_items.ledger_account_id' => ['table' => 'recurring_expense_template_items', 'parent' => 'ledger_accounts', 'foreign_key' => 'ledger_account_id'],
     ];
 
     public function handle(): int
@@ -64,6 +73,42 @@ class AuditFinanceTenantData extends Command
                     ->limit(20)
                     ->pluck("{$table}.id")
                     ->all(),
+            ];
+        }
+
+        $ledgerQuery = DB::table('ledger_accounts as account')
+            ->leftJoin('businesses as owner', 'owner.id', '=', 'account.business_id')
+            ->leftJoin('ledger_accounts as parent', 'parent.id', '=', 'account.parent_id')
+            ->where(function ($query): void {
+                $query->whereNull('account.business_id')
+                    ->orWhereNull('owner.id')
+                    ->orWhere(function ($parentMismatch): void {
+                        $parentMismatch->whereNotNull('account.parent_id')
+                            ->where(function ($mismatch): void {
+                                $mismatch->whereNull('parent.id')
+                                    ->orWhereColumn('account.business_id', '!=', 'parent.business_id');
+                            });
+                    });
+            });
+        $report['ledger_accounts'] = [
+            'invalid_count' => (clone $ledgerQuery)->count(),
+            'sample_ids' => (clone $ledgerQuery)->limit(20)->pluck('account.id')->all(),
+        ];
+
+        foreach (self::OPTIONAL_TENANT_RELATIONS as $label => $relation) {
+            $table = $relation['table'];
+            $parent = $relation['parent'];
+            $foreignKey = $relation['foreign_key'];
+            $query = DB::table($table)
+                ->leftJoin($parent, "{$parent}.id", '=', "{$table}.{$foreignKey}")
+                ->whereNotNull("{$table}.{$foreignKey}")
+                ->where(function ($mismatch) use ($table, $parent): void {
+                    $mismatch->whereNull("{$parent}.id")
+                        ->orWhereColumn("{$table}.business_id", '!=', "{$parent}.business_id");
+                });
+            $report[$label] = [
+                'invalid_count' => (clone $query)->count(),
+                'sample_ids' => (clone $query)->limit(20)->pluck("{$table}.id")->all(),
             ];
         }
 

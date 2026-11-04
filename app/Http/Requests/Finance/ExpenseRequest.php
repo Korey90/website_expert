@@ -70,7 +70,15 @@ abstract class ExpenseRequest extends FormRequest
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
             'items.*.supply_date' => ['nullable', 'date'],
             'items.*.tax_code_id' => ['required', 'integer', $taxCodeExists],
-            'items.*.ledger_account_id' => ['nullable', 'integer', 'min:1'],
+            'items.*.ledger_account_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('ledger_accounts', 'id')->where(fn ($query) => $query
+                    ->where('business_id', $businessId)
+                    ->where('is_active', true)
+                    ->where('is_postable', true)),
+            ],
+            'items.*.category' => ['sometimes', 'string', Rule::in(config('finance.expense_categories', []))],
             'items.*.client_id' => ['nullable', 'integer', $tenantExists('clients')],
             'items.*.project_id' => ['nullable', 'integer', $tenantExists('projects')],
             'items.*.billable' => ['sometimes', 'boolean'],
