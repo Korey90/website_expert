@@ -9,6 +9,7 @@ use App\Actions\Finance\PostExpenseAction;
 use App\Actions\Finance\UpdateExpenseAction;
 use App\Actions\Finance\VoidExpenseAction;
 use App\Filament\Resources\ExpenseResource;
+use App\Models\AccountingPeriod;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\Expense;
@@ -49,6 +50,17 @@ class ExpenseWorkflowTest extends TestCase
             'payment_terms_days' => 14,
         ]);
         app(InitializeAccountingSetupAction::class)->execute($this->business, $this->user);
+        Permission::findOrCreate('post_finance', 'web');
+        $this->user->givePermissionTo('post_finance');
+        AccountingPeriod::withoutGlobalScopes()->create([
+            'business_id' => $this->business->id,
+            'name' => 'FY 2026',
+            'financial_year' => 2026,
+            'start_date' => '2026-01-01',
+            'end_date' => '2026-12-31',
+            'status' => AccountingPeriod::STATUS_OPEN,
+            'created_by' => $this->user->id,
+        ]);
     }
 
     public function test_it_creates_a_draft_expense_with_mixed_purchase_vat_snapshots(): void

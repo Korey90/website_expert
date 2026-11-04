@@ -8,6 +8,7 @@ use App\Actions\Finance\CreatePurchaseCreditNoteAction;
 use App\Actions\Finance\InitializeAccountingSetupAction;
 use App\Actions\Finance\IssuePurchaseCreditNoteAction;
 use App\Filament\Pages\ExpenseReportPage;
+use App\Models\AccountingPeriod;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\Client;
@@ -54,6 +55,17 @@ class ExpenseReportTest extends TestCase
             'title' => 'Report Project',
         ]);
         app(InitializeAccountingSetupAction::class)->execute($this->business, $this->user);
+        Permission::findOrCreate('post_finance', 'web');
+        $this->user->givePermissionTo('post_finance');
+        AccountingPeriod::withoutGlobalScopes()->create([
+            'business_id' => $this->business->id,
+            'name' => 'FY 2026',
+            'financial_year' => 2026,
+            'start_date' => '2026-01-01',
+            'end_date' => '2026-12-31',
+            'status' => AccountingPeriod::STATUS_OPEN,
+            'created_by' => $this->user->id,
+        ]);
     }
 
     public function test_report_groups_gbp_totals_by_category_and_subtracts_issued_purchase_credits(): void

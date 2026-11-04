@@ -2,40 +2,40 @@
 
 namespace App\Actions\Finance;
 
+use App\Models\Business;
 use App\Models\Expense;
 use App\Models\User;
-use App\Services\Finance\AccountingPeriodGuard;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
 class PostExpenseAction
 {
-    public function __construct(private readonly AccountingPeriodGuard $periodGuard) {}
+    public function __construct(private readonly PostPurchaseExpenseAction $postPurchaseExpense) {}
 
     public function execute(Expense $expense, User $actor): Expense
     {
         return DB::transaction(function () use ($expense, $actor): Expense {
+            Business::query()->lockForUpdate()->findOrFail($expense->business_id);
             $locked = Expense::withoutGlobalScopes()->lockForUpdate()->findOrFail($expense->id);
 
             $this->assertActorMembership($locked, $actor);
 
-            if ($locked->status !== Expense::STATUS_APPROVED) {
+            if (! in_array($locked->status, [Expense::STATUS_APPROVED, Expense::STATUS_POSTED], true)) {
                 throw new DomainException('Only an approved expense can be posted.');
             }
 
-            $this->periodGuard->assertDateIsWritable(
-                $locked->business_id,
-                ($locked->tax_point ?? $locked->issue_date)->toDateString(),
-            );
+            if ($locked->status === Expense::STATUS_APPROVED) {
+                $locked->update([
+                    'status' => Expense::STATUS_POSTED,
+                    'posted_by' => $actor->id,
+                    'posted_at' => now(),
+                ]);
+            }
 
-            $locked->update([
-                'status' => Expense::STATUS_POSTED,
-                'posted_by' => $actor->id,
-                'posted_at' => now(),
-            ]);
+            $this->postPurchaseExpense->execute($locked, $actor);
 
             return $locked->fresh();
-        });
+        }, 3);
     }
 
     private function assertActorMembership(Expense $expense, User $actor): void

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToTenant;
+use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -57,6 +58,26 @@ class PurchaseCreditNote extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::updating(function (PurchaseCreditNote $creditNote): void {
+            if ($creditNote->journalEntries()->exists() && $creditNote->isDirty([
+                'business_id', 'number', 'expense_id', 'supplier_id', 'currency', 'reason',
+                'issue_date', 'tax_point', 'gbp_exchange_rate', 'exchange_rate_source',
+                'exchange_rate_date', 'subtotal', 'vat_amount', 'total', 'subtotal_gbp',
+                'vat_amount_gbp', 'total_gbp',
+            ])) {
+                throw new DomainException('Issued purchase credit note accounting fields are immutable and require a journal reversal.');
+            }
+        });
+
+        static::deleting(function (PurchaseCreditNote $creditNote): void {
+            if ($creditNote->journalEntries()->exists()) {
+                throw new DomainException('A posted purchase credit note cannot be deleted.');
+            }
+        });
+    }
+
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
@@ -105,6 +126,11 @@ class PurchaseCreditNote extends Model
     public function attachments(): MorphMany
     {
         return $this->morphMany(FinancialAttachment::class, 'attachable');
+    }
+
+    public function journalEntries(): MorphMany
+    {
+        return $this->morphMany(JournalEntry::class, 'source');
     }
 
     public function remainingAmount(): float

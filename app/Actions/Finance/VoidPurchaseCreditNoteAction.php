@@ -18,10 +18,8 @@ class VoidPurchaseCreditNoteAction
                 throw new DomainException('The actor does not belong to the purchase credit note business.');
             }
 
-            if (! in_array($locked->status, [PurchaseCreditNote::STATUS_DRAFT, PurchaseCreditNote::STATUS_ISSUED], true)
-                || (float) $locked->allocated_amount > 0
-                || (float) $locked->refunded_amount > 0) {
-                throw new DomainException('A settled purchase credit note cannot be voided.');
+            if ($locked->status !== PurchaseCreditNote::STATUS_DRAFT) {
+                throw new DomainException('An issued purchase credit note must be reversed and cannot be voided.');
             }
 
             $locked->update([

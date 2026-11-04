@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Services\Finance\PurchaseTaxCalculator;
 use App\Traits\BelongsToTenant;
+use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -64,6 +65,26 @@ class Expense extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::updating(function (Expense $expense): void {
+            if ($expense->journalEntries()->exists() && $expense->isDirty([
+                'business_id', 'supplier_id', 'client_id', 'project_id', 'supplier_invoice_number',
+                'currency', 'gbp_exchange_rate', 'exchange_rate_source', 'exchange_rate_date',
+                'issue_date', 'tax_point', 'subtotal', 'vat_amount', 'total', 'subtotal_gbp',
+                'vat_amount_gbp', 'total_gbp',
+            ])) {
+                throw new DomainException('Posted expense accounting fields are immutable and require a purchase credit note.');
+            }
+        });
+
+        static::deleting(function (Expense $expense): void {
+            if ($expense->journalEntries()->exists()) {
+                throw new DomainException('A posted expense cannot be deleted.');
+            }
+        });
+    }
+
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
@@ -117,6 +138,11 @@ class Expense extends Model
     public function attachments(): MorphMany
     {
         return $this->morphMany(FinancialAttachment::class, 'attachable');
+    }
+
+    public function journalEntries(): MorphMany
+    {
+        return $this->morphMany(JournalEntry::class, 'source');
     }
 
     public function purchaseCreditNotes(): HasMany

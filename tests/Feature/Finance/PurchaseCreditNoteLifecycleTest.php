@@ -11,6 +11,7 @@ use App\Actions\Finance\IssuePurchaseCreditNoteAction;
 use App\Actions\Finance\RecordPurchaseCreditRefundAction;
 use App\Actions\Finance\VoidPurchaseCreditNoteAction;
 use App\Filament\Resources\PurchaseCreditNoteResource;
+use App\Models\AccountingPeriod;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\Expense;
@@ -43,6 +44,17 @@ class PurchaseCreditNoteLifecycleTest extends TestCase
         $this->addMember($this->business, $this->user);
         $supplier = Supplier::factory()->for($this->business)->create();
         app(InitializeAccountingSetupAction::class)->execute($this->business, $this->user);
+        Permission::findOrCreate('post_finance', 'web');
+        $this->user->givePermissionTo('post_finance');
+        AccountingPeriod::withoutGlobalScopes()->create([
+            'business_id' => $this->business->id,
+            'name' => 'FY 2026',
+            'financial_year' => 2026,
+            'start_date' => '2026-01-01',
+            'end_date' => '2026-12-31',
+            'status' => AccountingPeriod::STATUS_OPEN,
+            'created_by' => $this->user->id,
+        ]);
         $this->expense = app(CreateExpenseAction::class)->execute($this->business, $this->user, [
             'supplier_id' => $supplier->id,
             'supplier_invoice_number' => 'BILL-PCN-001',

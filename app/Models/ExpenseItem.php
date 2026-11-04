@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToTenant;
+use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -36,6 +37,16 @@ class ExpenseItem extends Model
             if (empty($item->business_id) && $item->expense_id) {
                 $item->business_id = Expense::withoutGlobalScopes()->find($item->expense_id)?->business_id;
             }
+
+            $item->assertExpenseIsUnposted();
+        });
+
+        static::updating(function (ExpenseItem $item): void {
+            $item->assertExpenseIsUnposted();
+        });
+
+        static::deleting(function (ExpenseItem $item): void {
+            $item->assertExpenseIsUnposted();
         });
     }
 
@@ -67,5 +78,17 @@ class ExpenseItem extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class)->withTrashed();
+    }
+
+    private function assertExpenseIsUnposted(): void
+    {
+        if (! $this->expense_id) {
+            return;
+        }
+
+        $expense = Expense::withoutGlobalScopes()->find($this->expense_id);
+        if ($expense?->journalEntries()->exists()) {
+            throw new DomainException('Posted expense items are immutable and require a purchase credit note.');
+        }
     }
 }

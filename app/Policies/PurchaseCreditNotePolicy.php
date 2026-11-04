@@ -26,6 +26,7 @@ class PurchaseCreditNotePolicy
     public function issue(User $user, PurchaseCreditNote $creditNote): bool
     {
         return PermissionHelper::allows($user, 'approve_finance')
+            && PermissionHelper::allows($user, 'post_finance')
             && $creditNote->status === PurchaseCreditNote::STATUS_DRAFT
             && $this->belongsToCurrentBusiness($creditNote);
     }
@@ -43,10 +44,7 @@ class PurchaseCreditNotePolicy
     public function void(User $user, PurchaseCreditNote $creditNote): bool
     {
         return PermissionHelper::allows($user, 'manage_finance')
-            && in_array($creditNote->status, [
-                PurchaseCreditNote::STATUS_DRAFT,
-                PurchaseCreditNote::STATUS_ISSUED,
-            ], true)
+            && $creditNote->status === PurchaseCreditNote::STATUS_DRAFT
             && (float) $creditNote->allocated_amount === 0.0
             && (float) $creditNote->refunded_amount === 0.0
             && $this->belongsToCurrentBusiness($creditNote);

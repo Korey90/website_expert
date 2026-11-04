@@ -49,10 +49,10 @@ class AccountingPeriodTest extends TestCase
             'joined_at' => now(),
         ]);
 
-        foreach (['access_admin_panel', 'view_finance', 'manage_finance', 'close_finance_periods'] as $permission) {
+        foreach (['access_admin_panel', 'view_finance', 'manage_finance', 'close_finance_periods', 'post_finance'] as $permission) {
             Permission::findOrCreate($permission, 'web');
         }
-        $this->user->givePermissionTo(['access_admin_panel', 'view_finance', 'manage_finance', 'close_finance_periods']);
+        $this->user->givePermissionTo(['access_admin_panel', 'view_finance', 'manage_finance', 'close_finance_periods', 'post_finance']);
     }
 
     public function test_it_creates_and_updates_non_overlapping_open_periods(): void

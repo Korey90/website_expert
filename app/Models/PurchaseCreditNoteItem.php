@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToTenant;
+use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +30,21 @@ class PurchaseCreditNoteItem extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::creating(function (PurchaseCreditNoteItem $item): void {
+            $item->assertCreditNoteIsUnposted();
+        });
+
+        static::updating(function (PurchaseCreditNoteItem $item): void {
+            $item->assertCreditNoteIsUnposted();
+        });
+
+        static::deleting(function (PurchaseCreditNoteItem $item): void {
+            $item->assertCreditNoteIsUnposted();
+        });
+    }
+
     public function purchaseCreditNote(): BelongsTo
     {
         return $this->belongsTo(PurchaseCreditNote::class);
@@ -42,5 +58,17 @@ class PurchaseCreditNoteItem extends Model
     public function taxCode(): BelongsTo
     {
         return $this->belongsTo(TaxCode::class);
+    }
+
+    private function assertCreditNoteIsUnposted(): void
+    {
+        if (! $this->purchase_credit_note_id) {
+            return;
+        }
+
+        $creditNote = PurchaseCreditNote::withoutGlobalScopes()->find($this->purchase_credit_note_id);
+        if ($creditNote?->journalEntries()->exists()) {
+            throw new DomainException('Posted purchase credit note items are immutable and require a journal reversal.');
+        }
     }
 }
