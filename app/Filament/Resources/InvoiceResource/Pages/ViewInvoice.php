@@ -3,11 +3,13 @@
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Actions\Finance\CreateCreditNoteAction;
+use App\Actions\Finance\IssueInvoiceAction;
 use App\Filament\Resources\CreditNoteResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Mail\InvoiceSentMail;
 use App\Models\CreditNote;
 use App\Models\InvoiceItem;
+use App\Support\PermissionHelper;
 use DomainException;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -57,26 +59,27 @@ class ViewInvoice extends ViewRecord
                 ->label('Send Invoice')
                 ->icon('heroicon-o-paper-airplane')
                 ->color('primary')
-                ->visible(fn () => $invoice->status === 'draft')
+                ->visible(fn () => $invoice->status === 'draft' && PermissionHelper::allows(auth()->user(), 'post_finance'))
                 ->requiresConfirmation()
                 ->modalHeading('Send Invoice to Client')
                 ->modalDescription('This will mark the invoice as Sent and email the client.')
                 ->modalSubmitActionLabel('Yes, Send Invoice')
-                ->action(function () use ($invoice) {
-                    $invoice->update([
-                        'status' => 'sent',
-                        'sent_at' => now(),
-                    ]);
+                ->action(function () use ($invoice): void {
+                    try {
+                        $issued = app(IssueInvoiceAction::class)->execute($invoice, auth()->user());
 
-                    if ($invoice->client?->primary_contact_email) {
-                        Mail::to($invoice->client->primary_contact_email)
-                            ->send(new InvoiceSentMail($invoice));
+                        if ($issued->client?->primary_contact_email) {
+                            Mail::to($issued->client->primary_contact_email)
+                                ->send(new InvoiceSentMail($issued));
+                        }
+
+                        Notification::make()
+                            ->title('Invoice sent and posted!')
+                            ->success()
+                            ->send();
+                    } catch (DomainException $exception) {
+                        Notification::make()->title($exception->getMessage())->danger()->send();
                     }
-
-                    Notification::make()
-                        ->title('Invoice sent!')
-                        ->success()
-                        ->send();
                 }),
 
             Action::make('mark_paid')
@@ -166,9 +169,9 @@ class ViewInvoice extends ViewRecord
                 ->url(fn () => route('invoice.pdf', $invoice))
                 ->openUrlInNewTab(),
 
-            EditAction::make(),
-            DeleteAction::make(),
-            ForceDeleteAction::make(),
+            EditAction::make()->visible(fn (): bool => ! $invoice->journalEntries()->exists()),
+            DeleteAction::make()->visible(fn (): bool => ! $invoice->journalEntries()->exists()),
+            ForceDeleteAction::make()->visible(fn (): bool => ! $invoice->journalEntries()->exists()),
             RestoreAction::make(),
         ];
     }

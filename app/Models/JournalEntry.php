@@ -40,6 +40,12 @@ class JournalEntry extends Model
     protected static function booted(): void
     {
         static::creating(function (JournalEntry $entry): void {
+            if (blank($entry->status)) {
+                $entry->status = self::STATUS_DRAFT;
+            } elseif ($entry->status !== self::STATUS_DRAFT) {
+                throw new DomainException('A journal entry must be created as a draft and posted atomically.');
+            }
+
             $period = AccountingPeriod::withoutGlobalScopes()->find($entry->accounting_period_id);
 
             if (! $period || $period->business_id !== $entry->business_id) {
@@ -48,6 +54,18 @@ class JournalEntry extends Model
 
             if (! $period->start_date->lte($entry->entry_date) || ! $period->end_date->gte($entry->entry_date)) {
                 throw new DomainException('The journal date must fall within its accounting period.');
+            }
+        });
+
+        static::updating(function (JournalEntry $entry): void {
+            if (in_array($entry->getOriginal('status'), [self::STATUS_POSTED, self::STATUS_REVERSED], true)) {
+                throw new DomainException('A posted journal entry is immutable and must be reversed.');
+            }
+        });
+
+        static::deleting(function (JournalEntry $entry): void {
+            if ($entry->status !== self::STATUS_DRAFT) {
+                throw new DomainException('A posted journal entry cannot be deleted.');
             }
         });
     }

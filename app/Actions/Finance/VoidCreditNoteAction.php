@@ -22,6 +22,10 @@ class VoidCreditNoteAction
                 throw new DomainException('An allocated credit note cannot be voided.');
             }
 
+            if ($locked->status === CreditNote::STATUS_ISSUED && $locked->journalEntries()->exists()) {
+                throw new DomainException('A posted credit note must be reversed instead of voided.');
+            }
+
             $locked->update([
                 'status' => CreditNote::STATUS_VOID,
                 'voided_by' => $actor->id,

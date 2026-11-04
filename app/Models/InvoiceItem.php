@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToTenant;
+use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,6 +47,16 @@ class InvoiceItem extends Model
             if (empty($item->business_id) && $item->invoice_id) {
                 $item->business_id = Invoice::withoutGlobalScopes()->find($item->invoice_id)?->business_id;
             }
+
+            $item->assertInvoiceIsUnposted();
+        });
+
+        static::updating(function (InvoiceItem $item): void {
+            $item->assertInvoiceIsUnposted();
+        });
+
+        static::deleting(function (InvoiceItem $item): void {
+            $item->assertInvoiceIsUnposted();
         });
     }
 
@@ -67,5 +78,17 @@ class InvoiceItem extends Model
     public function creditNoteItems(): HasMany
     {
         return $this->hasMany(CreditNoteItem::class);
+    }
+
+    private function assertInvoiceIsUnposted(): void
+    {
+        if (! $this->invoice_id) {
+            return;
+        }
+
+        $invoice = Invoice::withoutGlobalScopes()->find($this->invoice_id);
+        if ($invoice?->journalEntries()->exists()) {
+            throw new DomainException('Posted invoice items are immutable and require a credit note.');
+        }
     }
 }

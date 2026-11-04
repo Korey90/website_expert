@@ -7,6 +7,7 @@ use App\Actions\Finance\CreateCreditNoteAction;
 use App\Actions\Finance\InitializeAccountingSetupAction;
 use App\Actions\Finance\IssueCreditNoteAction;
 use App\Actions\Finance\VoidCreditNoteAction;
+use App\Models\AccountingPeriod;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\Client;
@@ -17,6 +18,7 @@ use App\Models\TaxCode;
 use App\Models\User;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class CreditNoteLifecycleTest extends TestCase
@@ -50,6 +52,17 @@ class CreditNoteLifecycleTest extends TestCase
             'status' => 'active',
         ]);
         app(InitializeAccountingSetupAction::class)->execute($this->business, $this->user);
+        Permission::findOrCreate('post_finance', 'web');
+        $this->user->givePermissionTo('post_finance');
+        AccountingPeriod::withoutGlobalScopes()->create([
+            'business_id' => $this->business->id,
+            'name' => 'FY 2026',
+            'financial_year' => 2026,
+            'start_date' => '2026-01-01',
+            'end_date' => '2026-12-31',
+            'status' => AccountingPeriod::STATUS_OPEN,
+            'created_by' => $this->user->id,
+        ]);
         $taxCode = TaxCode::withoutGlobalScopes()
             ->where('business_id', $this->business->id)
             ->where('code', 'S20')

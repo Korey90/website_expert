@@ -8,6 +8,7 @@ use App\Actions\Finance\VoidCreditNoteAction;
 use App\Filament\Resources\CreditNoteResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Models\CreditNote;
+use App\Support\PermissionHelper;
 use DomainException;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
@@ -28,7 +29,9 @@ class ViewCreditNote extends ViewRecord
                 ->label(__('finance.credit_notes.actions.issue'))
                 ->icon('heroicon-o-paper-airplane')
                 ->color('primary')
-                ->visible(fn (): bool => $creditNote->status === CreditNote::STATUS_DRAFT && $this->canManage())
+                ->visible(fn (): bool => $creditNote->status === CreditNote::STATUS_DRAFT
+                    && $this->canManage()
+                    && PermissionHelper::allows(auth()->user(), 'post_finance'))
                 ->requiresConfirmation()
                 ->action(function () use ($creditNote): void {
                     $this->runLifecycleAction(
@@ -62,7 +65,7 @@ class ViewCreditNote extends ViewRecord
                 ->label(__('finance.credit_notes.actions.void'))
                 ->icon('heroicon-o-no-symbol')
                 ->color('danger')
-                ->visible(fn (): bool => in_array($creditNote->status, [CreditNote::STATUS_DRAFT, CreditNote::STATUS_ISSUED], true) && $this->canManage())
+                ->visible(fn (): bool => $creditNote->status === CreditNote::STATUS_DRAFT && $this->canManage())
                 ->requiresConfirmation()
                 ->action(function () use ($creditNote): void {
                     $this->runLifecycleAction(

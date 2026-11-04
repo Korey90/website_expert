@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** IMPLEMENTACJA W TOKU — Fazy 0–2 zaimplementowane, Faza 3 w toku (`UKFIN-301`–`UKFIN-303` ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
+**Status:** IMPLEMENTACJA W TOKU — Fazy 0–2 zaimplementowane, Faza 3 w toku (`UKFIN-301`–`UKFIN-305` ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -401,8 +401,8 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-301` [M] LedgerAccount i UK chart template. *(35 tenantowych kont UK z hierarchią, typem/podtypem, saldem normalnym, flagami system/postable/active i nazwami PL/EN/PT; idempotentna inicjalizacja i migracja istniejących firm, panel Filament/RBAC, domyślne konto dostawcy, automatyczne mapowanie kategorii kosztu oraz audyt referencji cross-tenant)*
 - [x] `UKFIN-302` [M] AccountingPeriod + open/close/lock workflow. *(tenantowe okresy bez nakładania zakresów, stany `open` → `closing` → `closed` → `locked`, kontrolowane ponowne otwarcie z uzasadnieniem, nieodwracalna blokada, historia przejść i metadane audytowe, RBAC `manage_finance`/`close_finance_periods`, blokada księgowania kosztu w zamkniętym okresie oraz panel Filament PL/EN/PT)*
 - [x] `UKFIN-303` [M] JournalEntry/JournalLine schema i constraints. *(tenantowe nagłówki i pozycje dziennika, okres/source/idempotency/snapshot/reversal metadata, kwoty debit/credit w GBP oraz snapshot waluty pierwotnej, wymiary księgowe, relacje z planem kont i VAT, ograniczenie DB wymuszające dokładnie jedną dodatnią stronę zapisu, unikalność klucza idempotencji per tenant, walidacja daty okresu i referencji cross-tenant oraz rozszerzony audyt spójności)*
-- [ ] `UKFIN-304` [M] Posting engine z transaction + idempotency.
-- [ ] `UKFIN-305` [M] Posting sprzedaży i credit notes.
+- [x] `UKFIN-304` [M] Posting engine z transaction + idempotency. *(atomowe tworzenie i posting journalu, blokada per tenant dla bezpiecznej numeracji i retry, klucz idempotencji z kanonicznym SHA-256 payloadu, odrzucenie ponowienia ze zmienionymi danymi, bilans w pensach bez błędów float, okres `open`/`closing`, RBAC `post_finance`, walidacja kont i wymiarów tenantowych, snapshot FX, pełny rollback oraz niezmienność zaksięgowanych entries/lines)*
+- [x] `UKFIN-305` [M] Posting sprzedaży i credit notes. *(wystawienie faktury i noty sprzedażowej atomowo tworzy idempotentny journal; dekretacja Trade Debtors / Sales / VAT Payable per pozycja i tax code, mixed VAT, zero/reverse charge, projekty i klienci, snapshoty waluty źródłowej i GBP, odwrotne zapisy noty, integracja z akcjami Filament, rollback w zamkniętym okresie oraz ochrona zaksięgowanych dokumentów przed zmianą pól księgowych)*
 - [ ] `UKFIN-306` [M] Posting zakupów i purchase credits.
 - [ ] `UKFIN-307` [M] Posting payments/refunds i accounts receivable/payable.
 - [ ] `UKFIN-308` [M] FX gains/losses.

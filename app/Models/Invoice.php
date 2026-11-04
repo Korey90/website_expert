@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\DefaultsCurrency;
 use App\Services\Finance\DocumentTaxCalculator;
 use App\Traits\BelongsToTenant;
+use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -45,6 +46,25 @@ class Invoice extends Model
         'sent_at' => 'datetime',
         'paid_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::updating(function (Invoice $invoice): void {
+            if ($invoice->journalEntries()->exists() && $invoice->isDirty([
+                'business_id', 'client_id', 'project_id', 'currency', 'subtotal', 'discount_amount',
+                'vat_rate', 'vat_amount', 'total', 'issue_date', 'tax_point', 'gbp_exchange_rate',
+                'exchange_rate_source', 'exchange_rate_date', 'subtotal_gbp', 'vat_amount_gbp', 'total_gbp',
+            ])) {
+                throw new DomainException('Issued invoice accounting fields are immutable and require a credit note.');
+            }
+        });
+
+        static::deleting(function (Invoice $invoice): void {
+            if ($invoice->journalEntries()->exists()) {
+                throw new DomainException('A posted invoice cannot be deleted.');
+            }
+        });
+    }
 
     public function client(): BelongsTo
     {
@@ -94,6 +114,11 @@ class Invoice extends Model
     public function attachments(): MorphMany
     {
         return $this->morphMany(FinancialAttachment::class, 'attachable');
+    }
+
+    public function journalEntries(): MorphMany
+    {
+        return $this->morphMany(JournalEntry::class, 'source');
     }
 
     public function isOverdue(): bool

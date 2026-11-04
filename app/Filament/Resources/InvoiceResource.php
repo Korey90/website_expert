@@ -62,7 +62,10 @@ class InvoiceResource extends BaseResource
                         ->placeholder('None'),
                     Forms\Components\Select::make('status')
                         ->options(['draft' => 'Draft', 'sent' => 'Sent', 'partially_paid' => 'Partially Paid', 'paid' => 'Paid', 'overdue' => 'Overdue', 'cancelled' => 'Cancelled'])
-                        ->default('draft')->required(),
+                        ->default('draft')
+                        ->disabled()
+                        ->dehydrated()
+                        ->required(),
                     Forms\Components\Select::make('currency')
                         ->options(fn () => FilamentCurrency::options())
                         ->default(fn () => FilamentCurrency::default())
@@ -180,13 +183,13 @@ class InvoiceResource extends BaseResource
             ])
             ->actions([
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()->visible(fn (Invoice $record): bool => ! $record->journalEntries()->exists()),
                 Action::make('pdf')
                     ->label('PDF')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->url(fn (Invoice $record) => route('invoice.pdf', $record))
                     ->openUrlInNewTab(),
-                DeleteAction::make(),
+                DeleteAction::make()->visible(fn (Invoice $record): bool => ! $record->journalEntries()->exists()),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

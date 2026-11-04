@@ -40,9 +40,21 @@ class JournalLine extends Model
                 throw new DomainException('The journal line must belong to its journal business.');
             }
 
+            if ($entry->status !== JournalEntry::STATUS_DRAFT) {
+                throw new DomainException('Lines cannot be added to a posted journal entry.');
+            }
+
             if (! $account || $account->business_id !== $line->business_id || ! $account->is_active || ! $account->is_postable) {
                 throw new DomainException('The journal line requires an active postable account from the same business.');
             }
+        });
+
+        static::updating(function (JournalLine $line): void {
+            $line->assertJournalIsDraft();
+        });
+
+        static::deleting(function (JournalLine $line): void {
+            $line->assertJournalIsDraft();
         });
     }
 
@@ -79,5 +91,14 @@ class JournalLine extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class)->withTrashed();
+    }
+
+    private function assertJournalIsDraft(): void
+    {
+        $status = JournalEntry::withoutGlobalScopes()->whereKey($this->journal_entry_id)->value('status');
+
+        if ($status !== JournalEntry::STATUS_DRAFT) {
+            throw new DomainException('A posted journal line is immutable and must be reversed.');
+        }
     }
 }

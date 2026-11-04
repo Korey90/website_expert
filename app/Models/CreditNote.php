@@ -99,4 +99,9 @@ class CreditNote extends Model
     {
         return $this->morphMany(FinancialAttachment::class, 'attachable');
     }
+
+    public function journalEntries(): MorphMany
+    {
+        return $this->morphMany(JournalEntry::class, 'source');
+    }
 }
