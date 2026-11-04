@@ -3,7 +3,11 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ContractTemplateResource\Pages;
+use App\Models\Client;
+use App\Models\Contract;
 use App\Models\ContractTemplate;
+use App\Models\Project;
+use App\Services\ContractInterpolationService;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -11,7 +15,6 @@ use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Html;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -21,9 +24,13 @@ use Filament\Tables\Table;
 class ContractTemplateResource extends BaseResource
 {
     protected static ?string $model = ContractTemplate::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
+
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
+
     protected static ?int $navigationSort = 4;
+
     protected static ?string $navigationLabel = 'Contract Templates';
 
     public static function infolist(Schema $schema): Schema
@@ -43,13 +50,13 @@ class ContractTemplateResource extends BaseResource
                         ->badge()
                         ->formatStateUsing(fn ($state) => match ($state) {
                             'web_development' => 'Web Development',
-                            'maintenance'     => 'Maintenance',
-                            default           => $state,
+                            'maintenance' => 'Maintenance',
+                            default => $state,
                         })
                         ->color(fn ($state) => match ($state) {
                             'web_development' => 'info',
-                            'maintenance'     => 'warning',
-                            default           => 'gray',
+                            'maintenance' => 'warning',
+                            default => 'gray',
                         }),
 
                     IconEntry::make('is_active')
@@ -83,10 +90,42 @@ class ContractTemplateResource extends BaseResource
                 ]),
 
             Section::make('Contract Content Preview')
-                ->description('Placeholders like {{legal.company_name}} will be replaced with actual values when used in a contract.')
+                ->description('Preview with example values uses the configured legal details and sample client, project, and contract data.')
                 ->schema([
                     Html::make(function ($record) {
                         $name = e($record->name);
+                        $resolvedContent = app(ContractInterpolationService::class)->interpolate(
+                            $record->content,
+                            new Client([
+                                'company_name' => 'Bright Studio Ltd',
+                                'trading_name' => 'Bright Studio',
+                                'companies_house_number' => '12345678',
+                                'vat_number' => 'GB123456789',
+                                'address_line1' => '24 Market Street',
+                                'city' => 'London',
+                                'postcode' => 'SW1A 1AA',
+                                'country' => 'United Kingdom',
+                                'primary_contact_name' => 'Alex Morgan',
+                                'primary_contact_email' => 'alex@brightstudio.example',
+                                'primary_contact_phone' => '+44 20 7946 0123',
+                                'website' => 'https://brightstudio.example',
+                            ]),
+                            new Project([
+                                'title' => 'Corporate Website Redesign',
+                                'budget' => 12500,
+                                'currency' => 'GBP',
+                                'start_date' => '2026-06-01',
+                                'deadline' => '2026-08-31',
+                            ]),
+                            new Contract([
+                                'number' => 'CNT-2026-001',
+                                'title' => $record->name,
+                                'starts_at' => '2026-06-01',
+                                'value' => 12500,
+                                'currency' => 'GBP',
+                            ]),
+                        );
+
                         return <<<HTML
 <style>
   .cp-wrap{background:#fff;color:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,.12)}
@@ -110,6 +149,7 @@ class ContractTemplateResource extends BaseResource
   .cp-btn:hover{background:rgba(0,0,0,.09)}
   .dark .cp-btn:hover{background:rgba(255,255,255,.09)}
   .cp-btn svg{width:12px;height:12px;flex-shrink:0}
+  .cp-wrap [x-cloak]{display:none!important}
   @media print{
     *{visibility:hidden!important}
     .contract-preview,.contract-preview *{visibility:visible!important}
@@ -121,24 +161,32 @@ class ContractTemplateResource extends BaseResource
     .contract-preview p,.contract-preview li{orphans:3;widows:3}
   }
 </style>
-<div x-data="{ copied: false }" class="cp-wrap" data-title="{$name}">
+<div x-data="{ copied: false, showValues: false }" class="cp-wrap" data-title="{$name}">
   <div class="cp-toolbar">
     <span style="width:10px;height:10px;border-radius:50%;background:#f87171;display:inline-block"></span>
     <span style="width:10px;height:10px;border-radius:50%;background:#fbbf24;display:inline-block"></span>
     <span style="width:10px;height:10px;border-radius:50%;background:#34d399;display:inline-block"></span>
     <span style="font-family:monospace;font-size:11px;opacity:.45;margin-left:2px;flex:1">{$name} — preview</span>
-    <button class="cp-btn" @click="navigator.clipboard.writeText(\$root.dataset.title+'\\n\\n'+\$root.querySelector('.contract-preview').innerText).then(()=>{copied=true;setTimeout(()=>copied=false,2000)})">
+    <button class="cp-btn" @click="navigator.clipboard.writeText(\$root.dataset.title+'\\n\\n'+\$root.querySelector(showValues ? '.contract-preview--resolved' : '.contract-preview--template').innerText).then(()=>{copied=true;setTimeout(()=>copied=false,2000)})">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
       <span x-text="copied ? 'Copied!' : 'Copy'">Copy</span>
+    </button>
+    <button class="cp-btn" @click="showValues = !showValues">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span x-text="showValues ? 'Show placeholders' : 'Preview with example values'">Preview with example values</span>
     </button>
     <button class="cp-btn" @click="window.print()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       <span>Print</span>
     </button>
   </div>
-  <div class="contract-preview">
+  <div class="contract-preview contract-preview--template" x-show="!showValues">
     <h1 class="cp-print-title">{$name}</h1>
     {$record->content}
+  </div>
+  <div class="contract-preview contract-preview--resolved" x-cloak x-show="showValues">
+    <h1 class="cp-print-title">{$name}</h1>
+    {$resolvedContent}
   </div>
 </div>
 HTML;
@@ -164,7 +212,7 @@ HTML;
                     Forms\Components\Select::make('type')
                         ->options([
                             'web_development' => 'Web Development Agreement',
-                            'maintenance'     => 'Website Maintenance Agreement',
+                            'maintenance' => 'Website Maintenance Agreement',
                         ])
                         ->required(),
                     Forms\Components\Select::make('language')
@@ -199,13 +247,13 @@ HTML;
                     ->badge()
                     ->formatStateUsing(fn ($state) => match ($state) {
                         'web_development' => 'Web Development',
-                        'maintenance'     => 'Maintenance',
-                        default           => $state,
+                        'maintenance' => 'Maintenance',
+                        default => $state,
                     })
                     ->color(fn ($state) => match ($state) {
                         'web_development' => 'info',
-                        'maintenance'     => 'warning',
-                        default           => 'gray',
+                        'maintenance' => 'warning',
+                        default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('language')
                     ->badge()
@@ -228,7 +276,7 @@ HTML;
                 Tables\Filters\SelectFilter::make('type')
                     ->options([
                         'web_development' => 'Web Development',
-                        'maintenance'     => 'Maintenance',
+                        'maintenance' => 'Maintenance',
                     ]),
                 Tables\Filters\SelectFilter::make('language')
                     ->options([
@@ -253,10 +301,10 @@ HTML;
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListContractTemplates::route('/'),
+            'index' => Pages\ListContractTemplates::route('/'),
             'create' => Pages\CreateContractTemplate::route('/create'),
-            'view'   => Pages\ViewContractTemplate::route('/{record}'),
-            'edit'   => Pages\EditContractTemplate::route('/{record}/edit'),
+            'view' => Pages\ViewContractTemplate::route('/{record}'),
+            'edit' => Pages\EditContractTemplate::route('/{record}/edit'),
         ];
     }
 }
