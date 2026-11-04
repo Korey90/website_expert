@@ -18,7 +18,7 @@ export default function MarketingLayout({ children, auth, footer, topBanner = nu
 
     return (
         <ConsentContext.Provider value={consent}>
-            <div className="min-h-screen w-full overflow-x-hidden bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white">
+            <div className="min-h-screen w-full flex flex-col gap-2 overflow-x-hidden bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white">
                 {/* Top announcement banner — rendered above the fixed Navbar */}
                 {topBanner && (
                     <div
@@ -29,7 +29,7 @@ export default function MarketingLayout({ children, auth, footer, topBanner = nu
                     </div>
                 )}
                 <Navbar auth={auth} topOffset={topBanner ? BANNER_HEIGHT : 0} />
-                <main className="overflow-x-hidden">{children}</main>
+                <main className="border-8 border-amber-700">{children}</main>
                 {footer && <Footer data={footer} />}
                 <CookieBanner />
                 <TrackingInit />

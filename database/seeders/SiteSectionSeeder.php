@@ -26,7 +26,7 @@ class SiteSectionSeeder extends Seeder
                 'button_url' => '#calculate',
                 'image_path' => null,
                 'extra' => [
-                    'badge_text_en' => '5-star rated on Google',
+                    'badge_text_en' => '5-star rated on Googleeeeeex',
                     'badge_text_pl' => 'Oceny 5 gwiazdek w Google',
                     'badge_text_pt' => 'Classificação 5 estrelas no Google',
                     'secondary_button_text_en' => 'View Our Work',

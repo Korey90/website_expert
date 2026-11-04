@@ -18,7 +18,7 @@
             display: table;
             width: 100%;
             padding: 36px 40px 24px;
-            border-bottom: 3px solid #6366f1;
+            border-bottom: 3px solid #7C7072;
         }
         .header-left  { display: table-cell; width: 60%; vertical-align: top; }
         .header-right { display: table-cell; width: 40%; vertical-align: top; text-align: right; }
@@ -26,7 +26,7 @@
         .company-name {
             font-size: 22px;
             font-weight: 700;
-            color: #6366f1;
+            color: #51373B;
             letter-spacing: -0.5px;
         }
         .company-meta {
@@ -131,7 +131,7 @@
             border-collapse: collapse;
         }
         .items-table thead tr {
-            background: #6366f1;
+            background: #7C7072;
             color: #ffffff;
         }
         .items-table thead th {
@@ -142,7 +142,7 @@
             letter-spacing: 0.6px;
             text-align: left;
         }
-        .items-table thead th.right { text-align: right; }
+        .items-table thead th.right { text-align: right; font-weight: 800; }
 
         .items-table tbody tr { border-bottom: 1px solid #f1f5f9; }
         .items-table tbody tr:last-child { border-bottom: none; }
@@ -176,13 +176,13 @@
         .totals-divider td { border-top: 1px solid #e2e8f0; padding-top: 10px; }
         .totals-total td {
             font-size: 15px;
-            font-weight: 700;
-            color: #6366f1;
+            font-weight: 800;
+            color: #7C7072;
             padding-top: 4px;
             padding-bottom: 4px;
         }
         .totals-due td {
-            background: #6366f1;
+            background: #7C7072;
             color: #ffffff;
             font-size: 14px;
             font-weight: 700;
@@ -196,7 +196,7 @@
         }
         .notes-block {
             background: #f8fafc;
-            border-left: 3px solid #6366f1;
+            border-left: 3px solid #7C7072;
             border-radius: 4px;
             padding: 14px 18px;
             margin-bottom: 14px;
@@ -206,7 +206,7 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.8px;
-            color: #6366f1;
+            color: #7C7072;
             margin-bottom: 6px;
         }
         .notes-block-body {
@@ -234,10 +234,10 @@
 {{-- ── Header ────────────────────────────────────────────── --}}
 <div class="header">
     <div class="header-left">
-        <div class="company-name">WebsiteExpert</div>
+        <div class="company-name">Website Expert NI</div>
         <div class="company-meta">
-            web@websiteexpert.co.uk<br>
-            www.websiteexpert.co.uk
+            sales@website-expert.uk<br>
+            www.website-expert.uk
         </div>
     </div>
     <div class="header-right">
@@ -287,7 +287,7 @@
     </div>
     <div class="address-block right">
         <div class="address-label">Issued By</div>
-        <div class="address-name">WebsiteExpert Ltd</div>
+        <div class="address-name">Website Expert NI</div>
         <div class="address-detail">
             @if($invoice->createdBy)
                 {{ $invoice->createdBy->name }}<br>
@@ -362,7 +362,7 @@
         @endif
         <tr class="totals-divider">
             <td class="label" style="font-weight:700;color:#1e293b">Total</td>
-            <td class="value" style="color:#6366f1;font-size:15px">{{ $money->format($invoice->total, $currency) }}</td>
+            <td class="value" style="color:#7C7072;font-size:15px">{{ $money->format($invoice->total, $currency) }}</td>
         </tr>
         @if($invoice->amount_paid > 0)
         <tr>
@@ -398,7 +398,7 @@
 
 {{-- ── Footer ───────────────────────────────────────────────── --}}
 <div class="footer">
-    WebsiteExpert Ltd &nbsp;·&nbsp; web@websiteexpert.co.uk &nbsp;·&nbsp; www.websiteexpert.co.uk
+    Website Expert NI &nbsp;·&nbsp; sales@website-expert.uk &nbsp;·&nbsp; www.website-expert.uk
     &nbsp;·&nbsp; Invoice {{ $invoice->number }}
 </div>
 

@@ -7,7 +7,7 @@ const DEFAULTS = {
     button_text: 'Sprawdz koszt projektu',
     button_url:  '#calculate',
     extra: {
-        badge_text_en:             '5-star rated on Google',
+        badge_text_en:             '5-star rated on Googleeee',
         badge_text_pl:             'Oceny 5 gwiazdek w Google',
         badge_text_pt:             'Avaliações 5 estrelas no Google',
         secondary_button_text_en:  'View Our Work',
@@ -94,15 +94,15 @@ export default function Hero({ data }) {
     const titleLines = (d.title ?? DEFAULTS.title).split('\n');
 
     return (
-        <section id="hero" className="relative min-h-screen flex sm:items-center overflow-hidden pt-4 md:pt-6">
+        <section id="hero" className="relative min-h-screen flex sm:items-center overflow-hidden pt-4 mt-auto">
             {/* Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-neutral-50 via-white to-brand-50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950" aria-hidden="true" />
             <div className="absolute top-1/4 right-0 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none hidden md:block" aria-hidden="true" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-500/5 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
 
-            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-1 md:py-0 grid lg:grid-cols-2 gap-12 lg:gap-16 -mt-24 sm:mt-18 items-center">
+            <div className="relative mx-auto max-w-7xl p-4 grid lg:grid-cols-5 gap-1 items-center border">
                 {/* Text */}
-                <div className=''>
+                <div className='col-span-3'>
                     {badgeText && (
                         <span className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-600 dark:text-brand-400">
                             <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
@@ -161,7 +161,7 @@ export default function Hero({ data }) {
                 </div>
 
                 {/* Browser mockup */}
-                <div className="relative hidden lg:flex items-center justify-center">
+                <div className="relative hidden lg:flex items-center justify-center col-span-2">
                     <div className="relative w-full max-w-md">
                         <div className="rounded-2xl overflow-hidden shadow-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
                             {/* Browser chrome */}
