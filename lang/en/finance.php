@@ -24,6 +24,13 @@ return [
         'types' => ['asset' => 'Asset', 'liability' => 'Liability', 'equity' => 'Equity', 'income' => 'Income', 'expense' => 'Expense'],
         'normal_balances' => ['debit' => 'Debit', 'credit' => 'Credit'],
     ],
+    'accounting_periods' => [
+        'navigation' => 'Accounting periods', 'singular' => 'accounting period', 'plural' => 'accounting periods', 'section' => 'Period details',
+        'fields' => ['name' => 'Name', 'financial_year' => 'Financial year', 'period_number' => 'Period number', 'start_date' => 'Start date', 'end_date' => 'End date', 'status' => 'Status', 'closed_at' => 'Closed at', 'locked_at' => 'Locked at', 'transitions' => 'Transitions', 'close_notes' => 'Closing notes', 'lock_reason' => 'Lock reason', 'reopen_reason' => 'Reopen reason'],
+        'statuses' => ['open' => 'Open', 'closing' => 'Closing', 'closed' => 'Closed', 'locked' => 'Locked'],
+        'actions' => ['start_closing' => 'Start closing', 'close' => 'Close period', 'reopen' => 'Reopen period', 'lock' => 'Lock permanently'],
+        'notifications' => ['updated' => 'Accounting period status updated.'],
+    ],
     'credit_notes' => [
         'navigation' => 'Credit notes', 'singular' => 'credit note', 'plural' => 'credit notes',
         'sections' => ['details' => 'Credit note details', 'items' => 'Credited items', 'totals' => 'Totals'],

@@ -8,6 +8,7 @@ use App\Listeners\AutomationEventListener;
 use App\Listeners\ClientActivityListener;
 use App\Listeners\NotifyLeadOwnerListener;
 use App\Livewire\CustomDatabaseNotifications;
+use App\Models\AccountingPeriod;
 use App\Models\Briefing;
 use App\Models\BriefingTemplate;
 use App\Models\Expense;
@@ -24,6 +25,7 @@ use App\Models\Setting;
 use App\Models\Supplier;
 use App\Notifications\LeadAssignedNotification;
 use App\Observers\PaymentObserver;
+use App\Policies\AccountingPeriodPolicy;
 use App\Policies\BriefingPolicy;
 use App\Policies\BriefingTemplatePolicy;
 use App\Policies\ExpensePolicy;
@@ -71,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::policy(LandingPage::class, LandingPagePolicy::class);
+        Gate::policy(AccountingPeriod::class, AccountingPeriodPolicy::class);
         Gate::policy(LedgerAccount::class, LedgerAccountPolicy::class);
         Gate::policy(Lead::class, LeadPolicy::class);
         Gate::policy(PurchaseCreditNote::class, PurchaseCreditNotePolicy::class);

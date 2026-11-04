@@ -24,6 +24,13 @@ return [
         'types' => ['asset' => 'Ativo', 'liability' => 'Passivo', 'equity' => 'Capital próprio', 'income' => 'Rendimento', 'expense' => 'Gasto'],
         'normal_balances' => ['debit' => 'Débito', 'credit' => 'Crédito'],
     ],
+    'accounting_periods' => [
+        'navigation' => 'Períodos contabilísticos', 'singular' => 'período contabilístico', 'plural' => 'períodos contabilísticos', 'section' => 'Dados do período',
+        'fields' => ['name' => 'Nome', 'financial_year' => 'Ano financeiro', 'period_number' => 'Número do período', 'start_date' => 'Data inicial', 'end_date' => 'Data final', 'status' => 'Estado', 'closed_at' => 'Fechado em', 'locked_at' => 'Bloqueado em', 'transitions' => 'Transições', 'close_notes' => 'Notas de fecho', 'lock_reason' => 'Motivo do bloqueio', 'reopen_reason' => 'Motivo da reabertura'],
+        'statuses' => ['open' => 'Aberto', 'closing' => 'Em fecho', 'closed' => 'Fechado', 'locked' => 'Bloqueado'],
+        'actions' => ['start_closing' => 'Iniciar fecho', 'close' => 'Fechar período', 'reopen' => 'Reabrir período', 'lock' => 'Bloquear definitivamente'],
+        'notifications' => ['updated' => 'Estado do período contabilístico atualizado.'],
+    ],
     'credit_notes' => [
         'navigation' => 'Notas de crédito', 'singular' => 'nota de crédito', 'plural' => 'notas de crédito',
         'sections' => ['details' => 'Detalhes da nota de crédito', 'items' => 'Itens creditados', 'totals' => 'Totais'],

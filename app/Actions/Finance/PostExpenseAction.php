@@ -4,11 +4,14 @@ namespace App\Actions\Finance;
 
 use App\Models\Expense;
 use App\Models\User;
+use App\Services\Finance\AccountingPeriodGuard;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
 class PostExpenseAction
 {
+    public function __construct(private readonly AccountingPeriodGuard $periodGuard) {}
+
     public function execute(Expense $expense, User $actor): Expense
     {
         return DB::transaction(function () use ($expense, $actor): Expense {
@@ -19,6 +22,11 @@ class PostExpenseAction
             if ($locked->status !== Expense::STATUS_APPROVED) {
                 throw new DomainException('Only an approved expense can be posted.');
             }
+
+            $this->periodGuard->assertDateIsWritable(
+                $locked->business_id,
+                ($locked->tax_point ?? $locked->issue_date)->toDateString(),
+            );
 
             $locked->update([
                 'status' => Expense::STATUS_POSTED,

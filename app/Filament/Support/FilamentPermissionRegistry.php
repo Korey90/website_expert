@@ -7,6 +7,7 @@ class FilamentPermissionRegistry
     private const PANEL_ACCESS_PERMISSION = 'access_admin_panel';
 
     private const RESOURCE_PERMISSIONS = [
+        'AccountingPeriodResource' => ['view' => 'view_finance', 'create' => 'manage_finance', 'update' => 'manage_finance'],
         'AutomationLogResource' => ['view' => 'view_automation_logs', 'delete' => 'delete_automation_logs'],
         'AutomationRuleResource' => ['view' => 'view_automations', 'create' => 'create_automations', 'update' => 'edit_automations', 'delete' => 'delete_automations'],
         'AutomationTriggerResource' => ['view' => 'view_automation_triggers', 'create' => 'create_automation_triggers', 'update' => 'edit_automation_triggers', 'delete' => 'delete_automation_triggers'],

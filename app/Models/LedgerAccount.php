@@ -64,6 +64,11 @@ class LedgerAccount extends Model
         return $this->hasMany(Supplier::class, 'default_ledger_account_id');
     }
 
+    public function journalLines(): HasMany
+    {
+        return $this->hasMany(JournalLine::class);
+    }
+
     public function scopeActivePostable(Builder $query): Builder
     {
         return $query->where('is_active', true)->where('is_postable', true);
@@ -74,6 +79,7 @@ class LedgerAccount extends Model
         return $this->children()->exists()
             || $this->expenseItems()->exists()
             || $this->recurringExpenseItems()->exists()
-            || $this->suppliers()->exists();
+            || $this->suppliers()->exists()
+            || $this->journalLines()->exists();
     }
 }

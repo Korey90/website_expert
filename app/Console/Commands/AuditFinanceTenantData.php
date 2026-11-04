@@ -31,6 +31,8 @@ class AuditFinanceTenantData extends Command
         'purchase_credit_refunds' => ['parent' => 'purchase_credit_notes', 'foreign_key' => 'purchase_credit_note_id'],
         'recurring_expense_templates' => ['parent' => 'suppliers', 'foreign_key' => 'supplier_id', 'nullable_parent' => true],
         'recurring_expense_template_items' => ['parent' => 'recurring_expense_templates', 'foreign_key' => 'recurring_expense_template_id'],
+        'journal_entries' => ['parent' => 'accounting_periods', 'foreign_key' => 'accounting_period_id'],
+        'journal_lines' => ['parent' => 'journal_entries', 'foreign_key' => 'journal_entry_id'],
     ];
 
     /** @var array<string, array{table: string, parent: string, foreign_key: string}> */
@@ -38,6 +40,11 @@ class AuditFinanceTenantData extends Command
         'suppliers.default_ledger_account_id' => ['table' => 'suppliers', 'parent' => 'ledger_accounts', 'foreign_key' => 'default_ledger_account_id'],
         'expense_items.ledger_account_id' => ['table' => 'expense_items', 'parent' => 'ledger_accounts', 'foreign_key' => 'ledger_account_id'],
         'recurring_expense_template_items.ledger_account_id' => ['table' => 'recurring_expense_template_items', 'parent' => 'ledger_accounts', 'foreign_key' => 'ledger_account_id'],
+        'journal_lines.ledger_account_id' => ['table' => 'journal_lines', 'parent' => 'ledger_accounts', 'foreign_key' => 'ledger_account_id'],
+        'journal_lines.tax_code_id' => ['table' => 'journal_lines', 'parent' => 'tax_codes', 'foreign_key' => 'tax_code_id'],
+        'journal_lines.client_id' => ['table' => 'journal_lines', 'parent' => 'clients', 'foreign_key' => 'client_id'],
+        'journal_lines.supplier_id' => ['table' => 'journal_lines', 'parent' => 'suppliers', 'foreign_key' => 'supplier_id'],
+        'journal_lines.project_id' => ['table' => 'journal_lines', 'parent' => 'projects', 'foreign_key' => 'project_id'],
     ];
 
     public function handle(): int
@@ -93,6 +100,14 @@ class AuditFinanceTenantData extends Command
         $report['ledger_accounts'] = [
             'invalid_count' => (clone $ledgerQuery)->count(),
             'sample_ids' => (clone $ledgerQuery)->limit(20)->pluck('account.id')->all(),
+        ];
+
+        $periodQuery = DB::table('accounting_periods as period')
+            ->leftJoin('businesses as owner', 'owner.id', '=', 'period.business_id')
+            ->where(fn ($query) => $query->whereNull('period.business_id')->orWhereNull('owner.id'));
+        $report['accounting_periods'] = [
+            'invalid_count' => (clone $periodQuery)->count(),
+            'sample_ids' => (clone $periodQuery)->limit(20)->pluck('period.id')->all(),
         ];
 
         foreach (self::OPTIONAL_TENANT_RELATIONS as $label => $relation) {

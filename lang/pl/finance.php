@@ -24,6 +24,13 @@ return [
         'types' => ['asset' => 'Aktywa', 'liability' => 'Zobowiązania', 'equity' => 'Kapitał', 'income' => 'Przychody', 'expense' => 'Koszty'],
         'normal_balances' => ['debit' => 'Winien', 'credit' => 'Ma'],
     ],
+    'accounting_periods' => [
+        'navigation' => 'Okresy księgowe', 'singular' => 'okres księgowy', 'plural' => 'okresy księgowe', 'section' => 'Dane okresu',
+        'fields' => ['name' => 'Nazwa', 'financial_year' => 'Rok obrotowy', 'period_number' => 'Numer okresu', 'start_date' => 'Data początkowa', 'end_date' => 'Data końcowa', 'status' => 'Status', 'closed_at' => 'Zamknięto', 'locked_at' => 'Zablokowano', 'transitions' => 'Zmiany statusu', 'close_notes' => 'Notatki zamknięcia', 'lock_reason' => 'Powód blokady', 'reopen_reason' => 'Powód ponownego otwarcia'],
+        'statuses' => ['open' => 'Otwarty', 'closing' => 'W zamykaniu', 'closed' => 'Zamknięty', 'locked' => 'Zablokowany'],
+        'actions' => ['start_closing' => 'Rozpocznij zamykanie', 'close' => 'Zamknij okres', 'reopen' => 'Otwórz ponownie', 'lock' => 'Zablokuj ostatecznie'],
+        'notifications' => ['updated' => 'Status okresu księgowego został zmieniony.'],
+    ],
     'credit_notes' => [
         'navigation' => 'Noty kredytowe', 'singular' => 'nota kredytowa', 'plural' => 'noty kredytowe',
         'sections' => ['details' => 'Dane noty kredytowej', 'items' => 'Korygowane pozycje', 'totals' => 'Podsumowanie'],

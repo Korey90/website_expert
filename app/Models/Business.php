@@ -70,6 +70,11 @@ class Business extends Model
         return $this->hasOne(AccountingProfile::class);
     }
 
+    public function accountingPeriods(): HasMany
+    {
+        return $this->hasMany(AccountingPeriod::class);
+    }
+
     public function taxCodes(): HasMany
     {
         return $this->hasMany(TaxCode::class);
@@ -78,6 +83,16 @@ class Business extends Model
     public function ledgerAccounts(): HasMany
     {
         return $this->hasMany(LedgerAccount::class);
+    }
+
+    public function journalEntries(): HasMany
+    {
+        return $this->hasMany(JournalEntry::class);
+    }
+
+    public function journalLines(): HasMany
+    {
+        return $this->hasMany(JournalLine::class);
     }
 
     public function documentSequences(): HasMany
