@@ -90,6 +90,26 @@ class Business extends Model
         return $this->hasMany(Supplier::class);
     }
 
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+    public function financialAttachments(): HasMany
+    {
+        return $this->hasMany(FinancialAttachment::class);
+    }
+
+    public function purchaseCreditNotes(): HasMany
+    {
+        return $this->hasMany(PurchaseCreditNote::class);
+    }
+
+    public function purchaseCreditRefunds(): HasMany
+    {
+        return $this->hasMany(PurchaseCreditRefund::class);
+    }
+
     public function planPrice(): BelongsTo
     {
         return $this->belongsTo(PlanPrice::class);

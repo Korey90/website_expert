@@ -38,6 +38,15 @@ return [
             'report' => false,
         ],
 
+        'financial' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/finance'),
+            'visibility' => 'private',
+            'serve' => false,
+            'throw' => true,
+            'report' => true,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

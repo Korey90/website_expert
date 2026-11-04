@@ -7,6 +7,7 @@ use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Payment extends Model
 {
@@ -30,5 +31,10 @@ class Payment extends Model
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function attachments(): MorphMany
+    {
+        return $this->morphMany(FinancialAttachment::class, 'attachable');
     }
 }

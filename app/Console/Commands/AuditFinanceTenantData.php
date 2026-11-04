@@ -12,7 +12,7 @@ class AuditFinanceTenantData extends Command
     protected $description = 'Audit finance records for missing or mismatched business ownership';
 
     /**
-     * @var array<string, array{parent: string, foreign_key: string}>
+     * @var array<string, array{parent: string, foreign_key: string, nullable_parent?: bool}>
      */
     private const RELATIONS = [
         'contacts' => ['parent' => 'clients', 'foreign_key' => 'client_id'],
@@ -24,6 +24,11 @@ class AuditFinanceTenantData extends Command
         'quote_items' => ['parent' => 'quotes', 'foreign_key' => 'quote_id'],
         'credit_notes' => ['parent' => 'invoices', 'foreign_key' => 'invoice_id'],
         'credit_note_items' => ['parent' => 'credit_notes', 'foreign_key' => 'credit_note_id'],
+        'expenses' => ['parent' => 'suppliers', 'foreign_key' => 'supplier_id', 'nullable_parent' => true],
+        'expense_items' => ['parent' => 'expenses', 'foreign_key' => 'expense_id'],
+        'purchase_credit_notes' => ['parent' => 'expenses', 'foreign_key' => 'expense_id'],
+        'purchase_credit_note_items' => ['parent' => 'purchase_credit_notes', 'foreign_key' => 'purchase_credit_note_id'],
+        'purchase_credit_refunds' => ['parent' => 'purchase_credit_notes', 'foreign_key' => 'purchase_credit_note_id'],
     ];
 
     public function handle(): int
@@ -36,10 +41,21 @@ class AuditFinanceTenantData extends Command
 
             $baseQuery = DB::table($table)
                 ->leftJoin($parent, "{$parent}.id", '=', "{$table}.{$foreignKey}")
-                ->where(function ($query) use ($table, $parent): void {
-                    $query->whereNull("{$table}.business_id")
-                        ->orWhereNull("{$parent}.business_id")
-                        ->orWhereColumn("{$table}.business_id", '!=', "{$parent}.business_id");
+                ->where(function ($query) use ($table, $parent, $foreignKey, $relation): void {
+                    $query->whereNull("{$table}.business_id");
+
+                    if ($relation['nullable_parent'] ?? false) {
+                        $query->orWhere(function ($parentMismatch) use ($table, $parent, $foreignKey): void {
+                            $parentMismatch->whereNotNull("{$table}.{$foreignKey}")
+                                ->where(function ($mismatch) use ($table, $parent): void {
+                                    $mismatch->whereNull("{$parent}.business_id")
+                                        ->orWhereColumn("{$table}.business_id", '!=', "{$parent}.business_id");
+                                });
+                        });
+                    } else {
+                        $query->orWhereNull("{$parent}.business_id")
+                            ->orWhereColumn("{$table}.business_id", '!=', "{$parent}.business_id");
+                    }
                 });
 
             $report[$table] = [

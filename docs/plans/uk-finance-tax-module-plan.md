@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** IMPLEMENTACJA W TOKU — Fazy 0–1 zaimplementowane, Faza 2 rozpoczęta; gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
+**Status:** IMPLEMENTACJA W TOKU — Fazy 0–1 zaimplementowane, Faza 2 w toku (`UKFIN-201`–`UKFIN-207` ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -382,12 +382,12 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 **Cel:** użytkownik rejestruje każdy zakup i ma dowód źródłowy.
 
 - [x] `UKFIN-201` [M] Supplier model, policy, factory i Filament Resource. *(tenant scope, soft archive, dane UK/VAT, warunki płatności, RBAC `view_finance`/`manage_finance`, PL/EN/PT)*
-- [ ] `UKFIN-202` [M] Expense + ExpenseItem schema i status workflow.
-- [ ] `UKFIN-203` [M] Actions: Create/Update/Approve/Post/VoidExpense.
-- [ ] `UKFIN-204` [M] Form Requests i walidacja duplikatu supplier invoice.
-- [ ] `UKFIN-205` [M] Private FinancialAttachment service z SHA-256.
-- [ ] `UKFIN-206` [M] Podgląd PDF/obrazu i kontrolowany download.
-- [ ] `UKFIN-207` [M] Purchase credit notes i refundy kosztowe.
+- [x] `UKFIN-202` [M] Expense + ExpenseItem schema i status workflow. *(mixed purchase VAT, tax/FX snapshots, billable client/project, reverse charge VAT bez zwiększania salda dostawcy, panel Filament PL/EN/PT)*
+- [x] `UKFIN-203` [M] Actions: Create/Update/Approve/Post/VoidExpense. *(transakcje i blokady, audit metadata, niezmienność po approval; posted wymaga przyszłego ledger reversal)*
+- [x] `UKFIN-204` [M] Form Requests i walidacja duplikatu supplier invoice. *(unikalność tenant + supplier, walidacja effective tax code/FX oraz referencji tenantowych)*
+- [x] `UKFIN-205` [M] Private FinancialAttachment service z SHA-256. *(prywatny dysk, tenant scope, MIME/limit 10 MB, deduplikacja hash, 6-letnia retencja, kwarantanna `pending`, relacje do invoice/expense/payment/credit note)*
+- [x] `UKFIN-206` [M] Podgląd PDF/obrazu i kontrolowany download. *(RBAC `view_finance`, brak publicznych URL-i, tylko status `clean`, kontrola SHA-256 przy każdym odczycie, `no-store`/`nosniff`, ochrona cross-tenant; integracja z silnikiem malware scan musi ustawiać wynik `clean`/`rejected`)*
+- [x] `UKFIN-207` [M] Purchase credit notes i refundy kosztowe. *(osobne dokumenty `PCN`, snapshoty VAT/FX z expense items, kontrola maksymalnej ilości, issue/allocate/refund/void, redukcja salda kosztu, rejestr zwrotów gotówkowych do wysokości zapłaty, tenant/RBAC i panel PL/EN/PT)*
 - [ ] `UKFIN-208` [M] Recurring expenses jako template + scheduled draft generation.
 - [ ] `UKFIN-209` [M] Raport kosztów per category/supplier/project/VAT code.
 - [ ] `UKFIN-210` [M] Testy auth, tenant, upload security, VAT, partial payments i duplicates.

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EmailTemplatePreviewController;
+use App\Http\Controllers\Finance\FinancialAttachmentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Domain\DomainPriceListCsvController;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,13 @@ Route::middleware('auth')->group(function () {
     // Email template preview (admin only)
     Route::get('/admin/email-preview/{template}/{locale?}', [EmailTemplatePreviewController::class, 'show'])
         ->name('admin.email-preview');
+
+    Route::prefix('admin/finance/attachments')->name('admin.finance.attachments.')->group(function () {
+        Route::get('/{attachment}/preview', [FinancialAttachmentController::class, 'preview'])
+            ->name('preview');
+        Route::get('/{attachment}/download', [FinancialAttachmentController::class, 'download'])
+            ->name('download');
+    });
 
     // Reports — admin only
     Route::prefix('reports')->name('reports.')->group(function () {

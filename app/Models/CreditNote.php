@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CreditNote extends Model
@@ -92,5 +93,10 @@ class CreditNote extends Model
     public function items(): HasMany
     {
         return $this->hasMany(CreditNoteItem::class)->orderBy('order');
+    }
+
+    public function attachments(): MorphMany
+    {
+        return $this->morphMany(FinancialAttachment::class, 'attachable');
     }
 }
