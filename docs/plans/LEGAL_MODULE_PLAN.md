@@ -69,26 +69,26 @@ Nowa strona ustawień wzorowana na istniejącym `TrackingSettingsPage` (ten sam 
 
 **Sekcja: Company Details** (używane we wszystkich dokumentach)
 ```
-legal.company_name        → "WebsiteExpert Ltd"           (TextInput, required)
+legal.company_name        → "Website Expert NI"           (TextInput, required)
 legal.company_number      → "[Companies House No.]"        (TextInput)
 legal.company_address     → "[Registered address]"         (Textarea, 3 lines)
 legal.vat_number          → "GB [numer VAT]"               (TextInput)
 legal.company_phone       → "+44 ..."                      (TextInput)
-legal.company_email       → "hello@websiteexpert.co.uk"    (TextInput)
+legal.company_email       → "sales@website-expert.uk"    (TextInput)
 ```
 
 **Sekcja: Data Protection** (Privacy Policy)
 ```
 legal.ico_number          → "ZB [ICO Registration No.]"   (TextInput)
 legal.ico_registration_url → "https://ico.org.uk/..."     (TextInput, URL)
-legal.privacy_email       → "privacy@websiteexpert.co.uk" (TextInput, email)
+legal.privacy_email       → "privacy@website-expert.uk" (TextInput, email)
 legal.dpo_name            → "[DPO name, if applicable]"   (TextInput, nullable)
 legal.data_retention_years → "7"                          (TextInput, number)
 ```
 
 **Sekcja: Customer Service & Complaints** (T&C)
 ```
-legal.complaints_email    → "support@websiteexpert.co.uk" (TextInput, email)
+legal.complaints_email    → "support@website-expert.uk" (TextInput, email)
 legal.complaints_phone    → "+44 ..."                     (TextInput)
 legal.response_days       → "14"                          (TextInput, number)
 legal.deposit_percent     → "50"                          (TextInput, number, %)
@@ -99,7 +99,7 @@ legal.payment_terms_days  → "30"                          (TextInput, number)
 ```
 → Wyświetla (readonly): GTM ID, GA4 ID, Pixel ID z grupy 'tracking'
    (nie duplikujemy danych — linkujemy do TrackingSettingsPage)
-legal.cookie_policy_email → "privacy@websiteexpert.co.uk" (TextInput)
+legal.cookie_policy_email → "privacy@website-expert.uk" (TextInput)
 ```
 
 **Sekcja: Document Dates** (wszystkie dokumenty)
@@ -127,13 +127,13 @@ legal.accessibility_version        → "1.0"
 Treść dokumentów w seederze (i zatem w TinyEditor) będzie używać **tokenów** zamiast hardcode'owanych danych:
 
 ```
-{{legal.company_name}}       → WebsiteExpert Ltd
+{{legal.company_name}}       → Website Expert NI
 {{legal.company_number}}     → 12345678
 {{legal.company_address}}    → 123 High Street, London, W1A 1AA
 {{legal.vat_number}}         → GB 123 456 789
 {{legal.ico_number}}         → ZB1234567
-{{legal.privacy_email}}      → privacy@websiteexpert.co.uk
-{{legal.complaints_email}}   → support@websiteexpert.co.uk
+{{legal.privacy_email}}      → privacy@website-expert.uk
+{{legal.complaints_email}}   → support@website-expert.uk
 {{legal.deposit_percent}}    → 50
 {{legal.payment_terms_days}} → 30
 {{legal.data_retention_years}} → 7
@@ -383,23 +383,23 @@ Poniższe dane będą wypełniane **bezpośrednio w panelu Filament** → Settin
 
 | Klucz (`legal.*`) | Label w panelu | Placeholder / Default |
 |-------------------|---------------|----------------------|
-| `company_name` | Company legal name | WebsiteExpert Ltd |
+| `company_name` | Company legal name | Website Expert NI |
 | `company_number` | Companies House No. | ❌ do uzupełnienia |
 | `company_address` | Registered address | ❌ do uzupełnienia |
 | `vat_number` | VAT number | GB xxxxxxx |
-| `company_email` | Contact email | hello@websiteexpert.co.uk |
+| `company_email` | Contact email | hello@website-expert.uk |
 | `company_phone` | Contact phone | +44 ... |
 | `ico_number` | ICO Registration No. | ZB xxxxxxx |
 | `ico_registration_url` | ICO register URL | https://ico.org.uk/... |
-| `privacy_email` | Privacy contact email | privacy@websiteexpert.co.uk |
+| `privacy_email` | Privacy contact email | privacy@website-expert.uk |
 | `dpo_name` | DPO name (optional) | — |
 | `data_retention_years` | Record retention (years) | 7 |
-| `complaints_email` | Complaints email | support@websiteexpert.co.uk |
+| `complaints_email` | Complaints email | support@website-expert.uk |
 | `complaints_phone` | Complaints phone | +44 ... |
 | `response_days` | Response time (days) | 14 |
 | `deposit_percent` | Deposit required (%) | 50 |
 | `payment_terms_days` | Payment terms (days) | 30 |
-| `cookie_policy_email` | Cookie queries email | privacy@websiteexpert.co.uk |
+| `cookie_policy_email` | Cookie queries email | privacy@website-expert.uk |
 | `privacy_effective_date` | Privacy Policy — effective from | ❌ do uzupełnienia |
 | `privacy_version` | Privacy Policy — version | 1.0 |
 | `terms_effective_date` | T&C — effective from | ❌ do uzupełnienia |

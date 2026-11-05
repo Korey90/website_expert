@@ -6,7 +6,7 @@
 
 ## Wstęp
 
-Digital Growth OS to platforma SaaS przeznaczona dla agencji i freelancerów. Transformowana z narzędzia single-tenant (WebsiteExpert Ltd) w system wielodzierżawczy, gdzie każda firma (tenant) zarządza swoimi landing pages, leadami i CRM we własnej, izolowanej przestrzeni danych.
+Digital Growth OS to platforma SaaS przeznaczona dla agencji i freelancerów. Transformowana z narzędzia single-tenant (Website Expert NI) w system wielodzierżawczy, gdzie każda firma (tenant) zarządza swoimi landing pages, leadami i CRM we własnej, izolowanej przestrzeni danych.
 
 **Stack bazowy (niezmieniony):**
 - Laravel 13, PHP 8.3

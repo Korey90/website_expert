@@ -748,7 +748,7 @@ Seedowanie testowego Business przy dev/seeding:
 W AdminSeeder::run() po tworzeniu admin user:
     $business = Business::firstOrCreate(
         ['slug' => 'website-expert'],
-        ['name' => 'WebsiteExpert Ltd', 'locale' => 'en', 'plan' => 'pro', 'is_active' => true]
+        ['name' => 'Website Expert NI', 'locale' => 'en', 'plan' => 'pro', 'is_active' => true]
     );
     BusinessUser::firstOrCreate(
         ['business_id' => $business->id, 'user_id' => $adminUser->id],

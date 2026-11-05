@@ -13,8 +13,8 @@ class QuoteSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('email', 'admin@websiteexpert.co.uk')->first();
-        $manager = User::where('email', 'manager@websiteexpert.co.uk')->first();
+        $admin = User::where('email', 'admin@website-expert.uk')->first();
+        $manager = User::where('email', 'manager@website-expert.uk')->first();
 
         $hargreaves = Client::where('company_name', 'Hargreaves & Sons Solicitors')->first();
         $nts = Client::where('company_name', 'Northern Trade Supplies Ltd')->first();

@@ -85,6 +85,25 @@ return [
             'invalid_rows' => 'Números das linhas CSV inválidas: :rows.',
         ],
     ],
+    'bank_reconciliation' => [
+        'navigation' => 'Reconciliação bancária', 'singular' => 'transação bancária', 'plural' => 'transações bancárias',
+        'sections' => ['transaction' => 'Transação bancária', 'allocations' => 'Alocações da reconciliação'],
+        'fields' => [
+            'booking_date' => 'Data de lançamento', 'value_date' => 'Data-valor', 'amount' => 'Montante bancário', 'status' => 'Estado da reconciliação',
+            'account' => 'Conta bancária', 'counterparty' => 'Contraparte', 'reference' => 'Referência', 'source' => 'Pagamento ou reembolso correspondente',
+            'event_type' => 'Tipo de evento', 'allocated_amount' => 'Montante alocado', 'remaining_amount' => 'Montante restante', 'source_amount' => 'Montante de origem', 'score' => 'Pontuação',
+            'reconciled_by' => 'Reconciliado por', 'reconciled_at' => 'Reconciliado em', 'notes' => 'Notas',
+        ],
+        'statuses' => ['unmatched' => 'Não reconciliada', 'partially_reconciled' => 'Parcialmente reconciliada', 'reconciled' => 'Reconciliada', 'matched' => 'Correspondente'],
+        'events' => ['customer_payment' => 'Pagamento de cliente', 'customer_refund' => 'Reembolso ao cliente', 'supplier_payment' => 'Pagamento a fornecedor', 'supplier_refund' => 'Reembolso de fornecedor'],
+        'actions' => ['reconcile' => 'Reconciliar'],
+        'modal' => [
+            'heading' => 'Reconciliar transação bancária',
+            'description' => 'Aloque o montante bancário restante a um ou mais pagamentos ou reembolsos sugeridos. As alocações parciais podem ser concluídas mais tarde.',
+        ],
+        'candidate_label' => ':event · :amount :currency · :date · :party · pontuação :score/100',
+        'notifications' => ['reconciled' => 'Alocação da transação bancária guardada.'],
+    ],
     'ledger_accounts' => [
         'navigation' => 'Plano de contas', 'singular' => 'conta contabilística', 'plural' => 'contas contabilísticas', 'section' => 'Dados da conta',
         'fields' => ['code' => 'Código', 'name' => 'Nome', 'name_en' => 'Nome (inglês)', 'name_pl' => 'Nome (polaco)', 'name_pt' => 'Nome (português)', 'type' => 'Tipo', 'subtype' => 'Subtipo', 'normal_balance' => 'Saldo normal', 'parent' => 'Conta principal', 'is_postable' => 'Permite lançamentos', 'is_active' => 'Ativa', 'is_system' => 'Conta de sistema'],

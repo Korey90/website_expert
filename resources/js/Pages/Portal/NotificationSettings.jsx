@@ -166,8 +166,8 @@ export default function NotificationSettings({ client, prefs }) {
                         <strong>Your privacy matters.</strong> We process your data in accordance with UK GDPR. Transactional
                         communications (invoices, payment receipts) may still be sent where required by our contractual
                         obligation. You can request full deletion of your data by contacting us at{' '}
-                        <a href={`mailto:${window.appConfig?.contactEmail ?? 'hello@websiteexpert.co.uk'}`} className="underline text-gray-700">
-                            hello@websiteexpert.co.uk
+                        <a href={`mailto:${window.appConfig?.contactEmail ?? 'hello@website-expert.uk'}`} className="underline text-gray-700">
+                            hello@website-expert.uk
                         </a>.
                     </p>
                 </div>

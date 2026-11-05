@@ -629,7 +629,7 @@ handle(): void
     'lead_stale':    Mail::to($user->email)->send(new StaleLeadReminderMail($lead, $user))
     'lead_won':      // opcjonalnie — logi, stats
 
-Uwaga: `NewLeadMail` (istniejący) — wysyłany do admin@websiteexpert.co.uk (hardcoded).
+Uwaga: `NewLeadMail` (istniejący) — wysyłany do admin@website-expert.uk (hardcoded).
 `NewLeadAssignedMail` (nowy) — do przypisanego użytkownika (dynamiczny email).
 ```
 

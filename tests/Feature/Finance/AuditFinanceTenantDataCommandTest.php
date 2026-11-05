@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\Contact;
 use App\Models\Expense;
 use App\Models\LedgerAccount;
+use App\Models\Payment;
 use App\Models\Supplier;
 use App\Services\Finance\BankAccountDetailsProtector;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -187,6 +188,70 @@ class AuditFinanceTenantDataCommandTest extends TestCase
 
         $this->artisan('finance:audit-tenants')
             ->expectsOutputToContain('Finance tenant audit failed: 2 invalid record(s).')
+            ->assertExitCode(1);
+    }
+
+    public function test_missing_polymorphic_reconciliation_source_is_reported(): void
+    {
+        $business = Business::create(['name' => 'Reconciliation Audit', 'slug' => 'reconciliation-audit', 'is_active' => true]);
+        app(InitializeAccountingSetupAction::class)->execute($business);
+        $cash = LedgerAccount::withoutGlobalScopes()
+            ->where('business_id', $business->id)
+            ->where('code', '1100')
+            ->firstOrFail();
+        $protected = app(BankAccountDetailsProtector::class)->protect('11112222', '112233');
+        $bankAccountId = DB::table('bank_accounts')->insertGetId([
+            'business_id' => $business->id,
+            'ledger_account_id' => $cash->id,
+            'name' => 'Reconciliation audit bank',
+            'bank_name' => 'Audit Bank',
+            ...$protected,
+            'currency' => 'GBP',
+            'opening_balance' => 0,
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $transactionId = DB::table('bank_transactions')->insertGetId([
+            'business_id' => $business->id,
+            'bank_account_id' => $bankAccountId,
+            'booking_date' => '2026-11-05',
+            'amount' => 25,
+            'currency' => 'GBP',
+            'source_hash' => str_repeat('c', 64),
+            'reconciliation_status' => 'reconciled',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $reconciliationId = DB::table('bank_reconciliations')->insertGetId([
+            'business_id' => $business->id,
+            'bank_transaction_id' => $transactionId,
+            'status' => 'active',
+            'total_amount' => 25,
+            'currency' => 'GBP',
+            'reconciled_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('bank_reconciliation_allocations')->insert([
+            'business_id' => $business->id,
+            'bank_reconciliation_id' => $reconciliationId,
+            'bank_transaction_id' => $transactionId,
+            'reconcilable_type' => Payment::class,
+            'reconcilable_id' => 999999,
+            'event_type' => 'customer_payment',
+            'candidate_key' => 'payment:999999:receipt',
+            'amount' => 25,
+            'currency' => 'GBP',
+            'source_amount' => 25,
+            'source_currency' => 'GBP',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->artisan('finance:audit-tenants')
+            ->expectsOutputToContain('bank_reconciliation_allocations.source')
+            ->expectsOutputToContain('Finance tenant audit failed: 1 invalid record(s).')
             ->assertExitCode(1);
     }
 }

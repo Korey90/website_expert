@@ -85,6 +85,25 @@ return [
             'invalid_rows' => 'Numery błędnych wierszy CSV: :rows.',
         ],
     ],
+    'bank_reconciliation' => [
+        'navigation' => 'Uzgadnianie banku', 'singular' => 'transakcja bankowa', 'plural' => 'transakcje bankowe',
+        'sections' => ['transaction' => 'Transakcja bankowa', 'allocations' => 'Alokacje uzgodnienia'],
+        'fields' => [
+            'booking_date' => 'Data księgowania', 'value_date' => 'Data waluty', 'amount' => 'Kwota bankowa', 'status' => 'Status uzgodnienia',
+            'account' => 'Rachunek bankowy', 'counterparty' => 'Kontrahent', 'reference' => 'Referencja', 'source' => 'Dopasowana płatność lub zwrot',
+            'event_type' => 'Typ zdarzenia', 'allocated_amount' => 'Kwota alokowana', 'remaining_amount' => 'Pozostała kwota', 'source_amount' => 'Kwota źródłowa', 'score' => 'Wynik dopasowania',
+            'reconciled_by' => 'Uzgodnił', 'reconciled_at' => 'Data uzgodnienia', 'notes' => 'Notatki',
+        ],
+        'statuses' => ['unmatched' => 'Nieuzgodniona', 'partially_reconciled' => 'Częściowo uzgodniona', 'reconciled' => 'Uzgodniona', 'matched' => 'Dopasowana'],
+        'events' => ['customer_payment' => 'Wpłata klienta', 'customer_refund' => 'Zwrot klientowi', 'supplier_payment' => 'Płatność dostawcy', 'supplier_refund' => 'Zwrot od dostawcy'],
+        'actions' => ['reconcile' => 'Uzgodnij'],
+        'modal' => [
+            'heading' => 'Uzgodnij transakcję bankową',
+            'description' => 'Przypisz pozostałą kwotę bankową do jednej lub kilku sugerowanych płatności albo zwrotów. Częściowe alokacje można uzupełnić później.',
+        ],
+        'candidate_label' => ':event · :amount :currency · :date · :party · wynik :score/100',
+        'notifications' => ['reconciled' => 'Zapisano alokację transakcji bankowej.'],
+    ],
     'ledger_accounts' => [
         'navigation' => 'Plan kont', 'singular' => 'konto księgowe', 'plural' => 'konta księgowe', 'section' => 'Dane konta',
         'fields' => ['code' => 'Kod', 'name' => 'Nazwa', 'name_en' => 'Nazwa (angielski)', 'name_pl' => 'Nazwa (polski)', 'name_pt' => 'Nazwa (portugalski)', 'type' => 'Typ', 'subtype' => 'Podtyp', 'normal_balance' => 'Saldo normalne', 'parent' => 'Konto nadrzędne', 'is_postable' => 'Dozwolone księgowanie', 'is_active' => 'Aktywne', 'is_system' => 'Konto systemowe'],

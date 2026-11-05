@@ -10,7 +10,7 @@ class DomainLegalPagesSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('email', 'admin@websiteexpert.co.uk')->first();
+        $admin = User::where('email', 'sales@website-expert.uk')->first();
 
         $pages = [
 

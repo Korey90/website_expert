@@ -110,6 +110,16 @@ class Business extends Model
         return $this->hasMany(BankTransaction::class);
     }
 
+    public function bankReconciliations(): HasMany
+    {
+        return $this->hasMany(BankReconciliation::class);
+    }
+
+    public function bankReconciliationAllocations(): HasMany
+    {
+        return $this->hasMany(BankReconciliationAllocation::class);
+    }
+
     public function documentSequences(): HasMany
     {
         return $this->hasMany(DocumentSequence::class);

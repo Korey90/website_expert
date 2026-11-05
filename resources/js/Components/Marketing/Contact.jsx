@@ -35,7 +35,7 @@ export default function Contact({ data = null }) {
     const subtitle     = (locale === 'pl' ? data?.subtitle?.pl : data?.subtitle?.en) || data?.subtitle || DEFAULTS.subtitle[locale];
     const sectionLabel = t('section_label') || DEFAULTS.section_label[locale];
 
-    const email       = extra.email      || 'sales@websiteexpert.co.uk';
+    const email       = extra.email      || 'sales@website-expert.uk';
     const phone       = extra.phone      || '+44 000 000 200';
     const phoneHref   = extra.phone_href || 'tel:+44000000000';
     const privacyUrl  = extra.privacy_url || '#';

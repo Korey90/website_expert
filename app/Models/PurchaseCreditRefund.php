@@ -72,4 +72,9 @@ class PurchaseCreditRefund extends Model
     {
         return $this->morphMany(JournalEntry::class, 'source');
     }
+
+    public function bankReconciliationAllocations(): MorphMany
+    {
+        return $this->morphMany(BankReconciliationAllocation::class, 'reconcilable');
+    }
 }

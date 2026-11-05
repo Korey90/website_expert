@@ -2,6 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ExpensePayment;
+use App\Models\Payment;
+use App\Models\PurchaseCreditRefund;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -37,6 +40,8 @@ class AuditFinanceTenantData extends Command
         'bank_accounts' => ['parent' => 'ledger_accounts', 'foreign_key' => 'ledger_account_id'],
         'bank_statement_imports' => ['parent' => 'bank_accounts', 'foreign_key' => 'bank_account_id'],
         'bank_transactions' => ['parent' => 'bank_accounts', 'foreign_key' => 'bank_account_id'],
+        'bank_reconciliations' => ['parent' => 'bank_transactions', 'foreign_key' => 'bank_transaction_id'],
+        'bank_reconciliation_allocations' => ['parent' => 'bank_reconciliations', 'foreign_key' => 'bank_reconciliation_id'],
     ];
 
     /** @var array<string, array{table: string, parent: string, foreign_key: string}> */
@@ -50,6 +55,14 @@ class AuditFinanceTenantData extends Command
         'journal_lines.supplier_id' => ['table' => 'journal_lines', 'parent' => 'suppliers', 'foreign_key' => 'supplier_id'],
         'journal_lines.project_id' => ['table' => 'journal_lines', 'parent' => 'projects', 'foreign_key' => 'project_id'],
         'bank_transactions.bank_statement_import_id' => ['table' => 'bank_transactions', 'parent' => 'bank_statement_imports', 'foreign_key' => 'bank_statement_import_id'],
+        'bank_reconciliation_allocations.bank_transaction_id' => ['table' => 'bank_reconciliation_allocations', 'parent' => 'bank_transactions', 'foreign_key' => 'bank_transaction_id'],
+    ];
+
+    /** @var array<class-string, string> */
+    private const RECONCILIATION_SOURCES = [
+        Payment::class => 'payments',
+        ExpensePayment::class => 'expense_payments',
+        PurchaseCreditRefund::class => 'purchase_credit_refunds',
     ];
 
     public function handle(): int
@@ -143,6 +156,43 @@ class AuditFinanceTenantData extends Command
                 'sample_ids' => (clone $query)->limit(20)->pluck("{$table}.id")->all(),
             ];
         }
+
+        $allocationTransactionQuery = DB::table('bank_reconciliation_allocations as allocation')
+            ->leftJoin('bank_reconciliations as reconciliation', 'reconciliation.id', '=', 'allocation.bank_reconciliation_id')
+            ->where(function ($query): void {
+                $query->whereNull('reconciliation.id')
+                    ->orWhereColumn('allocation.bank_transaction_id', '!=', 'reconciliation.bank_transaction_id');
+            });
+        $report['bank_reconciliation_allocations.batch_transaction'] = [
+            'invalid_count' => (clone $allocationTransactionQuery)->count(),
+            'sample_ids' => (clone $allocationTransactionQuery)->limit(20)->pluck('allocation.id')->all(),
+        ];
+
+        $sourceReport = ['invalid_count' => 0, 'sample_ids' => []];
+
+        foreach (self::RECONCILIATION_SOURCES as $sourceType => $sourceTable) {
+            $sourceQuery = DB::table('bank_reconciliation_allocations as allocation')
+                ->leftJoin("{$sourceTable} as source", 'source.id', '=', 'allocation.reconcilable_id')
+                ->where('allocation.reconcilable_type', $sourceType)
+                ->where(function ($query): void {
+                    $query->whereNull('source.id')
+                        ->orWhereColumn('allocation.business_id', '!=', 'source.business_id');
+                });
+            $sourceReport['invalid_count'] += (clone $sourceQuery)->count();
+            $sourceReport['sample_ids'] = array_slice(array_values(array_unique([
+                ...$sourceReport['sample_ids'],
+                ...(clone $sourceQuery)->limit(20)->pluck('allocation.id')->all(),
+            ])), 0, 20);
+        }
+
+        $unknownSourceQuery = DB::table('bank_reconciliation_allocations')
+            ->whereNotIn('reconcilable_type', array_keys(self::RECONCILIATION_SOURCES));
+        $sourceReport['invalid_count'] += (clone $unknownSourceQuery)->count();
+        $sourceReport['sample_ids'] = array_slice(array_values(array_unique([
+            ...$sourceReport['sample_ids'],
+            ...(clone $unknownSourceQuery)->limit(20)->pluck('id')->all(),
+        ])), 0, 20);
+        $report['bank_reconciliation_allocations.source'] = $sourceReport;
 
         $invalidCount = array_sum(array_column($report, 'invalid_count'));
 

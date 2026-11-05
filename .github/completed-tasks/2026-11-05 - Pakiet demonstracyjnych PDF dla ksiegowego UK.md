@@ -45,7 +45,7 @@ Przygotować spójny pakiet przykładowych dokumentów, który można przekazać
 ## Uwagi i rekomendacje
 
 - Wygenerowany pakiet używa danych `Website Expert NI` z `Legal Settings`, nie fikcyjnego wystawcy.
-- `AccountingProfile` jest niespójny z `Legal Settings`: zawiera `WebsiteExpert Ltd` i nie ma numerów ani adresu. Oba źródła trzeba zsynchronizować przed wystawianiem dokumentów produkcyjnych.
+- Nazwa w `AccountingProfile` została zsynchronizowana do `Website Expert NI`; profil nadal nie ma numerów ani adresu. Pozostałe pola obu źródeł trzeba zsynchronizować przed wystawianiem dokumentów produkcyjnych.
 - Numer firmy i VAT zostały przeniesione dokładnie z systemu; ich formalna poprawność nie była potwierdzana zewnętrznie.
 - Dokumenty `06`–`17` są docelowymi podglądami do akceptacji, a nie deklaracją dostępności produkcyjnego eksportu.
 

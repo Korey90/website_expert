@@ -1,5 +1,70 @@
 # Current Task
 
+**Zadanie:** UKFIN-405 — UI i domena uzgodnień exact/partial/split/many-to-many
+**Status:** 🟢 Zakończone
+**Start:** 2026-11-05
+**Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
+
+## Cel bieżącego przyrostu
+
+Umożliwić bezpieczne przypisanie jednej lub wielu transakcji bankowych do jednej lub wielu istniejących wpłat i wypłat, z kontrolą pozostałych kwot, tenantów, kierunku i waluty.
+
+## Delta Analysis: UKFIN-405
+
+### Anchor files (reużywam)
+
+- `app/Models/BankTransaction.php` — tenantowa transakcja oraz status reconciliation.
+- `app/Services/Finance/BankTransactionMatchingService.php` — kandydaci i kwoty porównywalne z UKFIN-404.
+- `app/Actions/Finance/FindBankTransactionMatchesAction.php` — membership, RBAC i dopuszczalne statusy.
+- `app/Models/Payment.php`, `ExpensePayment.php`, `PurchaseCreditRefund.php` — źródła wpływów i wypływów.
+- `app/Filament/Resources/BankAccountResource` — wzorzec UI Finance i importu CSV.
+- `tests/Feature/Finance/BankTransactionMatchingTest.php` — fixture oraz przypadki kierunku, FX i izolacji.
+
+### Do stworzenia
+
+- [x] Tenantowe modele i tabele reconciliation batch + polymorphic allocations.
+- [x] Action transakcyjna z blokadami i ochroną przed over-allocation.
+- [x] Obsługa exact, partial, split i many-to-many wraz z pozostałymi kwotami.
+- [x] `BankTransactionResource` z listą, szczegółami, filtrem statusu i modalem reconcile.
+- [x] Policy i rejestr uprawnień `view_finance` / `manage_finance`.
+- [x] Tłumaczenia PL/EN/PT.
+- [x] Testy domenowe, UI, tenant isolation, RBAC, FX i współbieżnej integralności.
+
+### Ryzyka i granice
+
+- Kwoty są zapisywane dodatnio; kierunek wynika z transakcji oraz typu zdarzenia.
+- Alokacja nie może przekroczyć reszty transakcji ani reszty dokumentu źródłowego.
+- Dla banku GBP i źródła walutowego używany jest istniejący, niezmienny snapshot `amount_gbp`.
+- Undo/reversal oraz tworzenie nowego expense/payment pozostają odpowiednio w UKFIN-407 i UKFIN-406.
+- Wszystkie odczyty i zapisy muszą być ograniczone do jednego `business_id`.
+
+## Walidacja planowana
+
+- [x] Migracje na SQLite i MySQL-compatible schema.
+- [x] PHPUnit: exact, partial, split, many-to-many, FX, over-allocation, RBAC i tenant isolation.
+- [x] Test dostępu do Filament resource i widoku.
+- [x] Pint, translation parity, `git diff --check` i regresja Finance.
+
+## Wynik UKFIN-405
+
+- [x] Uzgodnienia zapisują audytowalny batch i osobne alokacje do payment/refund.
+- [x] Blokady transakcji i źródeł oraz ponowne przeliczenie reszt chronią przed over-allocation.
+- [x] Statusy `unmatched`, `partially_reconciled` i `reconciled` odzwierciedlają pozostałą kwotę.
+- [x] Filament `/admin/bank-transactions` udostępnia listę, filtry, szczegóły i modal split.
+- [x] Audyt tenantów sprawdza oba nowe modele, transakcję batcha i źródło polymorficzne.
+- [x] Nazwa firmy została ujednolicona w bazie, seederach, UI i dokumentacji do `Website Expert NI`.
+- [x] Testy UKFIN-404/405: 15 passed, 92 assertions.
+- [x] Finance regression: 188 passed, 1 skipped, 1162 assertions.
+- [x] Full regression: 698 passed, 11 skipped, 9 znanych baseline failures, 2609 assertions.
+
+## Następny krok
+
+- [ ] `UKFIN-406` — utworzenie expense/payment z nieuzgodnionej transakcji bankowej.
+
+---
+
+# Poprzednie zadanie — pakiet demonstracyjnych PDF
+
 **Zadanie:** Pakiet demonstracyjnych PDF dla księgowego UK
 **Status:** 🟢 Zakończone
 **Start:** 2026-11-05
@@ -60,12 +125,12 @@ Przygotować odtwarzalny, anglojęzyczny pakiet demonstracyjnych dokumentów fin
 - [x] Każdy dokument ma oznaczenie `DEMO / NOT FOR SUBMISSION` i spójne sumy kontrolne.
 - [x] Finance regression: 180 passed, 1 skipped, 1116 assertions.
 - [x] Full regression: 689 passed, 11 skipped, 9 znanych baseline failures, 2556 assertions.
-- [x] Wykryto rozbieżność: `AccountingProfile` nadal zawiera `WebsiteExpert Ltd` i nie ma danych rejestrowych; wymaga synchronizacji przed użyciem produkcyjnym.
+- [x] Nazwa w `AccountingProfile` została zsynchronizowana do `Website Expert NI`; pozostałe brakujące dane profilu nadal wymagają synchronizacji przed użyciem produkcyjnym.
 
 ## Następny krok po ukończeniu
 
 - [ ] Przekazać ZIP i checklistę księgowemu UK.
-- [ ] Zapisać uwagi jako kryteria akceptacji przed UKFIN-405 i UKFIN-501–510.
+- [ ] Zapisać uwagi księgowego jako kryteria akceptacji przed UKFIN-501–510; UKFIN-405 został ukończony.
 
 ---
 
@@ -117,7 +182,7 @@ Dostarczyć deterministyczny, tenantowy scoring kandydatów dla transakcji banko
 
 ## Następny krok
 
-- [ ] `UKFIN-405` — model i UI reconcile exact/partial/split/many-to-many.
+- [x] `UKFIN-405` — model i UI reconcile exact/partial/split/many-to-many (ukończone 2026-11-05).
 
 ## Wykonane
 

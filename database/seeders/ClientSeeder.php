@@ -13,8 +13,8 @@ class ClientSeeder extends Seeder
     public function run(): void
     {
         $business = Business::where('is_active', true)->first();
-        $manager = User::where('email', 'manager@websiteexpert.co.uk')->first();
-        $developer = User::where('email', 'developer@websiteexpert.co.uk')->first();
+        $manager = User::where('email', 'sales@website-expert.uk')->first();
+        $developer = User::where('email', 'sales@website-expert.uk')->first();
 
         $clients = [
             [

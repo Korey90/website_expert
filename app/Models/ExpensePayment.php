@@ -72,4 +72,9 @@ class ExpensePayment extends Model
     {
         return $this->morphMany(FinancialAttachment::class, 'attachable');
     }
+
+    public function bankReconciliationAllocations(): MorphMany
+    {
+        return $this->morphMany(BankReconciliationAllocation::class, 'reconcilable');
+    }
 }

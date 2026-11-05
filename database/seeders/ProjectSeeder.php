@@ -14,9 +14,9 @@ class ProjectSeeder extends Seeder
 {
     public function run(): void
     {
-        $manager = User::where('email', 'manager@websiteexpert.co.uk')->first();
-        $developer = User::where('email', 'developer@websiteexpert.co.uk')->first();
-        $developer2 = User::where('email', 'developer2@websiteexpert.co.uk')->first();
+        $manager = User::where('email', 'sales@website-expert.uk')->first();
+        $developer = User::where('email', 'sales@website-expert.uk')->first();
+        $developer2 = User::where('email', 'sales@website-expert.uk')->first();
 
         $hargreaves = Client::where('company_name', 'Hargreaves & Sons Solicitors')->first();
         $oakfield = Client::where('company_name', 'Oakfield Dental Practice')->first();

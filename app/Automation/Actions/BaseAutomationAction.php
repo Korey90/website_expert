@@ -3,6 +3,10 @@
 namespace App\Automation\Actions;
 
 use App\Automation\AutomationActionContract;
+use App\Mail\InvoiceSentMail;
+use App\Mail\NewLeadMail;
+use App\Mail\ProjectStatusMail;
+use App\Mail\QuoteSentMail;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Lead;
@@ -39,6 +43,7 @@ abstract class BaseAutomationAction implements AutomationActionContract
         }
         if (isset($context['lead_id'])) {
             $lead = Lead::find($context['lead_id']);
+
             return $lead?->client?->primary_contact_email ?? $lead?->email;
         }
         if (isset($context['project_id'])) {
@@ -61,6 +66,7 @@ abstract class BaseAutomationAction implements AutomationActionContract
         }
         if (isset($context['lead_id'])) {
             $lead = Lead::find($context['lead_id']);
+
             return $lead?->client?->primary_contact_phone;
         }
         if (isset($context['project_id'])) {
@@ -80,8 +86,8 @@ abstract class BaseAutomationAction implements AutomationActionContract
     {
         return match ($recipient) {
             'client' => $this->resolveClientEmail($context),
-            'admin'  => config('mail.admin_address', 'admin@websiteexpert.co.uk'),
-            default  => filter_var($recipient, FILTER_VALIDATE_EMAIL) ? $recipient : null,
+            'admin' => config('mail.admin_address', 'sales@website-expert.uk'),
+            default => filter_var($recipient, FILTER_VALIDATE_EMAIL) ? $recipient : null,
         };
     }
 
@@ -89,7 +95,7 @@ abstract class BaseAutomationAction implements AutomationActionContract
     {
         return match ($recipient) {
             'client' => $this->resolveClientPhone($context),
-            default  => preg_match('/^\+?[\d\s\-()]{7,}$/', $recipient) ? $recipient : null,
+            default => preg_match('/^\+?[\d\s\-()]{7,}$/', $recipient) ? $recipient : null,
         };
     }
 
@@ -100,21 +106,21 @@ abstract class BaseAutomationAction implements AutomationActionContract
         if (isset($context['lead_id'])) {
             $lead = Lead::with(['client', 'stage', 'assignedTo'])->find($context['lead_id']);
             if ($lead) {
-                $vars['lead_title']    = $lead->title ?? '';
-                $vars['client_name']   = $lead->client?->primary_contact_name ?? '';
-                $vars['company_name']  = $lead->client?->company_name ?? '';
-                $vars['stage_name']    = $lead->stage?->name ?? '';
+                $vars['lead_title'] = $lead->title ?? '';
+                $vars['client_name'] = $lead->client?->primary_contact_name ?? '';
+                $vars['company_name'] = $lead->client?->company_name ?? '';
+                $vars['stage_name'] = $lead->stage?->name ?? '';
                 $vars['assigned_name'] = $lead->assignedTo?->name ?? '';
-                $vars['project_name']  = $lead->project?->name ?? '';
+                $vars['project_name'] = $lead->project?->name ?? '';
             }
         }
 
         if (isset($context['project_id'])) {
             $project = Project::with(['client', 'assignedTo'])->find($context['project_id']);
             if ($project) {
-                $vars['project_name']  = $project->name ?? '';
-                $vars['client_name']   = $vars['client_name']  ?? ($project->client?->primary_contact_name ?? '');
-                $vars['company_name']  = $vars['company_name'] ?? ($project->client?->company_name ?? '');
+                $vars['project_name'] = $project->name ?? '';
+                $vars['client_name'] = $vars['client_name'] ?? ($project->client?->primary_contact_name ?? '');
+                $vars['company_name'] = $vars['company_name'] ?? ($project->client?->company_name ?? '');
                 $vars['assigned_name'] = $vars['assigned_name'] ?? ($project->assignedTo?->name ?? '');
             }
         }
@@ -123,8 +129,8 @@ abstract class BaseAutomationAction implements AutomationActionContract
             $invoice = Invoice::with('client')->find($context['invoice_id']);
             if ($invoice) {
                 $vars['invoice_number'] = $invoice->invoice_number ?? "#{$invoice->id}";
-                $vars['client_name']    = $vars['client_name']  ?? ($invoice->client?->primary_contact_name ?? '');
-                $vars['company_name']   = $vars['company_name'] ?? ($invoice->client?->company_name ?? '');
+                $vars['client_name'] = $vars['client_name'] ?? ($invoice->client?->primary_contact_name ?? '');
+                $vars['company_name'] = $vars['company_name'] ?? ($invoice->client?->company_name ?? '');
             }
         }
 
@@ -133,34 +139,35 @@ abstract class BaseAutomationAction implements AutomationActionContract
 
     protected function interpolate(string $template, array $vars): string
     {
-        $search  = [];
+        $search = [];
         $replace = [];
         foreach ($vars as $key => $value) {
             if (is_scalar($value) || $value === null) {
-                $search[]  = '{{' . $key . '}}';
+                $search[] = '{{'.$key.'}}';
                 $replace[] = (string) ($value ?? '');
             }
         }
+
         return str_replace($search, $replace, $template);
     }
 
-    protected function resolveMailable(string|null $template, array $context): ?object
+    protected function resolveMailable(?string $template, array $context): ?object
     {
         return match ($template) {
-            'invoice_sent'   => isset($context['invoice_id'])
-                ? new \App\Mail\InvoiceSentMail(\App\Models\Invoice::findOrFail($context['invoice_id']))
+            'invoice_sent' => isset($context['invoice_id'])
+                ? new InvoiceSentMail(Invoice::findOrFail($context['invoice_id']))
                 : null,
-            'quote_sent'     => isset($context['quote_id'])
-                ? new \App\Mail\QuoteSentMail(\App\Models\Quote::findOrFail($context['quote_id']))
+            'quote_sent' => isset($context['quote_id'])
+                ? new QuoteSentMail(Quote::findOrFail($context['quote_id']))
                 : null,
             'project_status' => isset($context['project_id'])
-                ? new \App\Mail\ProjectStatusMail(
-                    \App\Models\Project::findOrFail($context['project_id']),
+                ? new ProjectStatusMail(
+                    Project::findOrFail($context['project_id']),
                     $context['old_status'] ?? 'unknown',
                 )
                 : null,
-            'new_lead'       => isset($context['lead_id'])
-                ? new \App\Mail\NewLeadMail($context, $context['lead_id'])
+            'new_lead' => isset($context['lead_id'])
+                ? new NewLeadMail($context, $context['lead_id'])
                 : null,
             default => null,
         };

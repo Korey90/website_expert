@@ -10,21 +10,21 @@ class PageSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('email', 'admin@websiteexpert.co.uk')->first();
+        $admin = User::where('email', 'sales@website-expert.uk')->first();
 
         $pages = [
 
             // ─── Privacy Policy ───────────────────────────────────────────────
             [
-                'slug'           => 'privacy-policy',
-                'status'         => 'published',
-                'type'           => 'policy',
+                'slug' => 'privacy-policy',
+                'status' => 'published',
+                'type' => 'policy',
                 'show_in_footer' => true,
-                'sort_order'     => 1,
-                'created_by'     => $admin?->id,
-                'published_at'   => now()->subMonths(6),
+                'sort_order' => 1,
+                'created_by' => $admin?->id,
+                'published_at' => now()->subMonths(6),
                 'effective_date' => '2025-01-01',
-                'version'        => '1.0',
+                'version' => '1.0',
 
                 'title' => [
                     'en' => 'Privacy Policy',
@@ -290,15 +290,15 @@ HTML,
 
             // ─── Terms & Conditions ───────────────────────────────────────────
             [
-                'slug'           => 'terms-and-conditions',
-                'status'         => 'published',
-                'type'           => 'terms',
+                'slug' => 'terms-and-conditions',
+                'status' => 'published',
+                'type' => 'terms',
                 'show_in_footer' => true,
-                'sort_order'     => 2,
-                'created_by'     => $admin?->id,
-                'published_at'   => now()->subMonths(6),
+                'sort_order' => 2,
+                'created_by' => $admin?->id,
+                'published_at' => now()->subMonths(6),
                 'effective_date' => '2025-01-01',
-                'version'        => '1.0',
+                'version' => '1.0',
 
                 'title' => [
                     'en' => 'Terms & Conditions',
@@ -504,15 +504,15 @@ HTML,
 
             // ─── Cookie Policy ────────────────────────────────────────────────
             [
-                'slug'           => 'cookies',
-                'status'         => 'published',
-                'type'           => 'cookie_policy',
+                'slug' => 'cookies',
+                'status' => 'published',
+                'type' => 'cookie_policy',
                 'show_in_footer' => true,
-                'sort_order'     => 3,
-                'created_by'     => $admin?->id,
-                'published_at'   => now()->subMonths(6),
+                'sort_order' => 3,
+                'created_by' => $admin?->id,
+                'published_at' => now()->subMonths(6),
                 'effective_date' => '2025-01-01',
-                'version'        => '1.0',
+                'version' => '1.0',
 
                 'title' => [
                     'en' => 'Cookie Policy',
@@ -682,15 +682,15 @@ HTML,
 
             // ─── Accessibility ────────────────────────────────────────────────
             [
-                'slug'           => 'accessibility',
-                'status'         => 'published',
-                'type'           => 'accessibility',
+                'slug' => 'accessibility',
+                'status' => 'published',
+                'type' => 'accessibility',
                 'show_in_footer' => true,
-                'sort_order'     => 4,
-                'created_by'     => $admin?->id,
-                'published_at'   => now()->subMonths(6),
+                'sort_order' => 4,
+                'created_by' => $admin?->id,
+                'published_at' => now()->subMonths(6),
                 'effective_date' => '2025-01-01',
-                'version'        => '1.0',
+                'version' => '1.0',
 
                 'title' => [
                     'en' => 'Accessibility Statement',

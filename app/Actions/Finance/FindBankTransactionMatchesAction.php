@@ -27,8 +27,11 @@ class FindBankTransactionMatchesAction
             throw new DomainException('The actor cannot view bank transaction matches.');
         }
 
-        if ($transaction->reconciliation_status !== BankTransaction::STATUS_UNMATCHED) {
-            throw new DomainException('Only unmatched bank transactions can be scored.');
+        if (! in_array($transaction->reconciliation_status, [
+            BankTransaction::STATUS_UNMATCHED,
+            BankTransaction::STATUS_PARTIALLY_RECONCILED,
+        ], true)) {
+            throw new DomainException('Only unmatched or partially reconciled bank transactions can be scored.');
         }
 
         return $this->matchingService->findCandidates($transaction);

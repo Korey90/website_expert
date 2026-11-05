@@ -85,6 +85,25 @@ return [
             'invalid_rows' => 'Invalid CSV row numbers: :rows.',
         ],
     ],
+    'bank_reconciliation' => [
+        'navigation' => 'Bank reconciliation', 'singular' => 'bank transaction', 'plural' => 'bank transactions',
+        'sections' => ['transaction' => 'Bank transaction', 'allocations' => 'Reconciliation allocations'],
+        'fields' => [
+            'booking_date' => 'Booking date', 'value_date' => 'Value date', 'amount' => 'Bank amount', 'status' => 'Reconciliation status',
+            'account' => 'Bank account', 'counterparty' => 'Counterparty', 'reference' => 'Reference', 'source' => 'Matching payment or refund',
+            'event_type' => 'Event type', 'allocated_amount' => 'Allocated amount', 'remaining_amount' => 'Remaining amount', 'source_amount' => 'Source amount', 'score' => 'Match score',
+            'reconciled_by' => 'Reconciled by', 'reconciled_at' => 'Reconciled at', 'notes' => 'Notes',
+        ],
+        'statuses' => ['unmatched' => 'Unmatched', 'partially_reconciled' => 'Partially reconciled', 'reconciled' => 'Reconciled', 'matched' => 'Matched'],
+        'events' => ['customer_payment' => 'Customer payment', 'customer_refund' => 'Customer refund', 'supplier_payment' => 'Supplier payment', 'supplier_refund' => 'Supplier refund'],
+        'actions' => ['reconcile' => 'Reconcile'],
+        'modal' => [
+            'heading' => 'Reconcile bank transaction',
+            'description' => 'Allocate the remaining bank amount to one or more suggested payments or refunds. Partial allocations can be completed later.',
+        ],
+        'candidate_label' => ':event · :amount :currency · :date · :party · score :score/100',
+        'notifications' => ['reconciled' => 'Bank transaction allocation saved.'],
+    ],
     'ledger_accounts' => [
         'navigation' => 'Chart of accounts', 'singular' => 'ledger account', 'plural' => 'ledger accounts', 'section' => 'Account details',
         'fields' => ['code' => 'Code', 'name' => 'Name', 'name_en' => 'Name (English)', 'name_pl' => 'Name (Polish)', 'name_pt' => 'Name (Portuguese)', 'type' => 'Type', 'subtype' => 'Subtype', 'normal_balance' => 'Normal balance', 'parent' => 'Parent account', 'is_postable' => 'Posting allowed', 'is_active' => 'Active', 'is_system' => 'System account'],

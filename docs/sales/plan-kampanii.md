@@ -741,7 +741,7 @@ Na podstawie analizy projektu wyróżniki to:
 ## 15. Materiały do przygotowania przed uruchomieniem
 
 ### Must have:
-- [ ] Domena (np. `digitalgrowth.io` / `websiteexpert.co.uk` / `landingos.com`) — **wymagana do uruchomienia**
+- [ ] Domena (np. `digitalgrowth.io` / `website-expert.uk` / `landingos.com`) — **wymagana do uruchomienia**
 - [ ] Konto Google Ads (billing, waluta: GBP lub PLN)
 - [ ] Konto Google Analytics 4 — połączone z Ads i GSC
 - [ ] Tag Manager skonfigurowany z konwersjami (GTM już jest w projekcie)

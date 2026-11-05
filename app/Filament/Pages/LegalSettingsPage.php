@@ -6,7 +6,6 @@ use App\Models\Setting;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Notifications\Notification;
-use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -15,9 +14,12 @@ class LegalSettingsPage extends BasePage
     protected string $view = 'filament.pages.legal-settings';
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-scale';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Settings';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+
     protected static ?string $navigationLabel = 'Legal & Company';
-    protected static ?int    $navigationSort  = 9;
+
+    protected static ?int $navigationSort = 9;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];
@@ -26,41 +28,41 @@ class LegalSettingsPage extends BasePage
     {
         $this->form->fill([
             // Company Details
-            'company_name'    => Setting::get('legal.company_name',    'WebsiteExpert Ltd'),
-            'company_number'  => Setting::get('legal.company_number',  ''),
+            'company_name' => Setting::get('legal.company_name', 'Website Expert NI'),
+            'company_number' => Setting::get('legal.company_number', ''),
             'company_address' => Setting::get('legal.company_address', ''),
-            'vat_number'      => Setting::get('legal.vat_number',      ''),
-            'company_email'   => Setting::get('legal.company_email',   'hello@websiteexpert.co.uk'),
-            'company_phone'   => Setting::get('legal.company_phone',   ''),
+            'vat_number' => Setting::get('legal.vat_number', ''),
+            'company_email' => Setting::get('legal.company_email', 'hello@website-expert.uk'),
+            'company_phone' => Setting::get('legal.company_phone', ''),
             // Data Protection
-            'ico_number'             => Setting::get('legal.ico_number',             ''),
-            'ico_registration_url'   => Setting::get('legal.ico_registration_url',   'https://ico.org.uk/ESDWebPages/Entry/'),
-            'privacy_email'          => Setting::get('legal.privacy_email',          'privacy@websiteexpert.co.uk'),
-            'dpo_name'               => Setting::get('legal.dpo_name',               ''),
-            'data_retention_years'   => Setting::get('legal.data_retention_years',   '7'),
+            'ico_number' => Setting::get('legal.ico_number', ''),
+            'ico_registration_url' => Setting::get('legal.ico_registration_url', 'https://ico.org.uk/ESDWebPages/Entry/'),
+            'privacy_email' => Setting::get('legal.privacy_email', 'privacy@website-expert.uk'),
+            'dpo_name' => Setting::get('legal.dpo_name', ''),
+            'data_retention_years' => Setting::get('legal.data_retention_years', '7'),
             // Customer Service
-            'complaints_email'    => Setting::get('legal.complaints_email',    'support@websiteexpert.co.uk'),
-            'complaints_phone'    => Setting::get('legal.complaints_phone',    ''),
-            'response_days'       => Setting::get('legal.response_days',       '14'),
-            'deposit_percent'     => Setting::get('legal.deposit_percent',     '50'),
-            'payment_terms_days'  => Setting::get('legal.payment_terms_days',  '30'),
+            'complaints_email' => Setting::get('legal.complaints_email', 'support@website-expert.uk'),
+            'complaints_phone' => Setting::get('legal.complaints_phone', ''),
+            'response_days' => Setting::get('legal.response_days', '14'),
+            'deposit_percent' => Setting::get('legal.deposit_percent', '50'),
+            'payment_terms_days' => Setting::get('legal.payment_terms_days', '30'),
             // Cookie queries
-            'cookie_policy_email' => Setting::get('legal.cookie_policy_email', 'privacy@websiteexpert.co.uk'),
+            'cookie_policy_email' => Setting::get('legal.cookie_policy_email', 'privacy@website-expert.uk'),
             // Document Dates & Versions
-            'privacy_effective_date'       => Setting::get('legal.privacy_effective_date',       ''),
-            'privacy_version'              => Setting::get('legal.privacy_version',              '1.0'),
-            'terms_effective_date'         => Setting::get('legal.terms_effective_date',         ''),
-            'terms_version'                => Setting::get('legal.terms_version',                '1.0'),
-            'cookies_effective_date'       => Setting::get('legal.cookies_effective_date',       ''),
-            'cookies_version'              => Setting::get('legal.cookies_version',              '1.0'),
+            'privacy_effective_date' => Setting::get('legal.privacy_effective_date', ''),
+            'privacy_version' => Setting::get('legal.privacy_version', '1.0'),
+            'terms_effective_date' => Setting::get('legal.terms_effective_date', ''),
+            'terms_version' => Setting::get('legal.terms_version', '1.0'),
+            'cookies_effective_date' => Setting::get('legal.cookies_effective_date', ''),
+            'cookies_version' => Setting::get('legal.cookies_version', '1.0'),
             'accessibility_effective_date' => Setting::get('legal.accessibility_effective_date', ''),
-            'accessibility_version'        => Setting::get('legal.accessibility_version',        '1.0'),
+            'accessibility_version' => Setting::get('legal.accessibility_version', '1.0'),
             // Domain Registration — Legal
             'domain_terms_effective_date' => Setting::get('legal.domain_terms_effective_date', ''),
-            'domain_terms_version'        => Setting::get('legal.domain_terms_version',        '1.0'),
-            'domain_registrar_name'       => Setting::get('legal.domain_registrar_name',       'Openprovider B.V.'),
-            'domain_abuse_email'          => Setting::get('legal.domain_abuse_email',          ''),
-            'domain_dispute_email'        => Setting::get('legal.domain_dispute_email',        ''),
+            'domain_terms_version' => Setting::get('legal.domain_terms_version', '1.0'),
+            'domain_registrar_name' => Setting::get('legal.domain_registrar_name', 'Openprovider B.V.'),
+            'domain_abuse_email' => Setting::get('legal.domain_abuse_email', ''),
+            'domain_dispute_email' => Setting::get('legal.domain_dispute_email', ''),
         ]);
     }
 
@@ -74,7 +76,7 @@ class LegalSettingsPage extends BasePage
                     ->schema([
                         Forms\Components\TextInput::make('company_name')
                             ->label('Legal company name')
-                            ->placeholder('WebsiteExpert Ltd')
+                            ->placeholder('Website Expert NI')
                             ->required()
                             ->columnSpanFull(),
                         Forms\Components\TextInput::make('company_number')
@@ -92,7 +94,7 @@ class LegalSettingsPage extends BasePage
                         Forms\Components\TextInput::make('company_email')
                             ->label('General contact email')
                             ->email()
-                            ->placeholder('hello@websiteexpert.co.uk'),
+                            ->placeholder('hello@website-expert.uk'),
                         Forms\Components\TextInput::make('company_phone')
                             ->label('Contact phone')
                             ->tel()
@@ -121,7 +123,7 @@ class LegalSettingsPage extends BasePage
                         Forms\Components\TextInput::make('privacy_email')
                             ->label('Privacy / GDPR contact email')
                             ->email()
-                            ->placeholder('privacy@websiteexpert.co.uk'),
+                            ->placeholder('privacy@website-expert.uk'),
                         Forms\Components\TextInput::make('dpo_name')
                             ->label('DPO name (optional)')
                             ->placeholder('Leave blank if no DPO appointed'),
@@ -134,7 +136,7 @@ class LegalSettingsPage extends BasePage
                         Forms\Components\TextInput::make('complaints_email')
                             ->label('Complaints email')
                             ->email()
-                            ->placeholder('support@websiteexpert.co.uk'),
+                            ->placeholder('support@website-expert.uk'),
                         Forms\Components\TextInput::make('complaints_phone')
                             ->label('Complaints phone')
                             ->tel()
@@ -155,7 +157,7 @@ class LegalSettingsPage extends BasePage
                         Forms\Components\TextInput::make('cookie_policy_email')
                             ->label('Cookie / privacy queries email')
                             ->email()
-                            ->placeholder('privacy@websiteexpert.co.uk'),
+                            ->placeholder('privacy@website-expert.uk'),
                     ]),
 
                 Section::make('Document Dates & Versions')
@@ -221,36 +223,36 @@ class LegalSettingsPage extends BasePage
         $data = $this->form->getState();
 
         $map = [
-            'company_name'                 => 'legal.company_name',
-            'company_number'               => 'legal.company_number',
-            'company_address'              => 'legal.company_address',
-            'vat_number'                   => 'legal.vat_number',
-            'company_email'                => 'legal.company_email',
-            'company_phone'                => 'legal.company_phone',
-            'ico_number'                   => 'legal.ico_number',
-            'ico_registration_url'         => 'legal.ico_registration_url',
-            'privacy_email'                => 'legal.privacy_email',
-            'dpo_name'                     => 'legal.dpo_name',
-            'data_retention_years'         => 'legal.data_retention_years',
-            'complaints_email'             => 'legal.complaints_email',
-            'complaints_phone'             => 'legal.complaints_phone',
-            'response_days'                => 'legal.response_days',
-            'deposit_percent'              => 'legal.deposit_percent',
-            'payment_terms_days'           => 'legal.payment_terms_days',
-            'cookie_policy_email'          => 'legal.cookie_policy_email',
-            'privacy_effective_date'       => 'legal.privacy_effective_date',
-            'privacy_version'              => 'legal.privacy_version',
-            'terms_effective_date'         => 'legal.terms_effective_date',
-            'terms_version'                => 'legal.terms_version',
-            'cookies_effective_date'       => 'legal.cookies_effective_date',
-            'cookies_version'              => 'legal.cookies_version',
+            'company_name' => 'legal.company_name',
+            'company_number' => 'legal.company_number',
+            'company_address' => 'legal.company_address',
+            'vat_number' => 'legal.vat_number',
+            'company_email' => 'legal.company_email',
+            'company_phone' => 'legal.company_phone',
+            'ico_number' => 'legal.ico_number',
+            'ico_registration_url' => 'legal.ico_registration_url',
+            'privacy_email' => 'legal.privacy_email',
+            'dpo_name' => 'legal.dpo_name',
+            'data_retention_years' => 'legal.data_retention_years',
+            'complaints_email' => 'legal.complaints_email',
+            'complaints_phone' => 'legal.complaints_phone',
+            'response_days' => 'legal.response_days',
+            'deposit_percent' => 'legal.deposit_percent',
+            'payment_terms_days' => 'legal.payment_terms_days',
+            'cookie_policy_email' => 'legal.cookie_policy_email',
+            'privacy_effective_date' => 'legal.privacy_effective_date',
+            'privacy_version' => 'legal.privacy_version',
+            'terms_effective_date' => 'legal.terms_effective_date',
+            'terms_version' => 'legal.terms_version',
+            'cookies_effective_date' => 'legal.cookies_effective_date',
+            'cookies_version' => 'legal.cookies_version',
             'accessibility_effective_date' => 'legal.accessibility_effective_date',
-            'accessibility_version'        => 'legal.accessibility_version',
-            'domain_terms_effective_date'  => 'legal.domain_terms_effective_date',
-            'domain_terms_version'         => 'legal.domain_terms_version',
-            'domain_registrar_name'        => 'legal.domain_registrar_name',
-            'domain_abuse_email'           => 'legal.domain_abuse_email',
-            'domain_dispute_email'         => 'legal.domain_dispute_email',
+            'accessibility_version' => 'legal.accessibility_version',
+            'domain_terms_effective_date' => 'legal.domain_terms_effective_date',
+            'domain_terms_version' => 'legal.domain_terms_version',
+            'domain_registrar_name' => 'legal.domain_registrar_name',
+            'domain_abuse_email' => 'legal.domain_abuse_email',
+            'domain_dispute_email' => 'legal.domain_dispute_email',
         ];
 
         foreach ($map as $field => $key) {

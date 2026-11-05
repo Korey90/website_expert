@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
         $users = [
             [
                 'name'      => 'Sarah Mitchell',
-                'email'     => 'manager@websiteexpert.co.uk',
+                'email'     => 'manager@website-expert.uk',
                 'password'  => bcrypt('Manager@WebsiteExpert2026!'),
                 'is_active' => true,
                 'locale'    => 'en',
@@ -20,7 +20,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name'      => 'James Carter',
-                'email'     => 'developer@websiteexpert.co.uk',
+                'email'     => 'developer@website-expert.uk',
                 'password'  => bcrypt('Dev@WebsiteExpert2026!'),
                 'is_active' => true,
                 'locale'    => 'en',
@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name'      => 'Emily Thompson',
-                'email'     => 'developer2@websiteexpert.co.uk',
+                'email'     => 'developer2@website-expert.uk',
                 'password'  => bcrypt('Dev2@WebsiteExpert2026!'),
                 'is_active' => true,
                 'locale'    => 'en',

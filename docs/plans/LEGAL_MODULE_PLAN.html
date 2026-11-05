@@ -140,22 +140,22 @@ Dokumenty prawne muszą mieć jawną datę wejścia w życie (wymagane przez UK 
 <p>Nowa strona ustawień wzorowana na istniejącym <code>TrackingSettingsPage</code> (ten sam wzorzec: <code>Setting::get</code> / <code>Setting::set</code>, grupy kluczy, cache). Wszystkie dane firmowe będą przechowywane w tabeli <code>settings</code> z grupą <code>legal</code>.</p>
 <h4>Pola formularza — sekcje:</h4>
 <p><strong>Sekcja: Company Details</strong> (używane we wszystkich dokumentach)</p>
-<pre><code>legal.company_name        → &quot;WebsiteExpert Ltd&quot;           (TextInput, required)
+<pre><code>legal.company_name        → &quot;Website Expert NI&quot;           (TextInput, required)
 legal.company_number      → &quot;[Companies House No.]&quot;        (TextInput)
 legal.company_address     → &quot;[Registered address]&quot;         (Textarea, 3 lines)
 legal.vat_number          → &quot;GB [numer VAT]&quot;               (TextInput)
 legal.company_phone       → &quot;+44 ...&quot;                      (TextInput)
-legal.company_email       → &quot;hello@websiteexpert.co.uk&quot;    (TextInput)
+legal.company_email       → &quot;hello@website-expert.uk&quot;    (TextInput)
 </code></pre>
 <p><strong>Sekcja: Data Protection</strong> (Privacy Policy)</p>
 <pre><code>legal.ico_number          → &quot;ZB [ICO Registration No.]&quot;   (TextInput)
 legal.ico_registration_url → &quot;https://ico.org.uk/...&quot;     (TextInput, URL)
-legal.privacy_email       → &quot;privacy@websiteexpert.co.uk&quot; (TextInput, email)
+legal.privacy_email       → &quot;privacy@website-expert.uk&quot; (TextInput, email)
 legal.dpo_name            → &quot;[DPO name, if applicable]&quot;   (TextInput, nullable)
 legal.data_retention_years → &quot;7&quot;                          (TextInput, number)
 </code></pre>
 <p><strong>Sekcja: Customer Service &amp; Complaints</strong> (T&amp;C)</p>
-<pre><code>legal.complaints_email    → &quot;support@websiteexpert.co.uk&quot; (TextInput, email)
+<pre><code>legal.complaints_email    → &quot;support@website-expert.uk&quot; (TextInput, email)
 legal.complaints_phone    → &quot;+44 ...&quot;                     (TextInput)
 legal.response_days       → &quot;14&quot;                          (TextInput, number)
 legal.deposit_percent     → &quot;50&quot;                          (TextInput, number, %)
@@ -164,7 +164,7 @@ legal.payment_terms_days  → &quot;30&quot;                          (TextInput
 <p><strong>Sekcja: Tracking &amp; Cookies</strong> (Cookie Policy — pobierane z istniejących ustawień!)</p>
 <pre><code>→ Wyświetla (readonly): GTM ID, GA4 ID, Pixel ID z grupy 'tracking'
    (nie duplikujemy danych — linkujemy do TrackingSettingsPage)
-legal.cookie_policy_email → &quot;privacy@websiteexpert.co.uk&quot; (TextInput)
+legal.cookie_policy_email → &quot;privacy@website-expert.uk&quot; (TextInput)
 </code></pre>
 <p><strong>Sekcja: Document Dates</strong> (wszystkie dokumenty)</p>
 <pre><code>legal.privacy_effective_date   → DatePicker
@@ -186,13 +186,13 @@ legal.accessibility_version        → &quot;1.0&quot;
 <hr />
 <h3>2.4 System zmiennych w treści dokumentów</h3>
 <p>Treść dokumentów w seederze (i zatem w TinyEditor) będzie używać <strong>tokenów</strong> zamiast hardcode’owanych danych:</p>
-<pre><code>{{legal.company_name}}       → WebsiteExpert Ltd
+<pre><code>{{legal.company_name}}       → Website Expert NI
 {{legal.company_number}}     → 12345678
 {{legal.company_address}}    → 123 High Street, London, W1A 1AA
 {{legal.vat_number}}         → GB 123 456 789
 {{legal.ico_number}}         → ZB1234567
-{{legal.privacy_email}}      → privacy@websiteexpert.co.uk
-{{legal.complaints_email}}   → support@websiteexpert.co.uk
+{{legal.privacy_email}}      → privacy@website-expert.uk
+{{legal.complaints_email}}   → support@website-expert.uk
 {{legal.deposit_percent}}    → 50
 {{legal.payment_terms_days}} → 30
 {{legal.data_retention_years}} → 7
@@ -661,7 +661,7 @@ Treść musi spełniać wymagania obu jurysdykcji.</p>
 <tr>
 <td><code>company_name</code></td>
 <td>Company legal name</td>
-<td>WebsiteExpert Ltd</td>
+<td>Website Expert NI</td>
 </tr>
 <tr>
 <td><code>company_number</code></td>
@@ -681,7 +681,7 @@ Treść musi spełniać wymagania obu jurysdykcji.</p>
 <tr>
 <td><code>company_email</code></td>
 <td>Contact email</td>
-<td><a href="mailto:hello@websiteexpert.co.uk">hello@websiteexpert.co.uk</a></td>
+<td><a href="mailto:hello@website-expert.uk">hello@website-expert.uk</a></td>
 </tr>
 <tr>
 <td><code>company_phone</code></td>
@@ -701,7 +701,7 @@ Treść musi spełniać wymagania obu jurysdykcji.</p>
 <tr>
 <td><code>privacy_email</code></td>
 <td>Privacy contact email</td>
-<td><a href="mailto:privacy@websiteexpert.co.uk">privacy@websiteexpert.co.uk</a></td>
+<td><a href="mailto:privacy@website-expert.uk">privacy@website-expert.uk</a></td>
 </tr>
 <tr>
 <td><code>dpo_name</code></td>
@@ -716,7 +716,7 @@ Treść musi spełniać wymagania obu jurysdykcji.</p>
 <tr>
 <td><code>complaints_email</code></td>
 <td>Complaints email</td>
-<td><a href="mailto:support@websiteexpert.co.uk">support@websiteexpert.co.uk</a></td>
+<td><a href="mailto:support@website-expert.uk">support@website-expert.uk</a></td>
 </tr>
 <tr>
 <td><code>complaints_phone</code></td>
@@ -741,7 +741,7 @@ Treść musi spełniać wymagania obu jurysdykcji.</p>
 <tr>
 <td><code>cookie_policy_email</code></td>
 <td>Cookie queries email</td>
-<td><a href="mailto:privacy@websiteexpert.co.uk">privacy@websiteexpert.co.uk</a></td>
+<td><a href="mailto:privacy@website-expert.uk">privacy@website-expert.uk</a></td>
 </tr>
 <tr>
 <td><code>privacy_effective_date</code></td>

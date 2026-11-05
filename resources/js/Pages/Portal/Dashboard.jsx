@@ -95,7 +95,7 @@ export default function Dashboard({ client, projects, invoices, quotes, timeline
                         You will receive an email confirmation once your portal is fully activated.
                     </p>
                     <p className="text-sm text-gray-400">
-                        Questions? Contact us at <a href="mailto:hello@websiteexpert.co.uk" className="text-red-600 hover:underline">hello@websiteexpert.co.uk</a>
+                        Questions? Contact us at <a href="mailto:hello@website-expert.uk" className="text-red-600 hover:underline">hello@website-expert.uk</a>
                     </p>
                 </div>
             </PortalLayout>

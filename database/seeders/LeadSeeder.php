@@ -12,8 +12,8 @@ class LeadSeeder extends Seeder
 {
     public function run(): void
     {
-        $manager = User::where('email', 'manager@websiteexpert.co.uk')->first();
-        $developer = User::where('email', 'developer@websiteexpert.co.uk')->first();
+        $manager = User::where('email', 'sales@website-expert.uk')->first();
+        $developer = User::where('email', 'sales@website-expert.uk')->first();
 
         $stages = PipelineStage::pluck('id', 'slug');
 

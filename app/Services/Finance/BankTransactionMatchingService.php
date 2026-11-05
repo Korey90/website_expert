@@ -3,6 +3,8 @@
 namespace App\Services\Finance;
 
 use App\Data\Finance\BankTransactionMatchCandidate;
+use App\Models\BankReconciliation;
+use App\Models\BankReconciliationAllocation;
 use App\Models\BankTransaction;
 use App\Models\ExpensePayment;
 use App\Models\Payment;
@@ -18,6 +20,12 @@ class BankTransactionMatchingService
         $windowDays = (int) config('finance.bank_matching.date_window_days', 30);
         $minimumScore = (int) config('finance.bank_matching.minimum_score', 50);
         $maximumCandidates = (int) config('finance.bank_matching.maximum_candidates', 50);
+        $transactionAmount = $this->remainingTransactionAmount($transaction);
+
+        if (abs($transactionAmount) < 0.005) {
+            return [];
+        }
+
         $date = $transaction->value_date ?? $transaction->booking_date;
         $dateFrom = $date->copy()->subDays($windowDays)->startOfDay();
         $dateTo = $date->copy()->addDays($windowDays)->endOfDay();
@@ -88,9 +96,20 @@ class BankTransactionMatchingService
         }
 
         $candidates = [];
+        $allocationTotals = $this->sourceAllocationTotals($transaction, $rawCandidates);
 
         foreach ($rawCandidates as $rawCandidate) {
-            $candidate = $this->score($transaction, $rawCandidate);
+            $allocationKey = $this->allocationKey(
+                $rawCandidate['source_type'],
+                $rawCandidate['source_id'],
+                $rawCandidate['event_type'],
+            );
+            $candidate = $this->score(
+                $transaction,
+                $rawCandidate,
+                $transactionAmount,
+                $allocationTotals[$allocationKey] ?? 0.0,
+            );
 
             if ($candidate !== null && $candidate->score >= $minimumScore) {
                 $candidates[] = $candidate;
@@ -132,9 +151,12 @@ class BankTransactionMatchingService
     /**
      * @param  array{key: string, source_type: class-string, source_id: int, event_type: string, date: CarbonInterface, amount: mixed, amount_gbp: mixed, currency: string, sign: int, references: array<int, mixed>, counterparties: array<int, mixed>}  $candidate
      */
-    private function score(BankTransaction $transaction, array $candidate): ?BankTransactionMatchCandidate
-    {
-        $transactionAmount = (float) $transaction->amount;
+    private function score(
+        BankTransaction $transaction,
+        array $candidate,
+        float $transactionAmount,
+        float $allocatedOriginalAmount,
+    ): ?BankTransactionMatchCandidate {
         $direction = $transactionAmount > 0 ? 'inflow' : 'outflow';
 
         if (($transactionAmount > 0 ? 1 : -1) !== $candidate['sign']) {
@@ -143,18 +165,29 @@ class BankTransactionMatchingService
 
         $transactionCurrency = strtoupper($transaction->currency);
         $originalCurrency = strtoupper($candidate['currency']);
-        $comparableAmount = $this->comparableAmount(
+        $fullOriginalAmount = abs((float) $candidate['amount']);
+        $remainingOriginalAmount = max(0, $fullOriginalAmount - $allocatedOriginalAmount);
+
+        if ($fullOriginalAmount < 0.005 || $remainingOriginalAmount < 0.005) {
+            return null;
+        }
+
+        $fullComparableAmount = $this->comparableAmount(
             $transactionCurrency,
             $originalCurrency,
             $candidate['amount'],
             $candidate['amount_gbp'],
         );
 
-        if ($comparableAmount === null) {
+        if ($fullComparableAmount === null) {
             return null;
         }
 
-        $signedComparableAmount = $candidate['sign'] * abs($comparableAmount);
+        $remainingComparableAmount = round(
+            abs($fullComparableAmount) * ($remainingOriginalAmount / $fullOriginalAmount),
+            2,
+        );
+        $signedComparableAmount = $candidate['sign'] * $remainingComparableAmount;
         $transactionPennies = $this->toPennies($transactionAmount);
         $candidatePennies = $this->toPennies($signedComparableAmount);
         [$amountScore, $amountReason] = $this->amountScore(abs($transactionPennies), abs($candidatePennies));
@@ -191,7 +224,7 @@ class BankTransactionMatchingService
             date: $candidate['date']->toDateString(),
             comparableAmount: number_format($signedComparableAmount, 2, '.', ''),
             comparableCurrency: $transactionCurrency,
-            originalAmount: number_format($candidate['sign'] * abs((float) $candidate['amount']), 2, '.', ''),
+            originalAmount: number_format($candidate['sign'] * $remainingOriginalAmount, 2, '.', ''),
             originalCurrency: $originalCurrency,
             amountDifference: number_format(abs($transactionAmount - $signedComparableAmount), 2, '.', ''),
             dateDifferenceDays: $dateDifference,
@@ -215,6 +248,68 @@ class BankTransactionMatchingService
         }
 
         return null;
+    }
+
+    private function remainingTransactionAmount(BankTransaction $transaction): float
+    {
+        $allocated = (float) BankReconciliationAllocation::withoutGlobalScopes()
+            ->where('business_id', $transaction->business_id)
+            ->where('bank_transaction_id', $transaction->id)
+            ->whereHas('reconciliation', fn ($query) => $query
+                ->withoutGlobalScopes()
+                ->where('status', BankReconciliation::STATUS_ACTIVE))
+            ->sum('amount');
+        $remaining = max(0, abs((float) $transaction->amount) - $allocated);
+
+        return (float) $transaction->amount < 0 ? -$remaining : $remaining;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $candidates
+     * @return array<string, float>
+     */
+    private function sourceAllocationTotals(BankTransaction $transaction, array $candidates): array
+    {
+        if ($candidates === []) {
+            return [];
+        }
+
+        $sourceIds = collect($candidates)
+            ->groupBy('source_type')
+            ->map(fn ($items) => $items->pluck('source_id')->unique()->values()->all());
+        $allocations = BankReconciliationAllocation::withoutGlobalScopes()
+            ->where('business_id', $transaction->business_id)
+            ->whereHas('reconciliation', fn ($query) => $query
+                ->withoutGlobalScopes()
+                ->where('status', BankReconciliation::STATUS_ACTIVE))
+            ->where(function ($query) use ($sourceIds): void {
+                foreach ($sourceIds as $sourceType => $ids) {
+                    $query->orWhere(function ($query) use ($sourceType, $ids): void {
+                        $query->where('reconcilable_type', $sourceType)
+                            ->whereIn('reconcilable_id', $ids);
+                    });
+                }
+            })
+            ->selectRaw('reconcilable_type, reconcilable_id, event_type, SUM(source_amount) as allocated_source_amount')
+            ->groupBy('reconcilable_type', 'reconcilable_id', 'event_type')
+            ->get();
+
+        $totals = [];
+
+        foreach ($allocations as $allocation) {
+            $totals[$this->allocationKey(
+                (string) $allocation->reconcilable_type,
+                (int) $allocation->reconcilable_id,
+                (string) $allocation->event_type,
+            )] = (float) $allocation->allocated_source_amount;
+        }
+
+        return $totals;
+    }
+
+    private function allocationKey(string $type, int $id, string $eventType): string
+    {
+        return $type.'|'.$id.'|'.$eventType;
     }
 
     /** @return array{int, string} */

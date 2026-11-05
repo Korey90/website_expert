@@ -151,7 +151,7 @@ class AdminSeeder extends Seeder
         // Default admin user
         // ---------------------------------------------------
         $adminUser = User::firstOrCreate(
-            ['email' => '20noname22x@gmail.com'],// admin@websiteexpert.co.uk
+            ['email' => '20noname22x@gmail.com'],// admin@website-expert.uk
             [
                 'name' => 'Admin WebsiteExpert',
                 'password' => bcrypt('password'), // Change this to a secure password in production!
@@ -167,7 +167,7 @@ class AdminSeeder extends Seeder
         $business = Business::firstOrCreate(
             ['slug' => 'website-expert'],
             [
-                'name' => 'WebsiteExpert Ltd',
+                'name' => 'Website Expert NI',
                 'locale' => 'en',
                 'timezone' => 'Europe/London',
                 'plan' => 'pro',
