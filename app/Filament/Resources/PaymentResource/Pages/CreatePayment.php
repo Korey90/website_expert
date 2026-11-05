@@ -2,22 +2,21 @@
 
 namespace App\Filament\Resources\PaymentResource\Pages;
 
+use App\Actions\Finance\RecordInvoicePaymentAction;
 use App\Filament\Resources\PaymentResource;
 use App\Models\Invoice;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Database\Eloquent\Model;
 
 class CreatePayment extends CreateRecord
 {
     protected static string $resource = PaymentResource::class;
 
-    protected function afterCreate(): void
+    /** @param array<string, mixed> $data */
+    protected function handleRecordCreation(array $data): Model
     {
-        // Recalculate invoice totals when a manual payment is added
-        $invoice = Invoice::find($this->record->invoice_id);
-        $invoice?->recalculate();
+        $invoice = Invoice::findOrFail($data['invoice_id']);
 
-        if ($invoice && $invoice->fresh()->amount_due <= 0) {
-            $invoice->update(['status' => 'paid', 'paid_at' => now()]);
-        }
+        return app(RecordInvoicePaymentAction::class)->execute($invoice, auth()->user(), $data);
     }
 }

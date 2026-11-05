@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ExpenseResource\Pages;
 use App\Actions\Finance\ApproveExpenseAction;
 use App\Actions\Finance\CreatePurchaseCreditNoteAction;
 use App\Actions\Finance\PostExpenseAction;
+use App\Actions\Finance\RecordExpensePaymentAction;
 use App\Actions\Finance\VoidExpenseAction;
 use App\Filament\Resources\ExpenseResource;
 use App\Filament\Resources\PurchaseCreditNoteResource;
@@ -13,6 +14,7 @@ use App\Models\Expense;
 use App\Models\FinancialAttachment;
 use App\Models\PurchaseCreditNote;
 use App\Services\Finance\FinancialAttachmentService;
+use App\Support\PermissionHelper;
 use DomainException;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -144,6 +146,39 @@ class ViewExpense extends ViewRecord
                 ->action(fn () => $this->runWorkflowAction(
                     fn () => app(PostExpenseAction::class)->execute($expense, auth()->user()),
                     __('finance.expenses.notifications.posted'),
+                )),
+            Action::make('record_payment')
+                ->label('Record payment')
+                ->icon('heroicon-o-banknotes')
+                ->color('success')
+                ->visible(fn (): bool => in_array($expense->status, [Expense::STATUS_POSTED, Expense::STATUS_PARTIALLY_PAID], true)
+                    && (float) $expense->amount_due > 0
+                    && PermissionHelper::allows(auth()->user(), 'post_finance'))
+                ->form([
+                    TextInput::make('amount')
+                        ->numeric()
+                        ->minValue(0.01)
+                        ->maxValue((float) $expense->amount_due)
+                        ->default((float) $expense->amount_due)
+                        ->required(),
+                    Select::make('method')
+                        ->options([
+                            'bank_transfer' => __('finance.expenses.payment_methods.bank_transfer'),
+                            'card' => __('finance.expenses.payment_methods.card'),
+                            'cash' => __('finance.expenses.payment_methods.cash'),
+                            'direct_debit' => __('finance.expenses.payment_methods.direct_debit'),
+                            'cheque' => __('finance.expenses.payment_methods.cheque'),
+                            'other' => __('finance.expenses.payment_methods.other'),
+                        ])
+                        ->default('bank_transfer')
+                        ->required(),
+                    TextInput::make('reference')->label('Payment reference'),
+                    DatePicker::make('paid_at')->default(today())->required(),
+                    Textarea::make('notes')->label(__('finance.expenses.fields.notes')),
+                ])
+                ->action(fn (array $data) => $this->runWorkflowAction(
+                    fn () => app(RecordExpensePaymentAction::class)->execute($expense, auth()->user(), $data),
+                    'Supplier payment recorded and posted.',
                 )),
             Action::make('void')
                 ->label(__('finance.expenses.actions.void'))

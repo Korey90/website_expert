@@ -26,6 +26,7 @@ class AuditFinanceTenantData extends Command
         'credit_note_items' => ['parent' => 'credit_notes', 'foreign_key' => 'credit_note_id'],
         'expenses' => ['parent' => 'suppliers', 'foreign_key' => 'supplier_id', 'nullable_parent' => true],
         'expense_items' => ['parent' => 'expenses', 'foreign_key' => 'expense_id'],
+        'expense_payments' => ['parent' => 'expenses', 'foreign_key' => 'expense_id'],
         'purchase_credit_notes' => ['parent' => 'expenses', 'foreign_key' => 'expense_id'],
         'purchase_credit_note_items' => ['parent' => 'purchase_credit_notes', 'foreign_key' => 'purchase_credit_note_id'],
         'purchase_credit_refunds' => ['parent' => 'purchase_credit_notes', 'foreign_key' => 'purchase_credit_note_id'],

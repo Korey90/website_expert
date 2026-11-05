@@ -155,6 +155,11 @@ class Expense extends Model
         return $this->hasMany(PurchaseCreditRefund::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(ExpensePayment::class);
+    }
+
     public function recalculate(): void
     {
         $totals = app(PurchaseTaxCalculator::class)->calculate(

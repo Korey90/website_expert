@@ -115,6 +115,11 @@ class Business extends Model
         return $this->hasMany(Expense::class);
     }
 
+    public function expensePayments(): HasMany
+    {
+        return $this->hasMany(ExpensePayment::class);
+    }
+
     public function financialAttachments(): HasMany
     {
         return $this->hasMany(FinancialAttachment::class);

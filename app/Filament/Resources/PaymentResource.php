@@ -35,7 +35,10 @@ class PaymentResource extends BaseResource
                 ->schema([
                     Forms\Components\Select::make('invoice_id')
                         ->label('Invoice')
-                        ->options(Invoice::all()->pluck('number', 'id'))
+                        ->options(Invoice::query()
+                            ->whereIn('status', ['sent', 'partially_paid', 'overdue'])
+                            ->where('amount_due', '>', 0)
+                            ->pluck('number', 'id'))
                         ->searchable()
                         ->required(),
 
@@ -68,10 +71,13 @@ class PaymentResource extends BaseResource
                             'refunded' => 'Refunded',
                         ])
                         ->default('completed')
+                        ->disabled()
+                        ->dehydrated()
                         ->required(),
 
                     Forms\Components\DateTimePicker::make('paid_at')
                         ->label('Paid at')
+                        ->default(now())
                         ->native(false),
 
                     Forms\Components\TextInput::make('reference')

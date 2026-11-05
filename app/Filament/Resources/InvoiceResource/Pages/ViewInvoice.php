@@ -4,6 +4,7 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Actions\Finance\CreateCreditNoteAction;
 use App\Actions\Finance\IssueInvoiceAction;
+use App\Actions\Finance\RecordInvoicePaymentAction;
 use App\Filament\Resources\CreditNoteResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Mail\InvoiceSentMail;
@@ -86,23 +87,38 @@ class ViewInvoice extends ViewRecord
                 ->label('Mark as Paid')
                 ->icon('heroicon-o-check-badge')
                 ->color('success')
-                ->visible(fn () => in_array($invoice->status, ['sent', 'partially_paid', 'overdue']))
-                ->requiresConfirmation()
+                ->visible(fn () => in_array($invoice->status, ['sent', 'partially_paid', 'overdue'])
+                    && PermissionHelper::allows(auth()->user(), 'post_finance'))
                 ->modalHeading('Mark Invoice as Paid')
-                ->modalDescription('This will set the invoice status to Paid and record the payment date as today.')
+                ->modalDescription('This records the outstanding payment and posts it to the ledger.')
                 ->modalSubmitActionLabel('Yes, Mark as Paid')
-                ->action(function () use ($invoice) {
-                    $invoice->update([
-                        'status' => 'paid',
-                        'paid_at' => now(),
-                        'amount_paid' => $invoice->total,
-                        'amount_due' => 0,
-                    ]);
+                ->form([
+                    Select::make('method')
+                        ->options([
+                            'bank_transfer' => 'Bank transfer',
+                            'stripe' => 'Stripe',
+                            'payu' => 'PayU',
+                            'cash' => 'Cash',
+                            'cheque' => 'Cheque',
+                            'other' => 'Other',
+                        ])
+                        ->default('bank_transfer')
+                        ->required(),
+                    TextInput::make('reference')->label('Payment reference'),
+                    DatePicker::make('paid_at')->default(today())->required(),
+                ])
+                ->action(function (array $data) use ($invoice): void {
+                    try {
+                        app(RecordInvoicePaymentAction::class)->execute($invoice, auth()->user(), [
+                            ...$data,
+                            'amount' => $invoice->amount_due,
+                        ]);
 
-                    Notification::make()
-                        ->title('Invoice marked as paid!')
-                        ->success()
-                        ->send();
+                        Notification::make()->title('Invoice payment recorded and posted!')->success()->send();
+                        $this->redirect(InvoiceResource::getUrl('view', ['record' => $invoice->id]));
+                    } catch (DomainException $exception) {
+                        Notification::make()->title($exception->getMessage())->danger()->send();
+                    }
                 }),
 
             Action::make('create_credit_note')
