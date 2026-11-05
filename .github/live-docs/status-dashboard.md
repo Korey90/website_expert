@@ -1,18 +1,19 @@
 # WebsiteExpert - Project Status Dashboard
 
 **Last Full Validation:** 2026-11-05
-**Last Targeted Validation:** 2026-11-05 — UKFIN-402/403: importer bank CSV + deduplikacja
+**Last Targeted Validation:** 2026-11-05 — UKFIN-404: scoring dopasowania transakcji bankowych
 
 ## Health Checks
 - **Code Quality (Pint + ESLint):** ✅ `vendor/bin/pint --dirty` i `npm run lint` przechodzą (1 niezwiązany pre-existing błąd w `docs/python tests/load-test.js`)
 - **Translations (pl/en/pt):** ✅ Homepage SEO w `lang/{locale}/seo.php`; Google Rank Checker w `lang/{locale}/rank_checker.php`; pozostały frontend inline EN/PL/PT
-- **Tests:** PHPUnit pełny pakiet (2026-11-05): 681 passed / 9 failed (baseline, niezwiązane: SocialAuth, 3×homepage meta, Billing PLN/GBP, 3×ProfileTest po przeniesieniu trasy, ServicePageController) / 11 skipped / 2382 assertions
+- **Tests:** PHPUnit pełny pakiet (2026-11-05): 688 passed / 9 failed (baseline, niezwiązane: SocialAuth, 3×homepage meta, Billing PLN/GBP, 3×ProfileTest po przeniesieniu trasy, ServicePageController) / 11 skipped / 2428 assertions
 - **Multi-Tenancy Compliance:** 100% ✅ (wyjątek celowy: `search_ranking_checks.business_id` nullable — narzędzie publiczne/anonimowe, przygotowane pod przyszłe powiązanie z klientem)
 - **Security Review:** ✅ OK — throttle + reCAPTCHA v3 na endpointach publicznych, `ip_hash` zamiast surowego IP, brak sekretów w logach
 - **Build (Vite):** ✅ Brak błędów TS/JS
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-11-05 — **UKFIN-404:** tenantowy scoring 0–100 kandydatów bank reconciliation dla wpłat klientów, zwrotów klientom, płatności i zwrotów dostawców; punkty za kwotę/datę/referencję/kontrahenta, kierunek przepływu, snapshot GBP, confidence exact/high/medium/low, deterministyczne sortowanie i próg partial 40. Finance regression: 179 passed / 1 skipped / 984 assertions; full regression: 688 passed / 9 baseline failures / 11 skipped / 2428 assertions ✅
 - 2026-11-05 — **UKFIN-402/403:** importer wyciągów CSV na widoku rachunku (mapowanie kolumn, formaty UK, UTF-8/Windows-1252, delimiter, limity 5 MB/5000, dry-run bez zapisów), tenantowe partie importu i `BankTransaction`, deduplikacja provider ID + kanoniczny SHA-256 z unique constraints, prywatny plik tymczasowy usuwany po operacji, tłumaczenia PL/EN/PT i rozszerzony audit tenantów. Finance regression: 172 passed / 1 skipped / 938 assertions ✅
 - 2026-10-05 — **SEO P2 (główna część zakończona):** włączone Inertia SSR (`resources/js/ssr.jsx`, `vite.config.js` `ssr:`, `npm run build:ssr` → `bootstrap/ssr/`, uruchamiane przez `php artisan inertia:start-ssr`) — surowy HTTP (bez JS) zawiera teraz prawdziwy `<h1>`/treść/JSON-LD na wszystkich stronach publicznych (wcześniej pusty div). Jedyny napotkany SSR-blocker: `Navbar.jsx` czytał `localStorage` w lazy state initializerze (crash w Node) — naprawione guardem `typeof window`. Dodany bezpieczny `Cache-Control: private, max-age=60` (`app/Http/Middleware/CacheMarketingResponse.php`, alias `cache.marketing`) na stronach marketingowych — `private` nie `public`, zero ryzyka przecieku waluty/sesji między użytkownikami. Rozbudowane H2 na PL LP (zakres usługi, SEO, lokalizacje) z linkiem do `/services/seo`. Pełny `php artisan test`: 502/6/10 (failę pre-existing, niezwiązane). Ukrycie wersji serwera i klaster treści SEO odrębnie udokumentowane w `current-task.md` — wymagają dostępu do hostingu / decyzji o platformie blogowej ✅
 - 2026-09-20 — Dodane widoczne breadcrumbs w hero na `/pl/strony-internetowe-uk` (`Strona główna › Strony internetowe UK`), zgodne z istniejącym JSON-LD `BreadcrumbList` (audyt SEO wskazywał ich brak jako czysto techniczne — dotąd był tylko schema, bez widocznego elementu UI). Wzorowane na istniejącym wzorcu `resources/js/Pages/CmsPage.jsx`. Build ✅, lint bez nowych błędów ✅, testy Landing 14/14 ✅, zweryfikowane na żywo w przeglądarce ✅

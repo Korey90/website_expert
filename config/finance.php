@@ -7,6 +7,11 @@ return [
         'max_rows' => 5000,
         'max_columns' => 100,
     ],
+    'bank_matching' => [
+        'date_window_days' => 30,
+        'minimum_score' => 40,
+        'maximum_candidates' => 50,
+    ],
     'expense_categories' => [
         'cost_of_sales',
         'software',

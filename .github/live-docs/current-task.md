@@ -1,50 +1,52 @@
 # Current Task
 
-**Zadanie:** UKFIN-402 — importer wyciągów bankowych CSV
+**Zadanie:** UKFIN-404 — reguły dopasowania transakcji bankowych
 **Status:** 🟢 Zakończone
 **Start:** 2026-11-04
 **Plan:** `docs/plans/uk-finance-tax-module-plan.md`
 
 ## Cel bieżącego przyrostu
 
-Dostarczyć tenantowy importer wyciągów CSV z konfigurowalnym mapowaniem kolumn, normalizacją brytyjskich formatów dat i kwot oraz trybem dry-run, bez tworzenia docelowych transakcji przed wdrożeniem deduplikacji z `UKFIN-403`.
+Dostarczyć deterministyczny, tenantowy scoring kandydatów dla transakcji bankowych na podstawie kierunku przepływu, kwoty, waluty, daty, referencji i kontrahenta, bez zapisywania uzgodnienia przed `UKFIN-405`.
 
-## Delta Analysis: UKFIN-402
+## Delta Analysis: UKFIN-404
 
 ### Anchor files (reużywam)
 
-- `app/Models/BankAccount.php` — tenant, waluta i kontrola dostępu do rachunku.
-- `app/Filament/Resources/BankAccountResource.php` — punkt wejścia importu w panelu finansowym.
-- `app/Filament/Resources/DomainPriceListResource/Pages/ListDomainPriceLists.php` — istniejący wzorzec uploadu i odczytu CSV.
-- `app/Actions/Finance/CreateBankAccountAction.php` — wzorzec autoryzowanej akcji finansowej.
-- `tests/Feature/Finance/BankAccountTest.php` — setup tenantów, permissions i rachunku bankowego.
+- `app/Models/BankTransaction.php` — transakcja wejściowa, znak kwoty, waluta i status uzgodnienia.
+- `app/Models/Payment.php` — wpłata klienta oraz pełny zwrot klientowi.
+- `app/Models/ExpensePayment.php` — wypływ do dostawcy.
+- `app/Models/PurchaseCreditRefund.php` — wpływ zwrotu od dostawcy.
+- `app/Models/Invoice.php`, `Client.php`, `Expense.php`, `Supplier.php` — numery dokumentów i nazwy kontrahentów.
+- `app/Support/PermissionHelper.php` — kontrola `view_finance`.
 
 ### Do stworzenia
 
-- [x] Parser CSV odporny na BOM, różne delimitery, formaty dat i separatory dziesiętne.
-- [x] Typowane mapowanie kolumn i wynik dry-run z błędami per wiersz.
-- [x] Autoryzowana akcja podglądu importu bez zapisu transakcji.
-- [x] Interfejs importu przy rachunku bankowym oraz tłumaczenia PL/EN/PT.
-- [x] Testy mapowania, walidacji, limitów, dry-run i izolacji tenantów.
+- [x] Typowany kandydat z wynikiem 0–100, confidence i rozbiciem punktów.
+- [x] Reguły kwoty, daty, referencji i kontrahenta z deterministycznym sortowaniem.
+- [x] Obsługa wpłat, wypłat, zwrotów oraz porównania `amount_gbp` dla rachunku GBP.
+- [x] Autoryzowana akcja wyszukiwania ograniczona do tenanta i statusu `unmatched`.
+- [x] Testy exact/partial, kierunku, FX, progów, uprawnień i izolacji tenantów.
 
 ### Ryzyka i zależności
 
-- Pliki bankowe są nieufnym wejściem: obowiązują limity rozmiaru/wierszy, brak trwałego przechowywania raw CSV i neutralizacja komórek formularzowych.
-- Docelowy zapis do `bank_transactions` wymaga hash/provider ID i unique constraints z `UKFIN-403`; UKFIN-402 nie może tworzyć rekordów z pominięciem tej ochrony.
-- Kwoty muszą być normalizowane w walucie rachunku, ale parser nie może wykonywać historycznych przeliczeń FX.
+- Reguły nie mogą zwracać rekordów innego `business_id`, nawet przy identycznej kwocie i referencji.
+- Kandydaci o przeciwnym kierunku przepływu są odrzucani przed scoringiem.
+- Dla transakcji GBP można porównać zapisane `amount_gbp`; silnik nie pobiera ani nie przelicza nowych kursów.
+- `UKFIN-404` tylko proponuje kandydatów; zapis split/partial/many-to-many i wykluczenie już zaalokowanych kwot należy do `UKFIN-405`.
 
-## Wynik UKFIN-402/403
+## Wynik UKFIN-404
 
-- [x] Dry-run nie zapisuje partii, transakcji ani `last_synced_at`.
-- [x] Import właściwy zapisuje zminimalizowane rekordy oraz audyt partii, bez raw CSV.
-- [x] Deduplikacja działa po provider ID i kanonicznym SHA-256, także w obrębie jednego pliku.
-- [x] Migracja `2026_11_05_000020` zastosowana; audit tenantów: 0 błędów.
-- [x] Finance regression: 172 passed, 1 skipped, 938 assertions.
-- [x] Full regression: 681 passed, 11 skipped, 9 znanych baseline failures, 2382 assertions.
+- [x] Cztery komponenty scoringu: amount 50, date 20, reference 20, counterparty 10.
+- [x] Okno 30 dni, próg 40 i limit 50 kandydatów są konfigurowalne.
+- [x] Kierunek inflow/outflow i brak nowego przeliczania FX są wymuszane przed scoringiem.
+- [x] Testy UKFIN-404: 7 passed, 46 assertions.
+- [x] Finance regression: 179 passed, 1 skipped, 984 assertions.
+- [x] Full regression: 688 passed, 11 skipped, 9 znanych baseline failures, 2428 assertions.
 
 ## Następny krok
 
-- [ ] `UKFIN-404` — reguły dopasowania transakcji po referencji, kwocie, dacie i kontrahencie.
+- [ ] `UKFIN-405` — model i UI reconcile exact/partial/split/many-to-many.
 
 ## Wykonane
 

@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** IMPLEMENTACJA W TOKU — Fazy 0–3 zaimplementowane, Faza 4 w toku (`UKFIN-401`–`UKFIN-403` ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
+**Status:** IMPLEMENTACJA W TOKU — Fazy 0–3 zaimplementowane, Faza 4 w toku (`UKFIN-401`–`UKFIN-404` ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -419,7 +419,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-401` [M] BankAccount model i bezpieczne maskowanie danych. *(tenantowy model wiąże rachunek z aktywnym kontem księgowym typu cash, walutą, saldem otwarcia, statusem i metadanymi synchronizacji; pełny 8-cyfrowy numer rachunku i 6-cyfrowy sort code istnieją wyłącznie podczas walidacji, baza przechowuje tylko końcówki 4/2 oraz HMAC fingerprint do deduplikacji, panel nigdy nie odczytuje ani nie ujawnia danych pełnych, edycja zachowuje maski bez ponownego podawania sekretów, archiwizacja zastępuje usunięcie, a RBAC, policy, tenant scope i audyt referencji chronią dostęp)*
 - [x] `UKFIN-402` [M] CSV importer z mapowaniem kolumn i dry-run. *(akcja na rachunku przyjmuje prywatny plik CSV do 5 MB/5000 wierszy, wykrywa BOM, kodowanie UTF-8/Windows-1252 i delimiter, obsługuje ręczne lub automatyczne mapowanie daty, kwoty albo debit/credit, waluty, opisu, kontrahenta i provider ID, normalizuje brytyjskie formaty dat/kwot, raportuje błędy per wiersz, a domyślny dry-run nie zapisuje ani partii, ani transakcji; właściwy import zapisuje wyłącznie zminimalizowane dane i audyt partii, po czym usuwa plik tymczasowy)*
 - [x] `UKFIN-403` [M] Deduplikacja bank transactions po provider ID/hash. *(tenantowy `BankTransaction` ma unikalność per rachunek zarówno po opcjonalnym provider ID, jak i stabilnym SHA-256 danych kanonicznych; importer wykrywa duplikaty istniejące i wewnątrz jednego pliku, baza chroni wyścigi przez unique constraints i `insertOrIgnore`, a audit command sprawdza własność rachunku oraz partii importu)*
-- [ ] `UKFIN-404` [M] Matching rules: reference, amount, date, counterparty.
+- [x] `UKFIN-404` [M] Matching rules: reference, amount, date, counterparty. *(tenantowy silnik tworzy deterministycznie posortowanych kandydatów 0–100 dla wpłat klientów, zwrotów klientom, płatności dostawców i zwrotów od dostawców; najpierw odrzuca przeciwny kierunek i nieporównywalną walutę, potem punktuje kwotę w pensach, odległość dat w oknie 30 dni, znormalizowaną referencję i kontrahenta, obsługuje zapisany snapshot `amount_gbp`, klasy confidence exact/high/medium/low oraz częściowe kwoty od 40 punktów; akcja wymaga aktywnego membership, `view_finance` i transakcji `unmatched`, nie zapisując jeszcze uzgodnienia)*
 - [ ] `UKFIN-405` [M] UI reconcile: exact, partial, split i many-to-many.
 - [ ] `UKFIN-406` [M] Create expense/payment from unmatched transaction.
 - [ ] `UKFIN-407` [M] Undo reconciliation z audit trail.
