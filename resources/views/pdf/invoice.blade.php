@@ -244,9 +244,22 @@
             font-size: 11px;
             color: #94a3b8;
         }
+        .demo-watermark {
+            position: fixed; top: 43%; left: 8%; width: 84%; text-align: center;
+            transform: rotate(-30deg); font-size: 38px; font-weight: 700;
+            color: rgba(127, 29, 29, .07); letter-spacing: 3px; z-index: -1;
+        }
+        .demo-banner {
+            padding: 7px 12px; background: #7f1d1d; color: #fff; text-align: center;
+            font-size: 9px; font-weight: 700; letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
+@if($demo ?? false)
+<div class="demo-watermark">DEMO / NOT FOR SUBMISSION</div>
+<div class="demo-banner">{{ $demoLabel ?? 'CURRENT SYSTEM OUTPUT' }} · FICTIONAL DATA · NOT FOR SUBMISSION</div>
+@endif
 @php
     $money = app(\App\Services\Currency\MoneyFormatter::class);
     $currency = $invoice->currency ?? 'GBP';

@@ -1,5 +1,76 @@
 # Current Task
 
+**Zadanie:** Pakiet demonstracyjnych PDF dla księgowego UK
+**Status:** 🟢 Zakończone
+**Start:** 2026-11-05
+**Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
+
+## Cel bieżącego przyrostu
+
+Przygotować odtwarzalny, anglojęzyczny pakiet demonstracyjnych dokumentów finansowych na rzeczywistych danych firmy zapisanych w `Legal Settings` oraz jednym spójnym zestawie fikcyjnych transakcji, aby księgowy UK mógł ocenić dokumenty istniejące oraz docelowe raporty przed dalszą implementacją modułu.
+
+## Delta Analysis: pakiet demonstracyjny
+
+### Anchor files (reużywam)
+
+- `resources/views/pdf/invoice.blade.php` — aktualny produkcyjny PDF faktury.
+- `resources/views/pdf/credit-note.blade.php` — aktualny produkcyjny PDF customer credit note.
+- `app/Http/Controllers/InvoicePdfController.php` i `CreditNotePdfController.php` — konfiguracja DomPDF/A4.
+- `tests/Feature/Finance/FinancialDocumentPdfTest.php` — wzorzec walidacji dokumentów finansowych.
+- `composer.json` — istniejący `barryvdh/laravel-dompdf`.
+
+### Do stworzenia
+
+- [x] Action generująca pakiet bez zapisu danych demonstracyjnych do bazy.
+- [x] Cienka komenda Artisan z konfigurowalnym katalogiem wyjściowym.
+- [x] Wspólny szablon raportów demonstracyjnych z oznaczeniem statusu dokumentu.
+- [x] Produkcyjne przykłady invoice i customer credit note z watermarkiem demo.
+- [x] Docelowe przykłady reconciliation, VAT, sprawozdań, ageing, expenses i audit trail.
+- [x] Przykłady zewnętrznych dokumentów zakupowych oznaczone jako przechowywane, a nie generowane.
+- [x] Indeks, dataset JSON, manifest SHA-256, checklista review i ZIP.
+- [x] Test spójności pakietu oraz walidacja wygenerowanych PDF-ów.
+
+### Założenia danych
+
+- Dane firmy pochodzą z systemowego `Legal Settings`; dane transakcyjne są fikcyjne.
+- Generator używa `AccountingProfile` wyłącznie jako fallback i raportuje niespójność obu źródeł.
+- Okres: 1 lipca–30 września 2026; waluta funkcjonalna GBP.
+- Jeden przykład faktury EUR z niezmiennym snapshotem GBP.
+- VAT Return: Box 1 £1,912.80, Box 4 £1,200.00, Box 5 £712.80, Box 6 £9,564, Box 7 £8,600.
+- Trial Balance i Balance Sheet muszą bilansować się do pensa.
+
+### Ryzyka i granice
+
+- Każdy dokument: `DEMO / NOT FOR SUBMISSION`.
+- Raporty fazy 5 są oznaczone jako `TARGET PREVIEW`, nie jako gotowa funkcja.
+- Incoming supplier documents są przechowywane, ale nie wystawiane przez system.
+- Pakiet nie jest poradą podatkową ani oficjalnym formularzem HMRC.
+- Szczególne schematy VAT są poza zakresem przykładu.
+
+## Walidacja planowana
+
+- [x] Test generatora i matematycznej spójności danych.
+- [x] Nagłówek `%PDF-`, rozmiar i SHA-256 każdego dokumentu.
+- [x] Laravel Pint, `git diff --check` i regresja dokumentów finansowych.
+
+## Wynik
+
+- [x] Wygenerowano 18 PDF-ów oraz ZIP w `docs/demo/uk-accountant-pack/`.
+- [x] Dokumenty używają danych `Website Expert NI` z `Legal Settings`; usunięto fikcyjne dane wystawcy.
+- [x] Każdy dokument ma oznaczenie `DEMO / NOT FOR SUBMISSION` i spójne sumy kontrolne.
+- [x] Finance regression: 180 passed, 1 skipped, 1116 assertions.
+- [x] Full regression: 689 passed, 11 skipped, 9 znanych baseline failures, 2556 assertions.
+- [x] Wykryto rozbieżność: `AccountingProfile` nadal zawiera `WebsiteExpert Ltd` i nie ma danych rejestrowych; wymaga synchronizacji przed użyciem produkcyjnym.
+
+## Następny krok po ukończeniu
+
+- [ ] Przekazać ZIP i checklistę księgowemu UK.
+- [ ] Zapisać uwagi jako kryteria akceptacji przed UKFIN-405 i UKFIN-501–510.
+
+---
+
+# Poprzednie zadanie — UKFIN-404
+
 **Zadanie:** UKFIN-404 — reguły dopasowania transakcji bankowych
 **Status:** 🟢 Zakończone
 **Start:** 2026-11-04

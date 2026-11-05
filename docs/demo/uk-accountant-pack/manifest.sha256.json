@@ -1,0 +1,112 @@
+{
+    "pack": "WebsiteExpert UK accountant demonstration pack",
+    "generated_on": "2026-11-05",
+    "classification": "DEMO / NOT FOR SUBMISSION",
+    "files": [
+        {
+            "name": "00-read-me-and-review-guide.pdf",
+            "bytes": 882400,
+            "sha256": "8f797e4365fb2b12eab1d84f8bd588bb3b3bc620f346971314888b1798e3cfb0"
+        },
+        {
+            "name": "01-uk-vat-invoice-gbp.pdf",
+            "bytes": 884583,
+            "sha256": "b326d198f4bc1804b2376e85088af87159c410496454987792ab1bc238f044cb"
+        },
+        {
+            "name": "02-uk-vat-invoice-eur.pdf",
+            "bytes": 884458,
+            "sha256": "e1df2b93d2d6da41e9ff3e752e54a9d1cd39d391bb956e778080bf2aacd041e9"
+        },
+        {
+            "name": "03-customer-credit-note.pdf",
+            "bytes": 880730,
+            "sha256": "606f6ce701c9c846b4df7b83bbde4573e43453365b5d49b9c274705b778ed269"
+        },
+        {
+            "name": "04-purchase-invoice-expense.pdf",
+            "bytes": 881718,
+            "sha256": "bedb13e2e330f63d873fb610d43109ecf20a7e0c07b6e0a1d1c394b6b7d9b42b"
+        },
+        {
+            "name": "05-supplier-credit-note.pdf",
+            "bytes": 881149,
+            "sha256": "c4b56c6b707400970bf80b951b513e63452a749b6c7a382d45d013cb94aee556"
+        },
+        {
+            "name": "06-payment-receipt.pdf",
+            "bytes": 880878,
+            "sha256": "f028af1dab6917b0cbe0321ec4707c9bd470194f19d4d5c1e68a4c2dab9995ae"
+        },
+        {
+            "name": "07-bank-reconciliation.pdf",
+            "bytes": 881380,
+            "sha256": "6e6b59dcb427443cd2dbd035a2106c3c6487d488c57f4412ab26effd1fa122f0"
+        },
+        {
+            "name": "08-vat-return-boxes-1-to-9.pdf",
+            "bytes": 881956,
+            "sha256": "4aa94ffea0e069b2d9c0420294d416b1427335560219791307c34357e1330330"
+        },
+        {
+            "name": "09-vat-transaction-detail.pdf",
+            "bytes": 882813,
+            "sha256": "5bd5e989928b51696509fa98f02bcc5697bd3bb92ecb7c0a540f54c069da84d4"
+        },
+        {
+            "name": "10-profit-and-loss.pdf",
+            "bytes": 881220,
+            "sha256": "3b831aafc27567641bbe6d6c656a9d71f6d8a39706e311593100f17ad32813df"
+        },
+        {
+            "name": "11-balance-sheet.pdf",
+            "bytes": 881077,
+            "sha256": "ef0cc156fc0f357c4ce379094f29c90d0e4e08ec56f45c136f41707834985f19"
+        },
+        {
+            "name": "12-trial-balance.pdf",
+            "bytes": 881732,
+            "sha256": "6ccf38b8497255a0639028cf38368b29a9c8835a99c8abd975348d2c2312ff97"
+        },
+        {
+            "name": "13-general-ledger.pdf",
+            "bytes": 882195,
+            "sha256": "f736de74108124f16937168e39870c06fa5c7bdcab9f0f3f541c67105536fc41"
+        },
+        {
+            "name": "14-accounts-receivable-ageing.pdf",
+            "bytes": 881089,
+            "sha256": "c550c5c2777a682f1f14f91a91f83ee74048b4460d70fa110289a0032a20d654"
+        },
+        {
+            "name": "15-accounts-payable-ageing.pdf",
+            "bytes": 880934,
+            "sha256": "81502bc1062585c884c3d47a012d581f184f20ef7e9ef93ac2e332c925148490"
+        },
+        {
+            "name": "16-expenses-by-category.pdf",
+            "bytes": 881238,
+            "sha256": "59903ece6022e2804226e57705d818f12a8d56788b503b69134b7f6ee0c3659c"
+        },
+        {
+            "name": "17-accounting-period-audit-trail.pdf",
+            "bytes": 881600,
+            "sha256": "2646f63b753ffce4d6ee5534df0d272c36f0294991321637e2bb5db99432bc2d"
+        },
+        {
+            "name": "README.md",
+            "bytes": 2159,
+            "sha256": "495ce722b4b839db4a99663fd9d80debe82a98a1cb578e51d378fd45fe943058"
+        },
+        {
+            "name": "accountant-review-checklist.md",
+            "bytes": 2199,
+            "sha256": "1d73ca7aa428479fc4091236039b476a5db3dee26aa4901ba3ede7eadf3cb86f"
+        },
+        {
+            "name": "demo-dataset.json",
+            "bytes": 1513,
+            "sha256": "435e8cbae8b254452c248eefa45150e98c42b3c7f5060f4497f972c37a2152c7"
+        }
+    ]
+}

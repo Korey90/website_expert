@@ -1,0 +1,54 @@
+{
+    "classification": "SYSTEM COMPANY DETAILS / FICTIONAL TRANSACTIONS / NOT FOR SUBMISSION",
+    "period": {
+        "from": "2026-07-01",
+        "to": "2026-09-30"
+    },
+    "vat_return": {
+        "box_1": 1912.8,
+        "box_2": 0,
+        "box_3": 1912.8,
+        "box_4": 1200,
+        "box_5": 712.8,
+        "box_6": 9564,
+        "box_7": 8600,
+        "box_8": 0,
+        "box_9": 0
+    },
+    "profit_and_loss": {
+        "net_sales": 9564,
+        "operating_expenses": 6350,
+        "other_income": 12,
+        "profit": 3226
+    },
+    "balance_sheet": {
+        "assets": 43138.8,
+        "liabilities": 4412.8,
+        "equity": 38726,
+        "equity_and_liabilities": 43138.8
+    },
+    "trial_balance": {
+        "debits": 53738.8,
+        "credits": 53738.8,
+        "difference": 0
+    },
+    "bank_reconciliation": {
+        "statement_balance": 24362,
+        "deposits_in_transit": 450,
+        "unpresented_payments": 600,
+        "ledger_balance": 24212,
+        "difference": 0
+    },
+    "company": {
+        "legal_name": "Website Expert NI",
+        "company_number": "123456789",
+        "vat_number": "2134578541",
+        "registered_address": "Suite 6\n129 University Street\nBelfast\nBT7 1HP",
+        "email": "sales@website-expert.uk",
+        "phone": "+447882799050",
+        "functional_currency": "GBP",
+        "accounting_basis": "accrual",
+        "source": "Legal Settings with AccountingProfile fallback",
+        "accounting_profile_consistent": false
+    }
+}
