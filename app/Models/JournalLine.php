@@ -44,7 +44,15 @@ class JournalLine extends Model
                 throw new DomainException('Lines cannot be added to a posted journal entry.');
             }
 
-            if (! $account || $account->business_id !== $line->business_id || ! $account->is_active || ! $account->is_postable) {
+            $isOriginalReversalAccount = $entry?->reversal_of_id !== null
+                && JournalLine::withoutGlobalScopes()
+                    ->where('journal_entry_id', $entry->reversal_of_id)
+                    ->where('ledger_account_id', $line->ledger_account_id)
+                    ->exists();
+
+            if (! $account
+                || $account->business_id !== $line->business_id
+                || (! $isOriginalReversalAccount && (! $account->is_active || ! $account->is_postable))) {
                 throw new DomainException('The journal line requires an active postable account from the same business.');
             }
         });

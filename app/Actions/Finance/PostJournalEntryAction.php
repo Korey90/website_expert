@@ -26,6 +26,7 @@ class PostJournalEntryAction
      *     description: string,
      *     idempotency_key: string,
      *     source?: Model|null,
+     *     reversal_of?: JournalEntry|null,
      *     source_snapshot?: mixed,
      *     lines: list<array<string, mixed>>
      * }  $data
@@ -66,11 +67,18 @@ class PostJournalEntryAction
                 throw new DomainException("Accounting period [{$period->name}] is {$period->status}.");
             }
 
-            $this->validateTenantReferences($business, $normalized['entry_date'], $normalized['source'], $normalized['lines']);
+            $this->validateTenantReferences(
+                $business,
+                $normalized['entry_date'],
+                $normalized['source'],
+                $normalized['lines'],
+                $normalized['reversal_of_id'] ?? null,
+            );
 
             $entry = JournalEntry::withoutGlobalScopes()->create([
                 'business_id' => $business->id,
                 'accounting_period_id' => $period->id,
+                'reversal_of_id' => $normalized['reversal_of_id'] ?? null,
                 'entry_date' => $normalized['entry_date'],
                 'entry_number' => $this->nextEntryNumber($business, $normalized['entry_date']),
                 'source_type' => $normalized['source']?->getMorphClass(),
@@ -217,6 +225,15 @@ class PostJournalEntryAction
             throw new DomainException('Journal source must be an Eloquent model.');
         }
 
+        $reversalOf = $data['reversal_of'] ?? null;
+        if ($reversalOf !== null && ! $reversalOf instanceof JournalEntry) {
+            throw new DomainException('A journal reversal must reference its original journal entry.');
+        }
+
+        if ($reversalOf) {
+            $this->assertReversalPayload($business, $entryDate, $source, $reversalOf, $normalizedLines);
+        }
+
         return [
             'business_id' => $business->id,
             'entry_date' => $entryDate,
@@ -227,19 +244,26 @@ class PostJournalEntryAction
             'source_id' => $source?->getKey(),
             'source_snapshot' => $data['source_snapshot'] ?? null,
             'lines' => $normalizedLines,
+            ...($reversalOf ? ['reversal_of_id' => $reversalOf->id] : []),
         ];
     }
 
     /** @param list<array<string, mixed>> $lines */
-    private function validateTenantReferences(Business $business, string $entryDate, ?Model $source, array $lines): void
-    {
+    private function validateTenantReferences(
+        Business $business,
+        string $entryDate,
+        ?Model $source,
+        array $lines,
+        ?int $reversalOfId = null,
+    ): void {
         if ($source && (! $source->exists || ! isset($source->business_id) || $source->business_id !== $business->id)) {
             throw new DomainException('The journal source must belong to the journal business.');
         }
 
         foreach ($lines as $line) {
             $account = LedgerAccount::withoutGlobalScopes()->find($line['ledger_account_id']);
-            if (! $account || $account->business_id !== $business->id || ! $account->is_active || ! $account->is_postable) {
+            $regularAccountUnavailable = ! $reversalOfId && (! $account?->is_active || ! $account?->is_postable);
+            if (! $account || $account->business_id !== $business->id || $regularAccountUnavailable) {
                 throw new DomainException('Journal lines require active postable accounts from the same business.');
             }
 
@@ -248,9 +272,53 @@ class PostJournalEntryAction
             $this->assertOptionalReference($business, Supplier::class, $line['supplier_id'], 'supplier');
             $this->assertOptionalReference($business, Project::class, $line['project_id'], 'project');
 
-            if ($line['tax_code_id'] && ! TaxCode::withoutGlobalScopes()->whereKey($line['tax_code_id'])->effectiveOn($entryDate)->exists()) {
+            if (! $reversalOfId && $line['tax_code_id'] && ! TaxCode::withoutGlobalScopes()->whereKey($line['tax_code_id'])->effectiveOn($entryDate)->exists()) {
                 throw new DomainException('The journal tax code is not effective on the journal date.');
             }
+        }
+    }
+
+    /** @param list<array<string, mixed>> $lines */
+    private function assertReversalPayload(
+        Business $business,
+        string $entryDate,
+        ?Model $source,
+        JournalEntry $original,
+        array $lines,
+    ): void {
+        if (! $original->exists || $original->business_id !== $business->id) {
+            throw new DomainException('The reversed journal must belong to the journal business.');
+        }
+
+        if ($original->status !== JournalEntry::STATUS_POSTED || $original->reversal_of_id !== null) {
+            throw new DomainException('Only an original posted journal entry can be reversed.');
+        }
+
+        if (! $source instanceof JournalEntry || ! $source->is($original)) {
+            throw new DomainException('A reversal journal source must be its original entry.');
+        }
+
+        if ($entryDate < $original->entry_date->toDateString()) {
+            throw new DomainException('A journal reversal cannot predate the original entry.');
+        }
+
+        $expected = $original->lines()->get()->map(fn ($line): array => [
+            'ledger_account_id' => $line->ledger_account_id,
+            'tax_code_id' => $line->tax_code_id,
+            'client_id' => $line->client_id,
+            'supplier_id' => $line->supplier_id,
+            'project_id' => $line->project_id,
+            'debit_gbp' => $line->credit_gbp,
+            'credit_gbp' => $line->debit_gbp,
+            'original_currency' => $line->original_currency,
+            'original_amount' => $line->original_amount,
+            'exchange_rate' => $line->exchange_rate,
+            'memo' => $line->memo,
+            'dimensions' => $line->dimensions,
+        ])->all();
+
+        if ($lines !== $expected) {
+            throw new DomainException('A reversal must exactly mirror every original journal line.');
         }
     }
 

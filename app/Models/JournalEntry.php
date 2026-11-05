@@ -55,6 +55,18 @@ class JournalEntry extends Model
             if (! $period->start_date->lte($entry->entry_date) || ! $period->end_date->gte($entry->entry_date)) {
                 throw new DomainException('The journal date must fall within its accounting period.');
             }
+
+            if ($entry->reversal_of_id !== null) {
+                $original = self::withoutGlobalScopes()->find($entry->reversal_of_id);
+
+                if (! $original || $original->business_id !== $entry->business_id) {
+                    throw new DomainException('The reversed journal must belong to the same business.');
+                }
+
+                if ($original->status !== self::STATUS_POSTED || $original->reversal_of_id !== null) {
+                    throw new DomainException('Only an original posted journal entry can be reversed.');
+                }
+            }
         });
 
         static::updating(function (JournalEntry $entry): void {

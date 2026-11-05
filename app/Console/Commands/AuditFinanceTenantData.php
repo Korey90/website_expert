@@ -111,6 +111,18 @@ class AuditFinanceTenantData extends Command
             'sample_ids' => (clone $periodQuery)->limit(20)->pluck('period.id')->all(),
         ];
 
+        $reversalQuery = DB::table('journal_entries as reversal')
+            ->leftJoin('journal_entries as original', 'original.id', '=', 'reversal.reversal_of_id')
+            ->whereNotNull('reversal.reversal_of_id')
+            ->where(function ($query): void {
+                $query->whereNull('original.id')
+                    ->orWhereColumn('reversal.business_id', '!=', 'original.business_id');
+            });
+        $report['journal_entries.reversal_of_id'] = [
+            'invalid_count' => (clone $reversalQuery)->count(),
+            'sample_ids' => (clone $reversalQuery)->limit(20)->pluck('reversal.id')->all(),
+        ];
+
         foreach (self::OPTIONAL_TENANT_RELATIONS as $label => $relation) {
             $table = $relation['table'];
             $parent = $relation['parent'];
