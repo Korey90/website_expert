@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** IMPLEMENTACJA W TOKU — Fazy 0–2 zaimplementowane, Faza 3 w toku (`UKFIN-301`–`UKFIN-310` ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
+**Status:** IMPLEMENTACJA W TOKU — Fazy 0–3 zaimplementowane (`UKFIN-001`–`UKFIN-311` ukończone), Faza 4 jest następna; gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -408,9 +408,9 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-308` [M] FX gains/losses. *(rozrachunki walutowe przechowują osobno faktyczną wartość przepływu GBP, wartość bilansową należności/zobowiązania i podpisaną zrealizowaną różnicę kursową; wpływy klientów, płatności dostawców i zwroty gotówkowe dostawców automatycznie dekretują zysk na konto 4300 albo stratę na 7100, częściowe rozliczenia zachowują kurs dokumentu dla AR/AP, refund klienta odwraca pierwotny dekret FX, formularze przyjmują snapshot kursu z dnia rozliczenia, a ponowienie z tą samą referencją pozostaje idempotentne)*
 - [x] `UKFIN-309` [M] Reversal zamiast edycji posted journals. *(atomowa akcja tworzy dokładny zapis lustrzany z zamienionymi stronami debit/credit, zachowuje konta, podatki, waluty, kursy i wymiary, a oryginał oznacza jako `reversed` z aktorem, czasem i wymaganym uzasadnieniem; reversal może trafić do późniejszego otwartego okresu bez naruszania okresu zablokowanego, jest idempotentny i ograniczony do jednego na oryginał, nie można odwracać reversalu ani antydatować operacji, a pełny rollback chroni przed częściowym zapisem)*
 - [x] `UKFIN-310` [M] General Ledger i Journal viewer read-only. *(tenantowy raport księgi głównej pokazuje saldo otwarcia, obroty i saldo narastające Dr/Cr per konto z filtrami daty/konta oraz zachowuje w historii zarówno oryginał oznaczony `reversed`, jak i zapis storna; dziennik Filament udostępnia wyłącznie listę i szczegółowy podgląd nagłówka, źródła, hashy audytowych, powiązań storna, kwot FX, podatków i wymiarów, z RBAC `view_finance`, izolacją tenantów i tłumaczeniami PL/EN/PT)*
-- [ ] `UKFIN-311` [M] Testy invariants: debit=credit, lock date, idempotency, reversal, tenant.
+- [x] `UKFIN-311` [M] Testy invariants: debit=credit, lock date, idempotency, reversal, tenant. *(dedykowany kontrakt integracyjny sprawdza każdą linię i journal w pensach, pełny rollback niezbilansowanego lub dwustronnego payloadu, blokadę dat w okresach closed/locked, zapis w późniejszym otwartym okresie, stabilność hasha i odrzucenie payload drift przy retry, dokładne pojedyncze storno zerujące każde konto, izolację tenantów oraz niezmienność i zakaz usuwania posted nagłówków i linii)*
 
-**Gate:** nie da się utworzyć niezbilansowanego ani zmienić posted journal.
+**Gate: SPEŁNIONY.** Nie da się utworzyć niezbilansowanego ani zmienić posted journal; niezmienniki są pokryte testami integracyjnymi silnika i ograniczeniami schematu.
 
 ### Faza 4 — bank reconciliation (1–2 tygodnie)
 
