@@ -35,6 +35,8 @@ class AuditFinanceTenantData extends Command
         'journal_entries' => ['parent' => 'accounting_periods', 'foreign_key' => 'accounting_period_id'],
         'journal_lines' => ['parent' => 'journal_entries', 'foreign_key' => 'journal_entry_id'],
         'bank_accounts' => ['parent' => 'ledger_accounts', 'foreign_key' => 'ledger_account_id'],
+        'bank_statement_imports' => ['parent' => 'bank_accounts', 'foreign_key' => 'bank_account_id'],
+        'bank_transactions' => ['parent' => 'bank_accounts', 'foreign_key' => 'bank_account_id'],
     ];
 
     /** @var array<string, array{table: string, parent: string, foreign_key: string}> */
@@ -47,6 +49,7 @@ class AuditFinanceTenantData extends Command
         'journal_lines.client_id' => ['table' => 'journal_lines', 'parent' => 'clients', 'foreign_key' => 'client_id'],
         'journal_lines.supplier_id' => ['table' => 'journal_lines', 'parent' => 'suppliers', 'foreign_key' => 'supplier_id'],
         'journal_lines.project_id' => ['table' => 'journal_lines', 'parent' => 'projects', 'foreign_key' => 'project_id'],
+        'bank_transactions.bank_statement_import_id' => ['table' => 'bank_transactions', 'parent' => 'bank_statement_imports', 'foreign_key' => 'bank_statement_import_id'],
     ];
 
     public function handle(): int

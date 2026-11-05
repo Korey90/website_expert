@@ -1,13 +1,50 @@
 # Current Task
 
-**Zadanie:** UK Finance & Tax — fundament tenantów i konfiguracja księgowa
-**Status:** 🟡 W realizacji
+**Zadanie:** UKFIN-402 — importer wyciągów bankowych CSV
+**Status:** 🟢 Zakończone
 **Start:** 2026-11-04
 **Plan:** `docs/plans/uk-finance-tax-module-plan.md`
 
 ## Cel bieżącego przyrostu
 
-Zabezpieczyć istniejące rekordy finansowe przed wyciekiem cross-tenant i dostarczyć fundament konfiguracji UK accounting bez wykonywania jeszcze deklaracji ani wysyłki do HMRC.
+Dostarczyć tenantowy importer wyciągów CSV z konfigurowalnym mapowaniem kolumn, normalizacją brytyjskich formatów dat i kwot oraz trybem dry-run, bez tworzenia docelowych transakcji przed wdrożeniem deduplikacji z `UKFIN-403`.
+
+## Delta Analysis: UKFIN-402
+
+### Anchor files (reużywam)
+
+- `app/Models/BankAccount.php` — tenant, waluta i kontrola dostępu do rachunku.
+- `app/Filament/Resources/BankAccountResource.php` — punkt wejścia importu w panelu finansowym.
+- `app/Filament/Resources/DomainPriceListResource/Pages/ListDomainPriceLists.php` — istniejący wzorzec uploadu i odczytu CSV.
+- `app/Actions/Finance/CreateBankAccountAction.php` — wzorzec autoryzowanej akcji finansowej.
+- `tests/Feature/Finance/BankAccountTest.php` — setup tenantów, permissions i rachunku bankowego.
+
+### Do stworzenia
+
+- [x] Parser CSV odporny na BOM, różne delimitery, formaty dat i separatory dziesiętne.
+- [x] Typowane mapowanie kolumn i wynik dry-run z błędami per wiersz.
+- [x] Autoryzowana akcja podglądu importu bez zapisu transakcji.
+- [x] Interfejs importu przy rachunku bankowym oraz tłumaczenia PL/EN/PT.
+- [x] Testy mapowania, walidacji, limitów, dry-run i izolacji tenantów.
+
+### Ryzyka i zależności
+
+- Pliki bankowe są nieufnym wejściem: obowiązują limity rozmiaru/wierszy, brak trwałego przechowywania raw CSV i neutralizacja komórek formularzowych.
+- Docelowy zapis do `bank_transactions` wymaga hash/provider ID i unique constraints z `UKFIN-403`; UKFIN-402 nie może tworzyć rekordów z pominięciem tej ochrony.
+- Kwoty muszą być normalizowane w walucie rachunku, ale parser nie może wykonywać historycznych przeliczeń FX.
+
+## Wynik UKFIN-402/403
+
+- [x] Dry-run nie zapisuje partii, transakcji ani `last_synced_at`.
+- [x] Import właściwy zapisuje zminimalizowane rekordy oraz audyt partii, bez raw CSV.
+- [x] Deduplikacja działa po provider ID i kanonicznym SHA-256, także w obrębie jednego pliku.
+- [x] Migracja `2026_11_05_000020` zastosowana; audit tenantów: 0 błędów.
+- [x] Finance regression: 172 passed, 1 skipped, 938 assertions.
+- [x] Full regression: 681 passed, 11 skipped, 9 znanych baseline failures, 2382 assertions.
+
+## Następny krok
+
+- [ ] `UKFIN-404` — reguły dopasowania transakcji po referencji, kwocie, dacie i kontrahencie.
 
 ## Wykonane
 

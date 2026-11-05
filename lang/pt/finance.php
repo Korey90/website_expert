@@ -55,6 +55,36 @@ return [
             'replace_sort_code' => 'Guardado como :masked. Deixe em branco para manter sem alterações.',
         ],
     ],
+    'bank_imports' => [
+        'actions' => ['import_csv' => 'Importar CSV', 'run' => 'Validar / importar'],
+        'modal' => [
+            'heading' => 'Importar extrato bancário CSV',
+            'description' => 'Carregue um extrato, mapeie as colunas e execute uma pré-visualização segura antes de criar transações.',
+        ],
+        'sections' => ['format' => 'Formato CSV', 'mapping' => 'Mapeamento de colunas'],
+        'fields' => [
+            'file' => 'Extrato CSV', 'delimiter' => 'Delimitador', 'date_format' => 'Formato da data',
+            'decimal_separator' => 'Separador decimal', 'booking_date' => 'Data de lançamento', 'value_date' => 'Data-valor',
+            'amount' => 'Montante com sinal', 'debit' => 'Débito / saída', 'credit' => 'Crédito / entrada',
+            'currency' => 'Moeda', 'reference' => 'Referência', 'counterparty' => 'Contraparte',
+            'provider_id' => 'ID da transação / fornecedor', 'dry_run' => 'Simulação (apenas pré-visualização)',
+        ],
+        'options' => [
+            'auto' => 'Detetar automaticamente', 'auto_detect' => 'Detetar automaticamente um cabeçalho comum',
+            'auto_uk_date' => 'Detetar automaticamente (formato UK primeiro)', 'comma' => 'Vírgula (,)', 'semicolon' => 'Ponto e vírgula (;)',
+            'tab' => 'Tabulação', 'dot' => 'Ponto (.)', 'decimal_comma' => 'Vírgula (,)',
+        ],
+        'hints' => [
+            'mapping' => 'Deixe um campo vazio para detetar automaticamente cabeçalhos bancários comuns. Mapeie um montante com sinal ou colunas de débito/crédito.',
+            'dry_run' => 'Ativado: valida e conta duplicados sem guardar uma importação ou transação. Desative apenas depois de rever o resultado.',
+        ],
+        'notifications' => [
+            'dry_run_complete' => 'Simulação do CSV concluída', 'import_complete' => 'Extrato bancário importado',
+            'failed' => 'Não foi possível processar o CSV', 'check_file' => 'Verifique o formato, os mapeamentos e os limites configurados e tente novamente.',
+            'summary' => 'Linhas: :total; válidas: :valid; importadas: :imported; duplicadas: :duplicates; inválidas: :failed.',
+            'invalid_rows' => 'Números das linhas CSV inválidas: :rows.',
+        ],
+    ],
     'ledger_accounts' => [
         'navigation' => 'Plano de contas', 'singular' => 'conta contabilística', 'plural' => 'contas contabilísticas', 'section' => 'Dados da conta',
         'fields' => ['code' => 'Código', 'name' => 'Nome', 'name_en' => 'Nome (inglês)', 'name_pl' => 'Nome (polaco)', 'name_pt' => 'Nome (português)', 'type' => 'Tipo', 'subtype' => 'Subtipo', 'normal_balance' => 'Saldo normal', 'parent' => 'Conta principal', 'is_postable' => 'Permite lançamentos', 'is_active' => 'Ativa', 'is_system' => 'Conta de sistema'],

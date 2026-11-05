@@ -138,4 +138,55 @@ class AuditFinanceTenantDataCommandTest extends TestCase
             ->expectsOutputToContain('Finance tenant audit failed: 1 invalid record(s).')
             ->assertExitCode(1);
     }
+
+    public function test_cross_tenant_bank_transaction_and_import_are_reported(): void
+    {
+        $business = Business::create(['name' => 'Transaction Audit', 'slug' => 'transaction-audit', 'is_active' => true]);
+        $otherBusiness = Business::create(['name' => 'Other Transaction Audit', 'slug' => 'other-transaction-audit', 'is_active' => true]);
+        app(InitializeAccountingSetupAction::class)->execute($business);
+        $cash = LedgerAccount::withoutGlobalScopes()
+            ->where('business_id', $business->id)
+            ->where('code', '1100')
+            ->firstOrFail();
+        $protected = app(BankAccountDetailsProtector::class)->protect('87654321', '654321');
+        $bankAccountId = DB::table('bank_accounts')->insertGetId([
+            'business_id' => $business->id,
+            'ledger_account_id' => $cash->id,
+            'name' => 'Audit bank',
+            'bank_name' => 'Audit Bank',
+            ...$protected,
+            'currency' => 'GBP',
+            'opening_balance' => 0,
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $importId = DB::table('bank_statement_imports')->insertGetId([
+            'business_id' => $business->id,
+            'bank_account_id' => $bankAccountId,
+            'original_filename' => 'audit.csv',
+            'file_hash' => str_repeat('a', 64),
+            'status' => 'completed',
+            'column_mapping' => '{}',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('bank_transactions')->insert([
+            'business_id' => $otherBusiness->id,
+            'bank_account_id' => $bankAccountId,
+            'bank_statement_import_id' => $importId,
+            'booking_date' => '2026-11-05',
+            'amount' => 10,
+            'currency' => 'GBP',
+            'source_hash' => str_repeat('b', 64),
+            'reconciliation_status' => 'unmatched',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->artisan('finance:audit-tenants')
+            ->expectsOutputToContain('Finance tenant audit failed: 2 invalid record(s).')
+            ->assertExitCode(1);
+    }
 }

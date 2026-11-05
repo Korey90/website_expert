@@ -100,6 +100,16 @@ class Business extends Model
         return $this->hasMany(BankAccount::class);
     }
 
+    public function bankStatementImports(): HasMany
+    {
+        return $this->hasMany(BankStatementImport::class);
+    }
+
+    public function bankTransactions(): HasMany
+    {
+        return $this->hasMany(BankTransaction::class);
+    }
+
     public function documentSequences(): HasMany
     {
         return $this->hasMany(DocumentSequence::class);

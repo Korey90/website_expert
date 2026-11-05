@@ -1,20 +1,17 @@
 # Current Sprint
 
-**Nazwa:** UK Finance & Tax — foundation
+**Nazwa:** UK Finance & Tax — bank reconciliation
 **Data rozpoczęcia:** 2026-11-04
 **Status:** 🟡 IN PROGRESS
 **Źródło:** `docs/plans/uk-finance-tax-module-plan.md`
 
 ## Zakres sprintu
 
-1. Faza 0: izolacja tenantów, audyt danych, uprawnienia i threat model.
-2. Początek Fazy 1: Accounting Profile i wersjonowane UK Tax Codes.
-3. Wykonane: tax snapshots na pozycjach oraz kalkulacja mixed VAT.
-4. Wykonane: UI Accounting Profile, walidacja zależna i bezpieczna edycja identyfikatorów podatkowych.
-5. Wykonane: supply date/tax point oraz snapshoty GBP/FX.
-6. Wykonane: bezpieczna numeracja invoice/quote per tenant, typ i rok.
-7. Wykonane: credit notes, snapshoty z faktury i kontrolowany lifecycle.
-8. Następnie: panel/PDF credit notes i aktualizacja kompletnego PDF invoice.
+1. Wykonane: tenantowe rachunki bankowe i bezpieczne maskowanie danych.
+2. Wykonane: importer CSV z mapowaniem kolumn, limitami i dry-run.
+3. Wykonane: `BankTransaction`, audyt partii oraz deduplikacja provider ID/SHA-256.
+4. Następnie: reguły dopasowania referencja/kwota/data/kontrahent (`UKFIN-404`).
+5. Następnie: UI uzgodnień exact/partial/split/many-to-many (`UKFIN-405`).
 
 ## Definition of Done
 
@@ -26,6 +23,8 @@
 - Numery invoice/quote są przydzielane transakcyjnie i blokowane na poziomie sekwencji tenanta.
 - Credit notes nie mogą przekroczyć ilości z faktury, a zaalokowane korekty trwale obniżają saldo.
 - Domyślne tax codes są idempotentne, wersjonowane datą i tłumaczone PL/EN/PT.
+- Dry-run importu bankowego nie zmienia stanu domeny, a import właściwy nie przechowuje raw CSV.
+- Duplikaty transakcji są odrzucane po provider ID lub stabilnym hashu również przy równoległym imporcie.
 - Testy domenowe i pełna regresja nie dodają nowych błędów względem baseline.
 - Dokumentacja wdrożenia zawiera kolejność migrate → audit → smoke tests.
 

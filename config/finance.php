@@ -2,6 +2,11 @@
 
 return [
     'bank_account_fingerprint_key' => env('FINANCE_BANK_FINGERPRINT_KEY', env('APP_KEY')),
+    'bank_statement_import' => [
+        'max_bytes' => 5 * 1024 * 1024,
+        'max_rows' => 5000,
+        'max_columns' => 100,
+    ],
     'expense_categories' => [
         'cost_of_sales',
         'software',

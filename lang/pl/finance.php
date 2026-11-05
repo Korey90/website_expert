@@ -55,6 +55,36 @@ return [
             'replace_sort_code' => 'Zapisano jako :masked. Pozostaw puste, aby nie zmieniać.',
         ],
     ],
+    'bank_imports' => [
+        'actions' => ['import_csv' => 'Importuj CSV', 'run' => 'Sprawdź / importuj'],
+        'modal' => [
+            'heading' => 'Import wyciągu bankowego CSV',
+            'description' => 'Prześlij wyciąg, zmapuj kolumny i wykonaj bezpieczny podgląd przed utworzeniem transakcji.',
+        ],
+        'sections' => ['format' => 'Format CSV', 'mapping' => 'Mapowanie kolumn'],
+        'fields' => [
+            'file' => 'Wyciąg CSV', 'delimiter' => 'Separator kolumn', 'date_format' => 'Format daty',
+            'decimal_separator' => 'Separator dziesiętny', 'booking_date' => 'Data księgowania', 'value_date' => 'Data waluty',
+            'amount' => 'Kwota ze znakiem', 'debit' => 'Obciążenie / wypływ', 'credit' => 'Uznanie / wpływ',
+            'currency' => 'Waluta', 'reference' => 'Tytuł / referencja', 'counterparty' => 'Kontrahent',
+            'provider_id' => 'ID transakcji / dostawcy', 'dry_run' => 'Tryb próbny (tylko podgląd)',
+        ],
+        'options' => [
+            'auto' => 'Wykryj automatycznie', 'auto_detect' => 'Wykryj typowy nagłówek automatycznie',
+            'auto_uk_date' => 'Wykryj automatycznie (najpierw format UK)', 'comma' => 'Przecinek (,)', 'semicolon' => 'Średnik (;)',
+            'tab' => 'Tabulator', 'dot' => 'Kropka (.)', 'decimal_comma' => 'Przecinek (,)',
+        ],
+        'hints' => [
+            'mapping' => 'Pozostaw pole puste, aby automatycznie wykryć typowy nagłówek bankowy. Zmapuj kwotę ze znakiem albo kolumny obciążenia i uznania.',
+            'dry_run' => 'Włączony: sprawdza dane i liczy duplikaty bez zapisu importu lub transakcji. Wyłącz dopiero po sprawdzeniu wyniku.',
+        ],
+        'notifications' => [
+            'dry_run_complete' => 'Zakończono próbę importu CSV', 'import_complete' => 'Zaimportowano wyciąg bankowy',
+            'failed' => 'Nie udało się przetworzyć pliku CSV', 'check_file' => 'Sprawdź format pliku, mapowanie i skonfigurowane limity, a następnie spróbuj ponownie.',
+            'summary' => 'Wiersze: :total; poprawne: :valid; zaimportowane: :imported; duplikaty: :duplicates; błędne: :failed.',
+            'invalid_rows' => 'Numery błędnych wierszy CSV: :rows.',
+        ],
+    ],
     'ledger_accounts' => [
         'navigation' => 'Plan kont', 'singular' => 'konto księgowe', 'plural' => 'konta księgowe', 'section' => 'Dane konta',
         'fields' => ['code' => 'Kod', 'name' => 'Nazwa', 'name_en' => 'Nazwa (angielski)', 'name_pl' => 'Nazwa (polski)', 'name_pt' => 'Nazwa (portugalski)', 'type' => 'Typ', 'subtype' => 'Podtyp', 'normal_balance' => 'Saldo normalne', 'parent' => 'Konto nadrzędne', 'is_postable' => 'Dozwolone księgowanie', 'is_active' => 'Aktywne', 'is_system' => 'Konto systemowe'],

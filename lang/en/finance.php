@@ -55,6 +55,36 @@ return [
             'replace_sort_code' => 'Stored as :masked. Leave blank to keep it unchanged.',
         ],
     ],
+    'bank_imports' => [
+        'actions' => ['import_csv' => 'Import CSV', 'run' => 'Validate / import'],
+        'modal' => [
+            'heading' => 'Import a bank statement CSV',
+            'description' => 'Upload a statement, map its columns and run a safe preview before creating transactions.',
+        ],
+        'sections' => ['format' => 'CSV format', 'mapping' => 'Column mapping'],
+        'fields' => [
+            'file' => 'CSV statement', 'delimiter' => 'Delimiter', 'date_format' => 'Date format',
+            'decimal_separator' => 'Decimal separator', 'booking_date' => 'Booking date', 'value_date' => 'Value date',
+            'amount' => 'Signed amount', 'debit' => 'Debit / money out', 'credit' => 'Credit / money in',
+            'currency' => 'Currency', 'reference' => 'Reference', 'counterparty' => 'Counterparty',
+            'provider_id' => 'Transaction / provider ID', 'dry_run' => 'Dry run (preview only)',
+        ],
+        'options' => [
+            'auto' => 'Detect automatically', 'auto_detect' => 'Detect common header automatically',
+            'auto_uk_date' => 'Detect automatically (UK first)', 'comma' => 'Comma (,)', 'semicolon' => 'Semicolon (;)',
+            'tab' => 'Tab', 'dot' => 'Dot (.)', 'decimal_comma' => 'Comma (,)',
+        ],
+        'hints' => [
+            'mapping' => 'Leave a field blank to detect common bank headers automatically. Map a signed amount or debit/credit columns.',
+            'dry_run' => 'Enabled: validate and count duplicates without saving an import or transaction. Disable only after reviewing the result.',
+        ],
+        'notifications' => [
+            'dry_run_complete' => 'CSV dry run completed', 'import_complete' => 'Bank statement imported',
+            'failed' => 'The CSV could not be processed', 'check_file' => 'Check the file format, mappings and configured limits, then try again.',
+            'summary' => 'Rows: :total; valid: :valid; imported: :imported; duplicates: :duplicates; invalid: :failed.',
+            'invalid_rows' => 'Invalid CSV row numbers: :rows.',
+        ],
+    ],
     'ledger_accounts' => [
         'navigation' => 'Chart of accounts', 'singular' => 'ledger account', 'plural' => 'ledger accounts', 'section' => 'Account details',
         'fields' => ['code' => 'Code', 'name' => 'Name', 'name_en' => 'Name (English)', 'name_pl' => 'Name (Polish)', 'name_pt' => 'Name (Portuguese)', 'type' => 'Type', 'subtype' => 'Subtype', 'normal_balance' => 'Normal balance', 'parent' => 'Parent account', 'is_postable' => 'Posting allowed', 'is_active' => 'Active', 'is_system' => 'System account'],

@@ -366,7 +366,7 @@ code {
     });
   </script>
 <h1 id="plan-modułu-finansów-księgowości-i-podatków-uk">Plan modułu finansów, księgowości i podatków UK</h1>
-<p><strong>Status:</strong> IMPLEMENTACJA W TOKU — Fazy 0–3 zaimplementowane (<code>UKFIN-001</code>–<code>UKFIN-311</code> ukończone), Faza 4 jest następna; gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
+<p><strong>Status:</strong> IMPLEMENTACJA W TOKU — Fazy 0–3 zaimplementowane, Faza 4 w toku (<code>UKFIN-401</code>–<code>UKFIN-403</code> ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
 <strong>Data opracowania:</strong> 2026-11-04<br>
 <strong>Rynek docelowy:</strong> Wielka Brytania<br>
 <strong>Projekt:</strong> WebsiteExpert<br>
@@ -803,9 +803,9 @@ code {
 <h3 id="faza-4--bank-reconciliation-12-tygodnie">Faza 4 — bank reconciliation (1–2 tygodnie)</h3>
 <p><strong>Cel:</strong> wpływy i wydatki można uzgodnić z bankiem bez ręcznego przepisywania.</p>
 <ul>
-<li><input type="checkbox" id="checkbox40"><label for="checkbox40"><code>UKFIN-401</code> [M] BankAccount model i bezpieczne maskowanie danych.</label></li>
-<li><input type="checkbox" id="checkbox41"><label for="checkbox41"><code>UKFIN-402</code> [M] CSV importer z mapowaniem kolumn i dry-run.</label></li>
-<li><input type="checkbox" id="checkbox42"><label for="checkbox42"><code>UKFIN-403</code> [M] Deduplikacja bank transactions po provider ID/hash.</label></li>
+<li><input type="checkbox" id="checkbox40" checked="true"><label for="checkbox40"><code>UKFIN-401</code> [M] BankAccount model i bezpieczne maskowanie danych. <em>(tenantowy model wiąże rachunek z aktywnym kontem księgowym typu cash, walutą, saldem otwarcia, statusem i metadanymi synchronizacji; pełny 8-cyfrowy numer rachunku i 6-cyfrowy sort code istnieją wyłącznie podczas walidacji, baza przechowuje tylko końcówki 4/2 oraz HMAC fingerprint do deduplikacji, panel nigdy nie odczytuje ani nie ujawnia danych pełnych, edycja zachowuje maski bez ponownego podawania sekretów, archiwizacja zastępuje usunięcie, a RBAC, policy, tenant scope i audyt referencji chronią dostęp)</em></label></li>
+<li><input type="checkbox" id="checkbox41" checked="true"><label for="checkbox41"><code>UKFIN-402</code> [M] CSV importer z mapowaniem kolumn i dry-run. <em>(akcja na rachunku przyjmuje prywatny plik CSV do 5 MB/5000 wierszy, wykrywa BOM, kodowanie UTF-8/Windows-1252 i delimiter, obsługuje ręczne lub automatyczne mapowanie daty, kwoty albo debit/credit, waluty, opisu, kontrahenta i provider ID, normalizuje brytyjskie formaty dat/kwot, raportuje błędy per wiersz, a domyślny dry-run nie zapisuje ani partii, ani transakcji; właściwy import zapisuje wyłącznie zminimalizowane dane i audyt partii, po czym usuwa plik tymczasowy)</em></label></li>
+<li><input type="checkbox" id="checkbox42" checked="true"><label for="checkbox42"><code>UKFIN-403</code> [M] Deduplikacja bank transactions po provider ID/hash. <em>(tenantowy <code>BankTransaction</code> ma unikalność per rachunek zarówno po opcjonalnym provider ID, jak i stabilnym SHA-256 danych kanonicznych; importer wykrywa duplikaty istniejące i wewnątrz jednego pliku, baza chroni wyścigi przez unique constraints i <code>insertOrIgnore</code>, a audit command sprawdza własność rachunku oraz partii importu)</em></label></li>
 <li><input type="checkbox" id="checkbox43"><label for="checkbox43"><code>UKFIN-404</code> [M] Matching rules: reference, amount, date, counterparty.</label></li>
 <li><input type="checkbox" id="checkbox44"><label for="checkbox44"><code>UKFIN-405</code> [M] UI reconcile: exact, partial, split i many-to-many.</label></li>
 <li><input type="checkbox" id="checkbox45"><label for="checkbox45"><code>UKFIN-406</code> [M] Create expense/payment from unmatched transaction.</label></li>

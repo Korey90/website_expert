@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BankAccount extends Model
 {
@@ -83,6 +84,16 @@ class BankAccount extends Model
     public function archivedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'archived_by');
+    }
+
+    public function statementImports(): HasMany
+    {
+        return $this->hasMany(BankStatementImport::class);
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(BankTransaction::class);
     }
 
     public function scopeActive(Builder $query): Builder
