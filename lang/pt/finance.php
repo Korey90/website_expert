@@ -18,6 +18,26 @@ return [
         'columns' => ['group' => 'Grupo', 'documents' => 'Documentos', 'net_gbp' => 'Líquido GBP', 'vat_gbp' => 'IVA GBP', 'gross_gbp' => 'Bruto GBP'],
         'uncategorised_supplier' => 'Sem fornecedor', 'no_project' => 'Sem projeto', 'no_tax_code' => 'Sem código de IVA',
     ],
+    'general_ledger' => [
+        'navigation' => 'Razão geral', 'title' => 'Razão geral', 'all_accounts' => 'Todas as contas',
+        'empty' => 'Não existem movimentos contabilizados até à data selecionada.', 'no_period_activity' => 'Apenas saldo de abertura — sem movimentos no período selecionado.',
+        'opening_balance' => 'Saldo de abertura', 'closing_balance' => 'Saldo final', 'normal_balance' => 'Saldo normal', 'period_totals' => 'Totais do período',
+        'fields' => ['date_from' => 'De', 'date_to' => 'Até', 'account' => 'Conta contabilística'],
+        'columns' => ['date' => 'Data', 'journal' => 'Diário', 'description' => 'Descrição', 'dimensions' => 'Dimensões', 'debit_gbp' => 'Débito GBP', 'credit_gbp' => 'Crédito GBP', 'balance' => 'Saldo', 'lines' => 'Linhas', 'difference_gbp' => 'Diferença GBP'],
+        'sides' => ['debit' => 'Débito', 'credit' => 'Crédito'], 'sides_short' => ['debit' => 'D', 'credit' => 'C'],
+    ],
+    'journals' => [
+        'navigation' => 'Diários', 'singular' => 'lançamento contabilístico', 'plural' => 'lançamentos contabilísticos',
+        'sections' => ['summary' => 'Resumo do lançamento', 'audit' => 'Origem e dados de auditoria', 'lines' => 'Linhas do lançamento'],
+        'fields' => [
+            'number' => 'N.º do lançamento', 'date' => 'Data', 'status' => 'Estado', 'period' => 'Período contabilístico', 'description' => 'Descrição', 'currency' => 'Moeda',
+            'posted_at' => 'Contabilizado em', 'created_by' => 'Criado por', 'posted_by' => 'Contabilizado por', 'reversed_by' => 'Estornado por', 'reversed_at' => 'Estornado em', 'reversal_reason' => 'Motivo do estorno',
+            'source_type' => 'Tipo de origem', 'source_id' => 'ID da origem', 'idempotency_key' => 'Chave de idempotência', 'snapshot_hash' => 'Hash do snapshot de origem', 'reversal_of' => 'Estorno de', 'reversal' => 'Lançamento de estorno',
+            'account' => 'Conta contabilística', 'memo' => 'Nota', 'debit' => 'Débito GBP', 'credit' => 'Crédito GBP', 'tax_code' => 'Código de IVA', 'client' => 'Cliente', 'supplier' => 'Fornecedor', 'project' => 'Projeto',
+            'original_currency' => 'Moeda original', 'original_amount' => 'Montante original', 'exchange_rate' => 'Taxa de câmbio', 'dimensions' => 'Dimensões adicionais',
+        ],
+        'statuses' => ['draft' => 'Rascunho', 'posted' => 'Contabilizado', 'reversed' => 'Estornado'],
+    ],
     'ledger_accounts' => [
         'navigation' => 'Plano de contas', 'singular' => 'conta contabilística', 'plural' => 'contas contabilísticas', 'section' => 'Dados da conta',
         'fields' => ['code' => 'Código', 'name' => 'Nome', 'name_en' => 'Nome (inglês)', 'name_pl' => 'Nome (polaco)', 'name_pt' => 'Nome (português)', 'type' => 'Tipo', 'subtype' => 'Subtipo', 'normal_balance' => 'Saldo normal', 'parent' => 'Conta principal', 'is_postable' => 'Permite lançamentos', 'is_active' => 'Ativa', 'is_system' => 'Conta de sistema'],

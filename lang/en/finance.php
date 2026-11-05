@@ -18,6 +18,26 @@ return [
         'columns' => ['group' => 'Group', 'documents' => 'Documents', 'net_gbp' => 'Net GBP', 'vat_gbp' => 'VAT GBP', 'gross_gbp' => 'Gross GBP'],
         'uncategorised_supplier' => 'No supplier', 'no_project' => 'No project', 'no_tax_code' => 'No VAT code',
     ],
+    'general_ledger' => [
+        'navigation' => 'General ledger', 'title' => 'General ledger', 'all_accounts' => 'All accounts',
+        'empty' => 'No posted ledger activity up to the selected date.', 'no_period_activity' => 'Opening balance only — no activity in the selected period.',
+        'opening_balance' => 'Opening balance', 'closing_balance' => 'Closing balance', 'normal_balance' => 'Normal balance', 'period_totals' => 'Period totals',
+        'fields' => ['date_from' => 'From', 'date_to' => 'To', 'account' => 'Ledger account'],
+        'columns' => ['date' => 'Date', 'journal' => 'Journal', 'description' => 'Description', 'dimensions' => 'Dimensions', 'debit_gbp' => 'Debit GBP', 'credit_gbp' => 'Credit GBP', 'balance' => 'Balance', 'lines' => 'Lines', 'difference_gbp' => 'Difference GBP'],
+        'sides' => ['debit' => 'Debit', 'credit' => 'Credit'], 'sides_short' => ['debit' => 'Dr', 'credit' => 'Cr'],
+    ],
+    'journals' => [
+        'navigation' => 'Journals', 'singular' => 'journal entry', 'plural' => 'journal entries',
+        'sections' => ['summary' => 'Journal summary', 'audit' => 'Source and audit data', 'lines' => 'Journal lines'],
+        'fields' => [
+            'number' => 'Entry no.', 'date' => 'Entry date', 'status' => 'Status', 'period' => 'Accounting period', 'description' => 'Description', 'currency' => 'Currency',
+            'posted_at' => 'Posted at', 'created_by' => 'Created by', 'posted_by' => 'Posted by', 'reversed_by' => 'Reversed by', 'reversed_at' => 'Reversed at', 'reversal_reason' => 'Reversal reason',
+            'source_type' => 'Source type', 'source_id' => 'Source ID', 'idempotency_key' => 'Idempotency key', 'snapshot_hash' => 'Source snapshot hash', 'reversal_of' => 'Reversal of', 'reversal' => 'Reversal entry',
+            'account' => 'Ledger account', 'memo' => 'Memo', 'debit' => 'Debit GBP', 'credit' => 'Credit GBP', 'tax_code' => 'VAT code', 'client' => 'Client', 'supplier' => 'Supplier', 'project' => 'Project',
+            'original_currency' => 'Original currency', 'original_amount' => 'Original amount', 'exchange_rate' => 'Exchange rate', 'dimensions' => 'Additional dimensions',
+        ],
+        'statuses' => ['draft' => 'Draft', 'posted' => 'Posted', 'reversed' => 'Reversed'],
+    ],
     'ledger_accounts' => [
         'navigation' => 'Chart of accounts', 'singular' => 'ledger account', 'plural' => 'ledger accounts', 'section' => 'Account details',
         'fields' => ['code' => 'Code', 'name' => 'Name', 'name_en' => 'Name (English)', 'name_pl' => 'Name (Polish)', 'name_pt' => 'Name (Portuguese)', 'type' => 'Type', 'subtype' => 'Subtype', 'normal_balance' => 'Normal balance', 'parent' => 'Parent account', 'is_postable' => 'Posting allowed', 'is_active' => 'Active', 'is_system' => 'System account'],

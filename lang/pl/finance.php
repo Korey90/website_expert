@@ -18,6 +18,26 @@ return [
         'columns' => ['group' => 'Grupa', 'documents' => 'Dokumenty', 'net_gbp' => 'Netto GBP', 'vat_gbp' => 'VAT GBP', 'gross_gbp' => 'Brutto GBP'],
         'uncategorised_supplier' => 'Bez dostawcy', 'no_project' => 'Bez projektu', 'no_tax_code' => 'Bez kodu VAT',
     ],
+    'general_ledger' => [
+        'navigation' => 'Księga główna', 'title' => 'Księga główna', 'all_accounts' => 'Wszystkie konta',
+        'empty' => 'Brak zaksięgowanych operacji do wybranej daty.', 'no_period_activity' => 'Tylko saldo otwarcia — brak operacji w wybranym okresie.',
+        'opening_balance' => 'Saldo otwarcia', 'closing_balance' => 'Saldo końcowe', 'normal_balance' => 'Saldo normalne', 'period_totals' => 'Obroty okresu',
+        'fields' => ['date_from' => 'Od', 'date_to' => 'Do', 'account' => 'Konto księgowe'],
+        'columns' => ['date' => 'Data', 'journal' => 'Dziennik', 'description' => 'Opis', 'dimensions' => 'Wymiary', 'debit_gbp' => 'Winien GBP', 'credit_gbp' => 'Ma GBP', 'balance' => 'Saldo', 'lines' => 'Pozycje', 'difference_gbp' => 'Różnica GBP'],
+        'sides' => ['debit' => 'Winien', 'credit' => 'Ma'], 'sides_short' => ['debit' => 'Wn', 'credit' => 'Ma'],
+    ],
+    'journals' => [
+        'navigation' => 'Dzienniki', 'singular' => 'zapis dziennika', 'plural' => 'zapisy dziennika',
+        'sections' => ['summary' => 'Podsumowanie zapisu', 'audit' => 'Źródło i dane audytowe', 'lines' => 'Pozycje zapisu'],
+        'fields' => [
+            'number' => 'Nr zapisu', 'date' => 'Data zapisu', 'status' => 'Status', 'period' => 'Okres księgowy', 'description' => 'Opis', 'currency' => 'Waluta',
+            'posted_at' => 'Zaksięgowano', 'created_by' => 'Utworzył', 'posted_by' => 'Zaksięgował', 'reversed_by' => 'Wystornował', 'reversed_at' => 'Data storna', 'reversal_reason' => 'Powód storna',
+            'source_type' => 'Typ źródła', 'source_id' => 'ID źródła', 'idempotency_key' => 'Klucz idempotencji', 'snapshot_hash' => 'Hash snapshotu źródła', 'reversal_of' => 'Storno zapisu', 'reversal' => 'Zapis storna',
+            'account' => 'Konto księgowe', 'memo' => 'Adnotacja', 'debit' => 'Winien GBP', 'credit' => 'Ma GBP', 'tax_code' => 'Kod VAT', 'client' => 'Klient', 'supplier' => 'Dostawca', 'project' => 'Projekt',
+            'original_currency' => 'Waluta oryginalna', 'original_amount' => 'Kwota oryginalna', 'exchange_rate' => 'Kurs wymiany', 'dimensions' => 'Dodatkowe wymiary',
+        ],
+        'statuses' => ['draft' => 'Szkic', 'posted' => 'Zaksięgowany', 'reversed' => 'Wystornowany'],
+    ],
     'ledger_accounts' => [
         'navigation' => 'Plan kont', 'singular' => 'konto księgowe', 'plural' => 'konta księgowe', 'section' => 'Dane konta',
         'fields' => ['code' => 'Kod', 'name' => 'Nazwa', 'name_en' => 'Nazwa (angielski)', 'name_pl' => 'Nazwa (polski)', 'name_pt' => 'Nazwa (portugalski)', 'type' => 'Typ', 'subtype' => 'Podtyp', 'normal_balance' => 'Saldo normalne', 'parent' => 'Konto nadrzędne', 'is_postable' => 'Dozwolone księgowanie', 'is_active' => 'Aktywne', 'is_system' => 'Konto systemowe'],
