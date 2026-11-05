@@ -11,6 +11,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -40,6 +42,16 @@ class PaymentResource extends BaseResource
                             ->where('amount_due', '>', 0)
                             ->pluck('number', 'id'))
                         ->searchable()
+                        ->live()
+                        ->afterStateUpdated(function (mixed $state, Set $set): void {
+                            $invoice = $state ? Invoice::find($state) : null;
+
+                            $set('currency', $invoice?->currency ?? FilamentCurrency::default());
+                            $set('amount', $invoice?->amount_due);
+                            $set('gbp_exchange_rate', $invoice?->gbp_exchange_rate);
+                            $set('exchange_rate_source', $invoice && strtoupper((string) $invoice->currency) !== 'GBP' ? 'manual' : 'identity');
+                            $set('exchange_rate_date', today()->toDateString());
+                        })
                         ->required(),
 
                     Forms\Components\Select::make('method')
@@ -61,7 +73,29 @@ class PaymentResource extends BaseResource
                     Forms\Components\Select::make('currency')
                         ->options(fn () => FilamentCurrency::options())
                         ->default(fn () => FilamentCurrency::default())
+                        ->disabled()
+                        ->dehydrated()
                         ->required(),
+
+                    Forms\Components\TextInput::make('gbp_exchange_rate')
+                        ->label('Payment GBP exchange rate')
+                        ->numeric()
+                        ->minValue(0.00000001)
+                        ->helperText('GBP value of one unit of the invoice currency at the payment date.')
+                        ->visible(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
+                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP'),
+
+                    Forms\Components\TextInput::make('exchange_rate_source')
+                        ->label('Exchange-rate source')
+                        ->default('manual')
+                        ->visible(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
+                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP'),
+
+                    Forms\Components\DatePicker::make('exchange_rate_date')
+                        ->label('Exchange-rate date')
+                        ->default(today())
+                        ->visible(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
+                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP'),
 
                     Forms\Components\Select::make('status')
                         ->options([
@@ -115,6 +149,19 @@ class PaymentResource extends BaseResource
                 Tables\Columns\TextColumn::make('amount')
                     ->money(fn (Payment $r) => $r->currency ?? 'GBP')
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('amount_gbp')
+                    ->label('Cash value (GBP)')
+                    ->money('GBP')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('realised_fx_gbp')
+                    ->label('Realised FX (GBP)')
+                    ->money('GBP')
+                    ->color(fn (mixed $state): string => (float) $state > 0 ? 'success' : ((float) $state < 0 ? 'danger' : 'gray'))
+                    ->sortable()
+                    ->toggleable(),
 
                 Tables\Columns\BadgeColumn::make('method')
                     ->colors([

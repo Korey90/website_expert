@@ -6,6 +6,7 @@ use App\Models\Business;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\Finance\RealisedFxCalculator;
 use DomainException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -13,9 +14,12 @@ use Illuminate\Support\Str;
 
 class RecordInvoicePaymentAction
 {
-    public function __construct(private readonly PostInvoicePaymentAction $postInvoicePayment) {}
+    public function __construct(
+        private readonly PostInvoicePaymentAction $postInvoicePayment,
+        private readonly RealisedFxCalculator $fxCalculator,
+    ) {}
 
-    /** @param array{amount: float|int|string, method: string, reference?: string|null, paid_at?: string|null, notes?: string|null} $data */
+    /** @param array{amount: float|int|string, method: string, reference?: string|null, paid_at?: string|null, notes?: string|null, gbp_exchange_rate?: float|int|string|null, exchange_rate_source?: string|null, exchange_rate_date?: string|null} $data */
     public function execute(Invoice $invoice, User $actor, array $data): Payment
     {
         return DB::transaction(function () use ($invoice, $actor, $data): Payment {
@@ -31,7 +35,14 @@ class RecordInvoicePaymentAction
                 ->first();
 
             if ($existing) {
-                if ($existing->invoice_id !== $locked->id || round((float) $existing->amount, 2) !== $amount || $existing->status !== 'completed') {
+                $requestedRate = filled($data['gbp_exchange_rate'] ?? null)
+                    ? round((float) $data['gbp_exchange_rate'], 8)
+                    : null;
+
+                if ($existing->invoice_id !== $locked->id
+                    || round((float) $existing->amount, 2) !== $amount
+                    || $existing->status !== 'completed'
+                    || ($requestedRate !== null && round((float) $existing->gbp_exchange_rate, 8) !== $requestedRate)) {
                     throw new DomainException('The payment reference is already used for different payment data.');
                 }
 
@@ -53,13 +64,7 @@ class RecordInvoicePaymentAction
                 throw new DomainException('A payment method is required.');
             }
 
-            $snapshot = $this->snapshot(
-                $locked->currency,
-                $amount,
-                $locked->gbp_exchange_rate,
-                $locked->exchange_rate_source,
-                $locked->exchange_rate_date ?? $locked->tax_point ?? $locked->issue_date,
-            );
+            $snapshot = $this->snapshot($locked, $amount, $data);
             $payment = Payment::withoutGlobalScopes()->create([
                 ...Arr::only($data, ['method', 'notes']),
                 ...$snapshot,
@@ -79,21 +84,41 @@ class RecordInvoicePaymentAction
         }, 3);
     }
 
-    /** @return array<string, mixed> */
-    private function snapshot(string $currency, float $amount, mixed $rate, mixed $source, mixed $date): array
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function snapshot(Invoice $invoice, float $amount, array $data): array
     {
-        $currency = strtoupper($currency);
-        $effectiveRate = $currency === 'GBP' ? 1.0 : (float) $rate;
+        $currency = strtoupper((string) $invoice->currency);
+        $carryingRate = $currency === 'GBP' ? 1.0 : (float) $invoice->gbp_exchange_rate;
+        $providedRate = filled($data['gbp_exchange_rate'] ?? null);
+        $settlementRate = $currency === 'GBP'
+            ? 1.0
+            : (float) ($providedRate ? $data['gbp_exchange_rate'] : $invoice->gbp_exchange_rate);
 
-        if ($effectiveRate <= 0) {
-            throw new DomainException('The invoice requires a GBP exchange-rate snapshot before payment.');
+        if ($carryingRate <= 0 || $settlementRate <= 0) {
+            throw new DomainException('The invoice and payment require positive GBP exchange-rate snapshots.');
         }
 
+        $fx = $this->fxCalculator->calculate(
+            $amount,
+            $settlementRate,
+            $carryingRate,
+            RealisedFxCalculator::INCOMING,
+        );
+
         return [
-            'amount_gbp' => round($amount * $effectiveRate, 2),
-            'gbp_exchange_rate' => $effectiveRate,
-            'exchange_rate_source' => $currency === 'GBP' ? 'identity' : ($source ?: 'invoice_snapshot'),
-            'exchange_rate_date' => $date,
+            ...$fx,
+            'gbp_exchange_rate' => $settlementRate,
+            'exchange_rate_source' => $currency === 'GBP'
+                ? 'identity'
+                : ($providedRate ? ($data['exchange_rate_source'] ?? 'manual') : ($invoice->exchange_rate_source ?: 'invoice_snapshot')),
+            'exchange_rate_date' => $currency === 'GBP'
+                ? ($data['paid_at'] ?? now())
+                : ($providedRate
+                    ? ($data['exchange_rate_date'] ?? $data['paid_at'] ?? now())
+                    : ($invoice->exchange_rate_date ?? $invoice->tax_point ?? $invoice->issue_date)),
         ];
     }
 

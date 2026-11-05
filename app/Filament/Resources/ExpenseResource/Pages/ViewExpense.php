@@ -174,6 +174,24 @@ class ViewExpense extends ViewRecord
                         ->required(),
                     TextInput::make('reference')->label('Payment reference'),
                     DatePicker::make('paid_at')->default(today())->required(),
+                    TextInput::make('gbp_exchange_rate')
+                        ->label('Payment GBP exchange rate')
+                        ->numeric()
+                        ->minValue(0.00000001)
+                        ->default($expense->gbp_exchange_rate)
+                        ->helperText('GBP value of one unit of the expense currency at the payment date.')
+                        ->visible(strtoupper((string) $expense->currency) !== 'GBP')
+                        ->required(strtoupper((string) $expense->currency) !== 'GBP'),
+                    TextInput::make('exchange_rate_source')
+                        ->label('Exchange-rate source')
+                        ->default('manual')
+                        ->visible(strtoupper((string) $expense->currency) !== 'GBP')
+                        ->required(strtoupper((string) $expense->currency) !== 'GBP'),
+                    DatePicker::make('exchange_rate_date')
+                        ->label('Exchange-rate date')
+                        ->default(today())
+                        ->visible(strtoupper((string) $expense->currency) !== 'GBP')
+                        ->required(strtoupper((string) $expense->currency) !== 'GBP'),
                     Textarea::make('notes')->label(__('finance.expenses.fields.notes')),
                 ])
                 ->action(fn (array $data) => $this->runWorkflowAction(

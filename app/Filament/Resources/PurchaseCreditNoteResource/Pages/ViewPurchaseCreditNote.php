@@ -70,6 +70,24 @@ class ViewPurchaseCreditNote extends ViewRecord
                     ])->required(),
                     TextInput::make('reference')->label(__('finance.purchase_credit_notes.fields.reference'))->maxLength(255),
                     DatePicker::make('received_at')->label(__('finance.purchase_credit_notes.fields.received_at'))->default(today())->required(),
+                    TextInput::make('gbp_exchange_rate')
+                        ->label('Refund GBP exchange rate')
+                        ->numeric()
+                        ->minValue(0.00000001)
+                        ->default($creditNote->gbp_exchange_rate)
+                        ->helperText('GBP value of one unit of the credit currency at the refund date.')
+                        ->visible(strtoupper((string) $creditNote->currency) !== 'GBP')
+                        ->required(strtoupper((string) $creditNote->currency) !== 'GBP'),
+                    TextInput::make('exchange_rate_source')
+                        ->label('Exchange-rate source')
+                        ->default('manual')
+                        ->visible(strtoupper((string) $creditNote->currency) !== 'GBP')
+                        ->required(strtoupper((string) $creditNote->currency) !== 'GBP'),
+                    DatePicker::make('exchange_rate_date')
+                        ->label('Exchange-rate date')
+                        ->default(today())
+                        ->visible(strtoupper((string) $creditNote->currency) !== 'GBP')
+                        ->required(strtoupper((string) $creditNote->currency) !== 'GBP'),
                     Textarea::make('notes')->label(__('finance.purchase_credit_notes.fields.notes')),
                 ])
                 ->action(fn (array $data) => $this->runAction(

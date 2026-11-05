@@ -15,7 +15,8 @@ class PurchaseCreditRefund extends Model
 
     protected $fillable = [
         'business_id', 'purchase_credit_note_id', 'expense_id', 'received_by',
-        'amount', 'amount_gbp', 'currency', 'gbp_exchange_rate', 'exchange_rate_source',
+        'amount', 'amount_gbp', 'carrying_amount_gbp', 'realised_fx_gbp', 'currency',
+        'gbp_exchange_rate', 'exchange_rate_source',
         'exchange_rate_date', 'method', 'reference', 'received_at', 'notes',
     ];
 
@@ -24,6 +25,8 @@ class PurchaseCreditRefund extends Model
         return [
             'amount' => 'decimal:2',
             'amount_gbp' => 'decimal:2',
+            'carrying_amount_gbp' => 'decimal:2',
+            'realised_fx_gbp' => 'decimal:2',
             'gbp_exchange_rate' => 'decimal:8',
             'exchange_rate_date' => 'date',
             'received_at' => 'date',

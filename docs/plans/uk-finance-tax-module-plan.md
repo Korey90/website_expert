@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** IMPLEMENTACJA W TOKU — Fazy 0–2 zaimplementowane, Faza 3 w toku (`UKFIN-301`–`UKFIN-307` ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
+**Status:** IMPLEMENTACJA W TOKU — Fazy 0–2 zaimplementowane, Faza 3 w toku (`UKFIN-301`–`UKFIN-308` ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -405,7 +405,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-305` [M] Posting sprzedaży i credit notes. *(wystawienie faktury i noty sprzedażowej atomowo tworzy idempotentny journal; dekretacja Trade Debtors / Sales / VAT Payable per pozycja i tax code, mixed VAT, zero/reverse charge, projekty i klienci, snapshoty waluty źródłowej i GBP, odwrotne zapisy noty, integracja z akcjami Filament, rollback w zamkniętym okresie oraz ochrona zaksięgowanych dokumentów przed zmianą pól księgowych)*
 - [x] `UKFIN-306` [M] Posting zakupów i purchase credits. *(zatwierdzenie kosztu i wystawienie zakupowej noty kredytowej atomowo tworzy idempotentny journal; dekretacja Expense / Input VAT / Trade Creditors per pozycja, mixed VAT, VAT nieodliczalny, reverse charge z równoległym Input VAT i VAT Payable bez zwiększania salda dostawcy, snapshoty FX i wymiary supplier/client/project, odwrotne zapisy purchase credit, rollback statusu przy błędzie okresu/uprawnień oraz ochrona zaksięgowanych dokumentów i pozycji przed zmianą danych księgowych)*
 - [x] `UKFIN-307` [M] Posting payments/refunds i accounts receivable/payable. *(wpływy klientów księgowane Bank / Trade Debtors, płatności dostawcom Trade Creditors / Bank, pełne refundy klientów jako zapis przeciwny oraz zwroty gotówkowe od dostawców Bank / Trade Creditors; osobny rejestr `expense_payments`, trwałe snapshoty kwoty/kursu GBP, wymiary client/project/supplier, atomowa synchronizacja sald i statusów `partially_paid`/`paid`, referencyjna idempotencja, ochrona zaksięgowanych płatności przed zmianą oraz rollback przy zamkniętym okresie lub braku uprawnienia)*
-- [ ] `UKFIN-308` [M] FX gains/losses.
+- [x] `UKFIN-308` [M] FX gains/losses. *(rozrachunki walutowe przechowują osobno faktyczną wartość przepływu GBP, wartość bilansową należności/zobowiązania i podpisaną zrealizowaną różnicę kursową; wpływy klientów, płatności dostawców i zwroty gotówkowe dostawców automatycznie dekretują zysk na konto 4300 albo stratę na 7100, częściowe rozliczenia zachowują kurs dokumentu dla AR/AP, refund klienta odwraca pierwotny dekret FX, formularze przyjmują snapshot kursu z dnia rozliczenia, a ponowienie z tą samą referencją pozostaje idempotentne)*
 - [ ] `UKFIN-309` [M] Reversal zamiast edycji posted journals.
 - [ ] `UKFIN-310` [M] General Ledger i Journal viewer read-only.
 - [ ] `UKFIN-311` [M] Testy invariants: debit=credit, lock date, idempotency, reversal, tenant.

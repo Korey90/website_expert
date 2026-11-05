@@ -15,6 +15,7 @@ class ExpensePayment extends Model
 
     protected $fillable = [
         'business_id', 'expense_id', 'created_by', 'amount', 'currency', 'amount_gbp',
+        'carrying_amount_gbp', 'realised_fx_gbp',
         'gbp_exchange_rate', 'exchange_rate_source', 'exchange_rate_date', 'method',
         'reference', 'notes', 'paid_at',
     ];
@@ -24,6 +25,8 @@ class ExpensePayment extends Model
         return [
             'amount' => 'decimal:2',
             'amount_gbp' => 'decimal:2',
+            'carrying_amount_gbp' => 'decimal:2',
+            'realised_fx_gbp' => 'decimal:2',
             'gbp_exchange_rate' => 'decimal:8',
             'exchange_rate_date' => 'date',
             'paid_at' => 'datetime',

@@ -15,7 +15,8 @@ class Payment extends Model
     use BelongsToTenant, DefaultsCurrency, HasFactory;
 
     protected $fillable = [
-        'business_id', 'invoice_id', 'created_by', 'amount', 'amount_gbp', 'currency',
+        'business_id', 'invoice_id', 'created_by', 'amount', 'amount_gbp', 'carrying_amount_gbp',
+        'realised_fx_gbp', 'currency',
         'gbp_exchange_rate', 'exchange_rate_source', 'exchange_rate_date', 'method', 'status',
         'stripe_payment_intent_id', 'reference', 'notes', 'paid_at', 'refunded_at',
     ];
@@ -23,6 +24,8 @@ class Payment extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'amount_gbp' => 'decimal:2',
+        'carrying_amount_gbp' => 'decimal:2',
+        'realised_fx_gbp' => 'decimal:2',
         'gbp_exchange_rate' => 'decimal:8',
         'exchange_rate_date' => 'date',
         'paid_at' => 'datetime',
@@ -33,7 +36,8 @@ class Payment extends Model
     {
         static::updating(function (Payment $payment): void {
             if ($payment->journalEntries()->exists() && $payment->isDirty([
-                'business_id', 'invoice_id', 'amount', 'amount_gbp', 'currency',
+                'business_id', 'invoice_id', 'amount', 'amount_gbp', 'carrying_amount_gbp',
+                'realised_fx_gbp', 'currency',
                 'gbp_exchange_rate', 'exchange_rate_source', 'exchange_rate_date',
                 'method', 'paid_at',
             ])) {

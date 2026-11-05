@@ -6,6 +6,7 @@ use App\Models\Business;
 use App\Models\Expense;
 use App\Models\ExpensePayment;
 use App\Models\User;
+use App\Services\Finance\RealisedFxCalculator;
 use DomainException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -13,9 +14,12 @@ use Illuminate\Support\Str;
 
 class RecordExpensePaymentAction
 {
-    public function __construct(private readonly PostExpensePaymentAction $postExpensePayment) {}
+    public function __construct(
+        private readonly PostExpensePaymentAction $postExpensePayment,
+        private readonly RealisedFxCalculator $fxCalculator,
+    ) {}
 
-    /** @param array{amount: float|int|string, method: string, reference?: string|null, paid_at?: string|null, notes?: string|null} $data */
+    /** @param array{amount: float|int|string, method: string, reference?: string|null, paid_at?: string|null, notes?: string|null, gbp_exchange_rate?: float|int|string|null, exchange_rate_source?: string|null, exchange_rate_date?: string|null} $data */
     public function execute(Expense $expense, User $actor, array $data): ExpensePayment
     {
         return DB::transaction(function () use ($expense, $actor, $data): ExpensePayment {
@@ -31,7 +35,13 @@ class RecordExpensePaymentAction
                 ->first();
 
             if ($existing) {
-                if ($existing->expense_id !== $locked->id || round((float) $existing->amount, 2) !== $amount) {
+                $requestedRate = filled($data['gbp_exchange_rate'] ?? null)
+                    ? round((float) $data['gbp_exchange_rate'], 8)
+                    : null;
+
+                if ($existing->expense_id !== $locked->id
+                    || round((float) $existing->amount, 2) !== $amount
+                    || ($requestedRate !== null && round((float) $existing->gbp_exchange_rate, 8) !== $requestedRate)) {
                     throw new DomainException('The supplier payment reference is already used for different payment data.');
                 }
 
@@ -54,22 +64,38 @@ class RecordExpensePaymentAction
             }
 
             $currency = strtoupper((string) $locked->currency);
-            $rate = $currency === 'GBP' ? 1.0 : (float) $locked->gbp_exchange_rate;
-            if ($rate <= 0) {
-                throw new DomainException('The expense requires a GBP exchange-rate snapshot before payment.');
+            $carryingRate = $currency === 'GBP' ? 1.0 : (float) $locked->gbp_exchange_rate;
+            $providedRate = filled($data['gbp_exchange_rate'] ?? null);
+            $settlementRate = $currency === 'GBP'
+                ? 1.0
+                : (float) ($providedRate ? $data['gbp_exchange_rate'] : $locked->gbp_exchange_rate);
+            if ($carryingRate <= 0 || $settlementRate <= 0) {
+                throw new DomainException('The expense and payment require positive GBP exchange-rate snapshots.');
             }
+            $fx = $this->fxCalculator->calculate(
+                $amount,
+                $settlementRate,
+                $carryingRate,
+                RealisedFxCalculator::OUTGOING,
+            );
 
             $payment = ExpensePayment::withoutGlobalScopes()->create([
                 ...Arr::only($data, ['method', 'notes']),
+                ...$fx,
                 'business_id' => $locked->business_id,
                 'expense_id' => $locked->id,
                 'created_by' => $actor->id,
                 'amount' => $amount,
                 'currency' => $currency,
-                'amount_gbp' => round($amount * $rate, 2),
-                'gbp_exchange_rate' => $rate,
-                'exchange_rate_source' => $currency === 'GBP' ? 'identity' : ($locked->exchange_rate_source ?: 'expense_snapshot'),
-                'exchange_rate_date' => $locked->exchange_rate_date ?? $locked->tax_point ?? $locked->issue_date,
+                'gbp_exchange_rate' => $settlementRate,
+                'exchange_rate_source' => $currency === 'GBP'
+                    ? 'identity'
+                    : ($providedRate ? ($data['exchange_rate_source'] ?? 'manual') : ($locked->exchange_rate_source ?: 'expense_snapshot')),
+                'exchange_rate_date' => $currency === 'GBP'
+                    ? ($data['paid_at'] ?? now())
+                    : ($providedRate
+                        ? ($data['exchange_rate_date'] ?? $data['paid_at'] ?? now())
+                        : ($locked->exchange_rate_date ?? $locked->tax_point ?? $locked->issue_date)),
                 'reference' => $reference,
                 'paid_at' => $data['paid_at'] ?? now(),
             ]);

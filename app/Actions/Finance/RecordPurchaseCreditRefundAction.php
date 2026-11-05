@@ -7,6 +7,7 @@ use App\Models\Expense;
 use App\Models\PurchaseCreditNote;
 use App\Models\PurchaseCreditRefund;
 use App\Models\User;
+use App\Services\Finance\RealisedFxCalculator;
 use DomainException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -14,9 +15,12 @@ use Illuminate\Support\Str;
 
 class RecordPurchaseCreditRefundAction
 {
-    public function __construct(private readonly PostPurchaseCreditRefundAction $postPurchaseCreditRefund) {}
+    public function __construct(
+        private readonly PostPurchaseCreditRefundAction $postPurchaseCreditRefund,
+        private readonly RealisedFxCalculator $fxCalculator,
+    ) {}
 
-    /** @param array{amount: float|int|string, method: string, reference?: string|null, received_at?: string, notes?: string|null} $data */
+    /** @param array{amount: float|int|string, method: string, reference?: string|null, received_at?: string, notes?: string|null, gbp_exchange_rate?: float|int|string|null, exchange_rate_source?: string|null, exchange_rate_date?: string|null} $data */
     public function execute(PurchaseCreditNote $creditNote, User $actor, array $data): PurchaseCreditRefund
     {
         return DB::transaction(function () use ($creditNote, $actor, $data): PurchaseCreditRefund {
@@ -30,7 +34,13 @@ class RecordPurchaseCreditRefundAction
                 ->first();
 
             if ($existing) {
-                if ($existing->purchase_credit_note_id !== $locked->id || round((float) $existing->amount, 2) !== $amount) {
+                $requestedRate = filled($data['gbp_exchange_rate'] ?? null)
+                    ? round((float) $data['gbp_exchange_rate'], 8)
+                    : null;
+
+                if ($existing->purchase_credit_note_id !== $locked->id
+                    || round((float) $existing->amount, 2) !== $amount
+                    || ($requestedRate !== null && round((float) $existing->gbp_exchange_rate, 8) !== $requestedRate)) {
                     throw new DomainException('The supplier refund reference is already used for different refund data.');
                 }
 
@@ -59,23 +69,39 @@ class RecordPurchaseCreditRefundAction
             }
 
             $currency = strtoupper((string) $locked->currency);
-            $rate = $currency === 'GBP' ? 1.0 : (float) $locked->gbp_exchange_rate;
-            if ($rate <= 0) {
-                throw new DomainException('The purchase credit requires a GBP exchange-rate snapshot before refund.');
+            $carryingRate = $currency === 'GBP' ? 1.0 : (float) $locked->gbp_exchange_rate;
+            $providedRate = filled($data['gbp_exchange_rate'] ?? null);
+            $settlementRate = $currency === 'GBP'
+                ? 1.0
+                : (float) ($providedRate ? $data['gbp_exchange_rate'] : $locked->gbp_exchange_rate);
+            if ($carryingRate <= 0 || $settlementRate <= 0) {
+                throw new DomainException('The purchase credit and refund require positive GBP exchange-rate snapshots.');
             }
+            $fx = $this->fxCalculator->calculate(
+                $amount,
+                $settlementRate,
+                $carryingRate,
+                RealisedFxCalculator::INCOMING,
+            );
 
             $refund = PurchaseCreditRefund::withoutGlobalScopes()->create([
                 ...Arr::only($data, ['method', 'notes']),
+                ...$fx,
                 'business_id' => $locked->business_id,
                 'purchase_credit_note_id' => $locked->id,
                 'expense_id' => $expense->id,
                 'received_by' => $actor->id,
                 'amount' => $amount,
-                'amount_gbp' => round($amount * $rate, 2),
                 'currency' => $currency,
-                'gbp_exchange_rate' => $rate,
-                'exchange_rate_source' => $currency === 'GBP' ? 'identity' : ($locked->exchange_rate_source ?: 'purchase_credit_snapshot'),
-                'exchange_rate_date' => $locked->exchange_rate_date ?? $locked->tax_point ?? $locked->issue_date,
+                'gbp_exchange_rate' => $settlementRate,
+                'exchange_rate_source' => $currency === 'GBP'
+                    ? 'identity'
+                    : ($providedRate ? ($data['exchange_rate_source'] ?? 'manual') : ($locked->exchange_rate_source ?: 'purchase_credit_snapshot')),
+                'exchange_rate_date' => $currency === 'GBP'
+                    ? ($data['received_at'] ?? today())
+                    : ($providedRate
+                        ? ($data['exchange_rate_date'] ?? $data['received_at'] ?? today())
+                        : ($locked->exchange_rate_date ?? $locked->tax_point ?? $locked->issue_date)),
                 'received_at' => $data['received_at'] ?? today(),
                 'reference' => $reference,
             ]);
