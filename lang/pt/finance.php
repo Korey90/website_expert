@@ -38,6 +38,23 @@ return [
         ],
         'statuses' => ['draft' => 'Rascunho', 'posted' => 'Contabilizado', 'reversed' => 'Estornado'],
     ],
+    'bank_accounts' => [
+        'navigation' => 'Contas bancárias', 'singular' => 'conta bancária', 'plural' => 'contas bancárias', 'never_synced' => 'Nunca sincronizada',
+        'sections' => ['identity' => 'Dados da conta bancária', 'accounting' => 'Configuração contabilística'],
+        'fields' => [
+            'name' => 'Nome da conta', 'bank_name' => 'Nome do banco', 'account_number' => 'Número da conta', 'sort_code' => 'Sort code',
+            'currency' => 'Moeda', 'ledger_account' => 'Conta contabilística de caixa', 'opening_balance' => 'Saldo de abertura',
+            'opening_balance_date' => 'Data do saldo de abertura', 'status' => 'Estado', 'last_synced_at' => 'Última sincronização',
+            'created_by' => 'Criada por', 'archived_by' => 'Arquivada por', 'archived_at' => 'Arquivada em',
+        ],
+        'statuses' => ['active' => 'Ativa', 'archived' => 'Arquivada'],
+        'hints' => [
+            'account_number' => 'Introduza o número de conta UK com 8 dígitos. Apenas os últimos 4 serão guardados.',
+            'sort_code' => 'Introduza o sort code com 6 dígitos. Apenas os últimos 2 serão guardados.',
+            'replace_account' => 'Guardado como :masked. Deixe em branco para manter sem alterações.',
+            'replace_sort_code' => 'Guardado como :masked. Deixe em branco para manter sem alterações.',
+        ],
+    ],
     'ledger_accounts' => [
         'navigation' => 'Plano de contas', 'singular' => 'conta contabilística', 'plural' => 'contas contabilísticas', 'section' => 'Dados da conta',
         'fields' => ['code' => 'Código', 'name' => 'Nome', 'name_en' => 'Nome (inglês)', 'name_pl' => 'Nome (polaco)', 'name_pt' => 'Nome (português)', 'type' => 'Tipo', 'subtype' => 'Subtipo', 'normal_balance' => 'Saldo normal', 'parent' => 'Conta principal', 'is_postable' => 'Permite lançamentos', 'is_active' => 'Ativa', 'is_system' => 'Conta de sistema'],

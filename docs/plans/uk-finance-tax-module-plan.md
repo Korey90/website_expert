@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** IMPLEMENTACJA W TOKU — Fazy 0–3 zaimplementowane (`UKFIN-001`–`UKFIN-311` ukończone), Faza 4 jest następna; gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
+**Status:** IMPLEMENTACJA W TOKU — Fazy 0–3 zaimplementowane, Faza 4 w toku (`UKFIN-401` ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -416,7 +416,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 
 **Cel:** wpływy i wydatki można uzgodnić z bankiem bez ręcznego przepisywania.
 
-- [ ] `UKFIN-401` [M] BankAccount model i bezpieczne maskowanie danych.
+- [x] `UKFIN-401` [M] BankAccount model i bezpieczne maskowanie danych. *(tenantowy model wiąże rachunek z aktywnym kontem księgowym typu cash, walutą, saldem otwarcia, statusem i metadanymi synchronizacji; pełny 8-cyfrowy numer rachunku i 6-cyfrowy sort code istnieją wyłącznie podczas walidacji, baza przechowuje tylko końcówki 4/2 oraz HMAC fingerprint do deduplikacji, panel nigdy nie odczytuje ani nie ujawnia danych pełnych, edycja zachowuje maski bez ponownego podawania sekretów, archiwizacja zastępuje usunięcie, a RBAC, policy, tenant scope i audyt referencji chronią dostęp)*
 - [ ] `UKFIN-402` [M] CSV importer z mapowaniem kolumn i dry-run.
 - [ ] `UKFIN-403` [M] Deduplikacja bank transactions po provider ID/hash.
 - [ ] `UKFIN-404` [M] Matching rules: reference, amount, date, counterparty.

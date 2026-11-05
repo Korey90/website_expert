@@ -38,6 +38,23 @@ return [
         ],
         'statuses' => ['draft' => 'Draft', 'posted' => 'Posted', 'reversed' => 'Reversed'],
     ],
+    'bank_accounts' => [
+        'navigation' => 'Bank accounts', 'singular' => 'bank account', 'plural' => 'bank accounts', 'never_synced' => 'Never synced',
+        'sections' => ['identity' => 'Bank account details', 'accounting' => 'Accounting settings'],
+        'fields' => [
+            'name' => 'Account name', 'bank_name' => 'Bank name', 'account_number' => 'Account number', 'sort_code' => 'Sort code',
+            'currency' => 'Currency', 'ledger_account' => 'Cash ledger account', 'opening_balance' => 'Opening balance',
+            'opening_balance_date' => 'Opening balance date', 'status' => 'Status', 'last_synced_at' => 'Last synchronised',
+            'created_by' => 'Created by', 'archived_by' => 'Archived by', 'archived_at' => 'Archived at',
+        ],
+        'statuses' => ['active' => 'Active', 'archived' => 'Archived'],
+        'hints' => [
+            'account_number' => 'Enter the 8-digit UK account number. Only its final 4 digits will be stored.',
+            'sort_code' => 'Enter the 6-digit sort code. Only its final 2 digits will be stored.',
+            'replace_account' => 'Stored as :masked. Leave blank to keep it unchanged.',
+            'replace_sort_code' => 'Stored as :masked. Leave blank to keep it unchanged.',
+        ],
+    ],
     'ledger_accounts' => [
         'navigation' => 'Chart of accounts', 'singular' => 'ledger account', 'plural' => 'ledger accounts', 'section' => 'Account details',
         'fields' => ['code' => 'Code', 'name' => 'Name', 'name_en' => 'Name (English)', 'name_pl' => 'Name (Polish)', 'name_pt' => 'Name (Portuguese)', 'type' => 'Type', 'subtype' => 'Subtype', 'normal_balance' => 'Normal balance', 'parent' => 'Parent account', 'is_postable' => 'Posting allowed', 'is_active' => 'Active', 'is_system' => 'System account'],

@@ -11,6 +11,7 @@ class FilamentPermissionRegistry
         'AutomationLogResource' => ['view' => 'view_automation_logs', 'delete' => 'delete_automation_logs'],
         'AutomationRuleResource' => ['view' => 'view_automations', 'create' => 'create_automations', 'update' => 'edit_automations', 'delete' => 'delete_automations'],
         'AutomationTriggerResource' => ['view' => 'view_automation_triggers', 'create' => 'create_automation_triggers', 'update' => 'edit_automation_triggers', 'delete' => 'delete_automation_triggers'],
+        'BankAccountResource' => ['view' => 'view_finance', 'create' => 'manage_finance', 'update' => 'manage_finance'],
         'ArticleResource' => ['view' => 'view_articles', 'create' => 'create_articles', 'update' => 'edit_articles', 'delete' => 'delete_articles'],
         'BriefingResource' => ['view' => 'view_briefings', 'create' => 'create_briefings', 'update' => 'edit_briefings', 'delete' => 'delete_briefings'],
         'BriefingTemplateResource' => ['view' => 'view_briefing_templates', 'create' => 'create_briefing_templates', 'update' => 'edit_briefing_templates', 'delete' => 'delete_briefing_templates'],

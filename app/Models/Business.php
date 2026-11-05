@@ -95,6 +95,11 @@ class Business extends Model
         return $this->hasMany(JournalLine::class);
     }
 
+    public function bankAccounts(): HasMany
+    {
+        return $this->hasMany(BankAccount::class);
+    }
+
     public function documentSequences(): HasMany
     {
         return $this->hasMany(DocumentSequence::class);

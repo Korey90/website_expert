@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'bank_account_fingerprint_key' => env('FINANCE_BANK_FINGERPRINT_KEY', env('APP_KEY')),
     'expense_categories' => [
         'cost_of_sales',
         'software',

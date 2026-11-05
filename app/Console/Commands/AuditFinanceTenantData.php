@@ -34,6 +34,7 @@ class AuditFinanceTenantData extends Command
         'recurring_expense_template_items' => ['parent' => 'recurring_expense_templates', 'foreign_key' => 'recurring_expense_template_id'],
         'journal_entries' => ['parent' => 'accounting_periods', 'foreign_key' => 'accounting_period_id'],
         'journal_lines' => ['parent' => 'journal_entries', 'foreign_key' => 'journal_entry_id'],
+        'bank_accounts' => ['parent' => 'ledger_accounts', 'foreign_key' => 'ledger_account_id'],
     ];
 
     /** @var array<string, array{table: string, parent: string, foreign_key: string}> */

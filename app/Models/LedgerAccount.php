@@ -69,6 +69,11 @@ class LedgerAccount extends Model
         return $this->hasMany(JournalLine::class);
     }
 
+    public function bankAccounts(): HasMany
+    {
+        return $this->hasMany(BankAccount::class);
+    }
+
     public function scopeActivePostable(Builder $query): Builder
     {
         return $query->where('is_active', true)->where('is_postable', true);
@@ -80,6 +85,7 @@ class LedgerAccount extends Model
             || $this->expenseItems()->exists()
             || $this->recurringExpenseItems()->exists()
             || $this->suppliers()->exists()
+            || $this->bankAccounts()->exists()
             || $this->journalLines()->exists();
     }
 }

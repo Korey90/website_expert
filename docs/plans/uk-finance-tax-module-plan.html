@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>uk-finance-tax-module-plan.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="plan-modułu-finansów-księgowości-i-podatków-uk">Plan modułu finansów, księgowości i podatków UK</h1>
+<p><strong>Status:</strong> IMPLEMENTACJA W TOKU — Fazy 0–3 zaimplementowane (<code>UKFIN-001</code>–<code>UKFIN-311</code> ukończone), Faza 4 jest następna; gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
+<strong>Data opracowania:</strong> 2026-11-04<br>
+<strong>Rynek docelowy:</strong> Wielka Brytania<br>
+<strong>Projekt:</strong> WebsiteExpert<br>
+<strong>Priorytet rekomendowany:</strong> najpierw ewidencja finansowa i VAT, następnie MTD VAT; pozostałe deklaracje jako osobne rozszerzenia</p>
+<hr>
+<h2 id="1-cel-biznesowy">1. Cel biznesowy</h2>
+<p>Rozbudować istniejący moduł faktur i płatności do systemu, który pozwala firmie w UK:</p>
+<ol>
+<li>ewidencjonować sprzedaż, zakupy, koszty, płatności, należności i zobowiązania;</li>
+<li>przechowywać dokumenty źródłowe oraz pełną historię zmian;</li>
+<li>prowadzić księgę w walucie funkcjonalnej GBP z obsługą transakcji GBP/EUR/PLN;</li>
+<li>przygotowywać raporty zarządcze i paczkę danych dla księgowego;</li>
+<li>wyliczać roboczą deklarację VAT na podstawie cyfrowych zapisów;</li>
+<li>po osobnym dopuszczeniu integracji — pobierać obowiązki i składać VAT Return przez HMRC Making Tax Digital;</li>
+<li>w dalszych etapach opcjonalnie obsługiwać MTD Income Tax, Corporation Tax, PAYE i CIS.</li>
+</ol>
+<p>System nie może przedstawiać wyliczeń jako profesjonalnej porady podatkowej. Każda deklaracja przed wysłaniem ma wymagać jawnego zatwierdzenia użytkownika, a reguły podatkowe i mapowania powinny zostać zaakceptowane przez księgowego znającego rynek UK.</p>
+<hr>
+<h2 id="2-zakres-i-granice-produktu">2. Zakres i granice produktu</h2>
+<h3 id="21-zakres-podstawowy--rekomendowany-do-realizacji">2.1 Zakres podstawowy — rekomendowany do realizacji</h3>
+<ul>
+<li>utwardzenie istniejących faktur, ofert i płatności pod multi-tenancy;</li>
+<li>poprawne faktury UK i VAT per pozycja;</li>
+<li>dostawcy, koszty, rachunki zakupowe i załączniki;</li>
+<li>noty kredytowe sprzedażowe i zakupowe;</li>
+<li>kategorie księgowe oraz podstawowy plan kont;</li>
+<li>import wyciągów bankowych i uzgadnianie płatności;</li>
+<li>niezmienny mechanizm podwójnego zapisu;</li>
+<li>okresy księgowe i blokowanie zamkniętych okresów;</li>
+<li>P&amp;L, Balance Sheet, Trial Balance, Cash Flow, VAT Detail;</li>
+<li>Aged Receivables i Aged Payables;</li>
+<li>przygotowanie 9 pól VAT Return;</li>
+<li>integracja HMRC MTD VAT;</li>
+<li>eksport paczki dla księgowego.</li>
+</ul>
+<h3 id="22-rozszerzenia-opcjonalne--osobne-produktysprinty">2.2 Rozszerzenia opcjonalne — osobne produkty/sprinty</h3>
+<ul>
+<li>MTD for Income Tax dla sole traders i landlordów;</li>
+<li>Corporation Tax i CT600;</li>
+<li>payroll, PAYE, FPS/EPS oraz workplace pension;</li>
+<li>Construction Industry Scheme;</li>
+<li>środki trwałe i amortyzacja podatkowa;</li>
+<li>magazyn i wycena zapasów;</li>
+<li>automatyczne bank feeds przez Open Banking.</li>
+</ul>
+<p>Te rozszerzenia nie powinny blokować uruchomienia podstawowej ewidencji finansowej. Payroll, CIS i pełne zeznania podatkowe mają niezależne reguły, cykle publikacji i ryzyko regulacyjne.</p>
+<hr>
+<h2 id="3-podstawa-wymagań-uk">3. Podstawa wymagań UK</h2>
+<p>Plan oparto na oficjalnych źródłach aktualnych na 2026-11-04:</p>
+<ul>
+<li>Firma musi przechowywać zapisy wszystkich wpływów i wydatków, aktywów, zobowiązań, sprzedaży i zakupów oraz dokumenty takie jak faktury, potwierdzenia i wyciągi bankowe. HMRC wskazuje dla dokumentacji Corporation Tax okres co najmniej 6 lat od końca właściwego okresu: <a href="https://www.gov.uk/running-a-limited-company/company-and-accounting-records">Company and accounting records — GOV.UK</a>.</li>
+<li>Faktura musi mieć m.in. unikalny numer, dane stron, opis, datę dostawy/usługi, datę wystawienia, kwoty, VAT i sumę należną: <a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include">Invoices — what they must include — GOV.UK</a>.</li>
+<li>VAT records obejmują sprzedaż i zakupy, faktury wystawione i otrzymane, credit/debit notes, dane bankowe i dokumentację VAT; określone dane muszą być utrzymywane cyfrowo: <a href="https://www.gov.uk/charge-reclaim-record-vat/keeping-vat-records">Keeping VAT records — GOV.UK</a>.</li>
+<li>Dla VAT należy rozróżnić standard rate 20%, reduced rate 5%, zero rate 0% oraz exempt/outside scope: <a href="https://www.gov.uk/vat-rates">VAT rates — GOV.UK</a>.</li>
+<li>Pełna faktura VAT wymaga stawki VAT dla poszczególnych pozycji, tax point oraz VAT wyrażonego w sterlingach: <a href="https://www.gov.uk/guidance/vat-guide-notice-700">VAT Notice 700 — GOV.UK</a>.</li>
+<li>MTD wymaga cyfrowych zapisów i cyfrowych połączeń między elementami oprogramowania: <a href="https://www.gov.uk/government/publications/vat-notice-70022-making-tax-digital-for-vat/vat-notice-70022-making-tax-digital-for-vat">VAT Notice 700/22 — GOV.UK</a>.</li>
+<li>Oficjalne VAT API pozwala pobrać obligations, wysłać i odczytać return oraz pobierać liabilities i payments: <a href="https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/vat-api/1.0">VAT MTD API — HMRC Developer Hub</a>.</li>
+<li>MTD Income Tax obowiązuje etapami dla sole traders/landlordów: ponad £50,000 od kwietnia 2026, ponad £30,000 od kwietnia 2027 i ponad £20,000 od kwietnia 2028: <a href="https://www.gov.uk/guidance/use-making-tax-digital-for-income-tax/using-making-tax-digital-for-income-tax-for-the-first-time">Use MTD for Income Tax — GOV.UK</a>.</li>
+<li>Payroll wymaga FPS na lub przed payday oraz, zależnie od sytuacji, EPS: <a href="https://www.gov.uk/running-payroll/reporting-to-hmrc">Reporting to HMRC: FPS — GOV.UK</a>.</li>
+<li>CIS contractors składają miesięczne returns obejmujące płatności dla subcontractors: <a href="https://www.gov.uk/what-you-must-do-as-a-cis-contractor/file-your-monthly-returns">File CIS monthly returns — GOV.UK</a>.</li>
+<li>Dostęp do danych bankowych przez API wymaga modelu Open Banking z autoryzacją i zgodą użytkownika: <a href="https://standards.openbanking.org.uk/api-specifications/latest/">Open Banking API Standards</a>.</li>
+</ul>
+<p>Wymagania prawne i API mogą się zmieniać. Przed rozpoczęciem każdego etapu integracyjnego należy ponownie zweryfikować bieżące dokumenty HMRC.</p>
+<hr>
+<h2 id="4-delta-analysis--stan-obecny">4. Delta analysis — stan obecny</h2>
+<h3 id="41-anchor-files-do-ponownego-użycia">4.1 Anchor files do ponownego użycia</h3>
+<table>
+<thead>
+<tr>
+<th>Obszar</th>
+<th>Istniejący element</th>
+<th>Zastosowanie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Faktury</td>
+<td><code>app/Models/Invoice.php</code></td>
+<td>relacje, statusy, przeliczenie subtotal/VAT/total/balance</td>
+</tr>
+<tr>
+<td>Pozycje faktury</td>
+<td><code>app/Models/InvoiceItem.php</code></td>
+<td>baza dla pozycji sprzedażowych</td>
+</tr>
+<tr>
+<td>Płatności</td>
+<td><code>app/Models/Payment.php</code></td>
+<td>metody, statusy i powiązanie z fakturą</td>
+</tr>
+<tr>
+<td>Oferty</td>
+<td><code>app/Models/Quote.php</code></td>
+<td>wzorzec dokumentu sprzedażowego</td>
+</tr>
+<tr>
+<td>Panel</td>
+<td><code>app/Filament/Resources/InvoiceResource.php</code></td>
+<td>formularze i tabela finansowa</td>
+</tr>
+<tr>
+<td>PDF</td>
+<td><code>resources/views/pdf/invoice.blade.php</code></td>
+<td>istniejący dokument sprzedażowy</td>
+</tr>
+<tr>
+<td>Raporty</td>
+<td><code>app/Http/Controllers/ReportController.php</code></td>
+<td>HTML/PDF/XLSX/CSV</td>
+</tr>
+<tr>
+<td>Waluty</td>
+<td><code>app/Services/Currency/*</code></td>
+<td>GBP/EUR/PLN, formatowanie i przeliczenia</td>
+</tr>
+<tr>
+<td>Płatności online</td>
+<td>Stripe/PayU controllers i webhooki</td>
+<td>automatyczna rejestracja wpłat</td>
+</tr>
+<tr>
+<td>Tenant</td>
+<td><code>app/Traits/BelongsToTenant.php</code></td>
+<td>globalny scope i automatyczny <code>business_id</code></td>
+</tr>
+<tr>
+<td>Uprawnienia</td>
+<td><code>BaseResource</code>, Spatie Permission</td>
+<td>kontrola dostępu w Filament</td>
+</tr>
+<tr>
+<td>Testy</td>
+<td><code>tests/Feature/ReportInvoicesTest.php</code> i portal payment tests</td>
+<td>wzorce testów raportów i płatności</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-funkcje-które-już-działają">4.2 Funkcje, które już działają</h3>
+<ul>
+<li>faktury, pozycje faktur i statusy płatności;</li>
+<li>VAT liczony jedną stawką na całą fakturę;</li>
+<li>kwoty zapłacone i saldo;</li>
+<li>PDF faktury;</li>
+<li>płatności Stripe, PayU i manualne;</li>
+<li>waluty GBP, EUR i PLN;</li>
+<li>raport faktur w HTML/PDF/XLSX/CSV;</li>
+<li>portal klienta;</li>
+<li>dane klienta: VAT number i Companies House number.</li>
+</ul>
+<h3 id="43-główne-luki">4.3 Główne luki</h3>
+<ul>
+<li>brak <code>business_id</code> bezpośrednio na <code>quotes</code>, <code>invoices</code>, <code>payments</code>, <code>projects</code> i części modeli pochodnych;</li>
+<li>brak dostawców, rachunków zakupowych i kosztów;</li>
+<li>brak tax code per pozycja i mixed-rate invoices;</li>
+<li>brak tax point, reverse charge, exempt i outside scope;</li>
+<li>brak credit notes;</li>
+<li>brak dokumentów źródłowych i polityki retencji;</li>
+<li>brak kont księgowych, journals i double-entry ledger;</li>
+<li>brak okresów księgowych i lock date;</li>
+<li>brak bank reconciliation;</li>
+<li>brak VAT return i połączenia HMRC;</li>
+<li>brak P&amp;L, Balance Sheet, Trial Balance i Cash Flow;</li>
+<li>brak modułów Income Tax, Corporation Tax, PAYE i CIS.</li>
+</ul>
+<hr>
+<h2 id="5-decyzje-architektoniczne">5. Decyzje architektoniczne</h2>
+<h3 id="51-tenant-i-identyfikatory">5.1 Tenant i identyfikatory</h3>
+<ul>
+<li>Każdy rekord finansowy należy do <code>business_id</code>.</li>
+<li><code>businesses.id</code> jest ULID, dlatego migracje mają używać <code>char('business_id', 26)</code> z właściwym FK, a nie domyślnego bigint <code>foreignId()</code>.</li>
+<li>Istniejące dokumenty trzeba backfillować przez <code>client.business_id</code> lub relację nadrzędną.</li>
+<li>Migracja ma najpierw dodać nullable column, wykonać kontrolowany backfill i raport braków, a dopiero potem ustawić NOT NULL tam, gdzie domena tego wymaga.</li>
+<li>Wszystkie listy, selecty i raporty muszą być testowane na izolację tenantów.</li>
+</ul>
+<h3 id="52-waluta">5.2 Waluta</h3>
+<ul>
+<li>Waluta funkcjonalna księgi: GBP.</li>
+<li>Dokument przechowuje walutę oryginalną, kurs, źródło kursu, datę kursu i równowartość GBP.</li>
+<li>Nie wolno przeliczać historycznych zapisów ponownie po zmianie kursu.</li>
+<li>VAT należny i naliczony musi być dostępny w GBP, nawet gdy faktura ma inną walutę.</li>
+<li>Różnice kursowe tworzą osobne journal lines.</li>
+</ul>
+<h3 id="53-ledger">5.3 Ledger</h3>
+<ul>
+<li>Posted journal jest niezmienny.</li>
+<li>Korekta odbywa się przez reversal i nowy zapis, nigdy przez cichą edycję.</li>
+<li>Każdy journal musi się bilansować: suma debit = suma credit.</li>
+<li>Draft dokumentu nie księguje się; posting następuje przez Action w transakcji DB.</li>
+<li>Każda akcja księgowa ma idempotency key.</li>
+<li>Usunięcie posted dokumentu jest zabronione; dostępne są void/reversal/credit note.</li>
+</ul>
+<h3 id="54-dokumenty-i-audyt">5.4 Dokumenty i audyt</h3>
+<ul>
+<li>Załączniki przechowywane prywatnie, nigdy na publicznym dysku.</li>
+<li>Hash SHA-256 pliku do wykrywania zmian i duplikatów.</li>
+<li>Audit log: kto, kiedy i z jakiego stanu zmienił dokument.</li>
+<li>Retention policy domyślnie 6 lat, konfigurowalna wyłącznie w górę.</li>
+<li>Eksport kompletnej paczki audytowej per okres.</li>
+</ul>
+<h3 id="55-integracja-hmrc">5.5 Integracja HMRC</h3>
+<ul>
+<li>Osobny adapter <code>HmrcClientInterface</code> i implementacje sandbox/production.</li>
+<li>OAuth tokens szyfrowane przez Laravel encrypted casts.</li>
+<li>Żadnych tokenów, UTR, NINO ani pełnych requestów HMRC w logach aplikacyjnych.</li>
+<li>Wymagane fraud-prevention headers zgodne z bieżącą dokumentacją HMRC.</li>
+<li>Submission tylko po ekranie review i dodatkowym potwierdzeniu.</li>
+<li>Zapisywać payload hash, response metadata, correlation ID oraz immutable submission snapshot.</li>
+<li>Automatyczne retry tylko dla bezpiecznych operacji GET; POST submission wymaga idempotency i kontroli stanu przed ponowieniem.</li>
+</ul>
+<hr>
+<h2 id="6-docelowy-model-danych">6. Docelowy model danych</h2>
+<h3 id="61-konfiguracja-firmy">6.1 Konfiguracja firmy</h3>
+<h4 id="accounting_profiles"><code>accounting_profiles</code></h4>
+<ul>
+<li><code>business_id</code> — unique FK;</li>
+<li><code>entity_type</code> — <code>limited_company</code>, <code>sole_trader</code>, <code>partnership</code>;</li>
+<li><code>legal_name</code>, <code>company_number</code>, <code>registered_address</code>;</li>
+<li><code>company_utr</code> — encrypted;</li>
+<li><code>functional_currency</code> — domyślnie GBP;</li>
+<li><code>accounting_basis</code> — <code>accrual</code>, <code>cash</code>;</li>
+<li><code>financial_year_start</code>, <code>financial_year_end</code>;</li>
+<li><code>vat_registered</code>, <code>vat_number</code>, <code>vat_scheme</code>;</li>
+<li><code>vat_effective_from</code>, <code>vat_effective_to</code>;</li>
+<li><code>paye_reference</code>, <code>accounts_office_reference</code> — encrypted, opcjonalne;</li>
+<li>timestamps + audit metadata.</li>
+</ul>
+<h4 id="accounting_periods"><code>accounting_periods</code></h4>
+<ul>
+<li>rok/okres, daty początku i końca;</li>
+<li><code>status</code>: open, closing, closed, locked;</li>
+<li><code>locked_at</code>, <code>locked_by</code>;</li>
+<li>możliwość soft close i final lock.</li>
+</ul>
+<h3 id="62-vat-i-podatki-pośrednie">6.2 VAT i podatki pośrednie</h3>
+<h4 id="tax_codes"><code>tax_codes</code></h4>
+<ul>
+<li>kod i etykiety pl/en/pt;</li>
+<li>typ: standard, reduced, zero, exempt, outside_scope, reverse_charge;</li>
+<li>rate;</li>
+<li>input/output eligibility;</li>
+<li>mapowanie do pól VAT Return;</li>
+<li>daty obowiązywania, bez nadpisywania historii.</li>
+</ul>
+<h4 id="rozszerzenie-invoice_items-i-quote_items">Rozszerzenie <code>invoice_items</code> i <code>quote_items</code></h4>
+<ul>
+<li><code>tax_code_id</code>;</li>
+<li><code>net_amount</code>, <code>vat_amount</code>, <code>gross_amount</code>;</li>
+<li><code>supply_date</code>/tax point;</li>
+<li><code>vat_rate_snapshot</code>;</li>
+<li><code>description</code>, quantity, unit price zachowane jako snapshot.</li>
+</ul>
+<h4 id="credit_notes-i-credit_note_items"><code>credit_notes</code> i <code>credit_note_items</code></h4>
+<ul>
+<li>typ sprzedażowy lub zakupowy;</li>
+<li>powiązanie z fakturą/expense;</li>
+<li>reason, issue date, tax point;</li>
+<li>kwoty netto/VAT/brutto;</li>
+<li>status draft/issued/allocated/void;</li>
+<li>posting do ledgeru przez reversal odpowiedniej części dokumentu.</li>
+</ul>
+<h3 id="63-zakupy-i-wydatki">6.3 Zakupy i wydatki</h3>
+<h4 id="suppliers"><code>suppliers</code></h4>
+<ul>
+<li>tenant, nazwa, adres, company number, VAT number;</li>
+<li>waluta domyślna i domyślne konto kosztowe;</li>
+<li>payment terms i dane kontaktowe;</li>
+<li>status active/archived.</li>
+</ul>
+<h4 id="expenses"><code>expenses</code></h4>
+<ul>
+<li>supplier, supplier invoice number i unikalność per supplier;</li>
+<li>issue date, tax point, due date, received date;</li>
+<li>currency, exchange rate snapshot i wartości GBP;</li>
+<li>subtotal, VAT, total, paid, due;</li>
+<li>status draft/approved/posted/partially_paid/paid/void;</li>
+<li>payment method, project/client optional;</li>
+<li>business purpose i notatki;</li>
+<li><code>created_by</code>, <code>approved_by</code>, <code>posted_by</code>.</li>
+</ul>
+<h4 id="expense_items"><code>expense_items</code></h4>
+<ul>
+<li>description, quantity, unit price;</li>
+<li>ledger account, tax code;</li>
+<li>net/VAT/gross w walucie dokumentu i GBP;</li>
+<li>billable flag i opcjonalne powiązanie z klientem/projektem.</li>
+</ul>
+<h4 id="financial_attachments"><code>financial_attachments</code></h4>
+<ul>
+<li>polymorphic relation do invoice, expense, payment, bank transaction i filing;</li>
+<li>private storage path, mime, size, SHA-256, uploaded_by;</li>
+<li>document type: invoice, receipt, bank statement, contract, HMRC acknowledgement.</li>
+</ul>
+<h3 id="64-bank-i-kasa">6.4 Bank i kasa</h3>
+<h4 id="bank_accounts"><code>bank_accounts</code></h4>
+<ul>
+<li>tenant, nazwa banku, masked account number, sort code masked;</li>
+<li>waluta, opening balance, ledger account;</li>
+<li>status i ostatnia synchronizacja;</li>
+<li>provider connection oddzielona od danych konta.</li>
+</ul>
+<h4 id="bank_transactions"><code>bank_transactions</code></h4>
+<ul>
+<li>provider/import ID z unique constraint;</li>
+<li>booking/value date, amount, currency, reference, counterparty;</li>
+<li>raw payload zaszyfrowany lub zminimalizowany;</li>
+<li>reconciliation status;</li>
+<li>hash do deduplikacji importu.</li>
+</ul>
+<h4 id="bank_transaction_matches"><code>bank_transaction_matches</code></h4>
+<ul>
+<li>bank transaction ↔ invoice/payment/expense/journal;</li>
+<li>kwota dopasowana, confidence score, matched_by;</li>
+<li>obsługa split/partial/many-to-many;</li>
+<li>pełna historia cofnięcia uzgodnienia.</li>
+</ul>
+<h3 id="65-księga-główna">6.5 Księga główna</h3>
+<h4 id="ledger_accounts"><code>ledger_accounts</code></h4>
+<ul>
+<li>tenant + code;</li>
+<li>typ: asset, liability, equity, income, expense;</li>
+<li>subtype, nazwy pl/en/pt;</li>
+<li>parent account, system flag, active flag;</li>
+<li>domyślny UK chart template kopiowany do firmy.</li>
+</ul>
+<h4 id="journal_entries"><code>journal_entries</code></h4>
+<ul>
+<li>tenant, date, accounting period, source type/id;</li>
+<li>status draft/posted/reversed;</li>
+<li>description, idempotency key;</li>
+<li>posted/reversed metadata;</li>
+<li>immutable source snapshot hash.</li>
+</ul>
+<h4 id="journal_lines"><code>journal_lines</code></h4>
+<ul>
+<li>journal, ledger account;</li>
+<li>debit/credit w GBP;</li>
+<li>original currency/amount i exchange rate;</li>
+<li>tax code, client, supplier, project opcjonalnie;</li>
+<li>memo i dimensions JSON na przyszłość.</li>
+</ul>
+<h3 id="66-vat-returns-i-hmrc">6.6 VAT returns i HMRC</h3>
+<h4 id="vat_periods"><code>vat_periods</code></h4>
+<ul>
+<li>period key HMRC, daty, due date;</li>
+<li>status open/fulfilled/submitted;</li>
+<li>source HMRC/manual.</li>
+</ul>
+<h4 id="vat_returns"><code>vat_returns</code></h4>
+<ul>
+<li>9 pól VAT Return;</li>
+<li>status draft/reviewed/submitted/accepted/rejected;</li>
+<li>adjustments z uzasadnieniem;</li>
+<li>snapshot ledger cutoff;</li>
+<li>calculated_at, reviewed_by, submitted_by;</li>
+<li>HMRC correlation ID i receipt metadata.</li>
+</ul>
+<h4 id="hmrc_connections"><code>hmrc_connections</code></h4>
+<ul>
+<li>tenant, environment, scopes;</li>
+<li>encrypted access/refresh tokens;</li>
+<li>expires_at, VRN, status;</li>
+<li>last successful call i reconnect reason.</li>
+</ul>
+<h4 id="hmrc_submission_logs"><code>hmrc_submission_logs</code></h4>
+<ul>
+<li>endpoint, method, payload hash, response code;</li>
+<li>correlation ID, request timestamp;</li>
+<li>sanitized error body;</li>
+<li>bez sekretów i danych nadmiarowych.</li>
+</ul>
+<hr>
+<h2 id="7-plan-realizacji">7. Plan realizacji</h2>
+<p>Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS &lt; 1h, S 1–3h, M 3–8h.</p>
+<h3 id="faza-0--zakres-bezpieczeństwo-i-fundament-tenantów-1-tydzień">Faza 0 — zakres, bezpieczeństwo i fundament tenantów (1 tydzień)</h3>
+<p><strong>Cel:</strong> usunąć ryzyka blokujące księgowość i zatwierdzić reguły z księgowym.</p>
+<ul>
+<li><input type="checkbox" id="checkbox0"><label for="checkbox0"><code>UKFIN-001</code> [S] Potwierdzić grupę użytkowników: limited company, sole trader, partnership.</label></li>
+<li><input type="checkbox" id="checkbox1"><label for="checkbox1"><code>UKFIN-002</code> [M] Warsztat z księgowym UK: plan kont, tax codes, VAT schemes, raporty i przykładowe dokumenty.</label></li>
+<li><input type="checkbox" id="checkbox2" checked="true"><label for="checkbox2"><code>UKFIN-003</code> [M] Audyt wszystkich finansowych queries, policies i tenant boundaries. <em>(2026-11-04: ścieżki zapisu + regresja reports/portal/workflow; kolejne modele obowiązkowo dopisywane do audytu)</em></label></li>
+<li><input type="checkbox" id="checkbox3" checked="true"><label for="checkbox3"><code>UKFIN-004</code> [M] Migracja <code>business_id</code> do quotes/invoices/payments/projects i tabel pochodnych. <em>(objęto również contacts)</em></label></li>
+<li><input type="checkbox" id="checkbox4" checked="true"><label for="checkbox4"><code>UKFIN-005</code> [M] Bezpieczny backfill + raport rekordów bez jednoznacznego tenanta. <em>(<code>finance:audit-tenants</code>)</em></label></li>
+<li><input type="checkbox" id="checkbox5" checked="true"><label for="checkbox5"><code>UKFIN-006</code> [M] Dodanie <code>BelongsToTenant</code>/jawnego scope i indeksów złożonych.</label></li>
+<li><input type="checkbox" id="checkbox6" checked="true"><label for="checkbox6"><code>UKFIN-007</code> [M] Testy izolacji dla invoices, payments, quotes, reports i Filament selects.</label></li>
+<li><input type="checkbox" id="checkbox7" checked="true"><label for="checkbox7"><code>UKFIN-008</code> [S] Rejestr uprawnień: view/manage/approve/post/close/submit-tax.</label></li>
+<li><input type="checkbox" id="checkbox8" checked="true"><label for="checkbox8"><code>UKFIN-009</code> [S] Threat model: HMRC tokens, bank data, attachments, UTR/PAYE refs. <em>(<code>docs/security/uk-finance-threat-model.md</code>)</em></label></li>
+</ul>
+<p><strong>Gate:</strong> nie rozpoczynać kosztów ani HMRC, dopóki testy cross-tenant nie są zielone.</p>
+<h3 id="faza-1--poprawne-dokumenty-sprzedażowe-uk-12-tygodnie">Faza 1 — poprawne dokumenty sprzedażowe UK (1–2 tygodnie)</h3>
+<p><strong>Cel:</strong> faktury i credit notes zawierają wymagane dane oraz obsługują mixed VAT.</p>
+<ul>
+<li><input type="checkbox" id="checkbox9" checked="true"><label for="checkbox9"><code>UKFIN-101</code> [M] AccountingProfile + konfiguracja entity/VAT/year-end. <em>(schema, szyfrowanie, Action, Inertia UI, role owner/admin i PL/EN/PT)</em></label></li>
+<li><input type="checkbox" id="checkbox10" checked="true"><label for="checkbox10"><code>UKFIN-102</code> [M] TaxCode model, migracja i seed standard/reduced/zero/exempt/outside scope/reverse charge.</label></li>
+<li><input type="checkbox" id="checkbox11" checked="true"><label for="checkbox11"><code>UKFIN-103</code> [M] Tax code i tax snapshot na invoice/quote items.</label></li>
+<li><input type="checkbox" id="checkbox12" checked="true"><label for="checkbox12"><code>UKFIN-104</code> [M] Refaktor kalkulacji VAT z poziomu faktury na pozycje.</label></li>
+<li><input type="checkbox" id="checkbox13" checked="true"><label for="checkbox13"><code>UKFIN-105</code> [M] Supply date/tax point i VAT amount in GBP. <em>(snapshot kursu, źródła i daty; kwoty GBP per pozycja i dokument; PDF)</em></label></li>
+<li><input type="checkbox" id="checkbox14" checked="true"><label for="checkbox14"><code>UKFIN-106</code> [M] Sekwencje numeracji per tenant i document type z blokadą race condition. <em>(transakcja + <code>lockForUpdate</code>, osobna sekwencja roczna, backfill)</em></label></li>
+<li><input type="checkbox" id="checkbox15" checked="true"><label for="checkbox15"><code>UKFIN-107</code> [M] CreditNote + items + lifecycle. <em>(snapshot z faktury, partial credit, issue/allocate/void, audit metadata i tenant scope)</em></label></li>
+<li><input type="checkbox" id="checkbox16" checked="true"><label for="checkbox16"><code>UKFIN-108</code> [M] Aktualizacja InvoiceResource, QuoteResource i PDF. <em>(formularze tax point/tax code/FX, panel Credit Notes z lifecycle, PDF faktury i noty z danymi sprzedawcy, stawkami VAT i odwołaniem do dokumentu źródłowego)</em></label></li>
+<li><input type="checkbox" id="checkbox17" checked="true"><label for="checkbox17"><code>UKFIN-109</code> [S] Walidacja pól zależnie od VAT registered/entity type. <em>(Form Request + normalizacja pól nieaktywnych)</em></label></li>
+<li><input type="checkbox" id="checkbox18" checked="true"><label for="checkbox18"><code>UKFIN-110</code> [M] Testy: mixed rates, rounding, FX, zero/exempt, credit note, concurrent numbering. <em>(test współbieżny uruchamiany na MySQL/PostgreSQL; lokalne SQLite nie obsługuje <code>SELECT ... FOR UPDATE</code>; dodatkowo pokryto reverse charge bez doliczania VAT do należności)</em></label></li>
+</ul>
+<p><strong>Gate:</strong> przykładowe faktury i credit notes zaakceptowane przez księgowego UK.</p>
+<h3 id="faza-2--dostawcy-koszty-i-dokumenty-12-tygodnie">Faza 2 — dostawcy, koszty i dokumenty (1–2 tygodnie)</h3>
+<p><strong>Cel:</strong> użytkownik rejestruje każdy zakup i ma dowód źródłowy.</p>
+<ul>
+<li><input type="checkbox" id="checkbox19" checked="true"><label for="checkbox19"><code>UKFIN-201</code> [M] Supplier model, policy, factory i Filament Resource. <em>(tenant scope, soft archive, dane UK/VAT, warunki płatności, RBAC <code>view_finance</code>/<code>manage_finance</code>, PL/EN/PT)</em></label></li>
+<li><input type="checkbox" id="checkbox20" checked="true"><label for="checkbox20"><code>UKFIN-202</code> [M] Expense + ExpenseItem schema i status workflow. <em>(mixed purchase VAT, tax/FX snapshots, billable client/project, reverse charge VAT bez zwiększania salda dostawcy, panel Filament PL/EN/PT)</em></label></li>
+<li><input type="checkbox" id="checkbox21" checked="true"><label for="checkbox21"><code>UKFIN-203</code> [M] Actions: Create/Update/Approve/Post/VoidExpense. <em>(transakcje i blokady, audit metadata, niezmienność po approval; posted wymaga przyszłego ledger reversal)</em></label></li>
+<li><input type="checkbox" id="checkbox22" checked="true"><label for="checkbox22"><code>UKFIN-204</code> [M] Form Requests i walidacja duplikatu supplier invoice. <em>(unikalność tenant + supplier, walidacja effective tax code/FX oraz referencji tenantowych)</em></label></li>
+<li><input type="checkbox" id="checkbox23" checked="true"><label for="checkbox23"><code>UKFIN-205</code> [M] Private FinancialAttachment service z SHA-256. <em>(prywatny dysk, tenant scope, MIME/limit 10 MB, deduplikacja hash, 6-letnia retencja, kwarantanna <code>pending</code>, relacje do invoice/expense/payment/credit note)</em></label></li>
+<li><input type="checkbox" id="checkbox24" checked="true"><label for="checkbox24"><code>UKFIN-206</code> [M] Podgląd PDF/obrazu i kontrolowany download. <em>(RBAC <code>view_finance</code>, brak publicznych URL-i, tylko status <code>clean</code>, kontrola SHA-256 przy każdym odczycie, <code>no-store</code>/<code>nosniff</code>, ochrona cross-tenant; integracja z silnikiem malware scan musi ustawiać wynik <code>clean</code>/<code>rejected</code>)</em></label></li>
+<li><input type="checkbox" id="checkbox25" checked="true"><label for="checkbox25"><code>UKFIN-207</code> [M] Purchase credit notes i refundy kosztowe. <em>(osobne dokumenty <code>PCN</code>, snapshoty VAT/FX z expense items, kontrola maksymalnej ilości, issue/allocate/refund/void, redukcja salda kosztu, rejestr zwrotów gotówkowych do wysokości zapłaty, tenant/RBAC i panel PL/EN/PT)</em></label></li>
+<li><input type="checkbox" id="checkbox26" checked="true"><label for="checkbox26"><code>UKFIN-208</code> [M] Recurring expenses jako template + scheduled draft generation. <em>(weekly/monthly/quarterly/yearly, pauza i wznowienie, idempotentne szkice z unikalnym occurrence, catch-up zaległych okresów, poprawna kotwica końca miesiąca, dzienna komenda scheduler, tenant/RBAC i panel PL/EN/PT; generowanie ograniczone do GBP, aby nie utrwalać nieaktualnych kursów FX)</em></label></li>
+<li><input type="checkbox" id="checkbox27" checked="true"><label for="checkbox27"><code>UKFIN-209</code> [M] Raport kosztów per category/supplier/project/VAT code. <em>(standardowe kategorie kosztowe, sumy netto/VAT/brutto w GBP, filtry okresu, grupowanie po kategorii/dostawcy/projekcie/kodzie VAT, wydane purchase credits jako wartości ujemne, CSV, tenant/RBAC oraz panel PL/EN/PT)</em></label></li>
+<li><input type="checkbox" id="checkbox28" checked="true"><label for="checkbox28"><code>UKFIN-210</code> [M] Testy auth, tenant, upload security, VAT, partial payments i duplicates. <em>(regresja RBAC i cross-tenant, prywatne pliki/MIME/limit/hash, mixed VAT/FX/rounding/reverse charge, duplikaty numerów i załączników, automatyczna synchronizacja faktury <code>partially_paid</code>/<code>paid</code> po zmianach płatności; pełny pakiet Finance na SQLite, z testem blokad współbieżnych przeznaczonym dla MySQL/PostgreSQL)</em></label></li>
+</ul>
+<p><strong>Gate:</strong> kompletna ścieżka receipt → approval → payment → audit export.</p>
+<h3 id="faza-3--ledger-i-okresy-księgowe-2-tygodnie">Faza 3 — ledger i okresy księgowe (2 tygodnie)</h3>
+<p><strong>Cel:</strong> każda operacja finansowa ma zbilansowany, audytowalny zapis księgowy.</p>
+<ul>
+<li><input type="checkbox" id="checkbox29" checked="true"><label for="checkbox29"><code>UKFIN-301</code> [M] LedgerAccount i UK chart template. <em>(35 tenantowych kont UK z hierarchią, typem/podtypem, saldem normalnym, flagami system/postable/active i nazwami PL/EN/PT; idempotentna inicjalizacja i migracja istniejących firm, panel Filament/RBAC, domyślne konto dostawcy, automatyczne mapowanie kategorii kosztu oraz audyt referencji cross-tenant)</em></label></li>
+<li><input type="checkbox" id="checkbox30" checked="true"><label for="checkbox30"><code>UKFIN-302</code> [M] AccountingPeriod + open/close/lock workflow. <em>(tenantowe okresy bez nakładania zakresów, stany <code>open</code> → <code>closing</code> → <code>closed</code> → <code>locked</code>, kontrolowane ponowne otwarcie z uzasadnieniem, nieodwracalna blokada, historia przejść i metadane audytowe, RBAC <code>manage_finance</code>/<code>close_finance_periods</code>, blokada księgowania kosztu w zamkniętym okresie oraz panel Filament PL/EN/PT)</em></label></li>
+<li><input type="checkbox" id="checkbox31" checked="true"><label for="checkbox31"><code>UKFIN-303</code> [M] JournalEntry/JournalLine schema i constraints. <em>(tenantowe nagłówki i pozycje dziennika, okres/source/idempotency/snapshot/reversal metadata, kwoty debit/credit w GBP oraz snapshot waluty pierwotnej, wymiary księgowe, relacje z planem kont i VAT, ograniczenie DB wymuszające dokładnie jedną dodatnią stronę zapisu, unikalność klucza idempotencji per tenant, walidacja daty okresu i referencji cross-tenant oraz rozszerzony audyt spójności)</em></label></li>
+<li><input type="checkbox" id="checkbox32" checked="true"><label for="checkbox32"><code>UKFIN-304</code> [M] Posting engine z transaction + idempotency. <em>(atomowe tworzenie i posting journalu, blokada per tenant dla bezpiecznej numeracji i retry, klucz idempotencji z kanonicznym SHA-256 payloadu, odrzucenie ponowienia ze zmienionymi danymi, bilans w pensach bez błędów float, okres <code>open</code>/<code>closing</code>, RBAC <code>post_finance</code>, walidacja kont i wymiarów tenantowych, snapshot FX, pełny rollback oraz niezmienność zaksięgowanych entries/lines)</em></label></li>
+<li><input type="checkbox" id="checkbox33" checked="true"><label for="checkbox33"><code>UKFIN-305</code> [M] Posting sprzedaży i credit notes. <em>(wystawienie faktury i noty sprzedażowej atomowo tworzy idempotentny journal; dekretacja Trade Debtors / Sales / VAT Payable per pozycja i tax code, mixed VAT, zero/reverse charge, projekty i klienci, snapshoty waluty źródłowej i GBP, odwrotne zapisy noty, integracja z akcjami Filament, rollback w zamkniętym okresie oraz ochrona zaksięgowanych dokumentów przed zmianą pól księgowych)</em></label></li>
+<li><input type="checkbox" id="checkbox34" checked="true"><label for="checkbox34"><code>UKFIN-306</code> [M] Posting zakupów i purchase credits. <em>(zatwierdzenie kosztu i wystawienie zakupowej noty kredytowej atomowo tworzy idempotentny journal; dekretacja Expense / Input VAT / Trade Creditors per pozycja, mixed VAT, VAT nieodliczalny, reverse charge z równoległym Input VAT i VAT Payable bez zwiększania salda dostawcy, snapshoty FX i wymiary supplier/client/project, odwrotne zapisy purchase credit, rollback statusu przy błędzie okresu/uprawnień oraz ochrona zaksięgowanych dokumentów i pozycji przed zmianą danych księgowych)</em></label></li>
+<li><input type="checkbox" id="checkbox35" checked="true"><label for="checkbox35"><code>UKFIN-307</code> [M] Posting payments/refunds i accounts receivable/payable. <em>(wpływy klientów księgowane Bank / Trade Debtors, płatności dostawcom Trade Creditors / Bank, pełne refundy klientów jako zapis przeciwny oraz zwroty gotówkowe od dostawców Bank / Trade Creditors; osobny rejestr <code>expense_payments</code>, trwałe snapshoty kwoty/kursu GBP, wymiary client/project/supplier, atomowa synchronizacja sald i statusów <code>partially_paid</code>/<code>paid</code>, referencyjna idempotencja, ochrona zaksięgowanych płatności przed zmianą oraz rollback przy zamkniętym okresie lub braku uprawnienia)</em></label></li>
+<li><input type="checkbox" id="checkbox36" checked="true"><label for="checkbox36"><code>UKFIN-308</code> [M] FX gains/losses. <em>(rozrachunki walutowe przechowują osobno faktyczną wartość przepływu GBP, wartość bilansową należności/zobowiązania i podpisaną zrealizowaną różnicę kursową; wpływy klientów, płatności dostawców i zwroty gotówkowe dostawców automatycznie dekretują zysk na konto 4300 albo stratę na 7100, częściowe rozliczenia zachowują kurs dokumentu dla AR/AP, refund klienta odwraca pierwotny dekret FX, formularze przyjmują snapshot kursu z dnia rozliczenia, a ponowienie z tą samą referencją pozostaje idempotentne)</em></label></li>
+<li><input type="checkbox" id="checkbox37" checked="true"><label for="checkbox37"><code>UKFIN-309</code> [M] Reversal zamiast edycji posted journals. <em>(atomowa akcja tworzy dokładny zapis lustrzany z zamienionymi stronami debit/credit, zachowuje konta, podatki, waluty, kursy i wymiary, a oryginał oznacza jako <code>reversed</code> z aktorem, czasem i wymaganym uzasadnieniem; reversal może trafić do późniejszego otwartego okresu bez naruszania okresu zablokowanego, jest idempotentny i ograniczony do jednego na oryginał, nie można odwracać reversalu ani antydatować operacji, a pełny rollback chroni przed częściowym zapisem)</em></label></li>
+<li><input type="checkbox" id="checkbox38" checked="true"><label for="checkbox38"><code>UKFIN-310</code> [M] General Ledger i Journal viewer read-only. <em>(tenantowy raport księgi głównej pokazuje saldo otwarcia, obroty i saldo narastające Dr/Cr per konto z filtrami daty/konta oraz zachowuje w historii zarówno oryginał oznaczony <code>reversed</code>, jak i zapis storna; dziennik Filament udostępnia wyłącznie listę i szczegółowy podgląd nagłówka, źródła, hashy audytowych, powiązań storna, kwot FX, podatków i wymiarów, z RBAC <code>view_finance</code>, izolacją tenantów i tłumaczeniami PL/EN/PT)</em></label></li>
+<li><input type="checkbox" id="checkbox39" checked="true"><label for="checkbox39"><code>UKFIN-311</code> [M] Testy invariants: debit=credit, lock date, idempotency, reversal, tenant. <em>(dedykowany kontrakt integracyjny sprawdza każdą linię i journal w pensach, pełny rollback niezbilansowanego lub dwustronnego payloadu, blokadę dat w okresach closed/locked, zapis w późniejszym otwartym okresie, stabilność hasha i odrzucenie payload drift przy retry, dokładne pojedyncze storno zerujące każde konto, izolację tenantów oraz niezmienność i zakaz usuwania posted nagłówków i linii)</em></label></li>
+</ul>
+<p><strong>Gate: SPEŁNIONY.</strong> Nie da się utworzyć niezbilansowanego ani zmienić posted journal; niezmienniki są pokryte testami integracyjnymi silnika i ograniczeniami schematu.</p>
+<h3 id="faza-4--bank-reconciliation-12-tygodnie">Faza 4 — bank reconciliation (1–2 tygodnie)</h3>
+<p><strong>Cel:</strong> wpływy i wydatki można uzgodnić z bankiem bez ręcznego przepisywania.</p>
+<ul>
+<li><input type="checkbox" id="checkbox40"><label for="checkbox40"><code>UKFIN-401</code> [M] BankAccount model i bezpieczne maskowanie danych.</label></li>
+<li><input type="checkbox" id="checkbox41"><label for="checkbox41"><code>UKFIN-402</code> [M] CSV importer z mapowaniem kolumn i dry-run.</label></li>
+<li><input type="checkbox" id="checkbox42"><label for="checkbox42"><code>UKFIN-403</code> [M] Deduplikacja bank transactions po provider ID/hash.</label></li>
+<li><input type="checkbox" id="checkbox43"><label for="checkbox43"><code>UKFIN-404</code> [M] Matching rules: reference, amount, date, counterparty.</label></li>
+<li><input type="checkbox" id="checkbox44"><label for="checkbox44"><code>UKFIN-405</code> [M] UI reconcile: exact, partial, split i many-to-many.</label></li>
+<li><input type="checkbox" id="checkbox45"><label for="checkbox45"><code>UKFIN-406</code> [M] Create expense/payment from unmatched transaction.</label></li>
+<li><input type="checkbox" id="checkbox46"><label for="checkbox46"><code>UKFIN-407</code> [M] Undo reconciliation z audit trail.</label></li>
+<li><input type="checkbox" id="checkbox47"><label for="checkbox47"><code>UKFIN-408</code> [M] Bank balance/reconciliation report.</label></li>
+<li><input type="checkbox" id="checkbox48"><label for="checkbox48"><code>UKFIN-409</code> [M] Testy duplicates, split, FX, reversal i tenant isolation.</label></li>
+</ul>
+<p><strong>Po MVP:</strong> Open Banking przez licencjonowanego agregatora zamiast budowania bezpośredniego TPP od zera.</p>
+<h3 id="faza-5--raporty-finansowe-i-vat-workspace-12-tygodnie">Faza 5 — raporty finansowe i VAT workspace (1–2 tygodnie)</h3>
+<p><strong>Cel:</strong> system daje sprawdzalne raporty i robocze 9 pól VAT Return.</p>
+<ul>
+<li><input type="checkbox" id="checkbox49"><label for="checkbox49"><code>UKFIN-501</code> [M] Trial Balance per period i comparison.</label></li>
+<li><input type="checkbox" id="checkbox50"><label for="checkbox50"><code>UKFIN-502</code> [M] Profit &amp; Loss.</label></li>
+<li><input type="checkbox" id="checkbox51"><label for="checkbox51"><code>UKFIN-503</code> [M] Balance Sheet.</label></li>
+<li><input type="checkbox" id="checkbox52"><label for="checkbox52"><code>UKFIN-504</code> [M] Cash Flow w wersji zarządczej.</label></li>
+<li><input type="checkbox" id="checkbox53"><label for="checkbox53"><code>UKFIN-505</code> [M] Aged Receivables i Aged Payables.</label></li>
+<li><input type="checkbox" id="checkbox54"><label for="checkbox54"><code>UKFIN-506</code> [M] VAT Detail: output/input VAT, tax codes i dokumenty źródłowe.</label></li>
+<li><input type="checkbox" id="checkbox55"><label for="checkbox55"><code>UKFIN-507</code> [M] VatReturnCalculationAction dla 9 pól.</label></li>
+<li><input type="checkbox" id="checkbox56"><label for="checkbox56"><code>UKFIN-508</code> [M] VAT adjustments z reason, attachment i approval.</label></li>
+<li><input type="checkbox" id="checkbox57"><label for="checkbox57"><code>UKFIN-509</code> [M] VAT return review/lock/snapshot workflow.</label></li>
+<li><input type="checkbox" id="checkbox58"><label for="checkbox58"><code>UKFIN-510</code> [M] Accountant pack ZIP: CSV/XLSX/PDF + attachments manifest + hashes.</label></li>
+<li><input type="checkbox" id="checkbox59"><label for="checkbox59"><code>UKFIN-511</code> [M] Golden dataset testowany względem ręcznie zaakceptowanych wyników księgowego.</label></li>
+</ul>
+<p><strong>Gate:</strong> wszystkie 9 pól uzgodnione z ledgerem i zaakceptowanym zestawem referencyjnym.</p>
+<h3 id="faza-6--hmrc-mtd-vat-23-tygodnie--czas-na-dostęp-produkcyjny">Faza 6 — HMRC MTD VAT (2–3 tygodnie + czas na dostęp produkcyjny)</h3>
+<p><strong>Cel:</strong> użytkownik pobiera obligations i świadomie składa VAT Return do HMRC.</p>
+<ul>
+<li><input type="checkbox" id="checkbox60"><label for="checkbox60"><code>UKFIN-601</code> [M] Rejestracja aplikacji HMRC Developer Hub i konfiguracja sandbox.</label></li>
+<li><input type="checkbox" id="checkbox61"><label for="checkbox61"><code>UKFIN-602</code> [M] HmrcClientInterface + sandbox/production clients.</label></li>
+<li><input type="checkbox" id="checkbox62"><label for="checkbox62"><code>UKFIN-603</code> [M] OAuth connect/callback/refresh/revoke.</label></li>
+<li><input type="checkbox" id="checkbox63"><label for="checkbox63"><code>UKFIN-604</code> [M] Encrypted token storage i redacted logs.</label></li>
+<li><input type="checkbox" id="checkbox64"><label for="checkbox64"><code>UKFIN-605</code> [M] Fraud-prevention headers builder + test endpoint.</label></li>
+<li><input type="checkbox" id="checkbox65"><label for="checkbox65"><code>UKFIN-606</code> [M] Retrieve VAT obligations i synchronizacja periods.</label></li>
+<li><input type="checkbox" id="checkbox66"><label for="checkbox66"><code>UKFIN-607</code> [M] View VAT return/liabilities/payments.</label></li>
+<li><input type="checkbox" id="checkbox67"><label for="checkbox67"><code>UKFIN-608</code> [M] Submit VAT return z review, declaration i step-up confirmation.</label></li>
+<li><input type="checkbox" id="checkbox68"><label for="checkbox68"><code>UKFIN-609</code> [M] Idempotency, timeout recovery i submission status reconciliation.</label></li>
+<li><input type="checkbox" id="checkbox69"><label for="checkbox69"><code>UKFIN-610</code> [M] HMRC audit log i receipt download.</label></li>
+<li><input type="checkbox" id="checkbox70"><label for="checkbox70"><code>UKFIN-611</code> [M] Sandbox scenarios: success, invalid VRN, expired token, duplicate, 5xx, timeout.</label></li>
+<li><input type="checkbox" id="checkbox71"><label for="checkbox71"><code>UKFIN-612</code> [M] Security review, penetration test i production access checklist.</label></li>
+<li><input type="checkbox" id="checkbox72"><label for="checkbox72"><code>UKFIN-613</code> [M] Pilot na jednej firmie i jednej deklaracji pod nadzorem księgowego.</label></li>
+</ul>
+<p><strong>Gate:</strong> brak automatycznych submission; produkcja dopiero po pozytywnym sandboxie i zgodzie właściciela.</p>
+<h3 id="faza-7--środki-trwałe-i-zamknięcie-roku-opcjonalnie-12-tygodnie">Faza 7 — środki trwałe i zamknięcie roku (opcjonalnie, 1–2 tygodnie)</h3>
+<ul>
+<li><input type="checkbox" id="checkbox73"><label for="checkbox73"><code>UKFIN-701</code> [M] FixedAsset i kategorie aktywów.</label></li>
+<li><input type="checkbox" id="checkbox74"><label for="checkbox74"><code>UKFIN-702</code> [M] Acquisition/disposal workflow.</label></li>
+<li><input type="checkbox" id="checkbox75"><label for="checkbox75"><code>UKFIN-703</code> [M] Book depreciation schedules.</label></li>
+<li><input type="checkbox" id="checkbox76"><label for="checkbox76"><code>UKFIN-704</code> [M] Asset register report.</label></li>
+<li><input type="checkbox" id="checkbox77"><label for="checkbox77"><code>UKFIN-705</code> [M] Year-end close i opening balance journals.</label></li>
+<li><input type="checkbox" id="checkbox78"><label for="checkbox78"><code>UKFIN-706</code> [M] Accountant adjustments import.</label></li>
+</ul>
+<p>Capital allowances i finalne reguły podatkowe pozostają poza automatyczną księgą bez osobnej specyfikacji zaakceptowanej przez księgowego.</p>
+<h3 id="faza-8--income-tax--corporation-tax--paye--cis-opcjonalne-strumienie">Faza 8 — Income Tax / Corporation Tax / PAYE / CIS (opcjonalne strumienie)</h3>
+<h4 id="a-mtd-income-tax">A. MTD Income Tax</h4>
+<ul>
+<li>digital records dla self-employment/property;</li>
+<li>quarterly updates;</li>
+<li>HMRC business details, obligations, summaries i final declaration;</li>
+<li>osobny eligibility engine według entity type i qualifying income;</li>
+<li>pełna implementacja tylko po potwierdzeniu dostępu do właściwych API i aktualnej ścieżki produkcyjnej.</li>
+</ul>
+<h4 id="b-corporation-tax">B. Corporation Tax</h4>
+<ul>
+<li>tax adjustments workspace, disallowable expenses i capital allowances;</li>
+<li>tax computation i CT600 mapping;</li>
+<li>iXBRL accounts/computations;</li>
+<li>XML submission adapter;</li>
+<li>w pierwszej wersji wyłącznie export pack dla księgowego, bez automatycznego filing.</li>
+</ul>
+<h4 id="c-payepayroll">C. PAYE/payroll</h4>
+<ul>
+<li>employees, employments, tax codes, NI categories, pay runs;</li>
+<li>FPS/EPS, corrections, YTD figures, payslips, starter/leaver;</li>
+<li>wersjonowane rates/thresholds per tax year;</li>
+<li>osobny silnik testowany na oficjalnych test packs.</li>
+</ul>
+<h4 id="d-cis">D. CIS</h4>
+<ul>
+<li>subcontractors, verification status i deduction rate;</li>
+<li>payments/material costs/deductions;</li>
+<li>monthly return/nil return;</li>
+<li>statements dla subcontractors i reconciliation.</li>
+</ul>
+<p>Każdy z czterech strumieni wymaga osobnego planu technicznego, konsultacji księgowej i własnego release gate.</p>
+<hr>
+<h2 id="8-warstwa-aplikacyjna--proponowana-struktura">8. Warstwa aplikacyjna — proponowana struktura</h2>
+<pre class="hljs"><code><div>app/
+  Actions/Finance/
+    ApproveExpenseAction.php
+    PostExpenseAction.php
+    PostInvoiceAction.php
+    ReverseJournalAction.php
+    ReconcileBankTransactionAction.php
+    CalculateVatReturnAction.php
+    SubmitVatReturnAction.php
+  DataTransferObjects/Finance/
+  Models/
+    AccountingProfile.php
+    AccountingPeriod.php
+    Supplier.php
+    Expense.php
+    ExpenseItem.php
+    TaxCode.php
+    LedgerAccount.php
+    JournalEntry.php
+    JournalLine.php
+    BankAccount.php
+    BankTransaction.php
+    VatPeriod.php
+    VatReturn.php
+    HmrcConnection.php
+  Services/Finance/
+    VatCalculator.php
+    PostingEngine.php
+    ExchangeRateService.php
+    BankImportService.php
+    ReconciliationService.php
+  Services/Hmrc/
+    HmrcClientInterface.php
+    HmrcVatClient.php
+    HmrcFraudPreventionHeaders.php
+  Filament/Resources/
+  Policies/
+  Jobs/Finance/
+lang/{pl,en,pt}/finance.php
+tests/Feature/Finance/
+tests/Unit/Finance/
+</div></code></pre>
+<p>Kontrolery i Filament Pages mają jedynie walidować/autoryzować oraz wywoływać Actions. Całe posting, VAT calculation, reconciliation i submission pozostają w Actions/Services.</p>
+<hr>
+<h2 id="9-ui-i-role">9. UI i role</h2>
+<h3 id="nawigacja-filament">Nawigacja Filament</h3>
+<pre class="hljs"><code><div>Finance
+├── Dashboard
+├── Sales
+│   ├── Invoices
+│   ├── Credit Notes
+│   └── Payments Received
+├── Purchases
+│   ├── Expenses / Bills
+│   ├── Suppliers
+│   └── Purchase Credits
+├── Banking
+│   ├── Bank Accounts
+│   ├── Import
+│   └── Reconciliation
+├── Accounting
+│   ├── Chart of Accounts
+│   ├── Journals
+│   └── Periods
+├── VAT
+│   ├── VAT Workspace
+│   ├── Returns
+│   └── HMRC Connection
+└── Reports
+</div></code></pre>
+<h3 id="uprawnienia">Uprawnienia</h3>
+<ul>
+<li><code>finance.view</code> — odczyt;</li>
+<li><code>finance.manage_sales</code>;</li>
+<li><code>finance.manage_purchases</code>;</li>
+<li><code>finance.approve_expenses</code>;</li>
+<li><code>finance.reconcile_bank</code>;</li>
+<li><code>finance.post_journals</code>;</li>
+<li><code>finance.close_periods</code>;</li>
+<li><code>finance.manage_tax_settings</code>;</li>
+<li><code>finance.submit_vat_return</code> — tylko owner/admin/accountant;</li>
+<li><code>finance.export_accountant_pack</code>.</li>
+</ul>
+<p>Należy rozważyć osobną rolę <code>accountant</code>, która ma dostęp do finansów bez dostępu do CRM, treści i konfiguracji technicznej.</p>
+<hr>
+<h2 id="10-testy-i-kryteria-jakości">10. Testy i kryteria jakości</h2>
+<h3 id="testy-obowiązkowe">Testy obowiązkowe</h3>
+<ul>
+<li>unit tests dla VAT, rounding, FX i posting rules;</li>
+<li>feature tests dla Actions, approvals, posting, period locks i submissions;</li>
+<li>property/invariant tests: journal zawsze się bilansuje;</li>
+<li>tenant isolation dla każdego modelu i raportu;</li>
+<li>authorization: read/manage/approve/post/submit;</li>
+<li>concurrency tests dla numeracji i idempotency;</li>
+<li>file upload security i private downloads;</li>
+<li>HMRC sandbox contract tests;</li>
+<li>golden datasets zaakceptowane przez księgowego;</li>
+<li>backup/restore test dla finansowych tabel i attachments;</li>
+<li>test eksportu pełnego okresu po 6 latach retencji bez utraty referencji.</li>
+</ul>
+<h3 id="definition-of-done-dla-każdego-etapu">Definition of Done dla każdego etapu</h3>
+<ul>
+<li><input type="checkbox" id="checkbox79"><label for="checkbox79">migracje reversible i przetestowane na SQLite oraz docelowym MySQL;</label></li>
+<li><input type="checkbox" id="checkbox80"><label for="checkbox80"><code>business_id</code> i indeksy sprawdzone;</label></li>
+<li><input type="checkbox" id="checkbox81"><label for="checkbox81">policies i permissions działają;</label></li>
+<li><input type="checkbox" id="checkbox82"><label for="checkbox82">pl/en/pt kompletne;</label></li>
+<li><input type="checkbox" id="checkbox83"><label for="checkbox83">brak <code>any</code> w nowych komponentach TypeScript;</label></li>
+<li><input type="checkbox" id="checkbox84"><label for="checkbox84">Pint, ESLint, Prettier i testy dotkniętej domeny przechodzą;</label></li>
+<li><input type="checkbox" id="checkbox85"><label for="checkbox85">logi nie zawierają sekretów ani pełnych identyfikatorów podatkowych;</label></li>
+<li><input type="checkbox" id="checkbox86"><label for="checkbox86">dokumentacja i live-docs zaktualizowane;</label></li>
+<li><input type="checkbox" id="checkbox87"><label for="checkbox87">księgowy zaakceptował reguły podatkowe dotknięte zmianą.</label></li>
+</ul>
+<hr>
+<h2 id="11-migracja-istniejących-danych">11. Migracja istniejących danych</h2>
+<ol>
+<li>Wykonać read-only preflight i raport liczby dokumentów bez business/client/project.</li>
+<li>Utworzyć backup bazy oraz checksum eksportu.</li>
+<li>Dodać nowe kolumny jako nullable.</li>
+<li>Backfill <code>business_id</code> przez klienta, projekt, fakturę lub zamówienie domeny.</li>
+<li>Rekordy niejednoznaczne przenieść do kolejki manual review, nie przypisywać automatycznie do pierwszej firmy.</li>
+<li>Przekształcić obecny <code>vat_rate</code> faktury w tax code snapshot na każdej pozycji.</li>
+<li>Utworzyć opening balances zamiast generowania sztucznych historycznych journals, jeśli pełna historia nie jest wystarczająca.</li>
+<li>Porównać sumy faktur, płatności i sald przed/po migracji.</li>
+<li>Dopiero po zgodności ustawić constraints i uruchomić nowy posting engine.</li>
+<li>Zachować skrypt rollbacku oraz eksport mapowania stary ID → nowy journal ID.</li>
+</ol>
+<hr>
+<h2 id="12-bezpieczeństwo-i-prywatność">12. Bezpieczeństwo i prywatność</h2>
+<ul>
+<li>szyfrowanie UTR, PAYE refs, HMRC tokens i provider credentials;</li>
+<li>osobne klucze/config dla sandbox i production;</li>
+<li>private object storage z signed URLs o krótkim czasie życia;</li>
+<li>malware scan załączników przed udostępnieniem;</li>
+<li>step-up authentication przed HMRC submission, period lock i zmianą tax settings;</li>
+<li>reautoryzacja po zmianie rachunku bankowego lub danych prawnych;</li>
+<li>immutable audit trail bez możliwości usuwania przez zwykłego admina;</li>
+<li>redaction eksportów supportowych;</li>
+<li>alerty dla failed submission, expired token, unreconciled balance i zmiany w zamkniętym okresie;</li>
+<li>backup szyfrowany i regularnie testowany restore;</li>
+<li>polityka incident response dla HMRC/Open Banking.</li>
+</ul>
+<hr>
+<h2 id="13-deployment-i-obserwowalność">13. Deployment i obserwowalność</h2>
+<ul>
+<li>feature flags: <code>finance_expenses</code>, <code>finance_ledger</code>, <code>finance_vat</code>, <code>hmrc_vat</code>;</li>
+<li>migracje expand/backfill/contract zamiast jednego ryzykownego deployu;</li>
+<li>shadow posting: przez jeden okres tworzyć journals bez wpływu na UI i porównywać wyniki;</li>
+<li>metryki: unbalanced attempts, posting failures, duplicate imports, reconciliation rate, HMRC latency/errors;</li>
+<li>kolejki oddzielne: <code>finance</code>, <code>hmrc</code>, <code>documents</code>;</li>
+<li>dead-letter/retry dashboard bez automatycznego ponawiania submission;</li>
+<li>health check HMRC tylko jako diagnostyka, bez wysyłania deklaracji;</li>
+<li>rollback nie może usuwać posted journals ani HMRC receipts.</li>
+</ul>
+<hr>
+<h2 id="14-estymata-i-rekomendowana-kolejność">14. Estymata i rekomendowana kolejność</h2>
+<table>
+<thead>
+<tr>
+<th>Zakres</th>
+<th style="text-align:right">Estymata solo dev</th>
+<th>Wynik</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Faza 0</td>
+<td style="text-align:right">1 tydzień</td>
+<td>bezpieczny tenant i zatwierdzona domena</td>
+</tr>
+<tr>
+<td>Faza 1</td>
+<td style="text-align:right">1–2 tygodnie</td>
+<td>poprawne dokumenty sprzedażowe UK</td>
+</tr>
+<tr>
+<td>Faza 2</td>
+<td style="text-align:right">1–2 tygodnie</td>
+<td>koszty, dostawcy, dowody</td>
+</tr>
+<tr>
+<td>Faza 3</td>
+<td style="text-align:right">2 tygodnie</td>
+<td>double-entry ledger</td>
+</tr>
+<tr>
+<td>Faza 4</td>
+<td style="text-align:right">1–2 tygodnie</td>
+<td>CSV bank reconciliation</td>
+</tr>
+<tr>
+<td>Faza 5</td>
+<td style="text-align:right">1–2 tygodnie</td>
+<td>raporty + VAT workspace</td>
+</tr>
+<tr>
+<td>Faza 6</td>
+<td style="text-align:right">2–3 tygodnie</td>
+<td>HMRC MTD VAT + pilot</td>
+</tr>
+<tr>
+<td>Bufor 20%</td>
+<td style="text-align:right">2–3 tygodnie</td>
+<td>integracje, poprawki, review</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Core bookkeeping bez HMRC:</strong> około 7–10 tygodni.<br>
+<strong>Core + MTD VAT:</strong> około 10–14 tygodni plus zewnętrzny czas oczekiwania na dostęp/akceptację HMRC.<br>
+<strong>Pełny zakres z CT, Income Tax, payroll i CIS:</strong> osobny program co najmniej 4–6 miesięcy, wymagający dalszej specyfikacji.</p>
+<h3 id="rekomendowany-pierwszy-release">Rekomendowany pierwszy release</h3>
+<p>Fazy 0–2 jako <strong>Finance Records MVP</strong>:</p>
+<ul>
+<li>bezpieczne faktury UK;</li>
+<li>mixed VAT i credit notes;</li>
+<li>suppliers, expenses i attachments;</li>
+<li>raport sprzedaży/kosztów;</li>
+<li>eksport dla księgowego.</li>
+</ul>
+<p>Następnie Fazy 3–5 jako <strong>Accounting Core</strong>, a dopiero potem Faza 6 jako <strong>MTD VAT</strong>.</p>
+<hr>
+<h2 id="15-kryteria-decyzji-przed-implementacją">15. Kryteria decyzji przed implementacją</h2>
+<p>Przed rozpoczęciem Fazy 0 użytkownik powinien zatwierdzić:</p>
+<ol>
+<li>czy pierwszym odbiorcą jest limited company, sole trader, czy oba typy;</li>
+<li>czy system ma zastąpić księgowość, czy przygotowywać dane dla zewnętrznego księgowego;</li>
+<li>czy firma jest VAT registered i z jakiego VAT scheme korzysta;</li>
+<li>czy podstawą ma być accrual czy cash accounting;</li>
+<li>czy walutą funkcjonalną zawsze będzie GBP;</li>
+<li>czy bank reconciliation zaczynamy od CSV, czy od razu od agregatora Open Banking;</li>
+<li>czy HMRC MTD VAT ma wejść do pierwszej wersji produkcyjnej;</li>
+<li>czy payroll i CIS są realną potrzebą, czy wyłącznie przyszłym rozszerzeniem;</li>
+<li>kto pełni rolę księgowego-reviewera i zatwierdza golden datasets.</li>
+</ol>
+<hr>
+<h2 id="16-rekomendacja-końcowa">16. Rekomendacja końcowa</h2>
+<p>Nie należy zaczynać od HMRC API ani od automatycznego wyliczania Corporation Tax. Najpierw system musi posiadać kompletne, cyfrowe i niezmienne źródło danych: sprzedaż, zakupy, płatności, bank, tax codes i zbilansowany ledger. Dopiero na tej podstawie raport VAT oraz submission do HMRC będą sprawdzalne i możliwe do audytu.</p>
+<p>Najbezpieczniejszy kierunek to:</p>
+<pre class="hljs"><code><div>Tenant hardening
+  → UK invoices + expenses
+  → double-entry ledger
+  → bank reconciliation
+  → financial/VAT reports
+  → HMRC MTD VAT
+  → opcjonalnie CT / Income Tax / PAYE / CIS
+</div></code></pre>
+
+</body>
+</html>

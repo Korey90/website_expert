@@ -9,7 +9,9 @@ use App\Models\Contact;
 use App\Models\Expense;
 use App\Models\LedgerAccount;
 use App\Models\Supplier;
+use App\Services\Finance\BankAccountDetailsProtector;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class AuditFinanceTenantDataCommandTest extends TestCase
@@ -101,6 +103,36 @@ class AuditFinanceTenantDataCommandTest extends TestCase
         $foreignParent = LedgerAccount::withoutGlobalScopes()->where('business_id', $otherBusiness->id)->where('code', '5000')->firstOrFail();
 
         $account->update(['parent_id' => $foreignParent->id]);
+
+        $this->artisan('finance:audit-tenants')
+            ->expectsOutputToContain('Finance tenant audit failed: 1 invalid record(s).')
+            ->assertExitCode(1);
+    }
+
+    public function test_cross_tenant_bank_ledger_account_is_reported(): void
+    {
+        $business = Business::create(['name' => 'Bank Audit', 'slug' => 'bank-audit', 'is_active' => true]);
+        $otherBusiness = Business::create(['name' => 'Other Bank Audit', 'slug' => 'other-bank-audit', 'is_active' => true]);
+        app(InitializeAccountingSetupAction::class)->execute($business);
+        app(InitializeAccountingSetupAction::class)->execute($otherBusiness);
+        $foreignCash = LedgerAccount::withoutGlobalScopes()
+            ->where('business_id', $otherBusiness->id)
+            ->where('code', '1100')
+            ->firstOrFail();
+        $protected = app(BankAccountDetailsProtector::class)->protect('12345678', '123456');
+
+        DB::table('bank_accounts')->insert([
+            'business_id' => $business->id,
+            'ledger_account_id' => $foreignCash->id,
+            'name' => 'Invalid bank',
+            'bank_name' => 'Audit Bank',
+            ...$protected,
+            'currency' => 'GBP',
+            'opening_balance' => 0,
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         $this->artisan('finance:audit-tenants')
             ->expectsOutputToContain('Finance tenant audit failed: 1 invalid record(s).')

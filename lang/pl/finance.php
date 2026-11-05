@@ -38,6 +38,23 @@ return [
         ],
         'statuses' => ['draft' => 'Szkic', 'posted' => 'Zaksięgowany', 'reversed' => 'Wystornowany'],
     ],
+    'bank_accounts' => [
+        'navigation' => 'Konta bankowe', 'singular' => 'konto bankowe', 'plural' => 'konta bankowe', 'never_synced' => 'Nigdy nie synchronizowano',
+        'sections' => ['identity' => 'Dane konta bankowego', 'accounting' => 'Ustawienia księgowe'],
+        'fields' => [
+            'name' => 'Nazwa konta', 'bank_name' => 'Nazwa banku', 'account_number' => 'Numer rachunku', 'sort_code' => 'Sort code',
+            'currency' => 'Waluta', 'ledger_account' => 'Konto księgowe banku', 'opening_balance' => 'Saldo otwarcia',
+            'opening_balance_date' => 'Data salda otwarcia', 'status' => 'Status', 'last_synced_at' => 'Ostatnia synchronizacja',
+            'created_by' => 'Utworzył', 'archived_by' => 'Zarchiwizował', 'archived_at' => 'Data archiwizacji',
+        ],
+        'statuses' => ['active' => 'Aktywne', 'archived' => 'Zarchiwizowane'],
+        'hints' => [
+            'account_number' => 'Wprowadź 8-cyfrowy numer rachunku UK. Zapisane zostaną tylko 4 ostatnie cyfry.',
+            'sort_code' => 'Wprowadź 6-cyfrowy sort code. Zapisane zostaną tylko 2 ostatnie cyfry.',
+            'replace_account' => 'Zapisano jako :masked. Pozostaw puste, aby nie zmieniać.',
+            'replace_sort_code' => 'Zapisano jako :masked. Pozostaw puste, aby nie zmieniać.',
+        ],
+    ],
     'ledger_accounts' => [
         'navigation' => 'Plan kont', 'singular' => 'konto księgowe', 'plural' => 'konta księgowe', 'section' => 'Dane konta',
         'fields' => ['code' => 'Kod', 'name' => 'Nazwa', 'name_en' => 'Nazwa (angielski)', 'name_pl' => 'Nazwa (polski)', 'name_pt' => 'Nazwa (portugalski)', 'type' => 'Typ', 'subtype' => 'Podtyp', 'normal_balance' => 'Saldo normalne', 'parent' => 'Konto nadrzędne', 'is_postable' => 'Dozwolone księgowanie', 'is_active' => 'Aktywne', 'is_system' => 'Konto systemowe'],
