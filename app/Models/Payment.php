@@ -15,7 +15,7 @@ class Payment extends Model
     use BelongsToTenant, DefaultsCurrency, HasFactory;
 
     protected $fillable = [
-        'business_id', 'invoice_id', 'created_by', 'amount', 'amount_gbp', 'carrying_amount_gbp',
+        'business_id', 'invoice_id', 'bank_account_id', 'created_by', 'amount', 'amount_gbp', 'carrying_amount_gbp',
         'realised_fx_gbp', 'currency',
         'gbp_exchange_rate', 'exchange_rate_source', 'exchange_rate_date', 'method', 'status',
         'stripe_payment_intent_id', 'reference', 'notes', 'paid_at', 'refunded_at',
@@ -36,7 +36,7 @@ class Payment extends Model
     {
         static::updating(function (Payment $payment): void {
             if ($payment->journalEntries()->exists() && $payment->isDirty([
-                'business_id', 'invoice_id', 'amount', 'amount_gbp', 'carrying_amount_gbp',
+                'business_id', 'invoice_id', 'bank_account_id', 'amount', 'amount_gbp', 'carrying_amount_gbp',
                 'realised_fx_gbp', 'currency',
                 'gbp_exchange_rate', 'exchange_rate_source', 'exchange_rate_date',
                 'method', 'paid_at',
@@ -60,6 +60,11 @@ class Payment extends Model
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(BankAccount::class);
     }
 
     public function createdBy(): BelongsTo

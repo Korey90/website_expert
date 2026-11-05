@@ -14,7 +14,7 @@ class ExpensePayment extends Model
     use BelongsToTenant, HasFactory;
 
     protected $fillable = [
-        'business_id', 'expense_id', 'created_by', 'amount', 'currency', 'amount_gbp',
+        'business_id', 'expense_id', 'bank_account_id', 'created_by', 'amount', 'currency', 'amount_gbp',
         'carrying_amount_gbp', 'realised_fx_gbp',
         'gbp_exchange_rate', 'exchange_rate_source', 'exchange_rate_date', 'method',
         'reference', 'notes', 'paid_at',
@@ -51,6 +51,11 @@ class ExpensePayment extends Model
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(BankAccount::class);
     }
 
     public function expense(): BelongsTo

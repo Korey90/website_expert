@@ -2,6 +2,7 @@
 
 namespace App\Services\Finance;
 
+use App\Models\BankAccount;
 use App\Models\Business;
 use App\Models\ExpensePayment;
 use App\Models\LedgerAccount;
@@ -14,9 +15,9 @@ class PaymentJournalPayloadFactory
     /** @return array<string, mixed> */
     public function forInvoicePayment(Payment $payment, bool $refund = false): array
     {
-        $payment->loadMissing('invoice');
+        $payment->loadMissing(['invoice', 'bankAccount']);
         $business = Business::query()->findOrFail($payment->business_id);
-        $bank = $this->accountId($business, '1100');
+        $bank = $this->bankLedgerAccountId($business, $payment->bankAccount);
         $receivable = $this->accountId($business, '1200');
         $amountGbp = $this->requiredGbpAmount($payment->amount_gbp, 'customer payment');
         $carryingAmountGbp = $this->requiredGbpAmount(
@@ -75,9 +76,9 @@ class PaymentJournalPayloadFactory
     /** @return array<string, mixed> */
     public function forExpensePayment(ExpensePayment $payment): array
     {
-        $payment->loadMissing('expense');
+        $payment->loadMissing(['expense', 'bankAccount']);
         $business = Business::query()->findOrFail($payment->business_id);
-        $bank = $this->accountId($business, '1100');
+        $bank = $this->bankLedgerAccountId($business, $payment->bankAccount);
         $payable = $this->accountId($business, '2100');
         $amountGbp = $this->requiredGbpAmount($payment->amount_gbp, 'supplier payment');
         $carryingAmountGbp = $this->requiredGbpAmount(
@@ -111,6 +112,7 @@ class PaymentJournalPayloadFactory
             'source_snapshot' => [
                 'id' => $payment->id,
                 'expense_id' => $payment->expense_id,
+                ...($payment->bank_account_id ? ['bank_account_id' => $payment->bank_account_id] : []),
                 'reference' => $payment->reference,
                 'amount' => $payment->amount,
                 'currency' => $payment->currency,
@@ -224,6 +226,29 @@ class PaymentJournalPayloadFactory
         return $account->id;
     }
 
+    private function bankLedgerAccountId(Business $business, ?BankAccount $bankAccount): int
+    {
+        if (! $bankAccount) {
+            return $this->accountId($business, '1100');
+        }
+
+        if ($bankAccount->business_id !== $business->id) {
+            throw new DomainException('The payment bank account does not belong to the journal business.');
+        }
+
+        $ledgerAccount = LedgerAccount::withoutGlobalScopes()
+            ->where('business_id', $business->id)
+            ->whereKey($bankAccount->ledger_account_id)
+            ->activePostable()
+            ->first();
+
+        if (! $ledgerAccount || $ledgerAccount->type !== 'asset' || $ledgerAccount->subtype !== 'cash') {
+            throw new DomainException('The payment bank account requires an active cash ledger account.');
+        }
+
+        return (int) $ledgerAccount->id;
+    }
+
     private function requiredGbpAmount(mixed $amount, string $label): string
     {
         if ($amount === null || (float) $amount <= 0) {
@@ -307,6 +332,7 @@ class PaymentJournalPayloadFactory
             'id' => $payment->id,
             'event' => $event,
             'invoice_id' => $payment->invoice_id,
+            ...($payment->bank_account_id ? ['bank_account_id' => $payment->bank_account_id] : []),
             'reference' => $payment->reference,
             'amount' => $payment->amount,
             'currency' => $payment->currency,

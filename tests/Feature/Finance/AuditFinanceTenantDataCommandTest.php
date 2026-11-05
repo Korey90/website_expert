@@ -7,9 +7,11 @@ use App\Models\Business;
 use App\Models\Client;
 use App\Models\Contact;
 use App\Models\Expense;
+use App\Models\Invoice;
 use App\Models\LedgerAccount;
 use App\Models\Payment;
 use App\Models\Supplier;
+use App\Models\User;
 use App\Services\Finance\BankAccountDetailsProtector;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -188,6 +190,70 @@ class AuditFinanceTenantDataCommandTest extends TestCase
 
         $this->artisan('finance:audit-tenants')
             ->expectsOutputToContain('Finance tenant audit failed: 2 invalid record(s).')
+            ->assertExitCode(1);
+    }
+
+    public function test_cross_tenant_payment_bank_account_is_reported(): void
+    {
+        $business = Business::create(['name' => 'Payment Audit', 'slug' => 'payment-audit', 'is_active' => true]);
+        $otherBusiness = Business::create(['name' => 'Other Payment Audit', 'slug' => 'other-payment-audit', 'is_active' => true]);
+        app(InitializeAccountingSetupAction::class)->execute($business);
+        app(InitializeAccountingSetupAction::class)->execute($otherBusiness);
+        $client = Client::create([
+            'business_id' => $business->id,
+            'company_name' => 'Payment Audit Client',
+            'status' => 'active',
+        ]);
+        $creator = User::factory()->create();
+        $invoice = Invoice::withoutGlobalScopes()->create([
+            'business_id' => $business->id,
+            'number' => 'INV-PAYMENT-AUDIT',
+            'client_id' => $client->id,
+            'created_by' => $creator->id,
+            'status' => 'sent',
+            'currency' => 'GBP',
+            'issue_date' => '2026-11-01',
+            'tax_point' => '2026-11-01',
+            'due_date' => '2026-11-30',
+        ]);
+        $foreignCash = LedgerAccount::withoutGlobalScopes()
+            ->where('business_id', $otherBusiness->id)
+            ->where('code', '1100')
+            ->firstOrFail();
+        $protected = app(BankAccountDetailsProtector::class)->protect('22223333', '223344');
+        $foreignBankAccountId = DB::table('bank_accounts')->insertGetId([
+            'business_id' => $otherBusiness->id,
+            'ledger_account_id' => $foreignCash->id,
+            'name' => 'Foreign payment bank',
+            'bank_name' => 'Audit Bank',
+            ...$protected,
+            'currency' => 'GBP',
+            'opening_balance' => 0,
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('payments')->insert([
+            'business_id' => $business->id,
+            'invoice_id' => $invoice->id,
+            'bank_account_id' => $foreignBankAccountId,
+            'amount' => 10,
+            'amount_gbp' => 10,
+            'currency' => 'GBP',
+            'gbp_exchange_rate' => 1,
+            'exchange_rate_source' => 'identity',
+            'exchange_rate_date' => '2026-11-05',
+            'method' => 'bank_transfer',
+            'status' => 'completed',
+            'paid_at' => '2026-11-05 09:00:00',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->artisan('finance:audit-tenants')
+            ->expectsOutputToContain('payments.bank_account_id')
+            ->expectsOutputToContain('Finance tenant audit failed: 1 invalid record(s).')
             ->assertExitCode(1);
     }
 

@@ -1,5 +1,72 @@
 # Current Task
 
+# UKFIN-406 — utworzenie expense/payment z transakcji bankowej
+
+**Zadanie:** UKFIN-406 — Create expense/payment from unmatched transaction
+**Status:** 🟢 Zakończone
+**Start:** 2026-11-05
+**Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
+
+## Cel bieżącego przyrostu
+
+Pozwolić użytkownikowi z `manage_finance` i `post_finance` zamienić nieuzgodniony wpływ w płatność do istniejącej wystawionej faktury albo nieuzgodniony wypływ w kompletny wydatek dostawcy, a następnie atomowo uzgodnić utworzony zapis z właściwą transakcją i kontem bankowym.
+
+## Delta Analysis: UKFIN-406
+
+### Anchor files (reużywam)
+
+- `CreateExpenseAction`, `ApproveExpenseAction`, `PostExpenseAction` — kalkulacja VAT i księgowanie dokumentu zakupu.
+- `RecordInvoicePaymentAction`, `RecordExpensePaymentAction` — saldo dokumentów, snapshot FX i posting płatności.
+- `ReconcileBankTransactionAction` — audytowalny batch oraz ochrona przed over-allocation.
+- `PaymentJournalPayloadFactory` — linie bank/receivable/payable i realised FX.
+- `BankTransactionResource/Pages/ViewBankTransaction` — modal oraz RBAC workflow bankowego.
+
+### Do stworzenia
+
+- [x] Migracja opcjonalnego `bank_account_id` na customer/supplier payments, aby posting trafiał na ledger rachunku źródłowego zamiast zawsze na konto `1100`.
+- [x] Tenantowe relacje i audit dla rachunku płatności.
+- [x] Atomowa Action dla wpływu: wystawiona faktura → `Payment` → posting → reconciliation.
+- [x] Atomowa Action dla wypływu: wydatek z jedną pozycją gross/VAT → approve/post → `ExpensePayment` → reconciliation.
+- [x] Walidacja kierunku, pełnego statusu `unmatched`, waluty, FX, daty, tax code, ledger account, membership oraz `manage_finance` + `post_finance`.
+- [x] Modal Filament z formularzem zależnym od kierunku transakcji.
+- [x] Tłumaczenia PL/EN/PT.
+- [x] Testy flow, księgowania na właściwy ledger, VAT gross-to-net, FX, rollbacku, tenant isolation, RBAC i UI.
+
+### Ryzyka i granice
+
+- Workflow tworzy zapis wyłącznie dla całej, jeszcze niealokowanej transakcji; częściowe transakcje nadal obsługuje ręczny split z UKFIN-405.
+- Wpływ wymaga istniejącej, zaksięgowanej faktury z dostępnym saldem.
+- Wypływ tworzy i od razu księguje wydatek oraz płatność, dlatego wymaga poprawnego tax code i konta kosztowego.
+- Waluta dokumentu musi odpowiadać walucie rachunku albo dokument może być walutowy przy rachunku GBP; snapshot FX nie może być domyślnie zgadywany.
+- Wszystkie operacje muszą zostać wycofane razem, jeśli posting lub reconciliation zawiedzie.
+
+## Walidacja planowana
+
+- [x] Migracja SQLite/MySQL i `finance:audit-tenants`.
+- [x] PHPUnit dla nowej Action oraz widoczności/wykonania akcji Filament.
+- [x] Regresja UKFIN-404–406 i pełna domena Finance.
+- [x] Pint na zmienionych plikach, parity tłumaczeń i `git diff --check`.
+
+## Wynik UKFIN-406
+
+- [x] Wpływ tworzy, księguje i uzgadnia customer payment do istniejącej faktury w jednej transakcji bazodanowej.
+- [x] Wypływ tworzy wydatek z kalkulacją gross-to-net VAT, zatwierdza go, księguje, opłaca i uzgadnia atomowo.
+- [x] Customer i supplier payments zachowują `bank_account_id`, a posting używa dokładnego konta cash ledger przypisanego do rachunku.
+- [x] Obsłużone są przepływy same-currency, GBP ↔ foreign ze snapshotem FX oraz jawny kurs dla rachunku walutowego.
+- [x] Workflow wymaga aktywnego membership oraz obu uprawnień `manage_finance` i `post_finance`; tenant audit obejmuje nowe relacje.
+- [x] Filament pokazuje osobne akcje dla wpływu i wypływu wyłącznie przy w pełni nieuzgodnionej transakcji.
+- [x] Dedykowane testy: 6 passed, 37 assertions; rozszerzony audit: 14 passed, 57 assertions.
+- [x] Finance regression: 196 passed, 1 skipped, 1205 assertions.
+- [x] Full regression: 705 passed, 11 skipped, 9 znanych baseline failures, 2649 assertions.
+
+## Następny krok
+
+- [ ] `UKFIN-407` — cofnięcie reconciliation z pełnym audit trail.
+
+---
+
+# Poprzednie zadanie — UKFIN-405
+
 **Zadanie:** UKFIN-405 — UI i domena uzgodnień exact/partial/split/many-to-many
 **Status:** 🟢 Zakończone
 **Start:** 2026-11-05
@@ -59,7 +126,7 @@ Umożliwić bezpieczne przypisanie jednej lub wielu transakcji bankowych do jedn
 
 ## Następny krok
 
-- [ ] `UKFIN-406` — utworzenie expense/payment z nieuzgodnionej transakcji bankowej.
+- [x] `UKFIN-406` — utworzenie expense/payment z nieuzgodnionej transakcji bankowej (ukończone 2026-11-05).
 
 ---
 

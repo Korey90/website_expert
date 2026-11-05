@@ -13,7 +13,8 @@
 4. Wykonane: reguły i scoring dopasowania referencja/kwota/data/kontrahent (`UKFIN-404`).
 5. Wykonane: demonstracyjny pakiet 18 PDF-ów do przeglądu przez księgowego UK, oparty o firmowe `Legal Settings`.
 6. Wykonane: model i UI uzgodnień exact/partial/split/many-to-many (`UKFIN-405`).
-7. Następnie: tworzenie expense/payment z nieuzgodnionej transakcji (`UKFIN-406`).
+7. Wykonane: tworzenie expense/payment z nieuzgodnionej transakcji (`UKFIN-406`).
+8. Następnie: cofnięcie reconciliation z pełnym audit trail (`UKFIN-407`).
 
 ## Definition of Done
 

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Finance;
 
+use App\Models\BankAccount;
 use App\Models\Business;
 use App\Models\Expense;
 use App\Models\ExpensePayment;
@@ -19,7 +20,7 @@ class RecordExpensePaymentAction
         private readonly RealisedFxCalculator $fxCalculator,
     ) {}
 
-    /** @param array{amount: float|int|string, method: string, reference?: string|null, paid_at?: string|null, notes?: string|null, gbp_exchange_rate?: float|int|string|null, exchange_rate_source?: string|null, exchange_rate_date?: string|null} $data */
+    /** @param array{amount: float|int|string, method: string, bank_account_id?: int|string|null, reference?: string|null, paid_at?: string|null, notes?: string|null, gbp_exchange_rate?: float|int|string|null, exchange_rate_source?: string|null, exchange_rate_date?: string|null} $data */
     public function execute(Expense $expense, User $actor, array $data): ExpensePayment
     {
         return DB::transaction(function () use ($expense, $actor, $data): ExpensePayment {
@@ -28,6 +29,7 @@ class RecordExpensePaymentAction
             $this->assertActorMembership($actor, $locked->business_id);
             $reference = trim((string) ($data['reference'] ?? '')) ?: 'EPAY-'.Str::uuid();
             $amount = round((float) ($data['amount'] ?? 0), 2);
+            $bankAccountId = $this->bankAccountId($locked->business_id, $data['bank_account_id'] ?? null);
 
             $existing = ExpensePayment::withoutGlobalScopes()
                 ->where('business_id', $locked->business_id)
@@ -41,6 +43,7 @@ class RecordExpensePaymentAction
 
                 if ($existing->expense_id !== $locked->id
                     || round((float) $existing->amount, 2) !== $amount
+                    || ($bankAccountId !== null && $existing->bank_account_id !== $bankAccountId)
                     || ($requestedRate !== null && round((float) $existing->gbp_exchange_rate, 8) !== $requestedRate)) {
                     throw new DomainException('The supplier payment reference is already used for different payment data.');
                 }
@@ -84,6 +87,7 @@ class RecordExpensePaymentAction
                 ...$fx,
                 'business_id' => $locked->business_id,
                 'expense_id' => $locked->id,
+                'bank_account_id' => $bankAccountId,
                 'created_by' => $actor->id,
                 'amount' => $amount,
                 'currency' => $currency,
@@ -119,5 +123,22 @@ class RecordExpensePaymentAction
         if (! $actor->businessMemberships()->where('business_id', $businessId)->where('is_active', true)->exists()) {
             throw new DomainException('The actor does not belong to the expense business.');
         }
+    }
+
+    private function bankAccountId(string $businessId, mixed $bankAccountId): ?int
+    {
+        if (blank($bankAccountId)) {
+            return null;
+        }
+
+        $account = BankAccount::withoutGlobalScopes()
+            ->where('business_id', $businessId)
+            ->find($bankAccountId);
+
+        if (! $account) {
+            throw new DomainException('The bank account does not belong to the supplier payment business.');
+        }
+
+        return (int) $account->id;
     }
 }

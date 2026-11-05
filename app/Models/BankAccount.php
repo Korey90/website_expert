@@ -96,6 +96,16 @@ class BankAccount extends Model
         return $this->hasMany(BankTransaction::class);
     }
 
+    public function customerPayments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function supplierPayments(): HasMany
+    {
+        return $this->hasMany(ExpensePayment::class);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_ACTIVE);

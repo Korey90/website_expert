@@ -55,6 +55,8 @@ class AuditFinanceTenantData extends Command
         'journal_lines.supplier_id' => ['table' => 'journal_lines', 'parent' => 'suppliers', 'foreign_key' => 'supplier_id'],
         'journal_lines.project_id' => ['table' => 'journal_lines', 'parent' => 'projects', 'foreign_key' => 'project_id'],
         'bank_transactions.bank_statement_import_id' => ['table' => 'bank_transactions', 'parent' => 'bank_statement_imports', 'foreign_key' => 'bank_statement_import_id'],
+        'payments.bank_account_id' => ['table' => 'payments', 'parent' => 'bank_accounts', 'foreign_key' => 'bank_account_id'],
+        'expense_payments.bank_account_id' => ['table' => 'expense_payments', 'parent' => 'bank_accounts', 'foreign_key' => 'bank_account_id'],
         'bank_reconciliation_allocations.bank_transaction_id' => ['table' => 'bank_reconciliation_allocations', 'parent' => 'bank_transactions', 'foreign_key' => 'bank_transaction_id'],
     ];
 

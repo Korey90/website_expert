@@ -1,18 +1,19 @@
 # WebsiteExpert - Project Status Dashboard
 
 **Last Full Validation:** 2026-11-05
-**Last Targeted Validation:** 2026-11-05 — UKFIN-405: uzgodnienia exact/partial/split/many-to-many
+**Last Targeted Validation:** 2026-11-05 — UKFIN-406: utworzenie expense/payment z transakcji bankowej
 
 ## Health Checks
-- **Code Quality (Pint + ESLint):** ✅ Pint przechodzi dla plików UKFIN-405; pełny skan repozytorium wskazuje wcześniejszy backlog formatowania. ESLint bez nowych błędów, pozostają 3 pre-existing `__ENV` w `docs/python tests/load-test.js`
-- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 494 klucze liściowe w PL/EN/PT
-- **Tests:** PHPUnit pełny pakiet (2026-11-05): 698 passed / 9 failed (baseline, niezwiązane: SocialAuth, 3×homepage meta, Billing PLN/GBP, 3×ProfileTest po przeniesieniu trasy, ServicePageController) / 11 skipped / 2609 assertions
+- **Code Quality (Pint + ESLint):** ✅ Pint przechodzi dla plików UKFIN-406; pełny skan repozytorium wskazuje wcześniejszy backlog formatowania. ESLint bez nowych błędów, pozostają 3 pre-existing `__ENV` w `docs/python tests/load-test.js`
+- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 508 kluczy liściowych w PL/EN/PT
+- **Tests:** PHPUnit pełny pakiet (2026-11-05): 705 passed / 9 failed (baseline, niezwiązane: SocialAuth, 3×homepage meta, Billing PLN/GBP, 3×ProfileTest po przeniesieniu trasy, ServicePageController) / 11 skipped / 2649 assertions
 - **Multi-Tenancy Compliance:** 100% ✅ (wyjątek celowy: `search_ranking_checks.business_id` nullable — narzędzie publiczne/anonimowe, przygotowane pod przyszłe powiązanie z klientem)
 - **Security Review:** ✅ OK — throttle + reCAPTCHA v3 na endpointach publicznych, `ip_hash` zamiast surowego IP, brak sekretów w logach
 - **Build (Vite):** ✅ Brak błędów TS/JS
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-11-05 — **UKFIN-406:** atomowe utworzenie customer payment do istniejącej faktury albo kompletnego posted/paid expense z nieuzgodnionej transakcji bankowej; płatności zachowują rachunek i księgują przepływ na jego cash ledger, a workflow obsługuje VAT gross-to-net, FX, tenant/RBAC, pełny rollback i automatyczne reconciliation. Finance regression: 196 passed / 1 skipped / 1205 assertions; full regression: 705 passed / 9 baseline failures / 11 skipped / 2649 assertions ✅
 - 2026-11-05 — **UKFIN-405:** tenantowe reconciliation batches i polymorphic allocations dla exact/partial/split/many-to-many; blokady DB i ponowne liczenie reszt zabezpieczają transakcję oraz payment/refund przed over-allocation, obsługiwany jest snapshot GBP dla źródeł walutowych. Nowy Filament `/admin/bank-transactions` ma listę, filtry, szczegóły i modal wielu alokacji; audit command sprawdza nowe relacje. Finance regression: 188 passed / 1 skipped / 1162 assertions; full regression: 698 passed / 9 baseline failures / 11 skipped / 2609 assertions ✅
 - 2026-11-05 — **Pakiet demonstracyjnych PDF dla księgowego UK:** 18 anglojęzycznych PDF-ów, checklista, dataset, manifest SHA-256 i ZIP w `docs/demo/uk-accountant-pack/`. Dane wystawcy są pobierane z rzeczywistych `Legal Settings` (`Website Expert NI`), transakcje pozostają fikcyjne, a raporty docelowe są jawnie oznaczone jako preview. Finance regression: 180 passed / 1 skipped / 1116 assertions; full regression: 689 passed / 9 baseline failures / 11 skipped / 2556 assertions ✅
 - 2026-11-05 — **UKFIN-404:** tenantowy scoring 0–100 kandydatów bank reconciliation dla wpłat klientów, zwrotów klientom, płatności i zwrotów dostawców; punkty za kwotę/datę/referencję/kontrahenta, kierunek przepływu, snapshot GBP, confidence exact/high/medium/low, deterministyczne sortowanie i próg partial 40. Finance regression: 179 passed / 1 skipped / 984 assertions; full regression: 688 passed / 9 baseline failures / 11 skipped / 2428 assertions ✅
