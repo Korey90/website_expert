@@ -432,7 +432,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 
 **Cel:** system daje sprawdzalne raporty i robocze 9 pól VAT Return.
 
-- [ ] `UKFIN-501` [M] Trial Balance per period i comparison.
+- [x] `UKFIN-501` [M] Trial Balance per period i comparison — tenantowy raport GBP z saldem otwarcia, obrotami, saldem końcowym, comparison/variance, kontrolą bilansowania i CSV (ukończone 2026-11-07).
 - [ ] `UKFIN-502` [M] Profit & Loss.
 - [ ] `UKFIN-503` [M] Balance Sheet.
 - [ ] `UKFIN-504` [M] Cash Flow w wersji zarządczej.

@@ -41,6 +41,22 @@ return [
         'columns' => ['date' => 'Date', 'journal' => 'Journal', 'description' => 'Description', 'dimensions' => 'Dimensions', 'debit_gbp' => 'Debit GBP', 'credit_gbp' => 'Credit GBP', 'balance' => 'Balance', 'lines' => 'Lines', 'difference_gbp' => 'Difference GBP'],
         'sides' => ['debit' => 'Debit', 'credit' => 'Credit'], 'sides_short' => ['debit' => 'Dr', 'credit' => 'Cr'],
     ],
+    'trial_balance' => [
+        'navigation' => 'Trial balance', 'title' => 'Trial balance', 'export_csv' => 'Export CSV',
+        'select_period' => 'Select a period', 'no_comparison' => 'No comparison', 'no_periods' => 'No accounting periods exist for this business.',
+        'compared_with' => 'Compared with: :period, balance at :date', 'balanced' => 'Balanced', 'unbalanced' => 'Out of balance',
+        'inactive_account' => 'inactive account', 'empty' => 'No posted balances or activity exist for the selected range.', 'total' => 'TOTAL',
+        'debit_short' => 'Dr', 'credit_short' => 'Cr',
+        'fields' => ['period' => 'Accounting period', 'comparison_period' => 'Comparison period'],
+        'groups' => ['opening' => 'Opening balance', 'period' => 'Period activity', 'closing' => 'Closing balance', 'comparison' => 'Comparison balance', 'variance' => 'Variance'],
+        'summary' => ['closing_debit_gbp' => 'Closing debit', 'closing_credit_gbp' => 'Closing credit', 'closing_difference_gbp' => 'Control difference', 'accounts_journals' => 'Accounts / journals'],
+        'columns' => [
+            'code' => 'Code', 'account' => 'Account', 'type' => 'Type', 'opening_debit' => 'Opening debit GBP', 'opening_credit' => 'Opening credit GBP',
+            'period_debit' => 'Period debit GBP', 'period_credit' => 'Period credit GBP', 'closing_debit' => 'Closing debit GBP', 'closing_credit' => 'Closing credit GBP',
+            'comparison_debit' => 'Comparison debit GBP', 'comparison_credit' => 'Comparison credit GBP', 'variance_debit' => 'Variance debit GBP', 'variance_credit' => 'Variance credit GBP',
+        ],
+        'csv' => ['report' => 'TRIAL BALANCE', 'period' => 'PERIOD', 'comparison' => 'COMPARISON'],
+    ],
     'journals' => [
         'navigation' => 'Journals', 'singular' => 'journal entry', 'plural' => 'journal entries',
         'sections' => ['summary' => 'Journal summary', 'audit' => 'Source and audit data', 'lines' => 'Journal lines'],

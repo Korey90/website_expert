@@ -5,6 +5,7 @@ use App\Http\Controllers\EmailTemplatePreviewController;
 use App\Http\Controllers\Finance\BankReconciliationReportExportController;
 use App\Http\Controllers\Finance\ExpenseReportExportController;
 use App\Http\Controllers\Finance\FinancialAttachmentController;
+use App\Http\Controllers\Finance\TrialBalanceReportExportController;
 use App\Http\Controllers\ReportController;
 use App\Models\LeadNote;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/finance/bank-reconciliation-report.csv', BankReconciliationReportExportController::class)
         ->name('admin.finance.bank-reconciliation-report.csv');
+
+    Route::get('/admin/finance/trial-balance.csv', TrialBalanceReportExportController::class)
+        ->name('admin.finance.trial-balance.csv');
 
     // Reports — admin only
     Route::prefix('reports')->name('reports.')->group(function () {

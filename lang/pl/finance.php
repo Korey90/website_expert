@@ -41,6 +41,22 @@ return [
         'columns' => ['date' => 'Data', 'journal' => 'Dziennik', 'description' => 'Opis', 'dimensions' => 'Wymiary', 'debit_gbp' => 'Winien GBP', 'credit_gbp' => 'Ma GBP', 'balance' => 'Saldo', 'lines' => 'Pozycje', 'difference_gbp' => 'Różnica GBP'],
         'sides' => ['debit' => 'Winien', 'credit' => 'Ma'], 'sides_short' => ['debit' => 'Wn', 'credit' => 'Ma'],
     ],
+    'trial_balance' => [
+        'navigation' => 'Bilans próbny', 'title' => 'Trial Balance / bilans próbny', 'export_csv' => 'Eksportuj CSV',
+        'select_period' => 'Wybierz okres', 'no_comparison' => 'Bez porównania', 'no_periods' => 'Brak okresów księgowych dla tej firmy.',
+        'compared_with' => 'Porównanie: :period, saldo na :date', 'balanced' => 'Bilans zgodny', 'unbalanced' => 'Bilans niezgodny',
+        'inactive_account' => 'konto nieaktywne', 'empty' => 'Brak zaksięgowanych sald lub obrotów dla wybranego zakresu.', 'total' => 'SUMA',
+        'debit_short' => 'Wn', 'credit_short' => 'Ma',
+        'fields' => ['period' => 'Okres księgowy', 'comparison_period' => 'Okres porównawczy'],
+        'groups' => ['opening' => 'Saldo otwarcia', 'period' => 'Obroty okresu', 'closing' => 'Saldo końcowe', 'comparison' => 'Saldo porównawcze', 'variance' => 'Zmiana'],
+        'summary' => ['closing_debit_gbp' => 'Saldo końcowe Winien', 'closing_credit_gbp' => 'Saldo końcowe Ma', 'closing_difference_gbp' => 'Różnica kontrolna', 'accounts_journals' => 'Konta / dzienniki'],
+        'columns' => [
+            'code' => 'Kod', 'account' => 'Konto', 'type' => 'Typ', 'opening_debit' => 'Otwarcie Wn GBP', 'opening_credit' => 'Otwarcie Ma GBP',
+            'period_debit' => 'Obroty Wn GBP', 'period_credit' => 'Obroty Ma GBP', 'closing_debit' => 'Zamknięcie Wn GBP', 'closing_credit' => 'Zamknięcie Ma GBP',
+            'comparison_debit' => 'Porównanie Wn GBP', 'comparison_credit' => 'Porównanie Ma GBP', 'variance_debit' => 'Zmiana Wn GBP', 'variance_credit' => 'Zmiana Ma GBP',
+        ],
+        'csv' => ['report' => 'TRIAL BALANCE', 'period' => 'OKRES', 'comparison' => 'PORÓWNANIE'],
+    ],
     'journals' => [
         'navigation' => 'Dzienniki', 'singular' => 'zapis dziennika', 'plural' => 'zapisy dziennika',
         'sections' => ['summary' => 'Podsumowanie zapisu', 'audit' => 'Źródło i dane audytowe', 'lines' => 'Pozycje zapisu'],

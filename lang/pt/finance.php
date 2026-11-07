@@ -41,6 +41,22 @@ return [
         'columns' => ['date' => 'Data', 'journal' => 'Diário', 'description' => 'Descrição', 'dimensions' => 'Dimensões', 'debit_gbp' => 'Débito GBP', 'credit_gbp' => 'Crédito GBP', 'balance' => 'Saldo', 'lines' => 'Linhas', 'difference_gbp' => 'Diferença GBP'],
         'sides' => ['debit' => 'Débito', 'credit' => 'Crédito'], 'sides_short' => ['debit' => 'D', 'credit' => 'C'],
     ],
+    'trial_balance' => [
+        'navigation' => 'Balancete', 'title' => 'Balancete', 'export_csv' => 'Exportar CSV',
+        'select_period' => 'Selecionar período', 'no_comparison' => 'Sem comparação', 'no_periods' => 'Não existem períodos contabilísticos para esta empresa.',
+        'compared_with' => 'Comparado com: :period, saldo em :date', 'balanced' => 'Equilibrado', 'unbalanced' => 'Desequilibrado',
+        'inactive_account' => 'conta inativa', 'empty' => 'Não existem saldos ou movimentos contabilizados no intervalo selecionado.', 'total' => 'TOTAL',
+        'debit_short' => 'D', 'credit_short' => 'C',
+        'fields' => ['period' => 'Período contabilístico', 'comparison_period' => 'Período de comparação'],
+        'groups' => ['opening' => 'Saldo de abertura', 'period' => 'Movimentos do período', 'closing' => 'Saldo final', 'comparison' => 'Saldo comparativo', 'variance' => 'Variação'],
+        'summary' => ['closing_debit_gbp' => 'Débito final', 'closing_credit_gbp' => 'Crédito final', 'closing_difference_gbp' => 'Diferença de controlo', 'accounts_journals' => 'Contas / diários'],
+        'columns' => [
+            'code' => 'Código', 'account' => 'Conta', 'type' => 'Tipo', 'opening_debit' => 'Abertura débito GBP', 'opening_credit' => 'Abertura crédito GBP',
+            'period_debit' => 'Período débito GBP', 'period_credit' => 'Período crédito GBP', 'closing_debit' => 'Final débito GBP', 'closing_credit' => 'Final crédito GBP',
+            'comparison_debit' => 'Comparação débito GBP', 'comparison_credit' => 'Comparação crédito GBP', 'variance_debit' => 'Variação débito GBP', 'variance_credit' => 'Variação crédito GBP',
+        ],
+        'csv' => ['report' => 'BALANCETE', 'period' => 'PERÍODO', 'comparison' => 'COMPARAÇÃO'],
+    ],
     'journals' => [
         'navigation' => 'Diários', 'singular' => 'lançamento contabilístico', 'plural' => 'lançamentos contabilísticos',
         'sections' => ['summary' => 'Resumo do lançamento', 'audit' => 'Origem e dados de auditoria', 'lines' => 'Linhas do lançamento'],

@@ -1,42 +1,42 @@
 # Current Sprint
 
-**Nazwa:** UK Finance & Tax — bank reconciliation
-**Data rozpoczęcia:** 2026-11-04
-**Status:** 🟢 COMPLETE
+**Nazwa:** UK Finance & Tax — raporty finansowe
+**Data rozpoczęcia:** 2026-11-07
+**Status:** 🟡 IN PROGRESS
 **Źródło:** `docs/plans/uk-finance-tax-module-plan.md`
 
-## Zakres sprintu
+**Cel:** użytkownik z `view_finance` może uzyskać sprawdzalne podstawowe sprawozdania finansowe w GBP z ledgeru dla wybranego okresu.
 
-1. Wykonane: tenantowe rachunki bankowe i bezpieczne maskowanie danych.
-2. Wykonane: importer CSV z mapowaniem kolumn, limitami i dry-run.
-3. Wykonane: `BankTransaction`, audyt partii oraz deduplikacja provider ID/SHA-256.
-4. Wykonane: reguły i scoring dopasowania referencja/kwota/data/kontrahent (`UKFIN-404`).
-5. Wykonane: demonstracyjny pakiet 18 PDF-ów do przeglądu przez księgowego UK, oparty o firmowe `Legal Settings`.
-6. Wykonane: model i UI uzgodnień exact/partial/split/many-to-many (`UKFIN-405`).
-7. Wykonane: tworzenie expense/payment z nieuzgodnionej transakcji (`UKFIN-406`).
-8. Wykonane: cofnięcie reconciliation z pełnym audit trail (`UKFIN-407`).
-9. Wykonane: raport salda i uzgodnienia bankowego z CSV (`UKFIN-408`).
-10. Wykonane: testy zamykające fazę bank reconciliation — duplicates, split, FX, reversal i tenant isolation (`UKFIN-409`).
+## Backlog
 
-Następny sprint rozpoczyna fazę 5 od `UKFIN-501` — Trial Balance per period i comparison.
+### In Progress
+
+- Brak — następne zadanie: `UKFIN-502`.
+
+### To Do
+
+- [ ] `UKFIN-502` [M] — Profit & Loss.
+- [ ] `UKFIN-503` [M] — Balance Sheet.
+- [ ] `UKFIN-504` [M] — Cash Flow w wersji zarządczej.
+
+### Done
+
+- [x] `UKFIN-501` [M] — Trial Balance per period i comparison.
+- [x] Faza 4 / `UKFIN-401–409` — bank reconciliation zamknięte testami przekrojowymi.
 
 ## Definition of Done
 
-- Wszystkie rekordy finansowe mają jednoznacznego tenanta lub są raportowane przez deploy gate.
-- Zapytania użytkownika nie zwracają danych innej firmy.
-- UTR/PAYE nie są przechowywane jawnie.
-- Profil księgowy jest edytowalny tylko przez aktywnego owner/admin, bez ujawniania zapisanych sekretów w UI.
-- Faktura walutowa przechowuje niezmienny kurs, źródło, datę oraz VAT w GBP; brak kursu nie jest zastępowany wartością domyślną.
-- Numery invoice/quote są przydzielane transakcyjnie i blokowane na poziomie sekwencji tenanta.
-- Credit notes nie mogą przekroczyć ilości z faktury, a zaalokowane korekty trwale obniżają saldo.
-- Domyślne tax codes są idempotentne, wersjonowane datą i tłumaczone PL/EN/PT.
-- Dry-run importu bankowego nie zmienia stanu domeny, a import właściwy nie przechowuje raw CSV.
-- Duplikaty transakcji są odrzucane po provider ID lub stabilnym hashu również przy równoległym imporcie.
+- Raporty czytają wyłącznie niezmienny tenantowy ledger i nie przeliczają ponownie snapshotów źródłowych.
+- Wszystkie sumy księgowe są liczone bez dryfu pensów i mają jawne sumy kontrolne Winien/Ma.
+- Okresy i porównania są walidowane względem aktywnego `business_id`.
+- Historycznie nieaktywne konta z saldem pozostają widoczne.
+- UI i eksporty wymagają `view_finance` oraz mają komplet tłumaczeń PL/EN/PT.
 - Testy domenowe i pełna regresja nie dodają nowych błędów względem baseline.
-- Dokumentacja wdrożenia zawiera kolejność migrate → audit → smoke tests.
+- Dokumentacja opisuje semantykę każdego raportu i jego ograniczenia.
 
 ## Poza zakresem tego sprintu
 
 - Produkcyjna integracja HMRC MTD VAT.
 - Payroll/PAYE, Corporation Tax, Self Assessment i CIS.
 - Automatyczne składanie jakichkolwiek deklaracji.
+- Raporty UKFIN-505–511 i accountant review pack.
