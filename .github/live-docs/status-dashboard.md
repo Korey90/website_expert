@@ -1,18 +1,19 @@
-# WebsiteExpert - Project Status Dashboard
+# Website Expert NI — Project Status Dashboard
 
 **Last Full Validation:** 2026-11-07
-**Last Targeted Validation:** 2026-11-07 — UKFIN-408: raport salda i uzgodnienia bankowego
+**Last Targeted Validation:** 2026-11-07 — UKFIN-409: testy zamykające bank reconciliation
 
 ## Health Checks
-- **Code Quality (Pint + ESLint):** ✅ Pint przechodzi dla plików UKFIN-408; pełny skan repozytorium wskazuje wcześniejszy backlog formatowania. ESLint bez nowych błędów, pozostają 3 pre-existing `__ENV` w `docs/python tests/load-test.js`
+- **Code Quality (Pint + ESLint):** ✅ Pint przechodzi dla plików UKFIN-409; pełny skan repozytorium wskazuje wcześniejszy backlog formatowania. ESLint bez nowych błędów, pozostają 3 pre-existing `__ENV` w `docs/python tests/load-test.js`
 - **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 555 kluczy liściowych w PL/EN/PT
-- **Tests:** PHPUnit pełny pakiet (2026-11-07): 718 passed / 9 failed (baseline, niezwiązane: SocialAuth, 3×homepage meta, Billing PLN/GBP, 3×ProfileTest po przeniesieniu trasy, ServicePageController) / 11 skipped / 2729 assertions
+- **Tests:** PHPUnit pełny pakiet (2026-11-07): 720 passed / 9 failed (baseline, niezwiązane: SocialAuth, 3×homepage meta, Billing PLN/GBP, 3×ProfileTest po przeniesieniu trasy, ServicePageController) / 11 skipped / 2757 assertions
 - **Multi-Tenancy Compliance:** 100% ✅ (wyjątek celowy: `search_ranking_checks.business_id` nullable — narzędzie publiczne/anonimowe, przygotowane pod przyszłe powiązanie z klientem)
 - **Security Review:** ✅ OK — throttle + reCAPTCHA v3 na endpointach publicznych, `ip_hash` zamiast surowego IP, brak sekretów w logach
 - **Build (Vite):** ✅ Brak błędów TS/JS
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-11-07 — **UKFIN-409 / zamknięcie fazy 4:** przekrojowe testy potwierdzają deduplikację provider ID/SHA-256 per rachunek i tenant, ponowne uzgodnienie cofniętego splitu z zachowaniem historii oraz częściowy FX `83.33 GBP ↔ 100.00 EUR` bez dryfu pensa po reversal/reallocation. Raport i capacity korzystają wyłącznie z aktywnych batchy. Nie był potrzebny patch produkcyjny. Bank suite: 48 passed / 326 assertions; tenant audit: zero nieprawidłowości; Finance regression: 211 passed / 1 skipped / 1313 assertions; full regression: 720 passed / 9 baseline failures / 11 skipped / 2757 assertions ✅
 - 2026-11-07 — **UKFIN-408:** tenantowy raport salda i uzgodnienia bankowego w Filament z filtrem okresu/rachunku i CSV; saldo otwarcia, wpływy, wypływy i saldo końcowe są liczone w natywnej walucie rachunku, a pokrycie i status transakcji wynikają wyłącznie z aktywnych alokacji, więc cofnięte batche nie zaniżają kwoty otwartej. Form Request, `view_finance`, PL/EN/PT oraz testy obejmują partial/reversal, wiele walut, tenant i RBAC. Finance regression: 209 passed / 1 skipped / 1285 assertions; full regression: 718 passed / 9 baseline failures / 11 skipped / 2729 assertions ✅
 - 2026-11-07 — **UKFIN-407:** audytowalne cofanie aktywnego reconciliation batch bez usuwania alokacji; status `reversed`, autor, czas i wymagany powód są niezmienne, transakcja i dostępność źródeł przeliczają się wyłącznie z aktywnych batchy, a blokady, idempotencja i kontrola sum gwarantują atomowy rollback. Filament pokazuje historię oraz akcję wyboru batcha, audit command kontroluje metadane reversal. Finance regression: 204 passed / 1 skipped / 1251 assertions; full regression: 713 passed / 9 baseline failures / 11 skipped / 2695 assertions ✅
 - 2026-11-05 — **UKFIN-406:** atomowe utworzenie customer payment do istniejącej faktury albo kompletnego posted/paid expense z nieuzgodnionej transakcji bankowej; płatności zachowują rachunek i księgują przepływ na jego cash ledger, a workflow obsługuje VAT gross-to-net, FX, tenant/RBAC, pełny rollback i automatyczne reconciliation. Finance regression: 196 passed / 1 skipped / 1205 assertions; full regression: 705 passed / 9 baseline failures / 11 skipped / 2649 assertions ✅

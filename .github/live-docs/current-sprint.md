@@ -2,7 +2,7 @@
 
 **Nazwa:** UK Finance & Tax — bank reconciliation
 **Data rozpoczęcia:** 2026-11-04
-**Status:** 🟡 IN PROGRESS
+**Status:** 🟢 COMPLETE
 **Źródło:** `docs/plans/uk-finance-tax-module-plan.md`
 
 ## Zakres sprintu
@@ -16,7 +16,9 @@
 7. Wykonane: tworzenie expense/payment z nieuzgodnionej transakcji (`UKFIN-406`).
 8. Wykonane: cofnięcie reconciliation z pełnym audit trail (`UKFIN-407`).
 9. Wykonane: raport salda i uzgodnienia bankowego z CSV (`UKFIN-408`).
-10. Następnie: testy zamykające fazę bank reconciliation (`UKFIN-409`).
+10. Wykonane: testy zamykające fazę bank reconciliation — duplicates, split, FX, reversal i tenant isolation (`UKFIN-409`).
+
+Następny sprint rozpoczyna fazę 5 od `UKFIN-501` — Trial Balance per period i comparison.
 
 ## Definition of Done
 

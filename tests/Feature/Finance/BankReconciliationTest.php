@@ -6,6 +6,7 @@ use App\Actions\Finance\CreateBankAccountAction;
 use App\Actions\Finance\FindBankTransactionMatchesAction;
 use App\Actions\Finance\InitializeAccountingSetupAction;
 use App\Actions\Finance\ReconcileBankTransactionAction;
+use App\Actions\Finance\UndoBankReconciliationAction;
 use App\Filament\Resources\BankTransactionResource;
 use App\Models\BankAccount;
 use App\Models\BankReconciliation;
@@ -18,6 +19,7 @@ use App\Models\Invoice;
 use App\Models\LedgerAccount;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\Finance\BankReconciliationReportService;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
@@ -182,6 +184,56 @@ class BankReconciliationTest extends TestCase
         $this->assertSame('GBP', $allocation->currency);
         $this->assertSame('50.00', $allocation->source_amount);
         $this->assertSame('EUR', $allocation->source_currency);
+    }
+
+    public function test_fx_partial_reversal_and_reallocation_conserve_bank_and_source_pennies(): void
+    {
+        $payment = $this->payment(100, 'FX-ROUNDING', 'FX Rounding Client', [
+            'currency' => 'EUR',
+            'amount_gbp' => 83.33,
+            'gbp_exchange_rate' => 0.8333,
+            'exchange_rate_source' => 'test_snapshot',
+        ]);
+        $transaction = $this->transaction(83.33, 'FX-ROUNDING', 'FX Rounding Client');
+        $key = "payment:{$payment->id}:receipt";
+        $first = $this->reconcile($transaction, [['candidate_key' => $key, 'amount' => 41.66]]);
+        $second = $this->reconcile($transaction, [['candidate_key' => $key, 'amount' => 41.67]]);
+
+        $this->assertSame('49.99', $first->allocations->sole()->source_amount);
+        $this->assertSame('50.01', $second->allocations->sole()->source_amount);
+        $this->assertSame(BankTransaction::STATUS_RECONCILED, $transaction->refresh()->reconciliation_status);
+
+        app(UndoBankReconciliationAction::class)->execute(
+            $first,
+            $this->user,
+            'Reallocate the first FX portion without changing its snapshot.',
+        );
+        $candidate = collect(app(FindBankTransactionMatchesAction::class)
+            ->execute($transaction->refresh(), $this->user))
+            ->firstWhere('candidateKey', $key);
+
+        $this->assertNotNull($candidate);
+        $this->assertSame('41.66', $candidate->comparableAmount);
+        $this->assertSame('49.99', $candidate->originalAmount);
+        $third = $this->reconcile($transaction, [['candidate_key' => $key, 'amount' => 41.66]]);
+        $activeAllocations = BankReconciliationAllocation::withoutGlobalScopes()
+            ->where('bank_transaction_id', $transaction->id)
+            ->whereHas('reconciliation', fn ($query) => $query
+                ->withoutGlobalScopes()
+                ->where('status', BankReconciliation::STATUS_ACTIVE));
+
+        $this->assertSame('49.99', $third->allocations->sole()->source_amount);
+        $this->assertSame('83.33', number_format((float) (clone $activeAllocations)->sum('amount'), 2, '.', ''));
+        $this->assertSame('100.00', number_format((float) (clone $activeAllocations)->sum('source_amount'), 2, '.', ''));
+        $this->assertSame(3, $transaction->reconciliationAllocations()->count());
+        $this->assertSame(BankTransaction::STATUS_RECONCILED, $transaction->refresh()->reconciliation_status);
+
+        $reportRow = app(BankReconciliationReportService::class)
+            ->report($this->business->id, '2026-11-01', '2026-11-30', $this->account->id)['transactions']
+            ->sole();
+        $this->assertSame(83.33, $reportRow->allocated_amount);
+        $this->assertSame(0.0, $reportRow->remaining_amount);
+        $this->assertSame(BankTransaction::STATUS_RECONCILED, $reportRow->status);
     }
 
     public function test_outflow_reconciliation_uses_positive_allocation_for_customer_refund(): void

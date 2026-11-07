@@ -179,6 +179,83 @@ class BankStatementCsvImportTest extends TestCase
         $this->assertDatabaseCount('bank_statement_imports', 3);
     }
 
+    public function test_duplicate_identity_is_scoped_to_bank_account_and_tenant(): void
+    {
+        $cashAccount = LedgerAccount::withoutGlobalScopes()
+            ->where('business_id', $this->business->id)
+            ->where('code', '1100')
+            ->firstOrFail();
+        $reserveAccount = app(CreateBankAccountAction::class)->execute($this->business, $this->user, [
+            'name' => 'Reserve account',
+            'bank_name' => 'Example Bank',
+            'account_number' => '87654321',
+            'sort_code' => '65-43-21',
+            'currency' => 'GBP',
+            'ledger_account_id' => $cashAccount->id,
+            'opening_balance' => 0,
+            'status' => BankAccount::STATUS_ACTIVE,
+        ]);
+        $otherBusiness = Business::create([
+            'name' => 'Other Import Ltd',
+            'slug' => 'other-import-ltd',
+            'is_active' => true,
+        ]);
+        $otherUser = User::factory()->create(['is_active' => true]);
+        BusinessUser::create([
+            'business_id' => $otherBusiness->id,
+            'user_id' => $otherUser->id,
+            'role' => 'owner',
+            'is_active' => true,
+            'joined_at' => now(),
+        ]);
+        $otherUser->givePermissionTo('manage_finance');
+        app(InitializeAccountingSetupAction::class)->execute($otherBusiness, $otherUser);
+        $otherCash = LedgerAccount::withoutGlobalScopes()
+            ->where('business_id', $otherBusiness->id)
+            ->where('code', '1100')
+            ->firstOrFail();
+        $otherAccount = app(CreateBankAccountAction::class)->execute($otherBusiness, $otherUser, [
+            'name' => 'Other tenant account',
+            'bank_name' => 'Example Bank',
+            'account_number' => '22223333',
+            'sort_code' => '22-33-44',
+            'currency' => 'GBP',
+            'ledger_account_id' => $otherCash->id,
+            'opening_balance' => 0,
+            'status' => BankAccount::STATUS_ACTIVE,
+        ]);
+        $path = $this->putCsv(
+            'scoped-duplicate.csv',
+            "date,amount,transaction id,description\n05/11/2026,10.00,SCOPE-1,Scoped transfer\n",
+        );
+        $options = ['decimal_separator' => 'dot'];
+
+        $first = $this->import($path, false, $options);
+        $secondAccount = $this->import($path, false, $options, $reserveAccount);
+        $secondTenant = $this->import($path, false, $options, $otherAccount, $otherUser);
+        $duplicate = $this->import($path, false, $options);
+
+        $this->assertSame(1, $first->importedRows);
+        $this->assertSame(1, $secondAccount->importedRows);
+        $this->assertSame(1, $secondTenant->importedRows);
+        $this->assertSame(0, $duplicate->importedRows);
+        $this->assertSame(1, $duplicate->duplicateRows);
+        $transactions = BankTransaction::withoutGlobalScopes()
+            ->where('provider_id', 'SCOPE-1')
+            ->orderBy('id')
+            ->get();
+        $this->assertCount(3, $transactions);
+        $this->assertCount(1, $transactions->pluck('source_hash')->unique());
+        $this->assertEqualsCanonicalizing(
+            [$this->account->id, $reserveAccount->id, $otherAccount->id],
+            $transactions->pluck('bank_account_id')->all(),
+        );
+        $this->assertEqualsCanonicalizing(
+            [$this->business->id, $otherBusiness->id],
+            $transactions->pluck('business_id')->unique()->values()->all(),
+        );
+    }
+
     public function test_import_enforces_limits_account_state_permission_and_tenant_membership(): void
     {
         config()->set('finance.bank_statement_import.max_rows', 1);
@@ -227,9 +304,14 @@ class BankStatementCsvImportTest extends TestCase
     }
 
     /** @param array<string, mixed> $overrides */
-    private function import(string $path, bool $dryRun, array $overrides = []): BankStatementImportResult
-    {
-        return app(ImportBankStatementCsvAction::class)->execute($this->account, $this->user, $path, [], [
+    private function import(
+        string $path,
+        bool $dryRun,
+        array $overrides = [],
+        ?BankAccount $account = null,
+        ?User $user = null,
+    ): BankStatementImportResult {
+        return app(ImportBankStatementCsvAction::class)->execute($account ?? $this->account, $user ?? $this->user, $path, [], [
             'delimiter' => 'auto',
             'date_format' => 'auto',
             'decimal_separator' => 'comma',

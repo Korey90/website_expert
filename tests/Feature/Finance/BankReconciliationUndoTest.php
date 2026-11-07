@@ -145,6 +145,21 @@ class BankReconciliationUndoTest extends TestCase
             ->all();
         $this->assertContains("payment:{$firstPayment->id}:receipt", $candidateKeys);
         $this->assertContains("payment:{$secondPayment->id}:receipt", $candidateKeys);
+
+        $replacement = $this->reconcile($transaction->fresh(), [
+            ['candidate_key' => "payment:{$firstPayment->id}:receipt", 'amount' => 60],
+            ['candidate_key' => "payment:{$secondPayment->id}:receipt", 'amount' => 40],
+        ]);
+
+        $this->assertSame(BankTransaction::STATUS_RECONCILED, $transaction->refresh()->reconciliation_status);
+        $this->assertCount(2, $replacement->allocations);
+        $this->assertSame(4, $transaction->reconciliationAllocations()->count());
+        $this->assertSame(1, $transaction->reconciliations()
+            ->where('status', BankReconciliation::STATUS_REVERSED)
+            ->count());
+        $this->assertSame('100.00', number_format((float) $transaction->reconciliationAllocations()
+            ->whereHas('reconciliation', fn ($query) => $query->where('status', BankReconciliation::STATUS_ACTIVE))
+            ->sum('amount'), 2, '.', ''));
     }
 
     public function test_undo_is_idempotent_for_same_reason_and_history_is_immutable(): void

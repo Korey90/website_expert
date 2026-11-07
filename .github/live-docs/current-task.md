@@ -1,5 +1,64 @@
 # Current Task
 
+# UKFIN-409 — testy zamykające fazę bank reconciliation
+
+**Zadanie:** UKFIN-409 — duplicates, split, FX, reversal i tenant isolation
+**Status:** 🟢 Zakończone
+**Start:** 2026-11-07
+**Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
+
+## Cel bieżącego przyrostu
+
+Zamknąć fazę 4 przekrojowym kontraktem regresyjnym, który potwierdza, że deduplikacja, split, częściowe FX, reversal, ponowne uzgodnienie, raport i izolacja tenantów zachowują spójność razem, a nie tylko w odseparowanych testach funkcji.
+
+## Delta Analysis: UKFIN-409
+
+### Istniejące pokrycie (reużywam)
+
+- `BankStatementCsvImportTest` — duplikaty provider ID i kanonicznego SHA-256 w obrębie rachunku.
+- `BankTransactionMatchingTest` — scoring, kierunek, snapshot GBP i odrzucanie kandydatów innego tenanta.
+- `BankReconciliationTest` — exact, partial, split, many-to-many, over-allocation i podstawowy FX.
+- `BankReconciliationUndoTest` — reversal exact/partial/split, historia, idempotencja i rollback.
+- `BankReconciliationReportTest` — aktywne vs cofnięte alokacje, wiele walut, RBAC i tenant raportu.
+
+### Luki do domknięcia
+
+- [x] Udowodnić, że identyczny provider ID/hash jest duplikatem tylko na tym samym rachunku, ale może legalnie wystąpić na innym rachunku i u innego tenanta.
+- [x] Sprawdzić dwubatchowy partial FX z niecałkowitym kursem, reversal pierwszej części i ponowną alokację bez dryfu jednego pensa.
+- [x] Po cofnięciu splitu ponownie uzgodnić oba źródła i potwierdzić, że historia reversal pozostaje, a aktywne alokacje dokładnie zamykają transakcję.
+- [x] Potwierdzić końcowy stan w raporcie oraz sumy aktywnych bank/source allocations.
+- [x] Uruchomić pełny pakiet bank reconciliation, `finance:audit-tenants`, Finance regression i pełną regresję projektu.
+
+### Kryteria niezmienników
+
+- Suma aktywnych alokacji bankowych nigdy nie przekracza bezwzględnej kwoty transakcji.
+- Suma aktywnych `source_amount` po konwersji i retry dokładnie odtwarza kwotę źródłową.
+- Alokacje cofnięte pozostają niezmienne w bazie, ale nie konsumują capacity i nie wpływają na raport.
+- Identyczne dane bankowe nie łączą tenantów ani oddzielnych rachunków.
+- Jeśli test ujawni defekt produkcyjny, poprawka musi pozostać w istniejących Action/Service, bez logiki w testach lub kontrolerach.
+
+## Walidacja planowana
+
+- [x] Dedykowane testy nowych luk i pełny pakiet `Bank*Test.php`: 48 passed / 326 assertions.
+- [x] `php artisan finance:audit-tenants --json` na lokalnej bazie: `valid: true`, zero nieprawidłowych rekordów i relacji.
+- [x] Finance regression: 211 passed / 1 skipped / 1313 assertions; pełny PHPUnit: 720 passed / 9 znanych baseline failures / 11 skipped / 2757 assertions.
+- [x] Pint dla zmienionych testów, parity tłumaczeń 555/555/555 i `git diff --check`.
+
+## Wynik UKFIN-409
+
+- [x] Deduplikacja provider ID i kanonicznego SHA-256 jest ograniczona do rachunku; identyczna tożsamość może legalnie wystąpić na innym rachunku tego samego tenanta oraz u innego tenanta.
+- [x] Dwubatchowy FX `83.33 GBP ↔ 100.00 EUR` po cofnięciu i ponownej alokacji zachowuje dokładnie 83.33 kwoty bankowej i 100.00 kwoty źródłowej, bez dryfu pensa.
+- [x] Cofnięty split zachowuje obie historyczne alokacje, zwalnia capacity i pozwala ponownie zamknąć transakcję dwoma aktywnymi alokacjami.
+- [x] Raport oraz status transakcji wynikają wyłącznie z aktywnych batchy i po ponownym uzgodnieniu pokazują pełne pokrycie oraz zero reszty.
+- [x] Nie był potrzebny patch produkcyjny; istniejące Action/Service spełniły przekrojowe niezmienniki fazy 4.
+- [x] Faza 4 — bank reconciliation została zamknięta bez nowych błędów regresyjnych.
+
+## Następny krok
+
+- [ ] `UKFIN-501` — Trial Balance per period i comparison.
+
+---
+
 # UKFIN-408 — raport salda i uzgodnienia bankowego
 
 **Zadanie:** UKFIN-408 — Bank balance/reconciliation report
@@ -57,7 +116,7 @@ Udostępnić księgowemu i użytkownikowi z `view_finance` sprawdzalny raport pe
 
 ## Następny krok
 
-- [ ] `UKFIN-409` — testy duplicates, split, FX, reversal i tenant isolation dla całej fazy bank reconciliation.
+- [x] `UKFIN-409` — testy duplicates, split, FX, reversal i tenant isolation dla całej fazy bank reconciliation (ukończone 2026-11-07).
 
 ---
 
