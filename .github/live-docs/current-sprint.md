@@ -15,7 +15,8 @@
 6. Wykonane: model i UI uzgodnień exact/partial/split/many-to-many (`UKFIN-405`).
 7. Wykonane: tworzenie expense/payment z nieuzgodnionej transakcji (`UKFIN-406`).
 8. Wykonane: cofnięcie reconciliation z pełnym audit trail (`UKFIN-407`).
-9. Następnie: raport salda i uzgodnienia bankowego (`UKFIN-408`).
+9. Wykonane: raport salda i uzgodnienia bankowego z CSV (`UKFIN-408`).
+10. Następnie: testy zamykające fazę bank reconciliation (`UKFIN-409`).
 
 ## Definition of Done
 

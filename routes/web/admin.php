@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Domain\DomainPriceListCsvController;
 use App\Http\Controllers\EmailTemplatePreviewController;
+use App\Http\Controllers\Finance\BankReconciliationReportExportController;
 use App\Http\Controllers\Finance\ExpenseReportExportController;
 use App\Http\Controllers\Finance\FinancialAttachmentController;
 use App\Http\Controllers\ReportController;
@@ -34,6 +35,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/finance/expense-report.csv', ExpenseReportExportController::class)
         ->name('admin.finance.expense-report.csv');
+
+    Route::get('/admin/finance/bank-reconciliation-report.csv', BankReconciliationReportExportController::class)
+        ->name('admin.finance.bank-reconciliation-report.csv');
 
     // Reports — admin only
     Route::prefix('reports')->name('reports.')->group(function () {

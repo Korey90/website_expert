@@ -70,7 +70,7 @@ Umożliwić bezpieczne przypisanie jednej lub wielu transakcji bankowych do jedn
 - Undo/reversal reconciliation jest świadomie pozostawione do UKFIN-407; bieżące batche mają status przygotowany pod ten workflow.
 - Utworzenie nowego expense/payment z nieuzgodnionej transakcji należy do UKFIN-406.
 - Produkcyjny deploy powinien wykonać `php artisan migrate --force`, następnie `php artisan finance:audit-tenants`.
-- Stara nazwa prawna `WebsiteExpert Ltd` nie występuje już w repozytorium ani aktywnych rekordach firmy.
+- Poprzednia błędna nazwa prawna nie występuje już w repozytorium ani aktywnych rekordach firmy.
 
 ## Next steps (opcjonalnie)
 

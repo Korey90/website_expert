@@ -18,6 +18,21 @@ return [
         'columns' => ['group' => 'Grupo', 'documents' => 'Documentos', 'net_gbp' => 'Líquido GBP', 'vat_gbp' => 'IVA GBP', 'gross_gbp' => 'Bruto GBP'],
         'uncategorised_supplier' => 'Sem fornecedor', 'no_project' => 'Sem projeto', 'no_tax_code' => 'Sem código de IVA',
     ],
+    'bank_reconciliation_report' => [
+        'navigation' => 'Relatório de reconciliação bancária', 'title' => 'Saldo e reconciliação bancária', 'export_csv' => 'Exportar CSV',
+        'all_accounts' => 'Todas as contas bancárias', 'native_currency_notice' => 'Os montantes são apresentados na moeda de cada conta e não são totalizados entre moedas.',
+        'coverage_from' => 'Saldo base desde: :date', 'empty_accounts' => 'Não existem contas bancárias para esta empresa.', 'empty_transactions' => 'Não existem transações bancárias no período selecionado.',
+        'fields' => ['date_from' => 'De', 'date_to' => 'Até', 'account' => 'Conta bancária'],
+        'sections' => ['accounts' => 'Resumo das contas', 'transactions' => 'Detalhes das transações'],
+        'summary' => ['accounts' => 'Contas', 'transactions' => 'Transações', 'reconciled' => 'Totalmente reconciliadas', 'open' => 'Abertas / parciais'],
+        'columns' => [
+            'account' => 'Conta', 'currency' => 'Moeda', 'opening_balance' => 'Saldo de abertura', 'inflows' => 'Entradas',
+            'outflows' => 'Saídas', 'closing_balance' => 'Saldo final', 'allocated_amount' => 'Reconciliado',
+            'remaining_amount' => 'Restante', 'reconciliation_rate' => 'Cobertura', 'transactions' => 'Transações',
+            'date' => 'Data', 'reference' => 'Referência', 'counterparty' => 'Contraparte', 'amount' => 'Montante', 'status' => 'Estado',
+        ],
+        'csv' => ['account_summary' => 'RESUMO DAS CONTAS', 'transaction_details' => 'DETALHES DAS TRANSAÇÕES'],
+    ],
     'general_ledger' => [
         'navigation' => 'Razão geral', 'title' => 'Razão geral', 'all_accounts' => 'Todas as contas',
         'empty' => 'Não existem movimentos contabilizados até à data selecionada.', 'no_period_activity' => 'Apenas saldo de abertura — sem movimentos no período selecionado.',

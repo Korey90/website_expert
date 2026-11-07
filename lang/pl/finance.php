@@ -18,6 +18,21 @@ return [
         'columns' => ['group' => 'Grupa', 'documents' => 'Dokumenty', 'net_gbp' => 'Netto GBP', 'vat_gbp' => 'VAT GBP', 'gross_gbp' => 'Brutto GBP'],
         'uncategorised_supplier' => 'Bez dostawcy', 'no_project' => 'Bez projektu', 'no_tax_code' => 'Bez kodu VAT',
     ],
+    'bank_reconciliation_report' => [
+        'navigation' => 'Raport uzgodnienia banku', 'title' => 'Saldo i uzgodnienie bankowe', 'export_csv' => 'Eksportuj CSV',
+        'all_accounts' => 'Wszystkie rachunki', 'native_currency_notice' => 'Kwoty są prezentowane w walucie każdego rachunku i nie są sumowane między walutami.',
+        'coverage_from' => 'Saldo bazowe od: :date', 'empty_accounts' => 'Brak rachunków bankowych dla tej firmy.', 'empty_transactions' => 'Brak transakcji bankowych w wybranym okresie.',
+        'fields' => ['date_from' => 'Od', 'date_to' => 'Do', 'account' => 'Rachunek bankowy'],
+        'sections' => ['accounts' => 'Podsumowanie rachunków', 'transactions' => 'Szczegóły transakcji'],
+        'summary' => ['accounts' => 'Rachunki', 'transactions' => 'Transakcje', 'reconciled' => 'W pełni uzgodnione', 'open' => 'Otwarte / częściowe'],
+        'columns' => [
+            'account' => 'Rachunek', 'currency' => 'Waluta', 'opening_balance' => 'Saldo otwarcia', 'inflows' => 'Wpływy',
+            'outflows' => 'Wypływy', 'closing_balance' => 'Saldo końcowe', 'allocated_amount' => 'Uzgodniono',
+            'remaining_amount' => 'Pozostało', 'reconciliation_rate' => 'Pokrycie', 'transactions' => 'Transakcje',
+            'date' => 'Data', 'reference' => 'Referencja', 'counterparty' => 'Kontrahent', 'amount' => 'Kwota', 'status' => 'Status',
+        ],
+        'csv' => ['account_summary' => 'PODSUMOWANIE RACHUNKÓW', 'transaction_details' => 'SZCZEGÓŁY TRANSAKCJI'],
+    ],
     'general_ledger' => [
         'navigation' => 'Księga główna', 'title' => 'Księga główna', 'all_accounts' => 'Wszystkie konta',
         'empty' => 'Brak zaksięgowanych operacji do wybranej daty.', 'no_period_activity' => 'Tylko saldo otwarcia — brak operacji w wybranym okresie.',

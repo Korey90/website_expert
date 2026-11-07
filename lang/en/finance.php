@@ -18,6 +18,21 @@ return [
         'columns' => ['group' => 'Group', 'documents' => 'Documents', 'net_gbp' => 'Net GBP', 'vat_gbp' => 'VAT GBP', 'gross_gbp' => 'Gross GBP'],
         'uncategorised_supplier' => 'No supplier', 'no_project' => 'No project', 'no_tax_code' => 'No VAT code',
     ],
+    'bank_reconciliation_report' => [
+        'navigation' => 'Bank reconciliation report', 'title' => 'Bank balance and reconciliation', 'export_csv' => 'Export CSV',
+        'all_accounts' => 'All bank accounts', 'native_currency_notice' => 'Amounts are shown in each account currency and are not totalled across currencies.',
+        'coverage_from' => 'Balance baseline from: :date', 'empty_accounts' => 'No bank accounts exist for this business.', 'empty_transactions' => 'No bank transactions exist in the selected period.',
+        'fields' => ['date_from' => 'From', 'date_to' => 'To', 'account' => 'Bank account'],
+        'sections' => ['accounts' => 'Account summary', 'transactions' => 'Transaction details'],
+        'summary' => ['accounts' => 'Accounts', 'transactions' => 'Transactions', 'reconciled' => 'Fully reconciled', 'open' => 'Open / partial'],
+        'columns' => [
+            'account' => 'Account', 'currency' => 'Currency', 'opening_balance' => 'Opening balance', 'inflows' => 'Money in',
+            'outflows' => 'Money out', 'closing_balance' => 'Closing balance', 'allocated_amount' => 'Reconciled',
+            'remaining_amount' => 'Remaining', 'reconciliation_rate' => 'Coverage', 'transactions' => 'Transactions',
+            'date' => 'Date', 'reference' => 'Reference', 'counterparty' => 'Counterparty', 'amount' => 'Amount', 'status' => 'Status',
+        ],
+        'csv' => ['account_summary' => 'ACCOUNT SUMMARY', 'transaction_details' => 'TRANSACTION DETAILS'],
+    ],
     'general_ledger' => [
         'navigation' => 'General ledger', 'title' => 'General ledger', 'all_accounts' => 'All accounts',
         'empty' => 'No posted ledger activity up to the selected date.', 'no_period_activity' => 'Opening balance only — no activity in the selected period.',

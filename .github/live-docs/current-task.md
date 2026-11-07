@@ -1,5 +1,66 @@
 # Current Task
 
+# UKFIN-408 — raport salda i uzgodnienia bankowego
+
+**Zadanie:** UKFIN-408 — Bank balance/reconciliation report
+**Status:** 🟢 Zakończone
+**Start:** 2026-11-07
+**Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
+
+## Cel bieżącego przyrostu
+
+Udostępnić księgowemu i użytkownikowi z `view_finance` sprawdzalny raport per rachunek bankowy i okres: saldo otwarcia, wpływy, wypływy, saldo zamknięcia oraz pokrycie uzgodnieniami, z możliwością przejścia do szczegółów transakcji i eksportu CSV.
+
+## Delta Analysis: UKFIN-408
+
+### Anchor files (reużywam)
+
+- `ExpenseReportService`, `ExpenseReportPage` i `ExpenseReportExportController` — wzorzec service → Filament page → tenantowy eksport CSV.
+- `BankAccount` i `BankTransaction` — saldo otwarcia, waluta, importowane przepływy oraz statusy reconciliation.
+- `BankReconciliation` i `BankReconciliationAllocation` — aktywne oraz cofnięte batche i kwoty alokacji.
+- `BankTransactionMatchingService` — reguła liczenia dostępnej kwoty wyłącznie z aktywnych alokacji.
+- `FilamentPermissionRegistry` i `PermissionHelper` — ochrona strony i eksportu przez `view_finance`.
+
+### Do stworzenia
+
+- [x] Tenantowy serwis raportowy z walidacją okresu i opcjonalnego rachunku.
+- [x] Podsumowanie per rachunek: saldo otwarcia, wpływy, wypływy, saldo zamknięcia, kwota uzgodniona i pozostała.
+- [x] Szczegóły transakcji: data, referencja, kontrahent, kwota, aktywna alokacja, reszta i status.
+- [x] Poprawne wykluczenie alokacji z cofniętych batchy oraz przeliczenie stanu na moment generowania raportu.
+- [x] Filament page z filtrem okresu/rachunku i czytelną obsługą wielu walut bez sumowania ich do jednej kwoty.
+- [x] Eksport CSV chroniony przez `view_finance`, tenant i `Cache-Control: private, no-store`.
+- [x] Tłumaczenia PL/EN/PT.
+- [x] Testy obliczeń, partial/reversal, opening balance, wielu walut, filtrów, tenant isolation, RBAC, strony i CSV.
+
+### Założenia i granice
+
+- Saldo rachunku jest saldem bankowym wyliczonym z zapisanego `opening_balance` oraz importowanych transakcji; nie jest jeszcze porównaniem z Trial Balance/General Ledger z fazy 5.
+- `opening_balance` jest stanem bazowym na `opening_balance_date`, a do kolejnych sald wchodzą transakcje od tej daty włącznie.
+- Kwoty pozostają w walucie rachunku; raport wielu rachunków nie tworzy mylącej sumy pieniężnej między GBP/EUR/USD.
+- Tylko alokacje należące do batchy `active` zmniejszają kwotę nieuzgodnioną; historia `reversed` pozostaje audytem, ale nie pokryciem.
+- Rachunki archiwalne są widoczne w raporcie historycznym i filtrze.
+
+## Walidacja planowana
+
+- [x] Dedykowany PHPUnit dla serwisu, strony i eksportu: 5 passed / 34 assertions.
+- [x] Regresja UKFIN-404–408: 33 passed / 206 assertions; Finance: 209 passed / 1 skipped / 1285 assertions.
+- [x] Pint na zmienionych plikach, parity tłumaczeń 555/555/555 kluczy liściowych i `git diff --check`.
+
+## Wynik UKFIN-408
+
+- [x] Raport pokazuje saldo otwarcia, przepływy i saldo końcowe z `opening_balance` oraz importowanych transakcji.
+- [x] Pokrycie uzgodnieniem jest liczone z aktywnych alokacji; cofnięte batche pozostają historią i nie zmniejszają reszty.
+- [x] Statusy szczegółów są przeliczane z kwot aktywnych alokacji, dzięki czemu raport pokazuje stan faktyczny `unmatched` / `partially_reconciled` / `reconciled`.
+- [x] Rachunki walutowe pozostają rozdzielone w walucie natywnej; brak mylącej sumy GBP/EUR/USD.
+- [x] Strona Filament i eksport CSV są chronione przez `view_finance`, aktywny tenant i tenantowy filtr rachunku.
+- [x] Pełna regresja: 718 passed / 9 znanych baseline failures / 11 skipped / 2729 assertions.
+
+## Następny krok
+
+- [ ] `UKFIN-409` — testy duplicates, split, FX, reversal i tenant isolation dla całej fazy bank reconciliation.
+
+---
+
 # UKFIN-407 — cofnięcie reconciliation z audit trail
 
 **Zadanie:** UKFIN-407 — Undo reconciliation z audit trail
@@ -60,7 +121,7 @@ Pozwolić uprawnionemu użytkownikowi cofnąć wybrany aktywny batch uzgodnienia
 
 ## Następny krok
 
-- [ ] `UKFIN-408` — bank balance/reconciliation report.
+- [x] `UKFIN-408` — bank balance/reconciliation report (ukończone 2026-11-07).
 
 ---
 

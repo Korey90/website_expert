@@ -58,6 +58,7 @@ class FilamentPermissionRegistry
 
     private const PAGE_PERMISSIONS = [
         'CalculatorAdminPage' => 'manage_calculator',
+        'BankReconciliationReportPage' => 'view_finance',
         'ConversionReportPage' => 'view_reports',
         'ExpenseReportPage' => 'view_finance',
         'GeneralLedgerPage' => 'view_finance',
