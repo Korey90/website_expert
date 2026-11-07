@@ -86,9 +86,15 @@ class BankTransactionResource extends BaseResource
                                 ->formatStateUsing(fn ($state, BankReconciliationAllocation $record): string => number_format((float) $state, 2).' '.$record->source_currency),
                             TextEntry::make('match_score')->label(__('finance.bank_reconciliation.fields.score'))
                                 ->suffix('/100')->placeholder('—'),
+                            TextEntry::make('reconciliation.status')->label(__('finance.bank_reconciliation.fields.batch_status'))->badge()
+                                ->formatStateUsing(fn (string $state): string => __('finance.bank_reconciliation.reconciliation_statuses.'.$state))
+                                ->color(fn (string $state): string => $state === BankReconciliation::STATUS_ACTIVE ? 'success' : 'gray'),
                             TextEntry::make('reconciliation.createdBy.name')->label(__('finance.bank_reconciliation.fields.reconciled_by'))->placeholder('—'),
                             TextEntry::make('reconciliation.reconciled_at')->label(__('finance.bank_reconciliation.fields.reconciled_at'))->dateTime(),
-                            TextEntry::make('reconciliation.notes')->label(__('finance.bank_reconciliation.fields.notes'))->placeholder('—')->columnSpan(4),
+                            TextEntry::make('reconciliation.notes')->label(__('finance.bank_reconciliation.fields.notes'))->placeholder('—')->columnSpan(3),
+                            TextEntry::make('reconciliation.reversedBy.name')->label(__('finance.bank_reconciliation.fields.reversed_by'))->placeholder('—'),
+                            TextEntry::make('reconciliation.reversed_at')->label(__('finance.bank_reconciliation.fields.reversed_at'))->dateTime()->placeholder('—'),
+                            TextEntry::make('reconciliation.reversal_reason')->label(__('finance.bank_reconciliation.fields.reversal_reason'))->placeholder('—')->columnSpan(4),
                         ])
                         ->columnSpanFull(),
                 ]),
@@ -143,6 +149,7 @@ class BankTransactionResource extends BaseResource
         return parent::getEloquentQuery()->with([
             'bankAccount',
             'reconciliationAllocations.reconciliation.createdBy',
+            'reconciliationAllocations.reconciliation.reversedBy',
         ]);
     }
 

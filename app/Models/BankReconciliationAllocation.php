@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToTenant;
+use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,6 +26,17 @@ class BankReconciliationAllocation extends Model
             'source_amount' => 'decimal:2',
             'match_score' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::updating(function (): never {
+            throw new DomainException('A bank reconciliation allocation is immutable.');
+        });
+
+        static::deleting(function (): never {
+            throw new DomainException('A bank reconciliation allocation cannot be deleted.');
+        });
     }
 
     public function business(): BelongsTo

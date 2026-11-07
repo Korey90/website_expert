@@ -320,4 +320,53 @@ class AuditFinanceTenantDataCommandTest extends TestCase
             ->expectsOutputToContain('Finance tenant audit failed: 1 invalid record(s).')
             ->assertExitCode(1);
     }
+
+    public function test_reversed_reconciliation_without_audit_metadata_is_reported(): void
+    {
+        $business = Business::create(['name' => 'Reversal Audit', 'slug' => 'reversal-audit', 'is_active' => true]);
+        app(InitializeAccountingSetupAction::class)->execute($business);
+        $cash = LedgerAccount::withoutGlobalScopes()
+            ->where('business_id', $business->id)
+            ->where('code', '1100')
+            ->firstOrFail();
+        $protected = app(BankAccountDetailsProtector::class)->protect('44445555', '445566');
+        $bankAccountId = DB::table('bank_accounts')->insertGetId([
+            'business_id' => $business->id,
+            'ledger_account_id' => $cash->id,
+            'name' => 'Reversal audit bank',
+            'bank_name' => 'Audit Bank',
+            ...$protected,
+            'currency' => 'GBP',
+            'opening_balance' => 0,
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $transactionId = DB::table('bank_transactions')->insertGetId([
+            'business_id' => $business->id,
+            'bank_account_id' => $bankAccountId,
+            'booking_date' => '2026-11-05',
+            'amount' => 10,
+            'currency' => 'GBP',
+            'source_hash' => str_repeat('d', 64),
+            'reconciliation_status' => 'unmatched',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('bank_reconciliations')->insert([
+            'business_id' => $business->id,
+            'bank_transaction_id' => $transactionId,
+            'status' => 'reversed',
+            'total_amount' => 10,
+            'currency' => 'GBP',
+            'reconciled_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->artisan('finance:audit-tenants')
+            ->expectsOutputToContain('bank_reconciliations.reversal_audit')
+            ->expectsOutputToContain('Finance tenant audit failed: 1 invalid record(s).')
+            ->assertExitCode(1);
+    }
 }

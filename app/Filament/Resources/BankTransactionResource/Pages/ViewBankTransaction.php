@@ -5,9 +5,11 @@ namespace App\Filament\Resources\BankTransactionResource\Pages;
 use App\Actions\Finance\CreateRecordFromBankTransactionAction;
 use App\Actions\Finance\FindBankTransactionMatchesAction;
 use App\Actions\Finance\ReconcileBankTransactionAction;
+use App\Actions\Finance\UndoBankReconciliationAction;
 use App\Data\Finance\BankTransactionMatchCandidate;
 use App\Filament\Resources\BankTransactionResource;
 use App\Filament\Support\Currency as FilamentCurrency;
+use App\Models\BankReconciliation;
 use App\Models\BankTransaction;
 use App\Models\Invoice;
 use App\Models\LedgerAccount;
@@ -164,6 +166,31 @@ class ViewBankTransaction extends ViewRecord
                         ->maxLength(2000),
                 ])
                 ->action(fn (array $data) => $this->createRecord($transaction, $data)),
+            Action::make('undo_reconciliation')
+                ->label(__('finance.bank_reconciliation.actions.undo'))
+                ->icon('heroicon-o-arrow-uturn-left')
+                ->color('danger')
+                ->visible(fn (): bool => PermissionHelper::allows(auth()->user(), 'manage_finance')
+                    && BankReconciliation::withoutGlobalScopes()
+                        ->where('business_id', $transaction->business_id)
+                        ->where('bank_transaction_id', $transaction->id)
+                        ->where('status', BankReconciliation::STATUS_ACTIVE)
+                        ->exists())
+                ->modalHeading(__('finance.bank_reconciliation.undo.heading'))
+                ->modalDescription(__('finance.bank_reconciliation.undo.description'))
+                ->form([
+                    Select::make('bank_reconciliation_id')
+                        ->label(__('finance.bank_reconciliation.undo.batch'))
+                        ->options(fn (): array => $this->activeReconciliationOptions($transaction))
+                        ->required(),
+                    Textarea::make('reason')
+                        ->label(__('finance.bank_reconciliation.fields.reversal_reason'))
+                        ->helperText(__('finance.bank_reconciliation.undo.reason_help'))
+                        ->minLength(1)
+                        ->maxLength(2000)
+                        ->required(),
+                ])
+                ->action(fn (array $data) => $this->undoReconciliation($transaction, $data)),
             Action::make('reconcile')
                 ->label(__('finance.bank_reconciliation.actions.reconcile'))
                 ->icon('heroicon-o-link')
@@ -268,6 +295,62 @@ class ViewBankTransaction extends ViewRecord
             app(CreateRecordFromBankTransactionAction::class)->execute($transaction, $user, $data);
             Notification::make()
                 ->title(__('finance.bank_reconciliation.notifications.record_created'))
+                ->success()
+                ->send();
+            $this->redirect(BankTransactionResource::getUrl('view', ['record' => $transaction->id]));
+        } catch (DomainException $exception) {
+            Notification::make()->title($exception->getMessage())->danger()->send();
+        }
+    }
+
+    /** @return array<int, string> */
+    private function activeReconciliationOptions(BankTransaction $transaction): array
+    {
+        return BankReconciliation::withoutGlobalScopes()
+            ->with('createdBy')
+            ->where('business_id', $transaction->business_id)
+            ->where('bank_transaction_id', $transaction->id)
+            ->where('status', BankReconciliation::STATUS_ACTIVE)
+            ->orderByDesc('reconciled_at')
+            ->get()
+            ->mapWithKeys(fn (BankReconciliation $reconciliation): array => [
+                $reconciliation->id => __('finance.bank_reconciliation.undo.batch_option', [
+                    'id' => $reconciliation->id,
+                    'amount' => number_format((float) $reconciliation->total_amount, 2),
+                    'currency' => $reconciliation->currency,
+                    'date' => $reconciliation->reconciled_at->format('Y-m-d H:i'),
+                    'user' => $reconciliation->createdBy?->name ?: '—',
+                ]),
+            ])
+            ->all();
+    }
+
+    /** @param array<string, mixed> $data */
+    private function undoReconciliation(BankTransaction $transaction, array $data): void
+    {
+        try {
+            $user = auth()->user();
+
+            if (! $user instanceof User) {
+                throw new DomainException('An authenticated user is required.');
+            }
+
+            $reconciliation = BankReconciliation::withoutGlobalScopes()
+                ->where('business_id', $transaction->business_id)
+                ->where('bank_transaction_id', $transaction->id)
+                ->find((int) ($data['bank_reconciliation_id'] ?? 0));
+
+            if (! $reconciliation) {
+                throw new DomainException('The selected reconciliation does not belong to this bank transaction.');
+            }
+
+            app(UndoBankReconciliationAction::class)->execute(
+                $reconciliation,
+                $user,
+                (string) ($data['reason'] ?? ''),
+            );
+            Notification::make()
+                ->title(__('finance.bank_reconciliation.notifications.undone'))
                 ->success()
                 ->send();
             $this->redirect(BankTransactionResource::getUrl('view', ['record' => $transaction->id]));

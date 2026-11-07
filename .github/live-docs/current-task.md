@@ -1,6 +1,70 @@
 # Current Task
 
-# UKFIN-406 — utworzenie expense/payment z transakcji bankowej
+# UKFIN-407 — cofnięcie reconciliation z audit trail
+
+**Zadanie:** UKFIN-407 — Undo reconciliation z audit trail
+**Status:** 🟢 Zakończone
+**Start:** 2026-11-07
+**Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
+
+## Cel bieżącego przyrostu
+
+Pozwolić uprawnionemu użytkownikowi cofnąć wybrany aktywny batch uzgodnienia bez usuwania historii, zwolnić jego alokacje dla kolejnego dopasowania i atomowo przeliczyć status transakcji bankowej na `unmatched`, `partially_reconciled` albo `reconciled`.
+
+## Delta Analysis: UKFIN-407
+
+### Anchor files (reużywam)
+
+- `ReconcileBankTransactionAction` — blokada transakcji, walidacja źródeł, active allocations i retry deadlocków.
+- `ReverseJournalEntryAction` — wymagane uzasadnienie, idempotencja i audyt autora/czasu bez kasowania historii.
+- `BankTransactionMatchingService` — dostępne kwoty liczą wyłącznie alokacje aktywnych batchy.
+- `BankTransactionResource` i `ViewBankTransaction` — szczegóły alokacji oraz akcje nagłówkowe Filament.
+- `finance:audit-tenants` — kontrola spójności reconciliation, transakcji i źródeł polymorficznych.
+
+### Do stworzenia
+
+- [x] Migracja pól `reversed_by`, `reversed_at`, `reversal_reason` i statusu `reversed` dla reconciliation batch.
+- [x] `UndoBankReconciliationAction` z tenant/RBAC, blokadami transakcji, batcha i źródeł oraz idempotencją dla tego samego uzasadnienia.
+- [x] Ponowne wyliczenie statusu transakcji z sumy wyłącznie aktywnych alokacji.
+- [x] Niezmienność historycznych batchy i alokacji: brak edycji oraz usuwania.
+- [x] Akcja Filament wyboru aktywnego batcha, wymagane uzasadnienie i widoczny audit trail.
+- [x] Rozszerzenie tenant audit o kompletność metadanych reversal.
+- [x] Tłumaczenia PL/EN/PT.
+- [x] Testy exact/partial/split, ponownej dostępności źródła, idempotencji, RBAC, tenant isolation, immutability, audytu i UI.
+
+### Ryzyka i granice
+
+- Cofnięcie odłącza wyłącznie batch reconciliation; nie usuwa ani nie odwraca payment, expense lub journal entry.
+- Alokacje odwróconego batcha pozostają w bazie jako niezmienny dowód historyczny, ale nie zmniejszają już dostępnych kwot.
+- Status transakcji musi wynikać z pozostałych aktywnych batchy; cofnięcie jednego z kilku batchy nie może naruszyć pozostałych.
+- Operacja nie może przekroczyć granic `business_id`, a wszystkie zmiany muszą zostać wycofane razem przy błędzie integralności.
+
+## Walidacja planowana
+
+- [x] Migracja SQLite/MySQL i `finance:audit-tenants`.
+- [x] PHPUnit dla nowej Action, audit command oraz widoczności/wykonania akcji Filament.
+- [x] Regresja UKFIN-404–407 i pełna domena Finance.
+- [x] Pint na zmienionych plikach, parity tłumaczeń i `git diff --check`.
+
+## Wynik UKFIN-407
+
+- [x] Cofnięcie zmienia batch z `active` na `reversed` i zapisuje autora, czas oraz wymagane uzasadnienie bez kasowania alokacji.
+- [x] Blokady transakcji, batcha, alokacji i źródeł oraz retry chronią przed wyścigami z nowym reconciliation.
+- [x] Operacja jest idempotentna dla tego samego powodu, odrzuca payload drift i wykonuje pełny rollback przy niespójnym audycie.
+- [x] Status bank transaction jest przeliczany wyłącznie z aktywnych batchy, a zwolnione kwoty ponownie trafiają do matching candidates.
+- [x] Modele batcha i alokacji blokują edycję oraz usuwanie historycznych rekordów.
+- [x] Filament pozwala wybrać aktywny batch, wymaga powodu i pokazuje status oraz pełne metadane reversal.
+- [x] Dedykowane testy UKFIN-407: 7 passed, 43 assertions; reconciliation + undo + audit: 24 passed, 112 assertions.
+- [x] Finance regression: 204 passed, 1 skipped, 1251 assertions.
+- [x] Full regression: 713 passed, 11 skipped, 9 znanych baseline failures, 2695 assertions.
+
+## Następny krok
+
+- [ ] `UKFIN-408` — bank balance/reconciliation report.
+
+---
+
+# Poprzednie zadanie — UKFIN-406: utworzenie expense/payment z transakcji bankowej
 
 **Zadanie:** UKFIN-406 — Create expense/payment from unmatched transaction
 **Status:** 🟢 Zakończone
@@ -61,7 +125,7 @@ Pozwolić użytkownikowi z `manage_finance` i `post_finance` zamienić nieuzgodn
 
 ## Następny krok
 
-- [ ] `UKFIN-407` — cofnięcie reconciliation z pełnym audit trail.
+- [x] `UKFIN-407` — cofnięcie reconciliation z pełnym audit trail (ukończone 2026-11-07).
 
 ---
 

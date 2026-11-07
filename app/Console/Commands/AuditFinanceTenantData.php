@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\BankReconciliation;
 use App\Models\ExpensePayment;
 use App\Models\Payment;
 use App\Models\PurchaseCreditRefund;
@@ -168,6 +169,32 @@ class AuditFinanceTenantData extends Command
         $report['bank_reconciliation_allocations.batch_transaction'] = [
             'invalid_count' => (clone $allocationTransactionQuery)->count(),
             'sample_ids' => (clone $allocationTransactionQuery)->limit(20)->pluck('allocation.id')->all(),
+        ];
+
+        $reconciliationReversalQuery = DB::table('bank_reconciliations')
+            ->where(function ($invalid): void {
+                $invalid->whereNotIn('status', [
+                    BankReconciliation::STATUS_ACTIVE,
+                    BankReconciliation::STATUS_REVERSED,
+                ])->orWhere(function ($reversed): void {
+                    $reversed->where('status', BankReconciliation::STATUS_REVERSED)
+                        ->where(function ($missingAudit): void {
+                            $missingAudit->whereNull('reversed_by')
+                                ->orWhereNull('reversed_at')
+                                ->orWhereRaw("TRIM(COALESCE(reversal_reason, '')) = ''");
+                        });
+                })->orWhere(function ($active): void {
+                    $active->where('status', BankReconciliation::STATUS_ACTIVE)
+                        ->where(function ($unexpectedAudit): void {
+                            $unexpectedAudit->whereNotNull('reversed_by')
+                                ->orWhereNotNull('reversed_at')
+                                ->orWhereNotNull('reversal_reason');
+                        });
+                });
+            });
+        $report['bank_reconciliations.reversal_audit'] = [
+            'invalid_count' => (clone $reconciliationReversalQuery)->count(),
+            'sample_ids' => (clone $reconciliationReversalQuery)->limit(20)->pluck('id')->all(),
         ];
 
         $sourceReport = ['invalid_count' => 0, 'sample_ids' => []];
