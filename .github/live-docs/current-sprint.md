@@ -2,7 +2,7 @@
 
 **Nazwa:** UK Finance & Tax — raporty finansowe
 **Data rozpoczęcia:** 2026-11-07
-**Status:** 🟡 IN PROGRESS
+**Status:** 🟢 COMPLETED
 **Źródło:** `docs/plans/uk-finance-tax-module-plan.md`
 
 **Cel:** użytkownik z `view_finance` może uzyskać sprawdzalne podstawowe sprawozdania finansowe w GBP z ledgeru dla wybranego okresu.
@@ -11,14 +11,15 @@
 
 ### In Progress
 
-- Brak — następne zadanie: `UKFIN-504`.
+- Brak — zakres sprintu został ukończony.
 
 ### To Do
 
-- [ ] `UKFIN-504` [M] — Cash Flow w wersji zarządczej.
+- Brak w tym sprincie. Kolejny etap planu rozpoczyna `UKFIN-505`.
 
 ### Done
 
+- [x] `UKFIN-504` [M] — Cash Flow w wersji zarządczej.
 - [x] `UKFIN-503` [M] — Balance Sheet.
 - [x] `UKFIN-502` [M] — Profit & Loss.
 - [x] `UKFIN-501` [M] — Trial Balance per period i comparison.

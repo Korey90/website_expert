@@ -435,7 +435,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-501` [M] Trial Balance per period i comparison — tenantowy raport GBP z saldem otwarcia, obrotami, saldem końcowym, comparison/variance, kontrolą bilansowania i CSV (ukończone 2026-11-07).
 - [x] `UKFIN-502` [M] Profit & Loss — tenantowy raport okresowy GBP z sekcjami, wynikami gross/operating/pre-tax/net, comparison/variance i CSV (ukończone 2026-11-09).
 - [x] `UKFIN-503` [M] Balance Sheet — tenantowy bilans GBP na koniec okresu z aktywami, zobowiązaniami i kapitałem, skumulowanym niezamkniętym wynikiem, comparison/variance, kontrolą równania bilansowego i CSV (ukończone 2026-11-09).
-- [ ] `UKFIN-504` [M] Cash Flow w wersji zarządczej.
+- [x] `UKFIN-504` [M] Cash Flow w wersji zarządczej — tenantowy raport bezpośredni GBP z przepływami operacyjnymi, inwestycyjnymi i finansowymi, saldem otwarcia/zamknięcia, comparison/variance, kontrolą uzgodnienia i CSV (ukończone 2026-11-09).
 - [ ] `UKFIN-505` [M] Aged Receivables i Aged Payables.
 - [ ] `UKFIN-506` [M] VAT Detail: output/input VAT, tax codes i dokumenty źródłowe.
 - [ ] `UKFIN-507` [M] VatReturnCalculationAction dla 9 pól.

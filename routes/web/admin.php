@@ -6,6 +6,7 @@ use App\Http\Controllers\Finance\BalanceSheetReportExportController;
 use App\Http\Controllers\Finance\BankReconciliationReportExportController;
 use App\Http\Controllers\Finance\ExpenseReportExportController;
 use App\Http\Controllers\Finance\FinancialAttachmentController;
+use App\Http\Controllers\Finance\ManagementCashFlowReportExportController;
 use App\Http\Controllers\Finance\ProfitAndLossReportExportController;
 use App\Http\Controllers\Finance\TrialBalanceReportExportController;
 use App\Http\Controllers\ReportController;
@@ -50,6 +51,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/finance/balance-sheet.csv', BalanceSheetReportExportController::class)
         ->name('admin.finance.balance-sheet.csv');
+
+    Route::get('/admin/finance/management-cash-flow.csv', ManagementCashFlowReportExportController::class)
+        ->name('admin.finance.management-cash-flow.csv');
 
     // Reports — admin only
     Route::prefix('reports')->name('reports.')->group(function () {

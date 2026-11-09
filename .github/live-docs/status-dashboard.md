@@ -1,18 +1,19 @@
 # Website Expert NI — Project Status Dashboard
 
 **Last Full Validation:** 2026-11-09
-**Last Targeted Validation:** 2026-11-09 — UKFIN-503: Balance Sheet
+**Last Targeted Validation:** 2026-11-09 — UKFIN-504: Management Cash Flow
 
 ## Health Checks
-- **Code Quality (Pint + ESLint):** ✅ Pint i self-review przechodzą dla plików UKFIN-503. Brak zmian JS/TS w tym etapie; istniejący status ESLint bez zmian
-- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 673 klucze liściowe w PL/EN/PT
-- **Tests:** PHPUnit pełny pakiet (2026-11-09): 739 passed / 9 failed (baseline, niezwiązane: SocialAuth, 3×homepage meta, Billing PLN/GBP, 3×ProfileTest po przeniesieniu trasy, ServicePageController) / 11 skipped / 2925 assertions
+- **Code Quality (Pint + ESLint):** ✅ Pint i self-review przechodzą dla plików UKFIN-504. Brak zmian JS/TS w tym etapie; istniejący status ESLint bez zmian
+- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 713 kluczy liściowych w PL/EN/PT
+- **Tests:** PHPUnit pełny pakiet (2026-11-09): 744 passed / 9 failed (baseline, niezwiązane: SocialAuth, 3×homepage meta, Billing PLN/GBP, 3×ProfileTest po przeniesieniu trasy, ServicePageController) / 11 skipped / 2992 assertions
 - **Multi-Tenancy Compliance:** 100% ✅ (wyjątek celowy: `search_ranking_checks.business_id` nullable — narzędzie publiczne/anonimowe, przygotowane pod przyszłe powiązanie z klientem)
 - **Security Review:** ✅ OK — throttle + reCAPTCHA v3 na endpointach publicznych, `ip_hash` zamiast surowego IP, brak sekretów w logach
 - **Build (Vite):** ✅ Brak błędów TS/JS
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-11-09 — **UKFIN-504:** tenantowy Management Cash Flow w GBP metodą bezpośrednią, oparty na ruchach kont `asset/cash` w ledgerze `posted`/`reversed`; pokazuje saldo otwarcia, wpływy, wydatki, przepływy operacyjne/inwestycyjne/finansowe, przepływ netto, saldo zamknięcia i różnicę kontrolną. Transfery pomiędzy własnymi kontami pieniężnymi są wyłączone, reversals pozostają audytowalne, a klasyfikacja wynika deterministycznie z typu/podtypu konta przeciwstawnego. Raport ma comparison/variance, stronę Filament, prywatny CSV, `view_finance`, tenant validation i jawne oznaczenie, że nie jest ustawowym IAS 7. Dedykowane: 5 passed / 67 assertions; raporty: 30 passed / 274 assertions; Finance: 235 passed / 1 skipped / 1548 assertions; full regression: 744 passed / 9 baseline failures / 11 skipped / 2992 assertions ✅
 - 2026-11-09 — **UKFIN-503:** tenantowy Balance Sheet w GBP na koniec wybranego okresu, oparty na skumulowanych zapisach ledgeru `posted`/`reversed`; aktywa są prezentowane jako debit-credit, a zobowiązania i kapitał jako credit-debit. Dwa jawne wiersze syntetyczne ujmują niezamknięty wynik sprzed okresu i wynik bieżący, dzięki czemu równanie aktywa = zobowiązania + kapitał pozostaje sprawdzalne bez formalnego closing journal. Raport zachowuje konta korygujące i nieaktywne, ma comparison/variance, status zbilansowania, stronę Filament i prywatny CSV z `view_finance` oraz tenant validation. Dedykowane: 6 passed / 61 assertions; raporty: 25 passed / 207 assertions; Finance: 230 passed / 1 skipped / 1481 assertions; full regression: 739 passed / 9 baseline failures / 11 skipped / 2925 assertions ✅
 - 2026-11-09 — **UKFIN-502:** tenantowy Profit & Loss w GBP dla wybranego okresu, oparty na niezmiennym ledgerze `posted`/`reversed`; klasyfikuje konta do revenue, cost of sales, operating expenses, other income/expenses i corporation tax oraz wylicza gross profit, operating profit, profit before tax i net profit/loss. Comparison i variance działają per konto, sekcja i wynik; korekty mogą dawać wartości ujemne, a obliczenia pozostają w integer pennies. Strona Filament i CSV wymagają `view_finance` oraz tenant validation. Dedykowane: 7 passed / 51 assertions; Finance: 224 passed / 1 skipped / 1420 assertions; full regression: 733 passed / 9 baseline failures / 11 skipped / 2864 assertions ✅
 - 2026-11-07 — **UKFIN-501:** tenantowy Trial Balance w GBP dla wybranego okresu, oparty wyłącznie na niezmiennych zapisach ledgeru `posted`/`reversed`; pokazuje saldo otwarcia, obroty Winien/Ma, saldo końcowe, opcjonalny okres porównawczy i wariancję oraz jawny status bilansowania. Obliczenia odbywają się w pensach, konta historycznie nieaktywne pozostają widoczne, a strona Filament i CSV są chronione przez `view_finance` oraz walidację tenanta. UKFIN-501 + General Ledger: 12 passed / 95 assertions; Finance: 217 passed / 1 skipped / 1369 assertions; full regression: 726 passed / 9 baseline failures / 11 skipped / 2813 assertions ✅
