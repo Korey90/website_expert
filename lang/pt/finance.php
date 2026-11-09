@@ -57,6 +57,24 @@ return [
         ],
         'csv' => ['report' => 'BALANCETE', 'period' => 'PERÍODO', 'comparison' => 'COMPARAÇÃO'],
     ],
+    'profit_and_loss' => [
+        'navigation' => 'Demonstração de resultados', 'title' => 'Demonstração de resultados', 'export_csv' => 'Exportar CSV',
+        'select_period' => 'Selecionar um período', 'no_comparison' => 'Sem comparação', 'no_periods' => 'Não existem períodos contabilísticos para esta empresa.',
+        'compared_with' => 'Comparado com: :period, :from – :to', 'inactive_account' => 'conta inativa',
+        'empty_section' => 'Sem atividade contabilizada nesta secção.', 'subtotal' => 'Total de :section', 'variance' => 'Variação',
+        'fields' => ['period' => 'Período contabilístico', 'comparison_period' => 'Período de comparação'],
+        'sections' => [
+            'sales' => 'Rendimentos de vendas', 'cost_of_sales' => 'Custo das vendas', 'operating_expenses' => 'Gastos operacionais',
+            'other_income' => 'Outros rendimentos', 'other_expenses' => 'Outros gastos', 'corporation_tax' => 'Imposto sobre sociedades',
+        ],
+        'summary' => ['accounts' => 'Contas', 'journals' => 'Lançamentos contribuintes'],
+        'columns' => ['section' => 'Secção', 'code' => 'Código', 'account' => 'Conta', 'current' => 'Atual GBP', 'comparison' => 'Comparação GBP', 'variance' => 'Variação GBP'],
+        'metrics' => [
+            'sales' => 'Rendimentos', 'gross_profit' => 'Resultado bruto', 'operating_profit' => 'Resultado operacional',
+            'profit_before_tax' => 'Resultado antes de impostos', 'net_profit' => 'Resultado líquido',
+        ],
+        'csv' => ['report' => 'DEMONSTRAÇÃO DE RESULTADOS', 'period' => 'PERÍODO', 'comparison' => 'COMPARAÇÃO'],
+    ],
     'journals' => [
         'navigation' => 'Diários', 'singular' => 'lançamento contabilístico', 'plural' => 'lançamentos contabilísticos',
         'sections' => ['summary' => 'Resumo do lançamento', 'audit' => 'Origem e dados de auditoria', 'lines' => 'Linhas do lançamento'],

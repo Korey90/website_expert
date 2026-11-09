@@ -11,16 +11,16 @@
 
 ### In Progress
 
-- Brak — następne zadanie: `UKFIN-502`.
+- Brak — następne zadanie: `UKFIN-503`.
 
 ### To Do
 
-- [ ] `UKFIN-502` [M] — Profit & Loss.
 - [ ] `UKFIN-503` [M] — Balance Sheet.
 - [ ] `UKFIN-504` [M] — Cash Flow w wersji zarządczej.
 
 ### Done
 
+- [x] `UKFIN-502` [M] — Profit & Loss.
 - [x] `UKFIN-501` [M] — Trial Balance per period i comparison.
 - [x] Faza 4 / `UKFIN-401–409` — bank reconciliation zamknięte testami przekrojowymi.
 

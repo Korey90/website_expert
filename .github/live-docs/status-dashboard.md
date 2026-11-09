@@ -1,18 +1,19 @@
 # Website Expert NI — Project Status Dashboard
 
-**Last Full Validation:** 2026-11-07
-**Last Targeted Validation:** 2026-11-07 — UKFIN-501: Trial Balance per period i comparison
+**Last Full Validation:** 2026-11-09
+**Last Targeted Validation:** 2026-11-09 — UKFIN-502: Profit & Loss
 
 ## Health Checks
-- **Code Quality (Pint + ESLint):** ✅ Pint przechodzi dla plików UKFIN-501; pełny skan repozytorium wskazuje wcześniejszy backlog formatowania. Brak zmian JS/TS w tym etapie; istniejący status ESLint bez zmian
-- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 596 kluczy liściowych w PL/EN/PT
-- **Tests:** PHPUnit pełny pakiet (2026-11-07): 726 passed / 9 failed (baseline, niezwiązane: SocialAuth, 3×homepage meta, Billing PLN/GBP, 3×ProfileTest po przeniesieniu trasy, ServicePageController) / 11 skipped / 2813 assertions
+- **Code Quality (Pint + ESLint):** ✅ Pint i self-review przechodzą dla plików UKFIN-502. Brak zmian JS/TS w tym etapie; istniejący status ESLint bez zmian
+- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 631 kluczy liściowych w PL/EN/PT
+- **Tests:** PHPUnit pełny pakiet (2026-11-09): 733 passed / 9 failed (baseline, niezwiązane: SocialAuth, 3×homepage meta, Billing PLN/GBP, 3×ProfileTest po przeniesieniu trasy, ServicePageController) / 11 skipped / 2864 assertions
 - **Multi-Tenancy Compliance:** 100% ✅ (wyjątek celowy: `search_ranking_checks.business_id` nullable — narzędzie publiczne/anonimowe, przygotowane pod przyszłe powiązanie z klientem)
 - **Security Review:** ✅ OK — throttle + reCAPTCHA v3 na endpointach publicznych, `ip_hash` zamiast surowego IP, brak sekretów w logach
 - **Build (Vite):** ✅ Brak błędów TS/JS
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-11-09 — **UKFIN-502:** tenantowy Profit & Loss w GBP dla wybranego okresu, oparty na niezmiennym ledgerze `posted`/`reversed`; klasyfikuje konta do revenue, cost of sales, operating expenses, other income/expenses i corporation tax oraz wylicza gross profit, operating profit, profit before tax i net profit/loss. Comparison i variance działają per konto, sekcja i wynik; korekty mogą dawać wartości ujemne, a obliczenia pozostają w integer pennies. Strona Filament i CSV wymagają `view_finance` oraz tenant validation. Dedykowane: 7 passed / 51 assertions; Finance: 224 passed / 1 skipped / 1420 assertions; full regression: 733 passed / 9 baseline failures / 11 skipped / 2864 assertions ✅
 - 2026-11-07 — **UKFIN-501:** tenantowy Trial Balance w GBP dla wybranego okresu, oparty wyłącznie na niezmiennych zapisach ledgeru `posted`/`reversed`; pokazuje saldo otwarcia, obroty Winien/Ma, saldo końcowe, opcjonalny okres porównawczy i wariancję oraz jawny status bilansowania. Obliczenia odbywają się w pensach, konta historycznie nieaktywne pozostają widoczne, a strona Filament i CSV są chronione przez `view_finance` oraz walidację tenanta. UKFIN-501 + General Ledger: 12 passed / 95 assertions; Finance: 217 passed / 1 skipped / 1369 assertions; full regression: 726 passed / 9 baseline failures / 11 skipped / 2813 assertions ✅
 - 2026-11-07 — **UKFIN-409 / zamknięcie fazy 4:** przekrojowe testy potwierdzają deduplikację provider ID/SHA-256 per rachunek i tenant, ponowne uzgodnienie cofniętego splitu z zachowaniem historii oraz częściowy FX `83.33 GBP ↔ 100.00 EUR` bez dryfu pensa po reversal/reallocation. Raport i capacity korzystają wyłącznie z aktywnych batchy. Nie był potrzebny patch produkcyjny. Bank suite: 48 passed / 326 assertions; tenant audit: zero nieprawidłowości; Finance regression: 211 passed / 1 skipped / 1313 assertions; full regression: 720 passed / 9 baseline failures / 11 skipped / 2757 assertions ✅
 - 2026-11-07 — **UKFIN-408:** tenantowy raport salda i uzgodnienia bankowego w Filament z filtrem okresu/rachunku i CSV; saldo otwarcia, wpływy, wypływy i saldo końcowe są liczone w natywnej walucie rachunku, a pokrycie i status transakcji wynikają wyłącznie z aktywnych alokacji, więc cofnięte batche nie zaniżają kwoty otwartej. Form Request, `view_finance`, PL/EN/PT oraz testy obejmują partial/reversal, wiele walut, tenant i RBAC. Finance regression: 209 passed / 1 skipped / 1285 assertions; full regression: 718 passed / 9 baseline failures / 11 skipped / 2729 assertions ✅

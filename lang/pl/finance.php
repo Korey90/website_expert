@@ -57,6 +57,24 @@ return [
         ],
         'csv' => ['report' => 'TRIAL BALANCE', 'period' => 'OKRES', 'comparison' => 'PORÓWNANIE'],
     ],
+    'profit_and_loss' => [
+        'navigation' => 'Rachunek zysków i strat', 'title' => 'Rachunek zysków i strat', 'export_csv' => 'Eksportuj CSV',
+        'select_period' => 'Wybierz okres', 'no_comparison' => 'Bez porównania', 'no_periods' => 'Dla tej firmy nie istnieją okresy księgowe.',
+        'compared_with' => 'Porównanie z: :period, :from – :to', 'inactive_account' => 'konto nieaktywne',
+        'empty_section' => 'Brak zaksięgowanej aktywności w tej sekcji.', 'subtotal' => 'Razem: :section', 'variance' => 'Odchylenie',
+        'fields' => ['period' => 'Okres księgowy', 'comparison_period' => 'Okres porównawczy'],
+        'sections' => [
+            'sales' => 'Przychody ze sprzedaży', 'cost_of_sales' => 'Koszt własny sprzedaży', 'operating_expenses' => 'Koszty operacyjne',
+            'other_income' => 'Pozostałe przychody', 'other_expenses' => 'Pozostałe koszty', 'corporation_tax' => 'Podatek dochodowy',
+        ],
+        'summary' => ['accounts' => 'Konta', 'journals' => 'Zapisy źródłowe'],
+        'columns' => ['section' => 'Sekcja', 'code' => 'Kod', 'account' => 'Konto', 'current' => 'Bieżący GBP', 'comparison' => 'Porównanie GBP', 'variance' => 'Odchylenie GBP'],
+        'metrics' => [
+            'sales' => 'Przychody', 'gross_profit' => 'Zysk brutto', 'operating_profit' => 'Zysk operacyjny',
+            'profit_before_tax' => 'Zysk przed opodatkowaniem', 'net_profit' => 'Zysk / strata netto',
+        ],
+        'csv' => ['report' => 'RACHUNEK ZYSKÓW I STRAT', 'period' => 'OKRES', 'comparison' => 'PORÓWNANIE'],
+    ],
     'journals' => [
         'navigation' => 'Dzienniki', 'singular' => 'zapis dziennika', 'plural' => 'zapisy dziennika',
         'sections' => ['summary' => 'Podsumowanie zapisu', 'audit' => 'Źródło i dane audytowe', 'lines' => 'Pozycje zapisu'],

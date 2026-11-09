@@ -763,11 +763,11 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
                     <div className="grid md:grid-cols-3 gap-6">
                         {[
                             {
-                                industry: 'Gabinet dentystyczny · UK',
-                                title: 'Klinika stomatologiczna',
-                                challenge: 'Stara strona utrudniała rezerwację wizyt i nie prezentowała usług w zrozumiały sposób.',
+                                industry: 'Firma Sanitarna · UK',
+                                title: 'Notrstar Cleaning NI',
+                                challenge: 'Obsluga klienta online, blog zintegrowany z facebook app.',
                                 solution: 'Redesign mobile-first, integracja rezerwacji online, opinie Google.',
-                                result: 'Więcej zapytań o nowych pacjentów przez formularz kontaktowy.',
+                                result: 'Więcej zapytań od nowych klientów dzieki integracji marketingowej oraz formularz kontaktowy.',
                             },
                             {
                                 industry: 'Firma budowlana · Belfast',

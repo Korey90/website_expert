@@ -62,6 +62,7 @@ class FilamentPermissionRegistry
         'ConversionReportPage' => 'view_reports',
         'ExpenseReportPage' => 'view_finance',
         'GeneralLedgerPage' => 'view_finance',
+        'ProfitAndLossPage' => 'view_finance',
         'TrialBalancePage' => 'view_finance',
         'IntegrationSettingsPage' => 'manage_settings',
         'LegalSettingsPage' => 'manage_settings',

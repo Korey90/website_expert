@@ -57,6 +57,24 @@ return [
         ],
         'csv' => ['report' => 'TRIAL BALANCE', 'period' => 'PERIOD', 'comparison' => 'COMPARISON'],
     ],
+    'profit_and_loss' => [
+        'navigation' => 'Profit and loss', 'title' => 'Profit and loss', 'export_csv' => 'Export CSV',
+        'select_period' => 'Select a period', 'no_comparison' => 'No comparison', 'no_periods' => 'No accounting periods exist for this business.',
+        'compared_with' => 'Compared with: :period, :from – :to', 'inactive_account' => 'inactive account',
+        'empty_section' => 'No posted activity in this section.', 'subtotal' => 'Total :section', 'variance' => 'Variance',
+        'fields' => ['period' => 'Accounting period', 'comparison_period' => 'Comparison period'],
+        'sections' => [
+            'sales' => 'Revenue', 'cost_of_sales' => 'Cost of sales', 'operating_expenses' => 'Operating expenses',
+            'other_income' => 'Other income', 'other_expenses' => 'Other expenses', 'corporation_tax' => 'Corporation tax expense',
+        ],
+        'summary' => ['accounts' => 'Accounts', 'journals' => 'Contributing journals'],
+        'columns' => ['section' => 'Section', 'code' => 'Code', 'account' => 'Account', 'current' => 'Current GBP', 'comparison' => 'Comparison GBP', 'variance' => 'Variance GBP'],
+        'metrics' => [
+            'sales' => 'Revenue', 'gross_profit' => 'Gross profit', 'operating_profit' => 'Operating profit',
+            'profit_before_tax' => 'Profit before tax', 'net_profit' => 'Net profit / loss',
+        ],
+        'csv' => ['report' => 'PROFIT AND LOSS', 'period' => 'PERIOD', 'comparison' => 'COMPARISON'],
+    ],
     'journals' => [
         'navigation' => 'Journals', 'singular' => 'journal entry', 'plural' => 'journal entries',
         'sections' => ['summary' => 'Journal summary', 'audit' => 'Source and audit data', 'lines' => 'Journal lines'],

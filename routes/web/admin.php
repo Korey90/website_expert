@@ -5,6 +5,7 @@ use App\Http\Controllers\EmailTemplatePreviewController;
 use App\Http\Controllers\Finance\BankReconciliationReportExportController;
 use App\Http\Controllers\Finance\ExpenseReportExportController;
 use App\Http\Controllers\Finance\FinancialAttachmentController;
+use App\Http\Controllers\Finance\ProfitAndLossReportExportController;
 use App\Http\Controllers\Finance\TrialBalanceReportExportController;
 use App\Http\Controllers\ReportController;
 use App\Models\LeadNote;
@@ -42,6 +43,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/finance/trial-balance.csv', TrialBalanceReportExportController::class)
         ->name('admin.finance.trial-balance.csv');
+
+    Route::get('/admin/finance/profit-and-loss.csv', ProfitAndLossReportExportController::class)
+        ->name('admin.finance.profit-and-loss.csv');
 
     // Reports — admin only
     Route::prefix('reports')->name('reports.')->group(function () {
