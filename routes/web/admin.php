@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Domain\DomainPriceListCsvController;
 use App\Http\Controllers\EmailTemplatePreviewController;
+use App\Http\Controllers\Finance\BalanceSheetReportExportController;
 use App\Http\Controllers\Finance\BankReconciliationReportExportController;
 use App\Http\Controllers\Finance\ExpenseReportExportController;
 use App\Http\Controllers\Finance\FinancialAttachmentController;
@@ -46,6 +47,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/finance/profit-and-loss.csv', ProfitAndLossReportExportController::class)
         ->name('admin.finance.profit-and-loss.csv');
+
+    Route::get('/admin/finance/balance-sheet.csv', BalanceSheetReportExportController::class)
+        ->name('admin.finance.balance-sheet.csv');
 
     // Reports — admin only
     Route::prefix('reports')->name('reports.')->group(function () {
