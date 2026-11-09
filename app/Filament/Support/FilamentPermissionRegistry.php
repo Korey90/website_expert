@@ -57,6 +57,7 @@ class FilamentPermissionRegistry
     ];
 
     private const PAGE_PERMISSIONS = [
+        'AgedReceivablesPayablesPage' => 'view_finance',
         'CalculatorAdminPage' => 'manage_calculator',
         'BankReconciliationReportPage' => 'view_finance',
         'BalanceSheetPage' => 'view_finance',

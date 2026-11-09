@@ -1,24 +1,30 @@
 # Current Sprint
 
-**Nazwa:** UK Finance & Tax — raporty finansowe
-**Data rozpoczęcia:** 2026-11-07
-**Status:** 🟢 COMPLETED
+**Nazwa:** UK Finance & Tax — subledger ageing i VAT workspace
+**Data rozpoczęcia:** 2026-11-09
+**Status:** 🟡 IN PROGRESS
 **Źródło:** `docs/plans/uk-finance-tax-module-plan.md`
 
-**Cel:** użytkownik z `view_finance` może uzyskać sprawdzalne podstawowe sprawozdania finansowe w GBP z ledgeru dla wybranego okresu.
+**Cel:** użytkownik z `view_finance` może uzyskać uzgodnione z ledgerem raporty wieku należności/zobowiązań, a następnie przygotować i zweryfikować robocze 9 pól VAT Return.
 
 ## Backlog
 
 ### In Progress
 
-- Brak — zakres sprintu został ukończony.
+- Brak aktywnego zadania; następne w kolejce jest `UKFIN-506`.
 
 ### To Do
 
-- Brak w tym sprincie. Kolejny etap planu rozpoczyna `UKFIN-505`.
+- [ ] `UKFIN-506` [M] — VAT Detail: output/input VAT, tax codes i dokumenty źródłowe.
+- [ ] `UKFIN-507` [M] — VatReturnCalculationAction dla 9 pól.
+- [ ] `UKFIN-508` [M] — VAT adjustments z reason, attachment i approval.
+- [ ] `UKFIN-509` [M] — VAT return review/lock/snapshot workflow.
+- [ ] `UKFIN-510` [M] — Accountant pack ZIP.
+- [ ] `UKFIN-511` [M] — Golden dataset zaakceptowany przez księgowego.
 
 ### Done
 
+- [x] `UKFIN-505` [M] — Aged Receivables i Aged Payables.
 - [x] `UKFIN-504` [M] — Cash Flow w wersji zarządczej.
 - [x] `UKFIN-503` [M] — Balance Sheet.
 - [x] `UKFIN-502` [M] — Profit & Loss.
@@ -40,4 +46,4 @@
 - Produkcyjna integracja HMRC MTD VAT.
 - Payroll/PAYE, Corporation Tax, Self Assessment i CIS.
 - Automatyczne składanie jakichkolwiek deklaracji.
-- Raporty UKFIN-505–511 i accountant review pack.
+- HMRC OAuth, obligations, submissions i fraud-prevention headers — zakres fazy 6.

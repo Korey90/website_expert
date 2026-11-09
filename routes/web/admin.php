@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Domain\DomainPriceListCsvController;
 use App\Http\Controllers\EmailTemplatePreviewController;
+use App\Http\Controllers\Finance\AgedReceivablesPayablesReportExportController;
 use App\Http\Controllers\Finance\BalanceSheetReportExportController;
 use App\Http\Controllers\Finance\BankReconciliationReportExportController;
 use App\Http\Controllers\Finance\ExpenseReportExportController;
@@ -54,6 +55,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/finance/management-cash-flow.csv', ManagementCashFlowReportExportController::class)
         ->name('admin.finance.management-cash-flow.csv');
+
+    Route::get('/admin/finance/aged-receivables-payables.csv', AgedReceivablesPayablesReportExportController::class)
+        ->name('admin.finance.aged-receivables-payables.csv');
 
     // Reports — admin only
     Route::prefix('reports')->name('reports.')->group(function () {

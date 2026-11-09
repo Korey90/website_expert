@@ -1,29 +1,29 @@
 # Current Task
 
 **Status:** Brak aktywnego zadania
-**Ostatnio zakończone:** UKFIN-504 — Cash Flow w wersji zarządczej
+**Ostatnio zakończone:** UKFIN-505 — Aged Receivables i Aged Payables
 **Data zakończenia:** 2026-11-09
 **Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
 
 ## Wynik ostatniego etapu
 
-- Dodano tenantowy Management Cash Flow w GBP metodą bezpośrednią.
-- Raport uzgadnia saldo otwarcia, przepływ netto i saldo zamknięcia dokładnie w pensach.
-- Ruchy są klasyfikowane jako operacyjne, inwestycyjne lub finansowe na podstawie kont przeciwstawnych.
-- Transfery pomiędzy własnymi kontami pieniężnymi są wyłączone, a reversals pozostają audytowalne.
-- Dostępna jest strona Filament `/admin/management-cash-flow` i prywatny eksport CSV.
-- UI i eksport wymagają `view_finance`, walidują okresy w aktywnym tenantcie i mają komplet tłumaczeń PL/EN/PT.
-- Raport jest jawnie opisany jako zarządczy, a nie ustawowy cash flow według IAS 7.
+- Dodano tenantowy raport wieku należności i zobowiązań w GBP na wybrany dzień.
+- Salda historyczne są rekonstruowane z journal lines `posted`/`reversed`, a nie z bieżącego `amount_due`.
+- Raport rozdziela salda na current, 1–30, 31–60, 61–90 i 91+ dni oraz zachowuje kwoty ujemne.
+- Faktury, koszty, płatności, credit notes, purchase credits, supplier refunds i reversals są mapowane do dokumentu źródłowego.
+- Ręczne i nierozpoznane zapisy pozostają widoczne jako ledger adjustments, dzięki czemu AR i AP uzgadniają się z kontami kontrolnymi co do pensa.
+- Dodano stronę Filament, prywatny CSV, `view_finance`, walidację daty, tenant isolation i tłumaczenia PL/EN/PT.
+- Nie dodano migracji.
 
 ## Walidacja
 
-- Dedykowane: 5 passed / 67 assertions.
-- Regresja raportów: 30 passed / 274 assertions.
-- Finance: 235 passed / 1 skipped / 1548 assertions.
-- Pełny pakiet: 744 passed / 9 znanych baseline failures / 11 skipped / 2992 assertions.
-- Tenant audit, Pint, parity tłumaczeń, trasa, skan nazw firmy i `git diff --check`: poprawne.
+- Dedykowane UKFIN-505: 5 passed / 63 assertions.
+- Raporty finansowe: 35 passed / 337 assertions.
+- Finance: 240 passed / 1 skipped / 1611 assertions.
+- Pełny pakiet: 749 passed / 9 znanych baseline failures / 11 skipped / 3055 assertions.
+- Tenant audit: `valid: true`, zero nieprawidłowości.
+- Pint, parity 749 kluczy PL/EN/PT, kontrola trasy, nazwy firmy i `git diff --check`: bez nowych problemów.
 
-## Następny planowany etap
+## Następne zadanie
 
-- `UKFIN-505` — Aged Receivables i Aged Payables.
-- Przed implementacją należy wykonać delta analysis względem ledgeru, faktur sprzedażowych, wydatków/purchase credits, płatności i aktywnych reconciliation allocations.
+- `UKFIN-506` [M] — VAT Detail: output/input VAT, tax codes i dokumenty źródłowe.
