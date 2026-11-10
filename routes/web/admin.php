@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Domain\DomainPriceListCsvController;
 use App\Http\Controllers\EmailTemplatePreviewController;
+use App\Http\Controllers\Finance\AccountantPackController;
 use App\Http\Controllers\Finance\AgedReceivablesPayablesReportExportController;
 use App\Http\Controllers\Finance\BalanceSheetReportExportController;
 use App\Http\Controllers\Finance\BankReconciliationReportExportController;
@@ -62,6 +63,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/finance/vat-detail.csv', VatDetailReportExportController::class)
         ->name('admin.finance.vat-detail.csv');
+
+    Route::get('/admin/finance/vat-returns/{vatReturn}/accountant-pack.zip', AccountantPackController::class)
+        ->name('admin.finance.vat-returns.accountant-pack');
 
     // Reports — admin only
     Route::prefix('reports')->name('reports.')->group(function () {

@@ -1,0 +1,299 @@
+{
+    "schema_version": 1,
+    "dataset_id": "website-expert-ni-uk-finance-golden-v1",
+    "classification": "FICTIONAL TRANSACTIONS / ACCOUNTANT REVIEW REQUIRED / NOT SUBMITTED TO HMRC",
+    "review_status": "pending",
+    "business_name": "Website Expert NI",
+    "period": {
+        "name": "Golden Q3 2026",
+        "financial_year": 2026,
+        "from": "2026-07-01",
+        "to": "2026-09-30"
+    },
+    "profile": {
+        "vat_number": "GB123456789",
+        "vat_scheme": "standard",
+        "vat_effective_from": "2020-01-01"
+    },
+    "journals": [
+        {
+            "key": "capital",
+            "date": "2026-07-01",
+            "description": "Opening share capital paid into bank",
+            "lines": [
+                {"account": "1100", "debit": "10000.00", "credit": "0.00"},
+                {"account": "3100", "debit": "0.00", "credit": "10000.00"}
+            ]
+        },
+        {
+            "key": "standard-sale",
+            "date": "2026-07-05",
+            "description": "Standard-rated credit sale",
+            "lines": [
+                {"account": "1200", "debit": "1200.00", "credit": "0.00"},
+                {"account": "4100", "tax": "S20", "debit": "0.00", "credit": "1000.00"},
+                {"account": "2200", "tax": "S20", "debit": "0.00", "credit": "200.00"}
+            ]
+        },
+        {
+            "key": "reduced-sale",
+            "date": "2026-07-06",
+            "description": "Reduced-rated credit sale",
+            "lines": [
+                {"account": "1200", "debit": "525.00", "credit": "0.00"},
+                {"account": "4100", "tax": "R5", "debit": "0.00", "credit": "500.00"},
+                {"account": "2200", "tax": "R5", "debit": "0.00", "credit": "25.00"}
+            ]
+        },
+        {
+            "key": "zero-sale",
+            "date": "2026-07-07",
+            "description": "Zero-rated credit sale",
+            "lines": [
+                {"account": "1200", "debit": "300.00", "credit": "0.00"},
+                {"account": "4100", "tax": "Z0", "debit": "0.00", "credit": "300.00"}
+            ]
+        },
+        {
+            "key": "exempt-sale",
+            "date": "2026-07-08",
+            "description": "VAT-exempt credit sale",
+            "lines": [
+                {"account": "1200", "debit": "200.00", "credit": "0.00"},
+                {"account": "4100", "tax": "EXEMPT", "debit": "0.00", "credit": "200.00"}
+            ]
+        },
+        {
+            "key": "outside-sale",
+            "date": "2026-07-09",
+            "description": "Outside-scope credit sale",
+            "lines": [
+                {"account": "1200", "debit": "100.00", "credit": "0.00"},
+                {"account": "4100", "tax": "OUTSIDE", "debit": "0.00", "credit": "100.00"}
+            ]
+        },
+        {
+            "key": "fx-sale",
+            "date": "2026-07-10",
+            "description": "EUR sale posted from immutable GBP snapshot",
+            "lines": [
+                {"account": "1200", "debit": "240.00", "credit": "0.00", "currency": "EUR", "original_amount": "300.00", "exchange_rate": "0.80000000"},
+                {"account": "4100", "tax": "S20", "debit": "0.00", "credit": "200.00", "currency": "EUR", "original_amount": "250.00", "exchange_rate": "0.80000000"},
+                {"account": "2200", "tax": "S20", "debit": "0.00", "credit": "40.00", "currency": "EUR", "original_amount": "50.00", "exchange_rate": "0.80000000"}
+            ]
+        },
+        {
+            "key": "standard-purchase",
+            "date": "2026-07-12",
+            "description": "Standard-rated software purchase",
+            "lines": [
+                {"account": "6200", "tax": "S20", "debit": "400.00", "credit": "0.00"},
+                {"account": "1300", "tax": "S20", "debit": "80.00", "credit": "0.00"},
+                {"account": "2100", "debit": "0.00", "credit": "480.00"}
+            ]
+        },
+        {
+            "key": "reduced-purchase",
+            "date": "2026-07-13",
+            "description": "Reduced-rated office purchase",
+            "lines": [
+                {"account": "6300", "tax": "R5", "debit": "100.00", "credit": "0.00"},
+                {"account": "1300", "tax": "R5", "debit": "5.00", "credit": "0.00"},
+                {"account": "2100", "debit": "0.00", "credit": "105.00"}
+            ]
+        },
+        {
+            "key": "zero-purchase",
+            "date": "2026-07-14",
+            "description": "Zero-rated travel purchase",
+            "lines": [
+                {"account": "6400", "tax": "Z0", "debit": "50.00", "credit": "0.00"},
+                {"account": "2100", "debit": "0.00", "credit": "50.00"}
+            ]
+        },
+        {
+            "key": "exempt-purchase",
+            "date": "2026-07-15",
+            "description": "VAT-exempt rent purchase",
+            "lines": [
+                {"account": "6100", "tax": "EXEMPT", "debit": "200.00", "credit": "0.00"},
+                {"account": "2100", "debit": "0.00", "credit": "200.00"}
+            ]
+        },
+        {
+            "key": "outside-purchase",
+            "date": "2026-07-16",
+            "description": "Outside-scope professional cost",
+            "lines": [
+                {"account": "6500", "tax": "OUTSIDE", "debit": "75.00", "credit": "0.00"},
+                {"account": "2100", "debit": "0.00", "credit": "75.00"}
+            ]
+        },
+        {
+            "key": "reverse-charge-purchase",
+            "date": "2026-07-17",
+            "description": "Reverse-charge professional service purchase",
+            "lines": [
+                {"account": "6500", "tax": "RC20", "debit": "250.00", "credit": "0.00"},
+                {"account": "1300", "tax": "RC20", "debit": "50.00", "credit": "0.00"},
+                {"account": "2200", "tax": "RC20", "debit": "0.00", "credit": "50.00"},
+                {"account": "2100", "debit": "0.00", "credit": "250.00"}
+            ]
+        },
+        {
+            "key": "capital-purchase",
+            "date": "2026-07-18",
+            "description": "Standard-rated equipment purchase",
+            "lines": [
+                {"account": "1500", "tax": "S20", "debit": "500.00", "credit": "0.00"},
+                {"account": "1300", "tax": "S20", "debit": "100.00", "credit": "0.00"},
+                {"account": "2100", "debit": "0.00", "credit": "600.00"}
+            ]
+        },
+        {
+            "key": "sales-credit",
+            "date": "2026-07-20",
+            "description": "Customer credit reducing standard-rated sale",
+            "lines": [
+                {"account": "4100", "tax": "S20", "debit": "100.00", "credit": "0.00"},
+                {"account": "2200", "tax": "S20", "debit": "20.00", "credit": "0.00"},
+                {"account": "1200", "debit": "0.00", "credit": "120.00"}
+            ]
+        },
+        {
+            "key": "purchase-credit",
+            "date": "2026-07-21",
+            "description": "Supplier credit reducing standard-rated purchase",
+            "lines": [
+                {"account": "2100", "debit": "60.00", "credit": "0.00"},
+                {"account": "6200", "tax": "S20", "debit": "0.00", "credit": "50.00"},
+                {"account": "1300", "tax": "S20", "debit": "0.00", "credit": "10.00"}
+            ]
+        },
+        {
+            "key": "mistaken-sale",
+            "date": "2026-07-22",
+            "description": "Mistaken standard sale reversed next day",
+            "lines": [
+                {"account": "1200", "debit": "120.00", "credit": "0.00"},
+                {"account": "4100", "tax": "S20", "debit": "0.00", "credit": "100.00"},
+                {"account": "2200", "tax": "S20", "debit": "0.00", "credit": "20.00"}
+            ]
+        },
+        {
+            "key": "mistaken-sale-reversal",
+            "date": "2026-07-23",
+            "description": "Reversal of mistaken standard sale",
+            "reverse_of": "mistaken-sale"
+        },
+        {
+            "key": "customer-payment",
+            "date": "2026-08-01",
+            "description": "Customer receipt allocated to receivables",
+            "lines": [
+                {"account": "1100", "debit": "1500.00", "credit": "0.00"},
+                {"account": "1200", "debit": "0.00", "credit": "1500.00"}
+            ]
+        },
+        {
+            "key": "supplier-payment",
+            "date": "2026-08-02",
+            "description": "Supplier payment allocated to payables",
+            "lines": [
+                {"account": "2100", "debit": "1000.00", "credit": "0.00"},
+                {"account": "1100", "debit": "0.00", "credit": "1000.00"}
+            ]
+        },
+        {
+            "key": "customer-refund",
+            "date": "2026-08-03",
+            "description": "Customer refund reopening receivables",
+            "lines": [
+                {"account": "1200", "debit": "50.00", "credit": "0.00"},
+                {"account": "1100", "debit": "0.00", "credit": "50.00"}
+            ]
+        },
+        {
+            "key": "supplier-refund",
+            "date": "2026-08-04",
+            "description": "Supplier cash refund reducing payable settlement",
+            "lines": [
+                {"account": "1100", "debit": "30.00", "credit": "0.00"},
+                {"account": "2100", "debit": "0.00", "credit": "30.00"}
+            ]
+        },
+        {
+            "key": "bank-fee",
+            "date": "2026-08-05",
+            "description": "Bank charge",
+            "lines": [
+                {"account": "6900", "debit": "10.00", "credit": "0.00"},
+                {"account": "1100", "debit": "0.00", "credit": "10.00"}
+            ]
+        },
+        {
+            "key": "bank-interest",
+            "date": "2026-08-06",
+            "description": "Bank interest received",
+            "lines": [
+                {"account": "1100", "debit": "5.00", "credit": "0.00"},
+                {"account": "4200", "debit": "0.00", "credit": "5.00"}
+            ]
+        },
+        {
+            "key": "vat-adjustment",
+            "date": "2026-09-15",
+            "description": "Documented output VAT accounting adjustment",
+            "source": "vat_adjustment",
+            "lines": [
+                {"account": "7900", "debit": "5.00", "credit": "0.00"},
+                {"account": "2200", "tax": "S20", "debit": "0.00", "credit": "5.00"}
+            ]
+        }
+    ],
+    "expected": {
+        "vat_return": {
+            "box_1": 300.00,
+            "box_2": 0.00,
+            "box_3": 300.00,
+            "box_4": 225.00,
+            "box_5": 75.00,
+            "box_6": 2100,
+            "box_7": 1450,
+            "box_8": 0,
+            "box_9": 0,
+            "net_direction": "payable"
+        },
+        "trial_balance": {"closing_debits": 13235.00, "closing_credits": 13235.00, "difference": 0.00},
+        "profit_and_loss": {
+            "sales": 2200.00,
+            "operating_expenses": 1040.00,
+            "other_income": 5.00,
+            "other_expenses": 0.00,
+            "net_profit": 1165.00
+        },
+        "balance_sheet": {
+            "assets": 12195.00,
+            "liabilities": 1030.00,
+            "ledger_equity": 10000.00,
+            "period_earnings": 1165.00,
+            "equity": 11165.00,
+            "liabilities_and_equity": 12195.00,
+            "difference": 0.00
+        },
+        "cash_flow": {
+            "inflows": 11535.00,
+            "outflows": 1060.00,
+            "operating": 475.00,
+            "investing": 0.00,
+            "financing": 10000.00,
+            "net": 10475.00,
+            "closing": 10475.00,
+            "difference": 0.00
+        },
+        "ageing": {
+            "receivables": 995.00,
+            "payables": 730.00
+        }
+    }
+}

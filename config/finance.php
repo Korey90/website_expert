@@ -51,4 +51,8 @@ return [
             'other',
         ],
     ],
+    'accountant_pack' => [
+        'max_attachments' => 100,
+        'max_attachment_bytes' => 100 * 1024 * 1024,
+    ],
 ];

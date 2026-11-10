@@ -25,6 +25,12 @@ class ViewVatReturn extends ViewRecord
         $return = $this->record;
 
         return [
+            Action::make('download_accountant_pack')
+                ->label(__('finance.accountant_pack.action'))
+                ->icon('heroicon-o-archive-box-arrow-down')
+                ->color('gray')
+                ->visible(fn (): bool => $return->status === VatReturn::STATUS_LOCKED && Gate::allows('view', $return))
+                ->url(fn (): string => route('admin.finance.vat-returns.accountant-pack', ['vatReturn' => $return])),
             Action::make('review')
                 ->label(__('finance.vat_returns.actions.review'))
                 ->icon('heroicon-o-check-badge')

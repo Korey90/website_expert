@@ -11,15 +11,15 @@
 
 ### In Progress
 
-_Brak aktywnego zadania._
+- [ ] `UKFIN-511` [M] — Golden dataset zaakceptowany przez księgowego.
 
 ### To Do
 
-- [ ] `UKFIN-510` [M] — Accountant pack ZIP.
-- [ ] `UKFIN-511` [M] — Golden dataset zaakceptowany przez księgowego.
+- [ ] Formalny gate księgowego UK dla golden datasetu i reguł podatkowych.
 
 ### Done
 
+- [x] `UKFIN-510` [M] — Accountant pack ZIP.
 - [x] `UKFIN-509` [M] — VAT return review/lock/snapshot workflow.
 - [x] `UKFIN-508` [M] — VAT adjustments z reason, attachment i approval.
 - [x] `UKFIN-507` [M] — VatReturnCalculationAction dla 9 pól.
