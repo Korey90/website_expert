@@ -20,18 +20,14 @@ class EditRole extends EditRecord
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $current  = $this->record->permissions->pluck('name')->all();
-        $groups   = RoleResource::permissionGroups();
+        $current = $this->record->permissions->pluck('name')->all();
+        $groups = RoleResource::permissionGroups();
 
         foreach ($groups as $key => $group) {
-            $data["perms_{$key}"] = array_values(array_filter($current, function ($name) use ($group) {
-                foreach ($group['suffixes'] as $suffix) {
-                    if (str_ends_with($name, '_' . $suffix) || $name === $suffix) {
-                        return true;
-                    }
-                }
-                return false;
-            }));
+            $data["perms_{$key}"] = array_values(array_filter(
+                $current,
+                fn (string $name): bool => RoleResource::permissionMatchesGroup($name, $group)
+            ));
         }
 
         return $data;
@@ -47,6 +43,7 @@ class EditRole extends EditRecord
                 unset($data[$key]);
             }
         }
+
         return $data;
     }
 

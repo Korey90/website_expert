@@ -143,6 +143,14 @@ class AuditFinanceTenantData extends Command
             'sample_ids' => (clone $vatReturnQuery)->limit(20)->pluck('vat_return.id')->all(),
         ];
 
+        $hmrcConnectionQuery = DB::table('hmrc_connections as connection')
+            ->leftJoin('businesses as owner', 'owner.id', '=', 'connection.business_id')
+            ->where(fn ($query) => $query->whereNull('connection.business_id')->orWhereNull('owner.id'));
+        $report['hmrc_connections'] = [
+            'invalid_count' => (clone $hmrcConnectionQuery)->count(),
+            'sample_ids' => (clone $hmrcConnectionQuery)->limit(20)->pluck('connection.id')->all(),
+        ];
+
         $invalidVatReturnSnapshots = [];
         $snapshotHasher = app(VatReturnSnapshotService::class);
 

@@ -1,48 +1,54 @@
 # Current Task
 
-**Status:** W toku — część techniczna; formalna akceptacja wymaga księgowego UK
-**Zadanie:** UKFIN-511 — Golden dataset i review gate księgowego
+**Status:** W toku — konfiguracja zewnętrzna UKFIN-601 + implementacja UKFIN-605
+**Zadanie:** HMRC MTD VAT sandbox end-to-end
 **Data rozpoczęcia:** 2026-11-10
 **Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
 **Ochrona równoległej pracy:** nie modyfikować `resources/js/Pages/Landing/PlStronyInternetowe.tsx` ani `package*.json`.
 
-## Cel
+## Decyzja wykonawcza
 
-Utworzyć deterministyczny, wersjonowany zestaw referencyjny dla fazy raportów i VAT workspace, który odtwarza reprezentatywne operacje UK, generuje oczekiwane wyniki ledger/raportów/VAT Return/accountant pack oraz udostępnia księgowemu jednoznaczną checklistę akceptacji. Zadanie można technicznie przygotować i zautomatyzować, ale nie wolno oznaczyć wyniku jako zaakceptowanego bez rzeczywistego podpisu lub udokumentowanej decyzji księgowego UK.
+Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowego zostaje świadomie przesunięty do czasu ukończenia pełnego HMRC sandbox end-to-end. Brak sign-off nie jest traktowany jako zgoda podatkowa i nie pozwala na produkcyjne wysyłanie deklaracji.
 
-## Zakres techniczny
+## Bieżący zakres
 
-- Wersjonowany fixture źródłowy z jawną wersją schematu, założeniami i fikcyjnymi kontrahentami.
-- Przypadki: standard/reduced/zero/exempt/outside scope, zakupy z odliczalnym i nieodliczalnym VAT, reverse charge, sales/purchase credit, payment/refund, FX, VAT adjustment i reversal.
-- Oczekiwane journale, Trial Balance, P&L, Balance Sheet, management Cash Flow, ageing, VAT Detail oraz wszystkie 9 pól VAT Return.
-- Automatyczny test zgodności co do pensa oraz stabilności snapshotu/manifestu.
-- Pakiet review dla księgowego oparty na rzeczywistym generatorze UKFIN-510, nie na równoległej demonstracyjnej implementacji.
-- Checklista decyzji dla mapowań tax codes, boxes 6/7/8/9, NI–EU, reverse charge, non-recoverable VAT i error corrections.
-- Plik sign-off z miejscem na imię, kwalifikacje/firmę, datę, wersję datasetu, decyzję i uwagi; domyślny status `pending`.
+- `UKFIN-601`: użytkownik posiada konto HMRC Developer Hub i pierwszą aplikację sandbox.
+- Do aplikacji trzeba dodać: VAT (MTD) API v1.0, Create Test User API v1.0 i Test Fraud Prevention Headers API v1.0.
+- Callback planowany przez system: `<APP_URL>/admin/hmrc/oauth/callback`.
+- Sekrety będą podawane wyłącznie przez zmienne środowiskowe i nie mogą trafić do Git, logów ani chatu.
+- `UKFIN-602`: ukończony adapter VAT API z klientami sandbox/production.
+- `UKFIN-603/604`: ukończony OAuth connect/callback/refresh/local disconnect oraz szyfrowane przechowywanie połączenia.
+- Następny etap implementacyjny: `UKFIN-605` fraud-prevention headers builder + sandbox test endpoint.
 
-## Granice i gate
+## Zrealizowane w UKFIN-602
 
-- Dane transakcyjne pozostają fikcyjne; dane wystawcy to `Website Expert NI` zgodnie z ustawieniami systemu.
-- Dataset nie jest poradą podatkową i nie jest deklaracją wysłaną do HMRC.
-- Testy mogą potwierdzić zgodność kodu z zaakceptowanym fixturem, ale nie mogą same zatwierdzić poprawności podatkowej fixtureu.
-- UKFIN-511 pozostaje w toku do czasu ręcznej akceptacji przez prawdziwego księgowego UK; część techniczna otrzyma osobny status „ready for accountant review”.
+- ✅ `HmrcClientInterface` i jawne implementacje sandbox/production.
+- ✅ Operacje: obligations, submit/view return, liabilities i payments.
+- ✅ `Accept: application/vnd.hmrc.1.0+json`, OAuth Bearer oraz kontrolowane `Gov-*`/`Gov-Test-Scenario`.
+- ✅ `Gov-Test-Scenario` jest blokowany w production.
+- ✅ Brak automatycznego retry POST submission.
+- ✅ Walidacja VRN, period key i zakresów dat przed requestem.
+- ✅ Sanitizowane wyjątki nie ujawniają access tokenu, pełnego VRN ani surowego body HMRC.
+- ✅ Konfiguracja środowiskowa i dokument `docs/integrations/hmrc-mtd-vat-sandbox.md`.
+- ✅ Dedykowane: 7 passed / 28 assertions.
+- ✅ Finance regression: 276 passed / 1 skipped / 2036 assertions.
+- ✅ Full regression: 787 passed / 9 znanych baseline failures / 11 skipped / 3495 assertions; brak nowych awarii HMRC.
 
-## Plan walidacji
+## Zrealizowane w UKFIN-603/604
 
-- Determinizm: dwie generacje tych samych danych dają identyczne wartości i snapshot hash.
-- Uzgodnienia: double-entry, VAT control accounts, AR/AP, cash i wszystkie raportowe sumy kontrolne są równe co do pensa.
-- Expected-vs-actual dla każdego journalu, raportu i dziewięciu pól.
-- Accountant pack: integralność ZIP/manifestu oraz brak pełnych danych wrażliwych.
-- Dokumentacja księgowego zawiera komplet założeń i otwartych decyzji.
-- Pint, test dedykowany, Finance regression i pełny baseline po zmianach produkcyjnych.
+- ✅ Authorization Code Grant z kryptograficznym `state` i PKCE S256; jednorazowy stan jest związany z tenantem, użytkownikiem i środowiskiem oraz ma ograniczony czas życia.
+- ✅ Callback wymienia kod bez ujawniania Client Secret w URL; błędy są sanitizowane i nie zawierają kodu, tokenów, sekretu ani surowej odpowiedzi HMRC.
+- ✅ Access token, rotowany single-use refresh token i VRN są szyfrowane przez model; żaden token ani pełny VRN nie jest prezentowany w panelu.
+- ✅ Refresh jest serializowany blokadą rekordu; `invalid_grant` usuwa lokalne tokeny i wymusza ponowne połączenie.
+- ✅ Panel `/admin/hmrc-connection` oraz endpointy zarządzania są tenantowe i dostępne do zarządzania tylko właścicielowi/adminowi aktywnego tenanta.
+- ✅ „Disconnect” usuwa wyłącznie lokalne tokeny. Cofnięcie autoryzacji po stronie HMRC wymaga użycia strony HMRC „Manage authorised applications”.
+- ✅ Migracja MySQL `2026_11_10_000026_create_hmrc_connections_table` została wykonana; tenant audit nie wykrył nieprawidłowości.
+- ✅ OAuth: 10 passed / 88 assertions; końcowy pakiet HMRC OAuth + VAT client + Filament permissions: 23 passed / 161 assertions; Finance: 286 passed / 1 skipped / 2124 assertions.
+- ✅ Full regression: 797 passed / 9 znanych baseline failures / 11 skipped / 3583 assertions; brak nowych awarii HMRC.
 
-## Stan realizacji
+## Gate
 
-- ✅ Fixture `v1.json` księguje reprezentatywne operacje przez produkcyjny posting engine.
-- ✅ Expected-vs-actual obejmuje Trial Balance, P&L, Balance Sheet, management Cash Flow, ageing i wszystkie 9 pól VAT Return.
-- ✅ Dwie budowy snapshotu dają identyczne dane i SHA-256.
-- ✅ Locked snapshot generuje rzeczywisty UKFIN-510 accountant pack z redakcją numeru VAT.
-- ✅ Fixture jest chroniony stałym SHA-256; zmiana in-place łamie test i wymaga nowej wersji.
-- ✅ README, szczegółowa checklista i formularz sign-off są gotowe w `docs/review/uk-finance-golden-dataset-v1/`.
-- ✅ Regresja modułu Finance: 269 passed / 1 skipped / 2008 assertions.
-- ⏳ Formalna akceptacja podatkowa przez prawdziwego księgowego UK pozostaje oczekującym zewnętrznym gate.
+- UKFIN-601 pozostaje otwarty do potwierdzenia subskrypcji trzech API i skonfigurowania lokalnych sekretów.
+- Nie wykonano rzeczywistego logowania HMRC: wymaga ono subskrypcji API, lokalnych credentials aplikacji i testowego użytkownika organizacji.
+- Żadne prawdziwe dane ani deklaracje nie są wysyłane na tym etapie.
+- `HMRC_ENVIRONMENT` pozostaje `sandbox` do czasu przejścia OAuth, fraud headers, pełnych scenariuszy sandbox, security review i jawnej decyzji właściciela.

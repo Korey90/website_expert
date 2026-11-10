@@ -463,6 +463,23 @@ return [
             'scan_status' => 'Scan status', 'inclusion_status' => 'Inclusion status', 'package_path' => 'Package path',
         ],
     ],
+    'hmrc_connection' => [
+        'navigation' => 'HMRC Connection',
+        'title' => 'HMRC Connection',
+        'subtitle' => 'OAuth connection for Making Tax Digital for VAT.',
+        'sections' => ['status' => 'Connection status', 'security' => 'Security and authority'],
+        'fields' => ['environment' => 'Environment', 'status' => 'Status', 'vrn' => 'VAT registration number', 'scopes' => 'Scopes', 'connected_at' => 'Connected at', 'expires_at' => 'Access token expires at', 'refreshed_at' => 'Last refreshed at'],
+        'statuses' => ['connected' => 'Connected', 'reconnect_required' => 'Reconnect required', 'disconnected' => 'Disconnected'],
+        'actions' => ['connect' => 'Connect HMRC', 'refresh' => 'Refresh token', 'disconnect' => 'Disconnect'],
+        'notifications' => ['refreshed' => 'HMRC access token refreshed.', 'disconnected' => 'HMRC tokens removed locally.'],
+        'help' => [
+            'security' => 'Access tokens, refresh tokens and the VRN are encrypted at rest and are never displayed on this page.',
+            'disconnect' => 'This removes local tokens. It does not revoke the authority held by HMRC.',
+            'external_revoke' => 'To fully revoke authority, use HMRC Manage authorised applications in addition to disconnecting here.',
+            'reconnect_required' => 'The stored authority can no longer be refreshed. Connect HMRC again.',
+            'sandbox_only' => 'Keep the integration in sandbox until all end-to-end and security gates have passed.',
+        ],
+    ],
     'vat_detail' => [
         'navigation' => 'VAT detail',
         'title' => 'VAT detail',

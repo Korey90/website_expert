@@ -24,6 +24,7 @@ require __DIR__.'/web/profile.php';
 require __DIR__.'/web/onboarding.php';
 require __DIR__.'/web/business.php';
 require __DIR__.'/web/calendar.php';
+require __DIR__.'/web/hmrc.php';
 require __DIR__.'/web/admin.php';
 
 // Dashboard redirect — required by RedirectIfAuthenticated (guest middleware)
@@ -36,4 +37,3 @@ Route::redirect('/dashboard', '/admin')->name('dashboard');
 Route::get('/{slug}', [ServicePageController::class, 'show'])
     ->name('service-page.show')
     ->where('slug', '[a-z0-9\-]+');
-

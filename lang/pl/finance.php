@@ -463,6 +463,23 @@ return [
             'scan_status' => 'Status skanowania', 'inclusion_status' => 'Status dołączenia', 'package_path' => 'Ścieżka w pakiecie',
         ],
     ],
+    'hmrc_connection' => [
+        'navigation' => 'Połączenie HMRC',
+        'title' => 'Połączenie HMRC',
+        'subtitle' => 'Połączenie OAuth dla Making Tax Digital for VAT.',
+        'sections' => ['status' => 'Status połączenia', 'security' => 'Bezpieczeństwo i upoważnienie'],
+        'fields' => ['environment' => 'Środowisko', 'status' => 'Status', 'vrn' => 'Numer rejestracyjny VAT', 'scopes' => 'Zakresy', 'connected_at' => 'Połączono', 'expires_at' => 'Wygaśnięcie access tokenu', 'refreshed_at' => 'Ostatnie odświeżenie'],
+        'statuses' => ['connected' => 'Połączono', 'reconnect_required' => 'Wymagane ponowne połączenie', 'disconnected' => 'Rozłączono'],
+        'actions' => ['connect' => 'Połącz z HMRC', 'refresh' => 'Odśwież token', 'disconnect' => 'Rozłącz'],
+        'notifications' => ['refreshed' => 'Access token HMRC został odświeżony.', 'disconnected' => 'Tokeny HMRC zostały usunięte lokalnie.'],
+        'help' => [
+            'security' => 'Access token, refresh token i VRN są szyfrowane w bazie i nigdy nie są wyświetlane na tej stronie.',
+            'disconnect' => 'Ta operacja usuwa lokalne tokeny. Nie cofa upoważnienia przechowywanego przez HMRC.',
+            'external_revoke' => 'Aby całkowicie cofnąć upoważnienie, użyj również usługi HMRC Manage authorised applications.',
+            'reconnect_required' => 'Zapisanego upoważnienia nie można już odświeżyć. Połącz HMRC ponownie.',
+            'sandbox_only' => 'Pozostaw integrację w sandboxie do przejścia wszystkich testów end-to-end i kontroli bezpieczeństwa.',
+        ],
+    ],
     'vat_detail' => [
         'navigation' => 'Szczegóły VAT',
         'title' => 'Szczegółowy raport VAT',

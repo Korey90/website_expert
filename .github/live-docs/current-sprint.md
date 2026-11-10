@@ -1,24 +1,28 @@
 # Current Sprint
 
-**Nazwa:** UK Finance & Tax — subledger ageing i VAT workspace
-**Data rozpoczęcia:** 2026-11-09
+**Nazwa:** UK Finance & Tax — HMRC MTD VAT sandbox
+**Data rozpoczęcia:** 2026-11-10
 **Status:** 🟡 IN PROGRESS
 **Źródło:** `docs/plans/uk-finance-tax-module-plan.md`
 
-**Cel:** użytkownik z `view_finance` może uzyskać uzgodnione z ledgerem raporty wieku należności/zobowiązań, a następnie przygotować i zweryfikować robocze 9 pól VAT Return.
+**Cel:** doprowadzić bezpieczny przepływ HMRC VAT MTD od OAuth sandbox przez obligations i kontrolowany submission do receipt oraz walidacji fraud-prevention headers.
 
 ## Backlog
 
 ### In Progress
 
-- [ ] `UKFIN-511` [M] — Golden dataset zaakceptowany przez księgowego.
+- [ ] `UKFIN-601` [M] — dodać trzy API do istniejącej aplikacji HMRC sandbox i skonfigurować sekrety poza repozytorium.
+- [ ] `UKFIN-605` [M] — fraud-prevention headers builder + test endpoint.
 
 ### To Do
 
-- [ ] Formalny gate księgowego UK dla golden datasetu i reguł podatkowych.
+- [ ] Formalny gate księgowego UK po sandbox end-to-end, przed produkcyjnym submission.
 
 ### Done
 
+- [x] `UKFIN-602` [M] — HmrcClientInterface + sandbox/production VAT API clients.
+- [x] `UKFIN-603` [M] — OAuth connect/callback/refresh/local disconnect z PKCE S256, jednorazowym `state` i blokadą refresh race.
+- [x] `UKFIN-604` [M] — szyfrowane tokeny/VRN, sanitizowane błędy i maskowany panel połączenia HMRC.
 - [x] `UKFIN-510` [M] — Accountant pack ZIP.
 - [x] `UKFIN-509` [M] — VAT return review/lock/snapshot workflow.
 - [x] `UKFIN-508` [M] — VAT adjustments z reason, attachment i approval.
@@ -33,17 +37,16 @@
 
 ## Definition of Done
 
-- Raporty czytają wyłącznie niezmienny tenantowy ledger i nie przeliczają ponownie snapshotów źródłowych.
-- Wszystkie sumy księgowe są liczone bez dryfu pensów i mają jawne sumy kontrolne Winien/Ma.
-- Okresy i porównania są walidowane względem aktywnego `business_id`.
-- Historycznie nieaktywne konta z saldem pozostają widoczne.
-- UI i eksporty wymagają `view_finance` oraz mają komplet tłumaczeń PL/EN/PT.
-- Testy domenowe i pełna regresja nie dodają nowych błędów względem baseline.
-- Dokumentacja opisuje semantykę każdego raportu i jego ograniczenia.
+- Sandbox i production mają jawnie rozdzielone URL-e oraz credentials.
+- OAuth ma `state`, PKCE, szyfrowane tokeny, single-use refresh locking i bezpieczne revoke.
+- Wszystkie VAT API calls zawierają wymagane fraud-prevention headers i zachowują correlation ID.
+- Submission odbywa się tylko z locked VAT Return snapshotu, po deklaracji i step-up confirmation.
+- POST nie ma ślepego retry, a timeout/niejednoznaczny wynik prowadzi do reconciliation.
+- Testy sandbox obejmują success, invalid VRN, expired token, duplicate, 5xx i timeout.
+- Produkcja pozostaje zablokowana do security review, zgody właściciela i wymaganych zewnętrznych gate'ów.
 
 ## Poza zakresem tego sprintu
 
-- Produkcyjna integracja HMRC MTD VAT.
 - Payroll/PAYE, Corporation Tax, Self Assessment i CIS.
-- Automatyczne składanie jakichkolwiek deklaracji.
-- HMRC OAuth, obligations, submissions i fraud-prevention headers — zakres fazy 6.
+- VAT Assist (MTD) i obsługa biur rachunkowych przez Agent Authorisation API.
+- Automatyczne składanie deklaracji bez świadomego potwierdzenia użytkownika.

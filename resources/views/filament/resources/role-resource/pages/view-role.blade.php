@@ -6,64 +6,16 @@
         // Permissions this role currently has
         $granted = $record->permissions->pluck('name')->flip(); // flip for O(1) lookup
 
-        // ── Group definitions ─────────────────────────────────────────────────
-        // Each entry: ['label', 'icon', 'dot' (tailwind color class), 'suffixes' (array of name suffixes)]
-        $groups = [
-            'CRM' => [
-                'label'    => 'CRM',
-                'icon'     => 'heroicon-o-building-office-2',
-                'dot'      => 'bg-indigo-500',
-                'suffixes' => ['clients', 'leads', 'contracts'],
-            ],
-            'Finance' => [
-                'label'    => 'Finance',
-                'icon'     => 'heroicon-o-banknotes',
-                'dot'      => 'bg-green-500',
-                'suffixes' => ['quotes', 'invoices'],
-            ],
-            'Projects' => [
-                'label'    => 'Projects',
-                'icon'     => 'heroicon-o-briefcase',
-                'dot'      => 'bg-blue-500',
-                'suffixes' => ['projects'],
-            ],
-            'Templates' => [
-                'label'    => 'Templates',
-                'icon'     => 'heroicon-o-document-duplicate',
-                'dot'      => 'bg-purple-500',
-                'suffixes' => ['contract_templates', 'email_templates', 'sms_templates'],
-            ],
-            'Automations' => [
-                'label'    => 'Automations',
-                'icon'     => 'heroicon-o-bolt',
-                'dot'      => 'bg-yellow-500',
-                'suffixes' => ['automations'],
-            ],
-            'Website CMS' => [
-                'label'    => 'Website CMS',
-                'icon'     => 'heroicon-o-globe-alt',
-                'dot'      => 'bg-cyan-500',
-                'suffixes' => ['pages', 'site_sections'],
-            ],
-            'Users' => [
-                'label'    => 'Users',
-                'icon'     => 'heroicon-o-users',
-                'dot'      => 'bg-orange-500',
-                'suffixes' => ['users'],
-            ],
-            'Reports' => [
-                'label'    => 'Reports',
-                'icon'     => 'heroicon-o-chart-bar',
-                'dot'      => 'bg-teal-500',
-                'suffixes' => ['reports'],
-            ],
-            'System' => [
-                'label'    => 'System',
-                'icon'     => 'heroicon-o-cog-6-tooth',
-                'dot'      => 'bg-rose-500',
-                'suffixes' => ['settings', 'roles', 'pipeline', 'calculator', 'project_templates'],
-            ],
+        // Keep the read-only view in sync with the create/edit role form.
+        $dots = [
+            'crm' => 'bg-indigo-500', 'finance' => 'bg-green-500', 'projects' => 'bg-blue-500',
+            'templates' => 'bg-purple-500', 'automations' => 'bg-yellow-500', 'website' => 'bg-cyan-500',
+            'billing' => 'bg-pink-500', 'users' => 'bg-orange-500', 'reports' => 'bg-teal-500',
+            'system' => 'bg-rose-500',
         ];
+        $groups = collect(\App\Filament\Resources\RoleResource::permissionGroups())
+            ->map(fn (array $group, string $key): array => $group + ['dot' => $dots[$key] ?? 'bg-gray-400'])
+            ->all();
 
         // For each group, collect the permissions that belong to it
         $grouped = [];
@@ -72,12 +24,9 @@
         foreach ($groups as $key => $group) {
             $perms = [];
             foreach ($allPermissions as $name => $perm) {
-                foreach ($group['suffixes'] as $suffix) {
-                    if (str_ends_with($name, '_' . $suffix) || $name === $suffix) {
-                        $perms[] = $name;
-                        $seen[$name] = true;
-                        break;
-                    }
+                if (\App\Filament\Resources\RoleResource::permissionMatchesGroup($name, $group)) {
+                    $perms[] = $name;
+                    $seen[$name] = true;
                 }
             }
             // Sort: view → create → edit → delete → manage → rest

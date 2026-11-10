@@ -463,6 +463,23 @@ return [
             'scan_status' => 'Estado da verificação', 'inclusion_status' => 'Estado de inclusão', 'package_path' => 'Caminho no pacote',
         ],
     ],
+    'hmrc_connection' => [
+        'navigation' => 'Ligação HMRC',
+        'title' => 'Ligação HMRC',
+        'subtitle' => 'Ligação OAuth para Making Tax Digital for VAT.',
+        'sections' => ['status' => 'Estado da ligação', 'security' => 'Segurança e autorização'],
+        'fields' => ['environment' => 'Ambiente', 'status' => 'Estado', 'vrn' => 'Número de registo de IVA', 'scopes' => 'Âmbitos', 'connected_at' => 'Ligado em', 'expires_at' => 'Expiração do token de acesso', 'refreshed_at' => 'Última atualização'],
+        'statuses' => ['connected' => 'Ligado', 'reconnect_required' => 'Nova ligação necessária', 'disconnected' => 'Desligado'],
+        'actions' => ['connect' => 'Ligar ao HMRC', 'refresh' => 'Atualizar token', 'disconnect' => 'Desligar'],
+        'notifications' => ['refreshed' => 'Token de acesso HMRC atualizado.', 'disconnected' => 'Tokens HMRC removidos localmente.'],
+        'help' => [
+            'security' => 'Os tokens de acesso, de atualização e o VRN são encriptados em repouso e nunca são apresentados nesta página.',
+            'disconnect' => 'Esta operação remove os tokens locais. Não revoga a autorização mantida pelo HMRC.',
+            'external_revoke' => 'Para revogar totalmente a autorização, utilize também o serviço HMRC Manage authorised applications.',
+            'reconnect_required' => 'A autorização guardada já não pode ser atualizada. Ligue novamente ao HMRC.',
+            'sandbox_only' => 'Mantenha a integração no sandbox até concluir todos os testes end-to-end e controlos de segurança.',
+        ],
+    ],
     'vat_detail' => [
         'navigation' => 'Detalhe do IVA',
         'title' => 'Detalhe do IVA',

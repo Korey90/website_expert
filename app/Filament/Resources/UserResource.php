@@ -4,24 +4,25 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
-use Filament\Forms;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables;
 use Filament\Tables\Table;
-use Spatie\Permission\Models\Role;
 
 class UserResource extends BaseResource
 {
     protected static ?string $model = User::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
+
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Schema $form): Schema
@@ -46,6 +47,13 @@ class UserResource extends BaseResource
                     Forms\Components\CheckboxList::make('roles')
                         ->relationship('roles', 'name')
                         ->columns(2)
+                        ->columnSpanFull(),
+                    Forms\Components\CheckboxList::make('businesses')
+                        ->label('Business access')
+                        ->relationship('businesses', 'name')
+                        ->helperText('Required for tenant-scoped finance, accounting and UK tax data.')
+                        ->columns(2)
+                        ->bulkToggleable()
                         ->columnSpanFull(),
                 ]),
         ]);
@@ -78,11 +86,10 @@ class UserResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListUsers::route('/'),
+            'index' => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
-            'view'   => Pages\ViewUser::route('/{record}'),
-            'edit'   => Pages\EditUser::route('/{record}/edit'),
+            'view' => Pages\ViewUser::route('/{record}'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }
-

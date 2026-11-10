@@ -9,18 +9,22 @@ use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RoleResource extends BaseResource
 {
     protected static ?string $model = Role::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
+
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+
     protected static ?string $navigationLabel = 'Roles & Permissions';
+
     protected static ?int $navigationSort = 2;
 
     /**
@@ -29,37 +33,50 @@ class RoleResource extends BaseResource
     public static function permissionGroups(): array
     {
         return [
-            'crm'         => ['label' => 'CRM',          'icon' => 'heroicon-o-building-office-2', 'suffixes' => ['clients', 'leads', 'contracts', 'briefings', 'sales_offers']],
-            'finance'     => ['label' => 'Finance',       'icon' => 'heroicon-o-banknotes',          'suffixes' => ['quotes', 'invoices', 'payments']],
-            'projects'    => ['label' => 'Projects',      'icon' => 'heroicon-o-briefcase',          'suffixes' => ['projects', 'portfolio_projects', 'services']],
-            'templates'   => ['label' => 'Templates',     'icon' => 'heroicon-o-document-duplicate', 'suffixes' => ['contract_templates', 'email_templates', 'sms_templates', 'briefing_templates', 'sales_offer_templates', 'project_templates']],
+            'crm' => ['label' => 'CRM',          'icon' => 'heroicon-o-building-office-2', 'suffixes' => ['clients', 'leads', 'contracts', 'briefings', 'sales_offers']],
+            'finance' => ['label' => 'Finance, Accounting & UK Tax', 'icon' => 'heroicon-o-banknotes', 'suffixes' => ['quotes', 'invoices', 'payments', 'finance', 'finance_periods', 'tax_returns']],
+            'projects' => ['label' => 'Projects',      'icon' => 'heroicon-o-briefcase',          'suffixes' => ['projects', 'portfolio_projects', 'services']],
+            'templates' => ['label' => 'Templates',     'icon' => 'heroicon-o-document-duplicate', 'suffixes' => ['contract_templates', 'email_templates', 'sms_templates', 'briefing_templates', 'sales_offer_templates', 'project_templates']],
             'automations' => ['label' => 'Automations',   'icon' => 'heroicon-o-bolt',               'suffixes' => ['automations', 'automation_triggers', 'automation_logs', 'notifications']],
-            'website'     => ['label' => 'Website',       'icon' => 'heroicon-o-globe-alt',          'suffixes' => ['pages', 'site_sections', 'landing_pages', 'landing_pages_ai']],
-            'billing'     => ['label' => 'SaaS Billing',  'icon' => 'heroicon-o-credit-card',        'suffixes' => ['businesses', 'business_settings', 'business_profile', 'plans', 'subscriptions', 'sessions']],
-            'users'       => ['label' => 'Users',         'icon' => 'heroicon-o-users',              'suffixes' => ['users', 'roles', 'permissions', 'api_tokens', 'lead_sources', 'admin_panel']],
-            'reports'     => ['label' => 'Reports',       'icon' => 'heroicon-o-chart-bar',           'suffixes' => ['reports']],
-            'system'      => ['label' => 'System',        'icon' => 'heroicon-o-cog-6-tooth',         'suffixes' => ['settings', 'roles', 'pipeline', 'calculator', 'project_templates']],
+            'website' => ['label' => 'Website',       'icon' => 'heroicon-o-globe-alt',          'suffixes' => ['pages', 'site_sections', 'landing_pages', 'landing_pages_ai']],
+            'billing' => ['label' => 'SaaS Billing',  'icon' => 'heroicon-o-credit-card',        'suffixes' => ['businesses', 'business_settings', 'business_profile', 'plans', 'subscriptions', 'sessions']],
+            'users' => ['label' => 'Users & Panel Access', 'icon' => 'heroicon-o-users', 'suffixes' => ['users', 'roles', 'permissions', 'api_tokens', 'lead_sources', 'admin_panel']],
+            'reports' => ['label' => 'Reports',       'icon' => 'heroicon-o-chart-bar',           'suffixes' => ['reports']],
+            'system' => ['label' => 'System',        'icon' => 'heroicon-o-cog-6-tooth',         'suffixes' => ['settings', 'roles', 'pipeline', 'calculator', 'project_templates']],
         ];
+    }
+
+    /**
+     * Determine whether a permission belongs to a configured role-form group.
+     */
+    public static function permissionMatchesGroup(string $permissionName, array $group): bool
+    {
+        foreach ($group['suffixes'] as $suffix) {
+            if (str_ends_with($permissionName, '_'.$suffix) || $permissionName === $suffix) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static function form(Schema $form): Schema
     {
-        $allPerms   = Permission::orderBy('name')->get();
-        $groupDefs  = static::permissionGroups();
+        $allPerms = Permission::orderBy('name')->get();
+        $groupDefs = static::permissionGroups();
 
         $groupKeys = array_keys($groupDefs);
-        $expandJs  = implode('', array_map(fn ($k) => "window.dispatchEvent(new CustomEvent('expand-section',{detail:{id:'perm-{$k}'}}));", $groupKeys));
+        $expandJs = implode('', array_map(fn ($k) => "window.dispatchEvent(new CustomEvent('expand-section',{detail:{id:'perm-{$k}'}}));", $groupKeys));
         $collapseJs = implode('', array_map(fn ($k) => "window.dispatchEvent(new CustomEvent('collapse-section',{detail:{id:'perm-{$k}'}}));", $groupKeys));
 
         $permSections = [];
         foreach ($groupDefs as $key => $group) {
             $opts = [];
             foreach ($allPerms as $perm) {
-                foreach ($group['suffixes'] as $suffix) {
-                    if (str_ends_with($perm->name, '_' . $suffix) || $perm->name === $suffix) {
-                        $opts[$perm->name] = str_replace('_', ' ', ucwords($perm->name, '_'));
-                        break;
-                    }
+                if (static::permissionMatchesGroup($perm->name, $group)) {
+                    $opts[$perm->name] = $perm->name === 'access_admin_panel'
+                        ? 'Access Admin Panel — required to sign in'
+                        : str_replace('_', ' ', ucwords($perm->name, '_'));
                 }
             }
             if (empty($opts)) {
@@ -99,15 +116,15 @@ class RoleResource extends BaseResource
                             ->required(),
                         Forms\Components\Placeholder::make('perm_toggles')
                             ->label('')
-                            ->content(new \Illuminate\Support\HtmlString(
+                            ->content(new HtmlString(
                                 '<div class="flex gap-2 justify-end">'
-                                . '<button type="button" onclick="' . htmlspecialchars($expandJs, ENT_QUOTES) . '" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">'
-                                . '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5"><path d="M13.28 7.78l3.22-3.22v2.69a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.69l-3.22 3.22a.75.75 0 001.06 1.06zM2 17.25v-4.5a.75.75 0 011.5 0v2.69l3.22-3.22a.75.75 0 011.06 1.06L4.56 16.5h2.69a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z"></path></svg>'
-                                . 'Expand All</button>'
-                                . '<button type="button" onclick="' . htmlspecialchars($collapseJs, ENT_QUOTES) . '" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">'
-                                . '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5"><path d="M9.22 3.22a.75.75 0 011.06 0l.97.97V1.75a.75.75 0 011.5 0v4.5a.75.75 0 01-.75.75h-4.5a.75.75 0 010-1.5h2.69l-.97-.97a.75.75 0 010-1.06zm1.06 13.56a.75.75 0 01-1.06 0l-.97-.97v2.44a.75.75 0 01-1.5 0v-4.5a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5H9.31l.97.97a.75.75 0 010 1.06z"></path></svg>'
-                                . 'Collapse All</button>'
-                                . '</div>'
+                                .'<button type="button" onclick="'.htmlspecialchars($expandJs, ENT_QUOTES).'" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">'
+                                .'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5"><path d="M13.28 7.78l3.22-3.22v2.69a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.69l-3.22 3.22a.75.75 0 001.06 1.06zM2 17.25v-4.5a.75.75 0 011.5 0v2.69l3.22-3.22a.75.75 0 011.06 1.06L4.56 16.5h2.69a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z"></path></svg>'
+                                .'Expand All</button>'
+                                .'<button type="button" onclick="'.htmlspecialchars($collapseJs, ENT_QUOTES).'" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">'
+                                .'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5"><path d="M9.22 3.22a.75.75 0 011.06 0l.97.97V1.75a.75.75 0 011.5 0v4.5a.75.75 0 01-.75.75h-4.5a.75.75 0 010-1.5h2.69l-.97-.97a.75.75 0 010-1.06zm1.06 13.56a.75.75 0 01-1.06 0l-.97-.97v2.44a.75.75 0 01-1.5 0v-4.5a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5H9.31l.97.97a.75.75 0 010 1.06z"></path></svg>'
+                                .'Collapse All</button>'
+                                .'</div>'
                             ))
                             ->columnSpanFull(),
                     ]),
@@ -149,10 +166,10 @@ class RoleResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListRoles::route('/'),
+            'index' => Pages\ListRoles::route('/'),
             'create' => Pages\CreateRole::route('/create'),
-            'view'   => Pages\ViewRole::route('/{record}'),
-            'edit'   => Pages\EditRole::route('/{record}/edit'),
+            'view' => Pages\ViewRole::route('/{record}'),
+            'edit' => Pages\EditRole::route('/{record}/edit'),
         ];
     }
 }

@@ -105,6 +105,11 @@ class Business extends Model
         return $this->hasMany(VatReturn::class);
     }
 
+    public function hmrcConnections(): HasMany
+    {
+        return $this->hasMany(HmrcConnection::class);
+    }
+
     public function bankAccounts(): HasMany
     {
         return $this->hasMany(BankAccount::class);

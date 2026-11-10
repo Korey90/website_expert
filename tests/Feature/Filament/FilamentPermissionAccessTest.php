@@ -8,12 +8,16 @@ use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\PaymentResource;
 use App\Filament\Resources\PermissionResource;
 use App\Filament\Resources\RoleResource;
+use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Models\Briefing;
+use App\Models\Business;
 use App\Models\SalesOffer;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class FilamentPermissionAccessTest extends TestCase
@@ -84,6 +88,58 @@ class FilamentPermissionAccessTest extends TestCase
 
         $this->assertFalse(ClientResource::canAccess());
         $this->assertFalse(IntegrationSettingsPage::canAccess());
+    }
+
+    public function test_finance_and_uk_tax_permissions_are_exposed_in_the_finance_role_group(): void
+    {
+        $groups = RoleResource::permissionGroups();
+
+        $this->assertSame('Finance, Accounting & UK Tax', $groups['finance']['label']);
+        $this->assertSame('Users & Panel Access', $groups['users']['label']);
+        $this->assertTrue(RoleResource::permissionMatchesGroup('access_admin_panel', $groups['users']));
+
+        foreach ([
+            'view_finance',
+            'manage_finance',
+            'approve_finance',
+            'post_finance',
+            'close_finance_periods',
+            'submit_tax_returns',
+        ] as $permission) {
+            $this->assertTrue(
+                RoleResource::permissionMatchesGroup($permission, $groups['finance']),
+                "Permission [{$permission}] is missing from the Finance role group."
+            );
+        }
+    }
+
+    public function test_admin_can_create_a_panel_user_with_business_membership(): void
+    {
+        $admin = User::query()->where('email', '20noname22x@gmail.com')->firstOrFail();
+        $business = Business::query()->where('slug', 'website-expert')->firstOrFail();
+        $developerRole = Role::findByName('developer');
+
+        Livewire::actingAs($admin)
+            ->test(CreateUser::class)
+            ->fillForm([
+                'name' => 'Finance User',
+                'email' => 'finance-user@example.test',
+                'password' => 'valid-password-123',
+                'is_active' => true,
+                'roles' => [$developerRole->getKey()],
+                'businesses' => [$business->getKey()],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $user = User::query()->where('email', 'finance-user@example.test')->firstOrFail();
+
+        $this->assertTrue($user->hasRole('developer'));
+        $this->assertTrue($user->businessMemberships()
+            ->where('business_id', $business->getKey())
+            ->where('is_active', true)
+            ->exists());
+        $this->assertSame($business->getKey(), $user->currentBusiness()?->getKey());
     }
 
     public function test_briefing_and_sales_offer_policies_use_permissions(): void

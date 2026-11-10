@@ -1,0 +1,139 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use App\Models\Business;
+use App\Models\HmrcConnection;
+use App\Models\User;
+use App\Services\Hmrc\Exceptions\HmrcOAuthException;
+use App\Services\Hmrc\HmrcOAuthService;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+
+class HmrcConnectionPage extends BasePage
+{
+    protected string $view = 'filament.pages.hmrc-connection';
+
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-building-library';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Finance';
+
+    protected static ?int $navigationSort = 40;
+
+    protected static ?string $slug = 'hmrc-connection';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('finance.hmrc_connection.navigation');
+    }
+
+    public function getTitle(): string
+    {
+        return __('finance.hmrc_connection.title');
+    }
+
+    /** @return array<string, mixed> */
+    public function getConnectionSummary(): array
+    {
+        $connection = $this->connection();
+        $status = $connection?->status ?? HmrcConnection::STATUS_DISCONNECTED;
+
+        return [
+            'environment' => (string) config('hmrc.environment', 'sandbox'),
+            'status' => $status,
+            'status_label' => __("finance.hmrc_connection.statuses.{$status}"),
+            'scopes' => $connection?->scopes ?? [],
+            'masked_vrn' => $this->maskedVrn($connection?->vrn),
+            'expires_at' => $connection?->expires_at,
+            'connected_at' => $connection?->connected_at,
+            'refreshed_at' => $connection?->refreshed_at,
+            'reconnect_reason' => $connection?->reconnect_reason,
+        ];
+    }
+
+    public function refreshConnection(): void
+    {
+        [$business, $actor] = $this->managementContext();
+
+        try {
+            app(HmrcOAuthService::class)->refresh($business, $actor);
+            Notification::make()->title(__('finance.hmrc_connection.notifications.refreshed'))->success()->send();
+        } catch (HmrcOAuthException $exception) {
+            Notification::make()->title($exception->getMessage())->danger()->send();
+        }
+    }
+
+    public function disconnectConnection(): void
+    {
+        [$business, $actor] = $this->managementContext();
+        app(HmrcOAuthService::class)->disconnect($business, $actor);
+        Notification::make()
+            ->title(__('finance.hmrc_connection.notifications.disconnected'))
+            ->body(__('finance.hmrc_connection.help.external_revoke'))
+            ->warning()
+            ->send();
+    }
+
+    protected function getHeaderActions(): array
+    {
+        $connection = $this->connection();
+        $canManage = $this->canManageConnection();
+
+        return [
+            Action::make('connect')
+                ->label(__('finance.hmrc_connection.actions.connect'))
+                ->icon('heroicon-o-link')
+                ->color('primary')
+                ->url(route('admin.hmrc.oauth.connect'))
+                ->visible($canManage && (! $connection || $connection->status !== HmrcConnection::STATUS_CONNECTED)),
+            Action::make('refresh')
+                ->label(__('finance.hmrc_connection.actions.refresh'))
+                ->icon('heroicon-o-arrow-path')
+                ->action('refreshConnection')
+                ->visible($canManage && $connection?->status === HmrcConnection::STATUS_CONNECTED),
+            Action::make('disconnect')
+                ->label(__('finance.hmrc_connection.actions.disconnect'))
+                ->icon('heroicon-o-x-circle')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalDescription(__('finance.hmrc_connection.help.disconnect'))
+                ->action('disconnectConnection')
+                ->visible($canManage && $connection && $connection->status !== HmrcConnection::STATUS_DISCONNECTED),
+        ];
+    }
+
+    private function connection(): ?HmrcConnection
+    {
+        return HmrcConnection::query()
+            ->where('environment', config('hmrc.environment', 'sandbox'))
+            ->first();
+    }
+
+    private function canManageConnection(): bool
+    {
+        $business = currentBusiness();
+        $actor = auth()->user();
+
+        return $business !== null && $actor !== null && $actor->businessMemberships()
+            ->where('business_id', $business->getKey())
+            ->where('is_active', true)
+            ->whereIn('role', ['owner', 'admin'])
+            ->exists();
+    }
+
+    /** @return array{Business, User} */
+    private function managementContext(): array
+    {
+        $business = currentBusiness();
+        $actor = auth()->user();
+
+        abort_unless($business instanceof Business && $actor instanceof User && $this->canManageConnection(), 403);
+
+        return [$business, $actor];
+    }
+
+    private function maskedVrn(?string $vrn): ?string
+    {
+        return filled($vrn) ? '•••••'.substr($vrn, -4) : null;
+    }
+}

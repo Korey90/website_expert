@@ -16,6 +16,10 @@ import {
     ReceiptText,
     RefreshCw,
     Smartphone,
+    SquareLetterA,
+    SquareLetterB,
+    SquareLetterC,
+    SquareLetterD,
     Unlink,
 } from 'lucide-react';
 import MarketingLayout from '@/Layouts/MarketingLayout';
@@ -60,12 +64,12 @@ function ProblemCard({ icon, title, body }: { icon: React.ReactNode; title: stri
 
 function ProcessStep({ num, title, body }: { num: number; title: string; body: string }) {
     return (
-        <div className="flex gap-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-sm">
+        <div className="flex gap-4 p-2 hover:bg-brand-300/10 hover:shadow rounded-sm transition-colors ease-in-out duration-300">
+            <div className="flex-shrink-0 sm:size-18 size-12 p-1 rounded-md bg-brand-50 dark:bg-brand-300/10 text-brand-500 flex items-center">
                 {num}
             </div>
             <div>
-                <h3 className="font-bold text-neutral-900 dark:text-white mb-1">{title}</h3>
+                <h3 className="font-bold text-neutral-900 text-lg dark:text-white mb-1">{title}</h3>
                 <p className="text-neutral-600 dark:text-white/70 text-sm leading-relaxed">{body}</p>
             </div>
         </div>
@@ -928,7 +932,7 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
                                     { icon: Unlink, text: 'Brak przymusowej umowy na długoterminowe utrzymanie' },
                                 ].map(({ icon: Icon, text }) => (
                                     <div key={text} className="flex items-center gap-2">
-                                        <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-500/10">
+                                        <span className="flex size-11 flex-shrink-0 shadow items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-500/10">
                                             <Icon aria-hidden="true" className="size-6 text-brand-500 dark:text-brand-400" strokeWidth={1.75} />
                                         </span>
                                         <p className="text-md text-neutral-700 dark:text-white/80 leading-relaxed">{text}</p>
@@ -947,10 +951,10 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
                         Jak wygląda współpraca
                     </h2>
                     <div className="grid sm:grid-cols-2 gap-8 mb-8">
-                        <ProcessStep num={1} title="Rozmowa" body="Omawiamy Twoją firmę, klientów, cele i potrzebne funkcje strony." />
-                        <ProcessStep num={2} title="Wycena" body="Otrzymujesz pisemny zakres projektu, ustaloną cenę i realny harmonogram." />
-                        <ProcessStep num={3} title="Projekt i budowa" body="Projektuję, buduję i testuję stronę z regularnymi aktualizacjami postępów." />
-                        <ProcessStep num={4} title="Uruchomienie i wsparcie" body="Uruchamiam stronę, przeprowadzam szkolenie i pozostaję dostępny po wdrożeniu." />
+                        <ProcessStep num={<SquareLetterA className='size-18' />} title="Rozmowa" body="Omawiamy Twoją firmę, klientów, cele i potrzebne funkcje strony." />
+                        <ProcessStep num={<SquareLetterB className='size-18' />} title="Wycena" body="Otrzymujesz pisemny zakres projektu, ustaloną cenę i realny harmonogram." />
+                        <ProcessStep num={<SquareLetterC className='size-18' />} title="Projekt i budowa" body="Projektuję, buduję i testuję stronę z regularnymi aktualizacjami postępów." />
+                        <ProcessStep num={<SquareLetterD className='size-18' />} title="Uruchomienie i wsparcie" body="Uruchamiam stronę, przeprowadzam szkolenie i pozostaję dostępny po wdrożeniu." />
                     </div>
                     <p className="text-center text-sm text-neutral-500 dark:text-white/50">
                         Typowy czas realizacji podstawowego pakietu: <strong className="text-neutral-700 dark:text-white/80">3–5 tygodni</strong>
