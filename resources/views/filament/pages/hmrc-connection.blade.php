@@ -92,5 +92,55 @@
                 @endif
             </div>
         </x-filament::section>
+
+        <x-filament::section class="lg:col-span-2">
+            <x-slot name="heading">{{ __('finance.hmrc_connection.obligations.title') }}</x-slot>
+            <x-slot name="description">{{ __('finance.hmrc_connection.obligations.description') }}</x-slot>
+
+            @php($obligations = $this->getVatObligations())
+
+            @if ($obligations->isEmpty())
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('finance.hmrc_connection.obligations.empty') }}
+                </p>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="border-b border-gray-200 text-gray-500 dark:border-white/10 dark:text-gray-400">
+                            <tr>
+                                <th class="px-3 py-2 font-medium">{{ __('finance.hmrc_connection.obligations.period') }}</th>
+                                <th class="px-3 py-2 font-medium">{{ __('finance.hmrc_connection.obligations.due') }}</th>
+                                <th class="px-3 py-2 font-medium">{{ __('finance.hmrc_connection.obligations.status') }}</th>
+                                <th class="px-3 py-2 font-medium">{{ __('finance.hmrc_connection.obligations.received') }}</th>
+                                <th class="px-3 py-2 font-medium">{{ __('finance.hmrc_connection.obligations.synced_at') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-white/10">
+                            @foreach ($obligations as $obligation)
+                                <tr>
+                                    <td class="whitespace-nowrap px-3 py-3">
+                                        {{ $obligation->start_date->format('Y-m-d') }} – {{ $obligation->end_date->format('Y-m-d') }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-3">{{ $obligation->due_date->format('Y-m-d') }}</td>
+                                    <td class="whitespace-nowrap px-3 py-3">
+                                        <x-filament::badge :color="$obligation->status === 'open' ? 'warning' : 'success'">
+                                            {{ __('finance.hmrc_connection.obligations.statuses.'.$obligation->status) }}
+                                        </x-filament::badge>
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-3">{{ $obligation->received_date?->format('Y-m-d') ?? '—' }}</td>
+                                    <td class="whitespace-nowrap px-3 py-3">
+                                        {{ $obligation->last_seen_at->timezone(config('app.timezone'))->format('Y-m-d H:i:s') }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+
+            <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                {{ __('finance.hmrc_connection.obligations.period_key_notice') }}
+            </p>
+        </x-filament::section>
     </div>
 </x-filament-panels::page>

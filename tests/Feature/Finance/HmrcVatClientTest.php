@@ -125,6 +125,30 @@ class HmrcVatClientTest extends TestCase
         Http::assertSent(fn (Request $request): bool => str_starts_with($request->url(), 'https://test-api.service.hmrc.gov.uk/organisations/vat/123456789/payments?'));
     }
 
+    public function test_client_encodes_special_period_keys_and_enforces_the_366_day_limit(): void
+    {
+        Http::fake(['*' => Http::response(['ok' => true])]);
+
+        (new HmrcSandboxClient)->viewVatReturn('token', '123456789', '#001', $this->fraudHeaders());
+
+        Http::assertSent(fn (Request $request): bool => $request->url()
+            === 'https://test-api.service.hmrc.gov.uk/organisations/vat/123456789/returns/%23001');
+
+        try {
+            (new HmrcSandboxClient)->retrieveVatObligations(
+                'token',
+                '123456789',
+                ['from' => '2025-01-01', 'to' => '2026-01-03'],
+                $this->fraudHeaders(),
+            );
+            $this->fail('A date range greater than 366 days must be rejected.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertStringContainsString('366 days', $exception->getMessage());
+        }
+
+        Http::assertSentCount(1);
+    }
+
     public function test_production_client_rejects_sandbox_scenario_header(): void
     {
         Http::fake();

@@ -4,16 +4,24 @@ namespace App\Filament\Pages;
 
 use App\Models\Business;
 use App\Models\HmrcConnection;
+use App\Models\HmrcVatObligation;
 use App\Models\User;
+use App\Services\Hmrc\Exceptions\HmrcApiException;
 use App\Services\Hmrc\Exceptions\HmrcFraudPreventionException;
 use App\Services\Hmrc\Exceptions\HmrcOAuthException;
+use App\Services\Hmrc\Exceptions\HmrcVatObligationSyncException;
 use App\Services\Hmrc\HmrcFraudPreventionClient;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
 use App\Services\Hmrc\HmrcOAuthService;
+use App\Services\Hmrc\HmrcVatObligationSyncService;
 use Filament\Actions\Action;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Collection;
+use InvalidArgumentException;
 
 class HmrcConnectionPage extends BasePage
 {
@@ -86,26 +94,11 @@ class HmrcConnectionPage extends BasePage
     public function validateFraudPreventionHeaders(array $data): void
     {
         [, $actor] = $this->managementContext();
-        $secret = $actor->getAppAuthenticationSecret();
+        $multiFactor = $this->verifiedMultiFactor($actor, $data['totp'] ?? null);
 
-        if (! is_string($secret) || $secret === '') {
-            Notification::make()->title(__('finance.hmrc_connection.notifications.mfa_required'))->danger()->send();
-
+        if ($multiFactor === null) {
             return;
         }
-
-        $code = (string) ($data['totp'] ?? '');
-        if (! AppAuthentication::make()->verifyCode($code, $secret, true)) {
-            Notification::make()->title(__('finance.hmrc_connection.notifications.mfa_invalid'))->danger()->send();
-
-            return;
-        }
-
-        $multiFactor = [
-            'type' => 'TOTP',
-            'timestamp' => now()->utc()->format('Y-m-d\TH:i:s\Z'),
-            'unique_reference' => hash_hmac('sha256', 'filament-totp:'.$secret, (string) config('app.key')),
-        ];
 
         try {
             $builder = app(HmrcFraudPreventionHeaders::class);
@@ -130,6 +123,57 @@ class HmrcConnectionPage extends BasePage
         } catch (HmrcFraudPreventionException $exception) {
             Notification::make()->title($exception->getMessage())->danger()->send();
         }
+    }
+
+    /** @param array{from?: string, to?: string, status?: string|null, totp?: string} $data */
+    public function syncVatObligations(array $data): void
+    {
+        [$business, $actor] = $this->managementContext();
+        $multiFactor = $this->verifiedMultiFactor($actor, $data['totp'] ?? null);
+
+        if ($multiFactor === null) {
+            return;
+        }
+
+        try {
+            $headers = app(HmrcFraudPreventionHeaders::class)->build(request(), $actor, $multiFactor)->headers;
+            $filters = [
+                'from' => (string) ($data['from'] ?? ''),
+                'to' => (string) ($data['to'] ?? ''),
+            ];
+
+            if (in_array($data['status'] ?? null, ['O', 'F'], true)) {
+                $filters['status'] = $data['status'];
+            }
+
+            $result = app(HmrcVatObligationSyncService::class)->sync(
+                $business,
+                $actor,
+                $filters,
+                $headers,
+                config('hmrc.environment') === 'sandbox'
+                    ? config('hmrc.sandbox.obligations_test_scenario')
+                    : null,
+            );
+
+            Notification::make()
+                ->title(__('finance.hmrc_connection.notifications.obligations_synced'))
+                ->body(__('finance.hmrc_connection.obligations.sync_result', $result))
+                ->success()
+                ->send();
+        } catch (HmrcApiException|HmrcFraudPreventionException|HmrcOAuthException|HmrcVatObligationSyncException|InvalidArgumentException $exception) {
+            Notification::make()->title($exception->getMessage())->danger()->send();
+        }
+    }
+
+    /** @return Collection<int, HmrcVatObligation> */
+    public function getVatObligations(): Collection
+    {
+        return HmrcVatObligation::query()
+            ->where('environment', config('hmrc.environment', 'sandbox'))
+            ->latest('start_date')
+            ->limit(24)
+            ->get();
     }
 
     protected function getHeaderActions(): array
@@ -173,6 +217,37 @@ class HmrcConnectionPage extends BasePage
                 ])
                 ->action(fn (array $data) => $this->validateFraudPreventionHeaders($data))
                 ->visible($canManage && config('hmrc.environment') === 'sandbox'),
+            Action::make('sync_vat_obligations')
+                ->label(__('finance.hmrc_connection.actions.sync_vat_obligations'))
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->modalHeading(__('finance.hmrc_connection.obligations.modal_title'))
+                ->modalDescription(__('finance.hmrc_connection.obligations.modal_description'))
+                ->form([
+                    DatePicker::make('from')
+                        ->label(__('finance.hmrc_connection.obligations.from'))
+                        ->default(now()->subDays(365)->toDateString())
+                        ->required(),
+                    DatePicker::make('to')
+                        ->label(__('finance.hmrc_connection.obligations.to'))
+                        ->default(now()->toDateString())
+                        ->required(),
+                    Select::make('status')
+                        ->label(__('finance.hmrc_connection.obligations.status_filter'))
+                        ->options([
+                            'O' => __('finance.hmrc_connection.obligations.statuses.open'),
+                            'F' => __('finance.hmrc_connection.obligations.statuses.fulfilled'),
+                        ])
+                        ->placeholder(__('finance.hmrc_connection.obligations.all_statuses')),
+                    TextInput::make('totp')
+                        ->label(__('finance.hmrc_connection.fraud_validation.totp'))
+                        ->password()
+                        ->required()
+                        ->minLength(6)
+                        ->maxLength(8),
+                ])
+                ->action(fn (array $data) => $this->syncVatObligations($data))
+                ->visible($canManage && $connection?->status === HmrcConnection::STATUS_CONNECTED),
         ];
     }
 
@@ -229,5 +304,31 @@ class HmrcConnectionPage extends BasePage
         }
 
         return $value;
+    }
+
+    /**
+     * @return array{type: string, timestamp: string, unique_reference: string}|null
+     */
+    private function verifiedMultiFactor(User $actor, mixed $code): ?array
+    {
+        $secret = $actor->getAppAuthenticationSecret();
+
+        if (! is_string($secret) || $secret === '') {
+            Notification::make()->title(__('finance.hmrc_connection.notifications.mfa_required'))->danger()->send();
+
+            return null;
+        }
+
+        if (! is_string($code) || ! AppAuthentication::make()->verifyCode($code, $secret, true)) {
+            Notification::make()->title(__('finance.hmrc_connection.notifications.mfa_invalid'))->danger()->send();
+
+            return null;
+        }
+
+        return [
+            'type' => 'TOTP',
+            'timestamp' => now()->utc()->format('Y-m-d\TH:i:s\Z'),
+            'unique_reference' => hash_hmac('sha256', 'filament-totp:'.$secret, (string) config('app.key')),
+        ];
     }
 }

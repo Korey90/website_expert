@@ -61,7 +61,7 @@ abstract class AbstractHmrcVatClient implements HmrcClientInterface
 
         return $this->send(
             'GET',
-            "/organisations/vat/{$vrn}/returns/{$periodKey}",
+            "/organisations/vat/{$vrn}/returns/".rawurlencode($periodKey),
             $accessToken,
             [],
             $fraudPreventionHeaders,
@@ -237,7 +237,7 @@ abstract class AbstractHmrcVatClient implements HmrcClientInterface
 
     private function assertPeriodKey(string $periodKey): void
     {
-        if (preg_match('/^[A-Za-z0-9]{1,18}$/', $periodKey) !== 1) {
+        if (preg_match('/^[A-Za-z0-9#]{1,18}$/', $periodKey) !== 1) {
             throw new InvalidArgumentException('HMRC period key is invalid.');
         }
     }
@@ -250,6 +250,12 @@ abstract class AbstractHmrcVatClient implements HmrcClientInterface
 
         if ($from === null || $to === null || ! $this->isDate($from) || ! $this->isDate($to) || $from > $to) {
             throw new InvalidArgumentException('HMRC date range must contain valid YYYY-MM-DD dates with from not after to.');
+        }
+
+        $days = (new DateTimeImmutable($from))->diff(new DateTimeImmutable($to))->days;
+
+        if ($days === false || $days > 366) {
+            throw new InvalidArgumentException('HMRC date range cannot exceed 366 days.');
         }
     }
 

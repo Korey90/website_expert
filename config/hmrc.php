@@ -31,6 +31,7 @@ return [
         'client_id' => env('HMRC_SANDBOX_CLIENT_ID'),
         'client_secret' => env('HMRC_SANDBOX_CLIENT_SECRET'),
         'redirect_uri' => env('HMRC_SANDBOX_REDIRECT_URI', env('APP_URL').'/admin/hmrc/oauth/callback'),
+        'obligations_test_scenario' => env('HMRC_SANDBOX_OBLIGATIONS_SCENARIO'),
     ],
 
     'production' => [

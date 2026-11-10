@@ -6,6 +6,7 @@ use App\Models\AccountingProfile;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\HmrcConnection;
+use App\Models\HmrcVatObligation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
@@ -301,17 +302,32 @@ class HmrcOAuthFlowTest extends TestCase
     public function test_connection_page_shows_only_masked_status_data(): void
     {
         $this->connectedConnection('page-access-secret', 'page-refresh-secret');
+        HmrcVatObligation::withoutGlobalScopes()->create([
+            'business_id' => $this->business->id,
+            'environment' => 'sandbox',
+            'period_key' => '#001',
+            'start_date' => '2026-07-01',
+            'end_date' => '2026-09-30',
+            'due_date' => '2026-11-07',
+            'status' => HmrcVatObligation::STATUS_OPEN,
+            'first_seen_at' => now(),
+            'last_seen_at' => now(),
+        ]);
 
         $this->actingAs($this->owner)
             ->get(route('filament.admin.pages.hmrc-connection'))
             ->assertOk()
             ->assertSee('HMRC Connection')
             ->assertSee('Validate fraud headers')
+            ->assertSee('Sync VAT obligations')
+            ->assertSee('2026-07-01')
+            ->assertSee('2026-11-07')
             ->assertSee('hmrc_fph_context', false)
             ->assertSee('•••••6789')
             ->assertDontSee('page-access-secret')
             ->assertDontSee('page-refresh-secret')
-            ->assertDontSee('123456789');
+            ->assertDontSee('123456789')
+            ->assertDontSee('#001');
     }
 
     private function beginConnection(): string

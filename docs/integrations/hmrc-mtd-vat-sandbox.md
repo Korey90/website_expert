@@ -1,6 +1,6 @@
 # HMRC MTD VAT — sandbox setup
 
-**Status:** OAuth implementation ready; external sandbox configuration and live sandbox journey pending
+**Status:** OAuth, fraud headers and VAT-obligation synchronisation ready; external sandbox configuration and live sandbox journey pending
 **Verified against official HMRC documentation:** 10 November 2026
 **Scope:** Website Expert NI, direct business journey, VAT MTD only
 
@@ -91,6 +91,25 @@ The local implementation and mocked contract tests are complete. A real HMRC val
 | Get fraud-header feedback | `GET /test/fraud-prevention-headers/vat-mtd/validation-feedback` | application-restricted token |
 
 HMRC requires `Accept: application/vnd.hmrc.1.0+json`. The application uses OAuth 2.0 Authorization Code Grant with PKCE S256. Authorization codes are single-use and valid for 10 minutes, access tokens last four hours, and refresh tokens are single-use; token refresh is therefore protected against races.
+
+## Implemented VAT-obligation synchronisation
+
+An owner or administrator can use **Sync VAT obligations** at `/admin/hmrc-connection`. The action:
+
+- requires a current authenticator-app code and sends the complete fraud-prevention header set;
+- refreshes an access token that is expired or close to expiry before the VAT API call;
+- retrieves open, fulfilled or both kinds of obligation over a maximum 366-day range;
+- strictly validates the full response before writing anything, then idempotently creates or updates tenant-owned obligation records;
+- retains obligations that are absent from a later filtered response, because absence is not evidence that HMRC deleted the historical obligation;
+- records first/last seen timestamps, status changes, the initiating user and the HMRC correlation ID without exposing tokens or the full VRN;
+- keeps HMRC VAT obligations separate from `accounting_periods`, which control local ledger closing and locking;
+- stores the technical HMRC `periodKey` for future view/submit operations but deliberately never displays it to the user.
+
+Special period keys containing `#` are accepted and percent-encoded when used in an HMRC URL. An invalid or duplicate response, a missing `read:vat` scope or an inactive/non-owner membership fails without partial period changes.
+
+For a fixed sandbox response, `HMRC_SANDBOX_OBLIGATIONS_SCENARIO` may optionally be set to an HMRC `Gov-Test-Scenario` value such as `QUARTERLY_NONE_MET`. Leave it blank for the sandbox default and never set a test scenario in production.
+
+The local MySQL migration is `2026_11_10_000027_create_hmrc_vat_obligations_table.php`. Mocked integration coverage is complete; the real obligations call remains pending until the external sandbox checklist is complete.
 
 ## Official references
 
