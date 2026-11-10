@@ -47,6 +47,7 @@ return [
             'bank_statement',
             'contract',
             'hmrc_acknowledgement',
+            'vat_adjustment_evidence',
             'other',
         ],
     ],

@@ -284,7 +284,7 @@ return [
         'actions' => ['upload' => 'Dołącz dokument'],
         'notifications' => ['uploaded' => 'Dokument został przesłany i oczekuje na skan bezpieczeństwa.'],
         'scan_statuses' => ['pending' => 'Oczekuje', 'clean' => 'Bezpieczny', 'rejected' => 'Odrzucony'],
-        'document_types' => ['invoice' => 'Faktura', 'receipt' => 'Paragon', 'bank_statement' => 'Wyciąg bankowy', 'contract' => 'Umowa', 'hmrc_acknowledgement' => 'Potwierdzenie HMRC', 'other' => 'Inny'],
+        'document_types' => ['invoice' => 'Faktura', 'receipt' => 'Paragon', 'bank_statement' => 'Wyciąg bankowy', 'contract' => 'Umowa', 'hmrc_acknowledgement' => 'Potwierdzenie HMRC', 'vat_adjustment_evidence' => 'Dowód korekty VAT', 'other' => 'Inny'],
     ],
     'purchase_credit_notes' => [
         'navigation' => 'Korekty zakupów', 'section' => 'Zakupowe noty kredytowe', 'singular' => 'zakupowa nota kredytowa', 'plural' => 'zakupowe noty kredytowe',
@@ -341,6 +341,33 @@ return [
         'unknown_supplier' => 'Dostawca nieprzypisany',
         'csv' => ['report' => 'WIEK NALEŻNOŚCI I ZOBOWIĄZAŃ', 'as_of' => 'Stan na'],
     ],
+    'vat_adjustments' => [
+        'navigation' => 'Korekty VAT', 'singular' => 'korekta VAT', 'plural' => 'korekty VAT',
+        'sections' => ['adjustment' => 'Korekta VAT', 'error_correction' => 'Korekta błędu poprzedniej deklaracji', 'audit' => 'Audyt akceptacji i księgowania'],
+        'fields' => [
+            'number' => 'Numer korekty', 'status' => 'Status', 'adjustment_type' => 'Rodzaj korekty',
+            'vat_side' => 'Strona VAT', 'direction' => 'Kierunek', 'amount_gbp' => 'Kwota VAT (GBP)',
+            'effective_date' => 'Data korekty', 'control_account' => 'Konto kontrolne VAT', 'contra_account' => 'Konto przeciwstawne',
+            'reason' => 'Powód i wyliczenie', 'correction_method' => 'Metoda korekty HMRC', 'discovered_on' => 'Data wykrycia',
+            'original_period_from' => 'Początek pierwotnego okresu', 'original_period_to' => 'Koniec pierwotnego okresu',
+            'is_deliberate' => 'Błąd umyślny', 'hmrc_reference' => 'Numer zgłoszenia HMRC',
+            'created_by' => 'Utworzył', 'approved_by' => 'Zatwierdził', 'approved_at' => 'Data zatwierdzenia',
+            'posted_by' => 'Zaksięgował', 'posted_at' => 'Data księgowania', 'journal' => 'Zapis journalu', 'sha256' => 'SHA-256',
+        ],
+        'statuses' => ['draft' => 'Szkic', 'approved' => 'Zatwierdzona', 'posted' => 'Zaksięgowana'],
+        'types' => ['accounting_adjustment' => 'Zwykła korekta rachunkowa VAT', 'error_correction' => 'Błąd poprzedniej deklaracji VAT'],
+        'sides' => ['output' => 'Output VAT', 'input' => 'Input VAT'],
+        'directions' => ['increase' => 'Zwiększenie', 'decrease' => 'Zmniejszenie'],
+        'methods' => ['not_error' => 'To nie jest korekta błędu', 'current_return' => 'Korekta w bieżącej deklaracji VAT', 'separate_notification' => 'Osobne zgłoszenie do HMRC'],
+        'actions' => ['upload_evidence' => 'Dodaj dowód', 'approve' => 'Zatwierdź korektę', 'post' => 'Zaksięguj korektę'],
+        'notifications' => ['evidence_uploaded' => 'Dowód przesłano i oczekuje na skan bezpieczeństwa.', 'approved' => 'Korekta VAT została zatwierdzona.', 'posted' => 'Korekta VAT została zaksięgowana w ledgerze.'],
+        'help' => [
+            'reason' => 'Zapisz, co się wydarzyło, dlaczego sposób rozliczenia jest prawidłowy i jak wyliczono kwotę.',
+            'error_correction' => 'Możliwość korekty w bieżącej deklaracji zależy od wartości netto błędów i progu box 6. Błędy umyślne wymagają osobnego zgłoszenia.',
+            'is_deliberate' => 'Błędu umyślnego nie można skorygować wyłącznie przez bieżącą deklarację.',
+            'evidence' => 'Akceptacja wymaga co najmniej jednego dowodu z pozytywnym skanem bezpieczeństwa. Hashe dowodów trafiają do snapshotu journalu.',
+        ],
+    ],
     'vat_detail' => [
         'navigation' => 'Szczegóły VAT',
         'title' => 'Szczegółowy raport VAT',
@@ -373,7 +400,7 @@ return [
         'document_types' => [
             'sales_invoice' => 'Faktura sprzedaży', 'sales_credit_note' => 'Nota kredytowa sprzedaży',
             'purchase_invoice' => 'Faktura zakupu', 'purchase_credit_note' => 'Nota kredytowa zakupu',
-            'adjustment' => 'Journal ledgeru',
+            'adjustment' => 'Journal ledgeru', 'vat_adjustment' => 'Korekta VAT',
         ],
         'tax_types' => [
             'standard' => 'Stawka standardowa', 'reduced' => 'Stawka obniżona', 'zero' => 'Stawka zerowa',
@@ -429,11 +456,14 @@ return [
             'unmapped_amount' => ':reference / :tax_code ma niezerową kwotę :metric bez poprawnego mapowania VAT Return.',
             'box_8_requires_box_6' => ':reference / :tax_code mapuje wartość do pola 8 bez ujęcia tej samej wartości w polu 6.',
             'box_9_requires_box_7' => ':reference / :tax_code mapuje wartość do pola 9 bez ujęcia tej samej wartości w polu 7.',
+            'deliberate_error_requires_separate_notification' => 'Błąd VAT oznaczony jako umyślny wymaga osobnego zgłoszenia do HMRC.',
+            'error_correction_separate_notification_required' => 'Wartość netto błędów VAT £:amount przekracza limit bieżącej deklaracji (1% pola 6 to £:box_6_limit); użyj osobnego zgłoszenia do HMRC.',
         ],
         'warnings' => [
             'ledger_adjustments_present' => 'Okres zawiera :count korekt ledgeru; sprawdź ich dowody i sposób rozliczenia VAT.',
             'inactive_tax_codes_present' => 'Okres korzysta z obecnie nieaktywnych tax codes; zastosowano ich bieżące mapowania.',
             'outside_scope_excluded' => ':reference / :tax_code wyłącza :metric z deklaracji; potwierdź sposób rozliczenia outside scope.',
+            'separate_notification_excluded' => ':reference ujęto w ewidencji VAT, ale wyłączono z tej deklaracji z powodu osobnego zgłoszenia do HMRC.',
         ],
     ],
     'accounting' => [

@@ -284,7 +284,7 @@ return [
         'actions' => ['upload' => 'Anexar documento'],
         'notifications' => ['uploaded' => 'O documento foi carregado e aguarda a verificação de segurança.'],
         'scan_statuses' => ['pending' => 'Pendente', 'clean' => 'Seguro', 'rejected' => 'Rejeitado'],
-        'document_types' => ['invoice' => 'Fatura', 'receipt' => 'Recibo', 'bank_statement' => 'Extrato bancário', 'contract' => 'Contrato', 'hmrc_acknowledgement' => 'Confirmação HMRC', 'other' => 'Outro'],
+        'document_types' => ['invoice' => 'Fatura', 'receipt' => 'Recibo', 'bank_statement' => 'Extrato bancário', 'contract' => 'Contrato', 'hmrc_acknowledgement' => 'Confirmação HMRC', 'vat_adjustment_evidence' => 'Prova de ajustamento de IVA', 'other' => 'Outro'],
     ],
     'purchase_credit_notes' => [
         'navigation' => 'Créditos de compra', 'section' => 'Notas de crédito de compra', 'singular' => 'nota de crédito de compra', 'plural' => 'notas de crédito de compra',
@@ -341,6 +341,33 @@ return [
         'unknown_supplier' => 'Fornecedor não atribuído',
         'csv' => ['report' => 'ANTIGUIDADE DE CONTAS A RECEBER E A PAGAR', 'as_of' => 'Em'],
     ],
+    'vat_adjustments' => [
+        'navigation' => 'Ajustamentos de IVA', 'singular' => 'ajustamento de IVA', 'plural' => 'ajustamentos de IVA',
+        'sections' => ['adjustment' => 'Ajustamento de IVA', 'error_correction' => 'Correção de erro de declaração anterior', 'audit' => 'Auditoria de aprovação e lançamento'],
+        'fields' => [
+            'number' => 'Número do ajustamento', 'status' => 'Estado', 'adjustment_type' => 'Tipo de ajustamento',
+            'vat_side' => 'Lado do IVA', 'direction' => 'Direção', 'amount_gbp' => 'Montante de IVA (GBP)',
+            'effective_date' => 'Data do ajustamento', 'control_account' => 'Conta de controlo do IVA', 'contra_account' => 'Conta de contrapartida',
+            'reason' => 'Motivo e cálculo', 'correction_method' => 'Método de correção HMRC', 'discovered_on' => 'Data de deteção',
+            'original_period_from' => 'Período original desde', 'original_period_to' => 'Período original até',
+            'is_deliberate' => 'Erro deliberado', 'hmrc_reference' => 'Referência da notificação HMRC',
+            'created_by' => 'Criado por', 'approved_by' => 'Aprovado por', 'approved_at' => 'Aprovado em',
+            'posted_by' => 'Lançado por', 'posted_at' => 'Lançado em', 'journal' => 'Lançamento contabilístico', 'sha256' => 'SHA-256',
+        ],
+        'statuses' => ['draft' => 'Rascunho', 'approved' => 'Aprovado', 'posted' => 'Lançado'],
+        'types' => ['accounting_adjustment' => 'Ajustamento contabilístico normal de IVA', 'error_correction' => 'Erro numa declaração de IVA anterior'],
+        'sides' => ['output' => 'IVA liquidado', 'input' => 'IVA dedutível'],
+        'directions' => ['increase' => 'Aumento', 'decrease' => 'Redução'],
+        'methods' => ['not_error' => 'Não é uma correção de erro', 'current_return' => 'Ajustar na declaração de IVA atual', 'separate_notification' => 'Notificar o HMRC separadamente'],
+        'actions' => ['upload_evidence' => 'Carregar prova', 'approve' => 'Aprovar ajustamento', 'post' => 'Lançar ajustamento'],
+        'notifications' => ['evidence_uploaded' => 'A prova foi carregada e aguarda a verificação de segurança.', 'approved' => 'Ajustamento de IVA aprovado.', 'posted' => 'Ajustamento de IVA lançado no livro.'],
+        'help' => [
+            'reason' => 'Registe o ocorrido, por que o tratamento está correto e como foi calculado o montante.',
+            'error_correction' => 'A elegibilidade na declaração atual depende dos erros líquidos e dos limites do campo 6. Erros deliberados exigem notificação separada.',
+            'is_deliberate' => 'Erros deliberados não podem ser corrigidos apenas na declaração atual.',
+            'evidence' => 'A aprovação exige pelo menos uma prova com verificação de segurança limpa. Os hashes das provas são incluídos no snapshot do lançamento.',
+        ],
+    ],
     'vat_detail' => [
         'navigation' => 'Detalhe do IVA',
         'title' => 'Detalhe do IVA',
@@ -373,7 +400,7 @@ return [
         'document_types' => [
             'sales_invoice' => 'Fatura de venda', 'sales_credit_note' => 'Nota de crédito de venda',
             'purchase_invoice' => 'Fatura de compra', 'purchase_credit_note' => 'Nota de crédito de compra',
-            'adjustment' => 'Lançamento contabilístico',
+            'adjustment' => 'Lançamento contabilístico', 'vat_adjustment' => 'Ajustamento de IVA',
         ],
         'tax_types' => [
             'standard' => 'Taxa normal', 'reduced' => 'Taxa reduzida', 'zero' => 'Taxa zero',
@@ -429,11 +456,14 @@ return [
             'unmapped_amount' => ':reference / :tax_code tem um valor :metric não nulo sem mapeamento válido.',
             'box_8_requires_box_6' => ':reference / :tax_code mapeia um valor para o campo 8 sem o incluir no campo 6.',
             'box_9_requires_box_7' => ':reference / :tax_code mapeia um valor para o campo 9 sem o incluir no campo 7.',
+            'deliberate_error_requires_separate_notification' => 'Um erro de IVA deliberado deve ser notificado separadamente ao HMRC.',
+            'error_correction_separate_notification_required' => 'Os erros líquidos de IVA de £:amount excedem o limite da declaração atual (1% do campo 6 é £:box_6_limit); use uma notificação HMRC separada.',
         ],
         'warnings' => [
             'ledger_adjustments_present' => 'O período contém :count ajustamento(s) contabilístico(s); reveja a prova e o tratamento fiscal.',
             'inactive_tax_codes_present' => 'O período usa códigos fiscais atualmente inativos; foram aplicados os mapeamentos atuais.',
             'outside_scope_excluded' => ':reference / :tax_code exclui :metric da declaração; confirme o tratamento fora do âmbito.',
+            'separate_notification_excluded' => ':reference está registado na conta de IVA, mas excluído desta declaração por utilizar uma notificação HMRC separada.',
         ],
     ],
     'accounting' => [

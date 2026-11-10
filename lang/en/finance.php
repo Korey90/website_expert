@@ -284,7 +284,7 @@ return [
         'actions' => ['upload' => 'Attach document'],
         'notifications' => ['uploaded' => 'The document was uploaded and is awaiting a security scan.'],
         'scan_statuses' => ['pending' => 'Pending', 'clean' => 'Clean', 'rejected' => 'Rejected'],
-        'document_types' => ['invoice' => 'Invoice', 'receipt' => 'Receipt', 'bank_statement' => 'Bank statement', 'contract' => 'Contract', 'hmrc_acknowledgement' => 'HMRC acknowledgement', 'other' => 'Other'],
+        'document_types' => ['invoice' => 'Invoice', 'receipt' => 'Receipt', 'bank_statement' => 'Bank statement', 'contract' => 'Contract', 'hmrc_acknowledgement' => 'HMRC acknowledgement', 'vat_adjustment_evidence' => 'VAT adjustment evidence', 'other' => 'Other'],
     ],
     'purchase_credit_notes' => [
         'navigation' => 'Purchase credits', 'section' => 'Purchase credit notes', 'singular' => 'purchase credit note', 'plural' => 'purchase credit notes',
@@ -341,6 +341,33 @@ return [
         'unknown_supplier' => 'Unassigned supplier',
         'csv' => ['report' => 'AGED RECEIVABLES AND PAYABLES', 'as_of' => 'As at'],
     ],
+    'vat_adjustments' => [
+        'navigation' => 'VAT adjustments', 'singular' => 'VAT adjustment', 'plural' => 'VAT adjustments',
+        'sections' => ['adjustment' => 'VAT adjustment', 'error_correction' => 'Previous-return error correction', 'audit' => 'Approval and posting audit'],
+        'fields' => [
+            'number' => 'Adjustment number', 'status' => 'Status', 'adjustment_type' => 'Adjustment type',
+            'vat_side' => 'VAT side', 'direction' => 'Direction', 'amount_gbp' => 'VAT amount (GBP)',
+            'effective_date' => 'Adjustment date', 'control_account' => 'VAT control account', 'contra_account' => 'Contra account',
+            'reason' => 'Reason and calculation', 'correction_method' => 'HMRC correction method', 'discovered_on' => 'Date discovered',
+            'original_period_from' => 'Original period from', 'original_period_to' => 'Original period to',
+            'is_deliberate' => 'Deliberate error', 'hmrc_reference' => 'HMRC notification reference',
+            'created_by' => 'Created by', 'approved_by' => 'Approved by', 'approved_at' => 'Approved at',
+            'posted_by' => 'Posted by', 'posted_at' => 'Posted at', 'journal' => 'Journal entry', 'sha256' => 'SHA-256',
+        ],
+        'statuses' => ['draft' => 'Draft', 'approved' => 'Approved', 'posted' => 'Posted'],
+        'types' => ['accounting_adjustment' => 'Normal VAT accounting adjustment', 'error_correction' => 'Error on a previous VAT Return'],
+        'sides' => ['output' => 'Output VAT', 'input' => 'Input VAT'],
+        'directions' => ['increase' => 'Increase', 'decrease' => 'Decrease'],
+        'methods' => ['not_error' => 'Not an error correction', 'current_return' => 'Adjust the current VAT Return', 'separate_notification' => 'Notify HMRC separately'],
+        'actions' => ['upload_evidence' => 'Upload evidence', 'approve' => 'Approve adjustment', 'post' => 'Post adjustment'],
+        'notifications' => ['evidence_uploaded' => 'Evidence uploaded and awaiting a security scan.', 'approved' => 'VAT adjustment approved.', 'posted' => 'VAT adjustment posted to the ledger.'],
+        'help' => [
+            'reason' => 'Record what happened, why the treatment is correct and how the amount was calculated.',
+            'error_correction' => 'Current-return eligibility depends on the net errors and box 6 thresholds. Deliberate errors must be notified separately.',
+            'is_deliberate' => 'Deliberate errors cannot be corrected only through the current return.',
+            'evidence' => 'Approval requires at least one evidence file with a clean security scan. Evidence hashes are included in the journal snapshot.',
+        ],
+    ],
     'vat_detail' => [
         'navigation' => 'VAT detail',
         'title' => 'VAT detail',
@@ -373,7 +400,7 @@ return [
         'document_types' => [
             'sales_invoice' => 'Sales invoice', 'sales_credit_note' => 'Sales credit note',
             'purchase_invoice' => 'Purchase invoice', 'purchase_credit_note' => 'Purchase credit note',
-            'adjustment' => 'Ledger journal',
+            'adjustment' => 'Ledger journal', 'vat_adjustment' => 'VAT adjustment',
         ],
         'tax_types' => [
             'standard' => 'Standard rate', 'reduced' => 'Reduced rate', 'zero' => 'Zero rate',
@@ -429,11 +456,14 @@ return [
             'unmapped_amount' => ':reference / :tax_code has a non-zero :metric amount without a valid VAT Return mapping.',
             'box_8_requires_box_6' => ':reference / :tax_code maps a value to box 8 without including the same value in box 6.',
             'box_9_requires_box_7' => ':reference / :tax_code maps a value to box 9 without including the same value in box 7.',
+            'deliberate_error_requires_separate_notification' => 'A deliberate VAT error must be notified separately to HMRC.',
+            'error_correction_separate_notification_required' => 'Net VAT errors of £:amount exceed the current-return limit (1% of box 6 is £:box_6_limit); use separate HMRC notification.',
         ],
         'warnings' => [
             'ledger_adjustments_present' => 'The period contains :count ledger adjustment(s); review their evidence and tax treatment.',
             'inactive_tax_codes_present' => 'The period uses tax codes that are now inactive; their current mappings were applied.',
             'outside_scope_excluded' => ':reference / :tax_code excludes :metric from the return; confirm the outside-scope treatment.',
+            'separate_notification_excluded' => ':reference is recorded in the VAT account but excluded from this return because it uses separate HMRC notification.',
         ],
     ],
     'accounting' => [

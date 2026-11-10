@@ -439,7 +439,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-505` [M] Aged Receivables i Aged Payables — tenantowy raport GBP „as at” rekonstruowany z kont kontrolnych ledgeru, z bucketami current/1–30/31–60/61–90/91+, dokumentami i jawnymi ledger adjustments, uzgodnieniem AR/AP, stroną Filament i CSV (ukończone 2026-11-09).
 - [x] `UKFIN-506` [M] VAT Detail — tenantowy raport okresowy GBP z dokumentami źródłowymi, net sales/purchases, output/input VAT, tax codes i mapowaniem VAT Return, reversals, reverse charge, manual adjustments, uzgodnieniem kont kontrolnych, stroną Filament i prywatnym CSV (ukończone 2026-11-10).
 - [x] `UKFIN-507` [M] VatReturnCalculationAction dla 9 pól — zakończone 2026-11-10; preview z VAT Detail, walidacją mapowań i gotowości do review.
-- [ ] `UKFIN-508` [M] VAT adjustments z reason, attachment i approval.
+- [x] `UKFIN-508` [M] VAT adjustments z reason, attachment i approval — tenantowy workflow draft → approved → posted z obowiązkowym powodem i czystym dowodem, rozróżnieniem normal adjustment/error correction, metodą current return/separate notification, progami HMRC liczonymi od błędów netto, niezmiennym journalem i integracją VAT Detail/Return (ukończone 2026-11-10).
 - [ ] `UKFIN-509` [M] VAT return review/lock/snapshot workflow.
 - [ ] `UKFIN-510` [M] Accountant pack ZIP: CSV/XLSX/PDF + attachments manifest + hashes.
 - [ ] `UKFIN-511` [M] Golden dataset testowany względem ręcznie zaakceptowanych wyników księgowego.

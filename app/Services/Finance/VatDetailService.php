@@ -11,6 +11,7 @@ use App\Models\JournalLine;
 use App\Models\PurchaseCreditNote;
 use App\Models\Supplier;
 use App\Models\TaxCode;
+use App\Models\VatAdjustment;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
@@ -228,6 +229,28 @@ class VatDetailService
                 ],
             ));
 
+        VatAdjustment::withoutGlobalScopes()
+            ->where('business_id', $businessId)
+            ->whereIn('id', $this->sourceIds($entries, VatAdjustment::class))
+            ->get(['id', 'number', 'vat_side', 'adjustment_type', 'correction_method', 'is_deliberate'])
+            ->each(fn (VatAdjustment $adjustment) => $documents->put(
+                $this->sourceKey(VatAdjustment::class, $adjustment->id),
+                (object) [
+                    'source_key' => $this->sourceKey(VatAdjustment::class, $adjustment->id),
+                    'kind' => 'vat_adjustment',
+                    'side' => $adjustment->vat_side === VatAdjustment::SIDE_OUTPUT ? 'sales' : 'purchases',
+                    'reference' => $adjustment->number,
+                    'counterparty_id' => null,
+                    'currency' => 'GBP',
+                    'is_adjustment' => true,
+                    'vat_adjustment_id' => $adjustment->id,
+                    'vat_adjustment_type' => $adjustment->adjustment_type,
+                    'vat_correction_method' => $adjustment->correction_method,
+                    'vat_error_is_deliberate' => $adjustment->is_deliberate,
+                    'is_vat_return_excluded' => $adjustment->correction_method === VatAdjustment::METHOD_SEPARATE_NOTIFICATION,
+                ],
+            ));
+
         return $documents;
     }
 
@@ -350,7 +373,12 @@ class VatDetailService
             'output_vat_gbp' => $this->penniesToMoney($outputVat),
             'input_vat_gbp' => $this->penniesToMoney($inputVat),
             'is_reversal' => (bool) $entry?->is_reversal,
-            'is_adjustment' => $document === null,
+            'is_adjustment' => $document?->is_adjustment ?? $document === null,
+            'vat_adjustment_id' => $document?->vat_adjustment_id ?? null,
+            'vat_adjustment_type' => $document?->vat_adjustment_type ?? null,
+            'vat_correction_method' => $document?->vat_correction_method ?? null,
+            'vat_error_is_deliberate' => $document?->vat_error_is_deliberate ?? false,
+            'is_vat_return_excluded' => $document?->is_vat_return_excluded ?? false,
             'source_key' => $document?->source_key,
             'line_count' => $group->count(),
         ];

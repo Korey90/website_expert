@@ -54,6 +54,7 @@ class FilamentPermissionRegistry
         'SubscriptionResource' => ['view' => 'view_subscriptions'],
         'SupplierResource' => ['view' => 'view_finance', 'create' => 'manage_finance', 'update' => 'manage_finance', 'delete' => 'manage_finance'],
         'UserResource' => ['view' => 'view_users', 'create' => 'create_users', 'update' => 'edit_users', 'delete' => 'delete_users'],
+        'VatAdjustmentResource' => ['view' => 'view_finance', 'create' => 'manage_finance', 'update' => 'manage_finance'],
     ];
 
     private const PAGE_PERMISSIONS = [

@@ -3,6 +3,7 @@
 namespace App\Actions\Finance;
 
 use App\Models\AccountingProfile;
+use App\Models\VatAdjustment;
 use App\Services\Finance\VatDetailService;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
@@ -73,12 +74,22 @@ final class VatReturnCalculationAction
             $this->mapRow($row, $boxPennies, $contributions, $issues, $warnings);
         }
 
+        $this->validateErrorCorrections($detail['rows'], $boxPennies, $issues);
+
         $boxPennies[3] = $boxPennies[1] + $boxPennies[2];
         $signedNetVatPennies = $boxPennies[3] - $boxPennies[4];
         $boxPennies[5] = abs($signedNetVatPennies);
 
         $detailOutputPennies = $this->moneyToPennies($detail['totals']->output_vat_gbp);
         $detailInputPennies = $this->moneyToPennies($detail['totals']->input_vat_gbp);
+        $excludedOutputPennies = $detail['rows']
+            ->where('is_vat_return_excluded', true)
+            ->sum(fn (object $row): int => $this->moneyToPennies($row->output_vat_gbp));
+        $excludedInputPennies = $detail['rows']
+            ->where('is_vat_return_excluded', true)
+            ->sum(fn (object $row): int => $this->moneyToPennies($row->input_vat_gbp));
+        $expectedOutputPennies = $detailOutputPennies - $excludedOutputPennies;
+        $expectedInputPennies = $detailInputPennies - $excludedInputPennies;
         $mappedOutputPennies = $boxPennies[1] + $boxPennies[2];
         $mappedInputPennies = $boxPennies[4];
 
@@ -86,15 +97,15 @@ final class VatReturnCalculationAction
             $this->addFinding($issues, 'vat_detail_unreconciled');
         }
 
-        if ($mappedOutputPennies !== $detailOutputPennies) {
+        if ($mappedOutputPennies !== $expectedOutputPennies) {
             $this->addFinding($issues, 'output_vat_not_fully_mapped', [
-                'difference' => $this->penniesToMoney($mappedOutputPennies - $detailOutputPennies),
+                'difference' => $this->penniesToMoney($mappedOutputPennies - $expectedOutputPennies),
             ]);
         }
 
-        if ($mappedInputPennies !== $detailInputPennies) {
+        if ($mappedInputPennies !== $expectedInputPennies) {
             $this->addFinding($issues, 'input_vat_not_fully_mapped', [
-                'difference' => $this->penniesToMoney($mappedInputPennies - $detailInputPennies),
+                'difference' => $this->penniesToMoney($mappedInputPennies - $expectedInputPennies),
             ]);
         }
 
@@ -124,8 +135,8 @@ final class VatReturnCalculationAction
 
         $checks = (object) [
             'vat_detail_reconciled' => (bool) $detail['totals']->is_reconciled,
-            'output_vat_mapped' => $mappedOutputPennies === $detailOutputPennies,
-            'input_vat_mapped' => $mappedInputPennies === $detailInputPennies,
+            'output_vat_mapped' => $mappedOutputPennies === $expectedOutputPennies,
+            'input_vat_mapped' => $mappedInputPennies === $expectedInputPennies,
             'box_3_formula_valid' => $boxPennies[3] === $boxPennies[1] + $boxPennies[2],
             'box_5_formula_valid' => $boxPennies[5] === abs($boxPennies[3] - $boxPennies[4]),
             'box_8_included_in_box_6' => $this->subsetMappingValid($contributions, 8, 6),
@@ -166,6 +177,14 @@ final class VatReturnCalculationAction
         Collection $issues,
         Collection $warnings,
     ): void {
+        if ($row->is_vat_return_excluded ?? false) {
+            $this->addFinding($warnings, 'separate_notification_excluded', [
+                'reference' => $row->reference ?? '—',
+            ]);
+
+            return;
+        }
+
         $mapping = is_array($row->vat_return_mapping ?? null) ? $row->vat_return_mapping : [];
 
         foreach (self::METRIC_FIELDS as $metric => $field) {
@@ -236,6 +255,42 @@ final class VatReturnCalculationAction
                     'tax_code' => $row->tax_code ?? 'UNKNOWN',
                 ]);
             }
+        }
+    }
+
+    /**
+     * @param  Collection<int, object>  $rows
+     * @param  array<int, int>  $boxPennies
+     * @param  Collection<int, object>  $issues
+     */
+    private function validateErrorCorrections(Collection $rows, array $boxPennies, Collection $issues): void
+    {
+        $currentReturnErrors = $rows->filter(fn (object $row): bool => ($row->vat_adjustment_type ?? null) === VatAdjustment::TYPE_ERROR_CORRECTION
+            && ($row->vat_correction_method ?? null) === VatAdjustment::METHOD_CURRENT_RETURN);
+
+        if ($currentReturnErrors->isEmpty()) {
+            return;
+        }
+
+        if ($currentReturnErrors->contains(fn (object $row): bool => (bool) ($row->vat_error_is_deliberate ?? false))) {
+            $this->addFinding($issues, 'deliberate_error_requires_separate_notification');
+        }
+
+        $netErrorPennies = $currentReturnErrors->sum(fn (object $row): int => $this->moneyToPennies($row->output_vat_gbp)
+            - $this->moneyToPennies($row->input_vat_gbp));
+        $absoluteNetErrorPennies = abs($netErrorPennies);
+
+        if ($absoluteNetErrorPennies <= 1_000_000) {
+            return;
+        }
+
+        $onePercentBoxSixPennies = intdiv(abs($boxPennies[6]), 100);
+
+        if ($absoluteNetErrorPennies > 5_000_000 || $absoluteNetErrorPennies > $onePercentBoxSixPennies) {
+            $this->addFinding($issues, 'error_correction_separate_notification_required', [
+                'amount' => $this->penniesToMoney($absoluteNetErrorPennies),
+                'box_6_limit' => $this->penniesToMoney($onePercentBoxSixPennies),
+            ]);
         }
     }
 
