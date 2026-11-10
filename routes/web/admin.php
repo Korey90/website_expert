@@ -10,6 +10,7 @@ use App\Http\Controllers\Finance\FinancialAttachmentController;
 use App\Http\Controllers\Finance\ManagementCashFlowReportExportController;
 use App\Http\Controllers\Finance\ProfitAndLossReportExportController;
 use App\Http\Controllers\Finance\TrialBalanceReportExportController;
+use App\Http\Controllers\Finance\VatDetailReportExportController;
 use App\Http\Controllers\ReportController;
 use App\Models\LeadNote;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +59,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/finance/aged-receivables-payables.csv', AgedReceivablesPayablesReportExportController::class)
         ->name('admin.finance.aged-receivables-payables.csv');
+
+    Route::get('/admin/finance/vat-detail.csv', VatDetailReportExportController::class)
+        ->name('admin.finance.vat-detail.csv');
 
     // Reports — admin only
     Route::prefix('reports')->name('reports.')->group(function () {

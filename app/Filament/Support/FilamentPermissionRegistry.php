@@ -67,6 +67,7 @@ class FilamentPermissionRegistry
         'ManagementCashFlowPage' => 'view_finance',
         'ProfitAndLossPage' => 'view_finance',
         'TrialBalancePage' => 'view_finance',
+        'VatDetailPage' => 'view_finance',
         'IntegrationSettingsPage' => 'manage_settings',
         'LegalSettingsPage' => 'manage_settings',
         'PaymentSettingsPage' => 'manage_settings',

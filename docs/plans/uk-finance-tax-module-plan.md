@@ -437,7 +437,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-503` [M] Balance Sheet — tenantowy bilans GBP na koniec okresu z aktywami, zobowiązaniami i kapitałem, skumulowanym niezamkniętym wynikiem, comparison/variance, kontrolą równania bilansowego i CSV (ukończone 2026-11-09).
 - [x] `UKFIN-504` [M] Cash Flow w wersji zarządczej — tenantowy raport bezpośredni GBP z przepływami operacyjnymi, inwestycyjnymi i finansowymi, saldem otwarcia/zamknięcia, comparison/variance, kontrolą uzgodnienia i CSV (ukończone 2026-11-09).
 - [x] `UKFIN-505` [M] Aged Receivables i Aged Payables — tenantowy raport GBP „as at” rekonstruowany z kont kontrolnych ledgeru, z bucketami current/1–30/31–60/61–90/91+, dokumentami i jawnymi ledger adjustments, uzgodnieniem AR/AP, stroną Filament i CSV (ukończone 2026-11-09).
-- [ ] `UKFIN-506` [M] VAT Detail: output/input VAT, tax codes i dokumenty źródłowe.
+- [x] `UKFIN-506` [M] VAT Detail — tenantowy raport okresowy GBP z dokumentami źródłowymi, net sales/purchases, output/input VAT, tax codes i mapowaniem VAT Return, reversals, reverse charge, manual adjustments, uzgodnieniem kont kontrolnych, stroną Filament i prywatnym CSV (ukończone 2026-11-10).
 - [ ] `UKFIN-507` [M] VatReturnCalculationAction dla 9 pól.
 - [ ] `UKFIN-508` [M] VAT adjustments z reason, attachment i approval.
 - [ ] `UKFIN-509` [M] VAT return review/lock/snapshot workflow.
