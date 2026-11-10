@@ -1,5 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 import { Head, router } from '@inertiajs/react';
+import {
+    BadgePoundSterling,
+    CalendarDays,
+    FilePenLine,
+    FileText,
+    Globe,
+    Handshake,
+    KeyRound,
+    Languages,
+    type LucideIcon,
+    MapPin,
+    MapPinned,
+    MessagesSquare,
+    ReceiptText,
+    RefreshCw,
+    Smartphone,
+    Unlink,
+} from 'lucide-react';
 import MarketingLayout from '@/Layouts/MarketingLayout';
 import { pushEvent } from '@/utils/dataLayer';
 
@@ -12,19 +30,28 @@ function getQueryParam(name: string): string {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function TrustItem({ icon, text }: { icon: string; text: string }) {
+const legacyTrustIcons: Record<string, LucideIcon> = {
+    '📍': MapPin,
+    '🇵🇱': Languages,
+    '📱': Smartphone,
+    '💷': BadgePoundSterling,
+};
+
+function TrustItem({ icon, text }: { icon: LucideIcon | string; text: string }) {
+    const Icon = typeof icon === 'string' ? legacyTrustIcons[icon] : icon;
+
     return (
-        <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-white/70">
-            <span className="text-brand-500 font-bold">{icon}</span>
+        <div className="flex items-center gap-2 text-sm text-white/70">
+            <span className="text-brand-500 font-bold">{Icon ? <Icon aria-hidden="true" /> : icon}</span>
             <span>{text}</span>
         </div>
     );
 }
 
-function ProblemCard({ icon, title, body }: { icon: string; title: string; body: string }) {
+function ProblemCard({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
     return (
         <div className="rounded-2xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900 p-6">
-            <div className="text-3xl mb-3">{icon}</div>
+            <div className="mb-3 text-brand-500 flex justify-center">{icon}</div>
             <h3 className="font-bold text-neutral-900 dark:text-white mb-2">{title}</h3>
             <p className="text-neutral-600 dark:text-white/70 text-sm leading-relaxed">{body}</p>
         </div>
@@ -422,11 +449,11 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
     const heroPriceLabel    = c('hero_price_label', 'Strony od £799');
     const heroDeliveryLabel = c('hero_delivery_label', 'Realizacja 3–5 tygodni');
     const heroCtaSecondary  = c('hero_cta_secondary', 'Zobacz realizacje');
-    const trustItems        = c('trust_items', [
-        { icon: '📍', text: 'Baza w Północnej Irlandii' },
-        { icon: '🇵🇱', text: 'Obsługa po polsku' },
-        { icon: '📱', text: 'Mobile-first' },
-        { icon: '💷', text: 'Ustalona cena z góry' },
+    const trustItems        = c<Array<{ icon: LucideIcon | string; text: string }>>('trust_items', [
+        { icon: MapPin, text: 'Baza w Północnej Irlandii' },
+        { icon: Languages, text: 'Obsługa po polsku' },
+        { icon: Smartphone, text: 'Mobile-first' },
+        { icon: BadgePoundSterling, text: 'Ustalona cena z góry' },
     ]);
     const packageFrom       = c('package_from', '£799');
     const packageScope      = c('package_scope', [
@@ -600,10 +627,10 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[
-                            { icon: '🗣️', title: 'Rozmowa po polsku', body: 'Bez nieporozumień dotyczących technologii, umowy, zakresu i kosztów projektu.' },
-                            { icon: '🇬🇧', title: 'Dopasowanie do rynku UK', body: 'Waluta, lokalizacja, SEO, Google Business Profile i brytyjska terminologia.' },
-                            { icon: '📝', title: 'Treści po angielsku', body: 'Strona może być angielska albo dwujęzyczna, zależnie od Twoich klientów.' },
-                            { icon: '🤝', title: 'Bezpośrednia współpraca', body: 'Rozmawiasz ze mną, a nie z handlowcem przekazującym informacje dalej.' },
+                                { icon: <MessagesSquare className='size-3/4' aria-hidden="true" />, title: 'Rozmowa po polsku', body: 'Bez nieporozumień dotyczących technologii, umowy, zakresu i kosztów projektu.' },
+                                { icon: <MapPinned className='size-3/4' aria-hidden="true" />, title: 'Dopasowanie do rynku UK', body: 'Waluta, lokalizacja, SEO, Google Business Profile i brytyjska terminologia.' },
+                                { icon: <FilePenLine className='size-3/4' aria-hidden="true" />, title: 'Treści w wielu jezykach', body: 'Strona może być angielska albo dwujęzyczna, zależnie od Twoich klientów.' },
+                                { icon: <Handshake className='size-3/4' aria-hidden="true" />, title: 'Bezpośrednia współpraca', body: 'Rozmawiasz ze mną, a nie z handlowcem przekazującym informacje dalej.' },
                         ].map(item => (
                             <ProblemCard key={item.title} icon={item.icon} title={item.title} body={item.body} />
                         ))}
@@ -765,23 +792,23 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
                             {
                                 industry: 'Firma Sanitarna · UK',
                                 title: 'Notrstar Cleaning NI',
-                                challenge: 'Obsluga klienta online, blog zintegrowany z facebook app.',
+                                challenge: 'Stara strona utrudniała rezerwację wizyt i nie prezentowała usług w zrozumiały sposób.',
                                 solution: 'Redesign mobile-first, integracja rezerwacji online, opinie Google.',
-                                result: 'Więcej zapytań od nowych klientów dzieki integracji marketingowej oraz formularz kontaktowy.',
+                                result: 'Więcej zapytań od nowych klientów dzieki przebudowie designu oraz optymalizacji SEO.',
                             },
                             {
-                                industry: 'Firma budowlana · Belfast',
-                                title: 'Wykonawca remontów',
+                                industry: 'SEO Tool · EU',
+                                title: 'Narzedzie do analizy SEO',
+                                challenge: 'Właściciele stron internetowych często nie wiedzą, jakie błędy techniczne SEO ograniczają ich widoczność w wyszukiwarkach',
+                                solution: 'Aplikacja SaaS, która automatycznie analizuje strony internetowe, wykrywa problemy SEO i generuje raporty z rekomendacjami.',
+                                result: 'Użytkownicy mogą szybciej identyfikować i naprawiać błędy SEO, oszczędzając czas i ograniczając potrzebę ręcznej analizy technicznej.',
+                            },
+                            {
+                                industry: 'Rozwiazania OZE · EU',
+                                title: 'PV Provider',
                                 challenge: 'Brak strony internetowej — klienci nie mogli sprawdzić firmy online przed kontaktem.',
-                                solution: 'Nowa strona z portfolio realizacji, formularzem wyceny i opiniami klientów.',
-                                result: 'Stała obecność online i regularne zapytania z wyszukiwarki.',
-                            },
-                            {
-                                industry: 'Kancelaria · Londyn',
-                                title: 'Kancelaria prawna',
-                                challenge: 'Strona nie budowała zaufania i nie odpowiadała na pytania potencjalnych klientów.',
-                                solution: 'Czytelna prezentacja usług, biografii i procesu współpracy.',
-                                result: 'Wyraźny wzrost liczby zapytań przez formularz kontaktowy.',
+                                solution: 'Nowa strona z portfolio realizacji, formularzem wyceny i opiniami klientów. dedykowany panel administracyjny + CMS. google buisness profile',
+                                result: 'Wyraźny wzrost liczby zapytań przez formularz kontaktowy oraz formularz wyceny.',
                             },
                         ].map(item => (
                             <div key={item.title} className="rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 p-6">
@@ -887,23 +914,27 @@ export default function PlStronyInternetowe({ footer, cms }: Props) {
                                 <span className="rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-white/70">Obsługa PL</span>
                             </div>
                         </div>
-                        <div className="mt-8 lg:mt-0 space-y-4">
-                            <h3 className="font-bold text-neutral-900 dark:text-white mb-4">Jasne zasady od początku</h3>
-                            {[
-                                ['📄', 'Pisemny zakres projektu przed startem'],
-                                ['💷', 'Ustalona cena — bez zaskakujących dopłat'],
-                                ['📅', 'Ustalony harmonogram realizacji'],
-                                ['🔄', 'Określona liczba poprawek w cenie'],
-                                ['🌐', 'Domena zarejestrowana na Ciebie lub Twoją firmę'],
-                                ['🔑', 'Pełny dostęp do strony po zakończeniu projektu'],
-                                ['🧾', 'Faktura i pełna dokumentacja projektu'],
-                                ['🤝', 'Brak przymusowej umowy na długoterminowe utrzymanie'],
-                            ].map(([icon, text]) => (
-                                <div key={text as string} className="flex items-start gap-3">
-                                    <span className="text-xl flex-shrink-0">{icon}</span>
-                                    <p className="text-sm text-neutral-700 dark:text-white/80 leading-relaxed">{text}</p>
-                                </div>
-                            ))}
+                        <div className="mt-8 lg:mt-0">
+                            <h3 className="font-bold text-neutral-900 dark:text-white mb-5 text-2xl">Jasne zasady od początku</h3>
+                            <div className="space-y-3">
+                                {[
+                                    { icon: FileText, text: 'Pisemny zakres projektu przed startem' },
+                                    { icon: BadgePoundSterling, text: 'Ustalona cena — bez zaskakujących dopłat' },
+                                    { icon: CalendarDays, text: 'Ustalony harmonogram realizacji' },
+                                    { icon: RefreshCw, text: 'Określona liczba poprawek w cenie' },
+                                    { icon: Globe, text: 'Domena zarejestrowana na Ciebie lub Twoją firmę' },
+                                    { icon: KeyRound, text: 'Pełny dostęp do strony po zakończeniu projektu' },
+                                    { icon: ReceiptText, text: 'Faktura i pełna dokumentacja projektu' },
+                                    { icon: Unlink, text: 'Brak przymusowej umowy na długoterminowe utrzymanie' },
+                                ].map(({ icon: Icon, text }) => (
+                                    <div key={text} className="flex items-center gap-2">
+                                        <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-500/10">
+                                            <Icon aria-hidden="true" className="size-6 text-brand-500 dark:text-brand-400" strokeWidth={1.75} />
+                                        </span>
+                                        <p className="text-md text-neutral-700 dark:text-white/80 leading-relaxed">{text}</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>

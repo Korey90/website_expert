@@ -6,6 +6,7 @@ use App\Models\BankReconciliation;
 use App\Models\ExpensePayment;
 use App\Models\Payment;
 use App\Models\PurchaseCreditRefund;
+use App\Services\Finance\VatReturnSnapshotService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -132,6 +133,63 @@ class AuditFinanceTenantData extends Command
         $report['accounting_periods'] = [
             'invalid_count' => (clone $periodQuery)->count(),
             'sample_ids' => (clone $periodQuery)->limit(20)->pluck('period.id')->all(),
+        ];
+
+        $vatReturnQuery = DB::table('vat_returns as vat_return')
+            ->leftJoin('businesses as owner', 'owner.id', '=', 'vat_return.business_id')
+            ->where(fn ($query) => $query->whereNull('vat_return.business_id')->orWhereNull('owner.id'));
+        $report['vat_returns'] = [
+            'invalid_count' => (clone $vatReturnQuery)->count(),
+            'sample_ids' => (clone $vatReturnQuery)->limit(20)->pluck('vat_return.id')->all(),
+        ];
+
+        $invalidVatReturnSnapshots = [];
+        $snapshotHasher = app(VatReturnSnapshotService::class);
+
+        DB::table('vat_returns')
+            ->select(['id', 'business_id', 'snapshot', 'snapshot_hash', 'source_journal_count', 'source_line_count'])
+            ->orderBy('id')
+            ->chunk(100, function ($returns) use (&$invalidVatReturnSnapshots, $snapshotHasher): void {
+                foreach ($returns as $return) {
+                    $snapshot = is_string($return->snapshot)
+                        ? json_decode($return->snapshot, true)
+                        : $return->snapshot;
+
+                    if (! is_array($snapshot)) {
+                        $invalidVatReturnSnapshots[] = $return->id;
+
+                        continue;
+                    }
+
+                    $sourceRows = data_get($snapshot, 'sources.rows', []);
+                    $journalIds = collect(is_array($sourceRows) ? $sourceRows : [])
+                        ->pluck('journal_entry_id')->filter()->unique()->values();
+                    $lineIds = collect(is_array($sourceRows) ? $sourceRows : [])
+                        ->flatMap(fn (array $row): array => is_array($row['journal_line_ids'] ?? null) ? $row['journal_line_ids'] : [])
+                        ->filter()->unique()->values();
+                    $validJournalCount = $journalIds->isEmpty() ? 0 : DB::table('journal_entries')
+                        ->where('business_id', $return->business_id)
+                        ->whereIn('id', $journalIds)
+                        ->count();
+                    $validLineCount = $lineIds->isEmpty() ? 0 : DB::table('journal_lines')
+                        ->where('business_id', $return->business_id)
+                        ->whereIn('journal_entry_id', $journalIds)
+                        ->whereIn('id', $lineIds)
+                        ->count();
+
+                    if ($validJournalCount !== $journalIds->count()
+                        || $validLineCount !== $lineIds->count()
+                        || (int) $return->source_journal_count !== $journalIds->count()
+                        || (int) $return->source_line_count !== $lineIds->count()
+                        || ! hash_equals((string) $return->snapshot_hash, $snapshotHasher->hash($snapshot))) {
+                        $invalidVatReturnSnapshots[] = $return->id;
+                    }
+                }
+            });
+
+        $report['vat_returns.snapshot_sources'] = [
+            'invalid_count' => count($invalidVatReturnSnapshots),
+            'sample_ids' => array_slice($invalidVatReturnSnapshots, 0, 20),
         ];
 
         $reversalQuery = DB::table('journal_entries as reversal')

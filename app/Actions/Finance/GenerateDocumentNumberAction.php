@@ -16,6 +16,7 @@ class GenerateDocumentNumberAction
         'credit_note' => 'CN',
         'purchase_credit_note' => 'PCN',
         'vat_adjustment' => 'VADJ',
+        'vat_return' => 'VATR',
     ];
 
     /** @var array<string, string> */
@@ -25,6 +26,7 @@ class GenerateDocumentNumberAction
         'credit_note' => 'credit_notes',
         'purchase_credit_note' => 'purchase_credit_notes',
         'vat_adjustment' => 'vat_adjustments',
+        'vat_return' => 'vat_returns',
     ];
 
     public function execute(

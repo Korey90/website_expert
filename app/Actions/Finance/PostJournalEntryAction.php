@@ -11,6 +11,7 @@ use App\Models\Project;
 use App\Models\Supplier;
 use App\Models\TaxCode;
 use App\Models\User;
+use App\Services\Finance\VatReturnPeriodGuard;
 use App\Support\PermissionHelper;
 use Carbon\CarbonImmutable;
 use DomainException;
@@ -20,6 +21,8 @@ use JsonException;
 
 class PostJournalEntryAction
 {
+    public function __construct(private readonly VatReturnPeriodGuard $vatReturnPeriodGuard) {}
+
     /**
      * @param  array{
      *     entry_date: string,
@@ -66,6 +69,8 @@ class PostJournalEntryAction
             if (! $period->isWritable()) {
                 throw new DomainException("Accounting period [{$period->name}] is {$period->status}.");
             }
+
+            $this->vatReturnPeriodGuard->assertWritable($business->id, $normalized['entry_date']);
 
             $this->validateTenantReferences(
                 $business,

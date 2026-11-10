@@ -100,6 +100,11 @@ class Business extends Model
         return $this->hasMany(VatAdjustment::class);
     }
 
+    public function vatReturns(): HasMany
+    {
+        return $this->hasMany(VatReturn::class);
+    }
+
     public function bankAccounts(): HasMany
     {
         return $this->hasMany(BankAccount::class);

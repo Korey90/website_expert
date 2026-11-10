@@ -25,6 +25,7 @@ use App\Models\SalesOfferTemplate;
 use App\Models\Setting;
 use App\Models\Supplier;
 use App\Models\VatAdjustment;
+use App\Models\VatReturn;
 use App\Notifications\LeadAssignedNotification;
 use App\Observers\PaymentObserver;
 use App\Policies\AccountingPeriodPolicy;
@@ -42,6 +43,7 @@ use App\Policies\SalesOfferPolicy;
 use App\Policies\SalesOfferTemplatePolicy;
 use App\Policies\SupplierPolicy;
 use App\Policies\VatAdjustmentPolicy;
+use App\Policies\VatReturnPolicy;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -91,6 +93,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(SalesOfferTemplate::class, SalesOfferTemplatePolicy::class);
         Gate::policy(Supplier::class, SupplierPolicy::class);
         Gate::policy(VatAdjustment::class, VatAdjustmentPolicy::class);
+        Gate::policy(VatReturn::class, VatReturnPolicy::class);
 
         Payment::observe(PaymentObserver::class);
 

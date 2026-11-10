@@ -112,6 +112,7 @@ class VatDetailService
                 journal_entries.description,
                 journal_entries.source_type,
                 journal_entries.source_id,
+                journal_entries.source_snapshot_hash,
                 ledger_accounts.type AS account_type,
                 ledger_accounts.subtype AS account_subtype
                 SQL)
@@ -351,6 +352,8 @@ class VatDetailService
 
         return (object) [
             'journal_entry_id' => (int) $first->journal_entry_id,
+            'journal_line_ids' => $group->pluck('id')->map(fn (mixed $id): int => (int) $id)->sort()->values()->all(),
+            'journal_snapshot_hash' => $first->source_snapshot_hash,
             'entry_number' => $first->entry_number,
             'tax_point' => (string) $first->entry_date,
             'kind' => $document?->kind ?? 'adjustment',

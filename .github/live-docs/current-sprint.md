@@ -15,12 +15,12 @@ _Brak aktywnego zadania._
 
 ### To Do
 
-- [ ] `UKFIN-509` [M] — VAT return review/lock/snapshot workflow.
 - [ ] `UKFIN-510` [M] — Accountant pack ZIP.
 - [ ] `UKFIN-511` [M] — Golden dataset zaakceptowany przez księgowego.
 
 ### Done
 
+- [x] `UKFIN-509` [M] — VAT return review/lock/snapshot workflow.
 - [x] `UKFIN-508` [M] — VAT adjustments z reason, attachment i approval.
 - [x] `UKFIN-507` [M] — VatReturnCalculationAction dla 9 pól.
 - [x] `UKFIN-506` [M] — VAT Detail: output/input VAT, tax codes i dokumenty źródłowe.
