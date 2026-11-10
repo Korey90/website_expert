@@ -7,6 +7,7 @@ use App\Actions\Finance\PostJournalEntryAction;
 use App\Actions\Finance\ReverseJournalEntryAction;
 use App\Filament\Pages\VatDetailPage;
 use App\Models\AccountingPeriod;
+use App\Models\AccountingProfile;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\Client;
@@ -263,11 +264,22 @@ class VatDetailReportTest extends TestCase
             $this->line('4100', '0.00', '100.00', 'S20', clientId: $this->client->id),
             $this->line('2200', '0.00', '20.00', 'S20', clientId: $this->client->id),
         ]);
+        AccountingProfile::withoutGlobalScopes()
+            ->where('business_id', $this->business->id)
+            ->update([
+                'vat_registered' => true,
+                'vat_number' => 'GB123456789',
+                'vat_scheme' => 'standard',
+                'vat_effective_from' => '2020-01-01',
+            ]);
 
         $this->actingAs($this->user)
             ->get(VatDetailPage::getUrl())
             ->assertOk()
             ->assertSee(__('finance.vat_detail.title'))
+            ->assertSee(__('finance.vat_return_calculation.title'))
+            ->assertSee(__('finance.vat_return_calculation.ready'))
+            ->assertSee(__('finance.vat_return_calculation.box_label', ['box' => 9]))
             ->assertSee('INV-EXPORT')
             ->assertSee('Causeway Customer Ltd');
 

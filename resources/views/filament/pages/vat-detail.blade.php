@@ -1,5 +1,7 @@
 <x-filament-panels::page>
-    @php($report = $this->getReport())
+    @php($workspace = $this->getWorkspace())
+    @php($report = $workspace['vat_detail'] ?? null)
+    @php($vatReturn = $workspace)
     @php($money = fn (float $value): string => ($value < 0 ? '-£' : '£').number_format(abs($value), 2))
 
     <div class="space-y-6">
@@ -81,6 +83,76 @@
                     </div>
                 @endforeach
             </div>
+
+            <section class="space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('finance.vat_return_calculation.title') }}</h2>
+                        <p class="mt-1 max-w-3xl text-sm text-gray-500">{{ __('finance.vat_return_calculation.subtitle') }}</p>
+                    </div>
+                    <span class="inline-flex rounded-full px-3 py-1 text-sm font-semibold {{ $vatReturn['status']->is_ready_for_review ? 'bg-success-50 text-success-700 dark:bg-success-950/40 dark:text-success-300' : 'bg-danger-50 text-danger-700 dark:bg-danger-950/40 dark:text-danger-300' }}">
+                        {{ __('finance.vat_return_calculation.'.($vatReturn['status']->is_ready_for_review ? 'ready' : 'blocked')) }}
+                    </span>
+                </div>
+
+                <div class="rounded-lg border border-warning-200 bg-warning-50 p-3 text-sm font-medium text-warning-800 dark:border-warning-900 dark:bg-warning-950/40 dark:text-warning-200">
+                    {{ __('finance.vat_return_calculation.not_submission') }}
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($vatReturn['boxes'] as $box)
+                        <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('finance.vat_return_calculation.box_label', ['box' => $box->number]) }}</div>
+                                    <div class="mt-1 text-sm text-gray-700 dark:text-gray-300">{{ __('finance.vat_return_calculation.boxes.'.$box->number) }}</div>
+                                </div>
+                                @if ($box->is_derived)
+                                    <span class="rounded bg-info-50 px-2 py-0.5 text-xs text-info-700 dark:bg-info-950/40 dark:text-info-300">{{ __('finance.vat_return_calculation.derived') }}</span>
+                                @endif
+                            </div>
+                            <div class="mt-3 text-2xl font-semibold text-gray-900 dark:text-white">
+                                {{ $box->decimal_places === 2 ? $money($box->submission_value) : '£'.number_format($box->submission_value, 0) }}
+                            </div>
+                            <div class="mt-1 font-mono text-xs text-gray-400">{{ $box->hmrc_field }}</div>
+                            @if ($box->decimal_places === 0 && $box->raw_gbp != $box->submission_value)
+                                <div class="mt-2 text-xs text-gray-500">
+                                    {{ __('finance.vat_return_calculation.raw_ledger_value', ['value' => $money($box->raw_gbp)]) }}
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="rounded-lg bg-gray-50 p-4 text-sm dark:bg-gray-800">
+                    <span class="text-gray-500">{{ __('finance.vat_return_calculation.net_position') }}</span>
+                    <span class="ml-2 font-semibold text-gray-900 dark:text-white">
+                        {{ __('finance.vat_return_calculation.directions.'.$vatReturn['status']->net_direction) }} — {{ $money(abs($vatReturn['status']->signed_net_vat_gbp)) }}
+                    </span>
+                </div>
+
+                @if ($vatReturn['issues']->isNotEmpty())
+                    <div class="rounded-lg border border-danger-200 bg-danger-50 p-4 text-sm text-danger-800 dark:border-danger-900 dark:bg-danger-950/40 dark:text-danger-200">
+                        <div class="font-semibold">{{ __('finance.vat_return_calculation.issues_title') }}</div>
+                        <ul class="mt-2 list-disc space-y-1 pl-5">
+                            @foreach ($vatReturn['issues'] as $issue)
+                                <li>{{ __('finance.vat_return_calculation.issues.'.$issue->code, $issue->context) }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @if ($vatReturn['warnings']->isNotEmpty())
+                    <div class="rounded-lg border border-warning-200 bg-warning-50 p-4 text-sm text-warning-800 dark:border-warning-900 dark:bg-warning-950/40 dark:text-warning-200">
+                        <div class="font-semibold">{{ __('finance.vat_return_calculation.warnings_title') }}</div>
+                        <ul class="mt-2 list-disc space-y-1 pl-5">
+                            @foreach ($vatReturn['warnings'] as $warning)
+                                <li>{{ __('finance.vat_return_calculation.warnings.'.$warning->code, $warning->context) }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+            </section>
 
             <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
                 <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-700">

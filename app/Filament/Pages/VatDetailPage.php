@@ -2,8 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use App\Actions\Finance\VatReturnCalculationAction;
 use App\Models\AccountingPeriod;
-use App\Services\Finance\VatDetailService;
 use Illuminate\Support\Collection;
 
 class VatDetailPage extends BasePage
@@ -44,14 +44,24 @@ class VatDetailPage extends BasePage
         $this->dateTo = $period?->end_date->toDateString() ?? today()->endOfQuarter()->toDateString();
     }
 
-    /** @return array{date_from: string, date_to: string, rows: Collection<int, object>, tax_codes: Collection<int, object>, totals: object}|null */
-    public function getReport(): ?array
+    /** @return array<string, mixed>|null */
+    public function getWorkspace(): ?array
     {
         if ($this->dateFrom === '' || $this->dateTo === '' || $this->dateFrom > $this->dateTo) {
             return null;
         }
 
-        return app(VatDetailService::class)->report(currentBusiness()->id, $this->dateFrom, $this->dateTo);
+        return app(VatReturnCalculationAction::class)->execute(
+            currentBusiness()->id,
+            $this->dateFrom,
+            $this->dateTo,
+        );
+    }
+
+    /** @return array{date_from: string, date_to: string, rows: Collection<int, object>, tax_codes: Collection<int, object>, totals: object}|null */
+    public function getReport(): ?array
+    {
+        return $this->getWorkspace()['vat_detail'] ?? null;
     }
 
     public function getExportUrl(): ?string

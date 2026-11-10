@@ -1,30 +1,19 @@
 # Current Task
 
 **Status:** Brak aktywnego zadania
-**Ostatnio zakończone:** UKFIN-506 — VAT Detail
-**Data zakończenia:** 2026-11-10
+**Ostatnio zakończone:** UKFIN-507 — VatReturnCalculationAction dla 9 pól (2026-11-10)
+**Następne zadanie:** UKFIN-508 — VAT adjustments z reason, attachment i approval
 **Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
 
-## Wynik ostatniego etapu
+## Stan przekazania
 
-- Dodano tenantowy raport VAT Detail w GBP dla inkluzywnego zakresu dat księgowych.
-- Net sales/purchases oraz output/input VAT są rekonstruowane z journal lines `posted`/`reversed`, a nie z bieżących sum dokumentu.
-- Raport obsługuje standard, reduced, zero, exempt, outside scope i reverse charge oraz prezentuje pełne mapowanie tax code do pól VAT Return.
-- Faktury, credit notes, expenses i purchase credit notes są mapowane do dokumentów i kontrahentów, również po soft delete.
-- Reversals pozostają osobnymi ujemnymi ruchami w swojej dacie; ręczne linie VAT bez tax code są widoczne jako `UNKNOWN` adjustments.
-- Output i input VAT są uzgadniane co do pensa z kontami kontrolnymi rozpoznawanymi po podtypie, także dla kont niestandardowych.
-- Dodano stronę Filament `/admin/vat-detail`, prywatny CSV, `view_finance`, ścisłą walidację dat, tenant isolation i tłumaczenia PL/EN/PT.
-- Nie dodano migracji ani automatycznego wyliczania/składania VAT Return.
-
-## Walidacja
-
-- Dedykowane UKFIN-506: 5 passed / 85 assertions.
-- Raporty finansowe: 40 passed / 422 assertions.
-- Finance: 245 passed / 1 skipped / 1696 assertions.
-- Pełny pakiet: 754 passed / 9 znanych baseline failures / 11 skipped / 3140 assertions.
+- Preview dziewięciu pól UK VAT Return działa w `/admin/vat-detail` i bazuje na uzgodnionym VAT Detail.
+- Kalkulacja, mapowania tax codes, precyzja HMRC, status payable/repayable oraz blokady gotowości są pokryte testami.
+- Cash Accounting i Flat Rate pozostają jawnie zablokowane; brak zapisu, locka i wysyłki do HMRC.
+- Finance: 251 passed / 1 skipped / 1755 assertions.
+- Pełny pakiet: 760 passed / 9 znanych baseline failures / 11 skipped / 3199 assertions.
 - Tenant audit: `valid: true`, zero nieprawidłowości.
-- Pint, parity 810 kluczy PL/EN/PT, kontrola trasy, nazwy firmy i `git diff --check`: bez nowych problemów.
 
-## Następne zadanie
+## Następny krok
 
-- `UKFIN-507` [M] — VatReturnCalculationAction dla 9 pól.
+Rozpocząć UKFIN-508 od delta analysis istniejących financial attachments, approval patterns i immutable ledger adjustments; korekty VAT muszą zachować reason, dowód, autora, akceptację i pełny tenant scope.

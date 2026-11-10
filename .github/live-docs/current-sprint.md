@@ -11,11 +11,10 @@
 
 ### In Progress
 
-- Brak aktywnego zadania; następne w kolejce jest `UKFIN-507`.
+- Brak aktywnego zadania; następny etap: `UKFIN-508`.
 
 ### To Do
 
-- [ ] `UKFIN-507` [M] — VatReturnCalculationAction dla 9 pól.
 - [ ] `UKFIN-508` [M] — VAT adjustments z reason, attachment i approval.
 - [ ] `UKFIN-509` [M] — VAT return review/lock/snapshot workflow.
 - [ ] `UKFIN-510` [M] — Accountant pack ZIP.
@@ -23,6 +22,7 @@
 
 ### Done
 
+- [x] `UKFIN-507` [M] — VatReturnCalculationAction dla 9 pól.
 - [x] `UKFIN-506` [M] — VAT Detail: output/input VAT, tax codes i dokumenty źródłowe.
 - [x] `UKFIN-505` [M] — Aged Receivables i Aged Payables.
 - [x] `UKFIN-504` [M] — Cash Flow w wersji zarządczej.
