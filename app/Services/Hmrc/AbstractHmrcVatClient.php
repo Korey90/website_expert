@@ -191,6 +191,8 @@ abstract class AbstractHmrcVatClient implements HmrcClientInterface
         array $fraudPreventionHeaders,
         ?string $testScenario,
     ): PendingRequest {
+        app(HmrcFraudPreventionHeaders::class)->assertComplete($fraudPreventionHeaders);
+
         $headers = [];
 
         foreach ($fraudPreventionHeaders as $name => $value) {

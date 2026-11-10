@@ -5,13 +5,21 @@ namespace App\Filament\Pages;
 use App\Models\Business;
 use App\Models\HmrcConnection;
 use App\Models\User;
+use App\Services\Hmrc\Exceptions\HmrcFraudPreventionException;
 use App\Services\Hmrc\Exceptions\HmrcOAuthException;
+use App\Services\Hmrc\HmrcFraudPreventionClient;
+use App\Services\Hmrc\HmrcFraudPreventionHeaders;
 use App\Services\Hmrc\HmrcOAuthService;
 use Filament\Actions\Action;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 
 class HmrcConnectionPage extends BasePage
 {
+    /** @var array<string, int|string|null>|null */
+    public ?array $fraudValidationSummary = null;
+
     protected string $view = 'filament.pages.hmrc-connection';
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-building-library';
@@ -74,6 +82,56 @@ class HmrcConnectionPage extends BasePage
             ->send();
     }
 
+    /** @param array{totp?: string} $data */
+    public function validateFraudPreventionHeaders(array $data): void
+    {
+        [, $actor] = $this->managementContext();
+        $secret = $actor->getAppAuthenticationSecret();
+
+        if (! is_string($secret) || $secret === '') {
+            Notification::make()->title(__('finance.hmrc_connection.notifications.mfa_required'))->danger()->send();
+
+            return;
+        }
+
+        $code = (string) ($data['totp'] ?? '');
+        if (! AppAuthentication::make()->verifyCode($code, $secret, true)) {
+            Notification::make()->title(__('finance.hmrc_connection.notifications.mfa_invalid'))->danger()->send();
+
+            return;
+        }
+
+        $multiFactor = [
+            'type' => 'TOTP',
+            'timestamp' => now()->utc()->format('Y-m-d\TH:i:s\Z'),
+            'unique_reference' => hash_hmac('sha256', 'filament-totp:'.$secret, (string) config('app.key')),
+        ];
+
+        try {
+            $builder = app(HmrcFraudPreventionHeaders::class);
+            $result = $builder->build(request(), $actor, $multiFactor);
+            $builder->assertComplete($result->headers);
+            $response = app(HmrcFraudPreventionClient::class)->validate($result->headers);
+
+            $headers = is_array($response->data['headers'] ?? null) ? $response->data['headers'] : [];
+            $this->fraudValidationSummary = [
+                'code' => $this->safeValidationCode($response->data['code'] ?? 'CHECKED'),
+                'spec_version' => $this->safeValidationCode($response->data['specVersion'] ?? null),
+                'errors' => $this->countValidationItems($headers, 'errors'),
+                'warnings' => $this->countValidationItems($headers, 'warnings'),
+                'checked_at' => now()->toIso8601String(),
+                'correlation_id' => $response->correlationId,
+            ];
+
+            Notification::make()
+                ->title(__('finance.hmrc_connection.notifications.fraud_validated'))
+                ->success()
+                ->send();
+        } catch (HmrcFraudPreventionException $exception) {
+            Notification::make()->title($exception->getMessage())->danger()->send();
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         $connection = $this->connection();
@@ -99,6 +157,22 @@ class HmrcConnectionPage extends BasePage
                 ->modalDescription(__('finance.hmrc_connection.help.disconnect'))
                 ->action('disconnectConnection')
                 ->visible($canManage && $connection && $connection->status !== HmrcConnection::STATUS_DISCONNECTED),
+            Action::make('validate_fraud_headers')
+                ->label(__('finance.hmrc_connection.actions.validate_fraud_headers'))
+                ->icon('heroicon-o-shield-check')
+                ->color('info')
+                ->modalHeading(__('finance.hmrc_connection.fraud_validation.modal_title'))
+                ->modalDescription(__('finance.hmrc_connection.fraud_validation.modal_description'))
+                ->form([
+                    TextInput::make('totp')
+                        ->label(__('finance.hmrc_connection.fraud_validation.totp'))
+                        ->password()
+                        ->required()
+                        ->minLength(6)
+                        ->maxLength(8),
+                ])
+                ->action(fn (array $data) => $this->validateFraudPreventionHeaders($data))
+                ->visible($canManage && config('hmrc.environment') === 'sandbox'),
         ];
     }
 
@@ -135,5 +209,25 @@ class HmrcConnectionPage extends BasePage
     private function maskedVrn(?string $vrn): ?string
     {
         return filled($vrn) ? '•••••'.substr($vrn, -4) : null;
+    }
+
+    /** @param array<int, mixed> $headers */
+    private function countValidationItems(array $headers, string $key): int
+    {
+        return array_sum(array_map(
+            fn (mixed $header): int => is_array($header) && is_array($header[$key] ?? null)
+                ? count($header[$key])
+                : 0,
+            $headers,
+        ));
+    }
+
+    private function safeValidationCode(mixed $value): ?string
+    {
+        if (! is_string($value) || preg_match('/^[A-Za-z0-9._-]{1,80}$/', $value) !== 1) {
+            return null;
+        }
+
+        return $value;
     }
 }

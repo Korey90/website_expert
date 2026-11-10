@@ -53,5 +53,44 @@
                 <p class="font-medium text-danger-700 dark:text-danger-300">{{ __('finance.hmrc_connection.help.sandbox_only') }}</p>
             </div>
         </x-filament::section>
+
+        <x-filament::section>
+            <x-slot name="heading">{{ __('finance.hmrc_connection.sections.fraud_prevention') }}</x-slot>
+            <x-slot name="description">{{ __('finance.hmrc_connection.fraud_validation.description') }}</x-slot>
+
+            <div class="space-y-4 text-sm text-gray-600 dark:text-gray-300">
+                <p>{{ __('finance.hmrc_connection.fraud_validation.browser_notice') }}</p>
+                <p>{{ __('finance.hmrc_connection.fraud_validation.infrastructure_notice') }}</p>
+
+                @if ($fraudValidationSummary)
+                    <dl class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.fraud_validation.code') }}</dt>
+                            <dd class="font-medium">{{ $fraudValidationSummary['code'] ?? '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.fraud_validation.spec_version') }}</dt>
+                            <dd class="font-medium">{{ $fraudValidationSummary['spec_version'] ?? '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.fraud_validation.errors') }}</dt>
+                            <dd class="font-medium">{{ $fraudValidationSummary['errors'] }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.fraud_validation.warnings') }}</dt>
+                            <dd class="font-medium">{{ $fraudValidationSummary['warnings'] }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.fraud_validation.checked_at') }}</dt>
+                            <dd class="font-medium">{{ $fraudValidationSummary['checked_at'] }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.fraud_validation.correlation_id') }}</dt>
+                            <dd class="font-mono font-medium">{{ $fraudValidationSummary['correlation_id'] ?? '—' }}</dd>
+                        </div>
+                    </dl>
+                @endif
+            </div>
+        </x-filament::section>
     </div>
 </x-filament-panels::page>

@@ -1,6 +1,6 @@
 # Current Task
 
-**Status:** W toku — konfiguracja zewnętrzna UKFIN-601 + implementacja UKFIN-605
+**Status:** W toku — konfiguracja zewnętrzna UKFIN-601 + przygotowanie UKFIN-606
 **Zadanie:** HMRC MTD VAT sandbox end-to-end
 **Data rozpoczęcia:** 2026-11-10
 **Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
@@ -18,7 +18,8 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 - Sekrety będą podawane wyłącznie przez zmienne środowiskowe i nie mogą trafić do Git, logów ani chatu.
 - `UKFIN-602`: ukończony adapter VAT API z klientami sandbox/production.
 - `UKFIN-603/604`: ukończony OAuth connect/callback/refresh/local disconnect oraz szyfrowane przechowywanie połączenia.
-- Następny etap implementacyjny: `UKFIN-605` fraud-prevention headers builder + sandbox test endpoint.
+- `UKFIN-605`: ukończony builder nagłówków Fraud Prevention i klient sandboxowego Test API.
+- Następny etap implementacyjny: `UKFIN-606` pobieranie VAT obligations i synchronizacja okresów.
 
 ## Zrealizowane w UKFIN-602
 
@@ -46,9 +47,23 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 - ✅ OAuth: 10 passed / 88 assertions; końcowy pakiet HMRC OAuth + VAT client + Filament permissions: 23 passed / 161 assertions; Finance: 286 passed / 1 skipped / 2124 assertions.
 - ✅ Full regression: 797 passed / 9 znanych baseline failures / 11 skipped / 3583 assertions; brak nowych awarii HMRC.
 
+## Zrealizowane w UKFIN-605
+
+- ✅ Builder kompletnego zestawu 16 nagłówków `WEB_APP_VIA_SERVER`, z kodowaniem struktur zgodnym ze specyfikacją HMRC.
+- ✅ Dane przeglądarki są zbierane lokalnie: trwały UUID urządzenia, JavaScript user agent, ekran, rozmiar okna i strefa czasowa; cookie jest nieautorytatywną telemetrią, nie mechanizmem bezpieczeństwa.
+- ✅ Publiczny IP, port źródłowy, timestamp, użytkownik, produkt, wersja, publiczny IP vendora i pełny łańcuch terminacji TLS są walidowane po stronie serwera.
+- ✅ Nagłówek MFA powstaje wyłącznie po rzeczywistym sprawdzeniu kodu TOTP; sekret ani kod nie trafiają do nagłówków lub logów.
+- ✅ Identyfikator licencji jest hashowany SHA-256. Brak nagłówka można dopuścić tylko przez jawny wyjątek uzgodniony wcześniej z HMRC — placeholdery są zabronione.
+- ✅ Wszystkie wywołania VAT działają fail-closed i odrzucają niepełny zestaw nagłówków przed HTTP.
+- ✅ Klient Test Fraud Prevention Headers API używa osobnego, nietrwałego tokenu `client_credentials`, obsługuje `/validate` i feedback `vat-mtd`, działa tylko w sandboxie i sanitizuje błędy.
+- ✅ Panel `/admin/hmrc-connection` ma akcję walidacji z TOTP; pokazuje wyłącznie wynik, liczniki błędów/ostrzeżeń, wersję specyfikacji i correlation ID — bez wartości nagłówków.
+- ✅ Targeted HMRC + Filament: 32 passed / 196 assertions; Finance: 295 passed / 1 skipped / 2159 assertions; PL/EN/PT po 1106 kluczy.
+- ✅ Full regression: 806 passed / 9 znanych baseline failures / 11 skipped / 3618 assertions; brak nowych awarii HMRC.
+
 ## Gate
 
 - UKFIN-601 pozostaje otwarty do potwierdzenia subskrypcji trzech API i skonfigurowania lokalnych sekretów.
 - Nie wykonano rzeczywistego logowania HMRC: wymaga ono subskrypcji API, lokalnych credentials aplikacji i testowego użytkownika organizacji.
+- Nie wykonano rzeczywistej walidacji nagłówków: wymagane są credentials, publiczne dane infrastruktury, wersja produktu, prawdziwy source port oraz decyzja HMRC dotycząca braku licencji, jeśli instalacja nie ma identyfikatora licencyjnego.
 - Żadne prawdziwe dane ani deklaracje nie są wysyłane na tym etapie.
 - `HMRC_ENVIRONMENT` pozostaje `sandbox` do czasu przejścia OAuth, fraud headers, pełnych scenariuszy sandbox, security review i jawnej decyzji właściciela.

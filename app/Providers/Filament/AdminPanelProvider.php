@@ -82,10 +82,12 @@ class AdminPanelProvider extends PanelProvider
 
                     $config = json_encode(['userId' => $userId]);
                     $src = Vite::asset('resources/js/admin/notifications.js');
+                    $fraudContext = view('filament.components.hmrc-fraud-context')->render();
 
                     return new HtmlString(
                         "<script data-navigate-once>window.AdminPanelConfig = {$config};</script>".
-                        "<script data-navigate-once src=\"{$src}\"></script>"
+                        "<script data-navigate-once src=\"{$src}\"></script>".
+                        $fraudContext
                     );
                 },
             )

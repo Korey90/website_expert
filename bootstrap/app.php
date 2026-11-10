@@ -38,6 +38,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Excluding it from encryption simplifies testing and avoids decryption issues.
         $middleware->encryptCookies(except: [
             DetectGeoCurrency::COOKIE_NAME,
+            // Browser-generated, non-authoritative telemetry used only to build HMRC Gov-* headers.
+            'hmrc_fph_context',
         ]);
 
         $middleware->web(append: [

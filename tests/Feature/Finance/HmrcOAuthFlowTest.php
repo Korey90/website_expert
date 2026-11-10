@@ -306,6 +306,8 @@ class HmrcOAuthFlowTest extends TestCase
             ->get(route('filament.admin.pages.hmrc-connection'))
             ->assertOk()
             ->assertSee('HMRC Connection')
+            ->assertSee('Validate fraud headers')
+            ->assertSee('hmrc_fph_context', false)
             ->assertSee('•••••6789')
             ->assertDontSee('page-access-secret')
             ->assertDontSee('page-refresh-secret')

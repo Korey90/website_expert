@@ -4,6 +4,8 @@ namespace Tests\Feature\Finance;
 
 use App\Services\Hmrc\Contracts\HmrcClientInterface;
 use App\Services\Hmrc\Exceptions\HmrcApiException;
+use App\Services\Hmrc\Exceptions\HmrcFraudPreventionException;
+use App\Services\Hmrc\HmrcFraudPreventionHeaders;
 use App\Services\Hmrc\HmrcProductionClient;
 use App\Services\Hmrc\HmrcSandboxClient;
 use Illuminate\Http\Client\Request;
@@ -41,7 +43,7 @@ class HmrcVatClientTest extends TestCase
             'sandbox-access-token',
             '123456789',
             ['from' => '2026-07-01', 'to' => '2026-09-30', 'status' => 'O'],
-            ['Gov-Client-Connection-Method' => 'WEB_APP_VIA_SERVER'],
+            $this->fraudHeaders(),
             'QUARTERLY_NONE_MET',
         );
 
@@ -91,7 +93,7 @@ class HmrcVatClientTest extends TestCase
             'sandbox-access-token',
             '123456789',
             $payload,
-            ['Gov-Client-Connection-Method' => 'WEB_APP_VIA_SERVER'],
+            $this->fraudHeaders(),
             'DEFAULT',
         );
 
@@ -112,9 +114,10 @@ class HmrcVatClientTest extends TestCase
         ]);
 
         $client = new HmrcSandboxClient;
-        $client->viewVatReturn('token', '123456789', '26A3');
-        $client->retrieveVatLiabilities('token', '123456789', '2026-01-01', '2026-12-31');
-        $client->retrieveVatPayments('token', '123456789', '2026-01-01', '2026-12-31');
+        $headers = $this->fraudHeaders();
+        $client->viewVatReturn('token', '123456789', '26A3', $headers);
+        $client->retrieveVatLiabilities('token', '123456789', '2026-01-01', '2026-12-31', $headers);
+        $client->retrieveVatPayments('token', '123456789', '2026-01-01', '2026-12-31', $headers);
 
         Http::assertSentCount(3);
         Http::assertSent(fn (Request $request): bool => $request->url() === 'https://test-api.service.hmrc.gov.uk/organisations/vat/123456789/returns/26A3');
@@ -148,7 +151,7 @@ class HmrcVatClientTest extends TestCase
             ->push(['unexpected' => true], 200);
 
         try {
-            (new HmrcSandboxClient)->retrieveVatObligations('secret-token', '123456789');
+            (new HmrcSandboxClient)->retrieveVatObligations('secret-token', '123456789', [], $this->fraudHeaders());
             $this->fail('An unsuccessful HMRC response must throw an exception.');
         } catch (HmrcApiException $exception) {
             $this->assertSame('VRN_INVALID', $exception->errorCode);
@@ -182,6 +185,21 @@ class HmrcVatClientTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_vat_request_fails_closed_when_fraud_headers_are_incomplete(): void
+    {
+        Http::fake();
+
+        $this->expectException(HmrcFraudPreventionException::class);
+        $this->expectExceptionMessage('Gov-Client-Device-ID');
+
+        (new HmrcSandboxClient)->retrieveVatObligations(
+            'token',
+            '123456789',
+            [],
+            ['Gov-Client-Connection-Method' => 'WEB_APP_VIA_SERVER'],
+        );
+    }
+
     public function test_container_selects_client_from_explicit_environment(): void
     {
         config()->set('hmrc.environment', 'sandbox');
@@ -191,5 +209,14 @@ class HmrcVatClientTest extends TestCase
         config()->set('hmrc.environment', 'production');
         $this->app->forgetInstance(HmrcClientInterface::class);
         $this->assertInstanceOf(HmrcProductionClient::class, app(HmrcClientInterface::class));
+    }
+
+    /** @return array<string, string> */
+    private function fraudHeaders(): array
+    {
+        return array_combine(
+            HmrcFraudPreventionHeaders::REQUIRED_HEADERS,
+            array_map(fn (string $header): string => $header === 'Gov-Client-Connection-Method' ? 'WEB_APP_VIA_SERVER' : 'test-value', HmrcFraudPreventionHeaders::REQUIRED_HEADERS),
+        );
     }
 }
