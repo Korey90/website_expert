@@ -110,6 +110,26 @@ class HmrcVatReadTest extends TestCase
             && ! str_contains($request->url(), 'FORGED'));
     }
 
+    public function test_missing_sandbox_return_is_explained_without_exposing_the_period_key(): void
+    {
+        Http::fake(['*' => Http::response('', 404)]);
+
+        try {
+            app(HmrcVatReadService::class)->viewReturn(
+                $this->business,
+                $this->owner,
+                $this->fulfilledObligation,
+                $this->fraudHeaders(),
+            );
+            $this->fail('A missing submitted return must be explained.');
+        } catch (HmrcVatReadException $exception) {
+            $this->assertSame(__('finance.hmrc_connection.errors.return_not_found'), $exception->getMessage());
+            $this->assertStringNotContainsString('26A3', $exception->getMessage());
+        }
+
+        $this->assertNull(HmrcConnection::withoutGlobalScopes()->sole()->last_successful_call_at);
+    }
+
     public function test_it_retrieves_and_normalizes_liabilities_and_payments(): void
     {
         Http::fake(function (Request $request) {

@@ -81,6 +81,8 @@ The panel now exposes **Retrieve fraud-header feedback** as a separate sandbox-o
 
 The implementation, mocked contract tests and server deployment are complete. The earlier zrok test reported one error (`Gov-Client-Public-Port`) and one warning (`Gov-Vendor-License-IDs`). On 11 November 2026, a direct-host test over a mobile-data hotspot returned `POTENTIALLY_INVALID_HEADERS` with zero errors and one missing-licence warning, proving that public client IP, timestamp, source port and forwarding chain are now collected. Passing the Test API is feedback on formatting and values, not a guarantee of production compliance.
 
+The default obligations response contains one fulfilled sample period and one open period, but the sandbox does not pre-store a VAT Return for the fulfilled sample. HMRC therefore correctly returns HTTP 404 when that sample is viewed. The OpenAPI contract states that View VAT Return returns only data previously submitted in the sandbox. Submit the controlled open test period before repeating the view operation; production behavior is unchanged.
+
 ### Deployed validation topology
 
 The deployed release is `c8a23a3` at `https://website-expert.uk`. Apache terminates TLS and passes the request directly to PHP-FPM; there is no zrok tunnel or application reverse proxy in this path. The configured vendor public IP and forwarding chain identify this single public TLS endpoint. Requests made from the same LAN through the public hostname can be NAT-hairpinned and appear to Apache as the private gateway, so they are not valid evidence for originating public IP/port collection.

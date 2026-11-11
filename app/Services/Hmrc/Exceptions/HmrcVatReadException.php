@@ -26,6 +26,11 @@ class HmrcVatReadException extends RuntimeException
         return new self('Select a fulfilled VAT obligation for the current business and environment.');
     }
 
+    public static function returnNotFound(): self
+    {
+        return new self(__('finance.hmrc_connection.errors.return_not_found'));
+    }
+
     public static function invalidReturnResponse(): self
     {
         return new self('HMRC returned an invalid VAT Return response. No result was displayed.');

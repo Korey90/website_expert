@@ -8,6 +8,7 @@ use App\Models\HmrcVatObligation;
 use App\Models\User;
 use App\Services\Hmrc\Contracts\HmrcClientInterface;
 use App\Services\Hmrc\Data\HmrcApiResponse;
+use App\Services\Hmrc\Exceptions\HmrcApiException;
 use App\Services\Hmrc\Exceptions\HmrcVatReadException;
 use DateTimeImmutable;
 
@@ -47,13 +48,21 @@ final class HmrcVatReadService
         $connection = $this->refreshIfNeeded($business, $actor, $connection);
         $this->assertReadScope($connection);
 
-        $response = $this->client->viewVatReturn(
-            (string) $connection->access_token,
-            (string) $connection->vrn,
-            (string) $obligation->period_key,
-            $fraudPreventionHeaders,
-            $testScenario,
-        );
+        try {
+            $response = $this->client->viewVatReturn(
+                (string) $connection->access_token,
+                (string) $connection->vrn,
+                (string) $obligation->period_key,
+                $fraudPreventionHeaders,
+                $testScenario,
+            );
+        } catch (HmrcApiException $exception) {
+            if ($exception->status === 404) {
+                throw HmrcVatReadException::returnNotFound();
+            }
+
+            throw $exception;
+        }
         $boxes = $this->normalizeReturn($response, (string) $obligation->period_key);
         $fetchedAt = now();
         $this->markSuccessfulCall($business, $connection, $fetchedAt);
