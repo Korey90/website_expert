@@ -101,6 +101,8 @@ The default private output directory is `storage/app/private/hmrc-evidence`. The
 
 Initial evidence captured on 2026-11-11 recorded the zrok limitation. After direct deployment, the latest specification 3.3 preflight returned `POTENTIALLY_INVALID_HEADERS` with zero errors and one warning for missing `Gov-Vendor-License-IDs`; feedback retrieval also succeeded. Sandbox VAT calls may omit only that header when `HMRC_SANDBOX_ALLOW_MISSING_VENDOR_LICENSE=true`. Production remains fail-closed and still requires a genuine licence or a referenced HMRC exception.
 
+The direct-host read journey then synchronised two obligations (one fulfilled and one open) idempotently and retrieved one sandbox liability plus one payment with separate correlation IDs. The evidence chain contains nine verified events. Export `hmrc-sandbox-evidence-20261111-214530.json` has file SHA-256 `ab210110fdc9900fbd39645d6f2e3743b08001177d58de74a6c7b01b4fc17d05` and payload SHA-256 `8bfc4c27a51873e7c137a6ccef524cae76a009babdd96da6e8c86df7e33c882f`.
+
 ### Missing-data fallback
 
 Do not use destination port `443`, a random port, a made-up licence, `null` or `undefined`. First validate the direct Apache deployment from an external network. Escalation to HMRC is only a fallback if that deployment still cannot supply a genuinely required value; no missing-header allow-list may be configured without a written HMRC exception.
