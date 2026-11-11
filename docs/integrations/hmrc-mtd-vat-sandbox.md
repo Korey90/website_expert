@@ -137,6 +137,14 @@ For an `outcome_unknown` attempt, the VAT Return page exposes **Check HMRC statu
 
 Every check records its actor, time, count, HMRC received date where available, sanitized error metadata and a redacted correlation ID. Snapshot and pre-POST payload hashes are revalidated before any HMRC call. Invalid responses and GET failures remain safe to check again; conflicts and confirmed matches cannot be reconciled repeatedly. Migration `2026_11_11_000030_add_reconciliation_to_hmrc_vat_submissions_table.php` adds the audit state.
 
+## Implemented audit trail and receipt PDF
+
+Every direct submission and reconciliation transition appends an immutable tenant-owned event. Events contain only allow-listed, length-limited metadata and form a SHA-256 chain using their sequence, previous hash, actor, timestamp, state and canonical metadata. Updating or deleting an event through the domain model is prohibited; receipt generation verifies the complete chain before rendering. The audit trail never stores an access/refresh token, full VRN, MFA secret, hidden period key or raw HMRC response.
+
+After a direct successful HTTP 201 submission with a complete HMRC receipt, an authorised user with `submit_tax_returns` can download a private, `no-store` PDF from the VAT Return page. The PDF contains the form bundle, optional charge reference, processing time, immutable snapshot/payload hashes and verified audit events. It is clearly labelled as system-generated evidence of the HMRC API response, not an HMRC-issued document. A return confirmed later only by GET reconciliation cannot generate a substitute receipt because HMRC does not return the original form bundle through that path.
+
+Each generated PDF is SHA-256 hashed and adds a `receipt_generated` event. Migration `2026_11_11_000031_create_hmrc_vat_submission_events_table.php` creates the append-only event store.
+
 ## Official references
 
 - [VAT (MTD) API](https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/vat-api/1.0)

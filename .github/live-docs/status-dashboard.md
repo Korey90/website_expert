@@ -1,11 +1,11 @@
 # Website Expert NI — Project Status Dashboard
 
 **Last Full Validation:** 2026-11-10
-**Last Targeted Validation:** 2026-11-11 — UKFIN-609 HMRC unknown-outcome reconciliation
+**Last Targeted Validation:** 2026-11-11 — UKFIN-610 HMRC audit chain and receipt PDF
 
 ## Health Checks
-- **Code Quality (Pint + ESLint):** ✅ Pint przechodzi dla plików PHP UKFIN-609; Blade templates kompilują się, równoległe zmiany landing page użytkownika pozostawiono bez ingerencji
-- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 1219 kluczy liściowych w PL/EN/PT
+- **Code Quality (Pint + ESLint):** ✅ Pint przechodzi dla plików PHP UKFIN-610; Blade templates kompilują się, równoległe zmiany landing page użytkownika pozostawiono bez ingerencji
+- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 1240 kluczy liściowych w PL/EN/PT
 - **Tests:** PHPUnit pełny pakiet (2026-11-10): 806 passed / 9 failed (baseline, niezwiązane: SocialAuth, 3×homepage meta, Billing PLN/GBP, 3×ProfileTest po przeniesieniu trasy, ServicePageController) / 11 skipped / 3618 assertions
 - **Multi-Tenancy Compliance:** 100% ✅ (wyjątek celowy: `search_ranking_checks.business_id` nullable — narzędzie publiczne/anonimowe, przygotowane pod przyszłe powiązanie z klientem)
 - **Security Review:** ✅ OK — throttle + reCAPTCHA v3 na endpointach publicznych, `ip_hash` zamiast surowego IP, brak sekretów w logach
@@ -13,6 +13,7 @@
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-11-11 — **UKFIN-610:** dodano tenantowy append-only audit log dla całego cyklu submission/reconciliation/receipt. Zdarzenia są niezmienne, mają sekwencję i łańcuch SHA-256 z kanonicznym metadata; nie utrwalają tokenów, pełnego VRN, MFA, period key ani raw response. Bezpośredni HTTP 201 udostępnia prywatny PDF receipt po kontroli snapshot/payload/audit integrity i `submit_tax_returns`; PDF ma no-store, własny SHA-256 i nie jest przedstawiany jako dokument wystawiony przez HMRC. Reconciled-only match bez form bundle świadomie nie generuje receipt. Migracja `000031` wykonana; tenant audit valid; HMRC 63/384; Finance 330 passed + 1 skipped / 2361 assertions; PL/EN/PT po 1240 kluczy; Pint/Blade poprawne ✅
 - 2026-11-11 — **UKFIN-609:** dodano bezpieczne reconciliation prób `outcome_unknown` wyłącznie przez GET obligations i GET return. Open obligation pozostaje pending bez retry; fulfilled jest porównywany we wszystkich dziewięciu polach z integralnym snapshotem i pre-POST payload hash, dając potwierdzony match albo trwały `outcome_conflict`. Kontrole są audytowane (aktor, czas, licznik, received date, sanitizowane błędy/correlation ID), wymagają TOTP, FPH, `read:vat`, membership i `submit_tax_returns`. Migracja `000030` wykonana; tenant audit valid; HMRC 60/354; Finance 327 passed + 1 skipped / 2331 assertions; PL/EN/PT po 1219 kluczy; Pint/Blade poprawne ✅
 - 2026-11-11 — **UKFIN-608:** wdrożono kontrolowany submit VAT Return z integralnego locked snapshotu i kanonicznego open obligation. Akcja wymaga osobnego `submit_tax_returns`, dokładnej deklaracji prawnej HMRC, świeżego TOTP, pełnych FPH, `write:vat` i tenant membership. Próba powstaje przed POST z hashami i audytem; receipt HTTP 201 jest ściśle walidowany, form bundle/charge ref szyfrowane, a timeout/5xx/nieprawidłowa odpowiedź przechodzą w `outcome_unknown` i blokują ślepy retry. Migracja `000029` wykonana; tenant audit valid; HMRC 55/319; Finance 322 passed + 1 skipped / 2296 assertions; PL/EN/PT po 1197 kluczy; Pint/Blade poprawne ✅
 - 2026-11-11 — **UKFIN-607:** dodano bezpieczny, tenantowy odczyt poprzedniej VAT Return oraz liabilities/payments. Serwis wymusza aktywne owner/admin, `read:vat` także po refreshu, poprawne połączenie/VRN, kanoniczny fulfilled obligation z bazy i fail-closed FPH; panel wymaga TOTP, nie ujawnia period key i utrzymuje wyniki tylko efemerycznie. Odpowiedzi HMRC są walidowane i normalizowane; zgodnie z oficjalnym kontraktem pola outstanding/due/received mogą być nieobecne. HMRC: 50 passed / 284 assertions; Finance: 317 passed + 1 skipped / 2261 assertions; PL/EN/PT po 1171 kluczy; Pint i Blade cache poprawne ✅

@@ -115,6 +115,20 @@ class VatReturnResource extends BaseResource
                     TextEntry::make('hmrcSubmission.reconciled_at')->label(__('finance.vat_returns.fields.reconciled_at'))->dateTime()->placeholder('—'),
                     TextEntry::make('hmrcSubmission.hmrc_received_date')->label(__('finance.vat_returns.fields.hmrc_received_date'))->date()->placeholder('—'),
                     TextEntry::make('hmrcSubmission.reconciliation_count')->label(__('finance.vat_returns.fields.reconciliation_count')),
+                    RepeatableEntry::make('hmrcSubmission.events')
+                        ->label(__('finance.vat_returns.fields.audit_events'))
+                        ->columns(6)
+                        ->columnSpanFull()
+                        ->schema([
+                            TextEntry::make('sequence')->label('#'),
+                            TextEntry::make('event_type')->label(__('finance.vat_returns.fields.audit_event'))
+                                ->formatStateUsing(fn (string $state): string => __('finance.vat_returns.submission.event_types.'.$state)),
+                            TextEntry::make('status')->label(__('finance.vat_returns.fields.status'))
+                                ->formatStateUsing(fn (string $state): string => __('finance.vat_returns.submission.statuses.'.$state)),
+                            TextEntry::make('occurred_at')->label(__('finance.vat_returns.fields.audit_occurred_at'))->dateTime(),
+                            TextEntry::make('actor.name')->label(__('finance.vat_returns.fields.audit_actor'))->placeholder('—'),
+                            TextEntry::make('event_hash')->label(__('finance.vat_returns.fields.audit_hash'))->copyable(),
+                        ]),
                 ]),
         ]);
     }
@@ -152,7 +166,11 @@ class VatReturnResource extends BaseResource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['createdBy', 'reviewedBy', 'lockedBy', 'supersededBy', 'hmrcSubmission.submittedBy', 'hmrcSubmission.reconciledBy']);
+        return parent::getEloquentQuery()->with([
+            'createdBy', 'reviewedBy', 'lockedBy', 'supersededBy',
+            'hmrcSubmission.submittedBy', 'hmrcSubmission.reconciledBy',
+            'hmrcSubmission.events.actor',
+        ]);
     }
 
     public static function canCreate(): bool

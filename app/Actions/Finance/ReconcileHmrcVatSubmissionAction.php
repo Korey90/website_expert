@@ -15,6 +15,7 @@ use App\Services\Hmrc\Exceptions\HmrcApiException;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
 use App\Services\Hmrc\HmrcOAuthService;
 use App\Services\Hmrc\HmrcVatReturnPayload;
+use App\Services\Hmrc\HmrcVatSubmissionAuditService;
 use App\Support\PermissionHelper;
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
@@ -30,6 +31,7 @@ final class ReconcileHmrcVatSubmissionAction
         private readonly HmrcFraudPreventionHeaders $fraudHeaders,
         private readonly VatReturnSnapshotService $snapshotService,
         private readonly HmrcVatReturnPayload $payloadService,
+        private readonly HmrcVatSubmissionAuditService $audit,
     ) {}
 
     /**
@@ -304,6 +306,23 @@ final class ReconcileHmrcVatSubmissionAction
                 'reconciliation_error_code' => null,
                 'reconciliation_error_status' => null,
             ]);
+            $eventType = match ($reconciliationStatus) {
+                HmrcVatSubmission::RECONCILIATION_MATCHED => HmrcVatSubmissionAuditService::EVENT_RECONCILIATION_MATCHED,
+                HmrcVatSubmission::RECONCILIATION_CONFLICT => HmrcVatSubmissionAuditService::EVENT_RECONCILIATION_CONFLICT,
+                default => HmrcVatSubmissionAuditService::EVENT_RECONCILIATION_PENDING,
+            };
+            $this->audit->record(
+                $submission,
+                $eventType,
+                $submission->status,
+                $actor,
+                [
+                    'reconciliation_status' => $reconciliationStatus,
+                    'hmrc_received_date' => $remoteObligation['received_date'],
+                    'obligation_correlation_id' => $obligationCorrelationId,
+                    'return_correlation_id' => $reconciliationCorrelationId,
+                ],
+            );
 
             HmrcConnection::withoutGlobalScopes()->whereKey($context['connection']->id)
                 ->where('business_id', $submission->business_id)
@@ -335,6 +354,17 @@ final class ReconcileHmrcVatSubmissionAction
                     : 'INVALID_RECONCILIATION_RESPONSE',
                 'reconciliation_error_status' => $exception instanceof HmrcApiException ? $exception->status : null,
             ]);
+            $this->audit->record(
+                $record,
+                HmrcVatSubmissionAuditService::EVENT_RECONCILIATION_FAILED,
+                HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN,
+                $actor,
+                [
+                    'error_code' => $record->reconciliation_error_code,
+                    'error_status' => $record->reconciliation_error_status,
+                    'correlation_id' => $record->reconciliation_correlation_id,
+                ],
+            );
         }, 3);
     }
 

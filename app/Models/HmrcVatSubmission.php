@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Traits\BelongsToTenant;
+use DomainException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class HmrcVatSubmission extends Model
 {
@@ -63,6 +65,13 @@ class HmrcVatSubmission extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::deleting(function (): void {
+            throw new DomainException(__('finance.vat_returns.errors.submission_cannot_delete'));
+        });
+    }
+
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
@@ -86,5 +95,10 @@ class HmrcVatSubmission extends Model
     public function reconciledBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reconciled_by');
+    }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(HmrcVatSubmissionEvent::class)->orderBy('sequence');
     }
 }

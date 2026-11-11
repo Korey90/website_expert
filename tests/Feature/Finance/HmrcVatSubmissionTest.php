@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Finance;
 
+use App\Actions\Finance\GenerateHmrcVatReceiptAction;
 use App\Actions\Finance\ReconcileHmrcVatSubmissionAction;
 use App\Actions\Finance\SubmitVatReturnAction;
 use App\Models\Business;
@@ -9,6 +10,7 @@ use App\Models\BusinessUser;
 use App\Models\HmrcConnection;
 use App\Models\HmrcVatObligation;
 use App\Models\HmrcVatSubmission;
+use App\Models\HmrcVatSubmissionEvent;
 use App\Models\User;
 use App\Models\VatReturn;
 use App\Services\Finance\VatReturnSnapshotService;
@@ -119,6 +121,19 @@ class HmrcVatSubmissionTest extends TestCase
             DB::table('hmrc_vat_submissions')->where('id', $submission->id)->value('charge_reference'),
         );
         $this->assertNotNull(HmrcConnection::withoutGlobalScopes()->sole()->last_successful_call_at);
+        $events = HmrcVatSubmissionEvent::withoutGlobalScopes()->orderBy('sequence')->get();
+        $this->assertSame([
+            'prepared',
+            'submitted',
+        ], $events->pluck('event_type')->all());
+        $this->assertNull($events[0]->previous_hash);
+        $this->assertSame($events[0]->event_hash, $events[1]->previous_hash);
+        $this->assertArrayNotHasKey('metadata', $events[1]->toArray());
+        $auditMetadata = $events->pluck('metadata')->toJson();
+        $this->assertStringNotContainsString('sandbox-access-token', $auditMetadata);
+        $this->assertStringNotContainsString('123456789', $auditMetadata);
+        $this->assertStringNotContainsString('26A3', $auditMetadata);
+        $this->assertStringNotContainsString('123456789012', $auditMetadata);
 
         Http::assertSent(function (Request $request): bool {
             return $request->method() === 'POST'
@@ -381,6 +396,84 @@ class HmrcVatSubmissionTest extends TestCase
         } finally {
             Http::assertNothingSent();
         }
+    }
+
+    public function test_authorized_user_can_download_a_private_integrity_checked_pdf_receipt(): void
+    {
+        Http::fake(['*' => Http::response([
+            'processingDate' => '2026-11-11T12:34:56Z',
+            'formBundleNumber' => '123456789012',
+            'paymentIndicator' => 'BANK',
+            'chargeRefNumber' => 'aCxFaNx0FZsCvyWF',
+        ], 201, ['X-CorrelationId' => 'corr-receipt'])]);
+        $this->submit();
+
+        $response = $this->actingAs($this->owner)
+            ->get(route('admin.finance.vat-returns.hmrc-receipt', $this->return));
+
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf')
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('Cache-Control', 'max-age=0, no-store, private')
+            ->assertHeader('Pragma', 'no-cache')
+            ->assertHeader('X-VAT-Return-Snapshot-SHA256', $this->return->snapshot_hash);
+        $this->assertStringStartsWith('%PDF-', $response->getContent());
+        $this->assertMatchesRegularExpression(
+            '/^[a-f0-9]{64}$/',
+            (string) $response->headers->get('X-HMRC-Receipt-SHA256'),
+        );
+        $this->assertStringContainsString('hmrc-vat-receipt-VAT-2026-Q3-', (string) $response->headers->get('Content-Disposition'));
+        $this->assertSame(3, HmrcVatSubmissionEvent::withoutGlobalScopes()->count());
+        $this->assertSame(
+            'receipt_generated',
+            HmrcVatSubmissionEvent::withoutGlobalScopes()->latest('sequence')->value('event_type'),
+        );
+    }
+
+    public function test_receipt_generation_rejects_tampered_audit_and_events_are_immutable(): void
+    {
+        Http::fake(['*' => Http::response([
+            'processingDate' => '2026-11-11T12:34:56Z',
+            'formBundleNumber' => '123456789012',
+        ], 201)]);
+        $this->submit();
+        $event = HmrcVatSubmissionEvent::withoutGlobalScopes()->orderBy('sequence')->firstOrFail();
+
+        try {
+            $event->update(['status' => 'changed']);
+            $this->fail('Audit events must be immutable.');
+        } catch (DomainException $exception) {
+            $this->assertStringContainsString('immutable', $exception->getMessage());
+        }
+
+        DB::table('hmrc_vat_submission_events')->where('id', $event->id)->update([
+            'event_hash' => str_repeat('0', 64),
+        ]);
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('audit chain failed');
+        app(GenerateHmrcVatReceiptAction::class)->execute($this->return, $this->owner);
+    }
+
+    public function test_receipt_requires_submission_permission_and_a_complete_direct_receipt(): void
+    {
+        $this->unknownSubmission()->forceFill([
+            'status' => HmrcVatSubmission::STATUS_SUBMITTED,
+            'reconciliation_status' => HmrcVatSubmission::RECONCILIATION_MATCHED,
+        ])->save();
+
+        try {
+            app(GenerateHmrcVatReceiptAction::class)->execute($this->return, $this->owner);
+            $this->fail('A reconciled result without a direct HMRC receipt must not produce a receipt PDF.');
+        } catch (DomainException $exception) {
+            $this->assertStringContainsString('direct successful submission', $exception->getMessage());
+        }
+
+        $this->owner->revokePermissionTo('submit_tax_returns');
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('cannot download');
+        app(GenerateHmrcVatReceiptAction::class)->execute($this->return, $this->owner);
     }
 
     private function submit(?string $testScenario = null): HmrcVatSubmission

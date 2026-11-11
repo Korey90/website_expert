@@ -36,6 +36,13 @@ class ViewVatReturn extends ViewRecord
         $return = $this->record;
 
         return [
+            Action::make('download_hmrc_receipt')
+                ->label(__('finance.vat_returns.actions.download_hmrc_receipt'))
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('gray')
+                ->visible(fn (): bool => Gate::allows('downloadReceipt', $return))
+                ->url(fn (): string => route('admin.finance.vat-returns.hmrc-receipt', ['vatReturn' => $return]))
+                ->openUrlInNewTab(),
             Action::make('reconcile_hmrc')
                 ->label(__('finance.vat_returns.actions.reconcile_hmrc'))
                 ->icon('heroicon-o-arrow-path')

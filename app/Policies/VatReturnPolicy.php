@@ -62,6 +62,17 @@ class VatReturnPolicy
             && $this->belongsToCurrentBusiness($return);
     }
 
+    public function downloadReceipt(User $user, VatReturn $return): bool
+    {
+        return PermissionHelper::allows($user, 'submit_tax_returns')
+            && $return->hmrcSubmission()
+                ->where('status', HmrcVatSubmission::STATUS_SUBMITTED)
+                ->where('environment', config('hmrc.environment', 'sandbox'))
+                ->whereNotNull('form_bundle_number')
+                ->exists()
+            && $this->belongsToCurrentBusiness($return);
+    }
+
     public function update(User $user, VatReturn $return): bool
     {
         return false;

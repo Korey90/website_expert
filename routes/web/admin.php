@@ -8,6 +8,7 @@ use App\Http\Controllers\Finance\BalanceSheetReportExportController;
 use App\Http\Controllers\Finance\BankReconciliationReportExportController;
 use App\Http\Controllers\Finance\ExpenseReportExportController;
 use App\Http\Controllers\Finance\FinancialAttachmentController;
+use App\Http\Controllers\Finance\HmrcVatReceiptController;
 use App\Http\Controllers\Finance\ManagementCashFlowReportExportController;
 use App\Http\Controllers\Finance\ProfitAndLossReportExportController;
 use App\Http\Controllers\Finance\TrialBalanceReportExportController;
@@ -66,6 +67,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/finance/vat-returns/{vatReturn}/accountant-pack.zip', AccountantPackController::class)
         ->name('admin.finance.vat-returns.accountant-pack');
+
+    Route::get('/admin/finance/vat-returns/{vatReturn}/hmrc-receipt.pdf', HmrcVatReceiptController::class)
+        ->name('admin.finance.vat-returns.hmrc-receipt');
 
     // Reports — admin only
     Route::prefix('reports')->name('reports.')->group(function () {

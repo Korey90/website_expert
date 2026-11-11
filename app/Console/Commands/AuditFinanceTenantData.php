@@ -46,6 +46,7 @@ class AuditFinanceTenantData extends Command
         'bank_reconciliations' => ['parent' => 'bank_transactions', 'foreign_key' => 'bank_transaction_id'],
         'bank_reconciliation_allocations' => ['parent' => 'bank_reconciliations', 'foreign_key' => 'bank_reconciliation_id'],
         'hmrc_vat_submissions' => ['parent' => 'vat_returns', 'foreign_key' => 'vat_return_id'],
+        'hmrc_vat_submission_events' => ['parent' => 'hmrc_vat_submissions', 'foreign_key' => 'hmrc_vat_submission_id'],
     ];
 
     /** @var array<string, array{table: string, parent: string, foreign_key: string}> */

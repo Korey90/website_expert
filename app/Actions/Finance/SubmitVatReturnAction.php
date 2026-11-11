@@ -14,6 +14,7 @@ use App\Services\Hmrc\Exceptions\HmrcApiException;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
 use App\Services\Hmrc\HmrcOAuthService;
 use App\Services\Hmrc\HmrcVatReturnPayload;
+use App\Services\Hmrc\HmrcVatSubmissionAuditService;
 use App\Support\PermissionHelper;
 use Carbon\CarbonImmutable;
 use DomainException;
@@ -28,6 +29,7 @@ final class SubmitVatReturnAction
         private readonly HmrcFraudPreventionHeaders $fraudHeaders,
         private readonly VatReturnSnapshotService $snapshotService,
         private readonly HmrcVatReturnPayload $payloadService,
+        private readonly HmrcVatSubmissionAuditService $audit,
     ) {}
 
     /**
@@ -106,6 +108,19 @@ final class SubmitVatReturnAction
                 'mfa_reference_hash' => hash('sha256', $mfa['unique_reference']),
                 'submitted_by' => $actor->id,
             ]);
+            $this->audit->record(
+                $submission,
+                HmrcVatSubmissionAuditService::EVENT_PREPARED,
+                HmrcVatSubmission::STATUS_PREPARED,
+                $actor,
+                [
+                    'snapshot_hash' => $lockedReturn->snapshot_hash,
+                    'payload_hash' => $payloadHash,
+                    'declaration_version' => HmrcVatSubmission::DECLARATION_VERSION,
+                    'mfa_type' => $mfa['type'],
+                    'environment' => $lockedConnection->environment,
+                ],
+            );
 
             return compact('submission', 'payload', 'lockedConnection');
         }, 3);
@@ -130,7 +145,7 @@ final class SubmitVatReturnAction
 
             $receipt = $this->receipt($response->data);
 
-            return DB::transaction(function () use ($submission, $lockedConnection, $response, $receipt): HmrcVatSubmission {
+            return DB::transaction(function () use ($submission, $lockedConnection, $response, $receipt, $actor): HmrcVatSubmission {
                 $record = HmrcVatSubmission::withoutGlobalScopes()->lockForUpdate()->findOrFail($submission->id);
                 $record->update([
                     'status' => HmrcVatSubmission::STATUS_SUBMITTED,
@@ -144,11 +159,26 @@ final class SubmitVatReturnAction
                 HmrcConnection::withoutGlobalScopes()->whereKey($lockedConnection->id)
                     ->where('business_id', $record->business_id)
                     ->update(['last_successful_call_at' => now()]);
+                $this->audit->record(
+                    $record,
+                    HmrcVatSubmissionAuditService::EVENT_SUBMITTED,
+                    HmrcVatSubmission::STATUS_SUBMITTED,
+                    $actor,
+                    [
+                        'processing_date' => $receipt['processing_date']->toIso8601String(),
+                        'payment_indicator' => $receipt['payment_indicator'],
+                        'form_bundle_hash' => hash('sha256', $receipt['form_bundle_number']),
+                        'charge_reference_hash' => $receipt['charge_reference'] !== null
+                            ? hash('sha256', $receipt['charge_reference'])
+                            : null,
+                        'correlation_id' => $this->correlationId($response->correlationId),
+                    ],
+                );
 
                 return $record->fresh(['submittedBy']);
             }, 3);
         } catch (Throwable $exception) {
-            $this->markOutcomeUnknown($submission, $exception);
+            $this->markOutcomeUnknown($submission, $actor, $exception);
 
             throw $exception;
         }
@@ -246,14 +276,31 @@ final class SubmitVatReturnAction
         ];
     }
 
-    private function markOutcomeUnknown(HmrcVatSubmission $submission, Throwable $exception): void
+    private function markOutcomeUnknown(HmrcVatSubmission $submission, User $actor, Throwable $exception): void
     {
-        HmrcVatSubmission::withoutGlobalScopes()->whereKey($submission->id)->update([
-            'status' => HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN,
-            'failure_code' => $exception instanceof HmrcApiException ? mb_substr($exception->errorCode, 0, 100) : 'INVALID_RESPONSE',
-            'failure_status' => $exception instanceof HmrcApiException ? $exception->status : null,
-            'correlation_id' => $exception instanceof HmrcApiException ? $this->correlationId($exception->correlationId) : null,
-        ]);
+        DB::transaction(function () use ($submission, $actor, $exception): void {
+            $record = HmrcVatSubmission::withoutGlobalScopes()->lockForUpdate()->findOrFail($submission->id);
+            $failureCode = $exception instanceof HmrcApiException ? mb_substr($exception->errorCode, 0, 100) : 'INVALID_RESPONSE';
+            $failureStatus = $exception instanceof HmrcApiException ? $exception->status : null;
+            $correlationId = $exception instanceof HmrcApiException ? $this->correlationId($exception->correlationId) : null;
+            $record->update([
+                'status' => HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN,
+                'failure_code' => $failureCode,
+                'failure_status' => $failureStatus,
+                'correlation_id' => $correlationId,
+            ]);
+            $this->audit->record(
+                $record,
+                HmrcVatSubmissionAuditService::EVENT_OUTCOME_UNKNOWN,
+                HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN,
+                $actor,
+                [
+                    'failure_code' => $failureCode,
+                    'failure_status' => $failureStatus,
+                    'correlation_id' => $correlationId,
+                ],
+            );
+        }, 3);
     }
 
     private function correlationId(?string $value): ?string
