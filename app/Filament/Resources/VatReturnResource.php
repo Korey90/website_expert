@@ -96,6 +96,18 @@ class VatReturnResource extends BaseResource
                     TextEntry::make('superseded_at')->label(__('finance.vat_returns.fields.superseded_at'))->dateTime()->placeholder('—'),
                     TextEntry::make('supersede_reason')->label(__('finance.vat_returns.fields.supersede_reason'))->placeholder('—')->columnSpanFull(),
                 ]),
+            Section::make(__('finance.vat_returns.sections.submission'))
+                ->columns(3)
+                ->visible(fn (VatReturn $record): bool => $record->hmrcSubmission !== null)
+                ->schema([
+                    TextEntry::make('hmrcSubmission.status')->label(__('finance.vat_returns.fields.submission_status'))->badge()
+                        ->formatStateUsing(fn (string $state): string => __('finance.vat_returns.submission.statuses.'.$state)),
+                    TextEntry::make('hmrcSubmission.submittedBy.name')->label(__('finance.vat_returns.fields.submitted_by'))->placeholder('—'),
+                    TextEntry::make('hmrcSubmission.submitted_at')->label(__('finance.vat_returns.fields.submitted_at'))->dateTime()->placeholder('—'),
+                    TextEntry::make('hmrcSubmission.processing_date')->label(__('finance.vat_returns.fields.processing_date'))->dateTime()->placeholder('—'),
+                    TextEntry::make('hmrcSubmission.payment_indicator')->label(__('finance.vat_returns.fields.payment_indicator'))->placeholder('—'),
+                    TextEntry::make('hmrcSubmission.payload_hash')->label(__('finance.vat_returns.fields.payload_hash'))->copyable()->columnSpanFull(),
+                ]),
         ]);
     }
 
@@ -132,7 +144,7 @@ class VatReturnResource extends BaseResource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['createdBy', 'reviewedBy', 'lockedBy', 'supersededBy']);
+        return parent::getEloquentQuery()->with(['createdBy', 'reviewedBy', 'lockedBy', 'supersededBy', 'hmrcSubmission.submittedBy']);
     }
 
     public static function canCreate(): bool

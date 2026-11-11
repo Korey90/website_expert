@@ -4,16 +4,24 @@ namespace App\Filament\Resources\VatReturnResource\Pages;
 
 use App\Actions\Finance\LockVatReturnAction;
 use App\Actions\Finance\ReviewVatReturnAction;
+use App\Actions\Finance\SubmitVatReturnAction;
 use App\Actions\Finance\SupersedeVatReturnAction;
 use App\Filament\Resources\VatReturnResource;
 use App\Models\VatReturn;
+use App\Services\Hmrc\Exceptions\HmrcApiException;
+use App\Services\Hmrc\Exceptions\HmrcFraudPreventionException;
+use App\Services\Hmrc\Exceptions\HmrcOAuthException;
+use App\Services\Hmrc\HmrcFraudPreventionHeaders;
 use DomainException;
 use Filament\Actions\Action;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Gate;
+use InvalidArgumentException;
 
 class ViewVatReturn extends ViewRecord
 {
@@ -25,6 +33,27 @@ class ViewVatReturn extends ViewRecord
         $return = $this->record;
 
         return [
+            Action::make('submit_hmrc')
+                ->label(__('finance.vat_returns.actions.submit_hmrc'))
+                ->icon('heroicon-o-paper-airplane')
+                ->color('danger')
+                ->modalHeading(__('finance.vat_returns.submission.modal_title'))
+                ->modalDescription(__('finance.vat_returns.submission.modal_description'))
+                ->visible(fn (): bool => Gate::allows('submit', $return))
+                ->form([
+                    Toggle::make('declaration_confirmed')
+                        ->label(__('finance.vat_returns.fields.submission_declaration'))
+                        ->helperText(__('finance.vat_returns.help.submission_declaration'))
+                        ->accepted()
+                        ->required(),
+                    TextInput::make('totp')
+                        ->label(__('finance.hmrc_connection.fraud_validation.totp'))
+                        ->password()
+                        ->required()
+                        ->minLength(6)
+                        ->maxLength(8),
+                ])
+                ->action(fn (array $data) => $this->submitToHmrc($return, $data)),
             Action::make('download_accountant_pack')
                 ->label(__('finance.accountant_pack.action'))
                 ->icon('heroicon-o-archive-box-arrow-down')
@@ -75,6 +104,48 @@ class ViewVatReturn extends ViewRecord
                     __('finance.vat_returns.notifications.superseded'),
                 )),
         ];
+    }
+
+    /** @param array{declaration_confirmed?: bool, totp?: string} $data */
+    private function submitToHmrc(VatReturn $return, array $data): void
+    {
+        $actor = auth()->user();
+        $secret = $actor?->getAppAuthenticationSecret();
+
+        if (! is_string($secret) || $secret === '') {
+            Notification::make()->title(__('finance.hmrc_connection.notifications.mfa_required'))->danger()->send();
+
+            return;
+        }
+
+        if (! is_string($data['totp'] ?? null)
+            || ! AppAuthentication::make()->verifyCode($data['totp'], $secret, true)) {
+            Notification::make()->title(__('finance.hmrc_connection.notifications.mfa_invalid'))->danger()->send();
+
+            return;
+        }
+
+        $multiFactor = [
+            'type' => 'TOTP',
+            'timestamp' => now()->utc()->format('Y-m-d\TH:i:s\Z'),
+            'unique_reference' => hash_hmac('sha256', 'filament-totp:'.$secret, (string) config('app.key')),
+        ];
+
+        try {
+            $headers = app(HmrcFraudPreventionHeaders::class)->build(request(), $actor, $multiFactor)->headers;
+            app(SubmitVatReturnAction::class)->execute(
+                $return,
+                $actor,
+                (bool) ($data['declaration_confirmed'] ?? false),
+                $multiFactor,
+                $headers,
+                config('hmrc.environment') === 'sandbox' ? config('hmrc.sandbox.submission_test_scenario') : null,
+            );
+            Notification::make()->title(__('finance.vat_returns.notifications.submitted'))->success()->send();
+            $this->redirect(VatReturnResource::getUrl('view', ['record' => $return->id]));
+        } catch (DomainException|HmrcApiException|HmrcFraudPreventionException|HmrcOAuthException|InvalidArgumentException $exception) {
+            Notification::make()->title($exception->getMessage())->danger()->send();
+        }
     }
 
     private function runAction(callable $action, string $successTitle): void

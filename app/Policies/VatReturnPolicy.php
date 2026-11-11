@@ -46,6 +46,14 @@ class VatReturnPolicy
             && $this->belongsToCurrentBusiness($return);
     }
 
+    public function submit(User $user, VatReturn $return): bool
+    {
+        return PermissionHelper::allows($user, 'submit_tax_returns')
+            && $return->status === VatReturn::STATUS_LOCKED
+            && ! $return->hmrcSubmission()->exists()
+            && $this->belongsToCurrentBusiness($return);
+    }
+
     public function update(User $user, VatReturn $return): bool
     {
         return false;

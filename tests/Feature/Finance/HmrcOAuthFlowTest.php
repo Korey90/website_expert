@@ -341,7 +341,8 @@ class HmrcOAuthFlowTest extends TestCase
             'start_date' => '2026-07-01',
             'end_date' => '2026-09-30',
             'due_date' => '2026-11-07',
-            'status' => HmrcVatObligation::STATUS_OPEN,
+            'status' => HmrcVatObligation::STATUS_FULFILLED,
+            'received_date' => '2026-11-01',
             'first_seen_at' => now(),
             'last_seen_at' => now(),
         ]);
@@ -353,6 +354,8 @@ class HmrcOAuthFlowTest extends TestCase
             ->assertSee('Validate fraud headers')
             ->assertSee('Set sandbox VRN')
             ->assertSee('Sync VAT obligations')
+            ->assertSee('View VAT Return')
+            ->assertSee('Retrieve liabilities and payments')
             ->assertSee('2026-07-01')
             ->assertSee('2026-11-07')
             ->assertSee('hmrc_fph_context', false)

@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** IMPLEMENTACJA W TOKU — Fazy 0–5 zaimplementowane, Faza 6 w toku (`UKFIN-601`–`UKFIN-606` ukończone; `UKFIN-607` następne); formalny gate księgowego pozostaje przed produkcyjnym submission
+**Status:** IMPLEMENTACJA W TOKU — Fazy 0–5 zaimplementowane, Faza 6 w toku (`UKFIN-601`–`UKFIN-608` ukończone; `UKFIN-609` następne); formalny gate księgowego pozostaje przed produkcyjnym submission
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -456,8 +456,8 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-604` [M] Encrypted token storage i redacted logs. *(ukończone 2026-11-10: szyfrowane access/refresh tokeny i VRN, hidden model fields, sanitizowane błędy, maskowany panel owner/admin, migracja MySQL `000026`, OAuth 10/88, Finance 286 passed + 1 skipped / 2124 assertions, full regression 797 passed + 11 skipped / 3583 assertions przy 9 znanych baseline failures)*
 - [x] `UKFIN-605` [M] Fraud-prevention headers builder + test endpoint. *(ukończone 2026-11-10: 16 nagłówków `WEB_APP_VIA_SERVER`, bezpieczna telemetria browser/device, rzeczywiste TOTP, trusted-edge public IP/port i TLS forwarding chain, hashowana licencja, fail-closed VAT calls, application-restricted `client_credentials`, sandbox validate + `vat-mtd` feedback; targeted 32/196, Finance 295 passed + 1 skipped / 2159 assertions, full regression 806 passed + 11 skipped / 3618 assertions przy 9 znanych baseline failures, PL/EN/PT po 1106 kluczy)*
 - [x] `UKFIN-606` [M] Retrieve VAT obligations i synchronizacja periods. *(ukończone 2026-11-10: tenantowy rejestr `hmrc_vat_obligations`, ścisła walidacja i atomowy/idempotentny sync O/F, auto-refresh tokenu, TOTP + fraud headers, 366-dniowy limit, ukryty i bezpiecznie kodowany `periodKey`, panel PL/EN/PT, migracja MySQL `000027` i rozszerzony audit tenantów; HMRC targeted 33/194, Finance 302 passed + 1 skipped / 2202 assertions, full regression 813 passed + 11 skipped / 3661 assertions przy 9 znanych baseline failures, PL/EN/PT po 1126 kluczy; rzeczywiste wywołanie sandbox oczekuje na zewnętrzną konfigurację)*
-- [ ] `UKFIN-607` [M] View VAT return/liabilities/payments.
-- [ ] `UKFIN-608` [M] Submit VAT return z review, declaration i step-up confirmation.
+- [x] `UKFIN-607` [M] View VAT return/liabilities/payments. *(ukończone 2026-11-11: tenantowy serwis read-only z auto-refresh i `read:vat`, ścisłą walidacją odpowiedzi zgodną z opcjonalnymi polami HMRC, kanonicznym wyborem fulfilled obligation bez ujawniania period key, efemerycznym panelem 9 pól/liabilities/payments, TOTP + FPH oraz bez zapisu surowych odpowiedzi; HMRC 50 passed / 284 assertions, Finance 317 passed + 1 skipped / 2261 assertions, PL/EN/PT po 1171 kluczy)*
+- [x] `UKFIN-608` [M] Submit VAT return z review, declaration i step-up confirmation. *(ukończone 2026-11-11: locked snapshot + matching open obligation, exact HMRC business declaration, fresh TOTP, FPH, `submit_tax_returns`, `write:vat`, prepared attempt before POST, SHA-256 audit, validated encrypted HTTP 201 receipt i fail-safe `outcome_unknown` bez blind retry; migracja `000029`, HMRC 55/319, Finance 322 passed + 1 skipped / 2296 assertions, PL/EN/PT po 1197 kluczy)*
 - [ ] `UKFIN-609` [M] Idempotency, timeout recovery i submission status reconciliation.
 - [ ] `UKFIN-610` [M] HMRC audit log i receipt download.
 - [ ] `UKFIN-611` [M] Sandbox scenarios: success, invalid VRN, expired token, duplicate, 5xx, timeout.

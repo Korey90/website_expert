@@ -45,6 +45,7 @@ class AuditFinanceTenantData extends Command
         'bank_transactions' => ['parent' => 'bank_accounts', 'foreign_key' => 'bank_account_id'],
         'bank_reconciliations' => ['parent' => 'bank_transactions', 'foreign_key' => 'bank_transaction_id'],
         'bank_reconciliation_allocations' => ['parent' => 'bank_reconciliations', 'foreign_key' => 'bank_reconciliation_id'],
+        'hmrc_vat_submissions' => ['parent' => 'vat_returns', 'foreign_key' => 'vat_return_id'],
     ];
 
     /** @var array<string, array{table: string, parent: string, foreign_key: string}> */
@@ -63,6 +64,7 @@ class AuditFinanceTenantData extends Command
         'payments.bank_account_id' => ['table' => 'payments', 'parent' => 'bank_accounts', 'foreign_key' => 'bank_account_id'],
         'expense_payments.bank_account_id' => ['table' => 'expense_payments', 'parent' => 'bank_accounts', 'foreign_key' => 'bank_account_id'],
         'bank_reconciliation_allocations.bank_transaction_id' => ['table' => 'bank_reconciliation_allocations', 'parent' => 'bank_transactions', 'foreign_key' => 'bank_transaction_id'],
+        'hmrc_vat_submissions.hmrc_vat_obligation_id' => ['table' => 'hmrc_vat_submissions', 'parent' => 'hmrc_vat_obligations', 'foreign_key' => 'hmrc_vat_obligation_id'],
     ];
 
     /** @var array<class-string, string> */

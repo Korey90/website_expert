@@ -11,11 +11,13 @@ use App\Services\Hmrc\Exceptions\HmrcApiException;
 use App\Services\Hmrc\Exceptions\HmrcFraudPreventionException;
 use App\Services\Hmrc\Exceptions\HmrcOAuthException;
 use App\Services\Hmrc\Exceptions\HmrcVatObligationSyncException;
+use App\Services\Hmrc\Exceptions\HmrcVatReadException;
 use App\Services\Hmrc\HmrcFraudPreventionClient;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
 use App\Services\Hmrc\HmrcFraudPreventionValidationSummary;
 use App\Services\Hmrc\HmrcOAuthService;
 use App\Services\Hmrc\HmrcVatObligationSyncService;
+use App\Services\Hmrc\HmrcVatReadService;
 use DomainException;
 use Filament\Actions\Action;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -30,6 +32,12 @@ class HmrcConnectionPage extends BasePage
 {
     /** @var array<string, mixed>|null */
     public ?array $fraudValidationSummary = null;
+
+    /** @var array<string, mixed>|null */
+    public ?array $vatReturnView = null;
+
+    /** @var array<string, mixed>|null */
+    public ?array $vatAccountView = null;
 
     protected string $view = 'filament.pages.hmrc-connection';
 
@@ -208,6 +216,96 @@ class HmrcConnectionPage extends BasePage
             ->get();
     }
 
+    /** @return array<string, string> */
+    public function getFulfilledObligationOptions(): array
+    {
+        return HmrcVatObligation::query()
+            ->where('environment', config('hmrc.environment', 'sandbox'))
+            ->where('status', HmrcVatObligation::STATUS_FULFILLED)
+            ->latest('start_date')
+            ->limit(24)
+            ->get()
+            ->mapWithKeys(fn (HmrcVatObligation $obligation): array => [
+                (string) $obligation->getKey() => $obligation->start_date->format('Y-m-d').' – '.$obligation->end_date->format('Y-m-d'),
+            ])
+            ->all();
+    }
+
+    /** @param array{obligation_id?: string|int, totp?: string} $data */
+    public function viewVatReturn(array $data): void
+    {
+        [$business, $actor] = $this->managementContext();
+        $multiFactor = $this->verifiedMultiFactor($actor, $data['totp'] ?? null);
+
+        if ($multiFactor === null) {
+            return;
+        }
+
+        try {
+            $obligation = HmrcVatObligation::query()
+                ->where('environment', config('hmrc.environment', 'sandbox'))
+                ->where('status', HmrcVatObligation::STATUS_FULFILLED)
+                ->whereKey($data['obligation_id'] ?? null)
+                ->first();
+
+            if (! $obligation) {
+                throw HmrcVatReadException::obligationRequired();
+            }
+
+            $headers = app(HmrcFraudPreventionHeaders::class)->build(request(), $actor, $multiFactor)->headers;
+            $result = app(HmrcVatReadService::class)->viewReturn(
+                $business,
+                $actor,
+                $obligation,
+                $headers,
+                config('hmrc.environment') === 'sandbox'
+                    ? config('hmrc.sandbox.return_test_scenario')
+                    : null,
+            );
+
+            $this->vatReturnView = [
+                ...$result,
+                'period' => $obligation->start_date->format('Y-m-d').' – '.$obligation->end_date->format('Y-m-d'),
+            ];
+
+            Notification::make()->title(__('finance.hmrc_connection.notifications.return_retrieved'))->success()->send();
+        } catch (HmrcApiException|HmrcFraudPreventionException|HmrcOAuthException|HmrcVatReadException|InvalidArgumentException $exception) {
+            Notification::make()->title($exception->getMessage())->danger()->send();
+        }
+    }
+
+    /** @param array{from?: string, to?: string, totp?: string} $data */
+    public function retrieveVatAccount(array $data): void
+    {
+        [$business, $actor] = $this->managementContext();
+        $multiFactor = $this->verifiedMultiFactor($actor, $data['totp'] ?? null);
+
+        if ($multiFactor === null) {
+            return;
+        }
+
+        try {
+            $headers = app(HmrcFraudPreventionHeaders::class)->build(request(), $actor, $multiFactor)->headers;
+            $this->vatAccountView = app(HmrcVatReadService::class)->retrieveAccount(
+                $business,
+                $actor,
+                (string) ($data['from'] ?? ''),
+                (string) ($data['to'] ?? ''),
+                $headers,
+                config('hmrc.environment') === 'sandbox'
+                    ? config('hmrc.sandbox.liabilities_test_scenario')
+                    : null,
+                config('hmrc.environment') === 'sandbox'
+                    ? config('hmrc.sandbox.payments_test_scenario')
+                    : null,
+            );
+
+            Notification::make()->title(__('finance.hmrc_connection.notifications.account_retrieved'))->success()->send();
+        } catch (HmrcApiException|HmrcFraudPreventionException|HmrcOAuthException|HmrcVatReadException|InvalidArgumentException $exception) {
+            Notification::make()->title($exception->getMessage())->danger()->send();
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         $connection = $this->connection();
@@ -295,6 +393,50 @@ class HmrcConnectionPage extends BasePage
                         ->maxLength(8),
                 ])
                 ->action(fn (array $data) => $this->syncVatObligations($data))
+                ->visible($canManage && $connection?->status === HmrcConnection::STATUS_CONNECTED),
+            Action::make('view_vat_return')
+                ->label(__('finance.hmrc_connection.actions.view_vat_return'))
+                ->icon('heroicon-o-document-magnifying-glass')
+                ->color('info')
+                ->modalHeading(__('finance.hmrc_connection.read.return_modal_title'))
+                ->modalDescription(__('finance.hmrc_connection.read.return_modal_description'))
+                ->form([
+                    Select::make('obligation_id')
+                        ->label(__('finance.hmrc_connection.read.period'))
+                        ->options(fn (): array => $this->getFulfilledObligationOptions())
+                        ->required(),
+                    TextInput::make('totp')
+                        ->label(__('finance.hmrc_connection.fraud_validation.totp'))
+                        ->password()
+                        ->required()
+                        ->minLength(6)
+                        ->maxLength(8),
+                ])
+                ->action(fn (array $data) => $this->viewVatReturn($data))
+                ->visible($canManage && $connection?->status === HmrcConnection::STATUS_CONNECTED && $this->getFulfilledObligationOptions() !== []),
+            Action::make('retrieve_vat_account')
+                ->label(__('finance.hmrc_connection.actions.retrieve_vat_account'))
+                ->icon('heroicon-o-banknotes')
+                ->color('info')
+                ->modalHeading(__('finance.hmrc_connection.read.account_modal_title'))
+                ->modalDescription(__('finance.hmrc_connection.read.account_modal_description'))
+                ->form([
+                    DatePicker::make('from')
+                        ->label(__('finance.hmrc_connection.obligations.from'))
+                        ->default(now()->subDays(365)->toDateString())
+                        ->required(),
+                    DatePicker::make('to')
+                        ->label(__('finance.hmrc_connection.obligations.to'))
+                        ->default(now()->toDateString())
+                        ->required(),
+                    TextInput::make('totp')
+                        ->label(__('finance.hmrc_connection.fraud_validation.totp'))
+                        ->password()
+                        ->required()
+                        ->minLength(6)
+                        ->maxLength(8),
+                ])
+                ->action(fn (array $data) => $this->retrieveVatAccount($data))
                 ->visible($canManage && $connection?->status === HmrcConnection::STATUS_CONNECTED),
         ];
     }

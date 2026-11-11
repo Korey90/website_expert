@@ -1,7 +1,7 @@
 # HMRC MTD VAT — sandbox setup
 
-**Status:** OAuth, fraud headers and VAT-obligation synchronisation ready; external sandbox configuration and live sandbox journey pending
-**Verified against official HMRC documentation:** 10 November 2026
+**Status:** OAuth and sandbox VRN connected; obligations/read/submission code ready; live VAT calls blocked by the fraud-header infrastructure gate
+**Verified against official HMRC documentation:** 11 November 2026
 **Scope:** Website Expert NI, direct business journey, VAT MTD only
 
 ## APIs to add to the sandbox application
@@ -25,9 +25,9 @@ The following are **not required** for the first end-to-end VAT sandbox journey:
 
 ## Sandbox application checklist
 
-- [ ] Subscribe the sandbox application to the three APIs above.
-- [ ] Add redirect URI: `<APP_URL>/admin/hmrc/oauth/callback`.
-- [ ] Copy the sandbox Client ID and Client Secret into local/server environment variables, never into Git or chat:
+- [x] Subscribe the sandbox application to the three APIs above.
+- [x] Add redirect URI: `<APP_URL>/admin/hmrc/oauth/callback`.
+- [x] Copy the sandbox Client ID and Client Secret into local/server environment variables, never into Git or chat:
   - `HMRC_SANDBOX_CLIENT_ID`
   - `HMRC_SANDBOX_CLIENT_SECRET`
   - `HMRC_SANDBOX_REDIRECT_URI`
@@ -37,11 +37,11 @@ The following are **not required** for the first end-to-end VAT sandbox journey:
   - `HMRC_VENDOR_FORWARDING_CHAIN` — every in-scope public TLS termination IP, in client-to-HMRC order; for a single server it is the same value as `HMRC_VENDOR_PUBLIC_IP`.
   - `HMRC_VENDOR_LICENSE_ID` — only when a genuine installation/software licence identifier exists; the system sends only its SHA-256 hash.
 - [ ] Confirm the reverse proxy/WAF supplies the real originating public IP and source TCP port. If Laravel's direct request values are not the originating values, configure `HMRC_CLIENT_PUBLIC_IP_HEADER` and `HMRC_CLIENT_PUBLIC_PORT_HEADER`. The trusted edge must strip client-supplied versions and overwrite both headers. `X-Forwarded-Port: 443` is a destination port and must not be substituted for the source port.
-- [ ] Set up authenticator-app MFA for the owner/admin who will validate and initiate HMRC operations.
+- [x] Set up authenticator-app MFA for the owner/admin who will validate and initiate HMRC operations.
 - [ ] If a genuinely required value cannot be collected, contact HMRC first. Only after HMRC accepts the exceptional case may its exact header name be listed in `HMRC_FPH_ALLOWED_MISSING_HEADERS`; never use `null`, `undefined` or another placeholder.
 - [ ] Keep `HMRC_ENVIRONMENT=sandbox` until the complete sandbox and security gates pass.
-- [ ] Create or reuse an **organisation** test user and retain its test User ID, password and VRN in a password manager.
-- [ ] Complete OAuth using the test user's HMRC credentials.
+- [x] Create or reuse an **organisation** test user and retain its test User ID, password and VRN in a password manager.
+- [x] Complete OAuth using the test user's HMRC credentials.
 - [ ] Run obligations → submit open period → view return → liabilities → payments.
 - [ ] Validate every endpoint's fraud-prevention headers and retrieve `vat-mtd` validation feedback.
 
@@ -61,7 +61,7 @@ The tenant owner or administrator manages the connection at `/admin/hmrc-connect
 
 The application's **Disconnect** action only deletes the locally stored credentials. It does not claim to revoke the user's authorization at HMRC because HMRC does not document a programmatic revoke endpoint for this flow. To withdraw the authority at HMRC, the user must also remove the application through HMRC's **Manage authorised applications** service.
 
-No live sandbox authorization has been performed yet. It requires the three API subscriptions, environment-only sandbox Client ID/Secret/redirect URI and an organisation test user.
+Live sandbox OAuth has been completed and the test VRN is stored encrypted. The application UI exposes only connection state and the final four VRN digits.
 
 ## Implemented fraud prevention headers
 
@@ -76,7 +76,7 @@ The browser values are refreshed into a same-site cookie and strictly validated 
 
 At `/admin/hmrc-connection`, an owner/admin can choose **Validate fraud headers**, enter a current authenticator code and call `GET /test/fraud-prevention-headers/validate`. The system obtains a separate application-restricted access token using Client Credentials Grant. It can also retrieve `GET /test/fraud-prevention-headers/vat-mtd/validation-feedback`. Both operations are hard-blocked outside sandbox.
 
-The local implementation and mocked contract tests are complete. A real HMRC validation remains pending until the external checklist above is complete. Passing the Test API is feedback on formatting and values, not a guarantee of production compliance.
+The local implementation and mocked contract tests are complete. The real Test API currently reports one error (`Gov-Client-Public-Port`) and one warning (`Gov-Vendor-License-IDs`). zrok does not expose the originating browser source TCP port; this must be solved by suitable trusted-edge infrastructure or an explicit HMRC-approved exception. Passing the Test API is feedback on formatting and values, not a guarantee of production compliance.
 
 ## Planned API operations
 
@@ -107,9 +107,23 @@ An owner or administrator can use **Sync VAT obligations** at `/admin/hmrc-conne
 
 Special period keys containing `#` are accepted and percent-encoded when used in an HMRC URL. An invalid or duplicate response, a missing `read:vat` scope or an inactive/non-owner membership fails without partial period changes.
 
-For a fixed sandbox response, `HMRC_SANDBOX_OBLIGATIONS_SCENARIO` may optionally be set to an HMRC `Gov-Test-Scenario` value such as `QUARTERLY_NONE_MET`. Leave it blank for the sandbox default and never set a test scenario in production.
+For fixed sandbox responses, `HMRC_SANDBOX_OBLIGATIONS_SCENARIO`, `HMRC_SANDBOX_RETURN_SCENARIO`, `HMRC_SANDBOX_LIABILITIES_SCENARIO`, `HMRC_SANDBOX_PAYMENTS_SCENARIO` and `HMRC_SANDBOX_SUBMISSION_SCENARIO` may optionally be set to endpoint-specific HMRC `Gov-Test-Scenario` values. Leave them blank for sandbox defaults and never set a test scenario in production.
 
 The local MySQL migration is `2026_11_10_000027_create_hmrc_vat_obligations_table.php`. Mocked integration coverage is complete; the real obligations call remains pending until the external sandbox checklist is complete.
+
+## Implemented VAT Return submission
+
+The locked VAT Return detail page exposes **Submit to HMRC** only to an active tenant member with the separate `submit_tax_returns` permission. Submission additionally requires:
+
+- a matching open HMRC obligation for the exact local return period;
+- an integrity-valid immutable snapshot containing the canonical nine HMRC fields;
+- the exact HMRC business legal declaration, explicitly accepted by the user;
+- a newly verified authenticator-app code and a complete fraud-prevention header set;
+- a connected sandbox/production account with `write:vat` and a valid encrypted VRN.
+
+The POST payload is built only from the locked snapshot, uses the obligation's hidden canonical `periodKey` and always sends `finalised: true`. Before the network request, the system persists a tenant-owned attempt with snapshot/payload hashes, declaration version, actor and hashed MFA reference. A successful HTTP 201 receipt is schema-validated; its form bundle and charge reference are encrypted at rest.
+
+There is no automatic POST retry. A timeout, HMRC 5xx, non-201 success response or malformed receipt marks the attempt as `outcome_unknown` and blocks another submission until reconciliation is implemented in `UKFIN-609`. The local migration is `2026_11_11_000029_create_hmrc_vat_submissions_table.php`.
 
 ## Official references
 

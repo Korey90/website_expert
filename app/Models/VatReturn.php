@@ -7,6 +7,7 @@ use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class VatReturn extends Model
 {
@@ -119,6 +120,11 @@ class VatReturn extends Model
     public function supersededBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'superseded_by');
+    }
+
+    public function hmrcSubmission(): HasOne
+    {
+        return $this->hasOne(HmrcVatSubmission::class);
     }
 
     /** @return list<string> */

@@ -1,6 +1,6 @@
 # Current Task
 
-**Status:** W toku — sandbox VRN gotowy, oczekiwanie na wpisanie testowego numeru; następnie UKFIN-607
+**Status:** W toku — UKFIN-608 ukończone; następny etap UKFIN-609
 **Zadanie:** HMRC MTD VAT sandbox end-to-end
 **Data rozpoczęcia:** 2026-11-10
 **Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
@@ -14,11 +14,16 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 
 - OAuth sandbox został wykonany end-to-end przez publiczny callback zrok; połączenie i tokeny są zapisane.
 - Test Fraud Prevention Headers API potwierdził 14/16 nagłówków; blokujący `Gov-Client-Public-Port` nie jest udostępniany przez zrok, a `Gov-Vendor-License-IDs` pozostaje ostrzeżeniem wymagającym prawdziwej licencji albo uzgodnienia z HMRC.
-- Bieżące zadanie implementacyjne: bezpieczna konfiguracja testowego VRN per tenant/environment, audyt zmiany i ochrona wartości przed wyzerowaniem przy ponownym OAuth.
-- Po zakończeniu użytkownik wpisze wyłącznie 9-cyfrowy VRN wygenerowanego testowego użytkownika organizacji; login i hasło HMRC nie trafiają do aplikacji ani chatu.
+- Testowy VRN został wpisany przez użytkownika; system potwierdził wyłącznie obecność, maskę ostatnich 4 cyfr oraz metadane audytu bez ujawnienia pełnej wartości.
 - ✅ Dodano tenantową akcję ustawienia sandboxowego VRN, szyfrowanie istniejącym castem, audyt aktora/czasu, formularz owner/admin oraz ochronę wartości przed wyzerowaniem podczas reconnect OAuth.
 - ✅ Migracja `2026_11_11_000028` wykonana; tenant audit bez błędów; HMRC targeted 32/192, pełny Finance 310 passed + 1 skipped / 2233 assertions; EN/PL/PT po 1140 kluczy.
-- Następny etap implementacyjny: `UKFIN-607` — bezpieczny odczyt VAT return, liabilities i payments oraz prezentacja w panelu.
+- ✅ `UKFIN-607`: dodano read-only VAT Return, liabilities i payments z auto-refresh tokenu, `read:vat`, tenant isolation, TOTP + FPH, ścisłą walidacją odpowiedzi i efemerycznym widokiem bez period key oraz surowych payloadów.
+- ✅ Oficjalny kontrakt HMRC został ponownie sprawdzony; parser dopuszcza opcjonalne `outstandingAmount`, `due` i payment `received`, pozostając fail-closed dla błędnych typów/dat/kwot.
+- ✅ UKFIN-607 validation: HMRC 50 passed / 284 assertions; Finance 317 passed + 1 skipped / 2261 assertions; EN/PL/PT po 1171 zgodnych kluczy; Blade cache i Pint poprawne.
+- ✅ `UKFIN-608`: kontrolowany POST VAT Return wyłącznie z integralnego locked snapshotu i pasującego open obligation; dokładna deklaracja prawna HMRC, świeże TOTP, `submit_tax_returns`, pełne FPH i `write:vat` są wymagane przed wysyłką.
+- ✅ Próba jest utrwalana przed POST z hashami snapshotu/payloadu i audytem; receipt HTTP 201 jest walidowany, identyfikatory są szyfrowane, a timeout/5xx/nieprawidłowa odpowiedź daje `outcome_unknown` bez automatycznego retry.
+- ✅ Migracja `2026_11_11_000029` wykonana; tenant audit valid; HMRC 55/319, Finance 322 passed + 1 skipped / 2296 assertions; EN/PL/PT po 1197 zgodnych kluczy; Blade cache i Pint poprawne.
+- Następny etap implementacyjny: `UKFIN-609` — bezpieczne reconciliation prób `outcome_unknown` bez ponownego POST.
 
 - `UKFIN-601`: użytkownik posiada konto HMRC Developer Hub i pierwszą aplikację sandbox.
 - Do aplikacji trzeba dodać: VAT (MTD) API v1.0, Create Test User API v1.0 i Test Fraud Prevention Headers API v1.0.
@@ -72,6 +77,6 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 
 - UKFIN-601 jest zakończony: trzy API są aktywne, credentials skonfigurowane, a OAuth testowej organizacji przeszedł end-to-end.
 - Rzeczywisty validator FPH działa i akceptuje 14/16 nagłówków; `Gov-Client-Public-Port` wymaga infrastruktury zachowującej source port, a `Gov-Vendor-License-IDs` prawdziwego modelu licencji albo uzgodnienia z HMRC.
-- Rzeczywiste obligations oczekują na wpisanie wygenerowanego testowego VRN i rozwiązanie/akceptację dwóch braków FPH.
+- Testowy VRN jest zapisany. Rzeczywiste obligations i operacje read-only oczekują na rozwiązanie/akceptację dwóch braków FPH.
 - Żadne prawdziwe dane ani deklaracje nie są wysyłane na tym etapie.
 - `HMRC_ENVIRONMENT` pozostaje `sandbox` do czasu przejścia OAuth, fraud headers, pełnych scenariuszy sandbox, security review i jawnej decyzji właściciela.

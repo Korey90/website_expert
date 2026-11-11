@@ -115,6 +115,11 @@ class Business extends Model
         return $this->hasMany(HmrcVatObligation::class);
     }
 
+    public function hmrcVatSubmissions(): HasMany
+    {
+        return $this->hasMany(HmrcVatSubmission::class);
+    }
+
     public function bankAccounts(): HasMany
     {
         return $this->hasMany(BankAccount::class);

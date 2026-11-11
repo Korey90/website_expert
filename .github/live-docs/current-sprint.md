@@ -11,7 +11,7 @@
 
 ### In Progress
 
-- [ ] `UKFIN-607` [M] — view VAT return, liabilities i payments.
+- [ ] `UKFIN-609` [M] — idempotency, timeout recovery i submission status reconciliation.
 
 ### To Do
 
@@ -19,6 +19,8 @@
 
 ### Done
 
+- [x] `UKFIN-608` [M] — kontrolowany submit z locked snapshotu, dokładną deklaracją HMRC, świeżym TOTP, FPH, trwałą próbą przed POST, walidowanym szyfrowanym receipt oraz `outcome_unknown` bez automatycznego retry.
+- [x] `UKFIN-607` [M] — bezpieczny read-only view VAT Return, liabilities i payments z walidacją odpowiedzi, tenant isolation, TOTP i FPH.
 - [x] `UKFIN-601` [M] — aktywne API, credentials poza repo, publiczny callback i udany OAuth sandbox testowej organizacji.
 - [x] `UKFIN-606` [M] — retrieve VAT obligations i tenantowa synchronizacja periods; rzeczywisty call oczekuje na testowy VRN oraz gate FPH.
 - [x] `UKFIN-602` [M] — HmrcClientInterface + sandbox/production VAT API clients.

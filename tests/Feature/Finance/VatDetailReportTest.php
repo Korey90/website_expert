@@ -194,7 +194,7 @@ class VatDetailReportTest extends TestCase
         ]);
 
         [$otherBusiness, $otherUser] = $this->otherTenant();
-        app(PostJournalEntryAction::class)->execute($otherBusiness, $otherUser, [
+        $otherTenantJournal = app(PostJournalEntryAction::class)->execute($otherBusiness, $otherUser, [
             'entry_date' => '2026-07-20',
             'description' => 'Private output VAT',
             'idempotency_key' => 'private:vat-detail',
@@ -221,7 +221,7 @@ class VatDetailReportTest extends TestCase
         $this->assertSame(1, $july['totals']->unknown_tax_code_count);
         $this->assertTrue($unknown->is_adjustment);
         $this->assertSame(3.0, $unknown->output_vat_gbp);
-        $this->assertStringNotContainsString('999', json_encode($july, JSON_THROW_ON_ERROR));
+        $this->assertFalse($july['rows']->contains('journal_entry_id', $otherTenantJournal->id));
 
         $august = app(VatDetailService::class)->report($this->business->id, '2026-08-01', '2026-08-31');
         $reversal = $august['rows']->first();

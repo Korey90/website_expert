@@ -180,5 +180,106 @@
                 {{ __('finance.hmrc_connection.obligations.period_key_notice') }}
             </p>
         </x-filament::section>
+
+        <x-filament::section class="lg:col-span-2">
+            <x-slot name="heading">{{ __('finance.hmrc_connection.read.return_title') }}</x-slot>
+            <x-slot name="description">{{ __('finance.hmrc_connection.read.return_description') }}</x-slot>
+
+            @if (! $vatReturnView)
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('finance.hmrc_connection.read.return_empty') }}
+                </p>
+            @else
+                <div class="mb-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
+                    <span>{{ __('finance.hmrc_connection.read.period') }}: <strong>{{ $vatReturnView['period'] }}</strong></span>
+                    <span>{{ __('finance.hmrc_connection.read.fetched_at') }}: <strong>{{ $vatReturnView['fetched_at'] }}</strong></span>
+                    <span>{{ __('finance.hmrc_connection.read.correlation_id') }}: <strong class="font-mono">{{ $vatReturnView['correlation_id'] ?? '—' }}</strong></span>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($vatReturnView['boxes'] as $box => $amount)
+                        <div class="rounded-lg border border-gray-200 p-4 dark:border-white/10">
+                            <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                {{ __('finance.hmrc_connection.read.box', ['box' => $box]) }}
+                            </p>
+                            <p class="mt-1 text-lg font-semibold tabular-nums">
+                                {{ number_format($amount, $box <= 5 ? 2 : 0, '.', ',') }}
+                            </p>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </x-filament::section>
+
+        <x-filament::section class="lg:col-span-2">
+            <x-slot name="heading">{{ __('finance.hmrc_connection.read.account_title') }}</x-slot>
+            <x-slot name="description">{{ __('finance.hmrc_connection.read.account_description') }}</x-slot>
+
+            @if (! $vatAccountView)
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('finance.hmrc_connection.read.account_empty') }}
+                </p>
+            @else
+                <div class="mb-5 flex flex-wrap gap-x-6 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
+                    <span>{{ __('finance.hmrc_connection.read.fetched_at') }}: <strong>{{ $vatAccountView['fetched_at'] }}</strong></span>
+                    <span>{{ __('finance.hmrc_connection.read.liabilities_correlation_id') }}: <strong class="font-mono">{{ $vatAccountView['liabilities_correlation_id'] ?? '—' }}</strong></span>
+                    <span>{{ __('finance.hmrc_connection.read.payments_correlation_id') }}: <strong class="font-mono">{{ $vatAccountView['payments_correlation_id'] ?? '—' }}</strong></span>
+                </div>
+
+                <h3 class="mb-3 font-semibold">{{ __('finance.hmrc_connection.read.liabilities') }}</h3>
+                @if (empty($vatAccountView['liabilities']))
+                    <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.read.no_liabilities') }}</p>
+                @else
+                    <div class="mb-6 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="border-b border-gray-200 text-gray-500 dark:border-white/10 dark:text-gray-400">
+                                <tr>
+                                    <th class="px-3 py-2 font-medium">{{ __('finance.hmrc_connection.read.tax_period') }}</th>
+                                    <th class="px-3 py-2 font-medium">{{ __('finance.hmrc_connection.read.type') }}</th>
+                                    <th class="px-3 py-2 text-right font-medium">{{ __('finance.hmrc_connection.read.original_amount') }}</th>
+                                    <th class="px-3 py-2 text-right font-medium">{{ __('finance.hmrc_connection.read.outstanding_amount') }}</th>
+                                    <th class="px-3 py-2 font-medium">{{ __('finance.hmrc_connection.read.due') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-white/10">
+                                @foreach ($vatAccountView['liabilities'] as $liability)
+                                    <tr>
+                                        <td class="whitespace-nowrap px-3 py-3">{{ $liability['from'] }} – {{ $liability['to'] }}</td>
+                                        <td class="px-3 py-3">{{ $liability['type'] }}</td>
+                                        <td class="whitespace-nowrap px-3 py-3 text-right tabular-nums">£{{ number_format($liability['original_amount'], 2, '.', ',') }}</td>
+                                        <td class="whitespace-nowrap px-3 py-3 text-right tabular-nums">{{ $liability['outstanding_amount'] === null ? '—' : '£'.number_format($liability['outstanding_amount'], 2, '.', ',') }}</td>
+                                        <td class="whitespace-nowrap px-3 py-3">{{ $liability['due'] ?? '—' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+
+                <h3 class="mb-3 font-semibold">{{ __('finance.hmrc_connection.read.payments') }}</h3>
+                @if (empty($vatAccountView['payments']))
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.read.no_payments') }}</p>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="border-b border-gray-200 text-gray-500 dark:border-white/10 dark:text-gray-400">
+                                <tr>
+                                    <th class="px-3 py-2 font-medium">{{ __('finance.hmrc_connection.read.received') }}</th>
+                                    <th class="px-3 py-2 text-right font-medium">{{ __('finance.hmrc_connection.read.amount') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-white/10">
+                                @foreach ($vatAccountView['payments'] as $payment)
+                                    <tr>
+                                        <td class="whitespace-nowrap px-3 py-3">{{ $payment['received'] ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-3 py-3 text-right tabular-nums">£{{ number_format($payment['amount'], 2, '.', ',') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            @endif
+        </x-filament::section>
     </div>
 </x-filament-panels::page>
