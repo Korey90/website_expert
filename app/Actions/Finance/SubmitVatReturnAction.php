@@ -13,6 +13,7 @@ use App\Services\Hmrc\Contracts\HmrcClientInterface;
 use App\Services\Hmrc\Exceptions\HmrcApiException;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
 use App\Services\Hmrc\HmrcOAuthService;
+use App\Services\Hmrc\HmrcVatReturnPayload;
 use App\Support\PermissionHelper;
 use Carbon\CarbonImmutable;
 use DomainException;
@@ -21,19 +22,12 @@ use Throwable;
 
 final class SubmitVatReturnAction
 {
-    /** @var list<string> */
-    private const HMRC_FIELDS = [
-        'vatDueSales', 'vatDueAcquisitions', 'totalVatDue',
-        'vatReclaimedCurrPeriod', 'netVatDue', 'totalValueSalesExVAT',
-        'totalValuePurchasesExVAT', 'totalValueGoodsSuppliedExVAT',
-        'totalAcquisitionsExVAT',
-    ];
-
     public function __construct(
         private readonly HmrcClientInterface $client,
         private readonly HmrcOAuthService $oauth,
         private readonly HmrcFraudPreventionHeaders $fraudHeaders,
         private readonly VatReturnSnapshotService $snapshotService,
+        private readonly HmrcVatReturnPayload $payloadService,
     ) {}
 
     /**
@@ -94,8 +88,8 @@ final class SubmitVatReturnAction
                 throw new DomainException(__('finance.vat_returns.errors.submission_obligation'));
             }
 
-            $payload = $this->payload($lockedReturn, $obligation);
-            $payloadHash = hash('sha256', json_encode($payload, JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION));
+            $payload = $this->payloadService->build($lockedReturn, (string) $obligation->period_key);
+            $payloadHash = $this->payloadService->hash($payload);
             $declaredAt = now();
             $submission = HmrcVatSubmission::withoutGlobalScopes()->create([
                 'business_id' => $lockedReturn->business_id,
@@ -215,39 +209,6 @@ final class SubmitVatReturnAction
         }
 
         return ['type' => $type, 'verified_at' => $verifiedAt, 'unique_reference' => $reference];
-    }
-
-    /** @return array<string, bool|int|float|string> */
-    private function payload(VatReturn $return, HmrcVatObligation $obligation): array
-    {
-        $values = data_get($return->snapshot, 'calculation.hmrc_values');
-
-        if (! is_array($values) || array_diff(array_keys($values), self::HMRC_FIELDS) !== []
-            || array_diff(self::HMRC_FIELDS, array_keys($values)) !== []) {
-            throw new DomainException(__('finance.vat_returns.errors.submission_payload'));
-        }
-
-        $normalized = [];
-
-        foreach (self::HMRC_FIELDS as $index => $field) {
-            $value = $values[$field];
-
-            if (! is_int($value) && ! is_float($value)) {
-                throw new DomainException(__('finance.vat_returns.errors.submission_payload'));
-            }
-
-            if ($index >= 5 && ! is_int($value)) {
-                throw new DomainException(__('finance.vat_returns.errors.submission_payload'));
-            }
-
-            $normalized[$field] = $value;
-        }
-
-        return [
-            'periodKey' => (string) $obligation->period_key,
-            ...$normalized,
-            'finalised' => true,
-        ];
     }
 
     /**

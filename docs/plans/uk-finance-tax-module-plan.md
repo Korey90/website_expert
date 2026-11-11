@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** IMPLEMENTACJA W TOKU — Fazy 0–5 zaimplementowane, Faza 6 w toku (`UKFIN-601`–`UKFIN-608` ukończone; `UKFIN-609` następne); formalny gate księgowego pozostaje przed produkcyjnym submission
+**Status:** IMPLEMENTACJA W TOKU — Fazy 0–5 zaimplementowane, Faza 6 w toku (`UKFIN-601`–`UKFIN-609` ukończone; `UKFIN-610` następne); formalny gate księgowego pozostaje przed produkcyjnym submission
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -458,7 +458,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-606` [M] Retrieve VAT obligations i synchronizacja periods. *(ukończone 2026-11-10: tenantowy rejestr `hmrc_vat_obligations`, ścisła walidacja i atomowy/idempotentny sync O/F, auto-refresh tokenu, TOTP + fraud headers, 366-dniowy limit, ukryty i bezpiecznie kodowany `periodKey`, panel PL/EN/PT, migracja MySQL `000027` i rozszerzony audit tenantów; HMRC targeted 33/194, Finance 302 passed + 1 skipped / 2202 assertions, full regression 813 passed + 11 skipped / 3661 assertions przy 9 znanych baseline failures, PL/EN/PT po 1126 kluczy; rzeczywiste wywołanie sandbox oczekuje na zewnętrzną konfigurację)*
 - [x] `UKFIN-607` [M] View VAT return/liabilities/payments. *(ukończone 2026-11-11: tenantowy serwis read-only z auto-refresh i `read:vat`, ścisłą walidacją odpowiedzi zgodną z opcjonalnymi polami HMRC, kanonicznym wyborem fulfilled obligation bez ujawniania period key, efemerycznym panelem 9 pól/liabilities/payments, TOTP + FPH oraz bez zapisu surowych odpowiedzi; HMRC 50 passed / 284 assertions, Finance 317 passed + 1 skipped / 2261 assertions, PL/EN/PT po 1171 kluczy)*
 - [x] `UKFIN-608` [M] Submit VAT return z review, declaration i step-up confirmation. *(ukończone 2026-11-11: locked snapshot + matching open obligation, exact HMRC business declaration, fresh TOTP, FPH, `submit_tax_returns`, `write:vat`, prepared attempt before POST, SHA-256 audit, validated encrypted HTTP 201 receipt i fail-safe `outcome_unknown` bez blind retry; migracja `000029`, HMRC 55/319, Finance 322 passed + 1 skipped / 2296 assertions, PL/EN/PT po 1197 kluczy)*
-- [ ] `UKFIN-609` [M] Idempotency, timeout recovery i submission status reconciliation.
+- [x] `UKFIN-609` [M] Idempotency, timeout recovery i submission status reconciliation. *(ukończone 2026-11-11: GET-only obligations + view return, pending-open bez retry, nine-box match albo trwały conflict, ponowna kontrola snapshot/payload hash, audyt aktora/czasu/count/received/error/correlation, TOTP + FPH + read:vat; migracja `000030`, HMRC 60/354, Finance 327 passed + 1 skipped / 2331 assertions, PL/EN/PT po 1219 kluczy)*
 - [ ] `UKFIN-610` [M] HMRC audit log i receipt download.
 - [ ] `UKFIN-611` [M] Sandbox scenarios: success, invalid VRN, expired token, duplicate, 5xx, timeout.
 - [ ] `UKFIN-612` [M] Security review, penetration test i production access checklist.

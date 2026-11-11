@@ -1,6 +1,6 @@
 # Current Task
 
-**Status:** W toku — UKFIN-608 ukończone; następny etap UKFIN-609
+**Status:** W toku — UKFIN-609 ukończone; następny etap UKFIN-610
 **Zadanie:** HMRC MTD VAT sandbox end-to-end
 **Data rozpoczęcia:** 2026-11-10
 **Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
@@ -23,7 +23,10 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 - ✅ `UKFIN-608`: kontrolowany POST VAT Return wyłącznie z integralnego locked snapshotu i pasującego open obligation; dokładna deklaracja prawna HMRC, świeże TOTP, `submit_tax_returns`, pełne FPH i `write:vat` są wymagane przed wysyłką.
 - ✅ Próba jest utrwalana przed POST z hashami snapshotu/payloadu i audytem; receipt HTTP 201 jest walidowany, identyfikatory są szyfrowane, a timeout/5xx/nieprawidłowa odpowiedź daje `outcome_unknown` bez automatycznego retry.
 - ✅ Migracja `2026_11_11_000029` wykonana; tenant audit valid; HMRC 55/319, Finance 322 passed + 1 skipped / 2296 assertions; EN/PL/PT po 1197 zgodnych kluczy; Blade cache i Pint poprawne.
-- Następny etap implementacyjny: `UKFIN-609` — bezpieczne reconciliation prób `outcome_unknown` bez ponownego POST.
+- ✅ `UKFIN-609`: próby `outcome_unknown` są uzgadniane wyłącznie przez GET obligations i GET return; open pozostaje pending, fulfilled wymaga zgodności wszystkich dziewięciu pól, a różnica daje trwały `outcome_conflict` bez ponownego POST.
+- ✅ Każda kontrola zapisuje aktora, czas, licznik, HMRC received date, bezpieczne metadane błędu i correlation ID; snapshot/payload hash są ponownie sprawdzane przed połączeniem.
+- ✅ Migracja `2026_11_11_000030` wykonana; tenant audit valid; HMRC 60/354, Finance 327 passed + 1 skipped / 2331 assertions; EN/PL/PT po 1219 zgodnych kluczy; Blade cache i Pint poprawne.
+- Następny etap implementacyjny: `UKFIN-610` — HMRC audit log i receipt download.
 
 - `UKFIN-601`: użytkownik posiada konto HMRC Developer Hub i pierwszą aplikację sandbox.
 - Do aplikacji trzeba dodać: VAT (MTD) API v1.0, Create Test User API v1.0 i Test Fraud Prevention Headers API v1.0.

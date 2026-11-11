@@ -16,6 +16,16 @@ class HmrcVatSubmission extends Model
 
     public const STATUS_OUTCOME_UNKNOWN = 'outcome_unknown';
 
+    public const STATUS_OUTCOME_CONFLICT = 'outcome_conflict';
+
+    public const RECONCILIATION_PENDING_OPEN = 'pending_open';
+
+    public const RECONCILIATION_MATCHED = 'matched';
+
+    public const RECONCILIATION_CONFLICT = 'conflict';
+
+    public const RECONCILIATION_CHECK_FAILED = 'check_failed';
+
     public const DECLARATION_VERSION = 'hmrc-vat-business-declaration-v1';
 
     protected $fillable = [
@@ -25,11 +35,15 @@ class HmrcVatSubmission extends Model
         'submitted_by', 'submitted_at', 'processing_date', 'form_bundle_number',
         'payment_indicator', 'charge_reference', 'correlation_id', 'failure_code',
         'failure_status',
+        'reconciliation_status', 'reconciliation_count', 'reconciled_at',
+        'reconciled_by', 'hmrc_received_date', 'reconciliation_correlation_id',
+        'reconciliation_error_code', 'reconciliation_error_status',
     ];
 
     protected $hidden = [
         'form_bundle_number', 'charge_reference', 'correlation_id',
         'mfa_reference_hash', 'failure_code',
+        'reconciliation_correlation_id', 'reconciliation_error_code',
     ];
 
     protected function casts(): array
@@ -42,6 +56,10 @@ class HmrcVatSubmission extends Model
             'form_bundle_number' => 'encrypted',
             'charge_reference' => 'encrypted',
             'failure_status' => 'integer',
+            'reconciliation_count' => 'integer',
+            'reconciled_at' => 'datetime',
+            'hmrc_received_date' => 'date',
+            'reconciliation_error_status' => 'integer',
         ];
     }
 
@@ -63,5 +81,10 @@ class HmrcVatSubmission extends Model
     public function submittedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'submitted_by');
+    }
+
+    public function reconciledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reconciled_by');
     }
 }

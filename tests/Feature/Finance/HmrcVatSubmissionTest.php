@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Finance;
 
+use App\Actions\Finance\ReconcileHmrcVatSubmissionAction;
 use App\Actions\Finance\SubmitVatReturnAction;
 use App\Models\Business;
 use App\Models\BusinessUser;
@@ -13,6 +14,7 @@ use App\Models\VatReturn;
 use App\Services\Finance\VatReturnSnapshotService;
 use App\Services\Hmrc\Exceptions\HmrcApiException;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
+use App\Services\Hmrc\HmrcVatReturnPayload;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
@@ -257,6 +259,130 @@ class HmrcVatSubmissionTest extends TestCase
         $this->assertDatabaseCount('hmrc_vat_submissions', 0);
     }
 
+    public function test_reconciliation_keeps_an_open_obligation_pending_without_resubmitting(): void
+    {
+        $attempt = $this->unknownSubmission();
+        Http::fake(['*' => Http::response(['obligations' => [[
+            'start' => '2026-07-01',
+            'end' => '2026-09-30',
+            'due' => '2026-11-07',
+            'status' => 'O',
+            'periodKey' => '26A3',
+        ]]], 200, ['X-CorrelationId' => 'corr-obligation-open'])]);
+
+        $result = $this->reconcile();
+
+        $this->assertSame($attempt->id, $result->id);
+        $this->assertSame(HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN, $result->status);
+        $this->assertSame(HmrcVatSubmission::RECONCILIATION_PENDING_OPEN, $result->reconciliation_status);
+        $this->assertSame(1, $result->reconciliation_count);
+        $this->assertSame($this->owner->id, $result->reconciled_by);
+        $this->assertNull($result->hmrc_received_date);
+        Http::assertSentCount(1);
+        Http::assertSent(fn (Request $request): bool => $request->method() === 'GET'
+            && str_contains($request->url(), '/obligations?')
+            && ! str_contains($request->url(), '/returns'));
+    }
+
+    public function test_reconciliation_marks_a_matching_fulfilled_return_as_submitted_using_get_only(): void
+    {
+        $this->unknownSubmission();
+        Http::fakeSequence()
+            ->push(['obligations' => [[
+                'start' => '2026-07-01',
+                'end' => '2026-09-30',
+                'due' => '2026-11-07',
+                'status' => 'F',
+                'received' => '2026-11-11',
+                'periodKey' => '26A3',
+            ]]], 200, ['X-CorrelationId' => 'corr-obligation-fulfilled'])
+            ->push($this->remoteReturn(), 200, ['X-CorrelationId' => 'corr-return-match']);
+
+        $result = $this->reconcile();
+
+        $this->assertSame(HmrcVatSubmission::STATUS_SUBMITTED, $result->status);
+        $this->assertSame(HmrcVatSubmission::RECONCILIATION_MATCHED, $result->reconciliation_status);
+        $this->assertSame('2026-11-11', $result->hmrc_received_date->format('Y-m-d'));
+        $this->assertNull($result->form_bundle_number);
+        $this->assertNull($result->submitted_at);
+        $this->assertSame(HmrcVatObligation::STATUS_FULFILLED, HmrcVatObligation::withoutGlobalScopes()->sole()->status);
+        Http::assertSentCount(2);
+        Http::assertNotSent(fn (Request $request): bool => $request->method() === 'POST');
+        Http::assertSent(fn (Request $request): bool => $request->method() === 'GET'
+            && str_contains($request->url(), '/returns/26A3'));
+    }
+
+    public function test_reconciliation_records_a_conflict_when_hmrc_has_different_box_values(): void
+    {
+        $this->unknownSubmission();
+        $remoteReturn = $this->remoteReturn();
+        $remoteReturn['vatDueSales'] = 999.99;
+        Http::fakeSequence()
+            ->push(['obligations' => [[
+                'start' => '2026-07-01',
+                'end' => '2026-09-30',
+                'due' => '2026-11-07',
+                'status' => 'F',
+                'received' => '2026-11-10',
+                'periodKey' => '26A3',
+            ]]])
+            ->push($remoteReturn);
+
+        $result = $this->reconcile();
+
+        $this->assertSame(HmrcVatSubmission::STATUS_OUTCOME_CONFLICT, $result->status);
+        $this->assertSame(HmrcVatSubmission::RECONCILIATION_CONFLICT, $result->reconciliation_status);
+        $this->assertNull($result->submitted_at);
+
+        Http::fake();
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('unknown outcome');
+        $this->reconcile();
+    }
+
+    public function test_failed_reconciliation_is_audited_and_remains_safe_to_check_again(): void
+    {
+        $this->unknownSubmission();
+        Http::fake(['*' => Http::response([
+            'code' => 'SERVER_ERROR',
+            'message' => 'sensitive upstream text',
+        ], 503, ['X-CorrelationId' => 'corr-reconcile-failure'])]);
+
+        try {
+            $this->reconcile();
+            $this->fail('The reconciliation API failure should have been raised.');
+        } catch (HmrcApiException $exception) {
+            $this->assertSame('SERVER_ERROR', $exception->errorCode);
+        }
+
+        $result = HmrcVatSubmission::withoutGlobalScopes()->sole();
+        $this->assertSame(HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN, $result->status);
+        $this->assertSame(HmrcVatSubmission::RECONCILIATION_CHECK_FAILED, $result->reconciliation_status);
+        $this->assertSame(1, $result->reconciliation_count);
+        $this->assertSame('SERVER_ERROR', $result->reconciliation_error_code);
+        $this->assertSame(503, $result->reconciliation_error_status);
+        $this->assertArrayNotHasKey('reconciliation_error_code', $result->toArray());
+        $this->assertDatabaseMissing('hmrc_vat_submissions', ['reconciliation_error_code' => 'sensitive upstream text']);
+        Http::assertSentCount(1);
+        Http::assertNotSent(fn (Request $request): bool => $request->method() === 'POST');
+    }
+
+    public function test_reconciliation_rejects_a_changed_payload_hash_before_any_hmrc_call(): void
+    {
+        $attempt = $this->unknownSubmission();
+        $attempt->forceFill(['payload_hash' => str_repeat('0', 64)])->save();
+        Http::fake();
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('does not match the payload');
+
+        try {
+            $this->reconcile();
+        } finally {
+            Http::assertNothingSent();
+        }
+    }
+
     private function submit(?string $testScenario = null): HmrcVatSubmission
     {
         return app(SubmitVatReturnAction::class)->execute(
@@ -267,6 +393,58 @@ class HmrcVatSubmissionTest extends TestCase
             $this->fraudHeaders(),
             $testScenario,
         );
+    }
+
+    private function reconcile(): HmrcVatSubmission
+    {
+        return app(ReconcileHmrcVatSubmissionAction::class)->execute(
+            $this->return,
+            $this->owner,
+            $this->multiFactor(),
+            $this->fraudHeaders(),
+        );
+    }
+
+    private function unknownSubmission(): HmrcVatSubmission
+    {
+        $obligation = HmrcVatObligation::withoutGlobalScopes()->sole();
+        $payloadService = app(HmrcVatReturnPayload::class);
+        $payload = $payloadService->build($this->return, (string) $obligation->period_key);
+
+        return HmrcVatSubmission::withoutGlobalScopes()->create([
+            'business_id' => $this->business->id,
+            'vat_return_id' => $this->return->id,
+            'hmrc_vat_obligation_id' => $obligation->id,
+            'environment' => 'sandbox',
+            'status' => HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN,
+            'snapshot_hash' => $this->return->snapshot_hash,
+            'payload_hash' => $payloadService->hash($payload),
+            'declaration_version' => HmrcVatSubmission::DECLARATION_VERSION,
+            'declared_at' => now(),
+            'mfa_type' => 'TOTP',
+            'mfa_verified_at' => now(),
+            'mfa_reference_hash' => hash('sha256', str_repeat('a', 64)),
+            'submitted_by' => $this->owner->id,
+            'failure_code' => 'HMRC_UNREACHABLE',
+            'failure_status' => 503,
+        ]);
+    }
+
+    /** @return array<string, int|float|string> */
+    private function remoteReturn(): array
+    {
+        return [
+            'periodKey' => '26A3',
+            'vatDueSales' => 100.25,
+            'vatDueAcquisitions' => 0,
+            'totalVatDue' => 100.25,
+            'vatReclaimedCurrPeriod' => 25,
+            'netVatDue' => 75.25,
+            'totalValueSalesExVAT' => 500,
+            'totalValuePurchasesExVAT' => 100,
+            'totalValueGoodsSuppliedExVAT' => 0,
+            'totalAcquisitionsExVAT' => 0,
+        ];
     }
 
     private function lockedReturn(): VatReturn

@@ -3,10 +3,13 @@
 namespace App\Filament\Resources\VatReturnResource\Pages;
 
 use App\Actions\Finance\LockVatReturnAction;
+use App\Actions\Finance\ReconcileHmrcVatSubmissionAction;
 use App\Actions\Finance\ReviewVatReturnAction;
 use App\Actions\Finance\SubmitVatReturnAction;
 use App\Actions\Finance\SupersedeVatReturnAction;
 use App\Filament\Resources\VatReturnResource;
+use App\Models\HmrcVatSubmission;
+use App\Models\User;
 use App\Models\VatReturn;
 use App\Services\Hmrc\Exceptions\HmrcApiException;
 use App\Services\Hmrc\Exceptions\HmrcFraudPreventionException;
@@ -33,6 +36,22 @@ class ViewVatReturn extends ViewRecord
         $return = $this->record;
 
         return [
+            Action::make('reconcile_hmrc')
+                ->label(__('finance.vat_returns.actions.reconcile_hmrc'))
+                ->icon('heroicon-o-arrow-path')
+                ->color('warning')
+                ->modalHeading(__('finance.vat_returns.submission.reconciliation_modal_title'))
+                ->modalDescription(__('finance.vat_returns.submission.reconciliation_modal_description'))
+                ->visible(fn (): bool => Gate::allows('reconcile', $return))
+                ->form([
+                    TextInput::make('totp')
+                        ->label(__('finance.hmrc_connection.fraud_validation.totp'))
+                        ->password()
+                        ->required()
+                        ->minLength(6)
+                        ->maxLength(8),
+                ])
+                ->action(fn (array $data) => $this->reconcileWithHmrc($return, $data)),
             Action::make('submit_hmrc')
                 ->label(__('finance.vat_returns.actions.submit_hmrc'))
                 ->icon('heroicon-o-paper-airplane')
@@ -110,26 +129,11 @@ class ViewVatReturn extends ViewRecord
     private function submitToHmrc(VatReturn $return, array $data): void
     {
         $actor = auth()->user();
-        $secret = $actor?->getAppAuthenticationSecret();
+        $multiFactor = $this->verifiedMultiFactor($actor, $data['totp'] ?? null);
 
-        if (! is_string($secret) || $secret === '') {
-            Notification::make()->title(__('finance.hmrc_connection.notifications.mfa_required'))->danger()->send();
-
+        if ($multiFactor === null) {
             return;
         }
-
-        if (! is_string($data['totp'] ?? null)
-            || ! AppAuthentication::make()->verifyCode($data['totp'], $secret, true)) {
-            Notification::make()->title(__('finance.hmrc_connection.notifications.mfa_invalid'))->danger()->send();
-
-            return;
-        }
-
-        $multiFactor = [
-            'type' => 'TOTP',
-            'timestamp' => now()->utc()->format('Y-m-d\TH:i:s\Z'),
-            'unique_reference' => hash_hmac('sha256', 'filament-totp:'.$secret, (string) config('app.key')),
-        ];
 
         try {
             $headers = app(HmrcFraudPreventionHeaders::class)->build(request(), $actor, $multiFactor)->headers;
@@ -146,6 +150,72 @@ class ViewVatReturn extends ViewRecord
         } catch (DomainException|HmrcApiException|HmrcFraudPreventionException|HmrcOAuthException|InvalidArgumentException $exception) {
             Notification::make()->title($exception->getMessage())->danger()->send();
         }
+    }
+
+    /** @param array{totp?: string} $data */
+    private function reconcileWithHmrc(VatReturn $return, array $data): void
+    {
+        $actor = auth()->user();
+        $multiFactor = $this->verifiedMultiFactor($actor, $data['totp'] ?? null);
+
+        if ($multiFactor === null) {
+            return;
+        }
+
+        try {
+            $headers = app(HmrcFraudPreventionHeaders::class)->build(request(), $actor, $multiFactor)->headers;
+            $submission = app(ReconcileHmrcVatSubmissionAction::class)->execute(
+                $return,
+                $actor,
+                $multiFactor,
+                $headers,
+                config('hmrc.environment') === 'sandbox' ? config('hmrc.sandbox.obligations_test_scenario') : null,
+                config('hmrc.environment') === 'sandbox' ? config('hmrc.sandbox.return_test_scenario') : null,
+            );
+            $notification = match ($submission->reconciliation_status) {
+                HmrcVatSubmission::RECONCILIATION_MATCHED => 'reconciliation_matched',
+                HmrcVatSubmission::RECONCILIATION_CONFLICT => 'reconciliation_conflict',
+                default => 'reconciliation_pending',
+            };
+            $notice = Notification::make()->title(__("finance.vat_returns.notifications.{$notification}"));
+
+            if ($submission->reconciliation_status === HmrcVatSubmission::RECONCILIATION_MATCHED) {
+                $notice->success();
+            } else {
+                $notice->warning();
+            }
+
+            $notice->send();
+            $this->redirect(VatReturnResource::getUrl('view', ['record' => $return->id]));
+        } catch (DomainException|HmrcApiException|HmrcFraudPreventionException|HmrcOAuthException|InvalidArgumentException $exception) {
+            Notification::make()->title($exception->getMessage())->danger()->send();
+        }
+    }
+
+    /**
+     * @return array{type: string, timestamp: string, unique_reference: string}|null
+     */
+    private function verifiedMultiFactor(?User $actor, mixed $code): ?array
+    {
+        $secret = $actor?->getAppAuthenticationSecret();
+
+        if (! is_string($secret) || $secret === '') {
+            Notification::make()->title(__('finance.hmrc_connection.notifications.mfa_required'))->danger()->send();
+
+            return null;
+        }
+
+        if (! is_string($code) || ! AppAuthentication::make()->verifyCode($code, $secret, true)) {
+            Notification::make()->title(__('finance.hmrc_connection.notifications.mfa_invalid'))->danger()->send();
+
+            return null;
+        }
+
+        return [
+            'type' => 'TOTP',
+            'timestamp' => now()->utc()->format('Y-m-d\TH:i:s\Z'),
+            'unique_reference' => hash_hmac('sha256', 'filament-totp:'.$secret, (string) config('app.key')),
+        ];
     }
 
     private function runAction(callable $action, string $successTitle): void

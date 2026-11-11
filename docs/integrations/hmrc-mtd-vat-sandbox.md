@@ -123,7 +123,19 @@ The locked VAT Return detail page exposes **Submit to HMRC** only to an active t
 
 The POST payload is built only from the locked snapshot, uses the obligation's hidden canonical `periodKey` and always sends `finalised: true`. Before the network request, the system persists a tenant-owned attempt with snapshot/payload hashes, declaration version, actor and hashed MFA reference. A successful HTTP 201 receipt is schema-validated; its form bundle and charge reference are encrypted at rest.
 
-There is no automatic POST retry. A timeout, HMRC 5xx, non-201 success response or malformed receipt marks the attempt as `outcome_unknown` and blocks another submission until reconciliation is implemented in `UKFIN-609`. The local migration is `2026_11_11_000029_create_hmrc_vat_submissions_table.php`.
+There is no automatic POST retry. A timeout, HMRC 5xx, non-201 success response or malformed receipt marks the attempt as `outcome_unknown`, blocks another submission and permits only the GET-based reconciliation described below. The local migration is `2026_11_11_000029_create_hmrc_vat_submissions_table.php`.
+
+## Implemented unknown-outcome reconciliation
+
+For an `outcome_unknown` attempt, the VAT Return page exposes **Check HMRC status** after a fresh authenticator code. Reconciliation performs only safe GET requests and never repeats the submission POST:
+
+1. retrieve the obligation for the exact locked return period;
+2. if it remains open, retain `outcome_unknown` and record `pending_open`;
+3. if it is fulfilled, retrieve the submitted return using the hidden canonical period key;
+4. compare all nine HMRC fields with the immutable snapshot, normalising Boxes 1–5 to pennies and Boxes 6–9 to whole pounds;
+5. record either `matched`/submitted or an explicit `outcome_conflict` requiring manual investigation.
+
+Every check records its actor, time, count, HMRC received date where available, sanitized error metadata and a redacted correlation ID. Snapshot and pre-POST payload hashes are revalidated before any HMRC call. Invalid responses and GET failures remain safe to check again; conflicts and confirmed matches cannot be reconciled repeatedly. Migration `2026_11_11_000030_add_reconciliation_to_hmrc_vat_submissions_table.php` adds the audit state.
 
 ## Official references
 

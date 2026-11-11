@@ -11,7 +11,7 @@
 
 ### In Progress
 
-- [ ] `UKFIN-609` [M] — idempotency, timeout recovery i submission status reconciliation.
+- [ ] `UKFIN-610` [M] — HMRC audit log i receipt download.
 
 ### To Do
 
@@ -19,6 +19,7 @@
 
 ### Done
 
+- [x] `UKFIN-609` [M] — bezpieczne GET-only reconciliation `outcome_unknown`: pending open, nine-box match albo trwały conflict, z audytem każdej kontroli i bez ponownego POST.
 - [x] `UKFIN-608` [M] — kontrolowany submit z locked snapshotu, dokładną deklaracją HMRC, świeżym TOTP, FPH, trwałą próbą przed POST, walidowanym szyfrowanym receipt oraz `outcome_unknown` bez automatycznego retry.
 - [x] `UKFIN-607` [M] — bezpieczny read-only view VAT Return, liabilities i payments z walidacją odpowiedzi, tenant isolation, TOTP i FPH.
 - [x] `UKFIN-601` [M] — aktywne API, credentials poza repo, publiczny callback i udany OAuth sandbox testowej organizacji.
