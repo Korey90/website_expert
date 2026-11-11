@@ -30,7 +30,6 @@
     AddOutputFilterByType BROTLI_COMPRESS application/javascript application/json
     AddOutputFilterByType BROTLI_COMPRESS image/svg+xml application/xml text/xml
     AddOutputFilterByType BROTLI_COMPRESS font/woff font/woff2 application/font-woff2
-    BrotliCompressionQuality 5
 </IfModule>
 
 # ── Kompresja Gzip (fallback gdy brak Brotli) ────────────────────────────────
