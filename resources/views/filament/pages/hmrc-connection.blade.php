@@ -66,7 +66,11 @@
                     <dl class="grid gap-4 sm:grid-cols-2">
                         <div>
                             <dt class="text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.fraud_validation.code') }}</dt>
-                            <dd class="font-medium">{{ $fraudValidationSummary['code'] ?? '—' }}</dd>
+                            <dd @class([
+                                'font-medium',
+                                'text-success-700 dark:text-success-300' => $fraudValidationSummary['valid'] ?? false,
+                                'text-danger-700 dark:text-danger-300' => ! ($fraudValidationSummary['valid'] ?? false),
+                            ])>{{ $fraudValidationSummary['code'] ?? '—' }}</dd>
                         </div>
                         <div>
                             <dt class="text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.fraud_validation.spec_version') }}</dt>
@@ -89,6 +93,40 @@
                             <dd class="font-mono font-medium">{{ $fraudValidationSummary['correlation_id'] ?? '—' }}</dd>
                         </div>
                     </dl>
+
+                    @if (! empty($fraudValidationSummary['error_items']))
+                        <div class="rounded-lg border border-danger-200 bg-danger-50 p-4 text-danger-900 dark:border-danger-800 dark:bg-danger-950/40 dark:text-danger-100">
+                            <p class="font-semibold">{{ __('finance.hmrc_connection.fraud_validation.error_details') }}</p>
+                            <ul class="mt-2 list-disc space-y-2 pl-5">
+                                @foreach ($fraudValidationSummary['error_items'] as $issue)
+                                    <li>
+                                        <span class="font-mono">{{ implode(', ', $issue['headers']) ?: '—' }}</span>
+                                        <span>· {{ $issue['code'] ?? 'UNKNOWN' }}</span>
+                                        @if ($issue['message'])
+                                            <span>· {{ $issue['message'] }}</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if (! empty($fraudValidationSummary['warning_items']))
+                        <div class="rounded-lg border border-warning-200 bg-warning-50 p-4 text-warning-900 dark:border-warning-800 dark:bg-warning-950/40 dark:text-warning-100">
+                            <p class="font-semibold">{{ __('finance.hmrc_connection.fraud_validation.warning_details') }}</p>
+                            <ul class="mt-2 list-disc space-y-2 pl-5">
+                                @foreach ($fraudValidationSummary['warning_items'] as $issue)
+                                    <li>
+                                        <span class="font-mono">{{ implode(', ', $issue['headers']) ?: '—' }}</span>
+                                        <span>· {{ $issue['code'] ?? 'UNKNOWN' }}</span>
+                                        @if ($issue['message'])
+                                            <span>· {{ $issue['message'] }}</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                 @endif
             </div>
         </x-filament::section>

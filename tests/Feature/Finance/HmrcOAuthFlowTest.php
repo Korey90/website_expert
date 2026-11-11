@@ -88,7 +88,7 @@ class HmrcOAuthFlowTest extends TestCase
         $this->assertGreaterThanOrEqual(43, strlen(Crypt::decryptString($pending['code_verifier'])));
     }
 
-    public function test_callback_exchanges_code_and_encrypts_tokens_and_vrn_at_rest(): void
+    public function test_callback_exchanges_code_and_encrypts_tokens_at_rest_without_copying_the_real_vrn_to_sandbox(): void
     {
         Http::fake([
             'https://test-api.service.hmrc.gov.uk/oauth/token' => Http::response([
@@ -126,12 +126,12 @@ class HmrcOAuthFlowTest extends TestCase
 
         $this->assertSame('plain-access-token', $connection->access_token);
         $this->assertSame('plain-refresh-token', $connection->refresh_token);
-        $this->assertSame('123456789', $connection->vrn);
+        $this->assertNull($connection->vrn);
         $this->assertSame(['read:vat', 'write:vat'], $connection->scopes);
         $this->assertSame(HmrcConnection::STATUS_CONNECTED, $connection->status);
         $this->assertNotSame('plain-access-token', $raw->access_token);
         $this->assertNotSame('plain-refresh-token', $raw->refresh_token);
-        $this->assertNotSame('123456789', $raw->vrn);
+        $this->assertNull($raw->vrn);
         $this->assertArrayNotHasKey('access_token', $connection->toArray());
         $this->assertArrayNotHasKey('refresh_token', $connection->toArray());
         $this->assertArrayNotHasKey('vrn', $connection->toArray());
@@ -141,6 +141,38 @@ class HmrcOAuthFlowTest extends TestCase
             ->expectsOutputToContain('hmrc_connections')
             ->expectsOutputToContain('Finance tenant audit passed.')
             ->assertExitCode(0);
+    }
+
+    public function test_reauthorising_the_sandbox_preserves_the_explicit_test_vrn(): void
+    {
+        $connection = $this->connectedConnection('old-access-token', 'old-refresh-token');
+        $connection->forceFill([
+            'vrn' => '987654321',
+            'vrn_updated_by' => $this->owner->id,
+            'vrn_updated_at' => now()->subHour(),
+        ])->save();
+
+        Http::fake([
+            'https://test-api.service.hmrc.gov.uk/oauth/token' => Http::response([
+                'access_token' => 'new-access-token',
+                'refresh_token' => 'new-refresh-token',
+                'token_type' => 'bearer',
+                'expires_in' => 14400,
+                'scope' => 'read:vat write:vat',
+            ]),
+        ]);
+
+        $state = $this->beginConnection();
+
+        $this->get(route('admin.hmrc.oauth.callback', [
+            'state' => $state,
+            'code' => 'new-single-use-code',
+        ]))->assertSessionHas('success');
+
+        $connection->refresh();
+        $this->assertSame('987654321', $connection->vrn);
+        $this->assertSame($this->owner->id, $connection->vrn_updated_by);
+        $this->assertSame('new-access-token', $connection->access_token);
     }
 
     public function test_callback_rejects_tampered_state_before_sending_tokens(): void
@@ -319,6 +351,7 @@ class HmrcOAuthFlowTest extends TestCase
             ->assertOk()
             ->assertSee('HMRC Connection')
             ->assertSee('Validate fraud headers')
+            ->assertSee('Set sandbox VRN')
             ->assertSee('Sync VAT obligations')
             ->assertSee('2026-07-01')
             ->assertSee('2026-11-07')

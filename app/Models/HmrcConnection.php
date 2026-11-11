@@ -23,6 +23,8 @@ class HmrcConnection extends Model
         'access_token',
         'refresh_token',
         'vrn',
+        'vrn_updated_by',
+        'vrn_updated_at',
         'expires_at',
         'status',
         'connected_at',
@@ -48,6 +50,7 @@ class HmrcConnection extends Model
             'access_token' => 'encrypted',
             'refresh_token' => 'encrypted',
             'vrn' => 'encrypted',
+            'vrn_updated_at' => 'datetime',
             'expires_at' => 'datetime',
             'connected_at' => 'datetime',
             'refreshed_at' => 'datetime',
@@ -64,6 +67,11 @@ class HmrcConnection extends Model
     public function connectedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'connected_by');
+    }
+
+    public function vrnUpdatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'vrn_updated_by');
     }
 
     public function refreshedBy(): BelongsTo

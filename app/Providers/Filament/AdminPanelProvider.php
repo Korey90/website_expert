@@ -37,9 +37,9 @@ class AdminPanelProvider extends PanelProvider
             ->multiFactorAuthentication([
                 AppAuthentication::make()
                     ->recoverable()
-                    ->brandName('WebsiteExpert'),
+                    ->brandName('Website Expert NI'),
             ])
-            ->brandName('WebsiteExpert')
+            ->brandName('Website Expert NI')
             ->favicon(asset('favicon.ico'))
             ->colors([
                 'primary' => Color::hex('#ff2b17'),

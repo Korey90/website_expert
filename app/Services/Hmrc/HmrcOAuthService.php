@@ -78,27 +78,39 @@ class HmrcOAuthService
         ]);
 
         return DB::transaction(function () use ($business, $actor, $configuration, $tokens): HmrcConnection {
-            $connection = HmrcConnection::withoutGlobalScopes()->updateOrCreate(
-                [
+            $connection = HmrcConnection::withoutGlobalScopes()
+                ->where('business_id', $business->getKey())
+                ->where('environment', $configuration['environment'])
+                ->lockForUpdate()
+                ->first();
+
+            $attributes = [
+                'scopes' => $tokens['scopes'],
+                'access_token' => $tokens['access_token'],
+                'refresh_token' => $tokens['refresh_token'],
+                'vrn' => $configuration['environment'] === 'sandbox'
+                    ? $connection?->vrn
+                    : $this->businessVrn($business),
+                'expires_at' => now()->addSeconds($tokens['expires_in']),
+                'status' => HmrcConnection::STATUS_CONNECTED,
+                'connected_at' => now(),
+                'connected_by' => $actor->getAuthIdentifier(),
+                'refreshed_at' => null,
+                'refreshed_by' => null,
+                'disconnected_at' => null,
+                'disconnected_by' => null,
+                'reconnect_reason' => null,
+            ];
+
+            if ($connection) {
+                $connection->forceFill($attributes)->save();
+            } else {
+                $connection = HmrcConnection::withoutGlobalScopes()->create([
                     'business_id' => $business->getKey(),
                     'environment' => $configuration['environment'],
-                ],
-                [
-                    'scopes' => $tokens['scopes'],
-                    'access_token' => $tokens['access_token'],
-                    'refresh_token' => $tokens['refresh_token'],
-                    'vrn' => $this->businessVrn($business),
-                    'expires_at' => now()->addSeconds($tokens['expires_in']),
-                    'status' => HmrcConnection::STATUS_CONNECTED,
-                    'connected_at' => now(),
-                    'connected_by' => $actor->getAuthIdentifier(),
-                    'refreshed_at' => null,
-                    'refreshed_by' => null,
-                    'disconnected_at' => null,
-                    'disconnected_by' => null,
-                    'reconnect_reason' => null,
-                ],
-            );
+                    ...$attributes,
+                ]);
+            }
 
             return $connection->fresh();
         });

@@ -1,6 +1,6 @@
 # Current Task
 
-**Status:** W toku — konfiguracja zewnętrzna UKFIN-601 + przygotowanie UKFIN-606
+**Status:** W toku — sandbox VRN gotowy, oczekiwanie na wpisanie testowego numeru; następnie UKFIN-607
 **Zadanie:** HMRC MTD VAT sandbox end-to-end
 **Data rozpoczęcia:** 2026-11-10
 **Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
@@ -12,6 +12,14 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 
 ## Bieżący zakres
 
+- OAuth sandbox został wykonany end-to-end przez publiczny callback zrok; połączenie i tokeny są zapisane.
+- Test Fraud Prevention Headers API potwierdził 14/16 nagłówków; blokujący `Gov-Client-Public-Port` nie jest udostępniany przez zrok, a `Gov-Vendor-License-IDs` pozostaje ostrzeżeniem wymagającym prawdziwej licencji albo uzgodnienia z HMRC.
+- Bieżące zadanie implementacyjne: bezpieczna konfiguracja testowego VRN per tenant/environment, audyt zmiany i ochrona wartości przed wyzerowaniem przy ponownym OAuth.
+- Po zakończeniu użytkownik wpisze wyłącznie 9-cyfrowy VRN wygenerowanego testowego użytkownika organizacji; login i hasło HMRC nie trafiają do aplikacji ani chatu.
+- ✅ Dodano tenantową akcję ustawienia sandboxowego VRN, szyfrowanie istniejącym castem, audyt aktora/czasu, formularz owner/admin oraz ochronę wartości przed wyzerowaniem podczas reconnect OAuth.
+- ✅ Migracja `2026_11_11_000028` wykonana; tenant audit bez błędów; HMRC targeted 32/192, pełny Finance 310 passed + 1 skipped / 2233 assertions; EN/PL/PT po 1140 kluczy.
+- Następny etap implementacyjny: `UKFIN-607` — bezpieczny odczyt VAT return, liabilities i payments oraz prezentacja w panelu.
+
 - `UKFIN-601`: użytkownik posiada konto HMRC Developer Hub i pierwszą aplikację sandbox.
 - Do aplikacji trzeba dodać: VAT (MTD) API v1.0, Create Test User API v1.0 i Test Fraud Prevention Headers API v1.0.
 - Callback planowany przez system: `<APP_URL>/admin/hmrc/oauth/callback`.
@@ -19,7 +27,7 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 - `UKFIN-602`: ukończony adapter VAT API z klientami sandbox/production.
 - `UKFIN-603/604`: ukończony OAuth connect/callback/refresh/local disconnect oraz szyfrowane przechowywanie połączenia.
 - `UKFIN-605`: ukończony builder nagłówków Fraud Prevention i klient sandboxowego Test API.
-- Następny etap implementacyjny: `UKFIN-606` pobieranie VAT obligations i synchronizacja okresów.
+- `UKFIN-606` jest zaimplementowany; rzeczywiste pobranie obligations oczekuje na testowy VRN oraz zaakceptowaną ścieżkę brakujących FPH.
 
 ## Zrealizowane w UKFIN-602
 
@@ -62,8 +70,8 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 
 ## Gate
 
-- UKFIN-601 pozostaje otwarty do potwierdzenia subskrypcji trzech API i skonfigurowania lokalnych sekretów.
-- Nie wykonano rzeczywistego logowania HMRC: wymaga ono subskrypcji API, lokalnych credentials aplikacji i testowego użytkownika organizacji.
-- Nie wykonano rzeczywistej walidacji nagłówków: wymagane są credentials, publiczne dane infrastruktury, wersja produktu, prawdziwy source port oraz decyzja HMRC dotycząca braku licencji, jeśli instalacja nie ma identyfikatora licencyjnego.
+- UKFIN-601 jest zakończony: trzy API są aktywne, credentials skonfigurowane, a OAuth testowej organizacji przeszedł end-to-end.
+- Rzeczywisty validator FPH działa i akceptuje 14/16 nagłówków; `Gov-Client-Public-Port` wymaga infrastruktury zachowującej source port, a `Gov-Vendor-License-IDs` prawdziwego modelu licencji albo uzgodnienia z HMRC.
+- Rzeczywiste obligations oczekują na wpisanie wygenerowanego testowego VRN i rozwiązanie/akceptację dwóch braków FPH.
 - Żadne prawdziwe dane ani deklaracje nie są wysyłane na tym etapie.
 - `HMRC_ENVIRONMENT` pozostaje `sandbox` do czasu przejścia OAuth, fraud headers, pełnych scenariuszy sandbox, security review i jawnej decyzji właściciela.

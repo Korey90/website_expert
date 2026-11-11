@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Actions\Finance\UpdateHmrcSandboxVrnAction;
 use App\Models\Business;
 use App\Models\HmrcConnection;
 use App\Models\HmrcVatObligation;
@@ -12,8 +13,10 @@ use App\Services\Hmrc\Exceptions\HmrcOAuthException;
 use App\Services\Hmrc\Exceptions\HmrcVatObligationSyncException;
 use App\Services\Hmrc\HmrcFraudPreventionClient;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
+use App\Services\Hmrc\HmrcFraudPreventionValidationSummary;
 use App\Services\Hmrc\HmrcOAuthService;
 use App\Services\Hmrc\HmrcVatObligationSyncService;
+use DomainException;
 use Filament\Actions\Action;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Forms\Components\DatePicker;
@@ -25,7 +28,7 @@ use InvalidArgumentException;
 
 class HmrcConnectionPage extends BasePage
 {
-    /** @var array<string, int|string|null>|null */
+    /** @var array<string, mixed>|null */
     public ?array $fraudValidationSummary = null;
 
     protected string $view = 'filament.pages.hmrc-connection';
@@ -90,6 +93,27 @@ class HmrcConnectionPage extends BasePage
             ->send();
     }
 
+    /** @param array{vrn?: string} $data */
+    public function updateSandboxVrn(array $data): void
+    {
+        [$business, $actor] = $this->managementContext();
+
+        try {
+            app(UpdateHmrcSandboxVrnAction::class)->execute(
+                $business,
+                $actor,
+                (string) ($data['vrn'] ?? ''),
+            );
+
+            Notification::make()
+                ->title(__('finance.hmrc_connection.notifications.sandbox_vrn_updated'))
+                ->success()
+                ->send();
+        } catch (DomainException $exception) {
+            Notification::make()->title($exception->getMessage())->danger()->send();
+        }
+    }
+
     /** @param array{totp?: string} $data */
     public function validateFraudPreventionHeaders(array $data): void
     {
@@ -103,23 +127,31 @@ class HmrcConnectionPage extends BasePage
         try {
             $builder = app(HmrcFraudPreventionHeaders::class);
             $result = $builder->build(request(), $actor, $multiFactor);
-            $builder->assertComplete($result->headers);
             $response = app(HmrcFraudPreventionClient::class)->validate($result->headers);
 
-            $headers = is_array($response->data['headers'] ?? null) ? $response->data['headers'] : [];
-            $this->fraudValidationSummary = [
-                'code' => $this->safeValidationCode($response->data['code'] ?? 'CHECKED'),
-                'spec_version' => $this->safeValidationCode($response->data['specVersion'] ?? null),
-                'errors' => $this->countValidationItems($headers, 'errors'),
-                'warnings' => $this->countValidationItems($headers, 'warnings'),
-                'checked_at' => now()->toIso8601String(),
-                'correlation_id' => $response->correlationId,
-            ];
+            $this->fraudValidationSummary = app(HmrcFraudPreventionValidationSummary::class)
+                ->fromResponse($response);
+            $code = $this->fraudValidationSummary['code'];
+            $errors = $this->fraudValidationSummary['errors'];
+            $warnings = $this->fraudValidationSummary['warnings'];
+            $isValid = $this->fraudValidationSummary['valid'];
 
-            Notification::make()
-                ->title(__('finance.hmrc_connection.notifications.fraud_validated'))
-                ->success()
-                ->send();
+            if ($isValid) {
+                Notification::make()
+                    ->title(__('finance.hmrc_connection.notifications.fraud_validated'))
+                    ->success()
+                    ->send();
+            } else {
+                Notification::make()
+                    ->title(__('finance.hmrc_connection.notifications.fraud_invalid'))
+                    ->body(__('finance.hmrc_connection.notifications.fraud_invalid_details', [
+                        'code' => $code ?? 'UNKNOWN',
+                        'errors' => $errors,
+                        'warnings' => $warnings,
+                    ]))
+                    ->danger()
+                    ->send();
+            }
         } catch (HmrcFraudPreventionException $exception) {
             Notification::make()->title($exception->getMessage())->danger()->send();
         }
@@ -201,6 +233,22 @@ class HmrcConnectionPage extends BasePage
                 ->modalDescription(__('finance.hmrc_connection.help.disconnect'))
                 ->action('disconnectConnection')
                 ->visible($canManage && $connection && $connection->status !== HmrcConnection::STATUS_DISCONNECTED),
+            Action::make('set_sandbox_vrn')
+                ->label(__('finance.hmrc_connection.actions.set_sandbox_vrn'))
+                ->icon('heroicon-o-identification')
+                ->color('warning')
+                ->modalHeading(__('finance.hmrc_connection.sandbox_vrn.modal_title'))
+                ->modalDescription(__('finance.hmrc_connection.sandbox_vrn.modal_description'))
+                ->form([
+                    TextInput::make('vrn')
+                        ->label(__('finance.hmrc_connection.sandbox_vrn.field'))
+                        ->helperText(__('finance.hmrc_connection.sandbox_vrn.help'))
+                        ->placeholder('123456789')
+                        ->required()
+                        ->regex('/^(?:GB)?[0-9\s-]{9,20}$/'),
+                ])
+                ->action(fn (array $data) => $this->updateSandboxVrn($data))
+                ->visible($canManage && config('hmrc.environment') === 'sandbox' && $connection !== null),
             Action::make('validate_fraud_headers')
                 ->label(__('finance.hmrc_connection.actions.validate_fraud_headers'))
                 ->icon('heroicon-o-shield-check')
@@ -284,26 +332,6 @@ class HmrcConnectionPage extends BasePage
     private function maskedVrn(?string $vrn): ?string
     {
         return filled($vrn) ? '•••••'.substr($vrn, -4) : null;
-    }
-
-    /** @param array<int, mixed> $headers */
-    private function countValidationItems(array $headers, string $key): int
-    {
-        return array_sum(array_map(
-            fn (mixed $header): int => is_array($header) && is_array($header[$key] ?? null)
-                ? count($header[$key])
-                : 0,
-            $headers,
-        ));
-    }
-
-    private function safeValidationCode(mixed $value): ?string
-    {
-        if (! is_string($value) || preg_match('/^[A-Za-z0-9._-]{1,80}$/', $value) !== 1) {
-            return null;
-        }
-
-        return $value;
     }
 
     /**

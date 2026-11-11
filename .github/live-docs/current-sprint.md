@@ -11,8 +11,7 @@
 
 ### In Progress
 
-- [ ] `UKFIN-601` [M] — dodać trzy API do istniejącej aplikacji HMRC sandbox i skonfigurować sekrety poza repozytorium.
-- [ ] `UKFIN-606` [M] — retrieve VAT obligations i synchronizacja periods.
+- [ ] `UKFIN-607` [M] — view VAT return, liabilities i payments.
 
 ### To Do
 
@@ -20,6 +19,8 @@
 
 ### Done
 
+- [x] `UKFIN-601` [M] — aktywne API, credentials poza repo, publiczny callback i udany OAuth sandbox testowej organizacji.
+- [x] `UKFIN-606` [M] — retrieve VAT obligations i tenantowa synchronizacja periods; rzeczywisty call oczekuje na testowy VRN oraz gate FPH.
 - [x] `UKFIN-602` [M] — HmrcClientInterface + sandbox/production VAT API clients.
 - [x] `UKFIN-603` [M] — OAuth connect/callback/refresh/local disconnect z PKCE S256, jednorazowym `state` i blokadą refresh race.
 - [x] `UKFIN-604` [M] — szyfrowane tokeny/VRN, sanitizowane błędy i maskowany panel połączenia HMRC.

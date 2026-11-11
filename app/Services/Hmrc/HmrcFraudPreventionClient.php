@@ -18,7 +18,10 @@ class HmrcFraudPreventionClient
     public function validate(array $headers): HmrcApiResponse
     {
         $this->assertSandbox();
-        app(HmrcFraudPreventionHeaders::class)->assertComplete($headers);
+        // The sandbox validator must also receive incomplete sets so it can
+        // report the exact missing or invalid headers. Live VAT requests remain
+        // fail-closed in AbstractHmrcVatClient.
+        app(HmrcFraudPreventionHeaders::class)->assertSafe($headers);
 
         return $this->get('/test/fraud-prevention-headers/validate', $headers);
     }

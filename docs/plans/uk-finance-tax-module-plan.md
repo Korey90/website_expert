@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** IMPLEMENTACJA W TOKU — Fazy 0–3 zaimplementowane, Faza 4 w toku (`UKFIN-401`–`UKFIN-404` ukończone); gate Fazy 1 oczekuje na akceptację przykładowych dokumentów przez księgowego UK
+**Status:** IMPLEMENTACJA W TOKU — Fazy 0–5 zaimplementowane, Faza 6 w toku (`UKFIN-601`–`UKFIN-606` ukończone; `UKFIN-607` następne); formalny gate księgowego pozostaje przed produkcyjnym submission
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -450,7 +450,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 
 **Cel:** użytkownik pobiera obligations i świadomie składa VAT Return do HMRC.
 
-- [ ] `UKFIN-601` [M] Rejestracja aplikacji HMRC Developer Hub i konfiguracja sandbox. *(konto i pierwsza aplikacja sandbox istnieją; zweryfikowana checklista wymaga VAT (MTD) API v1.0, Create Test User API v1.0 i Test Fraud Prevention Headers API v1.0 oraz callbacku `<APP_URL>/admin/hmrc/oauth/callback`; oczekuje na subskrypcje i sekrety środowiskowe)*
+- [x] `UKFIN-601` [M] Rejestracja aplikacji HMRC Developer Hub i konfiguracja sandbox. *(ukończone 2026-11-11: aktywne VAT (MTD), Create Test User i Test Fraud Prevention Headers API; credentials poza repozytorium, publiczny callback zrok, OAuth testowej organizacji zakończony sukcesem; validator FPH potwierdza 14/16 nagłówków, a source port i brak rzeczywistej licencji pozostają jawnym gate'em infrastrukturalnym/HMRC przed produkcją)*
 - [x] `UKFIN-602` [M] HmrcClientInterface + sandbox/production clients. *(ukończone 2026-11-10: obligations, submit/view return, liabilities i payments; wersjonowany Accept, Bearer, kontrolowane Gov headers/scenarios, sanitizowane błędy, brak ślepego retry POST; dedykowane 7/28, Finance 276 passed + 1 skipped / 2036 assertions, full regression 787 passed + 11 skipped / 3495 assertions przy 9 znanych baseline failures)*
 - [x] `UKFIN-603` [M] OAuth connect/callback/refresh/revoke. *(ukończone 2026-11-10: Authorization Code Grant z PKCE S256, jednorazowym i tenantowym `state`, callbackiem, serializowanym single-use refresh oraz lokalnym disconnect; zdalne cofnięcie zgody pozostaje w HMRC „Manage authorised applications”)*
 - [x] `UKFIN-604` [M] Encrypted token storage i redacted logs. *(ukończone 2026-11-10: szyfrowane access/refresh tokeny i VRN, hidden model fields, sanitizowane błędy, maskowany panel owner/admin, migracja MySQL `000026`, OAuth 10/88, Finance 286 passed + 1 skipped / 2124 assertions, full regression 797 passed + 11 skipped / 3583 assertions przy 9 znanych baseline failures)*

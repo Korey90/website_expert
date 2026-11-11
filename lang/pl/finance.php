@@ -470,8 +470,10 @@ return [
         'sections' => ['status' => 'Status połączenia', 'security' => 'Bezpieczeństwo i upoważnienie', 'fraud_prevention' => 'Nagłówki zapobiegania oszustwom'],
         'fields' => ['environment' => 'Środowisko', 'status' => 'Status', 'vrn' => 'Numer rejestracyjny VAT', 'scopes' => 'Zakresy', 'connected_at' => 'Połączono', 'expires_at' => 'Wygaśnięcie access tokenu', 'refreshed_at' => 'Ostatnie odświeżenie'],
         'statuses' => ['connected' => 'Połączono', 'reconnect_required' => 'Wymagane ponowne połączenie', 'disconnected' => 'Rozłączono'],
-        'actions' => ['connect' => 'Połącz z HMRC', 'refresh' => 'Odśwież token', 'disconnect' => 'Rozłącz', 'validate_fraud_headers' => 'Waliduj nagłówki fraud', 'sync_vat_obligations' => 'Synchronizuj obowiązki VAT'],
-        'notifications' => ['refreshed' => 'Access token HMRC został odświeżony.', 'disconnected' => 'Tokeny HMRC zostały usunięte lokalnie.', 'mfa_required' => 'Skonfiguruj MFA w aplikacji uwierzytelniającej przed walidacją nagłówków HMRC.', 'mfa_invalid' => 'Kod uwierzytelniający jest nieprawidłowy.', 'fraud_validated' => 'Nagłówki zapobiegania oszustwom zostały sprawdzone przez HMRC.', 'obligations_synced' => 'Obowiązki VAT HMRC zostały zsynchronizowane.'],
+        'actions' => ['connect' => 'Połącz z HMRC', 'refresh' => 'Odśwież token', 'disconnect' => 'Rozłącz', 'set_sandbox_vrn' => 'Ustaw testowy VRN', 'validate_fraud_headers' => 'Waliduj nagłówki fraud', 'sync_vat_obligations' => 'Synchronizuj obowiązki VAT'],
+        'notifications' => ['refreshed' => 'Access token HMRC został odświeżony.', 'disconnected' => 'Tokeny HMRC zostały usunięte lokalnie.', 'sandbox_vrn_updated' => 'Testowy VRN został bezpiecznie zapisany.', 'mfa_required' => 'Skonfiguruj MFA w aplikacji uwierzytelniającej przed walidacją nagłówków HMRC.', 'mfa_invalid' => 'Kod uwierzytelniający jest nieprawidłowy.', 'fraud_validated' => 'HMRC zaakceptował nagłówki zapobiegania oszustwom.', 'fraud_invalid' => 'HMRC nie zaakceptował nagłówków zapobiegania oszustwom.', 'fraud_invalid_details' => 'Wynik: :code · błędy: :errors · ostrzeżenia: :warnings.', 'obligations_synced' => 'Obowiązki VAT HMRC zostały zsynchronizowane.'],
+        'sandbox_vrn' => ['modal_title' => 'Ustaw testowy VRN HMRC', 'modal_description' => 'Użyj wyłącznie numeru VAT wygenerowanego razem z testową organizacją HMRC. Nie zmieni to prawdziwego profilu VAT firmy.', 'field' => 'Testowy numer rejestracyjny VAT', 'help' => 'Wpisz 9 cyfr. Prefiks GB i spacje zostaną usunięte. Pełna wartość jest szyfrowana i nie będzie ponownie wyświetlana.'],
+        'errors' => ['sandbox_vrn_only' => 'Testowy VRN można zmienić wyłącznie w sandboxie HMRC.', 'connection_required' => 'Połącz sandbox HMRC przed ustawieniem testowego VRN.', 'invalid_vrn' => 'Numer rejestracyjny VAT musi zawierać dokładnie 9 cyfr.', 'cannot_manage' => 'Tylko aktywny właściciel lub administrator firmy może zarządzać połączeniem HMRC.'],
         'fraud_validation' => [
             'description' => 'Kontrola sandbox zestawu WEB_APP_VIA_SERVER. Wartości nagłówków i tokeny nie są tutaj wyświetlane ani utrwalane.',
             'browser_notice' => 'Lokalnie zbierane są wyłącznie dane wymagane przez HMRC: UUID urządzenia, JavaScript user agent, ekran, okno i strefa czasowa.',
@@ -480,6 +482,7 @@ return [
             'modal_description' => 'Podaj bieżący kod z aplikacji uwierzytelniającej. Rejestruje to rzeczywiste zdarzenie MFA wymagane przez specyfikację HMRC.',
             'totp' => 'Kod aplikacji uwierzytelniającej',
             'code' => 'Wynik HMRC', 'spec_version' => 'Wersja specyfikacji', 'errors' => 'Błędy', 'warnings' => 'Ostrzeżenia',
+            'error_details' => 'Błędy zgłoszone przez HMRC', 'warning_details' => 'Ostrzeżenia zgłoszone przez HMRC',
             'checked_at' => 'Sprawdzono', 'correlation_id' => 'Correlation ID',
         ],
         'obligations' => [

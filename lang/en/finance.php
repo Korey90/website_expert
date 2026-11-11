@@ -470,8 +470,10 @@ return [
         'sections' => ['status' => 'Connection status', 'security' => 'Security and authority', 'fraud_prevention' => 'Fraud prevention headers'],
         'fields' => ['environment' => 'Environment', 'status' => 'Status', 'vrn' => 'VAT registration number', 'scopes' => 'Scopes', 'connected_at' => 'Connected at', 'expires_at' => 'Access token expires at', 'refreshed_at' => 'Last refreshed at'],
         'statuses' => ['connected' => 'Connected', 'reconnect_required' => 'Reconnect required', 'disconnected' => 'Disconnected'],
-        'actions' => ['connect' => 'Connect HMRC', 'refresh' => 'Refresh token', 'disconnect' => 'Disconnect', 'validate_fraud_headers' => 'Validate fraud headers', 'sync_vat_obligations' => 'Sync VAT obligations'],
-        'notifications' => ['refreshed' => 'HMRC access token refreshed.', 'disconnected' => 'HMRC tokens removed locally.', 'mfa_required' => 'Set up authenticator-app MFA before validating HMRC headers.', 'mfa_invalid' => 'The authentication code is invalid.', 'fraud_validated' => 'HMRC fraud prevention headers were validated.', 'obligations_synced' => 'HMRC VAT obligations synchronised.'],
+        'actions' => ['connect' => 'Connect HMRC', 'refresh' => 'Refresh token', 'disconnect' => 'Disconnect', 'set_sandbox_vrn' => 'Set sandbox VRN', 'validate_fraud_headers' => 'Validate fraud headers', 'sync_vat_obligations' => 'Sync VAT obligations'],
+        'notifications' => ['refreshed' => 'HMRC access token refreshed.', 'disconnected' => 'HMRC tokens removed locally.', 'sandbox_vrn_updated' => 'The sandbox VRN was saved securely.', 'mfa_required' => 'Set up authenticator-app MFA before validating HMRC headers.', 'mfa_invalid' => 'The authentication code is invalid.', 'fraud_validated' => 'HMRC accepted the fraud prevention headers.', 'fraud_invalid' => 'HMRC did not accept the fraud prevention headers.', 'fraud_invalid_details' => 'Result: :code · errors: :errors · warnings: :warnings.', 'obligations_synced' => 'HMRC VAT obligations synchronised.'],
+        'sandbox_vrn' => ['modal_title' => 'Set the HMRC sandbox VRN', 'modal_description' => 'Use only the VAT Registration Number generated with the HMRC test organisation. This does not change the real company VAT profile.', 'field' => 'Test VAT Registration Number', 'help' => 'Enter 9 digits. GB and spaces are accepted and removed. The full value is encrypted and will not be displayed again.'],
+        'errors' => ['sandbox_vrn_only' => 'A test VRN can only be changed in the HMRC sandbox.', 'connection_required' => 'Connect the HMRC sandbox before setting its test VRN.', 'invalid_vrn' => 'The VAT Registration Number must contain exactly 9 digits.', 'cannot_manage' => 'Only an active business owner or administrator can manage the HMRC connection.'],
         'fraud_validation' => [
             'description' => 'Sandbox preflight for the WEB_APP_VIA_SERVER header set. Header values and tokens are never displayed or persisted here.',
             'browser_notice' => 'Browser telemetry is collected locally for HMRC only: device UUID, JavaScript user agent, screen, window and timezone.',
@@ -480,6 +482,7 @@ return [
             'modal_description' => 'Enter the current code from your authenticator app. This records the real MFA event required by the HMRC header specification.',
             'totp' => 'Authenticator code',
             'code' => 'HMRC result', 'spec_version' => 'Specification version', 'errors' => 'Errors', 'warnings' => 'Warnings',
+            'error_details' => 'Errors reported by HMRC', 'warning_details' => 'Warnings reported by HMRC',
             'checked_at' => 'Checked at', 'correlation_id' => 'Correlation ID',
         ],
         'obligations' => [

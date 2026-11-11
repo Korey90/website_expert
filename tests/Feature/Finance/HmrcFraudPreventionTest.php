@@ -3,9 +3,11 @@
 namespace Tests\Feature\Finance;
 
 use App\Models\User;
+use App\Services\Hmrc\Data\HmrcApiResponse;
 use App\Services\Hmrc\Exceptions\HmrcFraudPreventionException;
 use App\Services\Hmrc\HmrcFraudPreventionClient;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
+use App\Services\Hmrc\HmrcFraudPreventionValidationSummary;
 use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -28,6 +30,8 @@ class HmrcFraudPreventionTest extends TestCase
         config()->set('hmrc.sandbox.client_secret', 'sandbox-client-secret');
         config()->set('hmrc.fraud_prevention.browser_context_cookie', 'hmrc_fph_context');
         config()->set('hmrc.fraud_prevention.browser_context_ttl', 1800);
+        config()->set('hmrc.fraud_prevention.client_public_ip_header', null);
+        config()->set('hmrc.fraud_prevention.client_public_port_header', null);
         config()->set('hmrc.fraud_prevention.product_name', 'Website Expert NI');
         config()->set('hmrc.fraud_prevention.product_id', 'website-expert-ni');
         config()->set('hmrc.fraud_prevention.product_version', '2026.11.10');
@@ -40,6 +44,7 @@ class HmrcFraudPreventionTest extends TestCase
     protected function tearDown(): void
     {
         Carbon::setTestNow();
+        Request::setTrustedProxies([], 0);
 
         parent::tearDown();
     }
@@ -87,6 +92,8 @@ class HmrcFraudPreventionTest extends TestCase
         config()->set('hmrc.fraud_prevention.client_public_ip_header', 'X-HMRC-Client-IP');
         config()->set('hmrc.fraud_prevention.client_public_port_header', 'X-HMRC-Client-Port');
         $request = $this->requestWithBrowserContext();
+        $request->server->set('REMOTE_ADDR', '127.0.0.1');
+        Request::setTrustedProxies(['127.0.0.1'], Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PORT);
         $request->headers->set('X-HMRC-Client-IP', '9.9.9.9');
         $request->headers->set('X-HMRC-Client-Port', '61234');
 
@@ -96,6 +103,25 @@ class HmrcFraudPreventionTest extends TestCase
         $this->assertSame('9.9.9.9', $result->headers['Gov-Client-Public-IP']);
         $this->assertSame('61234', $result->headers['Gov-Client-Public-Port']);
         $this->assertSame('by=1.1.1.1&for=9.9.9.9', $result->headers['Gov-Vendor-Forwarded']);
+    }
+
+    public function test_forwarded_for_uses_nearest_public_hop_and_does_not_reuse_the_proxy_port(): void
+    {
+        config()->set('hmrc.fraud_prevention.client_public_ip_header', 'X-Forwarded-For');
+        config()->set('hmrc.fraud_prevention.client_public_port_header', null);
+        $request = $this->requestWithBrowserContext();
+        $request->server->set('REMOTE_ADDR', '127.0.0.1');
+        $request->server->set('REMOTE_PORT', '58723');
+        Request::setTrustedProxies(['127.0.0.1'], Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PORT);
+        $request->headers->set('X-Forwarded-For', '8.8.8.8, 46.64.243.96, 10.32.1.250');
+        $request->headers->set('X-Forwarded-Port', '443');
+
+        $result = app(HmrcFraudPreventionHeaders::class)->build($request, $this->user(), $this->multiFactor());
+
+        $this->assertSame('46.64.243.96', $result->headers['Gov-Client-Public-IP']);
+        $this->assertArrayHasKey('Gov-Client-Public-IP-Timestamp', $result->headers);
+        $this->assertArrayNotHasKey('Gov-Client-Public-Port', $result->headers);
+        $this->assertContains('Gov-Client-Public-Port', $result->missingHeaders);
     }
 
     public function test_explicit_hmrc_exception_can_allow_a_genuinely_missing_header(): void
@@ -173,6 +199,53 @@ class HmrcFraudPreventionTest extends TestCase
             $request->url(),
             'https://test-api.service.hmrc.gov.uk/test/fraud-prevention-headers/vat-mtd/validation-feedback?',
         ) && str_contains($request->url(), 'connectionMethod=WEB_APP_VIA_SERVER'));
+    }
+
+    public function test_sandbox_validator_accepts_an_incomplete_set_for_diagnostics(): void
+    {
+        Http::fakeSequence()
+            ->push(['access_token' => 'app-token', 'token_type' => 'bearer', 'expires_in' => 14400])
+            ->push([
+                'specVersion' => '3.3',
+                'code' => 'INVALID_HEADERS',
+                'headers' => [],
+            ], 200);
+
+        $response = app(HmrcFraudPreventionClient::class)->validate([
+            'Gov-Client-Connection-Method' => 'WEB_APP_VIA_SERVER',
+        ]);
+
+        $this->assertSame('INVALID_HEADERS', $response->data['code']);
+        Http::assertSent(fn (HttpRequest $request): bool => $request->url() === 'https://test-api.service.hmrc.gov.uk/test/fraud-prevention-headers/validate'
+            && $request->hasHeader('Gov-Client-Connection-Method', 'WEB_APP_VIA_SERVER'));
+    }
+
+    public function test_validation_summary_reads_top_level_hmrc_errors_and_warnings(): void
+    {
+        $summary = app(HmrcFraudPreventionValidationSummary::class)->fromResponse(new HmrcApiResponse(
+            200,
+            [
+                'specVersion' => '3.3',
+                'code' => 'INVALID_HEADERS',
+                'errors' => [[
+                    'code' => 'MISSING_HEADER',
+                    'message' => 'Header required',
+                    'headers' => ['gov-client-public-port'],
+                ]],
+                'warnings' => [[
+                    'code' => 'MISSING_HEADER',
+                    'message' => 'Header required',
+                    'headers' => ['gov-vendor-license-ids'],
+                ]],
+            ],
+            'correlation-id',
+        ));
+
+        $this->assertFalse($summary['valid']);
+        $this->assertSame(1, $summary['errors']);
+        $this->assertSame(1, $summary['warnings']);
+        $this->assertSame('gov-client-public-port', $summary['error_items'][0]['headers'][0]);
+        $this->assertSame('MISSING_HEADER', $summary['warning_items'][0]['code']);
     }
 
     public function test_validation_is_blocked_outside_sandbox_before_http(): void

@@ -54,16 +54,22 @@ class HmrcFraudPreventionHeaders
     /** @param array<string, string> $headers */
     public function assertComplete(array $headers): void
     {
-        foreach ($headers as $name => $value) {
-            if (! is_string($name) || ! is_string($value) || str_contains($name.$value, "\r") || str_contains($name.$value, "\n")) {
-                throw HmrcFraudPreventionException::invalidHeader();
-            }
-        }
+        $this->assertSafe($headers);
 
         $missing = $this->missingHeaders($headers);
 
         if ($missing !== []) {
             throw HmrcFraudPreventionException::missing($missing);
+        }
+    }
+
+    /** @param array<string, string> $headers */
+    public function assertSafe(array $headers): void
+    {
+        foreach ($headers as $name => $value) {
+            if (! is_string($name) || ! is_string($value) || str_contains($name.$value, "\r") || str_contains($name.$value, "\n")) {
+                throw HmrcFraudPreventionException::invalidHeader();
+            }
         }
     }
 
@@ -126,21 +132,13 @@ class HmrcFraudPreventionHeaders
     /** @param array<string, string> $headers */
     private function addRequestHeaders(array &$headers, Request $request): void
     {
-        $clientIp = $this->trustedRequestValue(
-            $request,
-            config('hmrc.fraud_prevention.client_public_ip_header'),
-            $request->ip(),
-        );
-        if (is_string($clientIp) && $this->isPublicIp($clientIp)) {
+        $clientIp = $this->clientPublicIp($request);
+        if ($clientIp !== null) {
             $headers['Gov-Client-Public-IP'] = $clientIp;
             $headers['Gov-Client-Public-IP-Timestamp'] = now()->utc()->format('Y-m-d\TH:i:s.v\Z');
         }
 
-        $publicPort = $this->trustedRequestValue(
-            $request,
-            config('hmrc.fraud_prevention.client_public_port_header'),
-            $request->server('REMOTE_PORT'),
-        );
+        $publicPort = $this->clientPublicPort($request);
         $port = filter_var($publicPort, FILTER_VALIDATE_INT, [
             'options' => ['min_range' => 1, 'max_range' => 65535],
         ]);
@@ -361,11 +359,50 @@ class HmrcFraudPreventionHeaders
             return $fallback;
         }
 
+        if (! $request->isFromTrustedProxy()) {
+            return null;
+        }
+
         $headerName = trim($headerName);
         if (preg_match('/^[A-Za-z0-9-]{1,100}$/', $headerName) !== 1) {
             return null;
         }
 
         return $request->header($headerName);
+    }
+
+    private function clientPublicIp(Request $request): ?string
+    {
+        $configuredHeader = config('hmrc.fraud_prevention.client_public_ip_header');
+        $value = $this->trustedRequestValue($request, $configuredHeader, $request->ip());
+
+        if (! is_string($value)) {
+            return null;
+        }
+
+        // A trusted edge may append its own hops to an existing X-Forwarded-For
+        // value. Walk from the receiving side and select the nearest public hop,
+        // so client-supplied values prepended on the left cannot win.
+        $candidates = array_reverse(array_map('trim', explode(',', $value)));
+        foreach ($candidates as $candidate) {
+            if ($this->isPublicIp($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private function clientPublicPort(Request $request): mixed
+    {
+        $configuredHeader = config('hmrc.fraud_prevention.client_public_port_header');
+
+        if (is_string($configuredHeader) && trim($configuredHeader) !== '') {
+            return $this->trustedRequestValue($request, $configuredHeader, null);
+        }
+
+        // REMOTE_PORT belongs to the final proxy hop when a reverse proxy is in
+        // use. Reporting it as the originating device's public port is invalid.
+        return $request->isFromTrustedProxy() ? null : $request->server('REMOTE_PORT');
     }
 }
