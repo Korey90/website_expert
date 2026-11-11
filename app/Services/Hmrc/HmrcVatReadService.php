@@ -94,6 +94,7 @@ final class HmrcVatReadService
         ?string $paymentsTestScenario = null,
     ): array {
         $this->assertAuthorized($business, $actor);
+        $this->assertAccountDateRange($from, $to);
         $connection = $this->refreshIfNeeded($business, $actor, $this->connection($business));
         $this->assertReadScope($connection);
 
@@ -286,6 +287,14 @@ final class HmrcVatReadService
         $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value);
 
         return $date !== false && $date->format('Y-m-d') === $value;
+    }
+
+    private function assertAccountDateRange(string $from, string $to): void
+    {
+        if (! $this->isDate($from) || ! $this->isDate($to)
+            || $from < '2017-12-01' || $from > $to || $to > today()->toDateString()) {
+            throw HmrcVatReadException::invalidAccountDateRange();
+        }
     }
 
     private function markSuccessfulCall(Business $business, HmrcConnection $connection, mixed $at): void

@@ -153,7 +153,7 @@ class HmrcVatReadTest extends TestCase
             $this->business,
             $this->owner,
             '2026-01-01',
-            '2026-12-31',
+            '2026-11-11',
             $this->fraudHeaders(),
         );
 
@@ -179,13 +179,33 @@ class HmrcVatReadTest extends TestCase
             $this->business,
             $this->owner,
             '2026-01-01',
-            '2026-12-31',
+            '2026-11-11',
             $this->fraudHeaders(),
         );
 
         $this->assertNull($result['liabilities'][0]['outstanding_amount']);
         $this->assertNull($result['liabilities'][0]['due']);
         $this->assertNull($result['payments'][0]['received']);
+    }
+
+    public function test_account_read_rejects_an_unsupported_date_range_before_http(): void
+    {
+        Http::fake();
+
+        $this->expectException(HmrcVatReadException::class);
+        $this->expectExceptionMessage(__('finance.hmrc_connection.errors.account_date_range'));
+
+        try {
+            app(HmrcVatReadService::class)->retrieveAccount(
+                $this->business,
+                $this->owner,
+                '2017-01-01',
+                '2017-12-31',
+                $this->fraudHeaders(),
+            );
+        } finally {
+            Http::assertNothingSent();
+        }
     }
 
     public function test_invalid_hmrc_payloads_are_rejected_and_not_presented(): void
@@ -220,7 +240,7 @@ class HmrcVatReadTest extends TestCase
             $this->business,
             $this->owner,
             '2026-01-01',
-            '2026-12-31',
+            '2026-11-11',
             $this->fraudHeaders(),
         );
     }
@@ -274,7 +294,7 @@ class HmrcVatReadTest extends TestCase
             $this->business,
             $member,
             '2026-01-01',
-            '2026-12-31',
+            '2026-11-11',
             $this->fraudHeaders(),
         );
     }

@@ -136,6 +136,8 @@ Special period keys containing `#` are accepted and percent-encoded when used in
 
 For fixed sandbox responses, `HMRC_SANDBOX_OBLIGATIONS_SCENARIO`, `HMRC_SANDBOX_RETURN_SCENARIO`, `HMRC_SANDBOX_LIABILITIES_SCENARIO`, `HMRC_SANDBOX_PAYMENTS_SCENARIO` and `HMRC_SANDBOX_SUBMISSION_SCENARIO` may optionally be set to endpoint-specific HMRC `Gov-Test-Scenario` values. Submission values are fail-closed to the endpoint's documented catalogue: `INVALID_VRN`, `INVALID_PERIODKEY`, `INVALID_PAYLOAD`, `DUPLICATE_SUBMISSION`, `TAX_PERIOD_NOT_ENDED` and `INSOLVENT_TRADER`. Leave the submission value blank for the successful default and never set a test scenario in production.
 
+For the live read-only E2E run, liabilities use `MULTIPLE_LIABILITIES_2018_19` and payments use `MULTIPLE_PAYMENTS_2018_19`. Query both with `2018-01-01` through `2018-12-31`. The endpoint contract rejects dates before `2017-12-01`, future end dates and ranges over 366 days; Website Expert NI validates those constraints before HTTP. With no scenario header, both sandbox endpoints intentionally simulate no associated data.
+
 The local MySQL migration is `2026_11_10_000027_create_hmrc_vat_obligations_table.php`. Mocked integration coverage is complete; the real obligations call remains pending until the external sandbox checklist is complete.
 
 ## Implemented VAT Return submission

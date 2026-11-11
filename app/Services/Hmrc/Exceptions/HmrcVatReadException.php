@@ -31,6 +31,11 @@ class HmrcVatReadException extends RuntimeException
         return new self(__('finance.hmrc_connection.errors.return_not_found'));
     }
 
+    public static function invalidAccountDateRange(): self
+    {
+        return new self(__('finance.hmrc_connection.errors.account_date_range'));
+    }
+
     public static function invalidReturnResponse(): self
     {
         return new self('HMRC returned an invalid VAT Return response. No result was displayed.');
