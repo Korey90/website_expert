@@ -11,7 +11,7 @@
 
 ### In Progress
 
-- [ ] `UKFIN-612` [M] — techniczne zabezpieczenia i checklista wdrożone, audyty PHP/JavaScript czyste; pozostały niezależny pentest oraz zewnętrzne gate'y FPH/HMRC.
+- [ ] `UKFIN-612` [M] — techniczne zabezpieczenia, redacted sandbox evidence chain/export i checklista wdrożone, audyty PHP/JavaScript czyste; pozostały live E2E, niezależny pentest oraz zewnętrzne gate'y FPH/HMRC.
 
 ### To Do
 

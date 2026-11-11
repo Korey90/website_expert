@@ -34,7 +34,7 @@ class HmrcFraudPreventionValidationSummary
             'warning_items' => $warnings,
             'valid' => $code === 'VALID_HEADERS' && $errors === [],
             'checked_at' => now()->toIso8601String(),
-            'correlation_id' => $response->correlationId,
+            'correlation_id' => $this->safeCorrelationId($response->correlationId),
         ];
     }
 
@@ -85,6 +85,13 @@ class HmrcFraudPreventionValidationSummary
         $value = trim($value);
 
         return $value !== '' && strlen($value) <= 1000 && preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', $value) !== 1
+            ? $value
+            : null;
+    }
+
+    private function safeCorrelationId(mixed $value): ?string
+    {
+        return is_string($value) && preg_match('/^[A-Za-z0-9._:-]{1,100}$/', $value) === 1
             ? $value
             : null;
     }

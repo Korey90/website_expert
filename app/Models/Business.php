@@ -120,6 +120,11 @@ class Business extends Model
         return $this->hasMany(HmrcVatSubmission::class);
     }
 
+    public function hmrcSandboxEvidenceEvents(): HasMany
+    {
+        return $this->hasMany(HmrcSandboxEvidenceEvent::class);
+    }
+
     public function hmrcVatSubmissionEvents(): HasMany
     {
         return $this->hasMany(HmrcVatSubmissionEvent::class);

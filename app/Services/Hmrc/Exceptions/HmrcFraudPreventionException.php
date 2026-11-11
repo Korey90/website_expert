@@ -33,6 +33,11 @@ class HmrcFraudPreventionException extends RuntimeException
         return new self('HMRC returned an invalid application token response.');
     }
 
+    public static function invalidFeedbackResponse(): self
+    {
+        return new self('HMRC returned an invalid fraud prevention feedback response.');
+    }
+
     public static function unreachable(): self
     {
         return new self('HMRC fraud prevention validation is currently unreachable.');

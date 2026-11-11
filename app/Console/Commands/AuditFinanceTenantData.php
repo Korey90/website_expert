@@ -162,6 +162,14 @@ class AuditFinanceTenantData extends Command
             'sample_ids' => (clone $hmrcVatObligationQuery)->limit(20)->pluck('obligation.id')->all(),
         ];
 
+        $hmrcSandboxEvidenceQuery = DB::table('hmrc_sandbox_evidence_events as evidence')
+            ->leftJoin('businesses as owner', 'owner.id', '=', 'evidence.business_id')
+            ->where(fn ($query) => $query->whereNull('evidence.business_id')->orWhereNull('owner.id'));
+        $report['hmrc_sandbox_evidence_events'] = [
+            'invalid_count' => (clone $hmrcSandboxEvidenceQuery)->count(),
+            'sample_ids' => (clone $hmrcSandboxEvidenceQuery)->limit(20)->pluck('evidence.id')->all(),
+        ];
+
         $invalidVatReturnSnapshots = [];
         $snapshotHasher = app(VatReturnSnapshotService::class);
 

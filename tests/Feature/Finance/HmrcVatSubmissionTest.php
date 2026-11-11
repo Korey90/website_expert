@@ -42,11 +42,13 @@ class HmrcVatSubmissionTest extends TestCase
 
         Http::preventStrayRequests();
         config()->set([
+            'app.url' => 'http://localhost',
             'hmrc.environment' => 'sandbox',
             'hmrc.sandbox.base_url' => 'https://test-api.service.hmrc.gov.uk',
             'hmrc.sandbox.token_url' => 'https://test-api.service.hmrc.gov.uk/oauth/token',
             'hmrc.sandbox.client_id' => 'sandbox-client-id',
             'hmrc.sandbox.client_secret' => 'sandbox-client-secret',
+            'hmrc.sandbox.redirect_uri' => 'http://localhost/admin/hmrc/oauth/callback',
             'hmrc.api_version' => '1.0',
         ]);
 

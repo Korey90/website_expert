@@ -128,6 +128,26 @@
                         </div>
                     @endif
                 @endif
+
+                @if ($fraudFeedbackSummary)
+                    <div class="rounded-lg border border-gray-200 p-4 dark:border-white/10">
+                        <p class="font-semibold">{{ __('finance.hmrc_connection.fraud_feedback.title') }}</p>
+                        <dl class="mt-3 grid gap-3 sm:grid-cols-3">
+                            <div>
+                                <dt class="text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.fraud_feedback.request_count') }}</dt>
+                                <dd class="font-medium">{{ $fraudFeedbackSummary['request_count'] }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.fraud_validation.checked_at') }}</dt>
+                                <dd class="font-medium">{{ $fraudFeedbackSummary['checked_at'] }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-gray-500 dark:text-gray-400">{{ __('finance.hmrc_connection.fraud_validation.correlation_id') }}</dt>
+                                <dd class="font-mono font-medium">{{ $fraudFeedbackSummary['correlation_id'] ?? '—' }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                @endif
             </div>
         </x-filament::section>
 

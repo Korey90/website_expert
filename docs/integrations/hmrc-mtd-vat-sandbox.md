@@ -1,6 +1,6 @@
 # HMRC MTD VAT — sandbox setup
 
-**Status:** OAuth and sandbox VRN connected; obligations/read/submission code ready; live VAT calls blocked by the fraud-header infrastructure gate
+**Status:** OAuth and sandbox VRN connected; obligations/read/submission and redacted evidence export ready; live VAT calls blocked by the fraud-header infrastructure gate
 **Verified against official HMRC documentation:** 11 November 2026
 **Scope:** Website Expert NI, direct business journey, VAT MTD only
 
@@ -76,7 +76,21 @@ The browser values are refreshed into a same-site cookie and strictly validated 
 
 At `/admin/hmrc-connection`, an owner/admin can choose **Validate fraud headers**, enter a current authenticator code and call `GET /test/fraud-prevention-headers/validate`. The system obtains a separate application-restricted access token using Client Credentials Grant. It can also retrieve `GET /test/fraud-prevention-headers/vat-mtd/validation-feedback`. Both operations are hard-blocked outside sandbox.
 
+The panel now exposes **Retrieve fraud-header feedback** as a separate sandbox-only action. It validates the feedback envelope and displays only the number of assessed requests, timestamp and a safe correlation ID. Raw feedback, header values and tokens are not displayed or persisted.
+
 The local implementation and mocked contract tests are complete. The real Test API currently reports one error (`Gov-Client-Public-Port`) and one warning (`Gov-Vendor-License-IDs`). zrok does not expose the originating browser source TCP port; this must be solved by suitable trusted-edge infrastructure or an explicit HMRC-approved exception. Passing the Test API is feedback on formatting and values, not a guarantee of production compliance.
+
+## Redacted sandbox evidence
+
+Successful panel operations append tenant-owned evidence events for fraud-header validation/feedback, obligations, VAT Return reads, liabilities and payments. The events are immutable and form a per-business SHA-256 chain. They retain only the operation, outcome, time, actor pseudonym, safe correlation ID and bounded counts; they never retain tokens, full VRN, period keys, browser telemetry, raw headers, response bodies or financial amounts.
+
+Submission evidence remains in its existing, independent append-only submission chain. Export verifies both chains and emits a redacted JSON document plus a `.sha256` sidecar:
+
+```bash
+php artisan hmrc:export-sandbox-evidence website-expert
+```
+
+The default private output directory is `storage/app/private/hmrc-evidence`. The export is sandbox-only and includes the Website Expert NI name, pseudonymous business/actor references, connection/scopes status, obligation counts, operation evidence and verified submission hashes. Migration `2026_11_11_000032_create_hmrc_sandbox_evidence_events_table.php` creates the tenant evidence store.
 
 ## Planned API operations
 

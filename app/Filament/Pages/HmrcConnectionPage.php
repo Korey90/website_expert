@@ -13,9 +13,11 @@ use App\Services\Hmrc\Exceptions\HmrcOAuthException;
 use App\Services\Hmrc\Exceptions\HmrcVatObligationSyncException;
 use App\Services\Hmrc\Exceptions\HmrcVatReadException;
 use App\Services\Hmrc\HmrcFraudPreventionClient;
+use App\Services\Hmrc\HmrcFraudPreventionFeedbackSummary;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
 use App\Services\Hmrc\HmrcFraudPreventionValidationSummary;
 use App\Services\Hmrc\HmrcOAuthService;
+use App\Services\Hmrc\HmrcSandboxEvidenceRecorder;
 use App\Services\Hmrc\HmrcVatObligationSyncService;
 use App\Services\Hmrc\HmrcVatReadService;
 use DomainException;
@@ -32,6 +34,9 @@ class HmrcConnectionPage extends BasePage
 {
     /** @var array<string, mixed>|null */
     public ?array $fraudValidationSummary = null;
+
+    /** @var array<string, mixed>|null */
+    public ?array $fraudFeedbackSummary = null;
 
     /** @var array<string, mixed>|null */
     public ?array $vatReturnView = null;
@@ -125,7 +130,7 @@ class HmrcConnectionPage extends BasePage
     /** @param array{totp?: string} $data */
     public function validateFraudPreventionHeaders(array $data): void
     {
-        [, $actor] = $this->managementContext();
+        [$business, $actor] = $this->managementContext();
         $multiFactor = $this->verifiedMultiFactor($actor, $data['totp'] ?? null);
 
         if ($multiFactor === null) {
@@ -144,6 +149,20 @@ class HmrcConnectionPage extends BasePage
             $warnings = $this->fraudValidationSummary['warnings'];
             $isValid = $this->fraudValidationSummary['valid'];
 
+            app(HmrcSandboxEvidenceRecorder::class)->record(
+                $business,
+                $actor,
+                HmrcSandboxEvidenceRecorder::OPERATION_FPH_VALIDATION,
+                $isValid ? 'valid' : 'invalid',
+                $this->fraudValidationSummary['correlation_id'],
+                [
+                    'code' => $code,
+                    'spec_version' => $this->fraudValidationSummary['spec_version'],
+                    'errors' => $errors,
+                    'warnings' => $warnings,
+                ],
+            );
+
             if ($isValid) {
                 Notification::make()
                     ->title(__('finance.hmrc_connection.notifications.fraud_validated'))
@@ -160,6 +179,31 @@ class HmrcConnectionPage extends BasePage
                     ->danger()
                     ->send();
             }
+        } catch (HmrcFraudPreventionException $exception) {
+            Notification::make()->title($exception->getMessage())->danger()->send();
+        }
+    }
+
+    public function retrieveFraudPreventionFeedback(): void
+    {
+        [$business, $actor] = $this->managementContext();
+
+        try {
+            $response = app(HmrcFraudPreventionClient::class)->feedback();
+            $this->fraudFeedbackSummary = app(HmrcFraudPreventionFeedbackSummary::class)
+                ->fromResponse($response);
+            app(HmrcSandboxEvidenceRecorder::class)->record(
+                $business,
+                $actor,
+                HmrcSandboxEvidenceRecorder::OPERATION_FPH_FEEDBACK,
+                'succeeded',
+                $this->fraudFeedbackSummary['correlation_id'],
+                ['request_count' => $this->fraudFeedbackSummary['request_count']],
+            );
+            Notification::make()
+                ->title(__('finance.hmrc_connection.notifications.fraud_feedback_retrieved'))
+                ->success()
+                ->send();
         } catch (HmrcFraudPreventionException $exception) {
             Notification::make()->title($exception->getMessage())->danger()->send();
         }
@@ -195,6 +239,22 @@ class HmrcConnectionPage extends BasePage
                     ? config('hmrc.sandbox.obligations_test_scenario')
                     : null,
             );
+
+            if (config('hmrc.environment') === 'sandbox') {
+                app(HmrcSandboxEvidenceRecorder::class)->record(
+                    $business,
+                    $actor,
+                    HmrcSandboxEvidenceRecorder::OPERATION_OBLIGATIONS,
+                    'succeeded',
+                    $result['correlation_id'],
+                    [
+                        'created' => $result['created'],
+                        'updated' => $result['updated'],
+                        'unchanged' => $result['unchanged'],
+                        'total' => $result['total'],
+                    ],
+                );
+            }
 
             Notification::make()
                 ->title(__('finance.hmrc_connection.notifications.obligations_synced'))
@@ -268,6 +328,17 @@ class HmrcConnectionPage extends BasePage
                 'period' => $obligation->start_date->format('Y-m-d').' – '.$obligation->end_date->format('Y-m-d'),
             ];
 
+            if (config('hmrc.environment') === 'sandbox') {
+                app(HmrcSandboxEvidenceRecorder::class)->record(
+                    $business,
+                    $actor,
+                    HmrcSandboxEvidenceRecorder::OPERATION_VAT_RETURN,
+                    'succeeded',
+                    $result['correlation_id'],
+                    ['box_count' => count($result['boxes'])],
+                );
+            }
+
             Notification::make()->title(__('finance.hmrc_connection.notifications.return_retrieved'))->success()->send();
         } catch (HmrcApiException|HmrcFraudPreventionException|HmrcOAuthException|HmrcVatReadException|InvalidArgumentException $exception) {
             Notification::make()->title($exception->getMessage())->danger()->send();
@@ -299,6 +370,26 @@ class HmrcConnectionPage extends BasePage
                     ? config('hmrc.sandbox.payments_test_scenario')
                     : null,
             );
+
+            if (config('hmrc.environment') === 'sandbox') {
+                $recorder = app(HmrcSandboxEvidenceRecorder::class);
+                $recorder->record(
+                    $business,
+                    $actor,
+                    HmrcSandboxEvidenceRecorder::OPERATION_LIABILITIES,
+                    'succeeded',
+                    $this->vatAccountView['liabilities_correlation_id'],
+                    ['item_count' => count($this->vatAccountView['liabilities'])],
+                );
+                $recorder->record(
+                    $business,
+                    $actor,
+                    HmrcSandboxEvidenceRecorder::OPERATION_PAYMENTS,
+                    'succeeded',
+                    $this->vatAccountView['payments_correlation_id'],
+                    ['item_count' => count($this->vatAccountView['payments'])],
+                );
+            }
 
             Notification::make()->title(__('finance.hmrc_connection.notifications.account_retrieved'))->success()->send();
         } catch (HmrcApiException|HmrcFraudPreventionException|HmrcOAuthException|HmrcVatReadException|InvalidArgumentException $exception) {
@@ -362,6 +453,14 @@ class HmrcConnectionPage extends BasePage
                         ->maxLength(8),
                 ])
                 ->action(fn (array $data) => $this->validateFraudPreventionHeaders($data))
+                ->visible($canManage && config('hmrc.environment') === 'sandbox'),
+            Action::make('retrieve_fraud_feedback')
+                ->label(__('finance.hmrc_connection.actions.retrieve_fraud_feedback'))
+                ->icon('heroicon-o-clipboard-document-check')
+                ->color('gray')
+                ->requiresConfirmation()
+                ->modalDescription(__('finance.hmrc_connection.fraud_feedback.modal_description'))
+                ->action('retrieveFraudPreventionFeedback')
                 ->visible($canManage && config('hmrc.environment') === 'sandbox'),
             Action::make('sync_vat_obligations')
                 ->label(__('finance.hmrc_connection.actions.sync_vat_obligations'))

@@ -526,8 +526,8 @@ return [
         'sections' => ['status' => 'Connection status', 'security' => 'Security and authority', 'fraud_prevention' => 'Fraud prevention headers'],
         'fields' => ['environment' => 'Environment', 'status' => 'Status', 'vrn' => 'VAT registration number', 'scopes' => 'Scopes', 'connected_at' => 'Connected at', 'expires_at' => 'Access token expires at', 'refreshed_at' => 'Last refreshed at'],
         'statuses' => ['connected' => 'Connected', 'reconnect_required' => 'Reconnect required', 'disconnected' => 'Disconnected'],
-        'actions' => ['connect' => 'Connect HMRC', 'refresh' => 'Refresh token', 'disconnect' => 'Disconnect', 'set_sandbox_vrn' => 'Set sandbox VRN', 'validate_fraud_headers' => 'Validate fraud headers', 'sync_vat_obligations' => 'Sync VAT obligations', 'view_vat_return' => 'View VAT Return', 'retrieve_vat_account' => 'Retrieve liabilities and payments'],
-        'notifications' => ['refreshed' => 'HMRC access token refreshed.', 'disconnected' => 'HMRC tokens removed locally.', 'sandbox_vrn_updated' => 'The sandbox VRN was saved securely.', 'mfa_required' => 'Set up authenticator-app MFA before validating HMRC headers.', 'mfa_invalid' => 'The authentication code is invalid.', 'fraud_validated' => 'HMRC accepted the fraud prevention headers.', 'fraud_invalid' => 'HMRC did not accept the fraud prevention headers.', 'fraud_invalid_details' => 'Result: :code · errors: :errors · warnings: :warnings.', 'obligations_synced' => 'HMRC VAT obligations synchronised.', 'return_retrieved' => 'The VAT Return was retrieved from HMRC.', 'account_retrieved' => 'VAT liabilities and payments were retrieved from HMRC.'],
+        'actions' => ['connect' => 'Connect HMRC', 'refresh' => 'Refresh token', 'disconnect' => 'Disconnect', 'set_sandbox_vrn' => 'Set sandbox VRN', 'validate_fraud_headers' => 'Validate fraud headers', 'retrieve_fraud_feedback' => 'Retrieve fraud-header feedback', 'sync_vat_obligations' => 'Sync VAT obligations', 'view_vat_return' => 'View VAT Return', 'retrieve_vat_account' => 'Retrieve liabilities and payments'],
+        'notifications' => ['refreshed' => 'HMRC access token refreshed.', 'disconnected' => 'HMRC tokens removed locally.', 'sandbox_vrn_updated' => 'The sandbox VRN was saved securely.', 'mfa_required' => 'Set up authenticator-app MFA before validating HMRC headers.', 'mfa_invalid' => 'The authentication code is invalid.', 'fraud_validated' => 'HMRC accepted the fraud prevention headers.', 'fraud_invalid' => 'HMRC did not accept the fraud prevention headers.', 'fraud_invalid_details' => 'Result: :code · errors: :errors · warnings: :warnings.', 'fraud_feedback_retrieved' => 'HMRC fraud-header feedback was retrieved.', 'obligations_synced' => 'HMRC VAT obligations synchronised.', 'return_retrieved' => 'The VAT Return was retrieved from HMRC.', 'account_retrieved' => 'VAT liabilities and payments were retrieved from HMRC.'],
         'sandbox_vrn' => ['modal_title' => 'Set the HMRC sandbox VRN', 'modal_description' => 'Use only the VAT Registration Number generated with the HMRC test organisation. This does not change the real company VAT profile.', 'field' => 'Test VAT Registration Number', 'help' => 'Enter 9 digits. GB and spaces are accepted and removed. The full value is encrypted and will not be displayed again.'],
         'errors' => ['sandbox_vrn_only' => 'A test VRN can only be changed in the HMRC sandbox.', 'connection_required' => 'Connect the HMRC sandbox before setting its test VRN.', 'invalid_vrn' => 'The VAT Registration Number must contain exactly 9 digits.', 'cannot_manage' => 'Only an active business owner or administrator can manage the HMRC connection.'],
         'fraud_validation' => [
@@ -540,6 +540,11 @@ return [
             'code' => 'HMRC result', 'spec_version' => 'Specification version', 'errors' => 'Errors', 'warnings' => 'Warnings',
             'error_details' => 'Errors reported by HMRC', 'warning_details' => 'Warnings reported by HMRC',
             'checked_at' => 'Checked at', 'correlation_id' => 'Correlation ID',
+        ],
+        'fraud_feedback' => [
+            'title' => 'VAT MTD fraud-header feedback',
+            'modal_description' => 'Retrieve the current redacted feedback summary from HMRC. Header values and tokens are never displayed or stored.',
+            'request_count' => 'Requests assessed by HMRC',
         ],
         'obligations' => [
             'title' => 'VAT obligations',
