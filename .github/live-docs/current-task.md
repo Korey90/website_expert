@@ -1,6 +1,6 @@
 # Current Task
 
-**Status:** W toku — UKFIN-612 technicznie wdrożone; release gate nadal zablokowany
+**Status:** W toku — UKFIN-612 wdrożone na serwerze produkcyjnie równoważnym; oczekuje na ponowną walidację FPH i sandbox E2E
 **Zadanie:** HMRC MTD VAT sandbox end-to-end
 **Data rozpoczęcia:** 2026-11-10
 **Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
@@ -12,8 +12,8 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 
 ## Bieżący zakres
 
-- OAuth sandbox został wykonany end-to-end przez publiczny callback zrok; połączenie i tokeny są zapisane.
-- Test Fraud Prevention Headers API potwierdził 14/16 nagłówków; blokujący `Gov-Client-Public-Port` nie jest udostępniany przez zrok, a `Gov-Vendor-License-IDs` pozostaje ostrzeżeniem wymagającym prawdziwej licencji albo uzgodnienia z HMRC.
+- OAuth sandbox został wykonany end-to-end przez publiczny callback zrok; po wdrożeniu na docelowy host połączenie musi zostać ponowione przez callback `https://website-expert.uk/admin/hmrc/oauth/callback`.
+- Historyczny test przez zrok potwierdził 14/16 nagłówków. Aplikacja działa teraz bezpośrednio za Apache/PHP-FPM, więc Laravel może odczytać publiczny adres i źródłowy port TCP z połączenia; wymaga to potwierdzenia testem spoza lokalnej sieci. `Gov-Vendor-License-IDs` pozostaje ostrzeżeniem i nie wolno go uzupełniać fikcyjną wartością.
 - Testowy VRN został wpisany przez użytkownika; system potwierdził wyłącznie obecność, maskę ostatnich 4 cyfr oraz metadane audytu bez ujawnienia pełnej wartości.
 - ✅ Dodano tenantową akcję ustawienia sandboxowego VRN, szyfrowanie istniejącym castem, audyt aktora/czasu, formularz owner/admin oraz ochronę wartości przed wyzerowaniem podczas reconnect OAuth.
 - ✅ Migracja `2026_11_11_000028` wykonana; tenant audit bez błędów; HMRC targeted 32/192, pełny Finance 310 passed + 1 skipped / 2233 assertions; EN/PL/PT po 1140 kluczy.
@@ -39,8 +39,10 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 - ✅ Dodano tenantowy, append-only łańcuch dowodów sandbox dla walidacji/feedbacku FPH, obligations, view return, liabilities i payments. Zapisuje tylko statusy, czasy, bezpieczne correlation ID i ograniczone liczniki; tokeny, VRN, period key, nagłówki, telemetry i kwoty są wykluczone.
 - ✅ `hmrc:export-sandbox-evidence` weryfikuje łańcuch dowodów i istniejące łańcuchy submission, po czym tworzy prywatny zredagowany JSON oraz plik `.sha256`. Migracja `000032` wykonana, tenant audit bez błędów; HMRC 82/489; Finance 348 passed + 1 skipped / 2462 assertions; PL/EN/PT po 1254 klucze; Blade i ESLint poprawne.
 - ✅ Live evidence 2026-11-11: łańcuch 4/4 poprawny. Najnowszy preflight HMRC zwrócił `INVALID_HEADERS` według specyfikacji 3.3 (1 error: brak `Gov-Client-Public-Port`; 1 warning: brak `Gov-Vendor-License-IDs`). Dwa odczyty feedbacku zakończyły się poprawnie, ale HMRC zwrócił pustą listę (`request_count=0`). Zredagowany eksport: `hmrc-sandbox-evidence-20261111-200359.json`, file SHA-256 `529a113bb66eefec48a85c1ddd2dae58d69b7f9d104ea8a74ae18d397801dcec`.
+- ✅ Release `c8a23a3` wdrożony 2026-11-11 do `/var/www/website-expert.uk`: 32 migracje finansowe/HMRC wykonane, tenant audit `invalid_count=0`, produkcyjny build klienta i SSR aktywne, queue worker działa, `APP_DEBUG=false`, Composer/NPM audit = 0. Utworzono oddzielne kopie kodu, bazy i `.env`; produkcyjne przełączniki HMRC pozostają wyłączone.
+- ✅ Docelowa topologia FPH to bezpośredni Apache/PHP-FPM bez zrok i reverse proxy. `HMRC_VENDOR_PUBLIC_IP` oraz forwarding chain wskazują publiczny adres serwera, a `HMRC_PRODUCT_VERSION=c8a23a3`; publiczny port klienta jest pobierany z `REMOTE_PORT`.
 - ⛔ UKFIN-612 pozostaje formalnie otwarte: wymagany jest niezależny authenticated pentest oraz zamknięcie FPH source-port/licence i procedury HMRC production access.
-- ➡️ Następna akcja zewnętrzna: wysłać opis architektury i Application ID do `SDSTeam@hmrc.gov.uk` według szablonu w `docs/integrations/hmrc-mtd-vat-sandbox.md`; nie konfigurować wyjątku bez pisemnej odpowiedzi HMRC.
+- ➡️ Następna akcja zewnętrzna: ustawić w aplikacji HMRC sandbox callback `https://website-expert.uk/admin/hmrc/oauth/callback`, połączyć OAuth ponownie i uruchomić walidację FPH z urządzenia korzystającego z internetu mobilnego/hotspotu. Test z domowego Wi-Fi może przejść przez NAT hairpin i pokazać prywatny adres zamiast rzeczywistego klienta.
 
 - `UKFIN-601`: użytkownik posiada konto HMRC Developer Hub i pierwszą aplikację sandbox.
 - Do aplikacji trzeba dodać: VAT (MTD) API v1.0, Create Test User API v1.0 i Test Fraud Prevention Headers API v1.0.
@@ -93,9 +95,9 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 ## Gate
 
 - UKFIN-601 jest zakończony: trzy API są aktywne, credentials skonfigurowane, a OAuth testowej organizacji przeszedł end-to-end.
-- Rzeczywisty validator FPH działa i akceptuje 14/16 nagłówków; `Gov-Client-Public-Port` wymaga infrastruktury zachowującej source port, a `Gov-Vendor-License-IDs` prawdziwego modelu licencji albo uzgodnienia z HMRC.
+- Rzeczywisty validator FPH przez zrok zaakceptował 14/16 nagłówków. Bezpośrednie wdrożenie Apache/PHP-FPM powinno udostępnić `REMOTE_PORT`, ale musi to potwierdzić ponowny test z zewnętrznej sieci; `Gov-Vendor-License-IDs` może powstać wyłącznie z prawdziwego modelu licencji.
 - Testowy VRN jest zapisany. Rzeczywiste obligations i operacje read-only oczekują na rozwiązanie/akceptację dwóch braków FPH.
 - `php artisan hmrc:production-readiness` zwraca obecnie NOT READY/exit 1 zgodnie z projektem; dostęp i submission produkcyjne mają niezależne blokady.
-- Audyty PHP i JavaScript są czyste; wymagany jest jeszcze niezależny pentest produkcyjnie równoważnego środowiska staging.
+- Audyty PHP i JavaScript są czyste; wymagany jest jeszcze niezależny authenticated pentest wdrożonego, produkcyjnie równoważnego środowiska.
 - Żadne prawdziwe dane ani deklaracje nie są wysyłane na tym etapie.
 - `HMRC_ENVIRONMENT` pozostaje `sandbox` do czasu przejścia OAuth, fraud headers, pełnych scenariuszy sandbox, security review i jawnej decyzji właściciela.

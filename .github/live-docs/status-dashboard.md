@@ -1,18 +1,19 @@
 # Website Expert NI — Project Status Dashboard
 
-**Last Full Validation:** 2026-11-10
-**Last Targeted Validation:** 2026-11-11 — UKFIN-612 HMRC production security gate
+**Last Full Validation:** 2026-11-11
+**Last Targeted Validation:** 2026-11-11 — deploy `c8a23a3` i produkcyjny smoke test
 
 ## Health Checks
-- **Code Quality (Pint + ESLint):** ✅ Pint i ESLint przechodzą; Blade templates kompilują się, równoległe zmiany landing page użytkownika pozostawiono bez ingerencji
+- **Code Quality:** 🟡 ESLint, Blade i build przechodzą; repozytoryjny `pint --test` nadal wykazuje istniejący dług formatowania w plikach legacy, niezwiązany z wdrożeniem HMRC
 - **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 1249 kluczy liściowe w PL/EN/PT
-- **Tests:** PHPUnit pełny pakiet (2026-11-11): 853 passed / 9 failed (ten sam baseline, niezwiązane: SocialAuth, 3×homepage meta, Billing PLN/GBP, 3×ProfileTest po przeniesieniu trasy, ServicePageController) / 11 skipped / 3885 assertions; finalny Finance 343 passed + 1 skipped / 2429 assertions; HMRC 74/421
+- **Tests:** PHPUnit pełny pakiet (2026-11-11): 860 passed / 9 failed (ten sam baseline, niezwiązane: homepage meta, portal billing, stare profile i service page) / 11 skipped; finalny Finance 348 passed + 1 skipped / 2462 assertions; HMRC 82/489
 - **Multi-Tenancy Compliance:** 100% ✅ (wyjątek celowy: `search_ranking_checks.business_id` nullable — narzędzie publiczne/anonimowe, przygotowane pod przyszłe powiązanie z klientem)
 - **Security Review:** 🟡 HMRC production fail-closed, pełne audyty Composer/NPM i secret scan czyste; produkcja nadal zablokowana przez niezależny pentest oraz zewnętrzne gate'y FPH/HMRC
 - **Build (Vite):** ✅ Brak błędów TS/JS
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-11-11 — **Deploy HMRC/Finance:** release `c8a23a3` wdrożony do `/var/www/website-expert.uk` z produkcyjnymi buildami klienta i SSR. Wykonano 32 migracje finansowe/HMRC, tenant audit ma `invalid_count=0`, admin otrzymał sześć uprawnień finansowych, Website Expert NI ma 35 kont księgowych i 6 kodów podatkowych. `APP_DEBUG=false`, SSR i queue worker działają, publiczne smoke testy zwracają 200/302, a po naprawie `.htaccess` nie ma nowych błędów. Wykonano kopie bazy, kodu i `.env`; production access/submission HMRC pozostają wyłączone. Bezpośredni Apache ma dostarczyć publiczny source port przez `REMOTE_PORT`; następny test FPH musi odbyć się przez zewnętrzną sieć ✅
 - 2026-11-11 — **UKFIN-612 (sandbox evidence):** dodano tenantowy append-only SHA-256 chain dla walidacji/feedbacku FPH, obligations, view return, liabilities i payments oraz `hmrc:export-sandbox-evidence` tworzący prywatny redacted JSON + sidecar SHA-256. Eksport pseudonimizuje tenant/aktora, weryfikuje istniejące submission chains i wyklucza tokeny, pełny VRN, period key, browser telemetry, raw headers/body i kwoty. Panel ma osobną akcję retrieval `vat-mtd` feedback z bezpiecznym podsumowaniem. Migracja `000032` wykonana; tenant audit 0, HMRC 82/489, Finance 348 passed + 1 skipped / 2462 assertions, PL/EN/PT po 1254, Blade/ESLint poprawne ✅
 - 2026-11-11 — **UKFIN-612 (live FPH evidence):** zweryfikowano integralny łańcuch 4 zdarzeń. Najnowszy preflight: `INVALID_HEADERS`, spec 3.3, 1 error (`Gov-Client-Public-Port`) i 1 warning (`Gov-Vendor-License-IDs`); retrieval feedback działa, lecz HMRC zwraca `request_count=0`. Wygenerowano prywatny redacted export z file SHA-256 `529a113bb66eefec48a85c1ddd2dae58d69b7f9d104ea8a74ae18d397801dcec`. Live VAT pozostaje fail-closed ✅
 - 2026-11-11 — **UKFIN-612 (technical controls):** dodano exact-host guard dla VAT/OAuth/token endpointów i callbacku, osobne production access/submission kill switches, wymagane referencje HMRC/FPH/security/owner oraz bezsekretowy command `hmrc:production-readiness`. Host nie-HMRC i brak approval są odrzucane przed HTTP; production submission nie może zostać odblokowany samymi credentials. 11 PHP advisory usunięto aktualizacją locka; DOMPurify i zależności build/test podniesiono do poprawionych wersji (`composer audit` i pełny `npm audit` = 0). Czyste `npm ci`, frontend 16/16, ESLint i build przechodzą; tracked-secret scan czysty. Checklista w `docs/integrations/hmrc-production-readiness.md`; wynik nadal NOT READY przez niezależny pentest i FPH/HMRC gates. HMRC 74/421; Finance 343 passed + 1 skipped / 2429; full 853 passed / 9 baseline failures / 11 skipped / 3885; EN/PL/PT po 1249 ✅

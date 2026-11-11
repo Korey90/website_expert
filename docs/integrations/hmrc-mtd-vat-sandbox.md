@@ -1,6 +1,6 @@
 # HMRC MTD VAT — sandbox setup
 
-**Status:** OAuth and sandbox VRN connected; obligations/read/submission and redacted evidence export ready; live VAT calls blocked by the fraud-header infrastructure gate
+**Status:** Deployed on the direct Apache host; production-host OAuth reconnect and external-network fraud-header validation pending
 **Verified against official HMRC documentation:** 11 November 2026
 **Scope:** Website Expert NI, direct business journey, VAT MTD only
 
@@ -26,22 +26,22 @@ The following are **not required** for the first end-to-end VAT sandbox journey:
 ## Sandbox application checklist
 
 - [x] Subscribe the sandbox application to the three APIs above.
-- [x] Add redirect URI: `<APP_URL>/admin/hmrc/oauth/callback`.
+- [ ] Set the sandbox redirect URI to `https://website-expert.uk/admin/hmrc/oauth/callback` and reconnect OAuth on that host.
 - [x] Copy the sandbox Client ID and Client Secret into local/server environment variables, never into Git or chat:
   - `HMRC_SANDBOX_CLIENT_ID`
   - `HMRC_SANDBOX_CLIENT_SECRET`
   - `HMRC_SANDBOX_REDIRECT_URI`
-- [ ] Configure the real fraud-prevention infrastructure values:
+- [x] Configure the real fraud-prevention infrastructure values available for this deployment:
   - `HMRC_PRODUCT_VERSION` — the deployed Website Expert NI release identifier.
   - `HMRC_VENDOR_PUBLIC_IP` — public IP reached by the originating browser.
   - `HMRC_VENDOR_FORWARDING_CHAIN` — every in-scope public TLS termination IP, in client-to-HMRC order; for a single server it is the same value as `HMRC_VENDOR_PUBLIC_IP`.
-  - `HMRC_VENDOR_LICENSE_ID` — only when a genuine installation/software licence identifier exists; the system sends only its SHA-256 hash.
-- [ ] Confirm the reverse proxy/WAF supplies the real originating public IP and source TCP port. If Laravel's direct request values are not the originating values, configure `HMRC_CLIENT_PUBLIC_IP_HEADER` and `HMRC_CLIENT_PUBLIC_PORT_HEADER`. The trusted edge must strip client-supplied versions and overwrite both headers. `X-Forwarded-Port: 443` is a destination port and must not be substituted for the source port.
+  - `HMRC_VENDOR_LICENSE_ID` — intentionally empty unless a genuine installation/software licence identifier exists; the system sends only its SHA-256 hash.
+- [ ] Confirm with the Test API that the direct Apache connection exposes the real originating public IP and source TCP port through Laravel request values. Run this test from mobile data or a phone hotspot, not from the server's local Wi-Fi, because NAT hairpin traffic can appear as a private gateway address. If a future reverse proxy/WAF is introduced, configure `HMRC_CLIENT_PUBLIC_IP_HEADER` and `HMRC_CLIENT_PUBLIC_PORT_HEADER`; the trusted edge must strip client-supplied versions and overwrite both. `X-Forwarded-Port: 443` is a destination port and must not be substituted for the source port.
 - [x] Set up authenticator-app MFA for the owner/admin who will validate and initiate HMRC operations.
 - [ ] If a genuinely required value cannot be collected, contact HMRC first. Only after HMRC accepts the exceptional case may its exact header name be listed in `HMRC_FPH_ALLOWED_MISSING_HEADERS`; never use `null`, `undefined` or another placeholder.
 - [ ] Keep `HMRC_ENVIRONMENT=sandbox` until the complete sandbox and security gates pass.
 - [x] Create or reuse an **organisation** test user and retain its test User ID, password and VRN in a password manager.
-- [x] Complete OAuth using the test user's HMRC credentials.
+- [ ] Reconnect OAuth on `website-expert.uk` using the test user's HMRC credentials; the previous zrok-host connection is not copied to the server database.
 - [ ] Run obligations → submit open period → view return → liabilities → payments.
 - [ ] Validate every endpoint's fraud-prevention headers and retrieve `vat-mtd` validation feedback.
 
@@ -78,7 +78,11 @@ At `/admin/hmrc-connection`, an owner/admin can choose **Validate fraud headers*
 
 The panel now exposes **Retrieve fraud-header feedback** as a separate sandbox-only action. It validates the feedback envelope and displays only the number of assessed requests, timestamp and a safe correlation ID. Raw feedback, header values and tokens are not displayed or persisted.
 
-The local implementation and mocked contract tests are complete. The real Test API currently reports one error (`Gov-Client-Public-Port`) and one warning (`Gov-Vendor-License-IDs`). zrok does not expose the originating browser source TCP port; this must be solved by suitable trusted-edge infrastructure or an explicit HMRC-approved exception. Passing the Test API is feedback on formatting and values, not a guarantee of production compliance.
+The implementation, mocked contract tests and server deployment are complete. The earlier zrok test reported one error (`Gov-Client-Public-Port`) and one warning (`Gov-Vendor-License-IDs`). The application now runs directly behind Apache/PHP-FPM, where the source TCP port is available as `REMOTE_PORT`; an external-network Test API run must confirm this end to end. Passing the Test API is feedback on formatting and values, not a guarantee of production compliance.
+
+### Deployed validation topology
+
+The deployed release is `c8a23a3` at `https://website-expert.uk`. Apache terminates TLS and passes the request directly to PHP-FPM; there is no zrok tunnel or application reverse proxy in this path. The configured vendor public IP and forwarding chain identify this single public TLS endpoint. Requests made from the same LAN through the public hostname can be NAT-hairpinned and appear to Apache as the private gateway, so they are not valid evidence for originating public IP/port collection.
 
 ## Redacted sandbox evidence
 
@@ -94,45 +98,9 @@ The default private output directory is `storage/app/private/hmrc-evidence`. The
 
 Live evidence captured on 2026-11-11 contains four integrity-verified events. The latest HMRC specification 3.3 preflight returned `INVALID_HEADERS` with one error for missing `Gov-Client-Public-Port` and one warning for missing `Gov-Vendor-License-IDs`. Feedback retrieval itself succeeded twice, but HMRC returned an empty request list (`request_count=0`). This is evidence of the current infrastructure gate, not permission to bypass it; VAT API calls remain fail-closed.
 
-### Missing-data escalation to HMRC
+### Missing-data fallback
 
-Do not use destination port `443`, a random port, a made-up licence, `null` or `undefined`. Send the following to `SDSTeam@hmrc.gov.uk`, replacing only the application ID and correcting the deployment description if the architecture changes:
-
-```text
-Subject: Fraud prevention missing-data guidance — WEB_APP_VIA_SERVER — sandbox application [APPLICATION ID]
-
-Hello,
-
-We are implementing HMRC MTD VAT for Website Expert NI using the
-WEB_APP_VIA_SERVER connection method and fraud prevention specification 3.3.
-
-Our current sandbox development deployment is exposed through a zrok TLS tunnel.
-The tunnel provides the originating public IP, but it does not expose the public
-TCP source port used by the browser to our Laravel application. We therefore
-cannot accurately populate Gov-Client-Public-Port and will not substitute the
-destination port 443 or a fabricated value.
-
-The software does not currently issue a licence identifier on the originating
-browser device, so there is no genuine value available for
-Gov-Vendor-License-IDs.
-
-On 11 November 2026 the Test Fraud Prevention Headers API returned
-INVALID_HEADERS under specification 3.3: one error for the missing
-Gov-Client-Public-Port and one warning for the missing Gov-Vendor-License-IDs.
-
-Please confirm either:
-1. the supported deployment approach for accurately forwarding the originating
-   public source port through this type of tunnel; or
-2. whether these fields may be omitted for this architecture and provide the
-   written exception/reference we should retain for production approval.
-
-Sandbox Application ID: [APPLICATION ID]
-
-Kind regards,
-Website Expert NI
-```
-
-Do not attach API logs, headers, tokens, the full VRN or the private evidence export. Retain HMRC's reply and reference; only then configure an explicitly approved missing-header allow-list.
+Do not use destination port `443`, a random port, a made-up licence, `null` or `undefined`. First validate the direct Apache deployment from an external network. Escalation to HMRC is only a fallback if that deployment still cannot supply a genuinely required value; no missing-header allow-list may be configured without a written HMRC exception.
 
 ## Planned API operations
 
@@ -214,7 +182,7 @@ The UKFIN-611 automated contract matrix runs with outbound HTTP disabled. It exe
 | HMRC 5xx | deterministic HTTP contract simulation | `outcome_unknown`, no retry, reconciliation required |
 | Timeout | deterministic connection-failure simulation | `outcome_unknown`, no retry, no transport details persisted |
 
-HMRC documents that not every failure can be generated with `Gov-Test-Scenario`; therefore 5xx and timeout are transport simulations rather than invented header values. The live success/4xx runs remain intentionally blocked until the real originating source port and licence-header position pass the Fraud Prevention Headers gate. No real VAT Return was submitted while completing this matrix.
+HMRC documents that not every failure can be generated with `Gov-Test-Scenario`; therefore 5xx and timeout are transport simulations rather than invented header values. The live success/4xx runs remain intentionally blocked until the direct-host Fraud Prevention Headers test passes and the genuine licence-header position is recorded. No real VAT Return was submitted while completing this matrix.
 
 ## Production security gate
 
