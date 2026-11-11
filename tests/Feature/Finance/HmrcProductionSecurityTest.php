@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Finance;
 
+use App\Services\Hmrc\Exceptions\HmrcFraudPreventionException;
 use App\Services\Hmrc\HmrcEnvironmentGuard;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
 use App\Services\Hmrc\HmrcProductionClient;
@@ -99,6 +100,29 @@ class HmrcProductionSecurityTest extends TestCase
             $this->fail('An allowed missing header must have an HMRC exception reference.');
         } catch (DomainException $exception) {
             $this->assertSame(__('finance.hmrc_security.errors.fph_exception_reference'), $exception->getMessage());
+        }
+
+        Http::assertNothingSent();
+    }
+
+    public function test_sandbox_vendor_license_override_cannot_relax_production_headers(): void
+    {
+        $this->enableProductionReadAccess();
+        config()->set('hmrc.fraud_prevention.sandbox_allow_missing_vendor_license', true);
+        Http::fake();
+        $headers = $this->fraudHeaders();
+        unset($headers['Gov-Vendor-License-IDs']);
+
+        try {
+            (new HmrcProductionClient)->retrieveVatObligations(
+                'production-access-token',
+                '123456789',
+                [],
+                $headers,
+            );
+            $this->fail('A sandbox-only warning override must not relax production headers.');
+        } catch (HmrcFraudPreventionException $exception) {
+            $this->assertStringContainsString('Gov-Vendor-License-IDs', $exception->getMessage());
         }
 
         Http::assertNothingSent();

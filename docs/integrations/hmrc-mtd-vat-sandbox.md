@@ -1,6 +1,6 @@
 # HMRC MTD VAT — sandbox setup
 
-**Status:** Deployed on the direct Apache host; production-host OAuth reconnect and external-network fraud-header validation pending
+**Status:** Direct-host validation reached zero errors; sandbox E2E may proceed with one documented missing-licence warning while production remains blocked
 **Verified against official HMRC documentation:** 11 November 2026
 **Scope:** Website Expert NI, direct business journey, VAT MTD only
 
@@ -36,9 +36,10 @@ The following are **not required** for the first end-to-end VAT sandbox journey:
   - `HMRC_VENDOR_PUBLIC_IP` — public IP reached by the originating browser.
   - `HMRC_VENDOR_FORWARDING_CHAIN` — every in-scope public TLS termination IP, in client-to-HMRC order; for a single server it is the same value as `HMRC_VENDOR_PUBLIC_IP`.
   - `HMRC_VENDOR_LICENSE_ID` — intentionally empty unless a genuine installation/software licence identifier exists; the system sends only its SHA-256 hash.
-- [ ] Confirm with the Test API that the direct Apache connection exposes the real originating public IP and source TCP port through Laravel request values. Run this test from mobile data or a phone hotspot, not from the server's local Wi-Fi, because NAT hairpin traffic can appear as a private gateway address. If a future reverse proxy/WAF is introduced, configure `HMRC_CLIENT_PUBLIC_IP_HEADER` and `HMRC_CLIENT_PUBLIC_PORT_HEADER`; the trusted edge must strip client-supplied versions and overwrite both. `X-Forwarded-Port: 443` is a destination port and must not be substituted for the source port.
+- [x] Confirm with the Test API that the direct Apache connection exposes the real originating public IP and source TCP port through Laravel request values. The successful test used a mobile-data hotspot; LAN NAT-hairpin traffic was correctly rejected as private. If a future reverse proxy/WAF is introduced, configure `HMRC_CLIENT_PUBLIC_IP_HEADER` and `HMRC_CLIENT_PUBLIC_PORT_HEADER`; the trusted edge must strip client-supplied versions and overwrite both. `X-Forwarded-Port: 443` is a destination port and must not be substituted for the source port.
 - [x] Set up authenticator-app MFA for the owner/admin who will validate and initiate HMRC operations.
-- [ ] If a genuinely required value cannot be collected, contact HMRC first. Only after HMRC accepts the exceptional case may its exact header name be listed in `HMRC_FPH_ALLOWED_MISSING_HEADERS`; never use `null`, `undefined` or another placeholder.
+- [x] For sandbox E2E only, set `HMRC_SANDBOX_ALLOW_MISSING_VENDOR_LICENSE=true` after the Test API returned zero errors and only the `Gov-Vendor-License-IDs` warning. This switch is hard-coded to that single header and is ignored in production.
+- [ ] Before production, either supply a genuine originating-device licence or obtain an HMRC exception and record it through `HMRC_FPH_ALLOWED_MISSING_HEADERS` plus `HMRC_FPH_EXCEPTION_REFERENCE`; never use `null`, `undefined` or another placeholder.
 - [ ] Keep `HMRC_ENVIRONMENT=sandbox` until the complete sandbox and security gates pass.
 - [x] Create or reuse an **organisation** test user and retain its test User ID, password and VRN in a password manager.
 - [ ] Reconnect OAuth on `website-expert.uk` using the test user's HMRC credentials; the previous zrok-host connection is not copied to the server database.
@@ -78,7 +79,7 @@ At `/admin/hmrc-connection`, an owner/admin can choose **Validate fraud headers*
 
 The panel now exposes **Retrieve fraud-header feedback** as a separate sandbox-only action. It validates the feedback envelope and displays only the number of assessed requests, timestamp and a safe correlation ID. Raw feedback, header values and tokens are not displayed or persisted.
 
-The implementation, mocked contract tests and server deployment are complete. The earlier zrok test reported one error (`Gov-Client-Public-Port`) and one warning (`Gov-Vendor-License-IDs`). The application now runs directly behind Apache/PHP-FPM, where the source TCP port is available as `REMOTE_PORT`; an external-network Test API run must confirm this end to end. Passing the Test API is feedback on formatting and values, not a guarantee of production compliance.
+The implementation, mocked contract tests and server deployment are complete. The earlier zrok test reported one error (`Gov-Client-Public-Port`) and one warning (`Gov-Vendor-License-IDs`). On 11 November 2026, a direct-host test over a mobile-data hotspot returned `POTENTIALLY_INVALID_HEADERS` with zero errors and one missing-licence warning, proving that public client IP, timestamp, source port and forwarding chain are now collected. Passing the Test API is feedback on formatting and values, not a guarantee of production compliance.
 
 ### Deployed validation topology
 
@@ -96,7 +97,7 @@ php artisan hmrc:export-sandbox-evidence website-expert
 
 The default private output directory is `storage/app/private/hmrc-evidence`. The export is sandbox-only and includes the Website Expert NI name, pseudonymous business/actor references, connection/scopes status, obligation counts, operation evidence and verified submission hashes. Migration `2026_11_11_000032_create_hmrc_sandbox_evidence_events_table.php` creates the tenant evidence store.
 
-Live evidence captured on 2026-11-11 contains four integrity-verified events. The latest HMRC specification 3.3 preflight returned `INVALID_HEADERS` with one error for missing `Gov-Client-Public-Port` and one warning for missing `Gov-Vendor-License-IDs`. Feedback retrieval itself succeeded twice, but HMRC returned an empty request list (`request_count=0`). This is evidence of the current infrastructure gate, not permission to bypass it; VAT API calls remain fail-closed.
+Initial evidence captured on 2026-11-11 recorded the zrok limitation. After direct deployment, the latest specification 3.3 preflight returned `POTENTIALLY_INVALID_HEADERS` with zero errors and one warning for missing `Gov-Vendor-License-IDs`; feedback retrieval also succeeded. Sandbox VAT calls may omit only that header when `HMRC_SANDBOX_ALLOW_MISSING_VENDOR_LICENSE=true`. Production remains fail-closed and still requires a genuine licence or a referenced HMRC exception.
 
 ### Missing-data fallback
 

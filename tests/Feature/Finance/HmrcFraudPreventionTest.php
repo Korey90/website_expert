@@ -124,10 +124,11 @@ class HmrcFraudPreventionTest extends TestCase
         $this->assertContains('Gov-Client-Public-Port', $result->missingHeaders);
     }
 
-    public function test_explicit_hmrc_exception_can_allow_a_genuinely_missing_header(): void
+    public function test_observed_sandbox_warning_can_allow_only_the_missing_vendor_license_header(): void
     {
         config()->set('hmrc.fraud_prevention.vendor_license_id', null);
-        config()->set('hmrc.fraud_prevention.allowed_missing_headers', ['Gov-Vendor-License-IDs']);
+        config()->set('hmrc.environment', 'sandbox');
+        config()->set('hmrc.fraud_prevention.sandbox_allow_missing_vendor_license', true);
 
         $result = app(HmrcFraudPreventionHeaders::class)->build(
             $this->requestWithBrowserContext(),

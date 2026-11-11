@@ -304,6 +304,16 @@ class HmrcFraudPreventionHeaders
             array_filter((array) config('hmrc.fraud_prevention.allowed_missing_headers', []), 'is_string'),
         );
 
+        // The Test API reports a warning (not an error) when a browser-based
+        // SaaS product has no genuine licence installed on the originating
+        // device. Permit only that observed sandbox condition so end-to-end
+        // test journeys can run without fabricating a licence. Production
+        // continues to require a real value or a referenced HMRC exception.
+        if (config('hmrc.environment') === 'sandbox'
+            && config('hmrc.fraud_prevention.sandbox_allow_missing_vendor_license') === true) {
+            $allowed[] = strtolower('Gov-Vendor-License-IDs');
+        }
+
         return array_values(array_filter(
             self::REQUIRED_HEADERS,
             fn (string $header): bool => ! isset($present[strtolower($header)]) && ! in_array(strtolower($header), $allowed, true),

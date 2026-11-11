@@ -18,6 +18,10 @@ return [
         'vendor_public_ip' => env('HMRC_VENDOR_PUBLIC_IP'),
         'vendor_forwarding_chain' => env('HMRC_VENDOR_FORWARDING_CHAIN'),
         'vendor_license_id' => env('HMRC_VENDOR_LICENSE_ID'),
+        'sandbox_allow_missing_vendor_license' => filter_var(
+            env('HMRC_SANDBOX_ALLOW_MISSING_VENDOR_LICENSE', false),
+            FILTER_VALIDATE_BOOL,
+        ),
         'exception_reference' => env('HMRC_FPH_EXCEPTION_REFERENCE'),
         'allowed_missing_headers' => array_values(array_filter(array_map(
             'trim',

@@ -1,6 +1,6 @@
 # Current Task
 
-**Status:** W toku — UKFIN-612 wdrożone na serwerze produkcyjnie równoważnym; oczekuje na ponowną walidację FPH i sandbox E2E
+**Status:** W toku — direct-host FPH ma 0 błędów; sandbox E2E odblokowywane z jednym kontrolowanym ostrzeżeniem licencyjnym
 **Zadanie:** HMRC MTD VAT sandbox end-to-end
 **Data rozpoczęcia:** 2026-11-10
 **Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
@@ -41,8 +41,10 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 - ✅ Live evidence 2026-11-11: łańcuch 4/4 poprawny. Najnowszy preflight HMRC zwrócił `INVALID_HEADERS` według specyfikacji 3.3 (1 error: brak `Gov-Client-Public-Port`; 1 warning: brak `Gov-Vendor-License-IDs`). Dwa odczyty feedbacku zakończyły się poprawnie, ale HMRC zwrócił pustą listę (`request_count=0`). Zredagowany eksport: `hmrc-sandbox-evidence-20261111-200359.json`, file SHA-256 `529a113bb66eefec48a85c1ddd2dae58d69b7f9d104ea8a74ae18d397801dcec`.
 - ✅ Release `c8a23a3` wdrożony 2026-11-11 do `/var/www/website-expert.uk`: 32 migracje finansowe/HMRC wykonane, tenant audit `invalid_count=0`, produkcyjny build klienta i SSR aktywne, queue worker działa, `APP_DEBUG=false`, Composer/NPM audit = 0. Utworzono oddzielne kopie kodu, bazy i `.env`; produkcyjne przełączniki HMRC pozostają wyłączone.
 - ✅ Docelowa topologia FPH to bezpośredni Apache/PHP-FPM bez zrok i reverse proxy. `HMRC_VENDOR_PUBLIC_IP` oraz forwarding chain wskazują publiczny adres serwera, a `HMRC_PRODUCT_VERSION=c8a23a3`; publiczny port klienta jest pobierany z `REMOTE_PORT`.
+- ✅ Ponowna walidacja przez hotspot 2026-11-11: `POTENTIALLY_INVALID_HEADERS`, spec 3.3, `errors=0`, `warnings=1`; publiczny IP, timestamp, source port i forwarding chain zostały zaakceptowane. Jedynym ostrzeżeniem jest brak `Gov-Vendor-License-IDs`; feedback został pobrany poprawnie.
+- ✅ Dodano ograniczony przełącznik `HMRC_SANDBOX_ALLOW_MISSING_VENDOR_LICENSE`: pozwala wyłącznie sandboxowi pominąć ten jeden nagłówek po zaobserwowanym wyniku Test API. Test bezpieczeństwa potwierdza, że produkcja nadal odrzuca brak licencji przed HTTP.
 - ⛔ UKFIN-612 pozostaje formalnie otwarte: wymagany jest niezależny authenticated pentest oraz zamknięcie FPH source-port/licence i procedury HMRC production access.
-- ➡️ Następna akcja zewnętrzna: ustawić w aplikacji HMRC sandbox callback `https://website-expert.uk/admin/hmrc/oauth/callback`, połączyć OAuth ponownie i uruchomić walidację FPH z urządzenia korzystającego z internetu mobilnego/hotspotu. Test z domowego Wi-Fi może przejść przez NAT hairpin i pokazać prywatny adres zamiast rzeczywistego klienta.
+- ➡️ Następna akcja: po wdrożeniu kontrolowanego sandboxowego wyjątku pobrać rzeczywiste obligations, następnie przejść read-only return/liabilities/payments przed kontrolowanym submission scenariusza sandbox.
 
 - `UKFIN-601`: użytkownik posiada konto HMRC Developer Hub i pierwszą aplikację sandbox.
 - Do aplikacji trzeba dodać: VAT (MTD) API v1.0, Create Test User API v1.0 i Test Fraud Prevention Headers API v1.0.
@@ -95,7 +97,7 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 ## Gate
 
 - UKFIN-601 jest zakończony: trzy API są aktywne, credentials skonfigurowane, a OAuth testowej organizacji przeszedł end-to-end.
-- Rzeczywisty validator FPH przez zrok zaakceptował 14/16 nagłówków. Bezpośrednie wdrożenie Apache/PHP-FPM powinno udostępnić `REMOTE_PORT`, ale musi to potwierdzić ponowny test z zewnętrznej sieci; `Gov-Vendor-License-IDs` może powstać wyłącznie z prawdziwego modelu licencji.
+- Rzeczywisty validator FPH przez bezpośredni Apache i hotspot zaakceptował wszystkie dane sieciowe: 0 błędów, 1 ostrzeżenie dotyczące wyłącznie braku prawdziwej licencji na urządzeniu użytkownika.
 - Testowy VRN jest zapisany. Rzeczywiste obligations i operacje read-only oczekują na rozwiązanie/akceptację dwóch braków FPH.
 - `php artisan hmrc:production-readiness` zwraca obecnie NOT READY/exit 1 zgodnie z projektem; dostęp i submission produkcyjne mają niezależne blokady.
 - Audyty PHP i JavaScript są czyste; wymagany jest jeszcze niezależny authenticated pentest wdrożonego, produkcyjnie równoważnego środowiska.
