@@ -8,6 +8,7 @@ use App\Services\Hmrc\Exceptions\HmrcFraudPreventionException;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
 use App\Services\Hmrc\HmrcProductionClient;
 use App\Services\Hmrc\HmrcSandboxClient;
+use App\Services\Hmrc\HmrcSandboxScenario;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use InvalidArgumentException;
@@ -94,7 +95,7 @@ class HmrcVatClientTest extends TestCase
             '123456789',
             $payload,
             $this->fraudHeaders(),
-            'DEFAULT',
+            null,
         );
 
         $this->assertSame(201, $response->status);
@@ -104,7 +105,40 @@ class HmrcVatClientTest extends TestCase
         Http::assertSentCount(1);
         Http::assertSent(fn (Request $request): bool => $request->method() === 'POST'
             && $request->url() === 'https://test-api.service.hmrc.gov.uk/organisations/vat/123456789/returns'
+            && ! $request->hasHeader('Gov-Test-Scenario')
             && $request->data() === $payload);
+    }
+
+    public function test_submission_scenarios_are_restricted_to_the_official_endpoint_catalogue(): void
+    {
+        Http::fake(['*' => Http::response([
+            'code' => 'VRN_INVALID',
+            'message' => 'Invalid VRN.',
+        ], 400)]);
+        $payload = ['periodKey' => '26A3', 'finalised' => true];
+
+        try {
+            (new HmrcSandboxClient)->submitVatReturn(
+                'token',
+                '123456789',
+                $payload,
+                $this->fraudHeaders(),
+                HmrcSandboxScenario::SUBMISSION_INVALID_VRN,
+            );
+        } catch (HmrcApiException $exception) {
+            $this->assertSame('VRN_INVALID', $exception->errorCode);
+        }
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unsupported HMRC sandbox submission scenario.');
+
+        (new HmrcSandboxClient)->submitVatReturn(
+            'token',
+            '123456789',
+            $payload,
+            $this->fraudHeaders(),
+            'QUARTERLY_NONE_MET',
+        );
     }
 
     public function test_client_supports_return_liability_and_payment_read_paths(): void

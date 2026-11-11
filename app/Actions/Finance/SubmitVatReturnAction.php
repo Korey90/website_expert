@@ -65,11 +65,15 @@ final class SubmitVatReturnAction
             $lockedConnection = HmrcConnection::withoutGlobalScopes()->lockForUpdate()->findOrFail($connection->id);
             $this->assertConnection($lockedConnection, $lockedReturn->business_id);
 
-            if (HmrcVatSubmission::withoutGlobalScopes()
+            $submission = HmrcVatSubmission::withoutGlobalScopes()
                 ->where('business_id', $lockedReturn->business_id)
                 ->where('vat_return_id', $lockedReturn->id)
                 ->where('environment', $lockedConnection->environment)
-                ->exists()) {
+                ->lockForUpdate()
+                ->first();
+
+            if ($submission && ($submission->status !== HmrcVatSubmission::STATUS_REJECTED
+                || $submission->failure_code === 'DUPLICATE_SUBMISSION')) {
                 throw new DomainException(__('finance.vat_returns.errors.submission_exists'));
             }
 
@@ -93,7 +97,7 @@ final class SubmitVatReturnAction
             $payload = $this->payloadService->build($lockedReturn, (string) $obligation->period_key);
             $payloadHash = $this->payloadService->hash($payload);
             $declaredAt = now();
-            $submission = HmrcVatSubmission::withoutGlobalScopes()->create([
+            $attributes = [
                 'business_id' => $lockedReturn->business_id,
                 'vat_return_id' => $lockedReturn->id,
                 'hmrc_vat_obligation_id' => $obligation->id,
@@ -107,7 +111,29 @@ final class SubmitVatReturnAction
                 'mfa_verified_at' => $mfa['verified_at'],
                 'mfa_reference_hash' => hash('sha256', $mfa['unique_reference']),
                 'submitted_by' => $actor->id,
-            ]);
+                'submitted_at' => null,
+                'processing_date' => null,
+                'form_bundle_number' => null,
+                'payment_indicator' => null,
+                'charge_reference' => null,
+                'correlation_id' => null,
+                'failure_code' => null,
+                'failure_status' => null,
+                'reconciliation_status' => null,
+                'reconciliation_count' => 0,
+                'reconciled_at' => null,
+                'reconciled_by' => null,
+                'hmrc_received_date' => null,
+                'reconciliation_correlation_id' => null,
+                'reconciliation_error_code' => null,
+                'reconciliation_error_status' => null,
+            ];
+
+            if ($submission) {
+                $submission->forceFill($attributes)->save();
+            } else {
+                $submission = HmrcVatSubmission::withoutGlobalScopes()->create($attributes);
+            }
             $this->audit->record(
                 $submission,
                 HmrcVatSubmissionAuditService::EVENT_PREPARED,
@@ -178,7 +204,11 @@ final class SubmitVatReturnAction
                 return $record->fresh(['submittedBy']);
             }, 3);
         } catch (Throwable $exception) {
-            $this->markOutcomeUnknown($submission, $actor, $exception);
+            if ($this->isDefinitiveRejection($exception)) {
+                $this->markRejected($submission, $actor, $exception);
+            } else {
+                $this->markOutcomeUnknown($submission, $actor, $exception);
+            }
 
             throw $exception;
         }
@@ -301,6 +331,41 @@ final class SubmitVatReturnAction
                 ],
             );
         }, 3);
+    }
+
+    private function markRejected(HmrcVatSubmission $submission, User $actor, HmrcApiException $exception): void
+    {
+        DB::transaction(function () use ($submission, $actor, $exception): void {
+            $record = HmrcVatSubmission::withoutGlobalScopes()->lockForUpdate()->findOrFail($submission->id);
+            $failureCode = mb_substr($exception->errorCode, 0, 100);
+            $correlationId = $this->correlationId($exception->correlationId);
+            $record->update([
+                'status' => HmrcVatSubmission::STATUS_REJECTED,
+                'failure_code' => $failureCode,
+                'failure_status' => $exception->status,
+                'correlation_id' => $correlationId,
+            ]);
+            $this->audit->record(
+                $record,
+                HmrcVatSubmissionAuditService::EVENT_REJECTED,
+                HmrcVatSubmission::STATUS_REJECTED,
+                $actor,
+                [
+                    'failure_code' => $failureCode,
+                    'failure_status' => $exception->status,
+                    'correlation_id' => $correlationId,
+                    'reconciliation_available' => $failureCode === 'DUPLICATE_SUBMISSION',
+                ],
+            );
+        }, 3);
+    }
+
+    private function isDefinitiveRejection(Throwable $exception): bool
+    {
+        return $exception instanceof HmrcApiException
+            && $exception->status >= 400
+            && $exception->status < 500
+            && $exception->status !== 408;
     }
 
     private function correlationId(?string $value): ?string

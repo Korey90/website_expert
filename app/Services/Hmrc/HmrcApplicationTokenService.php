@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Http;
 
 class HmrcApplicationTokenService
 {
+    public function __construct(
+        private readonly HmrcEnvironmentGuard $environmentGuard,
+    ) {}
+
     public function issue(): string
     {
         $environment = (string) config('hmrc.environment', 'sandbox');
@@ -22,6 +26,8 @@ class HmrcApplicationTokenService
             || ! is_string($clientSecret) || trim($clientSecret) === '') {
             throw HmrcFraudPreventionException::configuration();
         }
+
+        $this->environmentGuard->assertApplicationTokenConfiguration($environment, $tokenUrl);
 
         try {
             $response = Http::asForm()

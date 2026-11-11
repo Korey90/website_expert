@@ -77,6 +77,7 @@ abstract class AbstractHmrcVatClient implements HmrcClientInterface
         ?string $testScenario = null,
     ): HmrcApiResponse {
         $this->assertVrn($vrn);
+        HmrcSandboxScenario::assertValidSubmissionScenario($testScenario);
 
         if ($payload === []) {
             throw new InvalidArgumentException('HMRC VAT return payload cannot be empty.');
@@ -165,12 +166,18 @@ abstract class AbstractHmrcVatClient implements HmrcClientInterface
         array $fraudPreventionHeaders,
         ?string $testScenario,
     ): HmrcApiResponse {
-        if (trim($accessToken) === '') {
-            throw new InvalidArgumentException('HMRC access token is required.');
-        }
-
         if ($testScenario !== null && ! $this->sandbox) {
             throw new InvalidArgumentException('Gov-Test-Scenario is only allowed in the HMRC sandbox.');
+        }
+
+        app(HmrcEnvironmentGuard::class)->assertVatRequestAllowed(
+            $this->sandbox,
+            $this->baseUrl,
+            $method === 'POST',
+        );
+
+        if (trim($accessToken) === '') {
+            throw new InvalidArgumentException('HMRC access token is required.');
         }
 
         try {

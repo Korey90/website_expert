@@ -21,14 +21,20 @@ class HmrcApiException extends RuntimeException
     public static function fromResponse(Response $response): self
     {
         $status = $response->status();
-        $errorCode = (string) data_get($response->json(), 'code', 'HMRC_REQUEST_FAILED');
+        $topLevelCode = self::safeCode(data_get($response->json(), 'code'));
+        $nestedCode = self::safeCode(data_get($response->json(), 'errors.0.code'));
+        $errorCode = $topLevelCode === 'BUSINESS_ERROR' && $nestedCode !== null
+            ? $nestedCode
+            : ($topLevelCode ?? 'HMRC_REQUEST_FAILED');
         $correlationId = $response->header('X-CorrelationId');
 
         return new self(
             "HMRC API request failed [{$errorCode}] (HTTP {$status}).",
             $errorCode,
             $status,
-            is_string($correlationId) && $correlationId !== '' ? $correlationId : null,
+            is_string($correlationId) && preg_match('/^[A-Za-z0-9._:-]{1,100}$/', $correlationId) === 1
+                ? $correlationId
+                : null,
         );
     }
 
@@ -41,5 +47,16 @@ class HmrcApiException extends RuntimeException
             null,
             $previous,
         );
+    }
+
+    private static function safeCode(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $value = strtoupper(trim($value));
+
+        return preg_match('/^[A-Z0-9_-]{1,100}$/', $value) === 1 ? $value : null;
     }
 }

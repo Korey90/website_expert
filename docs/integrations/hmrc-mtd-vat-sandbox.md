@@ -107,7 +107,7 @@ An owner or administrator can use **Sync VAT obligations** at `/admin/hmrc-conne
 
 Special period keys containing `#` are accepted and percent-encoded when used in an HMRC URL. An invalid or duplicate response, a missing `read:vat` scope or an inactive/non-owner membership fails without partial period changes.
 
-For fixed sandbox responses, `HMRC_SANDBOX_OBLIGATIONS_SCENARIO`, `HMRC_SANDBOX_RETURN_SCENARIO`, `HMRC_SANDBOX_LIABILITIES_SCENARIO`, `HMRC_SANDBOX_PAYMENTS_SCENARIO` and `HMRC_SANDBOX_SUBMISSION_SCENARIO` may optionally be set to endpoint-specific HMRC `Gov-Test-Scenario` values. Leave them blank for sandbox defaults and never set a test scenario in production.
+For fixed sandbox responses, `HMRC_SANDBOX_OBLIGATIONS_SCENARIO`, `HMRC_SANDBOX_RETURN_SCENARIO`, `HMRC_SANDBOX_LIABILITIES_SCENARIO`, `HMRC_SANDBOX_PAYMENTS_SCENARIO` and `HMRC_SANDBOX_SUBMISSION_SCENARIO` may optionally be set to endpoint-specific HMRC `Gov-Test-Scenario` values. Submission values are fail-closed to the endpoint's documented catalogue: `INVALID_VRN`, `INVALID_PERIODKEY`, `INVALID_PAYLOAD`, `DUPLICATE_SUBMISSION`, `TAX_PERIOD_NOT_ENDED` and `INSOLVENT_TRADER`. Leave the submission value blank for the successful default and never set a test scenario in production.
 
 The local MySQL migration is `2026_11_10_000027_create_hmrc_vat_obligations_table.php`. Mocked integration coverage is complete; the real obligations call remains pending until the external sandbox checklist is complete.
 
@@ -123,11 +123,11 @@ The locked VAT Return detail page exposes **Submit to HMRC** only to an active t
 
 The POST payload is built only from the locked snapshot, uses the obligation's hidden canonical `periodKey` and always sends `finalised: true`. Before the network request, the system persists a tenant-owned attempt with snapshot/payload hashes, declaration version, actor and hashed MFA reference. A successful HTTP 201 receipt is schema-validated; its form bundle and charge reference are encrypted at rest.
 
-There is no automatic POST retry. A timeout, HMRC 5xx, non-201 success response or malformed receipt marks the attempt as `outcome_unknown`, blocks another submission and permits only the GET-based reconciliation described below. The local migration is `2026_11_11_000029_create_hmrc_vat_submissions_table.php`.
+There is no blind POST retry. A timeout, HMRC 5xx, non-201 success response or malformed receipt marks the attempt as `outcome_unknown`, blocks another submission and permits only the GET-based reconciliation described below. A definitive 4xx response is recorded as `rejected` with only its sanitised code, status and correlation ID. After its cause is corrected, a non-duplicate rejection can be submitted again only through a new explicit declaration and fresh MFA; the same audit record is re-prepared and retains the complete event chain. A duplicate rejection is special: the current POST was rejected, but because a remote return already exists it permits only GET-based reconciliation and never another POST. The local migration is `2026_11_11_000029_create_hmrc_vat_submissions_table.php`.
 
 ## Implemented unknown-outcome reconciliation
 
-For an `outcome_unknown` attempt, the VAT Return page exposes **Check HMRC status** after a fresh authenticator code. Reconciliation performs only safe GET requests and never repeats the submission POST:
+For an `outcome_unknown` attempt, or a `DUPLICATE_SUBMISSION` rejection, the VAT Return page exposes **Check HMRC status** after a fresh authenticator code. Reconciliation performs only safe GET requests and never repeats the submission POST:
 
 1. retrieve the obligation for the exact locked return period;
 2. if it remains open, retain `outcome_unknown` and record `pending_open`;
@@ -144,6 +144,25 @@ Every direct submission and reconciliation transition appends an immutable tenan
 After a direct successful HTTP 201 submission with a complete HMRC receipt, an authorised user with `submit_tax_returns` can download a private, `no-store` PDF from the VAT Return page. The PDF contains the form bundle, optional charge reference, processing time, immutable snapshot/payload hashes and verified audit events. It is clearly labelled as system-generated evidence of the HMRC API response, not an HMRC-issued document. A return confirmed later only by GET reconciliation cannot generate a substitute receipt because HMRC does not return the original form bundle through that path.
 
 Each generated PDF is SHA-256 hashed and adds a `receipt_generated` event. Migration `2026_11_11_000031_create_hmrc_vat_submission_events_table.php` creates the append-only event store.
+
+## Sandbox scenario matrix
+
+The UKFIN-611 automated contract matrix runs with outbound HTTP disabled. It exercises the same application action, OAuth refresh, HTTP client, persistence, policy and append-only audit path used by the UI:
+
+| Scenario | Sandbox input | Required local result |
+|---|---|---|
+| Success | no `Gov-Test-Scenario` | one POST, validated HTTP 201 receipt, `submitted` |
+| Invalid VRN | `INVALID_VRN` | sanitised 4xx, `rejected`, no blind retry |
+| Expired access token | locally expired token | atomic refresh-token rotation, then exactly one submission POST |
+| Duplicate | `DUPLICATE_SUBMISSION` | `rejected`, then GET-only reconciliation is available |
+| HMRC 5xx | deterministic HTTP contract simulation | `outcome_unknown`, no retry, reconciliation required |
+| Timeout | deterministic connection-failure simulation | `outcome_unknown`, no retry, no transport details persisted |
+
+HMRC documents that not every failure can be generated with `Gov-Test-Scenario`; therefore 5xx and timeout are transport simulations rather than invented header values. The live success/4xx runs remain intentionally blocked until the real originating source port and licence-header position pass the Fraud Prevention Headers gate. No real VAT Return was submitted while completing this matrix.
+
+## Production security gate
+
+Production is protected by separate read-access and submission switches, exact HMRC endpoint/callback validation and approval-reference gates. The release procedure, security findings, HMRC approval sequence and emergency stop are maintained in [HMRC production readiness and security gate](hmrc-production-readiness.md). A failed readiness check blocks production; sandbox credentials or a successful OAuth connection are never sufficient to unlock it.
 
 ## Official references
 

@@ -14,6 +14,8 @@ final class HmrcVatSubmissionAuditService
 
     public const EVENT_SUBMITTED = 'submitted';
 
+    public const EVENT_REJECTED = 'rejected';
+
     public const EVENT_OUTCOME_UNKNOWN = 'outcome_unknown';
 
     public const EVENT_RECONCILIATION_PENDING = 'reconciliation_pending';
@@ -29,6 +31,7 @@ final class HmrcVatSubmissionAuditService
     private const EVENT_TYPES = [
         self::EVENT_PREPARED,
         self::EVENT_SUBMITTED,
+        self::EVENT_REJECTED,
         self::EVENT_OUTCOME_UNKNOWN,
         self::EVENT_RECONCILIATION_PENDING,
         self::EVENT_RECONCILIATION_MATCHED,

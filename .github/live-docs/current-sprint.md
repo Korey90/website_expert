@@ -11,7 +11,7 @@
 
 ### In Progress
 
-- [ ] `UKFIN-611` [M] — sandbox scenarios: success, invalid VRN, expired token, duplicate, 5xx i timeout.
+- [ ] `UKFIN-612` [M] — techniczne zabezpieczenia i checklista wdrożone; pozostały: krytyczny DOMPurify, niezależny pentest oraz zewnętrzne gate'y FPH/HMRC.
 
 ### To Do
 
@@ -19,6 +19,7 @@
 
 ### Done
 
+- [x] `UKFIN-611` [M] — deterministyczna macierz success/invalid VRN/expired token/duplicate/5xx/timeout, ścisły katalog submission scenarios, audytowane `rejected` i GET-only reconciliation duplikatu; live run nadal za gate'em FPH.
 - [x] `UKFIN-610` [M] — append-only SHA-256 event chain oraz prywatny, integrity-checked PDF receipt po bezpośrednim HTTP 201.
 - [x] `UKFIN-609` [M] — bezpieczne GET-only reconciliation `outcome_unknown`: pending open, nine-box match albo trwały conflict, z audytem każdej kontroli i bez ponownego POST.
 - [x] `UKFIN-608` [M] — kontrolowany submit z locked snapshotu, dokładną deklaracją HMRC, świeżym TOTP, FPH, trwałą próbą przed POST, walidowanym szyfrowanym receipt oraz `outcome_unknown` bez automatycznego retry.

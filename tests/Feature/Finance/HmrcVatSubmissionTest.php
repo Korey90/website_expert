@@ -16,6 +16,7 @@ use App\Models\VatReturn;
 use App\Services\Finance\VatReturnSnapshotService;
 use App\Services\Hmrc\Exceptions\HmrcApiException;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
+use App\Services\Hmrc\HmrcSandboxScenario;
 use App\Services\Hmrc\HmrcVatReturnPayload;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -100,7 +101,7 @@ class HmrcVatSubmissionTest extends TestCase
             'chargeRefNumber' => 'A1B2C3D4E5F6',
         ], 201, ['X-CorrelationId' => 'corr-submit-1'])]);
 
-        $submission = $this->submit('QUARTERLY_NONE_MET');
+        $submission = $this->submit();
 
         $this->assertSame(HmrcVatSubmission::STATUS_SUBMITTED, $submission->status);
         $this->assertSame($this->return->snapshot_hash, $submission->snapshot_hash);
@@ -139,7 +140,7 @@ class HmrcVatSubmissionTest extends TestCase
             return $request->method() === 'POST'
                 && $request->url() === 'https://test-api.service.hmrc.gov.uk/organisations/vat/123456789/returns'
                 && $request->hasHeader('Authorization', 'Bearer sandbox-access-token')
-                && $request->hasHeader('Gov-Test-Scenario', 'QUARTERLY_NONE_MET')
+                && ! $request->hasHeader('Gov-Test-Scenario')
                 && $request->data() === [
                     'periodKey' => '26A3',
                     'vatDueSales' => 100.25,
@@ -198,6 +199,160 @@ class HmrcVatSubmissionTest extends TestCase
         $this->assertSame(503, $attempt->failure_status);
         $this->assertArrayNotHasKey('failure_code', $attempt->toArray());
         $this->assertDatabaseMissing('hmrc_vat_submissions', ['failure_code' => 'sensitive upstream detail']);
+    }
+
+    public function test_invalid_vrn_is_rejected_and_allows_only_an_explicit_audited_retry_after_correction(): void
+    {
+        Http::fakeSequence()
+            ->push([
+                'code' => 'BUSINESS_ERROR',
+                'message' => 'Business validation failed for sensitive VRN 123456789.',
+                'errors' => [[
+                    'code' => 'VRN_INVALID',
+                    'message' => 'Sensitive nested response.',
+                ]],
+            ], 400, ['X-CorrelationId' => 'corr-invalid-vrn'])
+            ->push([
+                'processingDate' => '2026-11-11T13:15:00Z',
+                'formBundleNumber' => '456789012345',
+            ], 201, ['X-CorrelationId' => 'corr-corrected-submit']);
+
+        try {
+            $this->submit(HmrcSandboxScenario::SUBMISSION_INVALID_VRN);
+            $this->fail('The invalid VRN scenario should be rejected.');
+        } catch (HmrcApiException $exception) {
+            $this->assertSame('VRN_INVALID', $exception->errorCode);
+            $this->assertSame(400, $exception->status);
+            $this->assertStringNotContainsString('123456789', $exception->getMessage());
+        }
+
+        $attempt = HmrcVatSubmission::withoutGlobalScopes()->sole();
+        $this->assertSame(HmrcVatSubmission::STATUS_REJECTED, $attempt->status);
+        $this->assertSame('VRN_INVALID', $attempt->failure_code);
+        $this->assertSame(400, $attempt->failure_status);
+        $this->assertFalse($attempt->canReconcile());
+        $this->assertSame(
+            ['prepared', 'rejected'],
+            HmrcVatSubmissionEvent::withoutGlobalScopes()->orderBy('sequence')->pluck('event_type')->all(),
+        );
+        Http::assertSentCount(1);
+        Http::assertSent(fn (Request $request): bool => $request->hasHeader(
+            'Gov-Test-Scenario',
+            HmrcSandboxScenario::SUBMISSION_INVALID_VRN,
+        ));
+
+        $this->actingAs($this->owner);
+        $this->assertTrue($this->owner->can('submit', $this->return));
+        $corrected = $this->submit();
+
+        $this->assertSame($attempt->id, $corrected->id);
+        $this->assertSame(HmrcVatSubmission::STATUS_SUBMITTED, $corrected->status);
+        $this->assertNull($corrected->failure_code);
+        $this->assertSame(
+            ['prepared', 'rejected', 'prepared', 'submitted'],
+            HmrcVatSubmissionEvent::withoutGlobalScopes()->orderBy('sequence')->pluck('event_type')->all(),
+        );
+        $submissionPosts = Http::recorded()->filter(fn (array $pair): bool => $pair[0]->method() === 'POST'
+            && str_contains($pair[0]->url(), '/organisations/vat/'));
+        $this->assertCount(2, $submissionPosts);
+        $this->assertFalse($submissionPosts->last()[0]->hasHeader('Gov-Test-Scenario'));
+    }
+
+    public function test_expired_access_token_is_refreshed_before_exactly_one_submission_post(): void
+    {
+        HmrcConnection::withoutGlobalScopes()->sole()->forceFill([
+            'expires_at' => now()->subMinute(),
+        ])->save();
+        Http::fake(function (Request $request) {
+            if ($request->url() === 'https://test-api.service.hmrc.gov.uk/oauth/token') {
+                return Http::response([
+                    'access_token' => 'refreshed-access-token',
+                    'refresh_token' => 'rotated-refresh-token',
+                    'token_type' => 'bearer',
+                    'expires_in' => 14400,
+                    'scope' => 'read:vat write:vat',
+                ]);
+            }
+
+            return Http::response([
+                'processingDate' => '2026-11-11T13:00:00Z',
+                'formBundleNumber' => '987654321098',
+            ], 201, ['X-CorrelationId' => 'corr-refreshed-submit']);
+        });
+
+        $submission = $this->submit();
+
+        $this->assertSame(HmrcVatSubmission::STATUS_SUBMITTED, $submission->status);
+        $connection = HmrcConnection::withoutGlobalScopes()->sole();
+        $this->assertSame('refreshed-access-token', $connection->access_token);
+        $this->assertSame('rotated-refresh-token', $connection->refresh_token);
+        $this->assertSame($this->owner->id, $connection->refreshed_by);
+        Http::assertSentCount(2);
+        Http::assertSent(fn (Request $request): bool => $request->url() === 'https://test-api.service.hmrc.gov.uk/oauth/token'
+            && $request['grant_type'] === 'refresh_token'
+            && $request['refresh_token'] === 'sandbox-refresh-token');
+        $posts = Http::recorded()->filter(fn (array $pair): bool => $pair[0]->method() === 'POST'
+            && str_contains($pair[0]->url(), '/organisations/vat/'));
+        $this->assertCount(1, $posts);
+        $this->assertTrue($posts->first()[0]->hasHeader('Authorization', 'Bearer refreshed-access-token'));
+    }
+
+    public function test_duplicate_sandbox_scenario_is_rejected_then_available_for_get_only_reconciliation(): void
+    {
+        Http::fakeSequence()
+            ->push([
+                'code' => 'DUPLICATE_SUBMISSION',
+                'message' => 'A return already exists.',
+            ], 403, ['X-CorrelationId' => 'corr-duplicate'])
+            ->push(['obligations' => [[
+                'start' => '2026-07-01',
+                'end' => '2026-09-30',
+                'due' => '2026-11-07',
+                'status' => 'O',
+                'periodKey' => '26A3',
+            ]]], 200, ['X-CorrelationId' => 'corr-duplicate-check']);
+
+        try {
+            $this->submit(HmrcSandboxScenario::SUBMISSION_DUPLICATE);
+            $this->fail('The duplicate scenario should be rejected.');
+        } catch (HmrcApiException $exception) {
+            $this->assertSame('DUPLICATE_SUBMISSION', $exception->errorCode);
+        }
+
+        $attempt = HmrcVatSubmission::withoutGlobalScopes()->sole();
+        $this->assertSame(HmrcVatSubmission::STATUS_REJECTED, $attempt->status);
+        $this->assertTrue($attempt->canReconcile());
+        $this->actingAs($this->owner);
+        $this->assertTrue($this->owner->can('reconcile', $this->return));
+
+        $result = $this->reconcile();
+
+        $this->assertSame(HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN, $result->status);
+        $this->assertSame(HmrcVatSubmission::RECONCILIATION_PENDING_OPEN, $result->reconciliation_status);
+        $posts = Http::recorded()->filter(fn (array $pair): bool => $pair[0]->method() === 'POST'
+            && str_contains($pair[0]->url(), '/organisations/vat/'));
+        $this->assertCount(1, $posts);
+    }
+
+    public function test_timeout_records_an_unknown_outcome_without_retry_or_sensitive_transport_details(): void
+    {
+        Http::fake(Http::failedConnection('sandbox-access-token 123456789 transport detail'));
+
+        try {
+            $this->submit();
+            $this->fail('The timeout scenario should fail.');
+        } catch (HmrcApiException $exception) {
+            $this->assertSame('HMRC_UNREACHABLE', $exception->errorCode);
+            $this->assertSame(503, $exception->status);
+            $this->assertStringNotContainsString('sandbox-access-token', $exception->getMessage());
+            $this->assertStringNotContainsString('123456789', $exception->getMessage());
+        }
+
+        $attempt = HmrcVatSubmission::withoutGlobalScopes()->sole();
+        $this->assertSame(HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN, $attempt->status);
+        $this->assertSame('HMRC_UNREACHABLE', $attempt->failure_code);
+        $this->assertTrue($attempt->canReconcile());
+        Http::assertSentCount(1);
     }
 
     public function test_it_requires_the_legal_declaration_permission_and_a_matching_open_obligation_before_posting(): void

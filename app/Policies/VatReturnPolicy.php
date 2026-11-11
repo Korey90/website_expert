@@ -51,14 +51,27 @@ class VatReturnPolicy
     {
         return PermissionHelper::allows($user, 'submit_tax_returns')
             && $return->status === VatReturn::STATUS_LOCKED
-            && ! $return->hmrcSubmission()->exists()
+            && ! $return->hmrcSubmission()
+                ->where(function ($query): void {
+                    $query->where('status', '!=', HmrcVatSubmission::STATUS_REJECTED)
+                        ->orWhere('failure_code', 'DUPLICATE_SUBMISSION');
+                })
+                ->exists()
             && $this->belongsToCurrentBusiness($return);
     }
 
     public function reconcile(User $user, VatReturn $return): bool
     {
         return PermissionHelper::allows($user, 'submit_tax_returns')
-            && $return->hmrcSubmission()->where('status', HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN)->exists()
+            && $return->hmrcSubmission()
+                ->where(function ($query): void {
+                    $query->where('status', HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN)
+                        ->orWhere(function ($query): void {
+                            $query->where('status', HmrcVatSubmission::STATUS_REJECTED)
+                                ->where('failure_code', 'DUPLICATE_SUBMISSION');
+                        });
+                })
+                ->exists()
             && $this->belongsToCurrentBusiness($return);
     }
 

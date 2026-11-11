@@ -16,6 +16,8 @@ class HmrcVatSubmission extends Model
 
     public const STATUS_SUBMITTED = 'submitted';
 
+    public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_OUTCOME_UNKNOWN = 'outcome_unknown';
 
     public const STATUS_OUTCOME_CONFLICT = 'outcome_conflict';
@@ -100,5 +102,11 @@ class HmrcVatSubmission extends Model
     public function events(): HasMany
     {
         return $this->hasMany(HmrcVatSubmissionEvent::class)->orderBy('sequence');
+    }
+
+    public function canReconcile(): bool
+    {
+        return $this->status === self::STATUS_OUTCOME_UNKNOWN
+            || ($this->status === self::STATUS_REJECTED && $this->failure_code === 'DUPLICATE_SUBMISSION');
     }
 }

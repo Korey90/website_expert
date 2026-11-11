@@ -401,12 +401,12 @@ return [
         'submission' => [
             'modal_title' => 'Enviar declaração de IVA ao HMRC',
             'modal_description' => 'Verifique cuidadosamente o snapshot bloqueado. O sistema envia os nove valores imutáveis e não repete automaticamente o pedido se o resultado for incerto.',
-            'statuses' => ['prepared' => 'Preparada', 'submitted' => 'Enviada', 'outcome_unknown' => 'Resultado desconhecido — reconciliação necessária', 'outcome_conflict' => 'Conflito — existe uma declaração diferente no HMRC'],
+            'statuses' => ['prepared' => 'Preparada', 'submitted' => 'Enviada', 'rejected' => 'Rejeitada pelo HMRC', 'outcome_unknown' => 'Resultado desconhecido — reconciliação necessária', 'outcome_conflict' => 'Conflito — existe uma declaração diferente no HMRC'],
             'reconciliation_modal_title' => 'Verificar o resultado do envio no HMRC',
             'reconciliation_modal_description' => 'Esta operação efetua apenas pedidos GET seguros e nunca volta a enviar a declaração. Se o HMRC tiver cumprido a obrigação, os nove campos são comparados com o snapshot bloqueado.',
             'reconciliation_statuses' => ['pending_open' => 'Ainda aberta no HMRC', 'matched' => 'Nove campos coincidentes', 'conflict' => 'Declaração diferente no HMRC', 'check_failed' => 'Última verificação falhou'],
             'event_types' => [
-                'prepared' => 'Envio preparado', 'submitted' => 'Envio aceite pelo HMRC',
+                'prepared' => 'Envio preparado', 'submitted' => 'Envio aceite pelo HMRC', 'rejected' => 'Envio rejeitado pelo HMRC',
                 'outcome_unknown' => 'Resultado do envio desconhecido', 'reconciliation_pending' => 'Reconciliação ainda pendente',
                 'reconciliation_matched' => 'Reconciliação coincidente', 'reconciliation_conflict' => 'Conflito de reconciliação',
                 'reconciliation_failed' => 'Verificação de reconciliação falhou', 'receipt_generated' => 'Recibo gerado',
@@ -447,7 +447,7 @@ return [
             'submission_mfa' => 'O envio ao HMRC exige um fator recente e verificado da aplicação autenticadora.',
             'submission_payload' => 'O snapshot bloqueado não contém um payload HMRC válido.',
             'submission_response' => 'O HMRC devolveu um recibo de envio inválido. O resultado deve ser reconciliado antes de repetir.',
-            'reconciliation_unknown_only' => 'Apenas um envio com resultado desconhecido pode ser reconciliado.',
+            'reconciliation_unknown_only' => 'Apenas um resultado desconhecido ou uma rejeição por envio duplicado pode ser reconciliado.',
             'reconciliation_context' => 'O contexto de auditoria do envio HMRC está incompleto ou pertence a outro tenant.',
             'reconciliation_payload' => 'A declaração de IVA reconstruída não corresponde ao payload registado antes do envio.',
             'reconciliation_connection' => 'A reconciliação exige uma conta HMRC ligada com read:vat e um VRN válido.',
@@ -506,6 +506,17 @@ return [
             'source_type' => 'Tipo de origem', 'source_id' => 'ID de origem', 'attachment_id' => 'ID do anexo',
             'original_name' => 'Nome original do ficheiro', 'mime_type' => 'Tipo MIME', 'bytes' => 'Bytes', 'sha256' => 'SHA-256',
             'scan_status' => 'Estado da verificação', 'inclusion_status' => 'Estado de inclusão', 'package_path' => 'Caminho no pacote',
+        ],
+    ],
+    'hmrc_security' => [
+        'errors' => [
+            'configuration' => 'O ambiente HMRC não está configurado de forma segura.',
+            'client_environment' => 'O cliente HMRC não corresponde ao ambiente selecionado.',
+            'endpoint' => 'Um endpoint HMRC não corresponde ao endpoint oficial deste ambiente.',
+            'redirect_uri' => 'O callback HMRC deve usar o host da aplicação e um caminho seguro aprovado.',
+            'production_access_locked' => 'O acesso de produção HMRC está bloqueado até serem registadas a aprovação e uma decisão explícita de implementação.',
+            'production_submission_locked' => 'O envio de produção HMRC está bloqueado até serem configurados a referência de aprovação e o interruptor explícito de envio.',
+            'fph_exception_reference' => 'Uma exceção de produção para cabeçalhos antifraude requer a referência de aprovação HMRC.',
         ],
     ],
     'hmrc_connection' => [

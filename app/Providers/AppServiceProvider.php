@@ -45,6 +45,7 @@ use App\Policies\SupplierPolicy;
 use App\Policies\VatAdjustmentPolicy;
 use App\Policies\VatReturnPolicy;
 use App\Services\Hmrc\Contracts\HmrcClientInterface;
+use App\Services\Hmrc\HmrcEnvironmentGuard;
 use App\Services\Hmrc\HmrcProductionClient;
 use App\Services\Hmrc\HmrcSandboxClient;
 use Illuminate\Support\Facades\Config;
@@ -59,7 +60,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(HmrcClientInterface::class, function () {
-            return config('hmrc.environment') === 'production'
+            return app(HmrcEnvironmentGuard::class)->environment() === 'production'
                 ? new HmrcProductionClient
                 : new HmrcSandboxClient;
         });

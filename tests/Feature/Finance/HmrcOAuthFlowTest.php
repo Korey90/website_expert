@@ -31,6 +31,7 @@ class HmrcOAuthFlowTest extends TestCase
         Http::preventStrayRequests();
 
         config()->set([
+            'app.url' => 'http://localhost',
             'hmrc.environment' => 'sandbox',
             'hmrc.oauth_state_ttl' => 600,
             'hmrc.scopes' => ['read:vat', 'write:vat'],

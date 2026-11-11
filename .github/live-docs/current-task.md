@@ -1,6 +1,6 @@
 # Current Task
 
-**Status:** W toku — UKFIN-610 ukończone; następny etap UKFIN-611
+**Status:** W toku — UKFIN-612 technicznie wdrożone; release gate nadal zablokowany
 **Zadanie:** HMRC MTD VAT sandbox end-to-end
 **Data rozpoczęcia:** 2026-11-10
 **Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
@@ -29,7 +29,13 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 - ✅ `UKFIN-610`: append-only event log obejmuje prepared/submitted/outcome_unknown, reconciliation pending/matched/conflict/failed oraz receipt generation; zdarzenia tworzą weryfikowany łańcuch SHA-256 i nie przechowują tokenów, pełnego VRN, MFA, period key ani raw response.
 - ✅ Prywatny PDF receipt jest dostępny tylko po bezpośrednim HTTP 201 z pełnym receipt i `submit_tax_returns`; weryfikuje snapshot, payload i audit chain, ma `no-store`, SHA-256 oraz jasne oznaczenie, że jest dowodem systemowym, a nie dokumentem wystawionym przez HMRC.
 - ✅ Migracja `2026_11_11_000031` wykonana; tenant audit valid; HMRC 63/384, Finance 330 passed + 1 skipped / 2361 assertions; EN/PL/PT po 1240 zgodnych kluczy; Blade cache i Pint poprawne.
-- Następny etap implementacyjny: `UKFIN-611` — sandbox scenarios: success, invalid VRN, expired token, duplicate, 5xx i timeout.
+- ✅ `UKFIN-611`: deterministyczna macierz workflow obejmuje success, invalid VRN, expired token, duplicate, 5xx i timeout bez prawdziwego submission; submit scenario ma ścisły allow-list zgodny z endpointem.
+- ✅ Jednoznaczne 4xx są audytowane jako `rejected`; duplikat udostępnia wyłącznie GET-only reconciliation, a 5xx/timeout pozostają `outcome_unknown`. Wygasły token jest rotowany atomowo przed dokładnie jednym POST.
+- ✅ HMRC targeted 66/396; Finance 335 passed + 1 skipped / 2404 assertions; EN/PL/PT po 1242 zgodne klucze; live success/4xx pozostają celowo zablokowane do zamknięcia gate'u FPH source port/licence.
+- ✅ `UKFIN-612` technical controls: exact official endpoint/callback guard, osobne fail-closed production access/submission switches, approval references i bezsekretowy `hmrc:production-readiness` z exit code 1 przy każdym niespełnionym warunku.
+- ✅ PHP dependency audit oczyszczony z 11 advisory (`composer audit` = 0); tracked-secret scan bez trafień; checklista i evidence gate są w `docs/integrations/hmrc-production-readiness.md`.
+- ✅ HMRC targeted 74/421; Finance 343 passed + 1 skipped / 2429 assertions; full regression 853 passed / 9 znanych baseline failures / 11 skipped / 3885 assertions, wykonany przed finalnym pozytywnym testem gate'u, który przeszedł osobno; EN/PL/PT po 1249 kluczy; tenant audit i Blade poprawne.
+- ⛔ UKFIN-612 pozostaje formalnie otwarte: `dompurify <=3.4.16` ma krytyczne advisory (pliki `package*.json` chronione podczas równoległej pracy), wymagany jest niezależny authenticated pentest oraz zamknięcie FPH source-port/licence i procedury HMRC production access.
 
 - `UKFIN-601`: użytkownik posiada konto HMRC Developer Hub i pierwszą aplikację sandbox.
 - Do aplikacji trzeba dodać: VAT (MTD) API v1.0, Create Test User API v1.0 i Test Fraud Prevention Headers API v1.0.
@@ -84,5 +90,7 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 - UKFIN-601 jest zakończony: trzy API są aktywne, credentials skonfigurowane, a OAuth testowej organizacji przeszedł end-to-end.
 - Rzeczywisty validator FPH działa i akceptuje 14/16 nagłówków; `Gov-Client-Public-Port` wymaga infrastruktury zachowującej source port, a `Gov-Vendor-License-IDs` prawdziwego modelu licencji albo uzgodnienia z HMRC.
 - Testowy VRN jest zapisany. Rzeczywiste obligations i operacje read-only oczekują na rozwiązanie/akceptację dwóch braków FPH.
+- `php artisan hmrc:production-readiness` zwraca obecnie NOT READY/exit 1 zgodnie z projektem; dostęp i submission produkcyjne mają niezależne blokady.
+- Krytyczne advisory DOMPurify musi zostać usunięte po zwolnieniu ochrony `package*.json`; następnie wymagany jest niezależny pentest środowiska staging.
 - Żadne prawdziwe dane ani deklaracje nie są wysyłane na tym etapie.
 - `HMRC_ENVIRONMENT` pozostaje `sandbox` do czasu przejścia OAuth, fraud headers, pełnych scenariuszy sandbox, security review i jawnej decyzji właściciela.

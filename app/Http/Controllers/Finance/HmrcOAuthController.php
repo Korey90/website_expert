@@ -7,6 +7,7 @@ use App\Models\Business;
 use App\Models\User;
 use App\Services\Hmrc\Exceptions\HmrcOAuthException;
 use App\Services\Hmrc\HmrcOAuthService;
+use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -22,7 +23,7 @@ class HmrcOAuthController extends Controller
 
         try {
             return redirect()->away($this->oauth->authorizationUrl($request, $business, $actor));
-        } catch (HmrcOAuthException $exception) {
+        } catch (HmrcOAuthException|DomainException $exception) {
             return $this->failure($exception);
         }
     }
@@ -33,7 +34,7 @@ class HmrcOAuthController extends Controller
 
         try {
             $this->oauth->completeAuthorization($request, $business, $actor);
-        } catch (HmrcOAuthException $exception) {
+        } catch (HmrcOAuthException|DomainException $exception) {
             return $this->failure($exception);
         }
 
@@ -46,7 +47,7 @@ class HmrcOAuthController extends Controller
 
         try {
             $this->oauth->refresh($business, $actor);
-        } catch (HmrcOAuthException $exception) {
+        } catch (HmrcOAuthException|DomainException $exception) {
             return $this->failure($exception);
         }
 
@@ -88,7 +89,7 @@ class HmrcOAuthController extends Controller
         return redirect()->route('filament.admin.resources.vat-returns.index');
     }
 
-    private function failure(HmrcOAuthException $exception): RedirectResponse
+    private function failure(HmrcOAuthException|DomainException $exception): RedirectResponse
     {
         return $this->destination()->with('error', $exception->getMessage());
     }

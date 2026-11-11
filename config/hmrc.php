@@ -18,6 +18,7 @@ return [
         'vendor_public_ip' => env('HMRC_VENDOR_PUBLIC_IP'),
         'vendor_forwarding_chain' => env('HMRC_VENDOR_FORWARDING_CHAIN'),
         'vendor_license_id' => env('HMRC_VENDOR_LICENSE_ID'),
+        'exception_reference' => env('HMRC_FPH_EXCEPTION_REFERENCE'),
         'allowed_missing_headers' => array_values(array_filter(array_map(
             'trim',
             explode(',', (string) env('HMRC_FPH_ALLOWED_MISSING_HEADERS', '')),
@@ -39,6 +40,12 @@ return [
     ],
 
     'production' => [
+        'access_enabled' => env('HMRC_PRODUCTION_ACCESS_ENABLED', false),
+        'submission_enabled' => env('HMRC_PRODUCTION_SUBMISSION_ENABLED', false),
+        'approval_reference' => env('HMRC_PRODUCTION_APPROVAL_REFERENCE'),
+        'fph_validation_reference' => env('HMRC_PRODUCTION_FPH_VALIDATION_REFERENCE'),
+        'security_review_reference' => env('HMRC_PRODUCTION_SECURITY_REVIEW_REFERENCE'),
+        'owner_approval_reference' => env('HMRC_PRODUCTION_OWNER_APPROVAL_REFERENCE'),
         'base_url' => env('HMRC_PRODUCTION_BASE_URL', 'https://api.service.hmrc.gov.uk'),
         'authorize_url' => env('HMRC_PRODUCTION_AUTHORIZE_URL', 'https://www.tax.service.gov.uk/oauth/authorize'),
         'token_url' => env('HMRC_PRODUCTION_TOKEN_URL', 'https://api.service.hmrc.gov.uk/oauth/token'),

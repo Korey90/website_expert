@@ -18,6 +18,10 @@ class HmrcOAuthService
 {
     private const SESSION_KEY = 'hmrc.oauth.pending';
 
+    public function __construct(
+        private readonly HmrcEnvironmentGuard $environmentGuard,
+    ) {}
+
     public function authorizationUrl(Request $request, Business $business, User $actor): string
     {
         $configuration = $this->configuration();
@@ -208,6 +212,8 @@ class HmrcOAuthService
             }
         }
 
+        $this->environmentGuard->assertOAuthConfiguration($environment, $configuration);
+
         return [
             'environment' => $environment,
             'authorize_url' => rtrim($configuration['authorize_url'], '/'),
@@ -220,13 +226,7 @@ class HmrcOAuthService
 
     private function environment(): string
     {
-        $environment = (string) config('hmrc.environment', 'sandbox');
-
-        if (! in_array($environment, ['sandbox', 'production'], true)) {
-            throw HmrcOAuthException::configuration();
-        }
-
-        return $environment;
+        return $this->environmentGuard->environment();
     }
 
     /**

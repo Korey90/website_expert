@@ -401,12 +401,12 @@ return [
         'submission' => [
             'modal_title' => 'Submit VAT Return to HMRC',
             'modal_description' => 'Check the locked snapshot carefully. The system sends its immutable nine-box values and will not retry automatically if the outcome is uncertain.',
-            'statuses' => ['prepared' => 'Prepared', 'submitted' => 'Submitted', 'outcome_unknown' => 'Outcome unknown — reconciliation required', 'outcome_conflict' => 'Conflict — a different return exists at HMRC'],
+            'statuses' => ['prepared' => 'Prepared', 'submitted' => 'Submitted', 'rejected' => 'Rejected by HMRC', 'outcome_unknown' => 'Outcome unknown — reconciliation required', 'outcome_conflict' => 'Conflict — a different return exists at HMRC'],
             'reconciliation_modal_title' => 'Check the submission outcome with HMRC',
             'reconciliation_modal_description' => 'This performs only safe GET requests. It never resubmits the VAT Return. If HMRC has fulfilled the obligation, all nine boxes are compared with the locked snapshot.',
             'reconciliation_statuses' => ['pending_open' => 'Still open at HMRC', 'matched' => 'Matched all nine boxes', 'conflict' => 'Different return at HMRC', 'check_failed' => 'Last check failed'],
             'event_types' => [
-                'prepared' => 'Submission prepared', 'submitted' => 'HMRC accepted submission',
+                'prepared' => 'Submission prepared', 'submitted' => 'HMRC accepted submission', 'rejected' => 'HMRC rejected submission',
                 'outcome_unknown' => 'Submission outcome unknown', 'reconciliation_pending' => 'Reconciliation still pending',
                 'reconciliation_matched' => 'Reconciliation matched', 'reconciliation_conflict' => 'Reconciliation conflict',
                 'reconciliation_failed' => 'Reconciliation check failed', 'receipt_generated' => 'Receipt generated',
@@ -447,7 +447,7 @@ return [
             'submission_mfa' => 'A fresh verified authenticator-app factor is required for HMRC submission.',
             'submission_payload' => 'The locked VAT Return snapshot does not contain a valid HMRC submission payload.',
             'submission_response' => 'HMRC returned an invalid submission receipt. The outcome must be reconciled before retrying.',
-            'reconciliation_unknown_only' => 'Only a submission with an unknown outcome can be reconciled.',
+            'reconciliation_unknown_only' => 'Only a submission with an unknown outcome or a duplicate rejection can be reconciled.',
             'reconciliation_context' => 'The HMRC submission audit context is incomplete or belongs to another tenant.',
             'reconciliation_payload' => 'The reconstructed VAT Return does not match the payload recorded before submission.',
             'reconciliation_connection' => 'A connected HMRC account with read:vat and a valid VRN is required for reconciliation.',
@@ -506,6 +506,17 @@ return [
             'source_type' => 'Source type', 'source_id' => 'Source ID', 'attachment_id' => 'Attachment ID',
             'original_name' => 'Original filename', 'mime_type' => 'MIME type', 'bytes' => 'Bytes', 'sha256' => 'SHA-256',
             'scan_status' => 'Scan status', 'inclusion_status' => 'Inclusion status', 'package_path' => 'Package path',
+        ],
+    ],
+    'hmrc_security' => [
+        'errors' => [
+            'configuration' => 'The HMRC environment is not safely configured.',
+            'client_environment' => 'The HMRC client does not match the selected environment.',
+            'endpoint' => 'An HMRC service endpoint does not match the official endpoint for this environment.',
+            'redirect_uri' => 'The HMRC callback URL must use the application host and a secure approved path.',
+            'production_access_locked' => 'HMRC production access is locked until approval and an explicit deployment decision are recorded.',
+            'production_submission_locked' => 'HMRC production submission is locked until the production approval reference and explicit submission switch are configured.',
+            'fph_exception_reference' => 'A production fraud-header exception requires the HMRC approval reference.',
         ],
     ],
     'hmrc_connection' => [

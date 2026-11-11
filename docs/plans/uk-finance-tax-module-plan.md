@@ -1,6 +1,6 @@
 # Plan modułu finansów, księgowości i podatków UK
 
-**Status:** IMPLEMENTACJA W TOKU — Fazy 0–5 zaimplementowane, Faza 6 w toku (`UKFIN-601`–`UKFIN-610` ukończone; `UKFIN-611` następne); formalny gate księgowego pozostaje przed produkcyjnym submission
+**Status:** IMPLEMENTACJA W TOKU — Fazy 0–5 zaimplementowane, Faza 6 w toku (`UKFIN-601`–`UKFIN-611` ukończone; techniczna część `UKFIN-612` wdrożona, release gate nadal otwarty); formalny gate księgowego pozostaje przed produkcyjnym submission
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
 **Projekt:** WebsiteExpert  
@@ -460,8 +460,8 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-608` [M] Submit VAT return z review, declaration i step-up confirmation. *(ukończone 2026-11-11: locked snapshot + matching open obligation, exact HMRC business declaration, fresh TOTP, FPH, `submit_tax_returns`, `write:vat`, prepared attempt before POST, SHA-256 audit, validated encrypted HTTP 201 receipt i fail-safe `outcome_unknown` bez blind retry; migracja `000029`, HMRC 55/319, Finance 322 passed + 1 skipped / 2296 assertions, PL/EN/PT po 1197 kluczy)*
 - [x] `UKFIN-609` [M] Idempotency, timeout recovery i submission status reconciliation. *(ukończone 2026-11-11: GET-only obligations + view return, pending-open bez retry, nine-box match albo trwały conflict, ponowna kontrola snapshot/payload hash, audyt aktora/czasu/count/received/error/correlation, TOTP + FPH + read:vat; migracja `000030`, HMRC 60/354, Finance 327 passed + 1 skipped / 2331 assertions, PL/EN/PT po 1219 kluczy)*
 - [x] `UKFIN-610` [M] HMRC audit log i receipt download. *(ukończone 2026-11-11: append-only event sequence + SHA-256 chain dla submission/reconciliation/receipt, immutable events, allow-listed metadata bez tokenów/full VRN/MFA/period key/raw response, tenant audit; prywatny no-store PDF wyłącznie po bezpośrednim HTTP 201 i pełnym receipt, snapshot/payload/audit verification, dokument SHA-256 i jawna klasyfikacja system evidence; migracja `000031`, HMRC 63/384, Finance 330 passed + 1 skipped / 2361 assertions, PL/EN/PT po 1240 kluczy)*
-- [ ] `UKFIN-611` [M] Sandbox scenarios: success, invalid VRN, expired token, duplicate, 5xx, timeout.
-- [ ] `UKFIN-612` [M] Security review, penetration test i production access checklist.
+- [x] `UKFIN-611` [M] Sandbox scenarios: success, invalid VRN, expired token, duplicate, 5xx, timeout. *(ukończone 2026-11-11: endpointowy allow-list `Gov-Test-Scenario`; deterministyczna macierz pełnego workflow bez ruchu zewnętrznego; 4xx jako audytowane `rejected` z kontrolowanym, jawnym retry po korekcie, duplikat wyłącznie z GET-only reconciliation, 5xx/timeout jako `outcome_unknown`, wygasły token odświeżany przed dokładnie jednym POST; live run pozostaje za gate'em FPH; HMRC 66/396, Finance 335 passed + 1 skipped / 2404 assertions)*
+- [ ] `UKFIN-612` [M] Security review, penetration test i production access checklist. *(2026-11-11: wdrożono fail-closed environment/endpoint/callback guard, osobne production access/submission kill switches, wymagane referencje HMRC/FPH/security/owner oraz bezsekretowy `hmrc:production-readiness`; powstała checklista `docs/integrations/hmrc-production-readiness.md`; PHP audit 0 advisory, HMRC 74/421, Finance 343 passed + 1 skipped / 2429 assertions. Do zamknięcia: krytyczne advisory DOMPurify po zakończeniu równoległej pracy w `package*.json`, niezależny pentest, FPH source-port/licence lub pisemne wyjątki HMRC i production approval.)*
 - [ ] `UKFIN-613` [M] Pilot na jednej firmie i jednej deklaracji pod nadzorem księgowego.
 
 **Gate:** brak automatycznych submission; produkcja dopiero po pozytywnym sandboxie i zgodzie właściciela.

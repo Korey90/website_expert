@@ -401,12 +401,12 @@ return [
         'submission' => [
             'modal_title' => 'Wyślij deklarację VAT do HMRC',
             'modal_description' => 'Dokładnie sprawdź zablokowany snapshot. System wyśle jego niezmienne wartości dziewięciu pól i nie ponowi automatycznie żądania, gdy wynik będzie niepewny.',
-            'statuses' => ['prepared' => 'Przygotowana', 'submitted' => 'Wysłana', 'outcome_unknown' => 'Wynik nieznany — wymagane uzgodnienie', 'outcome_conflict' => 'Konflikt — w HMRC istnieje inna deklaracja'],
+            'statuses' => ['prepared' => 'Przygotowana', 'submitted' => 'Wysłana', 'rejected' => 'Odrzucona przez HMRC', 'outcome_unknown' => 'Wynik nieznany — wymagane uzgodnienie', 'outcome_conflict' => 'Konflikt — w HMRC istnieje inna deklaracja'],
             'reconciliation_modal_title' => 'Sprawdź wynik wysyłki w HMRC',
             'reconciliation_modal_description' => 'Operacja wykonuje wyłącznie bezpieczne żądania GET i nigdy nie wysyła deklaracji ponownie. Jeśli HMRC zamknął obowiązek, wszystkie dziewięć pól zostanie porównane z zablokowanym snapshotem.',
             'reconciliation_statuses' => ['pending_open' => 'Nadal otwarty w HMRC', 'matched' => 'Zgodne wszystkie dziewięć pól', 'conflict' => 'Inna deklaracja w HMRC', 'check_failed' => 'Ostatnia kontrola nieudana'],
             'event_types' => [
-                'prepared' => 'Przygotowano wysyłkę', 'submitted' => 'HMRC przyjął wysyłkę',
+                'prepared' => 'Przygotowano wysyłkę', 'submitted' => 'HMRC przyjął wysyłkę', 'rejected' => 'HMRC odrzucił wysyłkę',
                 'outcome_unknown' => 'Nieznany wynik wysyłki', 'reconciliation_pending' => 'Uzgodnienie nadal oczekuje',
                 'reconciliation_matched' => 'Uzgodnienie zgodne', 'reconciliation_conflict' => 'Konflikt uzgodnienia',
                 'reconciliation_failed' => 'Kontrola uzgodnienia nieudana', 'receipt_generated' => 'Wygenerowano potwierdzenie',
@@ -447,7 +447,7 @@ return [
             'submission_mfa' => 'Wysyłka do HMRC wymaga świeżo zweryfikowanego kodu z aplikacji uwierzytelniającej.',
             'submission_payload' => 'Zablokowany snapshot VAT Return nie zawiera prawidłowego payloadu do HMRC.',
             'submission_response' => 'HMRC zwrócił nieprawidłowe potwierdzenie wysyłki. Przed ponowieniem należy uzgodnić wynik.',
-            'reconciliation_unknown_only' => 'Uzgodnić można wyłącznie wysyłkę o nieznanym wyniku.',
+            'reconciliation_unknown_only' => 'Uzgodnić można wyłącznie nieznany wynik wysyłki albo odrzucenie z powodu duplikatu.',
             'reconciliation_context' => 'Kontekst audytowy wysyłki HMRC jest niekompletny lub należy do innego tenanta.',
             'reconciliation_payload' => 'Odtworzona deklaracja VAT nie odpowiada payloadowi zapisanemu przed wysyłką.',
             'reconciliation_connection' => 'Uzgodnienie wymaga połączonego konta HMRC z read:vat i prawidłowym VRN.',
@@ -506,6 +506,17 @@ return [
             'source_type' => 'Typ źródła', 'source_id' => 'ID źródła', 'attachment_id' => 'ID załącznika',
             'original_name' => 'Oryginalna nazwa pliku', 'mime_type' => 'Typ MIME', 'bytes' => 'Bajty', 'sha256' => 'SHA-256',
             'scan_status' => 'Status skanowania', 'inclusion_status' => 'Status dołączenia', 'package_path' => 'Ścieżka w pakiecie',
+        ],
+    ],
+    'hmrc_security' => [
+        'errors' => [
+            'configuration' => 'Środowisko HMRC nie jest bezpiecznie skonfigurowane.',
+            'client_environment' => 'Klient HMRC nie odpowiada wybranemu środowisku.',
+            'endpoint' => 'Endpoint usługi HMRC nie odpowiada oficjalnemu endpointowi dla tego środowiska.',
+            'redirect_uri' => 'Callback HMRC musi używać hosta aplikacji i bezpiecznej, zatwierdzonej ścieżki.',
+            'production_access_locked' => 'Dostęp produkcyjny HMRC jest zablokowany do czasu zapisania akceptacji i jawnej decyzji wdrożeniowej.',
+            'production_submission_locked' => 'Produkcyjne wysyłanie do HMRC jest zablokowane do czasu skonfigurowania referencji akceptacji i jawnego przełącznika wysyłki.',
+            'fph_exception_reference' => 'Produkcyjny wyjątek dla nagłówków fraud prevention wymaga referencji akceptacji HMRC.',
         ],
     ],
     'hmrc_connection' => [

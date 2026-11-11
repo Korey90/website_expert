@@ -29,6 +29,7 @@ class HmrcVatObligationSyncTest extends TestCase
 
         Http::preventStrayRequests();
         config()->set([
+            'app.url' => 'http://localhost',
             'hmrc.environment' => 'sandbox',
             'hmrc.sandbox.base_url' => 'https://test-api.service.hmrc.gov.uk',
             'hmrc.sandbox.token_url' => 'https://test-api.service.hmrc.gov.uk/oauth/token',

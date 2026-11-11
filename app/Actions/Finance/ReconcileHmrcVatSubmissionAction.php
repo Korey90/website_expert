@@ -142,7 +142,7 @@ final class ReconcileHmrcVatSubmissionAction
                 ->lockForUpdate()
                 ->first();
 
-            if (! $submission || $submission->status !== HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN) {
+            if (! $submission || ! $submission->canReconcile()) {
                 throw new DomainException(__('finance.vat_returns.errors.reconciliation_unknown_only'));
             }
 
@@ -275,7 +275,7 @@ final class ReconcileHmrcVatSubmissionAction
             $submission = HmrcVatSubmission::withoutGlobalScopes()->lockForUpdate()
                 ->findOrFail($context['submission']->id);
 
-            if ($submission->status !== HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN) {
+            if (! $submission->canReconcile()) {
                 throw new DomainException(__('finance.vat_returns.errors.reconciliation_unknown_only'));
             }
 
@@ -337,7 +337,7 @@ final class ReconcileHmrcVatSubmissionAction
         DB::transaction(function () use ($submission, $actor, $exception): void {
             $record = HmrcVatSubmission::withoutGlobalScopes()->lockForUpdate()->find($submission->id);
 
-            if (! $record || $record->status !== HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN) {
+            if (! $record || ! $record->canReconcile()) {
                 return;
             }
 
@@ -357,7 +357,7 @@ final class ReconcileHmrcVatSubmissionAction
             $this->audit->record(
                 $record,
                 HmrcVatSubmissionAuditService::EVENT_RECONCILIATION_FAILED,
-                HmrcVatSubmission::STATUS_OUTCOME_UNKNOWN,
+                $record->status,
                 $actor,
                 [
                     'error_code' => $record->reconciliation_error_code,
