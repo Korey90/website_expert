@@ -92,6 +92,48 @@ php artisan hmrc:export-sandbox-evidence website-expert
 
 The default private output directory is `storage/app/private/hmrc-evidence`. The export is sandbox-only and includes the Website Expert NI name, pseudonymous business/actor references, connection/scopes status, obligation counts, operation evidence and verified submission hashes. Migration `2026_11_11_000032_create_hmrc_sandbox_evidence_events_table.php` creates the tenant evidence store.
 
+Live evidence captured on 2026-11-11 contains four integrity-verified events. The latest HMRC specification 3.3 preflight returned `INVALID_HEADERS` with one error for missing `Gov-Client-Public-Port` and one warning for missing `Gov-Vendor-License-IDs`. Feedback retrieval itself succeeded twice, but HMRC returned an empty request list (`request_count=0`). This is evidence of the current infrastructure gate, not permission to bypass it; VAT API calls remain fail-closed.
+
+### Missing-data escalation to HMRC
+
+Do not use destination port `443`, a random port, a made-up licence, `null` or `undefined`. Send the following to `SDSTeam@hmrc.gov.uk`, replacing only the application ID and correcting the deployment description if the architecture changes:
+
+```text
+Subject: Fraud prevention missing-data guidance — WEB_APP_VIA_SERVER — sandbox application [APPLICATION ID]
+
+Hello,
+
+We are implementing HMRC MTD VAT for Website Expert NI using the
+WEB_APP_VIA_SERVER connection method and fraud prevention specification 3.3.
+
+Our current sandbox development deployment is exposed through a zrok TLS tunnel.
+The tunnel provides the originating public IP, but it does not expose the public
+TCP source port used by the browser to our Laravel application. We therefore
+cannot accurately populate Gov-Client-Public-Port and will not substitute the
+destination port 443 or a fabricated value.
+
+The software does not currently issue a licence identifier on the originating
+browser device, so there is no genuine value available for
+Gov-Vendor-License-IDs.
+
+On 11 November 2026 the Test Fraud Prevention Headers API returned
+INVALID_HEADERS under specification 3.3: one error for the missing
+Gov-Client-Public-Port and one warning for the missing Gov-Vendor-License-IDs.
+
+Please confirm either:
+1. the supported deployment approach for accurately forwarding the originating
+   public source port through this type of tunnel; or
+2. whether these fields may be omitted for this architecture and provide the
+   written exception/reference we should retain for production approval.
+
+Sandbox Application ID: [APPLICATION ID]
+
+Kind regards,
+Website Expert NI
+```
+
+Do not attach API logs, headers, tokens, the full VRN or the private evidence export. Retain HMRC's reply and reference; only then configure an explicitly approved missing-header allow-list.
+
 ## Planned API operations
 
 | Operation | Method and path | OAuth scope |

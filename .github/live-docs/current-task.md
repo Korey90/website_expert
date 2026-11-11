@@ -38,7 +38,9 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 - ✅ Audyt JavaScript oczyszczony: DOMPurify `3.4.17`, postcss-selector-parser `6.1.5` oraz poprawione zależności narzędziowe; pełny `npm audit` = 0, czyste `npm ci`, frontend 16/16, lint i produkcyjny build przechodzą.
 - ✅ Dodano tenantowy, append-only łańcuch dowodów sandbox dla walidacji/feedbacku FPH, obligations, view return, liabilities i payments. Zapisuje tylko statusy, czasy, bezpieczne correlation ID i ograniczone liczniki; tokeny, VRN, period key, nagłówki, telemetry i kwoty są wykluczone.
 - ✅ `hmrc:export-sandbox-evidence` weryfikuje łańcuch dowodów i istniejące łańcuchy submission, po czym tworzy prywatny zredagowany JSON oraz plik `.sha256`. Migracja `000032` wykonana, tenant audit bez błędów; HMRC 82/489; Finance 348 passed + 1 skipped / 2462 assertions; PL/EN/PT po 1254 klucze; Blade i ESLint poprawne.
+- ✅ Live evidence 2026-11-11: łańcuch 4/4 poprawny. Najnowszy preflight HMRC zwrócił `INVALID_HEADERS` według specyfikacji 3.3 (1 error: brak `Gov-Client-Public-Port`; 1 warning: brak `Gov-Vendor-License-IDs`). Dwa odczyty feedbacku zakończyły się poprawnie, ale HMRC zwrócił pustą listę (`request_count=0`). Zredagowany eksport: `hmrc-sandbox-evidence-20261111-200359.json`, file SHA-256 `529a113bb66eefec48a85c1ddd2dae58d69b7f9d104ea8a74ae18d397801dcec`.
 - ⛔ UKFIN-612 pozostaje formalnie otwarte: wymagany jest niezależny authenticated pentest oraz zamknięcie FPH source-port/licence i procedury HMRC production access.
+- ➡️ Następna akcja zewnętrzna: wysłać opis architektury i Application ID do `SDSTeam@hmrc.gov.uk` według szablonu w `docs/integrations/hmrc-mtd-vat-sandbox.md`; nie konfigurować wyjątku bez pisemnej odpowiedzi HMRC.
 
 - `UKFIN-601`: użytkownik posiada konto HMRC Developer Hub i pierwszą aplikację sandbox.
 - Do aplikacji trzeba dodać: VAT (MTD) API v1.0, Create Test User API v1.0 i Test Fraud Prevention Headers API v1.0.
