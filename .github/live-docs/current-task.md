@@ -4,7 +4,7 @@
 **Zadanie:** HMRC MTD VAT sandbox end-to-end
 **Data rozpoczęcia:** 2026-11-10
 **Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
-**Ochrona równoległej pracy:** nie modyfikować `resources/js/Pages/Landing/PlStronyInternetowe.tsx` ani `package*.json`.
+**Ochrona równoległej pracy:** nie modyfikować `resources/js/Pages/Landing/PlStronyInternetowe.tsx`.
 
 ## Decyzja wykonawcza
 
@@ -35,7 +35,8 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 - ✅ `UKFIN-612` technical controls: exact official endpoint/callback guard, osobne fail-closed production access/submission switches, approval references i bezsekretowy `hmrc:production-readiness` z exit code 1 przy każdym niespełnionym warunku.
 - ✅ PHP dependency audit oczyszczony z 11 advisory (`composer audit` = 0); tracked-secret scan bez trafień; checklista i evidence gate są w `docs/integrations/hmrc-production-readiness.md`.
 - ✅ HMRC targeted 74/421; Finance 343 passed + 1 skipped / 2429 assertions; full regression 853 passed / 9 znanych baseline failures / 11 skipped / 3885 assertions, wykonany przed finalnym pozytywnym testem gate'u, który przeszedł osobno; EN/PL/PT po 1249 kluczy; tenant audit i Blade poprawne.
-- ⛔ UKFIN-612 pozostaje formalnie otwarte: `dompurify <=3.4.16` ma krytyczne advisory (pliki `package*.json` chronione podczas równoległej pracy), wymagany jest niezależny authenticated pentest oraz zamknięcie FPH source-port/licence i procedury HMRC production access.
+- ✅ Audyt JavaScript oczyszczony: DOMPurify `3.4.17`, postcss-selector-parser `6.1.5` oraz poprawione zależności narzędziowe; pełny `npm audit` = 0, czyste `npm ci`, frontend 16/16, lint i produkcyjny build przechodzą.
+- ⛔ UKFIN-612 pozostaje formalnie otwarte: wymagany jest niezależny authenticated pentest oraz zamknięcie FPH source-port/licence i procedury HMRC production access.
 
 - `UKFIN-601`: użytkownik posiada konto HMRC Developer Hub i pierwszą aplikację sandbox.
 - Do aplikacji trzeba dodać: VAT (MTD) API v1.0, Create Test User API v1.0 i Test Fraud Prevention Headers API v1.0.
@@ -91,6 +92,6 @@ Techniczny golden dataset UKFIN-511 jest gotowy, ale formalny sign-off księgowe
 - Rzeczywisty validator FPH działa i akceptuje 14/16 nagłówków; `Gov-Client-Public-Port` wymaga infrastruktury zachowującej source port, a `Gov-Vendor-License-IDs` prawdziwego modelu licencji albo uzgodnienia z HMRC.
 - Testowy VRN jest zapisany. Rzeczywiste obligations i operacje read-only oczekują na rozwiązanie/akceptację dwóch braków FPH.
 - `php artisan hmrc:production-readiness` zwraca obecnie NOT READY/exit 1 zgodnie z projektem; dostęp i submission produkcyjne mają niezależne blokady.
-- Krytyczne advisory DOMPurify musi zostać usunięte po zwolnieniu ochrony `package*.json`; następnie wymagany jest niezależny pentest środowiska staging.
+- Audyty PHP i JavaScript są czyste; wymagany jest jeszcze niezależny pentest produkcyjnie równoważnego środowiska staging.
 - Żadne prawdziwe dane ani deklaracje nie są wysyłane na tym etapie.
 - `HMRC_ENVIRONMENT` pozostaje `sandbox` do czasu przejścia OAuth, fraud headers, pełnych scenariuszy sandbox, security review i jawnej decyzji właściciela.

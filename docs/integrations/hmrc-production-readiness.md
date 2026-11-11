@@ -58,7 +58,7 @@ Do not enable production submission merely because credentials are present.
 | Tenant/RBAC isolation | PASS | Existing Finance/HMRC suites cover membership, permissions and cross-tenant denial. |
 | Sensitive data in tracked source | PASS | High-confidence credential assignment scan returned no findings. |
 | PHP dependency audit | PASS | 11 advisories remediated; `composer audit --locked` returns no advisories. |
-| JavaScript dependency audit | **FAIL** | `dompurify <=3.4.16` has a critical advisory; two moderate PostCSS findings also remain. `package*.json` is protected during parallel work, so no dependency mutation was made in UKFIN-612. |
+| JavaScript dependency audit | PASS | DOMPurify is pinned above the affected range at `3.4.17`; postcss-selector-parser is overridden to patched `6.1.5`; build/test tooling advisories were also remediated. A clean install and full `npm audit --audit-level=low` return no vulnerabilities. |
 | Independent penetration test | **PENDING** | Arrange an external authenticated assessment against a production-equivalent staging environment before production submission. |
 | Fraud-prevention headers | **PENDING** | Obtain a real originating public source port through the edge or a written HMRC exception; configure the real vendor licence or obtain a written exception; rerun the HMRC validator. |
 | HMRC production access | **PENDING** | Complete sandbox evidence, questionnaires, terms acceptance and receive production credentials/approval. |
@@ -85,7 +85,7 @@ Official references:
 
 ## Deployment checklist
 
-- [ ] Critical JavaScript advisory is remediated and `npm audit --omit=dev --audit-level=high` passes the agreed release threshold.
+- [x] JavaScript advisories are remediated; a clean `npm ci` and full `npm audit --audit-level=low` report no vulnerabilities.
 - [x] `composer audit --locked` has no advisories.
 - [ ] Independent authenticated penetration test has no unresolved high/critical finding.
 - [ ] Production host has `APP_ENV=production`, `APP_DEBUG=false`, HTTPS and secure/encrypted/HTTP-only session cookies.

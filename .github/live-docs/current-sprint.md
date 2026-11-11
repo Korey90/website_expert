@@ -11,7 +11,7 @@
 
 ### In Progress
 
-- [ ] `UKFIN-612` [M] — techniczne zabezpieczenia i checklista wdrożone; pozostały: krytyczny DOMPurify, niezależny pentest oraz zewnętrzne gate'y FPH/HMRC.
+- [ ] `UKFIN-612` [M] — techniczne zabezpieczenia i checklista wdrożone, audyty PHP/JavaScript czyste; pozostały niezależny pentest oraz zewnętrzne gate'y FPH/HMRC.
 
 ### To Do
 
