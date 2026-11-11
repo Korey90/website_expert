@@ -522,11 +522,11 @@ class HmrcConnectionPage extends BasePage
                 ->form([
                     DatePicker::make('from')
                         ->label(__('finance.hmrc_connection.obligations.from'))
-                        ->default(now()->subDays(365)->toDateString())
+                        ->default(fn (): string => $this->vatAccountDefaultDates()['from'])
                         ->required(),
                     DatePicker::make('to')
                         ->label(__('finance.hmrc_connection.obligations.to'))
-                        ->default(now()->toDateString())
+                        ->default(fn (): string => $this->vatAccountDefaultDates()['to'])
                         ->required(),
                     TextInput::make('totp')
                         ->label(__('finance.hmrc_connection.fraud_validation.totp'))
@@ -537,6 +537,21 @@ class HmrcConnectionPage extends BasePage
                 ])
                 ->action(fn (array $data) => $this->retrieveVatAccount($data))
                 ->visible($canManage && $connection?->status === HmrcConnection::STATUS_CONNECTED),
+        ];
+    }
+
+    /** @return array{from: string, to: string} */
+    private function vatAccountDefaultDates(): array
+    {
+        if (config('hmrc.environment') === 'sandbox'
+            && config('hmrc.sandbox.liabilities_test_scenario') === 'SINGLE_LIABILITY_2018_19'
+            && config('hmrc.sandbox.payments_test_scenario') === 'SINGLE_PAYMENT_2018_19') {
+            return ['from' => '2018-01-02', 'to' => '2018-02-02'];
+        }
+
+        return [
+            'from' => now()->subDays(365)->toDateString(),
+            'to' => now()->toDateString(),
         ];
     }
 
