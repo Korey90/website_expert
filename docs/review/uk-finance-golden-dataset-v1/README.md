@@ -1,8 +1,8 @@
-# UK Finance golden dataset v1 — accountant review pack
+# UK Finance golden dataset v1 - accountant review pack
 
 ## Status
 
-**READY FOR ACCOUNTANT REVIEW — NOT YET ACCEPTED — NOT SUBMITTED TO HMRC**
+**READY FOR ACCOUNTANT REVIEW - NOT YET ACCEPTED - NOT SUBMITTED TO HMRC**
 
 This review package describes the versioned fictional dataset used to validate the Website Expert NI finance and UK VAT workspace. The executable source is:
 
@@ -10,7 +10,7 @@ This review package describes the versioned fictional dataset used to validate t
 - Dataset ID: `website-expert-ni-uk-finance-golden-v1`
 - Schema version: `1`
 - SHA-256: `6271a6a9e179c1a8769e7fd957f401fde892b0421ea2a73bdc7a0918fd2672a1`
-- Period: 1 July–30 September 2026
+- Period: 1 July-30 September 2026
 - Basis: accrual, GBP functional currency, standard VAT accounting
 
 All counterparties and transactions are fictional. The business name is the system name `Website Expert NI`. The VAT number in the test fixture is synthetic and the generated accountant pack exposes only its last four characters and SHA-256.
@@ -50,7 +50,7 @@ The fixture contains:
 - bank charge and interest;
 - a documented output VAT accounting adjustment.
 
-The v1 fixture deliberately leaves NI–EU goods boxes 8 and 9 at zero. A reviewer must confirm whether a separate accepted scenario is required before those boxes are enabled for real use.
+The v1 fixture deliberately leaves NI-EU goods boxes 8 and 9 at zero. A reviewer must confirm whether a separate accepted scenario is required before those boxes are enabled for real use.
 
 ## Expected control totals
 
@@ -87,6 +87,12 @@ Use these documents for the independent engagement:
 - [request for quotation](../../legal/uk-vat-mtd-accounting-review-request-for-quotation.md);
 - [B2B services agreement](../../legal/uk-vat-mtd-accounting-review-b2b-agreement.md); and
 - [bookkeeper review guide](../uk-vat-mtd-bookkeeper-review-guide.md).
+
+Polish translations:
+
+- [zapytanie ofertowe](../../legal/uk-vat-mtd-accounting-review-request-for-quotation-pl.md);
+- [umowa B2B](../../legal/uk-vat-mtd-accounting-review-b2b-agreement-pl.md); and
+- [instrukcja dla bookkeepera](../uk-vat-mtd-bookkeeper-review-guide-pl.md).
 
 The request deliberately contains no target price. The reviewer proposes the fee and commercial terms, which are inserted into the agreement only after written acceptance.
 

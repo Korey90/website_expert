@@ -1,6 +1,8 @@
-# UK VAT/MTD accounting review — B2B services agreement
+# UK VAT/MTD accounting review - B2B services agreement
 
 > **Template status:** complete all square-bracket fields before signature. The Provider must propose the price. This document deliberately contains no price indication or preferred payment model. It should be reviewed by a Northern Ireland solicitor before use if the negotiated terms or scope change materially.
+
+[Polska wersja](uk-vat-mtd-accounting-review-b2b-agreement-pl.md)
 
 ## Particulars
 
@@ -12,13 +14,13 @@
 | Service Provider | [FULL LEGAL NAME / FIRM NAME], [LEGAL FORM AND REGISTRATION NUMBER], of [ADDRESS] (**Provider**) |
 | Lead Reviewer | [NAME, QUALIFICATION, PROFESSIONAL BODY AND MEMBERSHIP NUMBER] (**Reviewer**) |
 | Provider contact | [EMAIL AND PHONE] |
-| Review environment | **Website Expert NI — HMRC Sandbox** and the separately supplied UK Finance golden dataset v1 |
-| Accepted quotation | [QUOTATION REFERENCE, VERSION AND DATE — INSERT ONLY AFTER ACCEPTANCE] |
+| Review environment | **Website Expert NI - HMRC Sandbox** and the separately supplied UK Finance golden dataset v1 |
+| Accepted quotation | [QUOTATION REFERENCE, VERSION AND DATE - INSERT ONLY AFTER ACCEPTANCE] |
 | Agreed fee | [INSERT THE FEE FROM THE ACCEPTED QUOTATION] |
 | VAT treatment | [AS STATED IN THE ACCEPTED QUOTATION] |
 | Payment terms | [AS STATED IN THE ACCEPTED QUOTATION] |
 | Target start and delivery | [AS AGREED AFTER ACCEPTANCE] |
-| Re-test | [INCLUDED / SEPARATELY PRICED / NOT INCLUDED — AS QUOTED] |
+| Re-test | [INCLUDED / SEPARATELY PRICED / NOT INCLUDED - AS QUOTED] |
 
 The Client and Provider are together the **Parties** and each a **Party**.
 
@@ -84,7 +86,7 @@ The Client and Provider are together the **Parties** and each a **Party**.
 - a guarantee that the software covers every UK tax rule, business model or VAT scheme; or
 - a review of Corporation Tax, PAYE, payroll, CIS, Self Assessment, capital allowances or statutory accounts.
 
-4.2 Unless added by an accepted Change Request, the review excludes Cash Accounting, Flat Rate Scheme, Annual Accounting, margin schemes, partial exemption, non-recoverable input VAT, domestic reverse charge, construction-industry cases, import VAT, postponed import VAT accounting and Northern Ireland–EU goods movements for Boxes 8 and 9.
+4.2 Unless added by an accepted Change Request, the review excludes Cash Accounting, Flat Rate Scheme, Annual Accounting, margin schemes, partial exemption, non-recoverable input VAT, domestic reverse charge, construction-industry cases, import VAT, postponed import VAT accounting and Northern Ireland-EU goods movements for Boxes 8 and 9.
 
 4.3 The Provider must identify an excluded scenario when it affects a conclusion. Silence does not expand the agreed scope.
 
@@ -258,6 +260,8 @@ The Client and Provider are together the **Parties** and each a **Party**.
 
 19.7 **Working Day** means Monday to Friday excluding bank and public holidays in Northern Ireland.
 
+19.8 If the Parties sign both the English and Polish versions, the Polish version is provided as a convenience translation and the English version prevails in the event of inconsistency.
+
 ## 20. Governing law and jurisdiction
 
 20.1 This Agreement and related non-contractual obligations are governed by the law of Northern Ireland.
@@ -304,7 +308,7 @@ Date: __________________________________________
 
 ---
 
-# Schedule 1 — Statement of Work
+# Schedule 1 - Statement of Work
 
 ## A. Objective
 
@@ -319,7 +323,7 @@ The Client shall provide:
 3. expected dataset SHA-256 **6271a6a9e179c1a8769e7fd957f401fde892b0421ea2a73bdc7a0918fd2672a1**;
 4. the generated accountant ZIP and its SHA-256 manifest;
 5. the checklist and sign-off form in docs/review/uk-finance-golden-dataset-v1/;
-6. an account restricted to **Website Expert NI — HMRC Sandbox**;
+6. an account restricted to **Website Expert NI - HMRC Sandbox**;
 7. a release/commit identifier and relevant redacted sandbox evidence; and
 8. an agreed secure location for findings.
 
@@ -337,7 +341,7 @@ The review covers:
 - foreign-currency source evidence with an immutable GBP-rate snapshot;
 - VAT adjustments and correction boundaries;
 - Trial Balance, General Ledger, Profit and Loss, Balance Sheet, management Cash Flow and aged receivables/payables; and
-- VAT Detail, Boxes 1–9, immutable review snapshot, accountant pack and audit evidence.
+- VAT Detail, Boxes 1-9, immutable review snapshot, accountant pack and audit evidence.
 
 ## D. HMRC sandbox review
 
@@ -381,7 +385,7 @@ The initial Services are complete when all available listed materials have been 
 
 ---
 
-# Schedule 2 — Data processing terms
+# Schedule 2 - Data processing terms
 
 ## 1. Processing details
 
@@ -413,14 +417,14 @@ The Client shall provide lawful instructions, minimise data, maintain a lawful b
 
 ---
 
-# Schedule 3 — Security and acceptable use
+# Schedule 3 - Security and acceptable use
 
 The Provider and Reviewer shall:
 
 - use a supported, patched device with screen lock, disk encryption and malware protection;
 - use a unique account, unique password and authenticator-app MFA;
 - keep credentials in a password manager and never send passwords or MFA codes by email/chat;
-- select and remain in **Website Expert NI — HMRC Sandbox**;
+- select and remain in **Website Expert NI - HMRC Sandbox**;
 - store authorised exports only in the agreed encrypted location;
 - redact full VRNs, credentials, tokens, MFA values, header values and unnecessary personal data;
 - record page, test reference, time, expected result and actual result for every finding;
@@ -431,7 +435,7 @@ The Provider and Reviewer shall:
 
 ---
 
-# Completion notes — remove before signature
+# Completion notes - remove before signature
 
 1. Confirm whether the Client is a sole trader, partnership or company and insert the exact legal contracting name. **Website Expert NI** alone may be only a trading/system name.
 2. Ask the Provider to propose the price. Do not put a benchmark or target price into the request.
@@ -443,7 +447,7 @@ The Provider and Reviewer shall:
 
 Drafting references checked on 13 November 2026:
 
-- ICO controller–processor terms: https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/accountability-and-governance/contracts-and-liabilities-between-controllers-and-processors-multi/what-needs-to-be-included-in-the-contract/
+- ICO controller-processor terms: https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/accountability-and-governance/contracts-and-liabilities-between-controllers-and-processors-multi/what-needs-to-be-included-in-the-contract/
 - Copyright, Designs and Patents Act 1988, section 90: https://www.legislation.gov.uk/ukpga/1988/48/section/90
 - Unfair Contract Terms Act 1977, section 2: https://www.legislation.gov.uk/ukpga/1977/50/section/2
 - GOV.UK late commercial payments: https://www.gov.uk/late-commercial-payments-interest-debt-recovery/charging-interest-commercial-debt

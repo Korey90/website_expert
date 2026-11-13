@@ -1,9 +1,11 @@
-# Request for quotation — independent UK VAT/MTD accounting software review
+# Request for quotation - independent UK VAT/MTD accounting software review
 
-**From:** Website Expert NI  
-**Contact:** [NAME / EMAIL / PHONE]  
-**RFQ date:** [DATE]  
+**From:** Website Expert NI<br>
+**Contact:** [NAME / EMAIL / PHONE]<br>
+**RFQ date:** [DATE]<br>
 **Response requested by:** [DATE]
+
+[Polska wersja](uk-vat-mtd-accounting-review-request-for-quotation-pl.md)
 
 ## 1. Request
 
@@ -77,7 +79,7 @@ No additional work or expense will be authorised without prior written acceptanc
 ## 6. Important boundaries
 
 - The operational Website Expert NI tenant and HMRC production environment are outside scope.
-- The reviewer receives access only to **Website Expert NI — HMRC Sandbox**.
+- The reviewer receives access only to **Website Expert NI - HMRC Sandbox**.
 - A new HMRC sandbox submission is not required for the base review because successful submission evidence already exists.
 - No real customer financial data should be used.
 - This is not a statutory audit, penetration test, HMRC certification or full tax-system review.
@@ -87,6 +89,6 @@ No additional work or expense will be authorised without prior written acceptanc
 
 Please send the quotation and evidence of qualifications/insurance to [EMAIL] using the subject:
 
-**Website Expert NI — UK VAT/MTD review quotation**
+**Website Expert NI - UK VAT/MTD review quotation**
 
 Appointment occurs only after written acceptance and signature of the final agreement or mutually agreed engagement terms.

@@ -1,12 +1,14 @@
-# Website Expert NI — UK VAT/MTD bookkeeper review guide
+# Website Expert NI - UK VAT/MTD bookkeeper review guide
 
-**Audience:** independent UK bookkeeper/accountant  
-**Environment:** **Website Expert NI — HMRC Sandbox** plus UK Finance golden dataset v1  
-**Review status:** independent review required; not an HMRC approval or real VAT filing  
-**System contact:** [NAME / EMAIL]  
-**Security contact:** [NAME / EMAIL / PHONE]  
-**Review release/commit:** [IDENTIFIER]  
+**Audience:** independent UK bookkeeper/accountant<br>
+**Environment:** **Website Expert NI - HMRC Sandbox** plus UK Finance golden dataset v1<br>
+**Review status:** independent review required; not an HMRC approval or real VAT filing<br>
+**System contact:** [NAME / EMAIL]<br>
+**Security contact:** [NAME / EMAIL / PHONE]<br>
+**Review release/commit:** [IDENTIFIER]<br>
 **Accountant ZIP SHA-256:** [INSERT BEFORE HAND-OFF]
+
+[Polska wersja](uk-vat-mtd-bookkeeper-review-guide-pl.md)
 
 ## 1. Purpose
 
@@ -17,15 +19,15 @@ Your job is to test, challenge and document. A negative or conditional conclusio
 The review has two distinct tracks:
 
 1. **Accounting logic:** the versioned fictional golden dataset and generated accountant pack.
-2. **HMRC integration:** the isolated deployed tenant **Website Expert NI — HMRC Sandbox** and its existing sandbox submission evidence.
+2. **HMRC integration:** the isolated deployed tenant **Website Expert NI - HMRC Sandbox** and its existing sandbox submission evidence.
 
 The HMRC tenant contains a controlled nil-return journey. It is not expected to contain the full golden accounting dataset. Review each track independently, then assess whether the boundary between the locked VAT Return and HMRC payload is adequately evidenced.
 
-## 2. Safety rules — read before signing in
+## 2. Safety rules - read before signing in
 
 1. Use only your named account. Do not share credentials or sessions.
 2. Enable authenticator-app MFA before testing HMRC functions.
-3. In the top-bar workspace selector choose **Website Expert NI — HMRC Sandbox**.
+3. In the top-bar workspace selector choose **Website Expert NI - HMRC Sandbox**.
 4. Never enter or inspect the operational **Website Expert NI** workspace. If it is visible or selected, stop and contact the owner.
 5. Do not enter real customer, supplier, employee or banking data. Test transactions must be fictional.
 6. Do not disconnect HMRC, replace the sandbox VRN, change fraud-header configuration or alter environment settings.
@@ -39,7 +41,7 @@ The HMRC tenant contains a controlled nil-return journey. It is not expected to 
 - [ ] signed B2B agreement or engagement letter;
 - [ ] accepted Provider quotation;
 - [ ] unique active account and login URL;
-- [ ] access only to **Website Expert NI — HMRC Sandbox**;
+- [ ] access only to **Website Expert NI - HMRC Sandbox**;
 - [ ] release/commit identifier;
 - [ ] golden dataset README and source or generated pack;
 - [ ] accountant ZIP SHA-256 and internal manifest;
@@ -86,7 +88,7 @@ Matching totals do not by themselves prove the tax treatment is correct. Review 
 
 ## 5. Review sequence
 
-### Phase A — integrity and scope
+### Phase A - integrity and scope
 
 - [ ] Record the release/commit identifier.
 - [ ] Verify the golden dataset SHA-256.
@@ -95,7 +97,7 @@ Matching totals do not by themselves prove the tax treatment is correct. Review 
 - [ ] Confirm accrual basis, GBP functional currency and standard VAT accounting.
 - [ ] Record all excluded schemes and factual assumptions before reviewing totals.
 
-### Phase B — accounting profile and chart of accounts
+### Phase B - accounting profile and chart of accounts
 
 - [ ] Legal/business identity is clearly distinguished from demo values.
 - [ ] Financial year, accounting basis and VAT settings are understandable.
@@ -107,7 +109,7 @@ Matching totals do not by themselves prove the tax treatment is correct. Review 
 
 Record requested design changes as findings; do not redesign the chart inside the test tenant.
 
-### Phase C — source transactions and posting lifecycle
+### Phase C - source transactions and posting lifecycle
 
 Trace every representative source to its journal, ledger accounts, VAT Detail and report outcome.
 
@@ -128,7 +130,7 @@ Trace every representative source to its journal, ledger accounts, VAT Detail an
 
 Record the source reference and affected debit, credit and VAT boxes for every material sample.
 
-### Phase D — bank and subledger controls
+### Phase D - bank and subledger controls
 
 - [ ] Imported bank rows are deduplicated.
 - [ ] Suggested matches are distinguishable from confirmed reconciliations.
@@ -138,7 +140,7 @@ Record the source reference and affected debit, credit and VAT boxes for every m
 - [ ] Receivables and payables reconcile to their control accounts.
 - [ ] Manual ledger adjustments in ageing are handled or explicitly disclosed.
 
-### Phase E — financial reports
+### Phase E - financial reports
 
 - [ ] Trial Balance debits equal credits.
 - [ ] General Ledger traces balances to journals and source references.
@@ -149,13 +151,13 @@ Record the source reference and affected debit, credit and VAT boxes for every m
 - [ ] Date and period filters do not silently mix periods.
 - [ ] Currency, signs, rounding and export labels are unambiguous.
 
-### Phase F — VAT Detail and nine-box return
+### Phase F - VAT Detail and nine-box return
 
 - [ ] VAT Detail reconciles to the VAT control accounts.
 - [ ] Box 3 equals Box 1 plus Box 2.
 - [ ] Box 5 correctly indicates payable or repayable.
-- [ ] Boxes 1–5 retain penny precision.
-- [ ] Boxes 6–9 use acceptable whole-pound submission values.
+- [ ] Boxes 1-5 retain penny precision.
+- [ ] Boxes 6-9 use acceptable whole-pound submission values.
 - [ ] Credits and reversals affect the correct period and boxes.
 - [ ] The service reverse-charge treatment is correct for the stated facts.
 - [ ] VAT adjustments include reason, actor, date and treatment metadata.
@@ -165,13 +167,13 @@ Record the source reference and affected debit, credit and VAT boxes for every m
 - [ ] Superseding a snapshot preserves the old audit record.
 - [ ] The accountant ZIP comes only from the locked snapshot and verified source evidence.
 
-Do not approve Boxes 8/9 merely because they are zero. State whether NI–EU goods scenarios are not applicable to launch or require a separate fixture.
+Do not approve Boxes 8/9 merely because they are zero. State whether NI-EU goods scenarios are not applicable to launch or require a separate fixture.
 
-### Phase G — HMRC sandbox tenant
+### Phase G - HMRC sandbox tenant
 
 The sandbox journey has already completed successfully. Base-scope review uses existing evidence and does not require another submission.
 
-1. Confirm the selected workspace is **Website Expert NI — HMRC Sandbox**.
+1. Confirm the selected workspace is **Website Expert NI - HMRC Sandbox**.
 2. Open **Finance → HMRC Connection**.
 3. Confirm the environment is clearly sandbox and expected OAuth scopes are presented.
 4. Review the displayed fraud-prevention-header validation without requesting raw values.
@@ -185,7 +187,7 @@ The sandbox journey has already completed successfully. Base-scope review uses e
 
 Do not use **Disconnect**, **Set sandbox VRN** or **Submit to HMRC** unless the owner separately authorises that exact action in writing.
 
-### Phase H — submission and failure controls
+### Phase H - submission and failure controls
 
 Review the interface and supplied test evidence. Do not manufacture HMRC failures unless the owner schedules them.
 
@@ -200,7 +202,7 @@ Review the interface and supplied test evidence. Do not manufacture HMRC failure
 - [ ] A mismatch becomes an explicit conflict requiring investigation.
 - [ ] Events are append-only and their hash chain is verified before receipt generation.
 
-### Phase I — permissions and tenant isolation
+### Phase I - permissions and tenant isolation
 
 - [ ] Your account can access only intended sandbox business records.
 - [ ] Direct links to another business do not reveal a record.
@@ -215,7 +217,7 @@ Do not attempt exploit techniques. If normal navigation or an ordinary copied ap
 The report must answer or explicitly defer:
 
 1. For which represented classes should outside-scope supplies or purchases enter Boxes 6/7?
-2. Are NI–EU goods movements relevant to launch? If yes, what Boxes 8/9 fixtures are required?
+2. Are NI-EU goods movements relevant to launch? If yes, what Boxes 8/9 fixtures are required?
 3. What evidence and rounding policy should govern foreign-currency VAT conversion?
 4. Is the service reverse-charge example correct for its stated facts and recoverability assumption?
 5. What non-recoverable or partially recoverable input-VAT cases are required before wider use?
