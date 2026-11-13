@@ -82,7 +82,7 @@ The original workspace remains separate with zero accounting periods, journals a
 To continue the controlled success journey:
 
 1. Sign in at `/admin` and choose `Website Expert NI — HMRC Sandbox` from the top-bar workspace switcher.
-2. Open `/admin/hmrc-connection`, connect the same organisation test user and confirm/set its sandbox VRN if the connection page requests it.
+2. Open `/admin/hmrc-connection`, connect the same organisation test user, then use **Set sandbox VRN** and enter that test organisation's nine-digit VRN. The new HMRC connection intentionally starts without a copied VRN or tokens.
 3. Using an external network such as the mobile hotspot, sync both VAT obligations with a current authenticator code. The open `2017-04-01` through `2017-06-30` obligation must match the locked local return exactly.
 4. Open `VATR-2017-001`, accept the exact legal declaration and submit with a fresh authenticator code.
 5. View the submitted VAT Return and download the integrity-checked receipt PDF. Do not create invoices, expenses or journals in this tenant before the nil-return test is complete.
