@@ -327,6 +327,7 @@ class HmrcConnectionPage extends BasePage
                 ...$result,
                 'period' => $obligation->start_date->format('Y-m-d').' – '.$obligation->end_date->format('Y-m-d'),
             ];
+            $this->dispatch('hmrc-vat-return-retrieved');
 
             if (config('hmrc.environment') === 'sandbox') {
                 app(HmrcSandboxEvidenceRecorder::class)->record(
