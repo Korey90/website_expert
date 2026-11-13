@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToTenant;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -56,5 +57,20 @@ class HmrcVatObligation extends Model
     public function lastSyncedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'last_synced_by');
+    }
+
+    public function scopeReturnViewable(Builder $query): Builder
+    {
+        return $query->where(function (Builder $query): void {
+            $query->where($query->qualifyColumn('status'), self::STATUS_FULFILLED)
+                ->orWhereExists(function ($subquery): void {
+                    $subquery->selectRaw('1')
+                        ->from('hmrc_vat_submissions')
+                        ->whereColumn('hmrc_vat_submissions.hmrc_vat_obligation_id', 'hmrc_vat_obligations.id')
+                        ->whereColumn('hmrc_vat_submissions.business_id', 'hmrc_vat_obligations.business_id')
+                        ->whereColumn('hmrc_vat_submissions.environment', 'hmrc_vat_obligations.environment')
+                        ->where('hmrc_vat_submissions.status', HmrcVatSubmission::STATUS_SUBMITTED);
+                });
+        });
     }
 }

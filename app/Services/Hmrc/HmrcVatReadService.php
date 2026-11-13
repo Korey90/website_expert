@@ -181,7 +181,7 @@ final class HmrcVatReadService
             ->whereKey($obligation->getKey())
             ->where('business_id', $business->getKey())
             ->where('environment', $connection->environment)
-            ->where('status', HmrcVatObligation::STATUS_FULFILLED)
+            ->returnViewable()
             ->first();
 
         if (! $canonical || preg_match('/^[A-Za-z0-9#]{1,18}$/', (string) $canonical->period_key) !== 1) {

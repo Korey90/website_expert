@@ -6,7 +6,9 @@ use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\HmrcConnection;
 use App\Models\HmrcVatObligation;
+use App\Models\HmrcVatSubmission;
 use App\Models\User;
+use App\Models\VatReturn;
 use App\Services\Hmrc\Exceptions\HmrcVatReadException;
 use App\Services\Hmrc\HmrcFraudPreventionHeaders;
 use App\Services\Hmrc\HmrcVatReadService;
@@ -282,6 +284,36 @@ class HmrcVatReadTest extends TestCase
         );
     }
 
+    public function test_it_can_view_an_open_sandbox_obligation_after_a_verified_local_submission(): void
+    {
+        $open = $this->obligation($this->business, '26A4', HmrcVatObligation::STATUS_OPEN);
+        $this->submittedReturn($open);
+        Http::fake(['*' => Http::response([
+            'periodKey' => '26A4',
+            'vatDueSales' => 0,
+            'vatDueAcquisitions' => 0,
+            'totalVatDue' => 0,
+            'vatReclaimedCurrPeriod' => 0,
+            'netVatDue' => 0,
+            'totalValueSalesExVAT' => 0,
+            'totalValuePurchasesExVAT' => 0,
+            'totalValueGoodsSuppliedExVAT' => 0,
+            'totalAcquisitionsExVAT' => 0,
+        ], 200, ['X-CorrelationId' => 'corr-submitted-return'])]);
+
+        $result = app(HmrcVatReadService::class)->viewReturn(
+            $this->business,
+            $this->owner,
+            $open,
+            $this->fraudHeaders(),
+        );
+
+        $this->assertSame(array_fill(1, 9, 0), $result['boxes']);
+        $this->assertSame('corr-submitted-return', $result['correlation_id']);
+        $this->assertTrue(HmrcVatObligation::withoutGlobalScopes()->whereKey($open->id)->returnViewable()->exists());
+        Http::assertSent(fn (Request $request): bool => str_contains($request->url(), '/returns/26A4'));
+    }
+
     public function test_it_enforces_active_owner_or_admin_membership(): void
     {
         $member = User::factory()->create(['is_active' => true]);
@@ -331,6 +363,43 @@ class HmrcVatReadTest extends TestCase
             'received_date' => $status === HmrcVatObligation::STATUS_FULFILLED ? '2026-11-01' : null,
             'first_seen_at' => now(),
             'last_seen_at' => now(),
+        ]);
+    }
+
+    private function submittedReturn(HmrcVatObligation $obligation): HmrcVatSubmission
+    {
+        $return = VatReturn::withoutGlobalScopes()->create([
+            'business_id' => $this->business->id,
+            'number' => 'VATR-SANDBOX-001',
+            'status' => VatReturn::STATUS_DRAFT,
+            'period_from' => $obligation->start_date,
+            'period_to' => $obligation->end_date,
+            'snapshot_version' => 1,
+            'snapshot' => [],
+            'snapshot_hash' => str_repeat('a', 64),
+            'source_journal_count' => 0,
+            'source_line_count' => 0,
+            'warning_count' => 0,
+            'created_by' => $this->owner->id,
+        ]);
+        $return->update(['status' => VatReturn::STATUS_REVIEWED]);
+        $return->update(['status' => VatReturn::STATUS_LOCKED]);
+
+        return HmrcVatSubmission::withoutGlobalScopes()->create([
+            'business_id' => $this->business->id,
+            'vat_return_id' => $return->id,
+            'hmrc_vat_obligation_id' => $obligation->id,
+            'environment' => 'sandbox',
+            'status' => HmrcVatSubmission::STATUS_SUBMITTED,
+            'snapshot_hash' => $return->snapshot_hash,
+            'payload_hash' => str_repeat('b', 64),
+            'declaration_version' => HmrcVatSubmission::DECLARATION_VERSION,
+            'declared_at' => now(),
+            'mfa_type' => 'TOTP',
+            'mfa_verified_at' => now(),
+            'mfa_reference_hash' => str_repeat('c', 64),
+            'submitted_by' => $this->owner->id,
+            'submitted_at' => now(),
         ]);
     }
 

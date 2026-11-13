@@ -277,11 +277,11 @@ class HmrcConnectionPage extends BasePage
     }
 
     /** @return array<string, string> */
-    public function getFulfilledObligationOptions(): array
+    public function getViewableObligationOptions(): array
     {
         return HmrcVatObligation::query()
             ->where('environment', config('hmrc.environment', 'sandbox'))
-            ->where('status', HmrcVatObligation::STATUS_FULFILLED)
+            ->returnViewable()
             ->latest('start_date')
             ->limit(24)
             ->get()
@@ -304,7 +304,7 @@ class HmrcConnectionPage extends BasePage
         try {
             $obligation = HmrcVatObligation::query()
                 ->where('environment', config('hmrc.environment', 'sandbox'))
-                ->where('status', HmrcVatObligation::STATUS_FULFILLED)
+                ->returnViewable()
                 ->whereKey($data['obligation_id'] ?? null)
                 ->first();
 
@@ -502,7 +502,7 @@ class HmrcConnectionPage extends BasePage
                 ->form([
                     Select::make('obligation_id')
                         ->label(__('finance.hmrc_connection.read.period'))
-                        ->options(fn (): array => $this->getFulfilledObligationOptions())
+                        ->options(fn (): array => $this->getViewableObligationOptions())
                         ->required(),
                     TextInput::make('totp')
                         ->label(__('finance.hmrc_connection.fraud_validation.totp'))
@@ -512,7 +512,7 @@ class HmrcConnectionPage extends BasePage
                         ->maxLength(8),
                 ])
                 ->action(fn (array $data) => $this->viewVatReturn($data))
-                ->visible($canManage && $connection?->status === HmrcConnection::STATUS_CONNECTED && $this->getFulfilledObligationOptions() !== []),
+                ->visible($canManage && $connection?->status === HmrcConnection::STATUS_CONNECTED && $this->getViewableObligationOptions() !== []),
             Action::make('retrieve_vat_account')
                 ->label(__('finance.hmrc_connection.actions.retrieve_vat_account'))
                 ->icon('heroicon-o-banknotes')
