@@ -93,7 +93,7 @@ Official references:
 - [ ] Vendor public IP and every TLS termination hop are the actual production values.
 - [ ] Vendor licence is configured, or HMRC's written exception reference is configured.
 - [ ] All sandbox `Gov-Test-Scenario` environment values are blank.
-- [ ] Sandbox obligations, return, liabilities, payments and submission evidence is complete.
+- [x] Sandbox obligations, return, liabilities, payments and submission evidence is complete.
 - [ ] HMRC questionnaires and terms are complete; production approval has been received.
 - [ ] Production OAuth callback is registered exactly and production credentials are in the secret store.
 - [ ] Backup, restore, queue monitoring, alerting and audit-log retention have been rehearsed.
