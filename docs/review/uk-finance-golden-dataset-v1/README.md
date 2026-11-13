@@ -80,6 +80,16 @@ The v1 fixture deliberately leaves NI–EU goods boxes 8 and 9 at zero. A review
 5. Record every required change. Do not edit the accepted fixture in place; create a new version and hash.
 6. Complete `sign-off.md`. Only a real reviewer may change the status from `pending`.
 
+## External reviewer hand-off
+
+Use these documents for the independent engagement:
+
+- [request for quotation](../../legal/uk-vat-mtd-accounting-review-request-for-quotation.md);
+- [B2B services agreement](../../legal/uk-vat-mtd-accounting-review-b2b-agreement.md); and
+- [bookkeeper review guide](../uk-vat-mtd-bookkeeper-review-guide.md).
+
+The request deliberately contains no target price. The reviewer proposes the fee and commercial terms, which are inserted into the agreement only after written acceptance.
+
 ## Scope boundary
 
 This dataset does not cover Cash Accounting, Flat Rate Scheme, margin schemes, partial exemption, CIS, payroll/PAYE, Corporation Tax computation, Self Assessment, capital allowances or HMRC submission. These require their own specifications and professional review.
