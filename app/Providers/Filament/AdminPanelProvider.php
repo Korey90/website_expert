@@ -48,6 +48,10 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->renderHook(
                 PanelsRenderHook::TOPBAR_END,
+                fn (): View => view('filament.components.business-switcher'),
+            )
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_END,
                 function (): View {
                     $pinnedNotes = LeadNote::where('is_pinned', true)
                         ->with('lead')

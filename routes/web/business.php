@@ -4,6 +4,7 @@ use App\Http\Controllers\Business\AccountingProfileController;
 use App\Http\Controllers\Business\ApiTokenController;
 use App\Http\Controllers\Business\BusinessController;
 use App\Http\Controllers\Business\BusinessProfileController;
+use App\Http\Controllers\Business\SwitchBusinessController;
 use App\Http\Controllers\LandingPage\AiLandingGeneratorController;
 use App\Http\Controllers\LandingPage\LandingPageController;
 use App\Http\Controllers\LandingPage\LandingPageSectionController;
@@ -13,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 // -----------------------------------------------------------------------
 // Business settings, CRM, API tokens, Landing Pages — auth + has.business
 // -----------------------------------------------------------------------
+
+Route::post('/business/switch/{business}', SwitchBusinessController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('business.switch');
 
 Route::middleware(['auth', 'verified', 'has.business'])->group(function () {
 

@@ -26,6 +26,8 @@ use Spatie\Permission\Traits\HasRoles;
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery
 {
+    public const CURRENT_BUSINESS_SESSION_KEY = 'current_business_id';
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
 
@@ -45,8 +47,28 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     public function currentBusiness(): ?Business
     {
-        return $this->businesses()
+        $businesses = fn () => $this->businesses()
             ->wherePivot('is_active', true)
+            ->where('businesses.is_active', true);
+
+        $request = request();
+
+        if ($request->hasSession()) {
+            $businessId = $request->session()->get(self::CURRENT_BUSINESS_SESSION_KEY);
+
+            if (filled($businessId)) {
+                $selected = $businesses()->whereKey($businessId)->first();
+
+                if ($selected) {
+                    return $selected;
+                }
+
+                $request->session()->forget(self::CURRENT_BUSINESS_SESSION_KEY);
+            }
+        }
+
+        return $businesses()
+            ->orderBy('business_users.id')
             ->first();
     }
 
