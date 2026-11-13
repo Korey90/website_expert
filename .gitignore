@@ -27,3 +27,6 @@ Thumbs.db
 notatki.txt
 /database/seeders/DeployConfigSeeder.php
 /zapisane_strony
+
+# Private HMRC receipt exports
+/docs/hmrc-vat-receipt-*.pdf
