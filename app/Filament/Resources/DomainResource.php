@@ -3,12 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\DomainResource\Pages;
-use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\Domain;
 use App\Scopes\BusinessScope;
 use App\Support\PermissionHelper;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\IconEntry;
@@ -18,14 +15,19 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class DomainResource extends BaseResource
 {
     protected static ?string $model = Domain::class;
-    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-globe-alt';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Domains';
+
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-globe-alt';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Domains';
+
     protected static ?string $navigationLabel = 'Domains';
-    protected static ?int    $navigationSort  = 3;
+
+    protected static ?int $navigationSort = 3;
 
     public static function infolist(Schema $schema): Schema
     {
@@ -43,12 +45,12 @@ class DomainResource extends BaseResource
                         ->label('Status')
                         ->badge()
                         ->color(fn ($state) => match ($state) {
-                            'active'      => 'success',
-                            'pending'     => 'warning',
-                            'expired'     => 'danger',
+                            'active' => 'success',
+                            'pending' => 'warning',
+                            'expired' => 'danger',
                             'transferred' => 'info',
-                            'cancelled'   => 'gray',
-                            default       => 'gray',
+                            'cancelled' => 'gray',
+                            default => 'gray',
                         }),
 
                     TextEntry::make('provider')
@@ -163,12 +165,12 @@ class DomainResource extends BaseResource
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn ($state) => match ($state) {
-                        'active'      => 'success',
-                        'pending'     => 'warning',
-                        'expired'     => 'danger',
+                        'active' => 'success',
+                        'pending' => 'warning',
+                        'expired' => 'danger',
                         'transferred' => 'info',
-                        'cancelled'   => 'gray',
-                        default       => 'gray',
+                        'cancelled' => 'gray',
+                        default => 'gray',
                     }),
 
                 Tables\Columns\TextColumn::make('expires_at')
@@ -199,11 +201,11 @@ class DomainResource extends BaseResource
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        'active'      => 'Active',
-                        'pending'     => 'Pending',
-                        'expired'     => 'Expired',
+                        'active' => 'Active',
+                        'pending' => 'Pending',
+                        'expired' => 'Expired',
                         'transferred' => 'Transferred',
-                        'cancelled'   => 'Cancelled',
+                        'cancelled' => 'Cancelled',
                     ]),
 
                 Tables\Filters\TernaryFilter::make('auto_renew')
@@ -222,15 +224,15 @@ class DomainResource extends BaseResource
     {
         return [
             'index' => Pages\ListDomains::route('/'),
-            'view'  => Pages\ViewDomain::route('/{record}'),
+            'view' => Pages\ViewDomain::route('/{record}'),
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $user = auth()->user();
 
-        if (PermissionHelper::allows($user, FilamentPermissionRegistry::panelAccessPermission())) {
+        if (PermissionHelper::allows($user, 'view_businesses')) {
             return parent::getEloquentQuery()
                 ->withoutGlobalScope(BusinessScope::class);
         }

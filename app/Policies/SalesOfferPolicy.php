@@ -15,7 +15,8 @@ class SalesOfferPolicy
 
     public function view(User $user, SalesOffer $offer): bool
     {
-        return PermissionHelper::allows($user, 'view_sales_offers');
+        return $this->canAccessTenant($user, $offer->business_id)
+            && PermissionHelper::allows($user, 'view_sales_offers');
     }
 
     public function create(User $user): bool
@@ -25,7 +26,7 @@ class SalesOfferPolicy
 
     public function update(User $user, SalesOffer $offer): bool
     {
-        if (! $offer->isEditable()) {
+        if (! $this->canAccessTenant($user, $offer->business_id) || ! $offer->isEditable()) {
             return false;
         }
 
@@ -34,12 +35,20 @@ class SalesOfferPolicy
 
     public function delete(User $user, SalesOffer $offer): bool
     {
-        return PermissionHelper::allows($user, 'delete_sales_offers');
+        return $this->canAccessTenant($user, $offer->business_id)
+            && PermissionHelper::allows($user, 'delete_sales_offers');
     }
 
     public function send(User $user, SalesOffer $offer): bool
     {
-        return PermissionHelper::allows($user, 'send_sales_offers')
+        return $this->canAccessTenant($user, $offer->business_id)
+            && PermissionHelper::allows($user, 'send_sales_offers')
             && $offer->isEditable();
+    }
+
+    private function canAccessTenant(User $user, ?string $businessId): bool
+    {
+        return $businessId === currentBusiness()?->id
+            || PermissionHelper::allows($user, 'view_businesses');
     }
 }

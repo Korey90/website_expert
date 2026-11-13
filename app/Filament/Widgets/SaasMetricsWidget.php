@@ -7,6 +7,7 @@ use App\Models\PlanPrice;
 use App\Services\Billing\PlanService;
 use App\Services\Currency\CurrencyResolver;
 use App\Services\Currency\CurrencySummaryFormatter;
+use App\Support\PermissionHelper;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Carbon;
@@ -14,6 +15,11 @@ use Illuminate\Support\Collection;
 
 class SaasMetricsWidget extends BaseWidget
 {
+    public static function canView(): bool
+    {
+        return PermissionHelper::allows(auth()->user(), 'view_subscriptions');
+    }
+
     protected static ?int $sort = 3;
 
     protected int|string|array $columnSpan = 'full';

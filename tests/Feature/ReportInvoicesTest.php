@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class ReportInvoicesTest extends TestCase
@@ -20,6 +21,9 @@ class ReportInvoicesTest extends TestCase
     {
         parent::setUp();
         $this->user = User::factory()->create();
+        Permission::findOrCreate('view_reports');
+        Permission::findOrCreate('export_reports');
+        $this->user->givePermissionTo(['view_reports', 'export_reports']);
         $this->client = Client::create([
             'company_name' => 'Test Corp',
             'primary_contact_email' => 'test@example.com',

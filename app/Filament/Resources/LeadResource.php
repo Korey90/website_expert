@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\LeadResource\Pages;
 use App\Filament\Support\Currency as FilamentCurrency;
-use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\BriefingTemplate;
 use App\Models\Client;
 use App\Models\Lead;
@@ -62,7 +61,14 @@ class LeadResource extends BaseResource
                         ->required(),
                     Forms\Components\Select::make('assigned_to')
                         ->label('Assigned To')
-                        ->options(User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'manager']))->pluck('name', 'id'))
+                        ->options(fn (): array => User::query()
+                            ->whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager']))
+                            ->whereHas('businesses', fn ($query) => $query
+                                ->whereKey(currentBusiness()?->getKey())
+                                ->where('business_users.is_active', true))
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->all())
                         ->searchable(),
                     Forms\Components\Select::make('source')
                         ->options(['calculator' => 'Calculator', 'contact_form' => 'Contact Form', 'referral' => 'Referral', 'cold_outreach' => 'Cold Outreach', 'social_media' => 'Social Media', 'other' => 'Other'])
@@ -164,7 +170,7 @@ class LeadResource extends BaseResource
                             ->required(),
                     ])
                     ->action(function (Lead $record, array $data) {
-                        $template = BriefingTemplate::findOrFail($data['briefing_template_id']);
+                        $template = BriefingTemplate::forBusiness()->findOrFail($data['briefing_template_id']);
                         $briefing = app(BriefingService::class)
                             ->createFromTemplate($record, $template, auth()->user());
 
@@ -204,7 +210,7 @@ class LeadResource extends BaseResource
                             ->required(),
                     ])
                     ->action(function (Lead $record, array $data) {
-                        $template = SalesOfferTemplate::findOrFail($data['template_id']);
+                        $template = SalesOfferTemplate::forBusiness()->findOrFail($data['template_id']);
                         $service = app(SalesOfferService::class);
 
                         $offer = $service->createFromTemplate($record, $template, auth()->user());
@@ -254,7 +260,7 @@ class LeadResource extends BaseResource
                             ->required(),
                     ])
                     ->action(function (Lead $record, array $data) {
-                        $template = SalesOfferTemplate::findOrFail($data['template_id']);
+                        $template = SalesOfferTemplate::forBusiness()->findOrFail($data['template_id']);
                         $offer = app(SalesOfferService::class)
                             ->createFromTemplate($record, $template, auth()->user());
 
@@ -294,7 +300,7 @@ class LeadResource extends BaseResource
     {
         $user = auth()->user();
 
-        if (PermissionHelper::allows($user, FilamentPermissionRegistry::panelAccessPermission())) {
+        if (PermissionHelper::allows($user, 'view_businesses')) {
             return parent::getEloquentQuery()
                 ->withoutGlobalScope(BusinessScope::class)
                 ->withTrashed();

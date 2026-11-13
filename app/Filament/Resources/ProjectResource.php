@@ -252,7 +252,14 @@ class ProjectResource extends BaseResource
                         ->required(),
                     Forms\Components\Select::make('assigned_to')
                         ->label('Lead Developer')
-                        ->options(User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'manager', 'developer']))->pluck('name', 'id'))
+                        ->options(fn (): array => User::query()
+                            ->whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager', 'developer']))
+                            ->whereHas('businesses', fn ($query) => $query
+                                ->whereKey(currentBusiness()?->getKey())
+                                ->where('business_users.is_active', true))
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->all())
                         ->searchable(),
                     Forms\Components\Select::make('status')
                         ->options(['draft' => 'Draft', 'active' => 'Active', 'on_hold' => 'On Hold', 'completed' => 'Completed', 'cancelled' => 'Cancelled'])

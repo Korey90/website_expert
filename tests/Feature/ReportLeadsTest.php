@@ -7,6 +7,7 @@ use App\Models\Lead;
 use App\Models\PipelineStage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class ReportLeadsTest extends TestCase
@@ -14,12 +15,16 @@ class ReportLeadsTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private PipelineStage $stage;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->user  = User::factory()->create();
+        $this->user = User::factory()->create();
+        Permission::findOrCreate('view_reports');
+        Permission::findOrCreate('export_reports');
+        $this->user->givePermissionTo(['view_reports', 'export_reports']);
         $this->stage = PipelineStage::create(['name' => 'New', 'slug' => 'new', 'order' => 1]);
     }
 
@@ -31,10 +36,10 @@ class ReportLeadsTest extends TestCase
     private function makeLead(Client $client, array $override = []): Lead
     {
         return Lead::create(array_merge([
-            'title'             => 'Test Lead',
-            'client_id'         => $client->id,
+            'title' => 'Test Lead',
+            'client_id' => $client->id,
             'pipeline_stage_id' => $this->stage->id,
-            'source'            => 'contact_form',
+            'source' => 'contact_form',
         ], $override));
     }
 

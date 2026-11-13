@@ -7,14 +7,13 @@ use App\Actions\Account\UpdateAdminProfileAction;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Notifications\Notification;
-use Filament\Pages\Page;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
-class AccountProfilePage extends Page
+class AccountProfilePage extends BasePage
 {
     protected string $view = 'filament.pages.account-profile';
 

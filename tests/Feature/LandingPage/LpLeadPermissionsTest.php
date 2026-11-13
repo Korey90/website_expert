@@ -31,7 +31,8 @@ class LpLeadPermissionsTest extends TestCase
 {
     use RefreshDatabase;
 
-    private Business    $business;
+    private Business $business;
+
     private LandingPage $page;
 
     protected function setUp(): void
@@ -44,16 +45,16 @@ class LpLeadPermissionsTest extends TestCase
         PipelineStage::firstOrCreate(['slug' => 'new-lead'], ['name' => 'New Lead', 'order' => 1]);
 
         $this->business = Business::create([
-            'name'      => 'Permissions Corp',
-            'slug'      => 'permissions-corp',
+            'name' => 'Permissions Corp',
+            'slug' => 'permissions-corp',
             'is_active' => true,
         ]);
 
         $this->page = LandingPage::create([
-            'business_id'  => $this->business->id,
-            'title'        => 'Permission LP',
-            'slug'         => 'permission-lp',
-            'status'       => LandingPage::STATUS_PUBLISHED,
+            'business_id' => $this->business->id,
+            'title' => 'Permission LP',
+            'slug' => 'permission-lp',
+            'status' => LandingPage::STATUS_PUBLISHED,
             'template_key' => 'lead_magnet',
         ]);
     }
@@ -274,6 +275,11 @@ class LpLeadPermissionsTest extends TestCase
     {
         $manager = User::factory()->create();
         $manager->assignRole('manager');
+        $manager->businesses()->attach($this->business->id, [
+            'role' => 'manager',
+            'is_active' => true,
+            'joined_at' => now(),
+        ]);
 
         $this->postJson(route('lp.submit', $this->page->slug), [
             'name' => 'Mgr Lead', 'email' => 'mgrlead@example.com',
@@ -282,6 +288,7 @@ class LpLeadPermissionsTest extends TestCase
         $lead = Lead::first();
         $lead->update(['assigned_to' => $manager->id]);
 
+        $this->actingAs($manager);
         $this->assertTrue($manager->can('view', $lead));
     }
 

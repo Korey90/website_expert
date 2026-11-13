@@ -1,10 +1,48 @@
 # Current Task
 
-**Status:** W toku — direct-host FPH ma 0 błędów; sandbox E2E odblokowywane z jednym kontrolowanym ostrzeżeniem licencyjnym
-**Zadanie:** HMRC MTD VAT sandbox end-to-end
-**Data rozpoczęcia:** 2026-11-10
-**Plan nadrzędny:** `docs/plans/uk-finance-tax-module-plan.md`
+**Status:** Zakończone — audyt wszystkich modułów i tras `/admin/*`
+**Zadanie:** RBAC, menu i izolacja tenantów w panelu administracyjnym
+**Data rozpoczęcia:** 2026-11-13
+**Plan nadrzędny:** audyt bezpieczeństwa panelu administracyjnego
 **Ochrona równoległej pracy:** nie modyfikować `resources/js/Pages/Landing/PlStronyInternetowe.tsx`.
+
+## Delta Analysis: RBAC i tenant isolation panelu `/admin/*`
+
+### Anchor files
+
+- `app/Filament/Support/FilamentPermissionRegistry.php` — centralna mapa kluczy Resources/Pages.
+- `app/Filament/Resources/BaseResource.php` i `app/Filament/Pages/BasePage.php` — wspólne bramki Filament.
+- `app/Traits/BelongsToTenant.php` + `app/Scopes/BusinessScope.php` — izolacja aktywnego workspace'u.
+- `tests/Feature/Filament/FilamentPermissionAccessTest.php` — istniejący kontrakt ról i permissions.
+
+### Wykryte luki
+
+- [x] 7 Resources i 5 Pages nie miało wpisu w centralnym rejestrze uprawnień.
+- [x] Brak wpisu w rejestrze działał fail-open w `BaseResource` i `BasePage`.
+- [x] `SearchRankingCheckResource` omijał `BaseResource`, a model z `business_id` nie miał tenant scope.
+- [x] Domain/DomainOrder zdejmowały tenant scope każdemu użytkownikowi panelu zamiast wyłącznie uprawnionemu operatorowi cross-tenant.
+- [x] część własnych tras `/admin/*` miała tylko `auth`, bez jawnego klucza dostępu.
+- [x] dashboard i topbar pokazywały widgety/akcje/dane bez dopasowania do permissions.
+- [x] ręczne pobieranie szablonów briefingów i ofert po ID omijało `forBusiness()`.
+
+### Plan wykonania
+
+1. [x] Uzupełnić i zamknąć fail-closed rejestr Resources/Pages.
+2. [x] Dodać brakujące klucze domen/kalendarza do seedera oraz grup edytora ról.
+3. [x] Wymusić permission middleware na niestandardowych trasach admina.
+4. [x] Naprawić izolację Search Ranking, domen, topbara i wyboru szablonów.
+5. [x] Dopasować dashboard/widgety/quick actions do ról.
+6. [x] Dodać automatyczny audyt pokrycia oraz testy cross-tenant i bezpośrednich URL-i.
+7. [x] Uruchomić Pint, testy Filament/tenant oraz pełną regresję proporcjonalną do zmian.
+
+### Wynik końcowy
+
+- 56/56 Resources i 24/24 Pages ma jawny, istniejący klucz dostępu; brak mapowania kończy się odmową.
+- Menu jest zgodne z rolami: panel-only nie widzi modułów, `admin` widzi komplet, a `manager` nie ma uprawnień operatora platformy.
+- Tenant scope obejmuje listy, rekordy, ręczne selektory użytkowników, powiadomienia, widgety, topbar i niestandardowe trasy/eksporty.
+- Migracja `2026_11_13_000033` aktualizuje istniejące role i dodaje klucze kalendarza/domen.
+- Audyt kontraktowy: 8 testów / 1140 asercji; Filament targeted: 14 testów / 1185 asercji; eksporty i polityki: 44 testy / 74 asercje.
+- Pełny przebieg wykrył 24 testy wymagające dostosowania do nowych bramek — wszystkie przechodzą po poprawie fixture'ów. Pozostało 6 potwierdzonych błędów baseline niezwiązanych z tym zadaniem: social OAuth redirect (1), homepage meta (3), portal billing currency (1), ServicePage Inertia shape (1).
 
 ## Decyzja wykonawcza
 

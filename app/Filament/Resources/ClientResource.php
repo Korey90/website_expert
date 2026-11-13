@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClientResource\Pages;
 use App\Filament\Support\Currency as FilamentCurrency;
-use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\Client;
 use App\Models\User;
 use App\Scopes\BusinessScope;
@@ -221,7 +220,14 @@ class ClientResource extends BaseResource
                         ->default('website'),
                     Forms\Components\Select::make('assigned_to')
                         ->label('Assigned To')
-                        ->options(User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'manager']))->pluck('name', 'id'))
+                        ->options(fn (): array => User::query()
+                            ->whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager']))
+                            ->whereHas('businesses', fn ($query) => $query
+                                ->whereKey(currentBusiness()?->getKey())
+                                ->where('business_users.is_active', true))
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->all())
                         ->searchable(),
                 ]),
 
@@ -341,7 +347,7 @@ class ClientResource extends BaseResource
     {
         $user = auth()->user();
 
-        if (PermissionHelper::allows($user, FilamentPermissionRegistry::panelAccessPermission())) {
+        if (PermissionHelper::allows($user, 'view_businesses')) {
             return parent::getEloquentQuery()
                 ->withoutGlobalScope(BusinessScope::class)
                 ->withTrashed();

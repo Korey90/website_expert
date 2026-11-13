@@ -28,7 +28,7 @@ class ListNotifications extends ListRecords
                 ->modifyQueryUsing(fn (Builder $query) => $query),
             'unread' => Tab::make('Unread')
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('read_at')->whereNull('deleted_at'))
-                ->badge(fn () => \App\Models\DatabaseNotification::withoutGlobalScopes()->where('data->format', 'filament')->whereNull('read_at')->whereNull('deleted_at')->count()),
+                ->badge(fn () => NotificationResource::getEloquentQuery()->whereNull('read_at')->whereNull('deleted_at')->count()),
             'read' => Tab::make('Read')
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('read_at')->whereNull('deleted_at')),
             'dismissed' => Tab::make('Dismissed')

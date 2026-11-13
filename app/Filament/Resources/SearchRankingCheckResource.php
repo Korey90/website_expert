@@ -4,16 +4,18 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SearchRankingCheckResource\Pages\ListSearchRankingChecks;
 use App\Models\SearchRankingCheck;
-use Filament\Resources\Resource;
+use App\Scopes\BusinessScope;
+use App\Support\PermissionHelper;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Read-only usage/cost visibility for the public Google Rank Checker tool
  * (plan §38: checks, provider requests, cache hits, errors, distinct users via IP hash).
  */
-class SearchRankingCheckResource extends Resource
+class SearchRankingCheckResource extends BaseResource
 {
     protected static ?string $model = SearchRankingCheck::class;
 
@@ -109,5 +111,14 @@ class SearchRankingCheckResource extends Resource
         return [
             'index' => ListSearchRankingChecks::route('/'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        return PermissionHelper::allows(auth()->user(), 'view_businesses')
+            ? $query->withoutGlobalScope(BusinessScope::class)
+            : $query;
     }
 }

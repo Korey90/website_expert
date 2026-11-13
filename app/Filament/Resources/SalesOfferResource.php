@@ -3,25 +3,28 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SalesOfferResource\Pages;
-use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\SalesOffer;
 use App\Scopes\BusinessScope;
 use App\Support\PermissionHelper;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class SalesOfferResource extends BaseResource
 {
     protected static ?string $model = SalesOffer::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-paper-airplane';
+
     protected static \UnitEnum|string|null $navigationGroup = 'CRM';
+
     protected static ?int $navigationSort = 4;
+
     protected static ?string $navigationLabel = 'Sales Offers';
 
     public static function form(Schema $form): Schema
@@ -95,11 +98,11 @@ class SalesOfferResource extends BaseResource
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'draft'      => 'gray',
-                        'sent'       => 'info',
-                        'viewed'     => 'warning',
-                        'converted'  => 'success',
-                        default      => 'gray',
+                        'draft' => 'gray',
+                        'sent' => 'info',
+                        'viewed' => 'warning',
+                        'converted' => 'success',
+                        default => 'gray',
                     }),
 
                 Tables\Columns\TextColumn::make('sent_at')
@@ -117,9 +120,9 @@ class SalesOfferResource extends BaseResource
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        'draft'     => 'Draft',
-                        'sent'      => 'Sent',
-                        'viewed'    => 'Viewed',
+                        'draft' => 'Draft',
+                        'sent' => 'Sent',
+                        'viewed' => 'Viewed',
                         'converted' => 'Converted',
                     ]),
                 Tables\Filters\SelectFilter::make('language')
@@ -136,15 +139,15 @@ class SalesOfferResource extends BaseResource
     {
         return [
             'index' => Pages\ListSalesOffers::route('/'),
-            'view'  => Pages\ViewSalesOffer::route('/{record}'),
+            'view' => Pages\ViewSalesOffer::route('/{record}'),
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $user = auth()->user();
 
-        if (PermissionHelper::allows($user, FilamentPermissionRegistry::panelAccessPermission())) {
+        if (PermissionHelper::allows($user, 'view_businesses')) {
             return parent::getEloquentQuery()
                 ->withoutGlobalScope(BusinessScope::class);
         }

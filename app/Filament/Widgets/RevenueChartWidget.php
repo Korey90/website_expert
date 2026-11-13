@@ -5,10 +5,16 @@ namespace App\Filament\Widgets;
 use App\Models\Invoice;
 use App\Models\Lead;
 use App\Services\Currency\CurrencyResolver;
+use App\Support\PermissionHelper;
 use Filament\Widgets\ChartWidget;
 
 class RevenueChartWidget extends ChartWidget
 {
+    public static function canView(): bool
+    {
+        return PermissionHelper::allows(auth()->user(), 'view_invoices');
+    }
+
     protected static ?int $sort = 4;
 
     public function getColumnSpan(): int|string|array

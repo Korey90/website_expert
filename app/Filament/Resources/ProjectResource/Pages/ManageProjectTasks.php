@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ProjectResource\Pages;
 
 use App\Filament\Resources\ProjectResource;
+use App\Models\ProjectPhase;
 use App\Models\ProjectTask;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -10,7 +11,6 @@ use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
-use Filament\Schemas\Schema;
 
 class ManageProjectTasks extends Page
 {
@@ -26,7 +26,8 @@ class ManageProjectTasks extends Page
 
     // Form state for inline create modal
     public ?int $editingTaskId = null;
-    public array $taskForm     = [];
+
+    public array $taskForm = [];
 
     public function mount(int|string $record): void
     {
@@ -41,13 +42,13 @@ class ManageProjectTasks extends Page
 
     public function getTitle(): string
     {
-        return 'Task Board — ' . $this->getRecord()->title;
+        return 'Task Board — '.$this->getRecord()->title;
     }
 
     public function getGroupedTasks(): array
     {
         $statuses = ['todo', 'in_progress', 'review', 'done'];
-        $tasks    = $this->getRecord()
+        $tasks = $this->getRecord()
             ->tasks()
             ->with(['assignedTo', 'phase'])
             ->leftJoin('project_phases', 'project_tasks.phase_id', '=', 'project_phases.id')
@@ -63,6 +64,7 @@ class ManageProjectTasks extends Page
         foreach ($statuses as $status) {
             $result[$status] = $tasks[$status] ?? [];
         }
+
         return $result;
     }
 
@@ -78,15 +80,15 @@ class ManageProjectTasks extends Page
 
         $oldStatus = $task->status;
         $task->update([
-            'status'       => $status,
+            'status' => $status,
             'completed_at' => $status === 'done' ? now() : null,
         ]);
 
         // Auto-update phase status based on task completion
         if ($task->phase_id) {
-            $phase       = \App\Models\ProjectPhase::find($task->phase_id);
-            $allTasks    = $phase?->tasks()->count() ?? 0;
-            $doneTasks   = $phase?->tasks()->where('status', 'done')->count() ?? 0;
+            $phase = ProjectPhase::find($task->phase_id);
+            $allTasks = $phase?->tasks()->count() ?? 0;
+            $doneTasks = $phase?->tasks()->where('status', 'done')->count() ?? 0;
             $activeTasks = $phase?->tasks()->whereIn('status', ['in_progress', 'review'])->count() ?? 0;
 
             if ($phase && $allTasks > 0) {
@@ -103,7 +105,7 @@ class ManageProjectTasks extends Page
         Notification::make()
             ->success()
             ->title('Task moved')
-            ->body('"' . $task->title . '" → ' . ucfirst(str_replace('_', ' ', $status)))
+            ->body('"'.$task->title.'" → '.ucfirst(str_replace('_', ' ', $status)))
             ->send();
     }
 
@@ -138,25 +140,31 @@ class ManageProjectTasks extends Page
                         ->maxLength(255),
                     Forms\Components\Select::make('status')
                         ->options([
-                            'todo'        => 'To Do',
+                            'todo' => 'To Do',
                             'in_progress' => 'In Progress',
-                            'review'      => 'Review',
-                            'done'        => 'Done',
+                            'review' => 'Review',
+                            'done' => 'Done',
                         ])
                         ->default('todo')
                         ->required(),
                     Forms\Components\Select::make('priority')
                         ->options([
-                            'low'    => 'Low',
+                            'low' => 'Low',
                             'medium' => 'Medium',
-                            'high'   => 'High',
+                            'high' => 'High',
                             'urgent' => 'Urgent',
                         ])
                         ->default('medium')
                         ->required(),
                     Forms\Components\Select::make('assigned_to')
                         ->label('Assignee')
-                        ->options(User::pluck('name', 'id'))
+                        ->options(fn (): array => User::query()
+                            ->whereHas('businesses', fn ($query) => $query
+                                ->whereKey(currentBusiness()?->getKey())
+                                ->where('business_users.is_active', true))
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->all())
                         ->searchable()
                         ->nullable(),
                     Forms\Components\DatePicker::make('due_date')

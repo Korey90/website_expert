@@ -157,7 +157,7 @@ class ViewLead extends ViewRecord
                         ->required(),
                 ])
                 ->action(function (array $data) use ($lead) {
-                    $template = BriefingTemplate::findOrFail($data['briefing_template_id']);
+                    $template = BriefingTemplate::forBusiness()->findOrFail($data['briefing_template_id']);
                     $briefing = app(BriefingService::class)
                         ->createFromTemplate($lead, $template, auth()->user());
 
@@ -194,7 +194,7 @@ class ViewLead extends ViewRecord
                         ->required(),
                 ])
                 ->action(function (array $data) use ($lead) {
-                    $template = SalesOfferTemplate::findOrFail($data['template_id']);
+                    $template = SalesOfferTemplate::forBusiness()->findOrFail($data['template_id']);
                     $service = app(SalesOfferService::class);
 
                     $offer = $service->createFromTemplate($lead, $template, auth()->user());
@@ -241,7 +241,7 @@ class ViewLead extends ViewRecord
                         ->required(),
                 ])
                 ->action(function (array $data) use ($lead) {
-                    $template = SalesOfferTemplate::findOrFail($data['template_id']);
+                    $template = SalesOfferTemplate::forBusiness()->findOrFail($data['template_id']);
                     $offer = app(SalesOfferService::class)
                         ->createFromTemplate($lead, $template, auth()->user());
 

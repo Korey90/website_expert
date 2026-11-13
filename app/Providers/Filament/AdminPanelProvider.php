@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\AdminDashboard;
 use App\Models\LeadNote;
+use App\Support\PermissionHelper;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -52,8 +53,16 @@ class AdminPanelProvider extends PanelProvider
             )
             ->renderHook(
                 PanelsRenderHook::TOPBAR_END,
-                function (): View {
+                function (): View|HtmlString {
+                    $user = auth()->user();
+                    $business = currentBusiness();
+
+                    if (! $user || ! $business || ! PermissionHelper::allows($user, 'view_leads')) {
+                        return new HtmlString('');
+                    }
+
                     $pinnedNotes = LeadNote::where('is_pinned', true)
+                        ->whereHas('lead', fn ($query) => $query->where('business_id', $business->id))
                         ->with('lead')
                         ->orderByDesc('created_at')
                         ->limit(15)

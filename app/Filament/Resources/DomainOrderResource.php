@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\DomainOrderResource\Pages;
 use App\Filament\Support\Currency as FilamentCurrency;
-use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\DomainOrder;
 use App\Scopes\BusinessScope;
 use App\Support\PermissionHelper;
@@ -397,7 +396,7 @@ class DomainOrderResource extends BaseResource
     {
         $user = auth()->user();
 
-        if (PermissionHelper::allows($user, FilamentPermissionRegistry::panelAccessPermission())) {
+        if (PermissionHelper::allows($user, 'view_businesses')) {
             return parent::getEloquentQuery()
                 ->withoutGlobalScope(BusinessScope::class);
         }

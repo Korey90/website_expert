@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\NotificationResource\Pages;
 use App\Models\DatabaseNotification;
 use App\Models\User;
+use App\Support\PermissionHelper;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ForceDeleteAction;
@@ -14,7 +15,6 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -44,7 +44,10 @@ class NotificationResource extends BaseResource
             Section::make('Send Notification')->schema([
                 Forms\Components\Select::make('user_ids')
                     ->label('Recipients')
-                    ->options(User::orderBy('name')->pluck('name', 'id'))
+                    ->options(fn (): array => static::recipientQuery()
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->all())
                     ->multiple()
                     ->required()
                     ->searchable(),
@@ -116,9 +119,9 @@ class NotificationResource extends BaseResource
                     ->badge()
                     ->getStateUsing(fn ($record) => $record->read_at ? 'Read' : 'Unread')
                     ->color(fn (string $state) => match ($state) {
-                        'Read'   => 'success',
+                        'Read' => 'success',
                         'Unread' => 'warning',
-                        default  => 'gray',
+                        default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('dismiss_status')
                     ->label('Dismissed')
@@ -126,8 +129,8 @@ class NotificationResource extends BaseResource
                     ->getStateUsing(fn ($record) => $record->deleted_at ? 'Dismissed' : 'Active')
                     ->color(fn (string $state) => match ($state) {
                         'Dismissed' => 'danger',
-                        'Active'    => 'primary',
-                        default     => 'gray',
+                        'Active' => 'primary',
+                        default => 'gray',
                     }),
             ])
             ->filters([
@@ -153,16 +156,43 @@ class NotificationResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListNotifications::route('/'),
+            'index' => Pages\ListNotifications::route('/'),
             'create' => Pages\CreateNotification::route('/create'),
-            'view'   => Pages\ViewNotification::route('/{record}'),
+            'view' => Pages\ViewNotification::route('/{record}'),
         ];
     }
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        $query = parent::getEloquentQuery()
             ->withoutGlobalScopes([SoftDeletingScope::class])
             ->where('data->format', 'filament');
+
+        if (PermissionHelper::allows(auth()->user(), 'view_businesses')) {
+            return $query;
+        }
+
+        return $query
+            ->where('notifiable_type', (new User)->getMorphClass())
+            ->whereIn('notifiable_id', static::recipientQuery()->select('users.id'));
+    }
+
+    public static function recipientQuery(): Builder
+    {
+        $query = User::query();
+
+        if (PermissionHelper::allows(auth()->user(), 'view_businesses')) {
+            return $query;
+        }
+
+        $businessId = currentBusiness()?->getKey();
+
+        if (! $businessId) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereHas('businesses', fn (Builder $businesses) => $businesses
+            ->whereKey($businessId)
+            ->where('business_users.is_active', true));
     }
 }

@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\Lead;
+use App\Support\PermissionHelper;
 use Filament\Actions\Action;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -11,6 +12,11 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class RecentLeadsWidget extends BaseWidget
 {
+    public static function canView(): bool
+    {
+        return PermissionHelper::allows(auth()->user(), 'view_leads');
+    }
+
     protected static ?int $sort = 8;
 
     protected int|string|array $columnSpan = 'full';

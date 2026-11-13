@@ -1,18 +1,19 @@
 # Website Expert NI — Project Status Dashboard
 
-**Last Full Validation:** 2026-11-11
-**Last Targeted Validation:** 2026-11-11 — deploy `c8a23a3` i produkcyjny smoke test
+**Last Full Validation:** 2026-11-13
+**Last Targeted Validation:** 2026-11-13 — audyt `/admin/*` RBAC i tenant isolation
 
 ## Health Checks
 - **Code Quality:** 🟡 ESLint, Blade i build przechodzą; repozytoryjny `pint --test` nadal wykazuje istniejący dług formatowania w plikach legacy, niezwiązany z wdrożeniem HMRC
 - **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 1249 kluczy liściowe w PL/EN/PT
-- **Tests:** PHPUnit pełny pakiet (2026-11-11): 860 passed / 9 failed (ten sam baseline, niezwiązane: homepage meta, portal billing, stare profile i service page) / 11 skipped; finalny Finance 348 passed + 1 skipped / 2462 assertions; HMRC 82/489
-- **Multi-Tenancy Compliance:** 100% ✅ (wyjątek celowy: `search_ranking_checks.business_id` nullable — narzędzie publiczne/anonimowe, przygotowane pod przyszłe powiązanie z klientem)
+- **Tests:** audyt admina 8 passed / 1140 assertions; Filament targeted 14 passed / 1185 assertions; eksporty/polityki 44 passed / 74 assertions. Pełna regresja ujawniła 24 testy fixture'ów dostosowane do nowych bramek oraz 6 potwierdzonych, niezwiązanych błędów baseline.
+- **Multi-Tenancy Compliance:** 100% dla modułów panelu ✅; `SearchRankingCheck` ma teraz `BelongsToTenant`, a publiczne rekordy nullable pozostają dostępne poza panelem zgodnie z przeznaczeniem.
 - **Security Review:** 🟡 HMRC production fail-closed, pełne audyty Composer/NPM i secret scan czyste; produkcja nadal zablokowana przez niezależny pentest oraz zewnętrzne gate'y FPH/HMRC
 - **Build (Vite):** ✅ Brak błędów TS/JS
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-11-13 — **Audyt `/admin/*` RBAC i tenant isolation:** wszystkie 56 Resources i 24 Pages mają jawne, fail-closed permission keys; dashboard, quick actions, topbar, kalendarz, HMRC OAuth, eksporty i custom routes respektują role. Cross-tenant dostęp wymaga `view_businesses`; `manager` utracił uprawnienia platformowe, selektory użytkowników i powiadomienia są tenantowe. Migracja `000033` aktualizuje istniejące role. Kontrakt automatyczny: 1140 asercji ✅
 - 2026-11-11 — **HMRC live account read:** poprawnie pobrano testową liability i payment z osobnymi correlation IDs; panel zachował wyniki efemerycznie i nie utworzył księgowań. Tenant evidence chain 9/9 jest integralny. Prywatny redacted export ma file SHA-256 `ab210110fdc9900fbd39645d6f2e3743b08001177d58de74a6c7b01b4fc17d05` i payload SHA-256 `8bfc4c27a51873e7c137a6ccef524cae76a009babdd96da6e8c86df7e33c882f` ✅
 - 2026-11-11 — **HMRC liabilities/payments contract:** live HTTP 400 ujawnił zarówno minimalną datę `2017-12-01`, jak i konieczność dopasowania zakresu do scenariusza. Dodano fail-fast walidację min/max/366 dni oraz automatyczne daty `2018-01-02`–`2018-02-02` dla kompatybilnej pary `SINGLE_LIABILITY_2018_19` / `SINGLE_PAYMENT_2018_19`; testy read 9/32 i Pint przechodzą ✅
 - 2026-11-11 — **HMRC live read journey:** obligations sync pobrał 1 fulfilled i 1 open period, a powtórzenie było idempotentne (`0 new / 2 unchanged`). View przykładowego fulfilled period zwrócił zgodne z kontraktem 404, bo HMRC sandbox przechowuje i zwraca tylko wcześniej przesłane deklaracje. Dodano lokalizowany komunikat `return_not_found`, który nie ujawnia `periodKey`; dedykowane testy 8/29 i parytet EN/PL/PT po 1255 kluczy ✅

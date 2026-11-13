@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class ReportProjectsTest extends TestCase
@@ -13,14 +14,18 @@ class ReportProjectsTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private Client $client;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->user   = User::factory()->create();
+        $this->user = User::factory()->create();
+        Permission::findOrCreate('view_reports');
+        Permission::findOrCreate('export_reports');
+        $this->user->givePermissionTo(['view_reports', 'export_reports']);
         $this->client = Client::create([
-            'company_name'          => 'Test Corp',
+            'company_name' => 'Test Corp',
             'primary_contact_email' => 'test@example.com',
         ]);
     }
@@ -28,9 +33,9 @@ class ReportProjectsTest extends TestCase
     private function makeProject(array $override = []): Project
     {
         return Project::create(array_merge([
-            'title'     => 'Test Project',
+            'title' => 'Test Project',
             'client_id' => $this->client->id,
-            'status'    => 'active',
+            'status' => 'active',
         ], $override));
     }
 

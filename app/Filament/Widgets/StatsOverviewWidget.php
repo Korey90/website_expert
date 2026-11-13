@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\Lead;
 use App\Models\Project;
 use App\Services\Currency\CurrencySummaryFormatter;
+use App\Support\PermissionHelper;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -15,37 +16,55 @@ class StatsOverviewWidget extends BaseWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+
+        return PermissionHelper::allows($user, 'view_projects')
+            || PermissionHelper::allows($user, 'view_leads')
+            || PermissionHelper::allows($user, 'view_invoices');
+    }
+
     protected function getStats(): array
     {
-        $activeProjects = Project::where('status', 'active')->count();
-        $newLeads = Lead::whereNull('deleted_at')->whereMonth('created_at', now()->month)->count();
-        $overdueInvoices = Invoice::where('status', 'overdue')->count();
-        $money = app(CurrencySummaryFormatter::class);
-        $monthRevenue = $money->sumByCurrency(Invoice::where('status', 'paid')
-            ->whereMonth('updated_at', now()->month)
-            ->whereYear('updated_at', now()->year)
-            ->get(['currency', 'total']));
+        $user = auth()->user();
+        $stats = [];
 
-        return [
-            Stat::make('Active Projects', $activeProjects)
+        if (PermissionHelper::allows($user, 'view_projects')) {
+            $activeProjects = Project::where('status', 'active')->count();
+            $stats[] = Stat::make('Active Projects', $activeProjects)
                 ->description('Currently in progress')
                 ->icon('heroicon-o-briefcase')
-                ->color('primary'),
+                ->color('primary');
+        }
 
-            Stat::make('New Leads This Month', $newLeads)
+        if (PermissionHelper::allows($user, 'view_leads')) {
+            $newLeads = Lead::whereNull('deleted_at')->whereMonth('created_at', now()->month)->count();
+            $stats[] = Stat::make('New Leads This Month', $newLeads)
                 ->description('Leads created in '.now()->format('F'))
                 ->icon('heroicon-o-funnel')
-                ->color('info'),
+                ->color('info');
+        }
 
-            Stat::make('Overdue Invoices', $overdueInvoices)
+        if (PermissionHelper::allows($user, 'view_invoices')) {
+            $overdueInvoices = Invoice::where('status', 'overdue')->count();
+            $money = app(CurrencySummaryFormatter::class);
+            $monthRevenue = $money->sumByCurrency(Invoice::where('status', 'paid')
+                ->whereMonth('updated_at', now()->month)
+                ->whereYear('updated_at', now()->year)
+                ->get(['currency', 'total']));
+
+            $stats[] = Stat::make('Overdue Invoices', $overdueInvoices)
                 ->description('Require immediate attention')
                 ->icon('heroicon-o-exclamation-triangle')
-                ->color($overdueInvoices > 0 ? 'danger' : 'success'),
+                ->color($overdueInvoices > 0 ? 'danger' : 'success');
 
-            Stat::make('Revenue This Month', $money->formatGrouped($monthRevenue))
+            $stats[] = Stat::make('Revenue This Month', $money->formatGrouped($monthRevenue))
                 ->description('Paid invoices in '.now()->format('F').', grouped per currency')
                 ->icon('heroicon-o-banknotes')
-                ->color('success'),
-        ];
+                ->color('success');
+        }
+
+        return $stats;
     }
 }

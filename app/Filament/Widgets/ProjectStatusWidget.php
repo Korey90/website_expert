@@ -3,11 +3,18 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Project;
+use App\Support\PermissionHelper;
 use Filament\Widgets\ChartWidget;
 
 class ProjectStatusWidget extends ChartWidget
 {
+    public static function canView(): bool
+    {
+        return PermissionHelper::allows(auth()->user(), 'view_projects');
+    }
+
     protected static ?int $sort = 6;
+
     protected int|string|array $columnSpan = 1;
 
     protected string $color = 'primary';
@@ -31,7 +38,7 @@ class ProjectStatusWidget extends ChartWidget
             ->groupBy('status')
             ->pluck('total', 'status');
 
-        $data   = array_map(fn ($s) => (int) ($counts[$s] ?? 0), $statuses);
+        $data = array_map(fn ($s) => (int) ($counts[$s] ?? 0), $statuses);
         $labels = array_map(fn ($s) => ucfirst(str_replace('_', ' ', $s)), $statuses);
 
         $colors = [
@@ -45,11 +52,11 @@ class ProjectStatusWidget extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label'           => 'Projects',
-                    'data'            => $data,
+                    'label' => 'Projects',
+                    'data' => $data,
                     'backgroundColor' => $colors,
-                    'borderRadius'    => 4,
-                    'borderWidth'     => 0,
+                    'borderRadius' => 4,
+                    'borderWidth' => 0,
                 ],
             ],
             'labels' => $labels,
@@ -62,7 +69,7 @@ class ProjectStatusWidget extends ChartWidget
             'scales' => [
                 'y' => [
                     'beginAtZero' => true,
-                    'ticks'       => ['stepSize' => 1],
+                    'ticks' => ['stepSize' => 1],
                 ],
             ],
             'plugins' => [

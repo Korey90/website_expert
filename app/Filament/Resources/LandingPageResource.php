@@ -5,25 +5,30 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\LandingPageResource\Pages;
 use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\LandingPage;
+use App\Scopes\BusinessScope;
 use App\Support\PermissionHelper;
-use Filament\Forms;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class LandingPageResource extends BaseResource
 {
     protected static ?string $model = LandingPage::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-globe-alt';
+
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
+
     protected static ?int $navigationSort = 1;
+
     protected static ?string $label = 'Landing Page';
+
     protected static ?string $pluralLabel = 'Landing Pages';
 
     // -------------------------------------------------------------------------
@@ -55,9 +60,9 @@ class LandingPageResource extends BaseResource
 
                     Forms\Components\Select::make('status')
                         ->options([
-                            LandingPage::STATUS_DRAFT     => 'Draft',
+                            LandingPage::STATUS_DRAFT => 'Draft',
                             LandingPage::STATUS_PUBLISHED => 'Published',
-                            LandingPage::STATUS_ARCHIVED  => 'Archived',
+                            LandingPage::STATUS_ARCHIVED => 'Archived',
                         ])
                         ->default(LandingPage::STATUS_DRAFT)
                         ->required(),
@@ -120,7 +125,7 @@ class LandingPageResource extends BaseResource
 
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
-                        'gray'    => LandingPage::STATUS_DRAFT,
+                        'gray' => LandingPage::STATUS_DRAFT,
                         'success' => LandingPage::STATUS_PUBLISHED,
                         'warning' => LandingPage::STATUS_ARCHIVED,
                     ])
@@ -156,9 +161,9 @@ class LandingPageResource extends BaseResource
 
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        LandingPage::STATUS_DRAFT     => 'Draft',
+                        LandingPage::STATUS_DRAFT => 'Draft',
                         LandingPage::STATUS_PUBLISHED => 'Published',
-                        LandingPage::STATUS_ARCHIVED  => 'Archived',
+                        LandingPage::STATUS_ARCHIVED => 'Archived',
                     ]),
 
                 Tables\Filters\SelectFilter::make('language')
@@ -182,10 +187,10 @@ class LandingPageResource extends BaseResource
     {
         $user = auth()->user();
 
-        if (PermissionHelper::allows($user, FilamentPermissionRegistry::panelAccessPermission())) {
-            // Staff see all tenants — bypass BusinessScope GlobalScope
+        if (PermissionHelper::allows($user, 'view_businesses')) {
+            // Platform operators may inspect all tenants.
             return parent::getEloquentQuery()
-                ->withoutGlobalScope(\App\Scopes\BusinessScope::class)
+                ->withoutGlobalScope(BusinessScope::class)
                 ->with('business');
         }
 
@@ -200,10 +205,10 @@ class LandingPageResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListLandingPages::route('/'),
+            'index' => Pages\ListLandingPages::route('/'),
             'create' => Pages\CreateLandingPage::route('/create'),
-            'view'   => Pages\ViewLandingPage::route('/{record}'),
-            'edit'   => Pages\EditLandingPage::route('/{record}/edit'),
+            'view' => Pages\ViewLandingPage::route('/{record}'),
+            'edit' => Pages\EditLandingPage::route('/{record}/edit'),
         ];
     }
 }

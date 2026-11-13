@@ -25,16 +25,22 @@ Route::middleware('auth')->group(function () {
 
     // Lead note unpin (quick inline action)
     Route::patch('/lead-notes/{note}/unpin', function (LeadNote $note) {
+        abort_unless(
+            $note->lead?->business_id === currentBusiness()?->id
+                || auth()->user()?->can('view_businesses'),
+            403,
+        );
         $note->update(['is_pinned' => false]);
 
         return back();
-    })->name('lead-notes.unpin');
+    })->middleware('can:edit_leads')->name('lead-notes.unpin');
 
     // Email template preview (admin only)
     Route::get('/admin/email-preview/{template}/{locale?}', [EmailTemplatePreviewController::class, 'show'])
+        ->middleware('can:view_email_templates')
         ->name('admin.email-preview');
 
-    Route::prefix('admin/finance/attachments')->name('admin.finance.attachments.')->group(function () {
+    Route::middleware('can:view_finance')->prefix('admin/finance/attachments')->name('admin.finance.attachments.')->group(function () {
         Route::get('/{attachment}/preview', [FinancialAttachmentController::class, 'preview'])
             ->name('preview');
         Route::get('/{attachment}/download', [FinancialAttachmentController::class, 'download'])
@@ -42,37 +48,47 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/admin/finance/expense-report.csv', ExpenseReportExportController::class)
+        ->middleware('can:view_finance')
         ->name('admin.finance.expense-report.csv');
 
     Route::get('/admin/finance/bank-reconciliation-report.csv', BankReconciliationReportExportController::class)
+        ->middleware('can:view_finance')
         ->name('admin.finance.bank-reconciliation-report.csv');
 
     Route::get('/admin/finance/trial-balance.csv', TrialBalanceReportExportController::class)
+        ->middleware('can:view_finance')
         ->name('admin.finance.trial-balance.csv');
 
     Route::get('/admin/finance/profit-and-loss.csv', ProfitAndLossReportExportController::class)
+        ->middleware('can:view_finance')
         ->name('admin.finance.profit-and-loss.csv');
 
     Route::get('/admin/finance/balance-sheet.csv', BalanceSheetReportExportController::class)
+        ->middleware('can:view_finance')
         ->name('admin.finance.balance-sheet.csv');
 
     Route::get('/admin/finance/management-cash-flow.csv', ManagementCashFlowReportExportController::class)
+        ->middleware('can:view_finance')
         ->name('admin.finance.management-cash-flow.csv');
 
     Route::get('/admin/finance/aged-receivables-payables.csv', AgedReceivablesPayablesReportExportController::class)
+        ->middleware('can:view_finance')
         ->name('admin.finance.aged-receivables-payables.csv');
 
     Route::get('/admin/finance/vat-detail.csv', VatDetailReportExportController::class)
+        ->middleware('can:view_finance')
         ->name('admin.finance.vat-detail.csv');
 
     Route::get('/admin/finance/vat-returns/{vatReturn}/accountant-pack.zip', AccountantPackController::class)
+        ->middleware('can:view_finance')
         ->name('admin.finance.vat-returns.accountant-pack');
 
     Route::get('/admin/finance/vat-returns/{vatReturn}/hmrc-receipt.pdf', HmrcVatReceiptController::class)
+        ->middleware('can:submit_tax_returns')
         ->name('admin.finance.vat-returns.hmrc-receipt');
 
     // Reports — admin only
-    Route::prefix('reports')->name('reports.')->group(function () {
+    Route::middleware(['can:view_reports', 'can:export_reports'])->prefix('reports')->name('reports.')->group(function () {
         foreach (['html', 'pdf', 'xlsx', 'csv'] as $format) {
             Route::get("leads/{$format}", [ReportController::class, 'leads'])->defaults('format', $format)->name("leads.{$format}");
             Route::get("invoices/{$format}", [ReportController::class, 'invoices'])->defaults('format', $format)->name("invoices.{$format}");
@@ -82,8 +98,10 @@ Route::middleware('auth')->group(function () {
 
     // Domain price list CSV export
     Route::get('/admin/domain-price-lists/export', [DomainPriceListCsvController::class, 'export'])
+        ->middleware('can:manage_domain_pricing')
         ->name('admin.domain-price-list.export');
 
     Route::get('/admin/domain-price-lists/export-template', [DomainPriceListCsvController::class, 'exportTemplate'])
+        ->middleware('can:manage_domain_pricing')
         ->name('admin.domain-price-list.export-template');
 });

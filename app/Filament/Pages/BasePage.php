@@ -12,10 +12,8 @@ abstract class BasePage extends FilamentPage
     {
         $permission = FilamentPermissionRegistry::pagePermission(static::class);
 
-        if (! $permission) {
-            return parent::canAccess();
-        }
-
-        return PermissionHelper::allows(auth()->user(), $permission) && parent::canAccess();
+        return filled($permission)
+            && PermissionHelper::allows(auth()->user(), $permission)
+            && parent::canAccess();
     }
 }

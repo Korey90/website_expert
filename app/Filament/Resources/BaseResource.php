@@ -78,7 +78,7 @@ abstract class BaseResource extends FilamentResource
     {
         $permission = FilamentPermissionRegistry::resourcePermission(static::class, $action);
 
-        if ($permission && ! PermissionHelper::allows(auth()->user(), $permission)) {
+        if (! $permission || ! PermissionHelper::allows(auth()->user(), $permission)) {
             return false;
         }
 

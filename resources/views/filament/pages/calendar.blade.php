@@ -3,7 +3,10 @@
         <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
     @endpush
 
-    @php $googleConnected = $this->getGoogleConnected(); @endphp
+    @php
+        $googleConnected = $this->getGoogleConnected();
+        $canManage = $this->canManage();
+    @endphp
 
     <div
         x-data="calendarPage()"
@@ -47,10 +50,12 @@
                         <span x-text="leg.label"></span>
                     </span>
                 </template>
+                @if($canManage)
                 <span class="ml-auto flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
                     <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
                     Click day to add · Drag to reschedule
                 </span>
+                @endif
             </div>
 
             {{-- Calendar (always visible; loading shows as overlay so FullCalendar keeps its DOM) --}}
@@ -210,7 +215,7 @@
                 </div>
 
                 <div class="flex items-center justify-between gap-2 border-t border-gray-100 px-5 py-3 dark:border-gray-800">
-                    <button x-show="!dm.virtual" @click="confirmDelete()"
+                    <button x-show="canManage && !dm.virtual" @click="confirmDelete()"
                         class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         Delete
@@ -218,12 +223,12 @@
                     <span x-show="dm.virtual" class="text-xs text-gray-400 dark:text-gray-500 italic">Auto-generated from project / invoice</span>
 
                     <div class="flex items-center gap-2">
-                        <button x-show="!dm.virtual && !dm.synced && googleConnected" @click="syncGoogle()"
+                        <button x-show="canManage && !dm.virtual && !dm.synced && googleConnected" @click="syncGoogle()"
                             class="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 transition">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
                             Sync
                         </button>
-                        <a :href="dm.editUrl" class="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700 transition">
+                        <a x-show="canManage" :href="dm.editUrl" class="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700 transition">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             Open
                         </a>
@@ -262,6 +267,7 @@
                   dateFormatted:'', description:'', status:'',
                   synced:false, virtual:false, editUrl:'#' },
             googleConnected: {{ $googleConnected ? 'true' : 'false' }},
+            canManage: {{ $canManage ? 'true' : 'false' }},
 
             init() {
                 const self = this;
@@ -272,7 +278,7 @@
                     firstDay    : 1,
                     nowIndicator: true,
                     dayMaxEvents: 3,
-                    editable    : true,
+                    editable    : self.canManage,
                     height      : 'auto',
 
                     headerToolbar: {
@@ -294,7 +300,7 @@
                     },
 
                     eventAllow(drop, dragged) {
-                        return !dragged.extendedProps?.virtual;
+                        return self.canManage && !dragged.extendedProps?.virtual;
                     },
 
                     eventDidMount(info) {
@@ -323,6 +329,7 @@
                     moreLinkContent(arg) { return `+${arg.num} more`; },
 
                     dateClick(info) {
+                        if (!self.canManage) return;
                         self.openCreateModal(info.dateStr, info.allDay);
                     },
 
@@ -332,6 +339,7 @@
                     },
 
                     eventDrop(info) {
+                        if (!self.canManage) { info.revert(); return; }
                         const id = parseInt(info.event.id);
                         if (isNaN(id)) { info.revert(); return; }
                         self.$wire.moveCalendarEvent(id, info.event.startStr, info.event.endStr||null)
@@ -339,6 +347,7 @@
                     },
 
                     eventResize(info) {
+                        if (!self.canManage) { info.revert(); return; }
                         const id = parseInt(info.event.id);
                         if (isNaN(id)) { info.revert(); return; }
                         self.$wire.moveCalendarEvent(id, info.event.startStr, info.event.endStr||null)

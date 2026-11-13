@@ -53,6 +53,10 @@ class AdminSeeder extends Seeder
             'view_projects', 'create_projects', 'edit_projects', 'delete_projects',
             'view_portfolio_projects', 'create_portfolio_projects', 'edit_portfolio_projects', 'delete_portfolio_projects',
             'view_services', 'create_services', 'edit_services', 'delete_services',
+            // Productivity — Calendar
+            'view_calendar', 'manage_calendar',
+            // Domains — tenant records and platform pricing
+            'view_domains', 'manage_domain_pricing',
             // Marketing — ArticleResource
             'view_articles', 'create_articles', 'edit_articles', 'delete_articles',
             // Templates — ContractTemplateResource
@@ -116,8 +120,17 @@ class AdminSeeder extends Seeder
         // Admin gets all
         $admin->syncPermissions($permissions);
 
-        // Manager: full CRM/Finance/Projects access; no role/user admin
-        $managerExclude = ['manage_roles', 'manage_permissions', 'delete_users', 'manage_pipeline', 'manage_project_templates', 'export_leads', 'view_security_events', 'manage_security_events', 'close_finance_periods', 'submit_tax_returns'];
+        // Manager: tenant operations only; no platform-wide tenant, billing, user or security administration.
+        $managerExclude = [
+            'manage_roles', 'manage_permissions',
+            'view_users', 'create_users', 'edit_users', 'delete_users',
+            'view_businesses', 'edit_businesses',
+            'view_plans', 'create_plans', 'edit_plans', 'delete_plans', 'view_subscriptions',
+            'view_sessions', 'revoke_sessions',
+            'manage_pipeline', 'manage_project_templates', 'manage_domain_pricing',
+            'export_leads', 'view_security_events', 'manage_security_events',
+            'close_finance_periods', 'submit_tax_returns',
+        ];
         $manager->syncPermissions(array_values(array_filter($permissions, fn ($p) => ! in_array($p, $managerExclude))));
 
         // Developer: read-only on CRM/Finance + edit projects/contracts
@@ -134,6 +147,8 @@ class AdminSeeder extends Seeder
             'view_finance',
             'view_contracts',
             'view_projects', 'edit_projects',
+            'view_calendar',
+            'view_domains',
             'view_business_settings',
             'view_landing_pages',
             'view_lead_sources',

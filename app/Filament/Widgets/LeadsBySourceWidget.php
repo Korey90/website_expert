@@ -3,16 +3,19 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Lead;
+use App\Support\PermissionHelper;
 use Filament\Widgets\ChartWidget;
 
 class LeadsBySourceWidget extends ChartWidget
 {
     protected static ?int $sort = 5;
+
     protected int|string|array $columnSpan = 1;
 
     public static function canView(): bool
     {
-        return Lead::whereNotNull('source')->exists();
+        return PermissionHelper::allows(auth()->user(), 'view_leads')
+            && Lead::whereNotNull('source')->exists();
     }
 
     protected string $color = 'info';
@@ -46,10 +49,10 @@ class LeadsBySourceWidget extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'data'            => $data->values()->toArray(),
+                    'data' => $data->values()->toArray(),
                     'backgroundColor' => $colors,
-                    'borderWidth'     => 2,
-                    'borderColor'     => '#fff',
+                    'borderWidth' => 2,
+                    'borderColor' => '#fff',
                 ],
             ],
             'labels' => $data->keys()->map(fn ($s) => ucfirst(str_replace('_', ' ', $s)))->toArray(),
@@ -61,7 +64,7 @@ class LeadsBySourceWidget extends ChartWidget
         return [
             'plugins' => [
                 'legend' => [
-                    'display'  => true,
+                    'display' => true,
                     'position' => 'right',
                 ],
             ],

@@ -4,8 +4,8 @@ namespace App\Filament\Pages;
 
 use App\Models\CalendarEvent;
 use App\Models\GoogleCalendarToken;
-use App\Services\Calendar\CalendarFeedService;
 use App\Services\Calendar\GoogleCalendarService;
+use App\Support\PermissionHelper;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
@@ -15,11 +15,20 @@ use Illuminate\Support\Facades\Validator;
 
 class CalendarPage extends BasePage
 {
-    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-calendar-days';
-    protected static \UnitEnum|string|null  $navigationGroup = 'Productivity';
-    protected static ?string                $navigationLabel = 'Calendar';
-    protected static ?int                   $navigationSort  = 0;
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-calendar-days';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Productivity';
+
+    protected static ?string $navigationLabel = 'Calendar';
+
+    protected static ?int $navigationSort = 0;
+
     protected string $view = 'filament.pages.calendar';
+
+    public function canManage(): bool
+    {
+        return PermissionHelper::allows(auth()->user(), 'manage_calendar');
+    }
 
     // ── View data ─────────────────────────────────────────────────────────
 
@@ -43,11 +52,11 @@ class CalendarPage extends BasePage
     // GC-4: warn when connected but refresh_token is missing
     public function mount(): void
     {
-        $userId     = auth()->id();
+        $userId = auth()->id();
         $businessId = currentBusiness()?->id;
-        $service    = app(GoogleCalendarService::class);
+        $service = app(GoogleCalendarService::class);
 
-        if ($this->getGoogleConnected() && ! $service->hasValidRefreshToken($userId, $businessId)) {
+        if ($this->canManage() && $this->getGoogleConnected() && ! $service->hasValidRefreshToken($userId, $businessId)) {
             Notification::make()
                 ->title('Google Calendar: reconnect required')
                 ->body('Your Google token cannot be refreshed automatically. Reconnect to restore sync.')
@@ -68,28 +77,31 @@ class CalendarPage extends BasePage
      */
     public function quickCreate(string $title, string $type, string $startsAt, bool $allDay = false): void
     {
+        $this->assertCanManage();
+
         $v = Validator::make(
             ['title' => $title, 'type' => $type, 'starts_at' => $startsAt],
             [
-                'title'     => ['required', 'string', 'max:255'],
-                'type'      => ['required', 'in:meeting,call,deadline,reminder,task'],
+                'title' => ['required', 'string', 'max:255'],
+                'type' => ['required', 'in:meeting,call,deadline,reminder,task'],
                 'starts_at' => ['required', 'date'],
             ]
         );
 
         if ($v->fails()) {
             Notification::make()->title('Validation error')->body($v->errors()->first())->danger()->send();
+
             return;
         }
 
         $event = CalendarEvent::create([
             'business_id' => currentBusiness()?->id,
-            'user_id'     => auth()->id(),
-            'title'       => strip_tags($title),
-            'type'        => $type,
-            'starts_at'   => Carbon::parse($startsAt),
-            'all_day'     => $allDay,
-            'status'      => 'scheduled',
+            'user_id' => auth()->id(),
+            'title' => strip_tags($title),
+            'type' => $type,
+            'starts_at' => Carbon::parse($startsAt),
+            'all_day' => $allDay,
+            'status' => 'scheduled',
         ]);
 
         if ($this->getGoogleConnected()) {
@@ -105,6 +117,8 @@ class CalendarPage extends BasePage
      */
     public function deleteCalendarEvent(int $id): void
     {
+        $this->assertCanManage();
+
         $event = CalendarEvent::where('business_id', currentBusiness()?->id)->findOrFail($id);
         $event->delete();
 
@@ -117,10 +131,12 @@ class CalendarPage extends BasePage
      */
     public function moveCalendarEvent(int $id, string $startsAt, ?string $endsAt = null): void
     {
+        $this->assertCanManage();
+
         $event = CalendarEvent::where('business_id', currentBusiness()?->id)->findOrFail($id);
         $event->update([
             'starts_at' => Carbon::parse($startsAt),
-            'ends_at'   => $endsAt ? Carbon::parse($endsAt) : null,
+            'ends_at' => $endsAt ? Carbon::parse($endsAt) : null,
         ]);
 
         $this->dispatch('calendarRefresh');
@@ -131,13 +147,16 @@ class CalendarPage extends BasePage
      */
     public function syncAllToGoogle(): void
     {
+        $this->assertCanManage();
+
         if (! $this->getGoogleConnected()) {
             Notification::make()->title('Google Calendar not connected')->danger()->send();
+
             return;
         }
 
         $service = app(GoogleCalendarService::class);
-        $events  = CalendarEvent::where('business_id', currentBusiness()?->id)
+        $events = CalendarEvent::where('business_id', currentBusiness()?->id)
             ->whereNull('google_event_id')
             ->get();
 
@@ -169,7 +188,9 @@ class CalendarPage extends BasePage
      */
     public function syncEventToGoogle(int $id): void
     {
-        $event  = CalendarEvent::where('business_id', currentBusiness()?->id)->findOrFail($id);
+        $this->assertCanManage();
+
+        $event = CalendarEvent::where('business_id', currentBusiness()?->id)->findOrFail($id);
         $result = app(GoogleCalendarService::class)->pushEvent($event, auth()->id(), currentBusiness()?->id);
 
         if ($result) {
@@ -187,14 +208,17 @@ class CalendarPage extends BasePage
      */
     public function importFromGoogle(?Carbon $from = null, ?Carbon $to = null): void
     {
+        $this->assertCanManage();
+
         if (! $this->getGoogleConnected()) {
             Notification::make()->title('Google Calendar not connected')->danger()->send();
+
             return;
         }
 
-        $service    = app(GoogleCalendarService::class);
-        $start      = ($from ?? Carbon::now()->subDays(30))->startOfDay();
-        $end        = ($to   ?? Carbon::now()->addDays(90))->endOfDay();
+        $service = app(GoogleCalendarService::class);
+        $start = ($from ?? Carbon::now()->subDays(30))->startOfDay();
+        $end = ($to ?? Carbon::now()->addDays(90))->endOfDay();
         $businessId = currentBusiness()?->id;
 
         // Fetch from all calendars (primary + holidays, birthdays, etc.)
@@ -203,9 +227,9 @@ class CalendarPage extends BasePage
             $calendars = [['id' => 'primary', 'summary' => 'Primary']];
         }
 
-        $imported        = 0;
-        $skipped         = 0;
-        $failed          = 0;
+        $imported = 0;
+        $skipped = 0;
+        $failed = 0;
         $failedSummaries = [];
 
         foreach ($calendars as $calendar) {
@@ -218,15 +242,16 @@ class CalendarPage extends BasePage
                 $failed++;
                 $failedSummaries[] = $calendar['summary'];
                 Log::warning('CalendarPage: importFromGoogle skipped calendar (API error)', [
-                    'id'      => $calendar['id'],
+                    'id' => $calendar['id'],
                     'summary' => $calendar['summary'],
                 ]);
+
                 continue;
             }
 
             Log::info('CalendarPage: importFromGoogle calendar', [
-                'id'          => $calendar['id'],
-                'summary'     => $calendar['summary'],
+                'id' => $calendar['id'],
+                'summary' => $calendar['summary'],
                 'event_count' => count($googleEvents),
             ]);
 
@@ -238,6 +263,7 @@ class CalendarPage extends BasePage
 
                 if (CalendarEvent::where('google_event_id', $googleId)->exists()) {
                     $skipped++;
+
                     continue;
                 }
 
@@ -245,7 +271,7 @@ class CalendarPage extends BasePage
                     continue;
                 }
 
-                $allDay   = isset($gEvent['start']['date']) && ! isset($gEvent['start']['dateTime']);
+                $allDay = isset($gEvent['start']['date']) && ! isset($gEvent['start']['dateTime']);
                 $startsAt = $allDay
                     ? Carbon::parse($gEvent['start']['date'])->startOfDay()
                     : Carbon::parse($gEvent['start']['dateTime']);
@@ -253,22 +279,22 @@ class CalendarPage extends BasePage
                 $endsAt = null;
                 if (isset($gEvent['end']['date'])) {
                     $candidate = Carbon::parse($gEvent['end']['date'])->subDay()->startOfDay();
-                    $endsAt    = $candidate->gt($startsAt) ? $candidate : null;
+                    $endsAt = $candidate->gt($startsAt) ? $candidate : null;
                 } elseif (isset($gEvent['end']['dateTime'])) {
                     $endsAt = Carbon::parse($gEvent['end']['dateTime']);
                 }
 
                 CalendarEvent::create([
-                    'business_id'      => $businessId,
-                    'user_id'          => auth()->id(),
-                    'title'            => strip_tags($gEvent['summary'] ?? '(no title)'),
-                    'description'      => isset($gEvent['description']) ? strip_tags($gEvent['description']) : null,
-                    'type'             => $this->resolveEventType($calendar['id']), // GC-1
-                    'starts_at'        => $startsAt,
-                    'ends_at'          => $endsAt,
-                    'all_day'          => $allDay,
-                    'status'           => 'scheduled',
-                    'google_event_id'  => $googleId,
+                    'business_id' => $businessId,
+                    'user_id' => auth()->id(),
+                    'title' => strip_tags($gEvent['summary'] ?? '(no title)'),
+                    'description' => isset($gEvent['description']) ? strip_tags($gEvent['description']) : null,
+                    'type' => $this->resolveEventType($calendar['id']), // GC-1
+                    'starts_at' => $startsAt,
+                    'ends_at' => $endsAt,
+                    'all_day' => $allDay,
+                    'status' => 'scheduled',
+                    'google_event_id' => $googleId,
                     'google_synced_at' => now(),
                 ]);
 
@@ -293,7 +319,7 @@ class CalendarPage extends BasePage
         if ($failed > 0) {
             Notification::make()
                 ->title("{$failed} calendar(s) could not be fetched")
-                ->body('Failed: ' . implode(', ', $failedSummaries))
+                ->body('Failed: '.implode(', ', $failedSummaries))
                 ->warning()
                 ->send();
         }
@@ -322,6 +348,10 @@ class CalendarPage extends BasePage
 
     protected function getHeaderActions(): array
     {
+        if (! $this->canManage()) {
+            return [];
+        }
+
         return [
             Action::make('newEvent')
                 ->label('New Event')
@@ -370,5 +400,10 @@ class CalendarPage extends BasePage
                 ->url($this->getGoogleDisconnectUrl())
                 ->visible(fn () => $this->getGoogleConnected()),
         ];
+    }
+
+    private function assertCanManage(): void
+    {
+        abort_unless($this->canManage(), 403);
     }
 }

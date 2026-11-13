@@ -15,7 +15,8 @@ class BriefingPolicy
 
     public function view(User $user, Briefing $briefing): bool
     {
-        return PermissionHelper::allows($user, 'view_briefings');
+        return $this->canAccessTenant($user, $briefing->business_id)
+            && PermissionHelper::allows($user, 'view_briefings');
     }
 
     public function create(User $user): bool
@@ -25,7 +26,7 @@ class BriefingPolicy
 
     public function update(User $user, Briefing $briefing): bool
     {
-        if (!$briefing->isEditable()) {
+        if (! $this->canAccessTenant($user, $briefing->business_id) || ! $briefing->isEditable()) {
             return false;
         }
 
@@ -34,12 +35,20 @@ class BriefingPolicy
 
     public function delete(User $user, Briefing $briefing): bool
     {
-        return PermissionHelper::allows($user, 'delete_briefings');
+        return $this->canAccessTenant($user, $briefing->business_id)
+            && PermissionHelper::allows($user, 'delete_briefings');
     }
 
     public function shareWithClient(User $user, Briefing $briefing): bool
     {
-        return PermissionHelper::allows($user, 'share_briefings')
+        return $this->canAccessTenant($user, $briefing->business_id)
+            && PermissionHelper::allows($user, 'share_briefings')
             && $briefing->isEditable();
+    }
+
+    private function canAccessTenant(User $user, ?string $businessId): bool
+    {
+        return $businessId === currentBusiness()?->id
+            || PermissionHelper::allows($user, 'view_businesses');
     }
 }

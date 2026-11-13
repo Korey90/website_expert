@@ -3,23 +3,26 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\BriefingResource\Pages;
-use App\Filament\Support\FilamentPermissionRegistry;
 use App\Models\Briefing;
 use App\Scopes\BusinessScope;
 use App\Support\PermissionHelper;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
-use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class BriefingResource extends BaseResource
 {
     protected static ?string $model = Briefing::class;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-list';
+
     protected static \UnitEnum|string|null $navigationGroup = 'CRM';
+
     protected static ?int $navigationSort = 3;
+
     protected static ?string $navigationLabel = 'Briefings';
 
     public static function form(Schema $form): Schema
@@ -51,20 +54,20 @@ class BriefingResource extends BaseResource
                 Tables\Columns\TextColumn::make('type')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'discovery'      => 'info',
-                        'qualification'  => 'warning',
+                        'discovery' => 'info',
+                        'qualification' => 'warning',
                         'proposal_input' => 'success',
-                        'sales_offer'    => 'primary',
-                        default          => 'gray',
+                        'sales_offer' => 'primary',
+                        default => 'gray',
                     }),
 
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'draft'       => 'gray',
+                        'draft' => 'gray',
                         'in_progress' => 'warning',
-                        'completed'   => 'success',
-                        'cancelled'   => 'danger',
+                        'completed' => 'success',
+                        'cancelled' => 'danger',
                     }),
 
                 Tables\Columns\TextColumn::make('completed_at')
@@ -76,18 +79,18 @@ class BriefingResource extends BaseResource
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        'draft'       => 'Draft',
+                        'draft' => 'Draft',
                         'in_progress' => 'In Progress',
-                        'completed'   => 'Completed',
-                        'cancelled'   => 'Cancelled',
+                        'completed' => 'Completed',
+                        'cancelled' => 'Cancelled',
                     ]),
                 Tables\Filters\SelectFilter::make('type')
                     ->options([
-                        'discovery'      => 'Discovery',
-                        'qualification'  => 'Qualification',
+                        'discovery' => 'Discovery',
+                        'qualification' => 'Qualification',
                         'proposal_input' => 'Proposal Input',
-                        'sales_offer'    => 'Sales Offer',
-                        'custom'         => 'Custom',
+                        'sales_offer' => 'Sales Offer',
+                        'custom' => 'Custom',
                     ]),
             ])
             ->actions([
@@ -101,15 +104,15 @@ class BriefingResource extends BaseResource
     {
         return [
             'index' => Pages\ListBriefings::route('/'),
-            'view'  => Pages\ViewBriefing::route('/{record}'),
+            'view' => Pages\ViewBriefing::route('/{record}'),
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $user = auth()->user();
 
-        if (PermissionHelper::allows($user, FilamentPermissionRegistry::panelAccessPermission())) {
+        if (PermissionHelper::allows($user, 'view_businesses')) {
             return parent::getEloquentQuery()
                 ->withoutGlobalScope(BusinessScope::class);
         }
