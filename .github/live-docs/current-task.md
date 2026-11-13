@@ -43,6 +43,7 @@
 - Migracja `2026_11_13_000033` aktualizuje istniejące role i dodaje klucze kalendarza/domen.
 - Audyt kontraktowy: 8 testów / 1140 asercji; Filament targeted: 14 testów / 1185 asercji; eksporty i polityki: 44 testy / 74 asercje.
 - Pełny przebieg wykrył 24 testy wymagające dostosowania do nowych bramek — wszystkie przechodzą po poprawie fixture'ów. Pozostało 6 potwierdzonych błędów baseline niezwiązanych z tym zadaniem: social OAuth redirect (1), homepage meta (3), portal billing currency (1), ServicePage Inertia shape (1).
+- Wdrożono commit `ef15028` na `website-expert.uk`; migracja batch 11 wykonana, cache odbudowany, kolejka zrestartowana, role zweryfikowane i HTTP smoke test `200/302/302` zakończony poprawnie. Zweryfikowana kopia przedwdrożeniowa: `storage/app/deploy-backups/20261113-rbac-ef15028-v2`.
 
 ## Decyzja wykonawcza
 

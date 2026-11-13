@@ -1,7 +1,7 @@
 # Website Expert NI — Project Status Dashboard
 
 **Last Full Validation:** 2026-11-13
-**Last Targeted Validation:** 2026-11-13 — audyt `/admin/*` RBAC i tenant isolation
+**Last Targeted Validation:** 2026-11-13 — deploy `ef15028`, migracja i produkcyjny smoke test RBAC
 
 ## Health Checks
 - **Code Quality:** 🟡 ESLint, Blade i build przechodzą; repozytoryjny `pint --test` nadal wykazuje istniejący dług formatowania w plikach legacy, niezwiązany z wdrożeniem HMRC
@@ -13,6 +13,7 @@
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-11-13 — **Deploy RBAC/tenant isolation:** commit `ef15028` wdrożony do `/var/www/website-expert.uk`; przed zmianą wykonano i zweryfikowano SHA-256 kopię kodu oraz pełny zrzut MySQL w `storage/app/deploy-backups/20261113-rbac-ef15028-v2`. Migracja `000033` jest w batch 11, permission/cache reset i `optimize` przeszły, kolejka otrzymała restart. Produkcja potwierdza 4 nowe klucze, pełny dostęp admina, tenantowe klucze managera/developera i 0 zabronionych uprawnień platformowych managera; HTTP `/`, `/admin` i guest calendar: `200/302/302`, brak świeżych błędów Laravel ✅
 - 2026-11-13 — **Audyt `/admin/*` RBAC i tenant isolation:** wszystkie 56 Resources i 24 Pages mają jawne, fail-closed permission keys; dashboard, quick actions, topbar, kalendarz, HMRC OAuth, eksporty i custom routes respektują role. Cross-tenant dostęp wymaga `view_businesses`; `manager` utracił uprawnienia platformowe, selektory użytkowników i powiadomienia są tenantowe. Migracja `000033` aktualizuje istniejące role. Kontrakt automatyczny: 1140 asercji ✅
 - 2026-11-11 — **HMRC live account read:** poprawnie pobrano testową liability i payment z osobnymi correlation IDs; panel zachował wyniki efemerycznie i nie utworzył księgowań. Tenant evidence chain 9/9 jest integralny. Prywatny redacted export ma file SHA-256 `ab210110fdc9900fbd39645d6f2e3743b08001177d58de74a6c7b01b4fc17d05` i payload SHA-256 `8bfc4c27a51873e7c137a6ccef524cae76a009babdd96da6e8c86df7e33c882f` ✅
 - 2026-11-11 — **HMRC liabilities/payments contract:** live HTTP 400 ujawnił zarówno minimalną datę `2017-12-01`, jak i konieczność dopasowania zakresu do scenariusza. Dodano fail-fast walidację min/max/366 dni oraz automatyczne daty `2018-01-02`–`2018-02-02` dla kompatybilnej pary `SINGLE_LIABILITY_2018_19` / `SINGLE_PAYMENT_2018_19`; testy read 9/32 i Pint przechodzą ✅

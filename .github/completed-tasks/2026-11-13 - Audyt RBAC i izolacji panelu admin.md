@@ -58,6 +58,8 @@ Sprawdzić wszystkie moduły i adresy `/admin/*`, zapewnić każdemu modułowi j
 - ✅ Raporty i polityki po hardeningu: 44 testy / 74 asercje
 - ⚠️ Pełny pakiet uruchomiony: wszystkie 24 regresje wywołane nowymi bramkami zostały poprawione i retestowane; nadal istnieje 6 niezwiązanych błędów baseline (OAuth redirect, homepage meta ×3, billing currency, ServicePage Inertia).
 - ✅ Nie dodano nowych tekstów interfejsu wymagających tłumaczeń PL/EN/PT.
+- ✅ Commit `ef15028` wdrożony na produkcję; migracja batch 11, cache, queue restart, role i HTTP smoke test przeszły.
+- ✅ Zweryfikowana kopia kodu i MySQL: `storage/app/deploy-backups/20261113-rbac-ef15028-v2` na serwerze.
 
 ## Uwagi i rekomendacje
 
@@ -66,6 +68,6 @@ Uprawnienie `view_businesses` jest teraz świadomym kluczem operatora platformy 
 ## Next steps (opcjonalnie)
 
 - Naprawić 6 istniejących błędów baseline w osobnym zadaniu.
-- Po wdrożeniu wykonać smoke test menu na rolach `admin`, `manager`, `developer` i `bookkeeper`.
+- Wykonać ręczny test UX menu na istniejącym koncie `bookkeeper` podczas kolejnej sesji akceptacyjnej.
 
 **Raport wygenerowany automatycznie przez WebsiteExpert**
