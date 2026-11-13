@@ -1,7 +1,7 @@
 # HMRC MTD VAT — sandbox setup
 
-**Status:** Direct-host validation reached zero errors; sandbox E2E may proceed with one documented missing-licence warning while production remains blocked
-**Verified against official HMRC documentation:** 11 November 2026
+**Status:** Direct-host validation reached zero errors; read-only sandbox E2E passed and an isolated nil-return submission workspace is ready; production remains blocked
+**Verified against official HMRC documentation:** 13 November 2026
 **Scope:** Website Expert NI, direct business journey, VAT MTD only
 
 ## APIs to add to the sandbox application
@@ -26,7 +26,7 @@ The following are **not required** for the first end-to-end VAT sandbox journey:
 ## Sandbox application checklist
 
 - [x] Subscribe the sandbox application to the three APIs above.
-- [ ] Set the sandbox redirect URI to `https://website-expert.uk/admin/hmrc/oauth/callback` and reconnect OAuth on that host.
+- [x] Set the sandbox redirect URI to `https://website-expert.uk/admin/hmrc/oauth/callback` and reconnect OAuth on that host.
 - [x] Copy the sandbox Client ID and Client Secret into local/server environment variables, never into Git or chat:
   - `HMRC_SANDBOX_CLIENT_ID`
   - `HMRC_SANDBOX_CLIENT_SECRET`
@@ -42,9 +42,10 @@ The following are **not required** for the first end-to-end VAT sandbox journey:
 - [ ] Before production, either supply a genuine originating-device licence or obtain an HMRC exception and record it through `HMRC_FPH_ALLOWED_MISSING_HEADERS` plus `HMRC_FPH_EXCEPTION_REFERENCE`; never use `null`, `undefined` or another placeholder.
 - [ ] Keep `HMRC_ENVIRONMENT=sandbox` until the complete sandbox and security gates pass.
 - [x] Create or reuse an **organisation** test user and retain its test User ID, password and VRN in a password manager.
-- [ ] Reconnect OAuth on `website-expert.uk` using the test user's HMRC credentials; the previous zrok-host connection is not copied to the server database.
-- [ ] Run obligations → submit open period → view return → liabilities → payments.
-- [ ] Validate every endpoint's fraud-prevention headers and retrieve `vat-mtd` validation feedback.
+- [x] Reconnect OAuth on `website-expert.uk` using the organisation test user's HMRC credentials for the original Website Expert NI workspace.
+- [x] Run the read-only journey: obligations → liabilities → payments.
+- [x] Validate the direct-host fraud-prevention headers and retrieve `vat-mtd` validation feedback.
+- [ ] In the isolated `Website Expert NI — HMRC Sandbox` workspace, reconnect OAuth → sync obligations → submit the locked nil return → view the submitted return → generate the receipt PDF.
 
 Do not send HMRC credentials, Client Secret, access tokens, refresh tokens or full VRNs through project logs, screenshots, commits or chat.
 
@@ -63,6 +64,30 @@ The tenant owner or administrator manages the connection at `/admin/hmrc-connect
 The application's **Disconnect** action only deletes the locally stored credentials. It does not claim to revoke the user's authorization at HMRC because HMRC does not document a programmatic revoke endpoint for this flow. To withdraw the authority at HMRC, the user must also remove the application through HMRC's **Manage authorised applications** service.
 
 Live sandbox OAuth has been completed and the test VRN is stored encrypted. The application UI exposes only connection state and the final four VRN digits.
+
+## Isolated submission workspace
+
+On 13 November 2026, production received a second tenant named `Website Expert NI — HMRC Sandbox` in the same application and database. It is selected through the workspace switcher in the Filament top bar. The selection is stored in the authenticated session and the switch endpoint accepts only an active business and an active membership; an invalid or stale selection falls back to the user's first active workspace.
+
+The sandbox tenant is deliberately separate from the operational Website Expert NI workspace:
+
+- one owner membership for the administrator who completed the existing sandbox OAuth journey;
+- 35 default UK ledger accounts, six system VAT tax codes and one open 2017/18 accounting period;
+- a VAT-registered standard-scheme profile using the existing HMRC organisation test VRN;
+- one immutable, reviewed and locked nil return, `VATR-2017-001`, for `2017-04-01` through `2017-06-30`; all nine boxes are zero and there are no source journals or lines;
+- no OAuth connection, access token, refresh token, HMRC obligation, submission or evidence event copied from the original workspace.
+
+The original workspace remains separate with zero accounting periods, journals and local VAT Returns, and retains its existing read-only HMRC connection and evidence. The production tenant audit passed with zero invalid references after creation.
+
+To continue the controlled success journey:
+
+1. Sign in at `/admin` and choose `Website Expert NI — HMRC Sandbox` from the top-bar workspace switcher.
+2. Open `/admin/hmrc-connection`, connect the same organisation test user and confirm/set its sandbox VRN if the connection page requests it.
+3. Using an external network such as the mobile hotspot, sync both VAT obligations with a current authenticator code. The open `2017-04-01` through `2017-06-30` obligation must match the locked local return exactly.
+4. Open `VATR-2017-001`, accept the exact legal declaration and submit with a fresh authenticator code.
+5. View the submitted VAT Return and download the integrity-checked receipt PDF. Do not create invoices, expenses or journals in this tenant before the nil-return test is complete.
+
+Rollback material created immediately before the workspace operation is stored privately on the server as `backups/database-before-sandbox-tenant-20261113-090250.sql` (SHA-256 `837f2ac9bd7352455bbfa161f8a5ca75aa468e60a28b4fbf11f096d52197f860`).
 
 ## Implemented fraud prevention headers
 
@@ -85,7 +110,7 @@ The default obligations response contains one fulfilled sample period and one op
 
 ### Deployed validation topology
 
-The deployed release is `c8a23a3` at `https://website-expert.uk`. Apache terminates TLS and passes the request directly to PHP-FPM; there is no zrok tunnel or application reverse proxy in this path. The configured vendor public IP and forwarding chain identify this single public TLS endpoint. Requests made from the same LAN through the public hostname can be NAT-hairpinned and appear to Apache as the private gateway, so they are not valid evidence for originating public IP/port collection.
+The deployed release is `ca1a724` at `https://website-expert.uk`. Apache terminates TLS and passes the request directly to PHP-FPM; there is no zrok tunnel or application reverse proxy in this path. The configured vendor public IP and forwarding chain identify this single public TLS endpoint. Requests made from the same LAN through the public hostname can be NAT-hairpinned and appear to Apache as the private gateway, so they are not valid evidence for originating public IP/port collection.
 
 ## Redacted sandbox evidence
 
@@ -140,7 +165,7 @@ For fixed sandbox responses, `HMRC_SANDBOX_OBLIGATIONS_SCENARIO`, `HMRC_SANDBOX_
 
 For the live read-only E2E run, liabilities use `SINGLE_LIABILITY_2018_19` and payments use `SINGLE_PAYMENT_2018_19`. Both scenarios require the same `2018-01-02` through `2018-02-02` range, which the sandbox modal selects automatically. The endpoint contract rejects dates before `2017-12-01`, future end dates and ranges over 366 days; Website Expert NI validates those constraints before HTTP. With no scenario header, both sandbox endpoints intentionally simulate no associated data.
 
-The local MySQL migration is `2026_11_10_000027_create_hmrc_vat_obligations_table.php`. Mocked integration coverage is complete; the real obligations call remains pending until the external sandbox checklist is complete.
+The local MySQL migration is `2026_11_10_000027_create_hmrc_vat_obligations_table.php`. Mocked integration coverage is complete and the original Website Expert NI workspace has completed the real, idempotent obligations read. The isolated workspace still requires its own OAuth connection and obligations sync before submission.
 
 ## Implemented VAT Return submission
 
@@ -189,7 +214,7 @@ The UKFIN-611 automated contract matrix runs with outbound HTTP disabled. It exe
 | HMRC 5xx | deterministic HTTP contract simulation | `outcome_unknown`, no retry, reconciliation required |
 | Timeout | deterministic connection-failure simulation | `outcome_unknown`, no retry, no transport details persisted |
 
-HMRC documents that not every failure can be generated with `Gov-Test-Scenario`; therefore 5xx and timeout are transport simulations rather than invented header values. The live success/4xx runs remain intentionally blocked until the direct-host Fraud Prevention Headers test passes and the genuine licence-header position is recorded. No real VAT Return was submitted while completing this matrix.
+HMRC documents that not every failure can be generated with `Gov-Test-Scenario`; therefore 5xx and timeout are transport simulations rather than invented header values. The direct-host test now has zero errors and the single missing-licence warning is allowed only by the sandbox-specific switch. The controlled live success run is pending in the isolated workspace. No real VAT Return was submitted while completing this matrix.
 
 ## Production security gate
 
