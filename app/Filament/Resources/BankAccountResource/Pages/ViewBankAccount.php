@@ -25,6 +25,11 @@ class ViewBankAccount extends ViewRecord
 {
     protected static string $resource = BankAccountResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.banking.accounts.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

@@ -10,6 +10,11 @@ class ListSmsTemplates extends ListRecords
 {
     protected static string $resource = SmsTemplateResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.marketing.sms_templates.list_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [CreateAction::make()];

@@ -24,6 +24,11 @@ class ViewClient extends ViewRecord
 
     protected string $view = 'filament.resources.client-resource.pages.view-client';
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.pilot.clients.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -37,7 +42,7 @@ class ViewClient extends ViewRecord
                 ->label('New Contract')
                 ->icon('heroicon-o-document-check')
                 ->color('gray')
-                ->url(fn () => ContractResource::getUrl('create') . '?client_id=' . $this->record->id),
+                ->url(fn () => ContractResource::getUrl('create').'?client_id='.$this->record->id),
             EditAction::make(),
             DeleteAction::make(),
             ForceDeleteAction::make(),
@@ -56,7 +61,7 @@ class ViewClient extends ViewRecord
 
             // ── modal when account already exists ──────────────────────────
             ->modalHeading(fn () => $client()->portal_user_id
-                ? 'Konto portalu – ' . ($client()->portalUser?->email ?? '')
+                ? 'Konto portalu – '.($client()->portalUser?->email ?? '')
                 : 'Utwórz dostęp do portalu klienta'
             )
             ->modalDescription(fn () => $client()->portal_user_id
@@ -132,7 +137,7 @@ class ViewClient extends ViewRecord
                     if (($data['send_password_reset'] ?? false) && $portalUser) {
                         Password::sendResetLink(['email' => $portalUser->email]);
 
-                        $messages[] = 'Link do resetowania hasła wysłany na adres: ' . $portalUser->email;
+                        $messages[] = 'Link do resetowania hasła wysłany na adres: '.$portalUser->email;
                     }
 
                     if ($messages === []) {
@@ -194,4 +199,3 @@ class ViewClient extends ViewRecord
             });
     }
 }
-

@@ -22,6 +22,11 @@ class ViewPurchaseCreditNote extends ViewRecord
 {
     protected static string $resource = PurchaseCreditNoteResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.procurement.purchase_credit_notes.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         /** @var PurchaseCreditNote $creditNote */

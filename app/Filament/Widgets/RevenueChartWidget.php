@@ -12,7 +12,8 @@ class RevenueChartWidget extends ChartWidget
 {
     public static function canView(): bool
     {
-        return PermissionHelper::allows(auth()->user(), 'view_invoices');
+        return PermissionHelper::allows(auth()->user(), 'view_invoices')
+            && Invoice::where('status', 'paid')->whereNotNull('paid_at')->exists();
     }
 
     protected static ?int $sort = 4;
@@ -24,11 +25,17 @@ class RevenueChartWidget extends ChartWidget
 
     protected string $color = 'success';
 
-    protected ?string $heading = 'Monthly Revenue';
-
-    protected ?string $description = 'Paid invoices over the last 12 months';
-
     protected ?string $maxHeight = '260px';
+
+    public function getHeading(): ?string
+    {
+        return __('admin.dashboard.widgets.revenue.heading');
+    }
+
+    public function getDescription(): ?string
+    {
+        return __('admin.dashboard.widgets.revenue.description');
+    }
 
     protected function getType(): string
     {
@@ -92,7 +99,8 @@ class RevenueChartWidget extends ChartWidget
                     'borderWidth' => 1,
                 ];
             })
-            ->toArray();
+            ->values()
+            ->all();
 
         return [
             'datasets' => $datasets,

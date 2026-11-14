@@ -10,6 +10,11 @@ class ListPayments extends ListRecords
 {
     protected static string $resource = PaymentResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.banking.payments.list_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

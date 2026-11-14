@@ -19,6 +19,8 @@ class PurchaseCreditNoteResource extends BaseResource
 {
     protected static ?string $model = PurchaseCreditNote::class;
 
+    protected static ?string $recordTitleAttribute = 'number';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-arrow-uturn-left';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
@@ -38,6 +40,12 @@ class PurchaseCreditNoteResource extends BaseResource
     public static function getPluralModelLabel(): string
     {
         return __('finance.purchase_credit_notes.plural');
+    }
+
+    /** @return array<string> */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['number', 'supplier.name', 'expense.supplier_invoice_number'];
     }
 
     public static function infolist(Schema $schema): Schema
@@ -84,18 +92,22 @@ class PurchaseCreditNoteResource extends BaseResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('number')->label(__('finance.purchase_credit_notes.fields.number'))->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('supplier.name')->label(__('finance.purchase_credit_notes.fields.supplier'))->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('expense.supplier_invoice_number')->label(__('finance.purchase_credit_notes.fields.expense'))->searchable(),
+                Tables\Columns\TextColumn::make('number')->label(__('finance.purchase_credit_notes.fields.number'))->searchable()->sortable()->weight('bold'),
+                Tables\Columns\TextColumn::make('supplier.name')->label(__('finance.purchase_credit_notes.fields.supplier'))->searchable()->sortable()->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('expense.supplier_invoice_number')->label(__('finance.purchase_credit_notes.fields.expense'))->searchable()->visibleFrom('lg'),
                 Tables\Columns\TextColumn::make('status')->label(__('finance.purchase_credit_notes.fields.status'))->badge()->formatStateUsing(fn (string $state): string => __('finance.purchase_credit_notes.statuses.'.$state))->color(fn (string $state): string => self::statusColor($state)),
                 Tables\Columns\TextColumn::make('total')->label(__('finance.purchase_credit_notes.fields.total'))->money(fn (PurchaseCreditNote $record): string => FilamentCurrency::tableCurrency($record))->sortable(),
-                Tables\Columns\TextColumn::make('issue_date')->label(__('finance.purchase_credit_notes.fields.issue_date'))->date()->sortable(),
+                Tables\Columns\TextColumn::make('issue_date')->label(__('finance.purchase_credit_notes.fields.issue_date'))->date()->sortable()->visibleFrom('md'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->options(collect(PurchaseCreditNote::statuses())->mapWithKeys(fn (string $status): array => [$status => __('finance.purchase_credit_notes.statuses.'.$status)])->all()),
                 Tables\Filters\SelectFilter::make('supplier_id')->relationship('supplier', 'name')->searchable()->preload(),
             ])
             ->actions([ViewAction::make()])
+            ->recordUrl(fn (PurchaseCreditNote $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateIcon('heroicon-o-arrow-uturn-left')
+            ->emptyStateHeading(__('admin.migration.procurement.purchase_credit_notes.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.procurement.purchase_credit_notes.empty_description'))
             ->defaultSort('issue_date', 'desc');
     }
 

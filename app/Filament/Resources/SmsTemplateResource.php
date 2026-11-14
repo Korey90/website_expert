@@ -4,27 +4,37 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SmsTemplateResource\Pages;
 use App\Models\SmsTemplate;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 
 class SmsTemplateResource extends BaseResource
 {
     protected static ?string $model = SmsTemplate::class;
-    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-chat-bubble-left-ellipsis';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Marketing';
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chat-bubble-left-ellipsis';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
+
     protected static ?string $navigationLabel = 'SMS Templates';
-    protected static ?int    $navigationSort  = 3;
+
+    protected static ?int $navigationSort = 3;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'content'];
+    }
 
     public static function form(Schema $form): Schema
     {
         $vars = collect(SmsTemplate::availableVariables())
-            ->map(fn ($desc, $key) => "{{" . $key . "}} — {$desc}")
+            ->map(fn ($desc, $key) => '{{'.$key."}} — {$desc}")
             ->implode("\n");
 
         return $form->schema([
@@ -66,17 +76,20 @@ class SmsTemplateResource extends BaseResource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
 
                 Tables\Columns\TextColumn::make('content')
                     ->limit(80)
                     ->tooltip(fn ($record) => $record->content)
-                    ->label('Content preview'),
+                    ->label('Content preview')
+                    ->visibleFrom('md'),
 
                 Tables\Columns\TextColumn::make('content')
                     ->label('Chars')
                     ->formatStateUsing(fn ($state) => strlen($state))
-                    ->sortable(false),
+                    ->sortable(false)
+                    ->visibleFrom('lg'),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
@@ -85,18 +98,26 @@ class SmsTemplateResource extends BaseResource
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime('d M Y')
                     ->sortable()
-                    ->label('Updated'),
+                    ->label('Updated')
+                    ->visibleFrom('xl')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([EditAction::make(), DeleteAction::make()])
+            ->recordUrl(fn (SmsTemplate $record): ?string => static::canEdit($record)
+                ? static::getUrl('edit', ['record' => $record])
+                : null)
+            ->emptyStateIcon('heroicon-o-chat-bubble-left-ellipsis')
+            ->emptyStateHeading(__('admin.migration.marketing.sms_templates.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.marketing.sms_templates.empty_description'))
             ->defaultSort('name');
     }
 
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListSmsTemplates::route('/'),
+            'index' => Pages\ListSmsTemplates::route('/'),
             'create' => Pages\CreateSmsTemplate::route('/create'),
-            'edit'   => Pages\EditSmsTemplate::route('/{record}/edit'),
+            'edit' => Pages\EditSmsTemplate::route('/{record}/edit'),
         ];
     }
 }

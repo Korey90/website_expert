@@ -31,6 +31,11 @@ class ViewBankTransaction extends ViewRecord
 {
     protected static string $resource = BankTransactionResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.banking.transactions.view_subheading');
+    }
+
     /** @var array<string, BankTransactionMatchCandidate> */
     private array $candidateCache = [];
 

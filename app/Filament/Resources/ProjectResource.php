@@ -29,11 +29,19 @@ class ProjectResource extends BaseResource
 {
     protected static ?string $model = Project::class;
 
+    protected static ?string $recordTitleAttribute = 'title';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-briefcase';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Projects';
 
     protected static ?int $navigationSort = 1;
+
+    /** @return array<string> */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['title', 'client.company_name'];
+    }
 
     public static function infolist(Schema $schema): Schema
     {
@@ -243,6 +251,7 @@ class ProjectResource extends BaseResource
         return $form->schema([
             Section::make('Project Details')
                 ->columns(2)
+                ->columnSpanFull()
                 ->schema([
                     Forms\Components\TextInput::make('title')->required()->maxLength(255)->columnSpanFull(),
                     Forms\Components\Select::make('client_id')
@@ -293,17 +302,39 @@ class ProjectResource extends BaseResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('client.company_name')->label('Client')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('service_type')->badge(),
+                Tables\Columns\TextColumn::make('title')
+                    ->label(__('admin.pilot.projects.columns.project'))
+                    ->searchable()
+                    ->sortable()
+                    ->weight('semibold'),
+                Tables\Columns\TextColumn::make('client.company_name')
+                    ->label(__('admin.pilot.common.client'))
+                    ->searchable()
+                    ->sortable()
+                    ->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('service_type')
+                    ->label(__('admin.pilot.projects.columns.service'))
+                    ->badge()
+                    ->visibleFrom('lg'),
                 Tables\Columns\TextColumn::make('status')
+                    ->label(__('admin.pilot.common.status'))
                     ->badge()
                     ->color(fn ($state) => match ($state) {
                         'draft' => 'gray', 'active' => 'success', 'on_hold' => 'warning', 'completed' => 'primary', 'cancelled' => 'danger', default => 'gray'
                     }),
-                Tables\Columns\TextColumn::make('budget')->money(fn (Project $record) => FilamentCurrency::tableCurrency($record))->sortable(),
-                Tables\Columns\TextColumn::make('deadline')->date()->sortable(),
-                Tables\Columns\TextColumn::make('assignedTo.name')->label('Developer'),
+                Tables\Columns\TextColumn::make('budget')
+                    ->label(__('admin.pilot.projects.columns.budget'))
+                    ->money(fn (Project $record) => FilamentCurrency::tableCurrency($record))
+                    ->sortable()
+                    ->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('deadline')
+                    ->label(__('admin.pilot.projects.columns.deadline'))
+                    ->date()
+                    ->sortable()
+                    ->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('assignedTo.name')
+                    ->label(__('admin.pilot.projects.columns.developer'))
+                    ->visibleFrom('lg'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('client_id')
@@ -327,6 +358,10 @@ class ProjectResource extends BaseResource
                     DeleteBulkAction::make(),
                 ]),
             ])
+            ->recordUrl(fn (Project $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateHeading(__('admin.pilot.projects.empty.heading'))
+            ->emptyStateDescription(__('admin.pilot.projects.empty.description'))
+            ->emptyStateIcon('heroicon-o-briefcase')
             ->defaultSort('created_at', 'desc');
     }
 

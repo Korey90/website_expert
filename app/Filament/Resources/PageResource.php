@@ -2,30 +2,43 @@
 
 namespace App\Filament\Resources;
 
-use App\Forms\Components\TinyEditor;
 use App\Filament\Resources\PageResource\Pages;
+use App\Forms\Components\TinyEditor;
 use App\Models\Page;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PageResource extends BaseResource
 {
     protected static ?string $model = Page::class;
+
+    protected static ?string $recordTitleAttribute = 'slug';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document';
+
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
+
     protected static ?string $navigationLabel = 'CMS Pages';
+
     protected static ?int $navigationSort = 7;
+
+    /** @return array<string> */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['slug'];
+    }
 
     public static function infolist(Schema $schema): Schema
     {
@@ -48,14 +61,14 @@ class PageResource extends BaseResource
                         ->badge()
                         ->color(fn ($state) => match ($state) {
                             'published' => 'success',
-                            default     => 'gray',
+                            default => 'gray',
                         }),
 
                     TextEntry::make('slug')
                         ->label('URL slug')
                         ->copyable()
                         ->icon('heroicon-o-link')
-                        ->getStateUsing(fn ($record) => '/p/' . $record->slug),
+                        ->getStateUsing(fn ($record) => '/p/'.$record->slug),
 
                     TextEntry::make('type')
                         ->label('Type')
@@ -156,12 +169,12 @@ class PageResource extends BaseResource
                         ->helperText('URL: /p/{slug}'),
                     Forms\Components\Select::make('type')
                         ->options([
-                            'page'            => 'Page',
-                            'policy'          => 'Privacy Policy',
-                            'terms'           => 'Terms & Conditions',
-                            'cookie_policy'   => 'Cookie Policy',
-                            'accessibility'   => 'Accessibility Statement',
-                            'other'           => 'Other',
+                            'page' => 'Page',
+                            'policy' => 'Privacy Policy',
+                            'terms' => 'Terms & Conditions',
+                            'cookie_policy' => 'Cookie Policy',
+                            'accessibility' => 'Accessibility Statement',
+                            'other' => 'Other',
                         ])
                         ->default('page')
                         ->required()
@@ -181,7 +194,7 @@ class PageResource extends BaseResource
                 ->description('Effective date and version override per-document. You can also set these globally in Settings → Legal & Company.')
                 ->columns(2)
                 ->collapsed()
-                ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('type') !== 'page')
+                ->visible(fn (Get $get) => $get('type') !== 'page')
                 ->schema([
                     Forms\Components\DatePicker::make('effective_date')
                         ->label('Effective date')
@@ -230,26 +243,29 @@ class PageResource extends BaseResource
                 Tables\Columns\TextColumn::make('title')
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', 'en'))
                     ->searchable(query: fn ($query, $value) => $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(title, '$.en')) LIKE ?", ["%{$value}%"]))
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('slug')->searchable(),
-                Tables\Columns\TextColumn::make('type')->badge(),
+                    ->sortable()
+                    ->weight('bold'),
+                Tables\Columns\TextColumn::make('slug')->searchable()->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('type')->badge()->visibleFrom('md'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn ($state) => match ($state) {
                         'published' => 'success',
-                        default     => 'gray',
+                        default => 'gray',
                     }),
-                Tables\Columns\IconColumn::make('show_in_footer')->boolean(),
+                Tables\Columns\IconColumn::make('show_in_footer')->boolean()->visibleFrom('lg')->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('effective_date')
                     ->label('Effective')
                     ->date('d M Y')
                     ->sortable()
+                    ->visibleFrom('xl')
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('version')
                     ->badge()
                     ->color('gray')
+                    ->visibleFrom('xl')
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')->date()->sortable(),
+                Tables\Columns\TextColumn::make('updated_at')->date()->sortable()->visibleFrom('md'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
@@ -260,22 +276,25 @@ class PageResource extends BaseResource
             ])
             ->actions([ViewAction::make(), EditAction::make(), DeleteAction::make()])
             ->reorderable('sort_order')
+            ->recordUrl(fn (Page $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateIcon('heroicon-o-document')
+            ->emptyStateHeading(__('admin.migration.marketing.pages.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.marketing.pages.empty_description'))
             ->defaultSort('sort_order');
     }
 
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListPages::route('/'),
+            'index' => Pages\ListPages::route('/'),
             'create' => Pages\CreatePage::route('/create'),
-            'view'   => Pages\ViewPage::route('/{record}'),
-            'edit'   => Pages\EditPage::route('/{record}/edit'),
+            'view' => Pages\ViewPage::route('/{record}'),
+            'edit' => Pages\EditPage::route('/{record}/edit'),
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->withTrashed();
     }
-
 }

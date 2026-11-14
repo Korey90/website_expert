@@ -10,6 +10,11 @@ class ListBankAccounts extends ListRecords
 {
     protected static string $resource = BankAccountResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.banking.accounts.list_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [CreateAction::make()];

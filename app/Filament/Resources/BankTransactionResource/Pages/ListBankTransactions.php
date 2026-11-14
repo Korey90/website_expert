@@ -9,6 +9,11 @@ class ListBankTransactions extends ListRecords
 {
     protected static string $resource = BankTransactionResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.banking.transactions.list_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [];

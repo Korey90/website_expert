@@ -34,6 +34,11 @@ class GeneralLedgerPage extends BasePage
         return __('finance.general_ledger.title');
     }
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.accounting.general_ledger.subheading');
+    }
+
     public function mount(): void
     {
         $this->dateFrom = now()->startOfYear()->toDateString();

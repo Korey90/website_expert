@@ -32,6 +32,11 @@ class ViewInvoice extends ViewRecord
 
     protected string $view = 'filament.resources.invoice-resource.pages.view-invoice';
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.sales_documents.invoices.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         $invoice = $this->record;

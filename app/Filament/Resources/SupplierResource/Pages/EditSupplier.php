@@ -11,6 +11,11 @@ class EditSupplier extends EditRecord
 {
     protected static string $resource = SupplierResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.procurement.suppliers.edit_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [DeleteAction::make(), RestoreAction::make()];

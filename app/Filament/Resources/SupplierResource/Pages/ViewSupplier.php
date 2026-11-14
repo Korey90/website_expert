@@ -10,6 +10,11 @@ class ViewSupplier extends ViewRecord
 {
     protected static string $resource = SupplierResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.procurement.suppliers.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [EditAction::make()];

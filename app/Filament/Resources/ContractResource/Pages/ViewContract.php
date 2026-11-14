@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\ContractResource\Pages;
 
 use App\Filament\Resources\ContractResource;
-use App\Models\Contract;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -18,6 +17,11 @@ class ViewContract extends ViewRecord
 
     protected string $view = 'filament.resources.contract-resource.pages.view-contract';
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.sales_documents.contracts.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -26,7 +30,7 @@ class ViewContract extends ViewRecord
                 ->label('Send to Portal')
                 ->icon('heroicon-o-paper-airplane')
                 ->color('primary')
-                ->visible(fn () => $this->record->status === 'draft')
+                ->visible(fn () => ContractResource::canEdit($this->record) && $this->record->status === 'draft')
                 ->requiresConfirmation()
                 ->modalHeading('Send Contract to Client Portal')
                 ->modalDescription('The contract will be marked as Sent and become visible to the client in their portal for signing.')
@@ -40,7 +44,7 @@ class ViewContract extends ViewRecord
                 ->label('Mark Signed')
                 ->icon('heroicon-o-check-badge')
                 ->color('success')
-                ->visible(fn () => $this->record->status === 'sent')
+                ->visible(fn () => ContractResource::canEdit($this->record) && $this->record->status === 'sent')
                 ->requiresConfirmation()
                 ->action(function () {
                     $this->record->update(['status' => 'signed', 'signed_at' => now()]);

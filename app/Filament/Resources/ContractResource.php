@@ -185,18 +185,24 @@ class ContractResource extends BaseResource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('number')
+                    ->label(__('admin.migration.sales_documents.columns.number'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('title')
+                    ->label(__('admin.migration.sales_documents.columns.title'))
                     ->searchable()
-                    ->limit(40),
+                    ->limit(40)
+                    ->visibleFrom('md'),
                 Tables\Columns\TextColumn::make('client.company_name')
-                    ->label('Client')
+                    ->label(__('admin.migration.sales_documents.columns.client'))
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('lg'),
                 Tables\Columns\TextColumn::make('status')
+                    ->label(__('admin.pilot.common.status'))
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => __('admin.migration.sales_documents.statuses.'.$state))
                     ->color(fn ($state) => match ($state) {
                         'draft' => 'gray',
                         'sent' => 'info',
@@ -206,18 +212,22 @@ class ContractResource extends BaseResource
                         default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('value')
+                    ->label(__('admin.migration.sales_documents.columns.value'))
                     ->money(fn ($record) => strtolower($record->currency))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('signed_at')
                     ->label('Signed')
                     ->date()
                     ->sortable()
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->visibleFrom('xl')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('expires_at')
                     ->label('Expires')
                     ->date()
                     ->sortable()
                     ->placeholder('—')
+                    ->visibleFrom('md')
                     ->color(fn ($record) => $record->expires_at && $record->expires_at->isPast() && $record->status !== 'signed' ? 'danger' : null),
             ])
             ->filters([
@@ -242,7 +252,7 @@ class ContractResource extends BaseResource
                     ->label('Mark Signed')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
-                    ->visible(fn (Contract $record) => $record->status === 'sent')
+                    ->visible(fn (Contract $record) => static::canEdit($record) && $record->status === 'sent')
                     ->requiresConfirmation()
                     ->action(function (Contract $record) {
                         $record->update(['status' => 'signed', 'signed_at' => now()]);
@@ -252,7 +262,7 @@ class ContractResource extends BaseResource
                     ->label('Mark Sent')
                     ->icon('heroicon-o-paper-airplane')
                     ->color('info')
-                    ->visible(fn (Contract $record) => $record->status === 'draft')
+                    ->visible(fn (Contract $record) => static::canEdit($record) && $record->status === 'draft')
                     ->requiresConfirmation()
                     ->action(function (Contract $record) {
                         $record->update(['status' => 'sent', 'sent_at' => now()]);
@@ -267,6 +277,10 @@ class ContractResource extends BaseResource
                     RestoreBulkAction::make(),
                 ]),
             ])
+            ->recordUrl(fn (Contract $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateIcon('heroicon-o-document-check')
+            ->emptyStateHeading(__('admin.migration.sales_documents.contracts.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.sales_documents.contracts.empty_description'))
             ->defaultSort('created_at', 'desc');
     }
 

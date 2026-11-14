@@ -10,11 +10,15 @@ use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Support\Collection;
 
 class EditServicePage extends EditRecord
 {
     protected static string $resource = ServicePageResource::class;
+
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.marketing.service_pages.edit_subheading');
+    }
 
     protected function getHeaderActions(): array
     {
@@ -32,10 +36,10 @@ class EditServicePage extends EditRecord
                     $record = $this->getRecord();
 
                     $source = [
-                        'title'            => $record->getTranslation('title', 'pl'),
-                        'meta_title'       => $record->getTranslation('meta_title', 'pl'),
+                        'title' => $record->getTranslation('title', 'pl'),
+                        'meta_title' => $record->getTranslation('meta_title', 'pl'),
                         'meta_description' => $record->getTranslation('meta_description', 'pl'),
-                        'nav_label'        => $record->getTranslation('nav_label', 'pl'),
+                        'nav_label' => $record->getTranslation('nav_label', 'pl'),
                     ];
 
                     if (empty(array_filter($source))) {
@@ -61,10 +65,10 @@ class EditServicePage extends EditRecord
                     }
 
                     foreach (['en', 'pt'] as $locale) {
-                        $record->setTranslation('title',            $locale, $translations[$locale]['title']);
-                        $record->setTranslation('meta_title',       $locale, $translations[$locale]['meta_title']);
+                        $record->setTranslation('title', $locale, $translations[$locale]['title']);
+                        $record->setTranslation('meta_title', $locale, $translations[$locale]['meta_title']);
                         $record->setTranslation('meta_description', $locale, $translations[$locale]['meta_description']);
-                        $record->setTranslation('nav_label',        $locale, $translations[$locale]['nav_label']);
+                        $record->setTranslation('nav_label', $locale, $translations[$locale]['nav_label']);
                     }
                     $record->save();
 
@@ -91,12 +95,12 @@ class EditServicePage extends EditRecord
             ->orderBy('sort_order')
             ->get()
             ->map(fn ($block) => [
-                'block_id'   => $block->id,
-                'type'       => $block->type,
+                'block_id' => $block->id,
+                'type' => $block->type,
                 'sort_order' => $block->sort_order,
-                'is_active'  => $block->is_active,
-                'content'    => $block->content ?? [],
-                'settings'   => $block->settings ?? [],
+                'is_active' => $block->is_active,
+                'content' => $block->content ?? [],
+                'settings' => $block->settings ?? [],
             ])
             ->toArray();
 
@@ -116,7 +120,7 @@ class EditServicePage extends EditRecord
     private static function normalizeContent(array $content): array
     {
         foreach ($content as $key => $value) {
-            if (!is_array($value)) {
+            if (! is_array($value)) {
                 continue;
             }
 
@@ -126,21 +130,23 @@ class EditServicePage extends EditRecord
             }
 
             // Associative array with non-integer keys = UUID-keyed Repeater items or FileUpload
-            if (!array_is_list($value)) {
+            if (! array_is_list($value)) {
                 $firstVal = array_values($value)[0] ?? null;
 
                 // FileUpload: {uuid: 'some/path.jpg'} → string
                 if (is_string($firstVal) && str_contains((string) $firstVal, '/')) {
                     $content[$key] = $firstVal;
+
                     continue;
                 }
 
                 // Repeater sub-items: {uuid: [...]} → indexed array, each item also normalized
                 if (is_array($firstVal)) {
                     $content[$key] = array_values(array_map(
-                        fn(array $item) => self::normalizeContent($item),
+                        fn (array $item) => self::normalizeContent($item),
                         array_filter($value, 'is_array')
                     ));
+
                     continue;
                 }
             }
@@ -148,11 +154,12 @@ class EditServicePage extends EditRecord
             // List of arrays — normalize each item recursively
             if (array_is_list($value)) {
                 $content[$key] = array_map(
-                    fn($item) => is_array($item) ? self::normalizeContent($item) : $item,
+                    fn ($item) => is_array($item) ? self::normalizeContent($item) : $item,
                     $value
                 );
             }
         }
+
         return $content;
     }
 
@@ -167,11 +174,11 @@ class EditServicePage extends EditRecord
         foreach ($rawBlocks->values() as $index => $blockData) {
             $attrs = [
                 'service_page_id' => $page->id,
-                'type'            => $blockData['type'] ?? 'hero',
-                'sort_order'      => $index + 1,
-                'is_active'       => (bool) ($blockData['is_active'] ?? true),
-                'content'         => self::normalizeContent(is_array($blockData['content'] ?? null) ? $blockData['content'] : []),
-                'settings'        => is_array($blockData['settings'] ?? null) ? $blockData['settings'] : [],
+                'type' => $blockData['type'] ?? 'hero',
+                'sort_order' => $index + 1,
+                'is_active' => (bool) ($blockData['is_active'] ?? true),
+                'content' => self::normalizeContent(is_array($blockData['content'] ?? null) ? $blockData['content'] : []),
+                'settings' => is_array($blockData['settings'] ?? null) ? $blockData['settings'] : [],
             ];
 
             $blockId = $blockData['block_id'] ?? null;
@@ -184,4 +191,3 @@ class EditServicePage extends EditRecord
         }
     }
 }
-

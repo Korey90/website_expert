@@ -19,6 +19,8 @@ class SearchRankingCheckResource extends BaseResource
 {
     protected static ?string $model = SearchRankingCheck::class;
 
+    protected static ?string $recordTitleAttribute = 'keyword';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-magnifying-glass';
 
     protected static \UnitEnum|string|null $navigationGroup = 'SEO';
@@ -26,6 +28,11 @@ class SearchRankingCheckResource extends BaseResource
     protected static ?string $navigationLabel = 'Google Rank Checker';
 
     protected static ?int $navigationSort = 1;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['keyword', 'domain'];
+    }
 
     public static function form(Schema $form): Schema
     {
@@ -40,21 +47,25 @@ class SearchRankingCheckResource extends BaseResource
                 Tables\Columns\TextColumn::make('keyword')
                     ->label('Fraza')
                     ->searchable()
-                    ->wrap(),
+                    ->wrap()
+                    ->weight('bold'),
 
                 Tables\Columns\TextColumn::make('domain')
                     ->label('Domena')
                     ->searchable()
-                    ->copyable(),
+                    ->copyable()
+                    ->visibleFrom('md'),
 
                 Tables\Columns\TextColumn::make('location')
                     ->label('Lokalizacja')
                     ->searchable()
+                    ->visibleFrom('xl')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('device')
                     ->label('Urządzenie')
-                    ->badge(),
+                    ->badge()
+                    ->visibleFrom('lg'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -76,21 +87,25 @@ class SearchRankingCheckResource extends BaseResource
                     ->limit(40)
                     ->copyable()
                     ->placeholder('—')
+                    ->visibleFrom('xl')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('provider')
                     ->label('Provider')
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')
+                    ->visibleFrom('lg'),
 
                 Tables\Columns\IconColumn::make('from_cache')
                     ->label('Cache')
-                    ->boolean(),
+                    ->boolean()
+                    ->visibleFrom('xl'),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Data')
                     ->dateTime('d.m.Y H:i')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('md'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -103,7 +118,10 @@ class SearchRankingCheckResource extends BaseResource
                     ->options(fn () => SearchRankingCheck::query()->distinct()->pluck('provider', 'provider')->toArray()),
                 Tables\Filters\TernaryFilter::make('from_cache')
                     ->label('Z cache'),
-            ]);
+            ])
+            ->emptyStateIcon('heroicon-o-magnifying-glass')
+            ->emptyStateHeading(__('admin.migration.marketing.rankings.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.marketing.rankings.empty_description'));
     }
 
     public static function getPages(): array

@@ -12,6 +12,11 @@ class ViewEmailTemplate extends ViewRecord
 {
     protected static string $resource = EmailTemplateResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.marketing.email_templates.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

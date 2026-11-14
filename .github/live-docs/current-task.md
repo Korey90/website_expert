@@ -1,10 +1,68 @@
 # Current Task
 
-**Status:** Zakończone — audyt wszystkich modułów i tras `/admin/*`
-**Zadanie:** RBAC, menu i izolacja tenantów w panelu administracyjnym
+**Status:** W toku — etap 5, fale finansowa oraz marketing/CMS/SEO zakończone
+**Zadanie:** Spójny i intuicyjny interfejs panelu administracyjnego
 **Data rozpoczęcia:** 2026-11-13
-**Plan nadrzędny:** audyt bezpieczeństwa panelu administracyjnego
+**Plan nadrzędny:** `docs/plans/admin-ui-redesign-plan.md`
 **Ochrona równoległej pracy:** nie modyfikować `resources/js/Pages/Landing/PlStronyInternetowe.tsx`.
+
+## Aktywny etap — Admin UI
+
+- [x] Audyt menu, topbara i reprezentatywnych widoków treści.
+- [x] Zatwierdzenie planu przebudowy przez użytkownika.
+- [x] Domknięcie architektury informacji i macierzy ról.
+- [x] Responsywny, klikalny prototyp powłoki panelu.
+- [x] Walidacja i zatwierdzenie prototypu przed zmianami w produkcyjnym `/admin/*`.
+- [x] Wdrożenie siedmiogrupowej nawigacji zgodnej z RBAC.
+- [x] Wdrożenie topbara: wyszukiwanie, szybkie tworzenie, workspace i przypięte notatki.
+- [x] Wdrożenie tokenów motywu i tłumaczeń PL/EN/PT.
+- [x] Testy nawigacji, uprawnień i tenant isolation oraz smoke test 1440/390 px.
+- [x] Końcowa walidacja ciemnego motywu i stanów interaktywnych fundamentu.
+- [x] Rozpoczęcie pilotażu CRM i projektów (etap 4).
+- [x] Odchudzić dashboard i ukrywać widgety bez danych do działania.
+- [x] Naprawić strukturę datasetu wykresu przychodów.
+- [x] Ujednolicić responsywne listy klientów, leadów i projektów.
+- [x] Ujednolicić formularze i widoki szczegółowe klientów, leadów i projektów.
+  - [x] Dodać kontekstowe opisy oraz poprawić szerokość głównych sekcji formularzy leadów/projektów.
+  - [x] Uporządkować niestandardowe widoki szczegółowe projektu i zabezpieczyć mutacje szczegółów leadów/projektów.
+- [x] Przebudować pipeline i dodać czytelny sygnał przewijania poziomego.
+  - [x] Dostępny region przewijania, scroll snap, fokus i opis przewijania.
+  - [x] Ukryć i zablokować po stronie serwera akcje mutujące dla ról tylko do odczytu.
+  - [x] Ujednolicić modale na natywnej powłoce Filament.
+- [x] Zweryfikować zakończony pilot: testy RBAC/tenant, Pint, Blade, ESLint, build, zgodność PL/EN/PT i `git diff --check`.
+- [x] Smoke test ośmiu tras pilota przy 1440/390 px bez overflow i błędów JavaScript.
+- [x] Rozpocząć etap 5 od dokumentów sprzedażowych.
+  - [x] Responsywne listy faktur, wycen, umów i korekt.
+  - [x] Kontekstowe opisy list, formularzy i szczegółów.
+  - [x] Klikalne rekordy oraz użyteczne puste stany.
+  - [x] Dopasowanie własnych akcji wycen i umów do `canEdit()`/`canCreate()`.
+  - [x] Test renderowania, regresja RBAC/tenant i smoke test 1440/390 px.
+- [x] Ujednolicić zakupy i wydatki.
+  - [x] Responsywne listy wydatków, dostawców, wydatków cyklicznych i korekt zakupowych.
+  - [x] Kontekstowe opisy, klikalne rekordy, wyszukiwanie globalne i użyteczne puste stany.
+  - [x] Regresja obu pakietów finansowych oraz smoke test 1440/390 px.
+- [x] Ujednolicić bankowość.
+  - [x] Responsywne i klikalne listy rachunków, transakcji oraz płatności.
+  - [x] Kontekst stron, wyszukiwanie globalne i użyteczne puste stany.
+  - [x] Regresja całej dotychczasowej fali finansowej oraz smoke test 1440/390 px.
+- [x] Ujednolicić księgowość, VAT i HMRC.
+  - [x] Responsywne listy planu kont, okresów, korekt VAT, dzienników i deklaracji VAT.
+  - [x] Kontekst stron, klikalne rekordy, wyszukiwanie globalne i puste stany.
+  - [x] Kontekst księgi głównej i połączenia HMRC bez zmian w workflow bezpieczeństwa.
+  - [x] Testy renderowania i smoke test siedmiu tras przy 1440/390 px.
+- [x] Domknąć falę finansową: raporty finansowe.
+  - [x] Kontekst operacyjny ośmiu raportów oraz zachowanie istniejących filtrów i eksportów.
+  - [x] Smoke test raportów przy 1440/390 px bez overflow i błędów JavaScript.
+  - [x] Wspólna regresja fali finansowej: 20 testów / 1252 asercje.
+- [x] Zakończyć falę 2: marketing, CMS i SEO.
+  - [x] Nawigacja publiczna, landing pages, strony CMS, sekcje i artykuły.
+  - [x] Katalog usług, strony usług i portfolio.
+  - [x] Szablony e-mail/SMS, monitoring pozycji i mapa strony.
+  - [x] Testy renderowania oraz smoke test 12 tras przy 1440/390 px.
+  - [x] Regresja interfejsu i dostępu: 18 testów / 1222 asercje; Pint, Blade, ESLint i tłumaczenia poprawne.
+- [ ] Rozpocząć falę 3: automatyzacje.
+
+Źródło prawdy i dziennik postępu: `docs/plans/admin-ui-redesign-plan.md`.
 
 ## Delta Analysis: RBAC i tenant isolation panelu `/admin/*`
 

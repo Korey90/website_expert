@@ -11,6 +11,11 @@ class CreateQuote extends CreateRecord
 {
     protected static string $resource = QuoteResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.sales_documents.quotes.create_subheading');
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['created_by'] = Auth::id();

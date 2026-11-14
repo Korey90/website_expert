@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateSupplier extends CreateRecord
 {
     protected static string $resource = SupplierResource::class;
+
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.procurement.suppliers.create_subheading');
+    }
 }

@@ -11,6 +11,11 @@ class CreateAccountingPeriod extends CreateRecord
 {
     protected static string $resource = AccountingPeriodResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.accounting.periods.create_subheading');
+    }
+
     protected function handleRecordCreation(array $data): Model
     {
         return app(CreateAccountingPeriodAction::class)->execute(currentBusiness(), auth()->user(), $data);

@@ -4,7 +4,6 @@ namespace App\Filament\Pages;
 
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
-use Filament\Pages\Page;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -12,10 +11,13 @@ class SitemapPage extends BasePage
 {
     protected string $view = 'filament.pages.sitemap';
 
-    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-map';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Settings';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-map';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+
     protected static ?string $navigationLabel = 'Sitemap';
-    protected static ?int    $navigationSort  = 13;
+
+    protected static ?int $navigationSort = 13;
 
     public string $sitemapUrl = '';
 
@@ -24,27 +26,32 @@ class SitemapPage extends BasePage
         $this->sitemapUrl = url('/sitemap.xml');
     }
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.marketing.sitemap.subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             Action::make('refresh')
-                ->label('Refresh Sitemap')
+                ->label(__('admin.migration.marketing.sitemap.refresh_label'))
                 ->icon('heroicon-o-arrow-path')
                 ->color('primary')
                 ->requiresConfirmation()
-                ->modalHeading('Refresh Sitemap Cache')
-                ->modalDescription('This will clear the cached sitemap and ping Google & Bing to re-index it. Continue?')
-                ->modalSubmitActionLabel('Refresh & Ping')
+                ->modalHeading(__('admin.migration.marketing.sitemap.refresh_heading'))
+                ->modalDescription(__('admin.migration.marketing.sitemap.refresh_description'))
+                ->modalSubmitActionLabel(__('admin.migration.marketing.sitemap.refresh_submit'))
                 ->action(function () {
                     Cache::forget('sitemap.xml');
 
-                    $sitemapUrl  = urlencode(url('/sitemap.xml'));
-                    $pinged      = [];
-                    $errors      = [];
+                    $sitemapUrl = urlencode(url('/sitemap.xml'));
+                    $pinged = [];
+                    $errors = [];
 
                     $endpoints = [
                         'Google' => "https://www.google.com/ping?sitemap={$sitemapUrl}",
-                        'Bing'   => "https://www.bing.com/ping?sitemap={$sitemapUrl}",
+                        'Bing' => "https://www.bing.com/ping?sitemap={$sitemapUrl}",
                     ];
 
                     foreach ($endpoints as $engine => $endpoint) {
@@ -60,16 +67,16 @@ class SitemapPage extends BasePage
                         }
                     }
 
-                    $body = 'Cache cleared.';
+                    $body = __('admin.migration.marketing.sitemap.cache_cleared');
                     if ($pinged) {
-                        $body .= ' Pinged: ' . implode(', ', $pinged) . '.';
+                        $body .= ' '.__('admin.migration.marketing.sitemap.pinged', ['engines' => implode(', ', $pinged)]);
                     }
                     if ($errors) {
-                        $body .= ' Failed: ' . implode(', ', $errors) . '.';
+                        $body .= ' '.__('admin.migration.marketing.sitemap.failed', ['engines' => implode(', ', $errors)]);
                     }
 
                     Notification::make()
-                        ->title('Sitemap refreshed')
+                        ->title(__('admin.migration.marketing.sitemap.refreshed'))
                         ->body($body)
                         ->success()
                         ->send();

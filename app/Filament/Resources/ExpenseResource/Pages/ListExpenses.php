@@ -10,6 +10,11 @@ class ListExpenses extends ListRecords
 {
     protected static string $resource = ExpenseResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.procurement.expenses.list_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [CreateAction::make()];

@@ -14,6 +14,11 @@ class EditRecurringExpenseTemplate extends EditRecord
 {
     protected static string $resource = RecurringExpenseTemplateResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.procurement.recurring_expenses.edit_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [DeleteAction::make(), RestoreAction::make()];

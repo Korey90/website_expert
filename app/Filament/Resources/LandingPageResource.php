@@ -21,6 +21,8 @@ class LandingPageResource extends BaseResource
 {
     protected static ?string $model = LandingPage::class;
 
+    protected static ?string $recordTitleAttribute = 'title';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-globe-alt';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
@@ -30,6 +32,12 @@ class LandingPageResource extends BaseResource
     protected static ?string $label = 'Landing Page';
 
     protected static ?string $pluralLabel = 'Landing Pages';
+
+    /** @return array<string> */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['title', 'slug'];
+    }
 
     // -------------------------------------------------------------------------
     // Form
@@ -113,15 +121,18 @@ class LandingPageResource extends BaseResource
                     ->searchable()
                     ->sortable()
                     ->toggleable()
+                    ->visibleFrom('xl')
                     ->visible(fn () => PermissionHelper::allows(auth()->user(), FilamentPermissionRegistry::panelAccessPermission())),
 
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
 
                 Tables\Columns\TextColumn::make('slug')
                     ->prefix('lp/')
-                    ->searchable(),
+                    ->searchable()
+                    ->visibleFrom('md'),
 
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
@@ -133,20 +144,25 @@ class LandingPageResource extends BaseResource
 
                 Tables\Columns\TextColumn::make('language')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('md'),
 
                 Tables\Columns\TextColumn::make('views_count')
                     ->label('Views')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('lg'),
 
                 Tables\Columns\TextColumn::make('conversions_count')
                     ->label('Leads')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('lg'),
 
                 Tables\Columns\TextColumn::make('published_at')
                     ->label('Published')
                     ->dateTime('d M Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('xl')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime('d M Y')
@@ -176,6 +192,10 @@ class LandingPageResource extends BaseResource
             ->bulkActions([
                 DeleteBulkAction::make(),
             ])
+            ->recordUrl(fn (LandingPage $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateIcon('heroicon-o-globe-alt')
+            ->emptyStateHeading(__('admin.migration.marketing.landing_pages.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.marketing.landing_pages.empty_description'))
             ->defaultSort('created_at', 'desc');
     }
 

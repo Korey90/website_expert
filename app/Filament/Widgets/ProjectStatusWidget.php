@@ -10,7 +10,8 @@ class ProjectStatusWidget extends ChartWidget
 {
     public static function canView(): bool
     {
-        return PermissionHelper::allows(auth()->user(), 'view_projects');
+        return PermissionHelper::allows(auth()->user(), 'view_projects')
+            && Project::query()->exists();
     }
 
     protected static ?int $sort = 6;
@@ -19,11 +20,17 @@ class ProjectStatusWidget extends ChartWidget
 
     protected string $color = 'primary';
 
-    protected ?string $heading = 'Projects by Status';
-
-    protected ?string $description = 'Current project status breakdown';
-
     protected ?string $maxHeight = null;
+
+    public function getHeading(): ?string
+    {
+        return __('admin.dashboard.widgets.projects_by_status.heading');
+    }
+
+    public function getDescription(): ?string
+    {
+        return __('admin.dashboard.widgets.projects_by_status.description');
+    }
 
     protected function getType(): string
     {

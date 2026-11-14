@@ -34,6 +34,11 @@ class BankReconciliationReportPage extends BasePage
         return __('finance.bank_reconciliation_report.title');
     }
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.reports.bank_reconciliation');
+    }
+
     public function mount(): void
     {
         $this->dateFrom = now()->startOfMonth()->toDateString();

@@ -13,6 +13,11 @@ class EditVatAdjustment extends EditRecord
 {
     protected static string $resource = VatAdjustmentResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.accounting.vat_adjustments.edit_subheading');
+    }
+
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         return app(UpdateVatAdjustmentAction::class)->execute($record, auth()->user(), $data);

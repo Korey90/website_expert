@@ -12,6 +12,11 @@ class CreatePayment extends CreateRecord
 {
     protected static string $resource = PaymentResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.banking.payments.create_subheading');
+    }
+
     /** @param array<string, mixed> $data */
     protected function handleRecordCreation(array $data): Model
     {

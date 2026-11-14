@@ -32,6 +32,11 @@ class ProfitAndLossPage extends BasePage
         return __('finance.profit_and_loss.title');
     }
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.reports.profit_and_loss');
+    }
+
     public function mount(): void
     {
         $period = AccountingPeriod::query()

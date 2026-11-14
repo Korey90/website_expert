@@ -110,16 +110,16 @@ class CreditNoteResource extends BaseResource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('number')->label(__('finance.credit_notes.fields.number'))->searchable()->sortable()->weight('bold'),
-                Tables\Columns\TextColumn::make('invoice.number')->label(__('finance.credit_notes.fields.invoice'))->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('client.company_name')->label(__('finance.credit_notes.fields.client'))->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('invoice.number')->label(__('finance.credit_notes.fields.invoice'))->searchable()->sortable()->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('client.company_name')->label(__('finance.credit_notes.fields.client'))->searchable()->sortable()->visibleFrom('lg'),
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('finance.credit_notes.fields.status'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => __('finance.credit_notes.statuses.'.$state))
                     ->color(fn (string $state): string => self::statusColor($state)),
                 Tables\Columns\TextColumn::make('total')->label(__('finance.credit_notes.fields.total'))->money(fn (CreditNote $record): string => FilamentCurrency::tableCurrency($record))->sortable(),
-                Tables\Columns\TextColumn::make('allocated_amount')->label(__('finance.credit_notes.fields.allocated'))->money(fn (CreditNote $record): string => FilamentCurrency::tableCurrency($record))->sortable(),
-                Tables\Columns\TextColumn::make('issue_date')->label(__('finance.credit_notes.fields.issue_date'))->date()->sortable(),
+                Tables\Columns\TextColumn::make('allocated_amount')->label(__('finance.credit_notes.fields.allocated'))->money(fn (CreditNote $record): string => FilamentCurrency::tableCurrency($record))->sortable()->visibleFrom('xl')->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('issue_date')->label(__('finance.credit_notes.fields.issue_date'))->date()->sortable()->visibleFrom('md'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('client_id')
@@ -140,6 +140,10 @@ class CreditNoteResource extends BaseResource
                     ->url(fn (CreditNote $record): string => route('credit-note.pdf', $record))
                     ->openUrlInNewTab(),
             ])
+            ->recordUrl(fn (CreditNote $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateIcon('heroicon-o-document-minus')
+            ->emptyStateHeading(__('admin.migration.sales_documents.credit_notes.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.sales_documents.credit_notes.empty_description'))
             ->defaultSort('created_at', 'desc');
     }
 

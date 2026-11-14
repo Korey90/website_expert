@@ -1,0 +1,1289 @@
+<!doctype html>
+<html lang="pl" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prototyp panelu administracyjnego — Website Expert</title>
+    <style>
+        :root {
+            --brand-50: #fff4f1;
+            --brand-100: #ffe2dc;
+            --brand-500: #f04b37;
+            --brand-600: #dc3827;
+            --brand-700: #b9271a;
+            --ink-950: #18181b;
+            --ink-800: #27272a;
+            --ink-700: #3f3f46;
+            --ink-600: #52525b;
+            --ink-500: #71717a;
+            --ink-400: #a1a1aa;
+            --ink-300: #d4d4d8;
+            --ink-200: #e4e4e7;
+            --ink-100: #f4f4f5;
+            --ink-50: #fafafa;
+            --surface: #ffffff;
+            --canvas: #f7f7f8;
+            --success: #14804a;
+            --success-bg: #eaf8f0;
+            --warning: #a75b09;
+            --warning-bg: #fff6df;
+            --danger: #c73123;
+            --danger-bg: #fff0ed;
+            --info: #2463a7;
+            --info-bg: #edf5ff;
+            --sidebar-width: 272px;
+            --topbar-height: 72px;
+            --shadow-sm: 0 1px 2px rgba(24, 24, 27, .05), 0 1px 3px rgba(24, 24, 27, .05);
+            --shadow-md: 0 12px 30px rgba(24, 24, 27, .10);
+        }
+
+        html[data-theme="dark"] {
+            --ink-950: #fafafa;
+            --ink-800: #f4f4f5;
+            --ink-700: #e4e4e7;
+            --ink-600: #d4d4d8;
+            --ink-500: #a1a1aa;
+            --ink-400: #71717a;
+            --ink-300: #52525b;
+            --ink-200: #3f3f46;
+            --ink-100: #27272a;
+            --ink-50: #202023;
+            --surface: #18181b;
+            --canvas: #111113;
+            --brand-50: rgba(240, 75, 55, .12);
+            --brand-100: rgba(240, 75, 55, .18);
+            --success-bg: rgba(20, 128, 74, .14);
+            --warning-bg: rgba(167, 91, 9, .14);
+            --danger-bg: rgba(199, 49, 35, .14);
+            --info-bg: rgba(36, 99, 167, .14);
+        }
+
+        * { box-sizing: border-box; }
+
+        html { color-scheme: light; }
+        html[data-theme="dark"] { color-scheme: dark; }
+
+        body {
+            margin: 0;
+            background: var(--canvas);
+            color: var(--ink-950);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        button, input { font: inherit; }
+        button, a { -webkit-tap-highlight-color: transparent; }
+        button { color: inherit; }
+        a { color: inherit; text-decoration: none; }
+
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible {
+            outline: 3px solid rgba(240, 75, 55, .28);
+            outline-offset: 2px;
+        }
+
+        .app-shell { min-height: 100vh; }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 50;
+            display: flex;
+            width: var(--sidebar-width);
+            flex-direction: column;
+            border-right: 1px solid var(--ink-200);
+            background: var(--surface);
+            transition: transform .2s ease;
+        }
+
+        .brand {
+            display: flex;
+            min-height: var(--topbar-height);
+            align-items: center;
+            gap: 11px;
+            padding: 0 22px;
+            border-bottom: 1px solid var(--ink-200);
+        }
+
+        .brand-mark {
+            display: grid;
+            width: 34px;
+            height: 34px;
+            place-items: center;
+            border-radius: 10px;
+            background: var(--brand-500);
+            color: white;
+            font-size: 16px;
+            font-weight: 800;
+            box-shadow: 0 6px 16px rgba(240, 75, 55, .22);
+        }
+
+        .brand-copy { min-width: 0; }
+        .brand-name { font-size: 15px; font-weight: 750; letter-spacing: -.01em; }
+        .brand-subtitle { margin-top: -1px; color: var(--ink-500); font-size: 11px; }
+
+        .navigation {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px 12px 20px;
+            scrollbar-width: thin;
+        }
+
+        .nav-group + .nav-group { margin-top: 4px; }
+
+        .nav-group-toggle {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            gap: 10px;
+            min-height: 42px;
+            padding: 9px 10px;
+            border: 0;
+            border-radius: 9px;
+            background: transparent;
+            cursor: pointer;
+            text-align: left;
+            transition: background .15s ease, color .15s ease;
+        }
+
+        .nav-group-toggle:hover { background: var(--ink-100); }
+        .nav-group-toggle.active { color: var(--brand-700); background: var(--brand-50); }
+
+        .nav-glyph {
+            display: grid;
+            width: 22px;
+            height: 22px;
+            flex: 0 0 22px;
+            place-items: center;
+            color: var(--ink-500);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .nav-group-toggle.active .nav-glyph { color: var(--brand-600); }
+        .nav-group-title { flex: 1; font-weight: 650; }
+        .nav-chevron { color: var(--ink-400); font-size: 12px; transition: transform .15s ease; }
+        .nav-group-toggle[aria-expanded="true"] .nav-chevron { transform: rotate(90deg); }
+
+        .nav-group-items {
+            display: none;
+            margin: 2px 0 8px 42px;
+            border-left: 1px solid var(--ink-200);
+            padding-left: 10px;
+        }
+
+        .nav-group-toggle[aria-expanded="true"] + .nav-group-items { display: grid; }
+
+        .nav-item {
+            padding: 7px 10px;
+            border-radius: 7px;
+            color: var(--ink-600);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .nav-item:hover { background: var(--ink-100); color: var(--ink-950); }
+        .nav-item.current { background: var(--brand-50); color: var(--brand-700); font-weight: 650; }
+
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid var(--ink-200);
+        }
+
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px;
+            border-radius: 10px;
+            background: var(--ink-50);
+        }
+
+        .avatar {
+            display: grid;
+            width: 34px;
+            height: 34px;
+            flex: 0 0 34px;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--ink-950);
+            color: var(--surface);
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .profile-copy { min-width: 0; flex: 1; }
+        .profile-name { overflow: hidden; font-size: 12px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+        .profile-role { color: var(--ink-500); font-size: 11px; }
+
+        .topbar {
+            position: fixed;
+            inset: 0 0 auto var(--sidebar-width);
+            z-index: 40;
+            display: flex;
+            height: var(--topbar-height);
+            align-items: center;
+            gap: 12px;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--ink-200);
+            background: color-mix(in srgb, var(--surface) 94%, transparent);
+            backdrop-filter: blur(12px);
+        }
+
+        .menu-button { display: none; }
+
+        .icon-button,
+        .menu-button {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            flex: 0 0 38px;
+            place-items: center;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--ink-600);
+            cursor: pointer;
+        }
+
+        .icon-button:hover,
+        .menu-button:hover { border-color: var(--ink-200); background: var(--ink-50); color: var(--ink-950); }
+
+        .global-search {
+            display: flex;
+            width: min(420px, 34vw);
+            height: 40px;
+            align-items: center;
+            gap: 9px;
+            padding: 0 11px;
+            border: 1px solid var(--ink-200);
+            border-radius: 10px;
+            background: var(--ink-50);
+            color: var(--ink-500);
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .global-search span:nth-of-type(2) { flex: 1; }
+        kbd { padding: 2px 6px; border: 1px solid var(--ink-200); border-radius: 5px; background: var(--surface); color: var(--ink-500); font-size: 10px; }
+
+        .topbar-spacer { flex: 1; }
+
+        .button {
+            display: inline-flex;
+            min-height: 40px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border: 1px solid var(--ink-200);
+            border-radius: 9px;
+            background: var(--surface);
+            color: var(--ink-800);
+            cursor: pointer;
+            font-weight: 650;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .button:hover { border-color: var(--ink-300); background: var(--ink-50); }
+        .button.primary { border-color: var(--brand-500); background: var(--brand-500); color: white; }
+        .button.primary:hover { border-color: var(--brand-600); background: var(--brand-600); }
+        .button.subtle { box-shadow: none; }
+
+        .workspace-button {
+            display: inline-flex;
+            min-height: 40px;
+            max-width: 220px;
+            align-items: center;
+            gap: 9px;
+            padding: 7px 11px;
+            border: 1px solid var(--ink-200);
+            border-radius: 10px;
+            background: var(--surface);
+            cursor: pointer;
+        }
+
+        .workspace-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 4px var(--success-bg); }
+        .workspace-copy { min-width: 0; text-align: left; }
+        .workspace-label { color: var(--ink-500); font-size: 10px; line-height: 1.2; }
+        .workspace-name { overflow: hidden; font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+
+        .badge-count {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
+            border: 2px solid var(--surface);
+            border-radius: 9px;
+            background: var(--brand-500);
+            color: white;
+            font-size: 9px;
+            font-weight: 750;
+            line-height: 12px;
+        }
+
+        .has-badge { position: relative; }
+
+        .main {
+            min-height: 100vh;
+            margin-left: var(--sidebar-width);
+            padding: calc(var(--topbar-height) + 30px) 32px 48px;
+        }
+
+        .page { display: none; width: min(1320px, 100%); margin: 0 auto; }
+        .page.active { display: block; }
+
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .eyebrow { margin-bottom: 4px; color: var(--ink-500); font-size: 12px; font-weight: 650; letter-spacing: .02em; }
+        h1 { margin: 0; font-size: clamp(25px, 3vw, 34px); line-height: 1.18; letter-spacing: -.035em; }
+        h2 { margin: 0; font-size: 16px; letter-spacing: -.015em; }
+        h3 { margin: 0; font-size: 14px; }
+        .page-description { max-width: 650px; margin: 8px 0 0; color: var(--ink-500); }
+        .page-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .priority-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .card {
+            border: 1px solid var(--ink-200);
+            border-radius: 14px;
+            background: var(--surface);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .metric-card { min-height: 138px; padding: 18px; }
+        .metric-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .metric-label { color: var(--ink-600); font-size: 12px; font-weight: 650; }
+        .metric-icon { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 9px; background: var(--ink-100); color: var(--ink-600); }
+        .metric-value { margin-top: 13px; font-size: 28px; font-weight: 760; letter-spacing: -.04em; line-height: 1; }
+        .metric-meta { margin-top: 8px; color: var(--ink-500); font-size: 12px; }
+        .metric-meta.alert { color: var(--danger); }
+        .metric-meta.good { color: var(--success); }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(300px, .75fr);
+            gap: 18px;
+        }
+
+        .card-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; border-bottom: 1px solid var(--ink-200); }
+        .card-description { margin-top: 3px; color: var(--ink-500); font-size: 12px; }
+        .card-body { padding: 20px; }
+        .text-link { border: 0; background: none; color: var(--brand-700); cursor: pointer; font-size: 12px; font-weight: 700; }
+
+        .pipeline-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .pipeline-step { padding: 14px; border: 1px solid var(--ink-200); border-radius: 11px; background: var(--ink-50); }
+        .pipeline-step-label { display: flex; align-items: center; gap: 7px; color: var(--ink-600); font-size: 11px; }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--info); }
+        .status-dot.warning { background: #d79114; }
+        .status-dot.success { background: var(--success); }
+        .status-dot.accent { background: var(--brand-500); }
+        .pipeline-value { margin-top: 10px; font-size: 20px; font-weight: 750; }
+        .pipeline-money { margin-top: 2px; color: var(--ink-500); font-size: 11px; }
+
+        .task-list { display: grid; gap: 1px; }
+        .task {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--ink-100);
+        }
+        .task:last-child { border-bottom: 0; }
+        .task > span:nth-child(2) { display: grid; min-width: 0; }
+        .task-icon { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 10px; background: var(--warning-bg); color: var(--warning); }
+        .task-icon.danger { background: var(--danger-bg); color: var(--danger); }
+        .task-icon.info { background: var(--info-bg); color: var(--info); }
+        .task-title { font-size: 13px; font-weight: 650; }
+        .task-meta { margin-top: 2px; color: var(--ink-500); font-size: 11px; }
+        .task-action { color: var(--brand-700); font-size: 12px; font-weight: 700; }
+
+        .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .quick-action { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--ink-200); border-radius: 10px; background: var(--surface); cursor: pointer; font-weight: 650; }
+        .quick-action:hover { border-color: var(--brand-500); background: var(--brand-50); }
+        .quick-action-icon { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 8px; background: var(--brand-50); color: var(--brand-700); }
+
+        .filter-bar { display: flex; align-items: center; gap: 10px; padding: 14px; border-bottom: 1px solid var(--ink-200); }
+        .search-input { display: flex; min-width: 260px; flex: 1; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid var(--ink-200); border-radius: 9px; background: var(--ink-50); }
+        .search-input input { width: 100%; height: 40px; border: 0; outline: 0; background: transparent; color: var(--ink-950); }
+        .filter-chip { display: inline-flex; min-height: 36px; align-items: center; gap: 7px; padding: 6px 10px; border: 1px solid var(--ink-200); border-radius: 9px; background: var(--surface); color: var(--ink-600); cursor: pointer; }
+
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; min-width: 850px; border-collapse: collapse; }
+        th, td { padding: 13px 16px; border-bottom: 1px solid var(--ink-100); text-align: left; white-space: nowrap; }
+        th { color: var(--ink-500); font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+        td { font-size: 12px; }
+        tbody tr:hover { background: var(--ink-50); }
+        .record-title { color: var(--ink-950); font-weight: 700; }
+        .record-subtitle { margin-top: 2px; color: var(--ink-500); font-size: 11px; }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: var(--info-bg);
+            color: var(--info);
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .status.warning { background: var(--warning-bg); color: var(--warning); }
+        .status.success { background: var(--success-bg); color: var(--success); }
+
+        .mobile-records { display: none; }
+
+        .pagination { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; color: var(--ink-500); font-size: 12px; }
+        .pagination-buttons { display: flex; gap: 4px; }
+        .pagination-button { min-width: 32px; height: 32px; border: 1px solid var(--ink-200); border-radius: 8px; background: var(--surface); cursor: pointer; }
+        .pagination-button.current { border-color: var(--brand-500); background: var(--brand-500); color: white; }
+
+        .form-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);
+            align-items: start;
+            gap: 18px;
+        }
+
+        .form-stack { display: grid; gap: 18px; }
+        .form-section { padding: 20px; }
+        .section-heading { margin-bottom: 18px; }
+        .section-description { margin: 4px 0 0; color: var(--ink-500); font-size: 12px; }
+        .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .field-grid + .field-grid { margin-top: 16px; }
+        .field.full { grid-column: 1 / -1; }
+        .field label { display: block; margin-bottom: 6px; color: var(--ink-700); font-size: 12px; font-weight: 650; }
+        .required { color: var(--danger); }
+        .control {
+            width: 100%;
+            min-height: 42px;
+            padding: 9px 11px;
+            border: 1px solid var(--ink-200);
+            border-radius: 9px;
+            background: var(--surface);
+            color: var(--ink-950);
+            outline: 0;
+        }
+        .control:focus { border-color: var(--brand-500); box-shadow: 0 0 0 3px rgba(240, 75, 55, .12); }
+        textarea.control { min-height: 110px; resize: vertical; }
+        .field-help { margin-top: 5px; color: var(--ink-500); font-size: 11px; }
+
+        .collapsible-preview { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 17px 20px; }
+        .collapsible-copy { display: flex; align-items: center; gap: 11px; }
+        .collapsible-icon { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 9px; background: var(--ink-100); color: var(--ink-600); }
+
+        .form-actions {
+            position: sticky;
+            bottom: 14px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 18px;
+            padding: 12px;
+            border: 1px solid var(--ink-200);
+            border-radius: 13px;
+            background: color-mix(in srgb, var(--surface) 94%, transparent);
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+        }
+        .form-actions-main { display: flex; gap: 8px; }
+        .save-hint { color: var(--ink-500); font-size: 11px; }
+
+        .detail-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+        .detail-metric { padding: 15px 17px; }
+        .detail-metric-label { color: var(--ink-500); font-size: 11px; }
+        .detail-metric-value { margin-top: 4px; font-size: 18px; font-weight: 750; }
+        .detail-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr); gap: 18px; }
+        .detail-grid > * { min-width: 0; }
+        .tabs { display: flex; gap: 4px; padding: 0 18px; border-bottom: 1px solid var(--ink-200); overflow-x: auto; }
+        .tab { padding: 14px 10px 11px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--ink-500); cursor: pointer; font-size: 12px; font-weight: 650; white-space: nowrap; }
+        .tab.active { border-color: var(--brand-500); color: var(--brand-700); }
+        .timeline { display: grid; }
+        .timeline-item { display: grid; grid-template-columns: auto 1fr; gap: 12px; padding: 15px 20px; border-bottom: 1px solid var(--ink-100); }
+        .timeline-item > span:last-child { min-width: 0; }
+        .timeline-item:last-child { border-bottom: 0; }
+        .timeline-marker { width: 10px; height: 10px; margin-top: 5px; border: 2px solid var(--brand-500); border-radius: 50%; background: var(--surface); box-shadow: 0 0 0 4px var(--brand-50); }
+        .timeline-title { display: block; overflow-wrap: anywhere; font-size: 12px; font-weight: 700; }
+        .timeline-meta { display: block; margin-top: 3px; overflow-wrap: anywhere; color: var(--ink-500); font-size: 11px; }
+        .definition-list { display: grid; gap: 14px; }
+        .definition-row { display: grid; grid-template-columns: 120px 1fr; gap: 12px; font-size: 12px; }
+        .definition-row dt { color: var(--ink-500); }
+        .definition-row dd { margin: 0; font-weight: 650; }
+
+        .scroll-hint { display: flex; align-items: center; gap: 7px; margin: -6px 0 10px; color: var(--ink-500); font-size: 11px; }
+        .kanban-scroll { overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x proximity; }
+        .kanban {
+            display: grid;
+            min-width: 1740px;
+            grid-template-columns: repeat(6, minmax(270px, 1fr));
+            gap: 12px;
+        }
+        .kanban-column { min-height: 410px; padding: 10px; border: 1px solid var(--ink-200); border-radius: 13px; background: color-mix(in srgb, var(--ink-50) 70%, var(--surface)); scroll-snap-align: start; }
+        .kanban-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 5px 4px 12px; }
+        .kanban-title { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 750; }
+        .kanban-count { display: grid; min-width: 24px; height: 24px; place-items: center; border-radius: 12px; background: var(--ink-200); color: var(--ink-600); font-size: 10px; font-weight: 750; }
+        .kanban-card { margin-bottom: 9px; padding: 13px; border: 1px solid var(--ink-200); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-sm); }
+        .kanban-card-title { font-size: 12px; font-weight: 750; }
+        .kanban-card-company { margin-top: 3px; color: var(--ink-500); font-size: 11px; }
+        .kanban-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 14px; }
+        .kanban-value { font-size: 12px; font-weight: 700; }
+        .mini-avatar { display: grid; width: 25px; height: 25px; place-items: center; border-radius: 50%; background: var(--ink-100); color: var(--ink-700); font-size: 9px; font-weight: 750; }
+
+        .report-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 18px; }
+        .report-layout > * { min-width: 0; }
+        .report-nav { padding: 8px; }
+        .report-link { display: block; padding: 9px 10px; border-radius: 8px; color: var(--ink-600); font-size: 12px; cursor: pointer; }
+        .report-link:hover { background: var(--ink-100); }
+        .report-link.active { background: var(--brand-50); color: var(--brand-700); font-weight: 700; }
+        .report-filters { display: grid; grid-template-columns: 1fr 1fr auto; align-items: end; gap: 12px; padding: 16px; border-bottom: 1px solid var(--ink-200); }
+        .report-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 16px; }
+        .report-summary-card { padding: 14px; border: 1px solid var(--ink-200); border-radius: 10px; background: var(--ink-50); }
+        .report-summary-value { margin-top: 5px; font-size: 19px; font-weight: 750; }
+
+        .state-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .state-example { min-height: 280px; }
+        .empty-state { display: grid; min-height: 220px; place-items: center; padding: 28px; text-align: center; }
+        .empty-icon { display: grid; width: 48px; height: 48px; margin: 0 auto 12px; place-items: center; border-radius: 14px; background: var(--ink-100); color: var(--ink-500); font-size: 20px; }
+        .empty-title { font-weight: 750; }
+        .empty-copy { max-width: 340px; margin: 5px auto 15px; color: var(--ink-500); font-size: 12px; }
+        .skeleton-stack { display: grid; gap: 12px; padding: 20px; }
+        .skeleton { height: 14px; border-radius: 7px; background: linear-gradient(90deg, var(--ink-100), var(--ink-200), var(--ink-100)); background-size: 200% 100%; animation: shimmer 1.4s infinite linear; }
+        .skeleton.short { width: 42%; }
+        .skeleton.medium { width: 68%; }
+        .skeleton-card { display: grid; grid-template-columns: 42px 1fr; gap: 12px; padding: 15px; border: 1px solid var(--ink-200); border-radius: 10px; }
+        .skeleton-avatar { width: 42px; height: 42px; border-radius: 12px; background: var(--ink-100); }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+        .state-message { margin: 20px; padding: 16px; border-radius: 11px; }
+        .state-message.error { border: 1px solid color-mix(in srgb, var(--danger) 30%, var(--ink-200)); background: var(--danger-bg); color: var(--danger); }
+        .state-message.success { border: 1px solid color-mix(in srgb, var(--success) 30%, var(--ink-200)); background: var(--success-bg); color: var(--success); }
+        .state-message-title { font-weight: 750; }
+        .state-message-copy { margin-top: 4px; font-size: 12px; }
+
+        .prototype-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 18px;
+            padding: 13px 15px;
+            border: 1px dashed color-mix(in srgb, var(--info) 35%, var(--ink-200));
+            border-radius: 11px;
+            background: var(--info-bg);
+            color: var(--info);
+            font-size: 12px;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 80;
+            display: none;
+            background: rgba(9, 9, 11, .46);
+            backdrop-filter: blur(3px);
+        }
+        .overlay.visible { display: block; }
+
+        .command-dialog {
+            position: fixed;
+            top: 12vh;
+            left: 50%;
+            z-index: 90;
+            display: none;
+            width: min(620px, calc(100vw - 32px));
+            transform: translateX(-50%);
+            overflow: hidden;
+            border: 1px solid var(--ink-200);
+            border-radius: 16px;
+            background: var(--surface);
+            box-shadow: var(--shadow-md);
+        }
+        .command-dialog.visible { display: block; }
+        .command-search { display: flex; align-items: center; gap: 10px; padding: 15px 17px; border-bottom: 1px solid var(--ink-200); }
+        .command-search input { width: 100%; height: 30px; border: 0; outline: 0; background: transparent; color: var(--ink-950); font-size: 16px; }
+        .command-section { padding: 10px; }
+        .command-label { padding: 5px 9px; color: var(--ink-500); font-size: 10px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+        .command-result { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 9px; cursor: pointer; }
+        .command-result:hover { background: var(--ink-100); }
+        .command-result-icon { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 8px; background: var(--ink-100); }
+        .command-result-copy { flex: 1; }
+        .command-result-title { font-size: 13px; font-weight: 700; }
+        .command-result-meta { color: var(--ink-500); font-size: 11px; }
+
+        .toast {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 100;
+            display: none;
+            max-width: 360px;
+            padding: 12px 15px;
+            border: 1px solid var(--ink-200);
+            border-radius: 11px;
+            background: var(--surface);
+            box-shadow: var(--shadow-md);
+            font-size: 12px;
+            font-weight: 650;
+        }
+        .toast.visible { display: block; }
+
+        @media (max-width: 1180px) {
+            .priority-grid { grid-template-columns: repeat(2, 1fr); }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .global-search { width: min(340px, 30vw); }
+            .form-layout, .detail-grid { grid-template-columns: 1fr; }
+            .report-layout { grid-template-columns: 220px minmax(0, 1fr); }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); box-shadow: var(--shadow-md); }
+            .sidebar.open { transform: translateX(0); }
+            .topbar { left: 0; padding: 0 14px; }
+            .menu-button { display: grid; }
+            .main { margin-left: 0; padding: calc(var(--topbar-height) + 24px) 18px 36px; }
+            .global-search { width: auto; flex: 1; }
+            .global-search kbd { display: none; }
+            .quick-create-label { display: none; }
+            .report-layout { grid-template-columns: 1fr; }
+            .report-nav { display: flex; gap: 4px; overflow-x: auto; }
+            .report-link { white-space: nowrap; }
+        }
+
+        @media (max-width: 640px) {
+            :root { --topbar-height: 64px; }
+            .topbar { gap: 6px; padding: 0 10px; }
+            .global-search { width: 38px; max-width: 38px; flex: 0 0 38px; justify-content: center; padding: 0; border-color: transparent; background: transparent; }
+            .global-search span:first-of-type { display: inline; }
+            .global-search span:nth-of-type(2) { display: none; }
+            .workspace-button { max-width: 128px; border: 0; background: transparent; }
+            .workspace-label { display: none; }
+            .workspace-name { max-width: 96px; }
+            .topbar .button.primary { width: 38px; min-height: 38px; padding: 0; }
+            .hide-mobile { display: none; }
+            .main { padding-right: 15px; padding-left: 15px; }
+            .page-header { display: block; }
+            .page-actions { margin-top: 16px; }
+            .page-actions .button { flex: 1; }
+            .priority-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .metric-card { min-height: 126px; padding: 14px; }
+            .metric-value { font-size: 24px; }
+            .pipeline-row { grid-template-columns: 1fr 1fr; }
+            .card-header { padding: 16px; }
+            .card-body { padding: 16px; }
+            .quick-actions { grid-template-columns: 1fr; }
+            .task { grid-template-columns: auto 1fr; padding: 13px 16px; }
+            .task-action { grid-column: 2; }
+            .filter-bar { align-items: stretch; flex-wrap: wrap; }
+            .search-input { min-width: 100%; }
+            .table-wrap { display: none; }
+            .report-layout .table-wrap { display: block; overflow-x: auto; }
+            .mobile-records { display: grid; gap: 10px; padding: 12px; }
+            .mobile-record { padding: 14px; border: 1px solid var(--ink-200); border-radius: 11px; background: var(--ink-50); }
+            .mobile-record-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+            .mobile-record-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+            .mobile-record-label { color: var(--ink-500); font-size: 10px; }
+            .mobile-record-value { margin-top: 2px; font-size: 12px; font-weight: 650; }
+            .pagination { justify-content: center; }
+            .pagination > span { display: none; }
+            .field-grid { grid-template-columns: 1fr; }
+            .field.full { grid-column: auto; }
+            .form-actions { bottom: 8px; align-items: stretch; flex-direction: column-reverse; }
+            .form-actions-main { display: grid; grid-template-columns: 1fr 1fr; }
+            .form-actions-main .button.primary { grid-column: 1 / -1; }
+            .save-hint { text-align: center; }
+            .detail-metrics { grid-template-columns: 1fr 1fr; }
+            .definition-row { grid-template-columns: 100px 1fr; }
+            .kanban { min-width: 0; grid-auto-flow: column; grid-auto-columns: calc(100vw - 62px); grid-template-columns: none; }
+            .report-filters { grid-template-columns: 1fr; }
+            .report-summary { grid-template-columns: 1fr; }
+            .state-grid { grid-template-columns: 1fr; }
+            .toast { right: 14px; bottom: 14px; left: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar" aria-label="Główna nawigacja">
+            <div class="brand">
+                <span class="brand-mark">W</span>
+                <div class="brand-copy">
+                    <div class="brand-name">Website Expert</div>
+                    <div class="brand-subtitle">Panel administracyjny</div>
+                </div>
+            </div>
+
+            <nav class="navigation">
+                <div class="nav-group">
+                    <button class="nav-group-toggle active" type="button" aria-expanded="true">
+                        <span class="nav-glyph">⌂</span><span class="nav-group-title">Start</span><span class="nav-chevron">›</span>
+                    </button>
+                    <div class="nav-group-items">
+                        <a class="nav-item current" href="#dashboard" data-page="dashboard">Pulpit</a>
+                        <a class="nav-item" href="#notifications" data-message="Centrum powiadomień będzie częścią etapu fundamentu.">Powiadomienia</a>
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <button class="nav-group-toggle" type="button" aria-expanded="true">
+                        <span class="nav-glyph">⌁</span><span class="nav-group-title">Sprzedaż</span><span class="nav-chevron">›</span>
+                    </button>
+                    <div class="nav-group-items">
+                        <a class="nav-item" href="#pipeline" data-page="pipeline">Pipeline</a>
+                        <a class="nav-item" href="#leads" data-page="leads">Leady</a>
+                        <a class="nav-item" href="#clients" data-message="Klienci będą korzystać z tego samego wzorca listy co Leady.">Klienci</a>
+                        <a class="nav-item" href="#briefings" data-message="Briefingi zostaną zgrupowane z procesem sprzedaży.">Briefingi</a>
+                        <a class="nav-item" href="#offers" data-message="Oferty zostaną zgrupowane z procesem sprzedaży.">Oferty</a>
+                        <a class="nav-item" href="#sales-settings" data-message="Hub konfiguracji: etapy pipeline i szablony sprzedażowe.">Konfiguracja sprzedaży</a>
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <button class="nav-group-toggle" type="button" aria-expanded="false">
+                        <span class="nav-glyph">▣</span><span class="nav-group-title">Realizacja</span><span class="nav-chevron">›</span>
+                    </button>
+                    <div class="nav-group-items">
+                        <a class="nav-item" href="#projects" data-page="project">Projekty</a>
+                        <a class="nav-item" href="#calendar" data-message="Kalendarz i zdarzenia w jednej sekcji.">Kalendarz</a>
+                        <a class="nav-item" href="#domains" data-message="Domeny, zamówienia domen i cennik TLD.">Domeny</a>
+                        <a class="nav-item" href="#delivery-settings" data-message="Szablony i konfiguracja realizacji.">Konfiguracja realizacji</a>
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <button class="nav-group-toggle" type="button" aria-expanded="false">
+                        <span class="nav-glyph">£</span><span class="nav-group-title">Finanse i raporty</span><span class="nav-chevron">›</span>
+                    </button>
+                    <div class="nav-group-items">
+                        <a class="nav-item" href="#finance" data-message="Przegląd finansów z alertami i skrótami.">Przegląd finansów</a>
+                        <a class="nav-item" href="#finance-sales" data-message="Faktury, wyceny, kontrakty i płatności.">Sprzedaż</a>
+                        <a class="nav-item" href="#purchases" data-message="Dostawcy, wydatki i korekty zakupowe.">Zakupy</a>
+                        <a class="nav-item" href="#banking" data-message="Konta bankowe i uzgadnianie transakcji.">Bankowość</a>
+                        <a class="nav-item" href="#accounting" data-message="Plan kont, okresy, VAT i HMRC.">Księgowość i VAT</a>
+                        <a class="nav-item" href="#reports" data-page="report">Raporty</a>
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <button class="nav-group-toggle" type="button" aria-expanded="false">
+                        <span class="nav-glyph">◎</span><span class="nav-group-title">Strona i marketing</span><span class="nav-chevron">›</span>
+                    </button>
+                    <div class="nav-group-items">
+                        <a class="nav-item" href="#content" data-message="Przegląd treści i nawigacji witryny.">Przegląd treści</a>
+                        <a class="nav-item" href="#landing" data-message="Landing pages.">Landing pages</a>
+                        <a class="nav-item" href="#pages" data-message="Strony CMS, artykuły i sekcje.">Strony i sekcje</a>
+                        <a class="nav-item" href="#communication" data-message="Szablony e-mail i SMS.">Komunikacja</a>
+                        <a class="nav-item" href="#portfolio" data-message="Usługi, strony usług i portfolio.">Portfolio i usługi</a>
+                        <a class="nav-item" href="#seo" data-message="Rank checker i mapa witryny.">SEO</a>
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <button class="nav-group-toggle" type="button" aria-expanded="false">
+                        <span class="nav-glyph">⌘</span><span class="nav-group-title">Automatyzacje</span><span class="nav-chevron">›</span>
+                    </button>
+                    <div class="nav-group-items">
+                        <a class="nav-item" href="#rules" data-message="Reguły automatyzacji.">Reguły</a>
+                        <a class="nav-item" href="#triggers" data-message="Triggery automatyzacji.">Triggery</a>
+                        <a class="nav-item" href="#automation-logs" data-message="Logi automatyzacji.">Logi</a>
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <button class="nav-group-toggle" type="button" aria-expanded="false">
+                        <span class="nav-glyph">⚙</span><span class="nav-group-title">Administracja</span><span class="nav-chevron">›</span>
+                    </button>
+                    <div class="nav-group-items">
+                        <a class="nav-item" href="#access" data-message="Użytkownicy, role, permissions i sesje.">Użytkownicy i dostęp</a>
+                        <a class="nav-item" href="#saas" data-message="Firmy, plany i subskrypcje.">Firmy i subskrypcje</a>
+                        <a class="nav-item" href="#integrations" data-message="Integracje, płatności i tracking.">Integracje</a>
+                        <a class="nav-item" href="#company" data-message="Dane firmy, legal i kalkulator.">Ustawienia firmy</a>
+                        <a class="nav-item" href="#security" data-message="Zdarzenia bezpieczeństwa.">Bezpieczeństwo</a>
+                        <a class="nav-item" href="#system" data-message="Log Viewer i Job Manager.">Narzędzia systemowe</a>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-profile">
+                    <span class="avatar">AW</span>
+                    <div class="profile-copy">
+                        <div class="profile-name">Anna WebsiteExpert</div>
+                        <div class="profile-role">Administrator</div>
+                    </div>
+                    <span aria-hidden="true">⋯</span>
+                </div>
+            </div>
+        </aside>
+
+        <header class="topbar">
+            <button class="menu-button" id="menuButton" type="button" aria-label="Otwórz menu" aria-controls="sidebar" aria-expanded="false">☰</button>
+            <button class="global-search" id="searchButton" type="button" aria-label="Szukaj w panelu">
+                <span aria-hidden="true">⌕</span><span>Szukaj stron, klientów, leadów…</span><kbd>Ctrl K</kbd>
+            </button>
+            <button class="button primary" type="button" data-message="Menu szybkiego tworzenia: lead, klient, projekt, faktura."><span aria-hidden="true">＋</span><span class="quick-create-label">Utwórz</span></button>
+            <div class="topbar-spacer"></div>
+            <button class="workspace-button" type="button" data-message="Przełącznik workspace'u pozostaje widoczny również przy jednej firmie.">
+                <span class="workspace-dot"></span>
+                <span class="workspace-copy"><span class="workspace-label">Workspace</span><span class="workspace-name">Website Expert NI</span></span>
+                <span class="hide-mobile" aria-hidden="true">⌄</span>
+            </button>
+            <button class="icon-button has-badge" type="button" aria-label="Powiadomienia" data-message="3 powiadomienia wymagają uwagi.">♢<span class="badge-count">3</span></button>
+            <button class="icon-button" type="button" aria-label="Przypięte notatki" data-message="Przypięte notatki będą miały pełną obsługę klawiatury i dotyku.">▮</button>
+            <button class="icon-button" id="themeButton" type="button" aria-label="Przełącz motyw">◐</button>
+        </header>
+
+        <main class="main">
+            <section class="page active" id="dashboardPage">
+                <div class="page-header">
+                    <div>
+                        <div class="eyebrow">Piątek, 13 listopada · Workspace: Website Expert NI</div>
+                        <h1>Dzień dobry, Anna</h1>
+                        <p class="page-description">Najpierw sprawy wymagające reakcji. Metryki informacyjne i narzędzia platformowe pozostają niżej lub są zależne od roli.</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="button subtle" type="button" data-page-link="leads">Zobacz leady</button>
+                        <button class="button primary" type="button" data-page-link="leadForm">＋ Nowy lead</button>
+                    </div>
+                </div>
+
+                <div class="priority-grid">
+                    <article class="card metric-card">
+                        <div class="metric-top"><span class="metric-label">Leady bez kontaktu</span><span class="metric-icon">⌁</span></div>
+                        <div class="metric-value">4</div>
+                        <div class="metric-meta alert">2 oczekują ponad 24 godz.</div>
+                    </article>
+                    <article class="card metric-card">
+                        <div class="metric-top"><span class="metric-label">Aktywne projekty</span><span class="metric-icon">▣</span></div>
+                        <div class="metric-value">8</div>
+                        <div class="metric-meta">1 termin w tym tygodniu</div>
+                    </article>
+                    <article class="card metric-card">
+                        <div class="metric-top"><span class="metric-label">Faktury po terminie</span><span class="metric-icon">£</span></div>
+                        <div class="metric-value">2</div>
+                        <div class="metric-meta alert">GBP 2,840.00 do odzyskania</div>
+                    </article>
+                    <article class="card metric-card">
+                        <div class="metric-top"><span class="metric-label">Przychód w listopadzie</span><span class="metric-icon">↗</span></div>
+                        <div class="metric-value">£18.4k</div>
+                        <div class="metric-meta good">12% więcej niż w październiku</div>
+                    </article>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div>
+                        <section class="card">
+                            <div class="card-header">
+                                <div><h2>Pipeline sprzedaży</h2><div class="card-description">Wartość i liczba aktywnych szans</div></div>
+                                <button class="text-link" type="button" data-message="Pełny widok Pipeline.">Otwórz pipeline →</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="pipeline-row">
+                                    <div class="pipeline-step"><div class="pipeline-step-label"><span class="status-dot"></span>Nowe</div><div class="pipeline-value">9</div><div class="pipeline-money">£14,200</div></div>
+                                    <div class="pipeline-step"><div class="pipeline-step-label"><span class="status-dot warning"></span>Rozmowy</div><div class="pipeline-value">6</div><div class="pipeline-money">£22,500</div></div>
+                                    <div class="pipeline-step"><div class="pipeline-step-label"><span class="status-dot accent"></span>Oferta</div><div class="pipeline-value">3</div><div class="pipeline-money">£12,800</div></div>
+                                    <div class="pipeline-step"><div class="pipeline-step-label"><span class="status-dot success"></span>Wygrane</div><div class="pipeline-value">5</div><div class="pipeline-money">£18,900</div></div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="card" style="margin-top:18px">
+                            <div class="card-header">
+                                <div><h2>Wymaga uwagi</h2><div class="card-description">Priorytety z różnych modułów w jednym miejscu</div></div>
+                                <button class="text-link" type="button" data-message="Pełna skrzynka zadań i alertów.">Pokaż wszystko →</button>
+                            </div>
+                            <div class="task-list">
+                                <a class="task" href="#task"><span class="task-icon danger">!</span><span><span class="task-title">Faktura INV-2026-104 jest 8 dni po terminie</span><span class="task-meta">Acme Digital · GBP 1,840.00</span></span><span class="task-action">Otwórz</span></a>
+                                <a class="task" href="#task"><span class="task-icon">◷</span><span><span class="task-title">Projekt „New Commerce” ma termin jutro</span><span class="task-meta">6 z 8 zadań ukończonych</span></span><span class="task-action">Otwórz</span></a>
+                                <a class="task" href="#task"><span class="task-icon info">⌁</span><span><span class="task-title">Nowy lead nie ma przypisanego opiekuna</span><span class="task-meta">Webcraft Ltd · dodano 3 godz. temu</span></span><span class="task-action">Przypisz</span></a>
+                            </div>
+                        </section>
+                    </div>
+
+                    <aside>
+                        <section class="card">
+                            <div class="card-header"><div><h2>Szybkie akcje</h2><div class="card-description">Dopasowane do uprawnień</div></div></div>
+                            <div class="card-body quick-actions">
+                                <button class="quick-action" type="button" data-page-link="leadForm"><span class="quick-action-icon">⌁</span>Lead</button>
+                                <button class="quick-action" type="button" data-message="Nowy klient"><span class="quick-action-icon">▤</span>Klient</button>
+                                <button class="quick-action" type="button" data-message="Nowy projekt"><span class="quick-action-icon">▣</span>Projekt</button>
+                                <button class="quick-action" type="button" data-message="Nowa faktura"><span class="quick-action-icon">£</span>Faktura</button>
+                            </div>
+                        </section>
+
+                        <section class="card" style="margin-top:18px">
+                            <div class="card-header"><div><h2>Dzisiejszy plan</h2><div class="card-description">Kalendarz i follow-up</div></div></div>
+                            <div class="task-list">
+                                <div class="task"><span class="task-icon info">10</span><span><span class="task-title">Call z North Studio</span><span class="task-meta">10:00–10:30</span></span></div>
+                                <div class="task"><span class="task-icon">14</span><span><span class="task-title">Follow-up ofert</span><span class="task-meta">3 oferty do sprawdzenia</span></span></div>
+                            </div>
+                        </section>
+                    </aside>
+                </div>
+
+                <div class="prototype-note"><span aria-hidden="true">ⓘ</span><span><strong>Założenie prototypu:</strong> dashboard pokazuje alerty i zadania przed wykresami. Widgety SaaS będą dostępne wyłącznie dla operatora platformy, a księgowy otrzyma wariant finansowy.</span></div>
+            </section>
+
+            <section class="page" id="leadsPage">
+                <div class="page-header">
+                    <div>
+                        <div class="eyebrow">Sprzedaż / Leady</div>
+                        <h1>Leady</h1>
+                        <p class="page-description">Najważniejsze informacje na liście, pozostałe pola w managerze kolumn i widoku szczegółowym.</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="button subtle" type="button" data-message="Widok Pipeline.">⌁ Pipeline</button>
+                        <button class="button primary" type="button" data-page-link="leadForm">＋ Nowy lead</button>
+                    </div>
+                </div>
+
+                <section class="card">
+                    <div class="filter-bar">
+                        <label class="search-input"><span aria-hidden="true">⌕</span><input type="search" placeholder="Szukaj po nazwie, kliencie lub e-mailu" aria-label="Szukaj leadów"></label>
+                        <button class="filter-chip" type="button" data-message="Filtry: etap, opiekun, źródło, data.">☷ Filtry <strong>2</strong></button>
+                        <button class="filter-chip" type="button" data-message="Manager kolumn zapisuje preferencje użytkownika.">▥ Kolumny</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Lead</th><th>Etap</th><th>Wartość</th><th>Opiekun</th><th>Ostatnia aktywność</th><th>Termin</th><th></th></tr></thead>
+                            <tbody>
+                                <tr><td><div class="record-title">Redesign sklepu North Studio</div><div class="record-subtitle">North Studio · Formularz kontaktowy</div></td><td><span class="status warning">● Rozmowy</span></td><td>£8,500</td><td>Anna W.</td><td>2 godz. temu</td><td>20 lis 2026</td><td>•••</td></tr>
+                                <tr><td><div class="record-title">Landing page kampanii Q1</div><div class="record-subtitle">Acme Digital · Polecenie</div></td><td><span class="status">● Oferta</span></td><td>£4,200</td><td>Konrad N.</td><td>Wczoraj</td><td>28 lis 2026</td><td>•••</td></tr>
+                                <tr><td><div class="record-title">Portal klienta B2B</div><div class="record-subtitle">Webcraft Ltd · Kalkulator</div></td><td><span class="status success">● Wygrany</span></td><td>£12,000</td><td>Anna W.</td><td>3 dni temu</td><td>—</td><td>•••</td></tr>
+                                <tr><td><div class="record-title">Strona kancelarii</div><div class="record-subtitle">Law & Co · Landing page</div></td><td><span class="status warning">● Nowy</span></td><td>£3,800</td><td>Nieprzypisany</td><td>3 godz. temu</td><td>—</td><td>•••</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mobile-records">
+                        <article class="mobile-record"><div class="mobile-record-top"><div><div class="record-title">Redesign sklepu North Studio</div><div class="record-subtitle">North Studio</div></div><span class="status warning">Rozmowy</span></div><div class="mobile-record-grid"><div><div class="mobile-record-label">Wartość</div><div class="mobile-record-value">£8,500</div></div><div><div class="mobile-record-label">Opiekun</div><div class="mobile-record-value">Anna W.</div></div><div><div class="mobile-record-label">Aktywność</div><div class="mobile-record-value">2 godz. temu</div></div><div><div class="mobile-record-label">Termin</div><div class="mobile-record-value">20 lis</div></div></div></article>
+                        <article class="mobile-record"><div class="mobile-record-top"><div><div class="record-title">Landing page kampanii Q1</div><div class="record-subtitle">Acme Digital</div></div><span class="status">Oferta</span></div><div class="mobile-record-grid"><div><div class="mobile-record-label">Wartość</div><div class="mobile-record-value">£4,200</div></div><div><div class="mobile-record-label">Opiekun</div><div class="mobile-record-value">Konrad N.</div></div><div><div class="mobile-record-label">Aktywność</div><div class="mobile-record-value">Wczoraj</div></div><div><div class="mobile-record-label">Termin</div><div class="mobile-record-value">28 lis</div></div></div></article>
+                    </div>
+                    <div class="pagination"><span>1–4 z 24 leadów</span><div class="pagination-buttons"><button class="pagination-button" type="button">‹</button><button class="pagination-button current" type="button">1</button><button class="pagination-button" type="button">2</button><button class="pagination-button" type="button">3</button><button class="pagination-button" type="button">›</button></div></div>
+                </section>
+
+                <div class="prototype-note"><span aria-hidden="true">ⓘ</span><span><strong>Widok mobilny:</strong> tabela automatycznie przechodzi w karty z czterema najważniejszymi polami. Użytkownik nie musi odkrywać niewidocznego przewijania poziomego.</span></div>
+            </section>
+
+            <section class="page" id="leadFormPage">
+                <div class="page-header">
+                    <div>
+                        <div class="eyebrow">Sprzedaż / Leady / Nowy lead</div>
+                        <h1>Nowy lead</h1>
+                        <p class="page-description">Najpierw dane potrzebne do rozpoczęcia pracy. Informacje dodatkowe pozostają dostępne bez tworzenia pustej kolumny.</p>
+                    </div>
+                    <div class="page-actions"><button class="button subtle" type="button" data-page-link="leads">Anuluj</button></div>
+                </div>
+
+                <form onsubmit="event.preventDefault(); showToast('Prototyp: lead zostałby zapisany.');">
+                    <div class="form-layout">
+                        <div class="form-stack">
+                            <section class="card form-section">
+                                <div class="section-heading"><h2>Podstawowe informacje</h2><p class="section-description">Dane identyfikujące szansę sprzedażową.</p></div>
+                                <div class="field-grid">
+                                    <div class="field full"><label for="leadTitle">Nazwa leada <span class="required">*</span></label><input class="control" id="leadTitle" type="text" placeholder="Np. Nowa strona internetowa North Studio"><div class="field-help">Krótka nazwa widoczna na liście i w Pipeline.</div></div>
+                                    <div class="field"><label for="leadClient">Klient</label><select class="control" id="leadClient"><option>Wybierz istniejącego klienta</option><option>North Studio</option><option>Acme Digital</option></select></div>
+                                    <div class="field"><label for="leadStage">Etap <span class="required">*</span></label><select class="control" id="leadStage"><option>Nowy</option><option>Rozmowy</option><option>Oferta</option></select></div>
+                                </div>
+                            </section>
+
+                            <section class="card form-section">
+                                <div class="section-heading"><h2>Wartość i termin</h2><p class="section-description">Informacje potrzebne do prognozy sprzedaży.</p></div>
+                                <div class="field-grid">
+                                    <div class="field"><label for="leadValue">Szacowana wartość</label><input class="control" id="leadValue" type="text" placeholder="0.00"></div>
+                                    <div class="field"><label for="leadCurrency">Waluta</label><select class="control" id="leadCurrency"><option>GBP — funt brytyjski</option><option>EUR — euro</option><option>PLN — złoty</option></select></div>
+                                    <div class="field"><label for="leadDate">Planowane zamknięcie</label><input class="control" id="leadDate" type="date"></div>
+                                    <div class="field"><label for="leadSource">Źródło</label><select class="control" id="leadSource"><option>Formularz kontaktowy</option><option>Kalkulator</option><option>Polecenie</option></select></div>
+                                </div>
+                            </section>
+
+                            <section class="card form-section">
+                                <div class="section-heading"><h2>Notatki</h2><p class="section-description">Kontekst dla osoby prowadzącej sprzedaż.</p></div>
+                                <div class="field"><label for="leadNotes">Notatka wewnętrzna</label><textarea class="control" id="leadNotes" placeholder="Najważniejsze ustalenia, potrzeby i następny krok"></textarea></div>
+                            </section>
+                        </div>
+
+                        <aside class="form-stack">
+                            <section class="card form-section">
+                                <div class="section-heading"><h2>Odpowiedzialność</h2><p class="section-description">Przypisanie i priorytet.</p></div>
+                                <div class="field-grid">
+                                    <div class="field full"><label for="leadOwner">Opiekun</label><select class="control" id="leadOwner"><option>Przypisz do mnie — Anna W.</option><option>Konrad N.</option><option>Nieprzypisany</option></select></div>
+                                    <div class="field full"><label for="leadPriority">Priorytet</label><select class="control" id="leadPriority"><option>Standardowy</option><option>Wysoki</option><option>Niski</option></select></div>
+                                </div>
+                            </section>
+
+                            <button class="card collapsible-preview" type="button" data-message="Sekcja danych kalkulatora rozwija się na pełną szerokość bez pustej kolumny.">
+                                <span class="collapsible-copy"><span class="collapsible-icon">⌄</span><span><strong>Dane kalkulatora</strong><span class="card-description">Opcjonalne dane źródłowe</span></span></span><span>Rozwiń</span>
+                            </button>
+                        </aside>
+                    </div>
+
+                    <div class="form-actions">
+                        <span class="save-hint">Pola oznaczone * są wymagane</span>
+                        <span class="form-actions-main"><button class="button subtle" type="button" data-page-link="leads">Anuluj</button><button class="button" type="button" data-message="Prototyp: zapis i utworzenie kolejnego leada.">Zapisz i utwórz kolejny</button><button class="button primary" type="submit">Zapisz lead</button></span>
+                    </div>
+                </form>
+            </section>
+
+            <section class="page" id="projectPage">
+                <div class="page-header">
+                    <div>
+                        <div class="eyebrow">Realizacja / Projekty / WEB-1042</div>
+                        <h1>New Commerce</h1>
+                        <p class="page-description">North Studio · Strona e-commerce</p>
+                    </div>
+                    <div class="page-actions"><span class="status warning">● W realizacji</span><button class="button subtle" type="button" data-message="Menu pozostałych akcji projektu.">Więcej ⋯</button><button class="button primary" type="button" data-message="Edycja projektu.">Edytuj projekt</button></div>
+                </div>
+
+                <div class="detail-metrics">
+                    <div class="card detail-metric"><div class="detail-metric-label">Postęp zadań</div><div class="detail-metric-value">18 / 24</div><div class="metric-meta good">75% ukończone</div></div>
+                    <div class="card detail-metric"><div class="detail-metric-label">Aktywna faza</div><div class="detail-metric-value">Development</div><div class="metric-meta">Faza 3 z 5</div></div>
+                    <div class="card detail-metric"><div class="detail-metric-label">Budżet</div><div class="detail-metric-value">£9,400</div><div class="metric-meta">z £12,000</div></div>
+                    <div class="card detail-metric"><div class="detail-metric-label">Termin</div><div class="detail-metric-value">14 lis</div><div class="metric-meta alert">Jutro</div></div>
+                </div>
+
+                <div class="detail-grid">
+                    <section class="card">
+                        <div class="tabs" role="tablist" aria-label="Sekcje projektu"><button class="tab active" type="button">Przegląd</button><button class="tab" type="button">Zadania 24</button><button class="tab" type="button">Fazy 5</button><button class="tab" type="button">Wiadomości 8</button><button class="tab" type="button">Pliki 12</button><button class="tab" type="button">Finanse</button></div>
+                        <div class="card-header"><div><h2>Ostatnia aktywność</h2><div class="card-description">Zmiany, wiadomości i decyzje</div></div><button class="text-link" type="button" data-message="Pełna historia projektu.">Pełna historia →</button></div>
+                        <div class="timeline">
+                            <div class="timeline-item"><span class="timeline-marker"></span><span><span class="timeline-title">Klient zaakceptował projekt strony produktowej</span><span class="timeline-meta">Dzisiaj, 11:42 · Anna W.</span></span></div>
+                            <div class="timeline-item"><span class="timeline-marker"></span><span><span class="timeline-title">Zadanie „Integracja płatności” przeniesiono do In progress</span><span class="timeline-meta">Dzisiaj, 09:16 · Konrad N.</span></span></div>
+                            <div class="timeline-item"><span class="timeline-marker"></span><span><span class="timeline-title">Dodano plik new-commerce-homepage-v3.fig</span><span class="timeline-meta">Wczoraj, 16:05 · Anna W.</span></span></div>
+                        </div>
+                    </section>
+
+                    <aside class="form-stack">
+                        <section class="card form-section">
+                            <div class="section-heading"><h2>Szczegóły projektu</h2></div>
+                            <dl class="definition-list">
+                                <div class="definition-row"><dt>Klient</dt><dd>North Studio</dd></div>
+                                <div class="definition-row"><dt>Opiekun</dt><dd>Anna WebsiteExpert</dd></div>
+                                <div class="definition-row"><dt>Developer</dt><dd>Konrad N.</dd></div>
+                                <div class="definition-row"><dt>Start</dt><dd>16 wrz 2026</dd></div>
+                                <div class="definition-row"><dt>Waluta</dt><dd>GBP</dd></div>
+                            </dl>
+                        </section>
+                        <section class="card form-section">
+                            <div class="section-heading"><h2>Następny krok</h2><p class="section-description">Wynika ze stanu projektu, nie z ręcznie utrzymywanej listy.</p></div>
+                            <div class="task-title">Dokończyć integrację płatności</div><div class="task-meta">Termin: jutro · Konrad N.</div><button class="button primary" style="width:100%;margin-top:14px" type="button" data-message="Otwarcie tablicy zadań.">Otwórz tablicę zadań</button>
+                        </section>
+                    </aside>
+                </div>
+            </section>
+
+            <section class="page" id="pipelinePage">
+                <div class="page-header">
+                    <div>
+                        <div class="eyebrow">Sprzedaż / Pipeline</div>
+                        <h1>Pipeline sprzedaży</h1>
+                        <p class="page-description">Widok procesu z jawną informacją o przewijaniu. Na telefonie każda kolumna zajmuje prawie całą szerokość ekranu.</p>
+                    </div>
+                    <div class="page-actions"><button class="button subtle" type="button" data-page-link="leads">Widok listy</button><button class="button primary" type="button" data-page-link="leadForm">＋ Nowy lead</button></div>
+                </div>
+
+                <div class="filter-bar card" style="margin-bottom:14px">
+                    <label class="search-input"><span>⌕</span><input type="search" placeholder="Szukaj w Pipeline" aria-label="Szukaj w Pipeline"></label>
+                    <button class="filter-chip" type="button" data-message="Filtr opiekuna.">Opiekun: wszyscy</button>
+                    <button class="filter-chip" type="button" data-message="Filtr zakresu dat.">Ten kwartał</button>
+                </div>
+                <div class="scroll-hint"><span aria-hidden="true">↔</span><span>Przewiń poziomo, aby zobaczyć kolejne etapy. Kolumny obsługują klawiaturę i dotyk.</span></div>
+                <div class="kanban-scroll" tabindex="0" aria-label="Kolumny Pipeline — przewijanie poziome">
+                    <div class="kanban">
+                        <section class="kanban-column"><div class="kanban-header"><span class="kanban-title"><span class="status-dot"></span>Nowe</span><span class="kanban-count">4</span></div><article class="kanban-card"><div class="kanban-card-title">Strona kancelarii</div><div class="kanban-card-company">Law & Co</div><div class="kanban-card-footer"><span class="kanban-value">£3,800</span><span class="mini-avatar">—</span></div></article><article class="kanban-card"><div class="kanban-card-title">Migracja WordPress</div><div class="kanban-card-company">Moss Studio</div><div class="kanban-card-footer"><span class="kanban-value">£2,100</span><span class="mini-avatar">AW</span></div></article></section>
+                        <section class="kanban-column"><div class="kanban-header"><span class="kanban-title"><span class="status-dot warning"></span>Rozmowy</span><span class="kanban-count">3</span></div><article class="kanban-card"><div class="kanban-card-title">Redesign sklepu</div><div class="kanban-card-company">North Studio</div><div class="kanban-card-footer"><span class="kanban-value">£8,500</span><span class="mini-avatar">AW</span></div></article></section>
+                        <section class="kanban-column"><div class="kanban-header"><span class="kanban-title"><span class="status-dot accent"></span>Oferta</span><span class="kanban-count">2</span></div><article class="kanban-card"><div class="kanban-card-title">Kampania Q1</div><div class="kanban-card-company">Acme Digital</div><div class="kanban-card-footer"><span class="kanban-value">£4,200</span><span class="mini-avatar">KN</span></div></article></section>
+                        <section class="kanban-column"><div class="kanban-header"><span class="kanban-title"><span class="status-dot warning"></span>Negocjacje</span><span class="kanban-count">1</span></div><article class="kanban-card"><div class="kanban-card-title">Portal partnerów</div><div class="kanban-card-company">Atlas Group</div><div class="kanban-card-footer"><span class="kanban-value">£16,000</span><span class="mini-avatar">AW</span></div></article></section>
+                        <section class="kanban-column"><div class="kanban-header"><span class="kanban-title"><span class="status-dot success"></span>Wygrane</span><span class="kanban-count">5</span></div><article class="kanban-card"><div class="kanban-card-title">Portal klienta B2B</div><div class="kanban-card-company">Webcraft Ltd</div><div class="kanban-card-footer"><span class="kanban-value">£12,000</span><span class="mini-avatar">AW</span></div></article></section>
+                        <section class="kanban-column"><div class="kanban-header"><span class="kanban-title"><span class="status-dot" style="background:var(--ink-400)"></span>Przegrane</span><span class="kanban-count">2</span></div></section>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page" id="reportPage">
+                <div class="page-header">
+                    <div>
+                        <div class="eyebrow">Finanse i raporty / Raporty</div>
+                        <h1>Raporty finansowe</h1>
+                        <p class="page-description">Raporty są zebrane w jednym hubie, ale zachowują bezpośrednie adresy i uprawnienia.</p>
+                    </div>
+                    <div class="page-actions"><button class="button subtle" type="button" data-message="Eksport CSV, XLSX lub PDF zależnie od raportu.">Eksportuj</button></div>
+                </div>
+
+                <div class="report-layout">
+                    <nav class="card report-nav" aria-label="Rodzaje raportów">
+                        <a class="report-link active" href="#report">Rachunek zysków i strat</a><a class="report-link" href="#report">Bilans</a><a class="report-link" href="#report">Bilans próbny</a><a class="report-link" href="#report">Przepływy pieniężne</a><a class="report-link" href="#report">Rozrachunki AR/AP</a><a class="report-link" href="#report">Szczegóły VAT</a><a class="report-link" href="#report">Wydatki</a>
+                    </nav>
+                    <section class="card">
+                        <div class="card-header"><div><h2>Rachunek zysków i strat</h2><div class="card-description">Okres bieżący z porównaniem do poprzedniego</div></div></div>
+                        <div class="report-filters">
+                            <div class="field"><label for="reportPeriod">Okres księgowy</label><select class="control" id="reportPeriod"><option>Listopad 2026</option><option>Październik 2026</option></select></div>
+                            <div class="field"><label for="reportCompare">Porównanie</label><select class="control" id="reportCompare"><option>Poprzedni miesiąc</option><option>Ten sam okres rok wcześniej</option></select></div>
+                            <button class="button primary" type="button" data-message="Raport zostałby przeliczony.">Generuj</button>
+                        </div>
+                        <div class="report-summary">
+                            <div class="report-summary-card"><div class="detail-metric-label">Przychody</div><div class="report-summary-value">£24,680</div><div class="metric-meta good">+8.4%</div></div>
+                            <div class="report-summary-card"><div class="detail-metric-label">Koszty</div><div class="report-summary-value">£11,240</div><div class="metric-meta">+2.1%</div></div>
+                            <div class="report-summary-card"><div class="detail-metric-label">Zysk netto</div><div class="report-summary-value">£13,440</div><div class="metric-meta good">+14.3%</div></div>
+                        </div>
+                        <div class="table-wrap">
+                            <table><thead><tr><th>Kategoria</th><th>Listopad 2026</th><th>Październik 2026</th><th>Zmiana</th></tr></thead><tbody><tr><td class="record-title">Przychody ze sprzedaży</td><td>£24,680</td><td>£22,760</td><td class="metric-meta good">+8.4%</td></tr><tr><td class="record-title">Koszty operacyjne</td><td>£8,940</td><td>£8,760</td><td>+2.1%</td></tr><tr><td class="record-title">Koszty usług zewnętrznych</td><td>£2,300</td><td>£2,250</td><td>+2.2%</td></tr><tr><td class="record-title">Zysk netto</td><td><strong>£13,440</strong></td><td><strong>£11,750</strong></td><td class="metric-meta good">+14.3%</td></tr></tbody></table>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <section class="page" id="statesPage">
+                <div class="page-header">
+                    <div>
+                        <div class="eyebrow">Biblioteka wzorców / Stany interfejsu</div>
+                        <h1>Stany systemowe</h1>
+                        <p class="page-description">Każdy stan wyjaśnia, co się dzieje i jaki jest następny krok użytkownika.</p>
+                    </div>
+                </div>
+                <div class="state-grid">
+                    <section class="card state-example">
+                        <div class="card-header"><div><h2>Pusty stan</h2><div class="card-description">Brak danych, które użytkownik może utworzyć</div></div></div>
+                        <div class="empty-state"><div><span class="empty-icon">⌁</span><div class="empty-title">Nie ma jeszcze leadów</div><div class="empty-copy">Dodaj pierwszego leada ręcznie albo skonfiguruj formularz, który utworzy go automatycznie.</div><button class="button primary" type="button" data-page-link="leadForm">＋ Dodaj pierwszego leada</button></div></div>
+                    </section>
+                    <section class="card state-example">
+                        <div class="card-header"><div><h2>Ładowanie</h2><div class="card-description">Szkielet zachowuje docelowy układ strony</div></div></div>
+                        <div class="skeleton-stack" aria-label="Ładowanie danych">
+                            <div class="skeleton short"></div><div class="skeleton medium"></div>
+                            <div class="skeleton-card"><div class="skeleton-avatar"></div><div class="skeleton-stack" style="padding:0"><div class="skeleton medium"></div><div class="skeleton"></div></div></div>
+                            <div class="skeleton-card"><div class="skeleton-avatar"></div><div class="skeleton-stack" style="padding:0"><div class="skeleton short"></div><div class="skeleton"></div></div></div>
+                        </div>
+                    </section>
+                    <section class="card state-example">
+                        <div class="card-header"><div><h2>Błąd</h2><div class="card-description">Bez technicznego kodu jako głównego komunikatu</div></div></div>
+                        <div class="state-message error"><div class="state-message-title">Nie udało się pobrać raportu</div><div class="state-message-copy">Dane nie zostały zmienione. Spróbuj ponownie, a jeśli problem wróci, skontaktuj się z administratorem i podaj identyfikator RPT-2841.</div><button class="button" style="margin-top:12px" type="button" data-message="Ponowna próba pobrania danych.">Spróbuj ponownie</button></div>
+                    </section>
+                    <section class="card state-example">
+                        <div class="card-header"><div><h2>Sukces</h2><div class="card-description">Potwierdzenie skutku i dostępny następny krok</div></div></div>
+                        <div class="state-message success"><div class="state-message-title">Lead został zapisany</div><div class="state-message-copy">North Studio jest teraz na etapie „Nowy”. Możesz przejść do rekordu albo od razu dodać aktywność.</div><button class="button" style="margin-top:12px" type="button" data-page-link="leads">Przejdź do listy</button></div>
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <section class="command-dialog" id="commandDialog" role="dialog" aria-modal="true" aria-labelledby="commandTitle">
+        <div class="command-search"><span aria-hidden="true">⌕</span><input id="commandInput" type="search" placeholder="Szukaj w panelu…" aria-label="Szukaj w panelu"><kbd>Esc</kbd></div>
+        <div class="command-section">
+            <div class="command-label" id="commandTitle">Szybkie wyniki</div>
+            <a class="command-result" href="#leads" data-page="leads"><span class="command-result-icon">⌁</span><span class="command-result-copy"><span class="command-result-title">Leady</span><span class="command-result-meta">Sprzedaż · lista rekordów</span></span><span>↵</span></a>
+            <a class="command-result" href="#pipeline" data-page="pipeline"><span class="command-result-icon">⌁</span><span class="command-result-copy"><span class="command-result-title">Pipeline</span><span class="command-result-meta">Sprzedaż · widok procesu</span></span><span>↵</span></a>
+            <a class="command-result" href="#new-lead" data-page="leadForm"><span class="command-result-icon">＋</span><span class="command-result-copy"><span class="command-result-title">Nowy lead</span><span class="command-result-meta">Szybka akcja</span></span><span>↵</span></a>
+            <a class="command-result" href="#project" data-page="project"><span class="command-result-icon">▣</span><span class="command-result-copy"><span class="command-result-title">Projekt New Commerce</span><span class="command-result-meta">Realizacja · projekt</span></span><span>↵</span></a>
+            <a class="command-result" href="#report" data-page="report"><span class="command-result-icon">£</span><span class="command-result-copy"><span class="command-result-title">Raporty finansowe</span><span class="command-result-meta">Finanse i raporty</span></span><span>↵</span></a>
+            <a class="command-result" href="#states" data-page="states"><span class="command-result-icon">◫</span><span class="command-result-copy"><span class="command-result-title">Stany interfejsu</span><span class="command-result-meta">Biblioteka wzorców prototypu</span></span><span>↵</span></a>
+            <a class="command-result" href="#client"><span class="command-result-icon">▤</span><span class="command-result-copy"><span class="command-result-title">North Studio</span><span class="command-result-meta">Klient · aktywny</span></span><span>↵</span></a>
+            <a class="command-result" href="#invoice"><span class="command-result-icon">£</span><span class="command-result-copy"><span class="command-result-title">INV-2026-104</span><span class="command-result-meta">Faktura · po terminie</span></span><span>↵</span></a>
+            <a class="command-result" href="#settings"><span class="command-result-icon">⚙</span><span class="command-result-copy"><span class="command-result-title">Integracje</span><span class="command-result-meta">Administracja · ustawienia</span></span><span>↵</span></a>
+        </div>
+    </section>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const menuButton = document.getElementById('menuButton');
+        const overlay = document.getElementById('overlay');
+        const searchButton = document.getElementById('searchButton');
+        const commandDialog = document.getElementById('commandDialog');
+        const commandInput = document.getElementById('commandInput');
+        const toast = document.getElementById('toast');
+        let toastTimer;
+
+        function setSidebar(open) {
+            sidebar.classList.toggle('open', open);
+            menuButton.setAttribute('aria-expanded', String(open));
+            overlay.classList.toggle('visible', open || commandDialog.classList.contains('visible'));
+        }
+
+        function setCommand(open) {
+            commandDialog.classList.toggle('visible', open);
+            overlay.classList.toggle('visible', open || sidebar.classList.contains('open'));
+            if (open) setTimeout(() => commandInput.focus(), 30);
+        }
+
+        function showToast(message) {
+            window.clearTimeout(toastTimer);
+            toast.textContent = message;
+            toast.classList.add('visible');
+            toastTimer = window.setTimeout(() => toast.classList.remove('visible'), 2600);
+        }
+
+        function showPage(name) {
+            document.querySelectorAll('.page').forEach((page) => page.classList.remove('active'));
+            const target = document.getElementById(`${name}Page`);
+            if (target) target.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach((item) => item.classList.toggle('current', item.dataset.page === name));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setCommand(false);
+            if (window.innerWidth <= 900) setSidebar(false);
+        }
+
+        document.querySelectorAll('.nav-group-toggle').forEach((button) => {
+            button.addEventListener('click', () => {
+                const expanded = button.getAttribute('aria-expanded') === 'true';
+                button.setAttribute('aria-expanded', String(!expanded));
+            });
+        });
+
+        document.querySelectorAll('[data-page]').forEach((link) => link.addEventListener('click', (event) => {
+            event.preventDefault();
+            showPage(link.dataset.page);
+        }));
+
+        document.querySelectorAll('[data-page-link]').forEach((button) => button.addEventListener('click', () => showPage(button.dataset.pageLink)));
+        document.querySelectorAll('[data-message]').forEach((element) => element.addEventListener('click', (event) => {
+            if (element.tagName === 'A') event.preventDefault();
+            showToast(element.dataset.message);
+            if (window.innerWidth <= 900 && element.closest('.sidebar')) setSidebar(false);
+        }));
+
+        menuButton.addEventListener('click', () => setSidebar(!sidebar.classList.contains('open')));
+        searchButton.addEventListener('click', () => setCommand(true));
+        overlay.addEventListener('click', () => { setSidebar(false); setCommand(false); });
+
+        document.addEventListener('keydown', (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                event.preventDefault();
+                setCommand(true);
+            }
+            if (event.key === 'Escape') { setSidebar(false); setCommand(false); }
+        });
+
+        document.getElementById('themeButton').addEventListener('click', () => {
+            const root = document.documentElement;
+            root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        });
+
+        const hashPages = {
+            '#dashboard': 'dashboard',
+            '#leads': 'leads',
+            '#new-lead': 'leadForm',
+            '#project': 'project',
+            '#pipeline': 'pipeline',
+            '#report': 'report',
+            '#states': 'states',
+        };
+        if (hashPages[location.hash]) showPage(hashPages[location.hash]);
+    </script>
+</body>
+</html>

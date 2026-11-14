@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateLedgerAccount extends CreateRecord
 {
     protected static string $resource = LedgerAccountResource::class;
+
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.accounting.ledger_accounts.create_subheading');
+    }
 }

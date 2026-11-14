@@ -32,6 +32,11 @@ class TrialBalancePage extends BasePage
         return __('finance.trial_balance.title');
     }
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.reports.trial_balance');
+    }
+
     public function mount(): void
     {
         $period = AccountingPeriod::query()

@@ -1,9 +1,9 @@
 # Plan przebudowy interfejsu panelu administracyjnego
 
-**Status:** planowanie  
+**Status:** etap 5 w toku — fale finansowa oraz marketing/CMS/SEO zakończone
 **Zakres:** wszystkie widoki pod `/admin/*`  
 **Data utworzenia:** 2026-11-13  
-**Ostatnia aktualizacja:** 2026-11-13  
+**Ostatnia aktualizacja:** 2026-11-14
 **Właściciel dokumentu:** zespół projektu Website Expert  
 **Źródło prawdy:** ten dokument
 
@@ -122,18 +122,15 @@ Poniższy układ jest hipotezą do zweryfikowania w prototypie.
 - szablony projektów;
 - kalendarz.
 
-### Finanse
+### Finanse i raporty
 
 - sprzedaż: faktury, wyceny, kontrakty i płatności;
 - zakupy: dostawcy, wydatki, korekty i wydatki cykliczne;
 - bankowość: konta i uzgadnianie transakcji;
 - księgowość i VAT: plan kont, okresy, dzienniki, VAT oraz HMRC.
+- raporty finansowe i podatkowe.
 
-### Raporty
-
-- raporty operacyjne;
-- raporty finansowe;
-- raporty podatkowe.
+Raport konwersji pozostaje przy procesie sprzedaży. Pozostałe raporty są dostępne z huba „Finanse i raporty”, dzięki czemu architektura zachowuje limit siedmiu głównych grup.
 
 ### Strona i marketing
 
@@ -164,88 +161,108 @@ Sekcja Administracja powinna być domyślnie zwinięta i dostępna wyłącznie d
 ### Etap 1 — architektura informacji
 
 **Szacunek:** 1–2 dni  
-**Status:** do wykonania
+**Status:** zakończone
 
-- [ ] Przypisać wszystkie elementy menu do procesów użytkownika.
-- [ ] Rozdzielić funkcje codzienne, konfiguracyjne i operatorskie.
-- [ ] Przygotować warianty menu dla administratora, managera i księgowego.
-- [ ] Ujednolicić nazwy stron, zasobów i akcji.
-- [ ] Przygotować klucze tłumaczeń dla wspólnej nawigacji.
-- [ ] Zatwierdzić docelową mapę panelu przed pracą wizualną.
+- [x] Przypisać wszystkie elementy menu do procesów użytkownika.
+- [x] Rozdzielić funkcje codzienne, konfiguracyjne i operatorskie.
+- [x] Przygotować warianty menu dla administratora, managera i księgowego.
+- [x] Ujednolicić nazwy stron, zasobów i akcji na poziomie architektury informacji.
+- [x] Przygotować klucze tłumaczeń dla wspólnej nawigacji.
+- [x] Zatwierdzić docelową mapę panelu przed pracą wizualną.
 
 **Rezultat:** zatwierdzona architektura informacji i macierz widoczności według ról.
 
 ### Etap 2 — prototypy UX/UI
 
 **Szacunek:** 3–4 dni  
-**Status:** do wykonania
+**Status:** zakończone — zatwierdzone przez użytkownika
 
-- [ ] Przygotować prototyp niskiej wierności menu i topbara na desktopie.
-- [ ] Przygotować prototyp mobilnego drawera i topbara.
-- [ ] Zaprojektować dashboard zależny od roli.
-- [ ] Zaprojektować wzorzec listy rekordów.
-- [ ] Zaprojektować wzorzec formularza tworzenia i edycji.
-- [ ] Zaprojektować widok szczegółowy rekordu.
-- [ ] Zaprojektować pipeline i świadome przewijanie poziome.
-- [ ] Zaprojektować raporty oraz stany puste, ładowania, błędów i sukcesu.
-- [ ] Przygotować wersję wizualną po zatwierdzeniu układu.
-- [ ] Zatwierdzić prototyp przed wdrożeniem fundamentu.
+- [x] Przygotować prototyp menu i topbara na desktopie.
+- [x] Przygotować prototyp mobilnego drawera i topbara.
+- [x] Zaprojektować dashboard zależny od roli.
+- [x] Zaprojektować wzorzec listy rekordów.
+- [x] Zaprojektować wzorzec formularza tworzenia i edycji.
+- [x] Zaprojektować widok szczegółowy rekordu.
+- [x] Zaprojektować pipeline i świadome przewijanie poziome.
+- [x] Zaprojektować raporty oraz stany puste, ładowania, błędów i sukcesu.
+- [x] Przygotować wersję wizualną powłoki i archetypów stron.
+- [x] Zatwierdzić prototyp przed wdrożeniem fundamentu.
 
 **Rezultat:** zaakceptowany prototyp desktopowy i mobilny dla wszystkich głównych archetypów stron.
 
 ### Etap 3 — fundament techniczny
 
 **Szacunek:** 3–5 dni  
-**Status:** do wykonania
+**Status:** zakończone
 
-- [ ] Zdefiniować tokeny kolorów, odstępów, promieni i typografii w motywie Filament.
-- [ ] Wdrożyć docelowe grupowanie i kolejność menu.
-- [ ] Dodać widoczny kontekst workspace’u.
-- [ ] Zaprojektować globalne wyszukiwanie i szybkie akcje.
-- [ ] Ujednolicić powiadomienia i przypięte notatki.
-- [ ] Utworzyć wspólne reguły dla nagłówków, toolbarów, formularzy, tabel i pustych stanów.
-- [ ] Usunąć style inline z komponentów objętych fundamentem.
-- [ ] Wdrożyć tłumaczenia PL, EN i PT.
-- [ ] Dodać testy wspólnych elementów i nawigacji według ról.
+- [x] Zdefiniować tokeny kolorów, odstępów, promieni i typografii w motywie Filament.
+- [x] Wdrożyć docelowe grupowanie i kolejność menu.
+- [x] Dodać widoczny kontekst workspace’u.
+- [x] Zaprojektować globalne wyszukiwanie i szybkie akcje.
+- [x] Ujednolicić powiadomienia i przypięte notatki.
+- [x] Utworzyć wspólne reguły dla nagłówków, toolbarów, formularzy, tabel i pustych stanów.
+- [x] Usunąć style inline z komponentów objętych fundamentem.
+- [x] Wdrożyć tłumaczenia PL, EN i PT.
+- [x] Dodać testy wspólnych elementów i nawigacji według ról.
+
+Walidacja wykonana w ramach etapu: build produkcyjny Vite, kompilacja Blade, test kontraktu siedmiu grup, test użytkownika `panel-only`, kontrola unikalności wyszukiwanych tras oraz istniejąca regresja RBAC/tenant. Smoke test 1440/390 px potwierdził brak przepełnienia dokumentu i kolizji elementów topbara. Sprawdzono też stan ciemny, wyszukiwanie nawigacji, szybkie tworzenie oraz dropdown przypiętych notatek.
 
 **Rezultat:** wspólna powłoka panelu i zestaw stabilnych wzorców UI.
 
 ### Etap 4 — pilotaż CRM i projektów
 
 **Szacunek:** 5–7 dni  
-**Status:** do wykonania
+**Status:** zakończone
 
-- [ ] Dashboard.
-- [ ] Klienci.
-- [ ] Leady.
-- [ ] Pipeline.
-- [ ] Projekty.
-- [ ] Widoki desktopowe i mobilne.
-- [ ] Test scenariuszy użytkownika po wdrożeniu pilotażu.
-- [ ] Korekta wzorców przed migracją pozostałych modułów.
+- [x] Dashboard — usunięto duplikat szybkich akcji i metryki operatorskie SaaS, ukryto nieistotne puste widgety, naprawiono dataset wykresu przychodów.
+- [x] Klienci.
+  - [x] Responsywna lista, opis kontekstu, klikalny rekord i użyteczny pusty stan.
+  - [x] Kontekstowe opisy formularza i widoku szczegółowego.
+  - [x] Ujednolicenie sekcji formularza i widoku szczegółowego.
+- [x] Leady.
+  - [x] Responsywna lista, opis kontekstu, klikalny rekord i użyteczny pusty stan.
+  - [x] Kontekstowe opisy formularza i widoku szczegółowego oraz pełna szerokość sekcji formularza.
+  - [x] Ujednolicenie akcji i widoku szczegółowego oraz serwerowa blokada mutacji dla dostępu tylko do odczytu.
+- [x] Pipeline.
+  - [x] Czytelny sygnał przewijania, scroll snap, obsługa focusu i lokalizacja działań kart.
+  - [x] Ukrycie i serwerowa blokada akcji mutujących dla ról tylko do odczytu.
+  - [x] Ujednolicenie modali na natywnej, dostępnej powłoce Filament.
+- [x] Projekty.
+  - [x] Responsywna lista, opis kontekstu, klikalny rekord i użyteczny pusty stan.
+  - [x] Kontekstowe opisy formularza i widoku szczegółowego oraz pełna szerokość sekcji formularza.
+  - [x] Ujednolicenie widoku szczegółowego, faz, szybkich działań i zadań oraz serwerowa kontrola mutacji.
+- [x] Widoki desktopowe i mobilne.
+  - [x] Dashboard i listy pilotażowe przy 1440/390 px.
+  - [x] Formularze, szczegóły, zadania i pipeline przy 1440/390 px.
+- [x] Test scenariuszy użytkownika po wdrożeniu pilotażu.
+- [x] Korekta wzorców przed migracją pozostałych modułów.
 
 **Rezultat:** zweryfikowany wzorzec możliwy do bezpiecznego powielenia.
 
 ### Etap 5 — migracja pozostałych modułów
 
 **Szacunek:** 10–15 dni  
-**Status:** do wykonania
+**Status:** w toku
 
 #### Fala 1 — finanse i raporty
 
-- [ ] Dokumenty sprzedażowe.
-- [ ] Zakupy i wydatki.
-- [ ] Bankowość.
-- [ ] Księgowość, VAT i HMRC.
-- [ ] Raporty finansowe.
+- [x] Dokumenty sprzedażowe — faktury, wyceny, umowy i korekty mają responsywne listy, kontekst, klikalne rekordy, puste stany i opisy formularzy/szczegółów.
+- [x] Zakupy i wydatki — wydatki, dostawcy, wydatki cykliczne i korekty zakupowe mają responsywne listy, kontekst stron, wyszukiwanie rekordów, klikalne wiersze i użyteczne puste stany.
+- [x] Bankowość — rachunki, transakcje i płatności mają responsywne listy, wyszukiwanie rekordów, klikalne wiersze, kontekst stron i użyteczne puste stany.
+- [x] Księgowość, VAT i HMRC — plan kont, okresy, korekty VAT, dzienniki, deklaracje, księga główna i połączenie HMRC mają spójny kontekst, responsywne listy oraz bezpieczne skróty do rekordów.
+- [x] Raporty finansowe — osiem raportów ma spójny kontekst operacyjny, responsywne filtry, podsumowania i bezpiecznie przewijane tabele.
+
+**Fala 1 zakończona:** 26 kluczowych tras finansowych zweryfikowano przy 1440 i 390 px.
 
 #### Fala 2 — marketing, CMS i SEO
 
-- [ ] Nawigacja strony.
-- [ ] Landing pages i CMS.
-- [ ] Treści, usługi i portfolio.
-- [ ] E-mail i SMS.
-- [ ] SEO.
+- [x] Nawigacja strony — kontekst konfiguracji, responsywna tabela i użyteczny pusty stan.
+- [x] Landing pages i CMS — landing pages, strony, sekcje oraz artykuły mają responsywne listy, kontekst stron, wyszukiwanie i puste stany.
+- [x] Treści, usługi i portfolio — katalog usług, strony usług oraz realizacje korzystają ze spójnego wzorca list i bezpiecznych skrótów do edycji.
+- [x] E-mail i SMS — szablony mają kontekst stron, wyszukiwanie, responsywne listy i czytelne puste stany.
+- [x] SEO — monitoring pozycji zachowuje tryb tylko do odczytu, a mapa strony ma przetłumaczony kontekst i opis zakresu.
+
+**Fala 2 zakończona:** 12 kluczowych tras marketingu, CMS i SEO zweryfikowano przy 1440 i 390 px.
 
 #### Fala 3 — automatyzacje
 
@@ -309,18 +326,38 @@ Sekcja Administracja powinna być domyślnie zwinięta i dostępna wyłącznie d
 | 2026-11-13 | Najpierw architektura informacji i prototyp, później wdrożenie | Głównym problemem jest struktura panelu, a nie tylko jego warstwa wizualna. |
 | 2026-11-13 | Wdrożenie modułami, zaczynając od CRM i projektów | Pozwala zweryfikować wzorce na najczęściej używanych procesach przed migracją całego panelu. |
 | 2026-11-13 | Zachować Filament jako fundament | Obecna baza komponentów jest stabilna; przebudowa od zera zwiększyłaby ryzyko i koszt. |
+| 2026-11-13 | Ograniczyć nawigację do siedmiu głównych grup | Raporty domenowe będą dostępne przy procesie sprzedaży lub w hubie finansowym zamiast tworzyć ósmą grupę. |
+| 2026-11-13 | Globalne wyszukiwanie obejmuje nawigację i kluczowe rekordy | W pierwszej wersji przeszukiwane są klienci, leady, projekty, wyceny i faktury, zawsze przez istniejące bramki RBAC i tenant scope. |
+| 2026-11-13 | Szybkie tworzenie pozostaje w topbarze | Lista akcji jest wyliczana z `canCreate()`, więc użytkownik nie zobaczy operacji bez uprawnień. |
+| 2026-11-14 | Niestandardowe mutacje szczegółów i pipeline’u wymagają `canEdit()` również po stronie serwera | Widoczność elementu interfejsu nie jest granicą bezpieczeństwa; bezpośrednie wywołanie Livewire musi kończyć się 403 dla roli tylko do odczytu. |
+| 2026-11-14 | Modale pipeline’u korzystają z natywnej powłoki Filament bez teleportacji DOM | Zapewnia to focus trap, Escape, ARIA i stabilne animacje w obrębie niestandardowej strony Livewire. |
 
 ## Backlog odkryć
 
-- [ ] Ustalić, czy globalne wyszukiwanie ma obejmować tylko strony, czy również rekordy domenowe.
+- [x] Ustalić, czy globalne wyszukiwanie ma obejmować tylko strony, czy również rekordy domenowe.
 - [ ] Ustalić priorytet domyślnego dashboardu dla każdej roli.
-- [ ] Zdecydować, czy szablony pozostają przy procesach, czy trafiają do wspólnej sekcji konfiguracji.
+- [x] Zdecydować, czy szablony pozostają przy procesach, czy trafiają do wspólnej sekcji konfiguracji.
 - [ ] Zweryfikować potrzebę oddzielnego trybu operatorskiego dla SaaS, bezpieczeństwa i narzędzi systemowych.
 - [ ] Ustalić sposób komunikowania poziomego przewijania pipeline’u i szerokich tabel.
+- [x] Naprawić błąd inicjalizacji pustych datasetów wykresów dashboardu (`normalizeDatasets`).
 
 ## Dziennik zmian
 
 | Data | Zmiana |
 |---|---|
 | 2026-11-13 | Utworzono dokument na podstawie audytu menu, topbara, dashboardu, list, formularzy, pipeline’u, raportów i widoków mobilnych. |
+| 2026-11-13 | Użytkownik zatwierdził plan; rozpoczęto etap architektury informacji i prototypowania. Scalono raporty z właściwymi domenami, aby zachować limit siedmiu głównych grup. |
+| 2026-11-13 | Ukończono architekturę informacji, macierz ról i klikalny prototyp siedmiu archetypów. Walidacja 1440/390 px: brak błędów JavaScript i brak przepełnienia dokumentu. |
+| 2026-11-13 | Wdrożono fundament produkcyjnego panelu: siedem grup RBAC, wyszukiwanie stron i kluczowych rekordów, szybkie tworzenie, stały workspace, dostępne przypięte notatki, tokeny motywu i tłumaczenia PL/EN/PT. Testy celowane: 18/1220; lint, build i Blade poprawne; smoke test jasny/ciemny 1440/390 bez przepełnienia i kolizji topbara. |
+| 2026-11-13 | Rozpoczęto pilotaż: dashboard pokazuje wyłącznie operacyjne sekcje z realnymi danymi, a listy klientów, leadów i projektów mają kontekstowe opisy, responsywne kolumny, klikalne wiersze i puste stany. Naprawiono asocjacyjny dataset wykresu przychodów. Smoke test 1440/390: brak błędów JavaScript i overflow. |
+| 2026-11-13 | Dodano kontekstowe opisy formularzy i szczegółów, poprawiono szerokość formularzy leadów/projektów oraz wdrożono dostępny region pipeline’u z widoczną instrukcją przewijania, scroll snapem i fokusem klawiatury. Smoke test pipeline’u 1440/390: lokalny scroll działa bez overflow dokumentu i błędów JavaScript. |
+| 2026-11-13 | Domknięto RBAC pipeline’u: role tylko do odczytu widzą historię, ale nie widzą i nie mogą wywołać akcji mutujących; kontrola działa także po stronie metod Livewire. Testy autoryzacji pipeline’u: 3/7. |
+| 2026-11-13 | Zweryfikowano cały bieżący przyrost pilota: 24 testy / 1239 asercji, Pint, cache widoków Blade, ESLint, produkcyjny build Vite i kontrola różnic przeszły bez błędów. Do domknięcia etapu 4 pozostają niestandardowe widoki szczegółowe oraz modale pipeline’u. |
+| 2026-11-14 | Zakończono etap 4: ujednolicono natywne modale pipeline’u, widok faz i szybkich działań projektu, dodano brakujące bramki mutacji w szczegółach leadów i projektów oraz tłumaczenia PL/EN/PT. Smoke test ośmiu tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript; modale mają dialog/ARIA, focus trap i obsługę Escape. Końcowa regresja: 28 testów / 1251 asercji; Pint, Blade, ESLint, build i zgodność tłumaczeń poprawne. |
+| 2026-11-14 | Rozpoczęto etap 5 i ukończono pierwszy pakiet fali finansowej: listy faktur, wycen, umów i faktur korygujących korzystają ze wzorca pilota, a strony tworzenia/edycji/szczegółów mają kontekstowe opisy. Dodatkowo akcje wysyłki wycen i zmiany statusu umów respektują `canEdit()`/`canCreate()`. Testy celowane: 15/1197; smoke test czterech list przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. |
+| 2026-11-14 | Ukończono pakiet zakupów i wydatków: listy wydatków, dostawców, wydatków cyklicznych i korekt zakupowych są responsywne, klikalne i dostępne w wyszukiwaniu globalnym; wszystkie powiązane strony mają kontekstowe opisy i puste stany. Dla szablonów cyklicznych link do edycji respektuje `canEdit()`. Regresja obu pakietów finansowych i dostępu: 16 testów / 1209 asercji; smoke test czterech nowych list przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. |
+| 2026-11-14 | Ukończono pakiet bankowości: rachunki bankowe, transakcje i płatności korzystają ze wspólnego wzorca list i kontekstu stron, są responsywne, klikalne oraz dostępne w wyszukiwaniu globalnym bez pustych tytułów rekordów. Regresja całej dotychczasowej fali finansowej i dostępu: 17 testów / 1218 asercji; smoke test trzech list przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. |
+| 2026-11-14 | Ukończono pakiet księgowości, VAT i HMRC: pięć zasobów tabelarycznych korzysta ze wspólnego wzorca responsywności, wyszukiwania i pustych stanów, a księga główna oraz HMRC mają kontekstowe opisy bez zmian w kontrolowanych workflow. Testy interfejsu pakietu: 2/18; smoke test siedmiu tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. |
+| 2026-11-14 | Zakończono pierwszą falę etapu 5. Osiem raportów finansowych otrzymało spójny kontekst operacyjny; smoke test raportów przy 1440/390 px potwierdził brak overflow i błędów JavaScript. Wspólna regresja pięciu pakietów finansowych oraz RBAC/tenant: 20 testów / 1252 asercje. Łącznie zweryfikowano 26 tras fali finansowej na desktopie i telefonie. |
+| 2026-11-14 | Zakończono drugą falę etapu 5: nawigacja publiczna, landing pages, CMS, artykuły, usługi, portfolio, komunikacja e-mail/SMS, monitoring pozycji i mapa strony korzystają ze spójnego kontekstu, responsywnych list, bezpiecznych linków i użytecznych pustych stanów. Mapa strony została przetłumaczona w PL/EN/PT, a monitoring pozycji zachował charakter tylko do odczytu. Smoke test 12 tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. Regresja interfejsu oraz RBAC/tenant: 18 testów / 1222 asercje; Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic poprawne. |
 

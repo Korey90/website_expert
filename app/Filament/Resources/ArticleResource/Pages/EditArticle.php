@@ -8,4 +8,9 @@ use Filament\Resources\Pages\EditRecord;
 class EditArticle extends EditRecord
 {
     protected static string $resource = ArticleResource::class;
+
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.marketing.articles.edit_subheading');
+    }
 }

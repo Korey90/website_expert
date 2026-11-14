@@ -11,6 +11,11 @@ class CreateBankAccount extends CreateRecord
 {
     protected static string $resource = BankAccountResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.banking.accounts.create_subheading');
+    }
+
     protected function handleRecordCreation(array $data): Model
     {
         return app(CreateBankAccountAction::class)->execute(currentBusiness(), auth()->user(), $data);

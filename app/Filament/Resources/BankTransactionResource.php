@@ -41,6 +41,17 @@ class BankTransactionResource extends BaseResource
         return __('finance.bank_reconciliation.plural');
     }
 
+    /** @return array<string> */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['reference', 'counterparty', 'bankAccount.name'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return $record->reference ?: $record->counterparty ?: '#'.$record->getKey();
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return $schema->schema([
@@ -105,10 +116,10 @@ class BankTransactionResource extends BaseResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('booking_date')->label(__('finance.bank_reconciliation.fields.booking_date'))->date()->sortable(),
-                Tables\Columns\TextColumn::make('bankAccount.name')->label(__('finance.bank_reconciliation.fields.account'))->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('counterparty')->label(__('finance.bank_reconciliation.fields.counterparty'))->searchable()->placeholder('—'),
-                Tables\Columns\TextColumn::make('reference')->label(__('finance.bank_reconciliation.fields.reference'))->searchable()->limit(40)->placeholder('—'),
+                Tables\Columns\TextColumn::make('booking_date')->label(__('finance.bank_reconciliation.fields.booking_date'))->date()->sortable()->weight('bold'),
+                Tables\Columns\TextColumn::make('bankAccount.name')->label(__('finance.bank_reconciliation.fields.account'))->searchable()->sortable()->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('counterparty')->label(__('finance.bank_reconciliation.fields.counterparty'))->searchable()->placeholder('—')->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('reference')->label(__('finance.bank_reconciliation.fields.reference'))->searchable()->limit(40)->placeholder('—')->visibleFrom('lg'),
                 Tables\Columns\TextColumn::make('amount')->label(__('finance.bank_reconciliation.fields.amount'))
                     ->money(fn (BankTransaction $record): string => $record->currency)
                     ->color(fn ($state): string => (float) $state >= 0 ? 'success' : 'danger')
@@ -133,6 +144,10 @@ class BankTransactionResource extends BaseResource
                     ]),
             ])
             ->actions([ViewAction::make()])
+            ->recordUrl(fn (BankTransaction $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateIcon('heroicon-o-arrows-right-left')
+            ->emptyStateHeading(__('admin.migration.banking.transactions.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.banking.transactions.empty_description'))
             ->defaultSort('booking_date', 'desc');
     }
 

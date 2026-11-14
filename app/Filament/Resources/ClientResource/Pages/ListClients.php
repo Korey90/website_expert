@@ -10,6 +10,11 @@ class ListClients extends ListRecords
 {
     protected static string $resource = ClientResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.pilot.clients.subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [CreateAction::make()];

@@ -19,6 +19,11 @@ class ViewCreditNote extends ViewRecord
 {
     protected static string $resource = CreditNoteResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.sales_documents.credit_notes.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         /** @var CreditNote $creditNote */

@@ -10,6 +10,11 @@ class ListSuppliers extends ListRecords
 {
     protected static string $resource = SupplierResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.procurement.suppliers.list_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [CreateAction::make()];

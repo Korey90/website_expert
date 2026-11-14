@@ -14,6 +14,11 @@ class EditExpense extends EditRecord
 {
     protected static string $resource = ExpenseResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.procurement.expenses.edit_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [DeleteAction::make(), RestoreAction::make()];

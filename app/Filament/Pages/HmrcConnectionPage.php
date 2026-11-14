@@ -64,6 +64,11 @@ class HmrcConnectionPage extends BasePage
         return __('finance.hmrc_connection.title');
     }
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.accounting.hmrc.subheading');
+    }
+
     /** @return array<string, mixed> */
     public function getConnectionSummary(): array
     {

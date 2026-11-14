@@ -11,6 +11,11 @@ class EditAccountingPeriod extends EditRecord
 {
     protected static string $resource = AccountingPeriodResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.accounting.periods.edit_subheading');
+    }
+
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         return app(UpdateAccountingPeriodAction::class)->execute($record, auth()->user(), $data);

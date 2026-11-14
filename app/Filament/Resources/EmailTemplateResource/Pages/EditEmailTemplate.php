@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\EmailTemplateResource\Pages;
 
 use App\Filament\Resources\EmailTemplateResource;
-use App\Models\EmailTemplate;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -11,6 +10,11 @@ use Filament\Resources\Pages\EditRecord;
 class EditEmailTemplate extends EditRecord
 {
     protected static string $resource = EmailTemplateResource::class;
+
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.marketing.email_templates.edit_subheading');
+    }
 
     protected function getHeaderActions(): array
     {

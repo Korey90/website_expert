@@ -7,10 +7,8 @@ use App\Filament\Widgets\LeadsBySourceWidget;
 use App\Filament\Widgets\OverdueInvoicesWidget;
 use App\Filament\Widgets\ProjectDeadlinesWidget;
 use App\Filament\Widgets\ProjectStatusWidget;
-use App\Filament\Widgets\QuickActionsWidget;
 use App\Filament\Widgets\RecentLeadsWidget;
 use App\Filament\Widgets\RevenueChartWidget;
-use App\Filament\Widgets\SaasMetricsWidget;
 use App\Filament\Widgets\StaleLeadsWidget;
 use App\Filament\Widgets\StatsOverviewWidget;
 use App\Support\PermissionHelper;
@@ -37,12 +35,24 @@ class AdminDashboard extends BaseDashboard
         ];
     }
 
+    public function getTitle(): string
+    {
+        return __('admin.dashboard.title');
+    }
+
+    public function getSubheading(): ?string
+    {
+        $businessName = currentBusiness()?->name;
+
+        return $businessName
+            ? __('admin.dashboard.subheading', ['business' => $businessName])
+            : __('admin.dashboard.subheading_fallback');
+    }
+
     public function getWidgets(): array
     {
         return [
-            QuickActionsWidget::class,
             StatsOverviewWidget::class,
-            SaasMetricsWidget::class,
             RevenueChartWidget::class,
             LeadsBySourceWidget::class,
             ProjectStatusWidget::class,

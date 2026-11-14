@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>admin-ui-redesign-plan.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="plan-przebudowy-interfejsu-panelu-administracyjnego">Plan przebudowy interfejsu panelu administracyjnego</h1>
+<p><strong>Status:</strong> planowanie<br>
+<strong>Zakres:</strong> wszystkie widoki pod <code>/admin/*</code><br>
+<strong>Data utworzenia:</strong> 2026-11-13<br>
+<strong>Ostatnia aktualizacja:</strong> 2026-11-13<br>
+<strong>Właściciel dokumentu:</strong> zespół projektu Website Expert<br>
+<strong>Źródło prawdy:</strong> ten dokument</p>
+<h2 id="cel">Cel</h2>
+<p>Przebudować interfejs panelu administracyjnego tak, aby był intuicyjny, spójny, responsywny i dostosowany do roli użytkownika, bez naruszania istniejącej logiki biznesowej, uprawnień ani izolacji tenantów.</p>
+<p>Dokument obejmuje drogę od architektury informacji i prototypów, przez wdrożenie wspólnych wzorców UI, po migrację wszystkich modułów i kontrolowane wdrożenie produkcyjne.</p>
+<h2 id="zasady-utrzymania-dokumentu">Zasady utrzymania dokumentu</h2>
+<ul>
+<li>Dokument należy aktualizować po zakończeniu każdego etapu lub po zmianie zakresu.</li>
+<li>Każda istotna decyzja projektowa trafia do sekcji „Decyzje”.</li>
+<li>Postęp jest oznaczany w checklistach etapów.</li>
+<li>Nowo odkryte problemy trafiają do backlogu, bez rozszerzania aktywnego etapu bez uzgodnienia.</li>
+<li>Przy każdej aktualizacji należy zmienić pole „Ostatnia aktualizacja” i dopisać wpis do dziennika zmian.</li>
+<li>Dokument opisuje stan faktyczny; ukończenia nie oznaczamy bez weryfikacji i testów.</li>
+</ul>
+<h2 id="stan-wyjściowy">Stan wyjściowy</h2>
+<p>Audyt wykonano na lokalnym panelu <code>http://127.0.0.1:8000/admin/*</code>, w kodzie aplikacji oraz na reprezentatywnych widokach desktopowych i mobilnych.</p>
+<p>Aktualny zakres panelu:</p>
+<ul>
+<li>56 zasobów Filament;</li>
+<li>24 strony Filament;</li>
+<li>17 widgetów;</li>
+<li>227 tras <code>/admin/*</code>;</li>
+<li>71 widocznych linków w nawigacji pełnego administratora;</li>
+<li>11 nazwanych grup menu oraz Dashboard i My Account poza grupami.</li>
+</ul>
+<p>Główne pliki sterujące interfejsem:</p>
+<ul>
+<li><code>app/Providers/Filament/AdminPanelProvider.php</code>;</li>
+<li><code>resources/css/filament/admin/theme.css</code>;</li>
+<li><code>resources/views/filament/components/business-switcher.blade.php</code>;</li>
+<li><code>resources/views/filament/components/pinned-notes.blade.php</code>;</li>
+<li><code>app/Filament/Pages/AdminDashboard.php</code>;</li>
+<li><code>app/Filament/Resources/*</code>;</li>
+<li><code>app/Filament/Pages/*</code>;</li>
+<li><code>app/Filament/Widgets/*</code>.</li>
+</ul>
+<h2 id="wyniki-audytu">Wyniki audytu</h2>
+<h3 id="menu-boczne">Menu boczne</h3>
+<ul>
+<li>Grupa Finance zawiera 19 pozycji na jednym poziomie.</li>
+<li>Grupy SEO i System są automatycznie wstawiane poza kolejnością zdefiniowaną w providerze panelu.</li>
+<li>Szablony ofert i briefingów są oddzielone od procesów, w których są używane.</li>
+<li>Notifications znajduje się w raportach.</li>
+<li>Calculator, Sitemap, Log Viewer i Job Manager są połączone w jednej grupie Settings mimo różnych zastosowań.</li>
+<li>Po wejściu na element położony nisko sidebar przewija się automatycznie i ukrywa główne punkty orientacyjne.</li>
+<li>Na telefonie menu działa jako drawer, ale nadal wymaga bardzo długiego przewijania.</li>
+</ul>
+<h3 id="górna-belka">Górna belka</h3>
+<ul>
+<li>Brakuje globalnego wyszukiwania stron i rekordów.</li>
+<li>Aktywny workspace jest widoczny tylko wtedy, gdy użytkownik ma dostęp do więcej niż jednej firmy.</li>
+<li>Powiadomienia i przypięte notatki są reprezentowane podobnymi ikonami bez wystarczającego opisu.</li>
+<li>Przycisk przypiętych notatek nie ma pełnego opisu dla technologii asystujących.</li>
+<li>Akcja odpięcia notatki jest dostępna wizualnie wyłącznie po najechaniu kursorem.</li>
+<li>Część tekstów jest wpisana na stałe po angielsku.</li>
+</ul>
+<h3 id="dashboard">Dashboard</h3>
+<ul>
+<li>Dashboard łączy operacje CRM, projekty, finanse i metryki SaaS.</li>
+<li>Zawiera 10 widgetów, przez co jest długi, zwłaszcza na telefonie.</li>
+<li>Puste wykresy i tabele zajmują dużo miejsca.</li>
+<li>Podczas ładowania niektórych widgetów pojawiają się duże puste karty.</li>
+<li>Quick Actions są użyteczne i powinny pozostać elementem docelowego rozwiązania.</li>
+</ul>
+<h3 id="listy-formularze-i-widoki-procesów">Listy, formularze i widoki procesów</h3>
+<ul>
+<li>Bazowe komponenty Filament dają spójny fundament, ale nie istnieje wystarczająca warstwa wspólnych reguł projektu.</li>
+<li>Lista leadów ma 10 kolumn, a przewijanie poziome na telefonie nie jest jasno komunikowane.</li>
+<li>Pipeline ma sześć kolumn i część zawartości jest ukryta również na desktopie.</li>
+<li>Formularz tworzenia leada jest responsywny, ale zwinięta sekcja Calculator Data tworzy pustą kolumnę na desktopie.</li>
+<li>Nazewnictwo stron i akcji jest niespójne, np. <code>New lead</code>, <code>Create Lead</code>, <code>Navigation Menu</code> i <code>Navbar Settings Page</code>.</li>
+<li>Część raportów ma puste stany bez wyjaśnienia następnego kroku lub odpowiedniego CTA.</li>
+<li>Niestandardowe widoki projektów używają stylów inline i kolorów projektowanych głównie dla ciemnego motywu.</li>
+<li>Teksty UI nie są konsekwentnie obsługiwane przez tłumaczenia PL, EN i PT.</li>
+</ul>
+<h2 id="założenia-projektowe">Założenia projektowe</h2>
+<ul>
+<li>Codzienne funkcje powinny być oddzielone od konfiguracji i narzędzi operatorskich.</li>
+<li>Widoczność menu pozostaje zależna od uprawnień.</li>
+<li>Najczęstsze zadania powinny być osiągalne w maksymalnie dwóch krokach nawigacyjnych.</li>
+<li>Jedna grupa menu nie powinna zawierać więcej niż 6–7 bezpośrednich pozycji.</li>
+<li>Desktop i mobile korzystają z tej samej architektury informacji.</li>
+<li>Wszystkie nowe lub zmodyfikowane teksty wymagają wersji PL, EN i PT.</li>
+<li>Warstwa UI nie może osłabić istniejących zabezpieczeń RBAC i tenant isolation.</li>
+<li>Działających modułów nie przepisujemy od zera; wdrożenie jest prowadzone metodą delta-first.</li>
+</ul>
+<h2 id="proponowana-architektura-informacji">Proponowana architektura informacji</h2>
+<p>Poniższy układ jest hipotezą do zweryfikowania w prototypie.</p>
+<h3 id="start">Start</h3>
+<ul>
+<li>Dashboard;</li>
+<li>Moje konto.</li>
+</ul>
+<h3 id="sprzedaż">Sprzedaż</h3>
+<ul>
+<li>Klienci;</li>
+<li>Leady;</li>
+<li>Pipeline;</li>
+<li>Briefingi;</li>
+<li>Oferty;</li>
+<li>szablony używane w procesie sprzedaży.</li>
+</ul>
+<h3 id="realizacja">Realizacja</h3>
+<ul>
+<li>Projekty;</li>
+<li>zadania i fazy;</li>
+<li>szablony projektów;</li>
+<li>kalendarz.</li>
+</ul>
+<h3 id="finanse">Finanse</h3>
+<ul>
+<li>sprzedaż: faktury, wyceny, kontrakty i płatności;</li>
+<li>zakupy: dostawcy, wydatki, korekty i wydatki cykliczne;</li>
+<li>bankowość: konta i uzgadnianie transakcji;</li>
+<li>księgowość i VAT: plan kont, okresy, dzienniki, VAT oraz HMRC.</li>
+</ul>
+<h3 id="raporty">Raporty</h3>
+<ul>
+<li>raporty operacyjne;</li>
+<li>raporty finansowe;</li>
+<li>raporty podatkowe.</li>
+</ul>
+<h3 id="strona-i-marketing">Strona i marketing</h3>
+<ul>
+<li>nawigacja strony;</li>
+<li>landing pages i CMS;</li>
+<li>usługi, portfolio i sekcje strony;</li>
+<li>komunikacja e-mail i SMS;</li>
+<li>SEO.</li>
+</ul>
+<h3 id="automatyzacje">Automatyzacje</h3>
+<ul>
+<li>reguły;</li>
+<li>triggery;</li>
+<li>logi.</li>
+</ul>
+<h3 id="administracja">Administracja</h3>
+<ul>
+<li>użytkownicy, role i sesje;</li>
+<li>integracje oraz ustawienia płatności;</li>
+<li>rozliczenia SaaS;</li>
+<li>bezpieczeństwo;</li>
+<li>narzędzia systemowe.</li>
+</ul>
+<p>Sekcja Administracja powinna być domyślnie zwinięta i dostępna wyłącznie dla właściwych ról.</p>
+<h2 id="plan-realizacji">Plan realizacji</h2>
+<h3 id="etap-1--architektura-informacji">Etap 1 — architektura informacji</h3>
+<p><strong>Szacunek:</strong> 1–2 dni<br>
+<strong>Status:</strong> do wykonania</p>
+<ul>
+<li><input type="checkbox" id="checkbox0"><label for="checkbox0">Przypisać wszystkie elementy menu do procesów użytkownika.</label></li>
+<li><input type="checkbox" id="checkbox1"><label for="checkbox1">Rozdzielić funkcje codzienne, konfiguracyjne i operatorskie.</label></li>
+<li><input type="checkbox" id="checkbox2"><label for="checkbox2">Przygotować warianty menu dla administratora, managera i księgowego.</label></li>
+<li><input type="checkbox" id="checkbox3"><label for="checkbox3">Ujednolicić nazwy stron, zasobów i akcji.</label></li>
+<li><input type="checkbox" id="checkbox4"><label for="checkbox4">Przygotować klucze tłumaczeń dla wspólnej nawigacji.</label></li>
+<li><input type="checkbox" id="checkbox5"><label for="checkbox5">Zatwierdzić docelową mapę panelu przed pracą wizualną.</label></li>
+</ul>
+<p><strong>Rezultat:</strong> zatwierdzona architektura informacji i macierz widoczności według ról.</p>
+<h3 id="etap-2--prototypy-uxui">Etap 2 — prototypy UX/UI</h3>
+<p><strong>Szacunek:</strong> 3–4 dni<br>
+<strong>Status:</strong> do wykonania</p>
+<ul>
+<li><input type="checkbox" id="checkbox6"><label for="checkbox6">Przygotować prototyp niskiej wierności menu i topbara na desktopie.</label></li>
+<li><input type="checkbox" id="checkbox7"><label for="checkbox7">Przygotować prototyp mobilnego drawera i topbara.</label></li>
+<li><input type="checkbox" id="checkbox8"><label for="checkbox8">Zaprojektować dashboard zależny od roli.</label></li>
+<li><input type="checkbox" id="checkbox9"><label for="checkbox9">Zaprojektować wzorzec listy rekordów.</label></li>
+<li><input type="checkbox" id="checkbox10"><label for="checkbox10">Zaprojektować wzorzec formularza tworzenia i edycji.</label></li>
+<li><input type="checkbox" id="checkbox11"><label for="checkbox11">Zaprojektować widok szczegółowy rekordu.</label></li>
+<li><input type="checkbox" id="checkbox12"><label for="checkbox12">Zaprojektować pipeline i świadome przewijanie poziome.</label></li>
+<li><input type="checkbox" id="checkbox13"><label for="checkbox13">Zaprojektować raporty oraz stany puste, ładowania, błędów i sukcesu.</label></li>
+<li><input type="checkbox" id="checkbox14"><label for="checkbox14">Przygotować wersję wizualną po zatwierdzeniu układu.</label></li>
+<li><input type="checkbox" id="checkbox15"><label for="checkbox15">Zatwierdzić prototyp przed wdrożeniem fundamentu.</label></li>
+</ul>
+<p><strong>Rezultat:</strong> zaakceptowany prototyp desktopowy i mobilny dla wszystkich głównych archetypów stron.</p>
+<h3 id="etap-3--fundament-techniczny">Etap 3 — fundament techniczny</h3>
+<p><strong>Szacunek:</strong> 3–5 dni<br>
+<strong>Status:</strong> do wykonania</p>
+<ul>
+<li><input type="checkbox" id="checkbox16"><label for="checkbox16">Zdefiniować tokeny kolorów, odstępów, promieni i typografii w motywie Filament.</label></li>
+<li><input type="checkbox" id="checkbox17"><label for="checkbox17">Wdrożyć docelowe grupowanie i kolejność menu.</label></li>
+<li><input type="checkbox" id="checkbox18"><label for="checkbox18">Dodać widoczny kontekst workspace’u.</label></li>
+<li><input type="checkbox" id="checkbox19"><label for="checkbox19">Zaprojektować globalne wyszukiwanie i szybkie akcje.</label></li>
+<li><input type="checkbox" id="checkbox20"><label for="checkbox20">Ujednolicić powiadomienia i przypięte notatki.</label></li>
+<li><input type="checkbox" id="checkbox21"><label for="checkbox21">Utworzyć wspólne reguły dla nagłówków, toolbarów, formularzy, tabel i pustych stanów.</label></li>
+<li><input type="checkbox" id="checkbox22"><label for="checkbox22">Usunąć style inline z komponentów objętych fundamentem.</label></li>
+<li><input type="checkbox" id="checkbox23"><label for="checkbox23">Wdrożyć tłumaczenia PL, EN i PT.</label></li>
+<li><input type="checkbox" id="checkbox24"><label for="checkbox24">Dodać testy wspólnych elementów i nawigacji według ról.</label></li>
+</ul>
+<p><strong>Rezultat:</strong> wspólna powłoka panelu i zestaw stabilnych wzorców UI.</p>
+<h3 id="etap-4--pilotaż-crm-i-projektów">Etap 4 — pilotaż CRM i projektów</h3>
+<p><strong>Szacunek:</strong> 5–7 dni<br>
+<strong>Status:</strong> do wykonania</p>
+<ul>
+<li><input type="checkbox" id="checkbox25"><label for="checkbox25">Dashboard.</label></li>
+<li><input type="checkbox" id="checkbox26"><label for="checkbox26">Klienci.</label></li>
+<li><input type="checkbox" id="checkbox27"><label for="checkbox27">Leady.</label></li>
+<li><input type="checkbox" id="checkbox28"><label for="checkbox28">Pipeline.</label></li>
+<li><input type="checkbox" id="checkbox29"><label for="checkbox29">Projekty.</label></li>
+<li><input type="checkbox" id="checkbox30"><label for="checkbox30">Widoki desktopowe i mobilne.</label></li>
+<li><input type="checkbox" id="checkbox31"><label for="checkbox31">Test scenariuszy użytkownika po wdrożeniu pilotażu.</label></li>
+<li><input type="checkbox" id="checkbox32"><label for="checkbox32">Korekta wzorców przed migracją pozostałych modułów.</label></li>
+</ul>
+<p><strong>Rezultat:</strong> zweryfikowany wzorzec możliwy do bezpiecznego powielenia.</p>
+<h3 id="etap-5--migracja-pozostałych-modułów">Etap 5 — migracja pozostałych modułów</h3>
+<p><strong>Szacunek:</strong> 10–15 dni<br>
+<strong>Status:</strong> do wykonania</p>
+<h4 id="fala-1--finanse-i-raporty">Fala 1 — finanse i raporty</h4>
+<ul>
+<li><input type="checkbox" id="checkbox33"><label for="checkbox33">Dokumenty sprzedażowe.</label></li>
+<li><input type="checkbox" id="checkbox34"><label for="checkbox34">Zakupy i wydatki.</label></li>
+<li><input type="checkbox" id="checkbox35"><label for="checkbox35">Bankowość.</label></li>
+<li><input type="checkbox" id="checkbox36"><label for="checkbox36">Księgowość, VAT i HMRC.</label></li>
+<li><input type="checkbox" id="checkbox37"><label for="checkbox37">Raporty finansowe.</label></li>
+</ul>
+<h4 id="fala-2--marketing-cms-i-seo">Fala 2 — marketing, CMS i SEO</h4>
+<ul>
+<li><input type="checkbox" id="checkbox38"><label for="checkbox38">Nawigacja strony.</label></li>
+<li><input type="checkbox" id="checkbox39"><label for="checkbox39">Landing pages i CMS.</label></li>
+<li><input type="checkbox" id="checkbox40"><label for="checkbox40">Treści, usługi i portfolio.</label></li>
+<li><input type="checkbox" id="checkbox41"><label for="checkbox41">E-mail i SMS.</label></li>
+<li><input type="checkbox" id="checkbox42"><label for="checkbox42">SEO.</label></li>
+</ul>
+<h4 id="fala-3--automatyzacje">Fala 3 — automatyzacje</h4>
+<ul>
+<li><input type="checkbox" id="checkbox43"><label for="checkbox43">Reguły.</label></li>
+<li><input type="checkbox" id="checkbox44"><label for="checkbox44">Triggery.</label></li>
+<li><input type="checkbox" id="checkbox45"><label for="checkbox45">Logi.</label></li>
+</ul>
+<h4 id="fala-4--administracja-i-narzędzia-systemowe">Fala 4 — administracja i narzędzia systemowe</h4>
+<ul>
+<li><input type="checkbox" id="checkbox46"><label for="checkbox46">Użytkownicy, role i sesje.</label></li>
+<li><input type="checkbox" id="checkbox47"><label for="checkbox47">SaaS Billing.</label></li>
+<li><input type="checkbox" id="checkbox48"><label for="checkbox48">Integracje i ustawienia.</label></li>
+<li><input type="checkbox" id="checkbox49"><label for="checkbox49">Bezpieczeństwo.</label></li>
+<li><input type="checkbox" id="checkbox50"><label for="checkbox50">Log Viewer, Job Manager i pozostałe narzędzia operatorskie.</label></li>
+</ul>
+<p><strong>Rezultat:</strong> wszystkie strony <code>/admin/*</code> korzystają ze wspólnej architektury i standardów interfejsu.</p>
+<h3 id="etap-6--walidacja-i-wdrożenie">Etap 6 — walidacja i wdrożenie</h3>
+<p><strong>Szacunek:</strong> 3–5 dni<br>
+<strong>Status:</strong> do wykonania</p>
+<ul>
+<li><input type="checkbox" id="checkbox51"><label for="checkbox51">Sprawdzić szerokości 390, 768, 1280 i 1440 px.</label></li>
+<li><input type="checkbox" id="checkbox52"><label for="checkbox52">Sprawdzić jasny i ciemny motyw.</label></li>
+<li><input type="checkbox" id="checkbox53"><label for="checkbox53">Sprawdzić obsługę klawiatury, focus, kontrast i ARIA.</label></li>
+<li><input type="checkbox" id="checkbox54"><label for="checkbox54">Zweryfikować wszystkie teksty PL, EN i PT.</label></li>
+<li><input type="checkbox" id="checkbox55"><label for="checkbox55">Uruchomić testy ról, uprawnień i izolacji tenantów.</label></li>
+<li><input type="checkbox" id="checkbox56"><label for="checkbox56">Uruchomić testy Filament/PHPUnit oraz produkcyjny build.</label></li>
+<li><input type="checkbox" id="checkbox57"><label for="checkbox57">Przeprowadzić smoke test najważniejszych procesów.</label></li>
+<li><input type="checkbox" id="checkbox58"><label for="checkbox58">Wdrożyć etapowo z możliwością szybkiego wycofania warstwy UI.</label></li>
+<li><input type="checkbox" id="checkbox59"><label for="checkbox59">Zebrać uwagi po wdrożeniu i zamknąć backlog krytyczny.</label></li>
+</ul>
+<p><strong>Rezultat:</strong> zweryfikowany i wdrożony panel bez regresji funkcjonalnych oraz bezpieczeństwa.</p>
+<h2 id="kryteria-odbioru">Kryteria odbioru</h2>
+<ul>
+<li>Maksymalnie 7 głównych grup menu.</li>
+<li>Maksymalnie 7 bezpośrednich pozycji w rozwiniętej grupie.</li>
+<li>Najczęstsze zadania osiągalne w najwyżej dwóch krokach nawigacyjnych.</li>
+<li>Brak niekontrolowanego obcinania lub przepełnienia strony przy szerokości 390 px.</li>
+<li>Lokalne przewijanie tabel i pipeline’u ma widoczny sygnał oraz nie blokuje obsługi klawiaturą.</li>
+<li>Brak akcji dostępnych wyłącznie przez hover.</li>
+<li>Aktywny workspace jest zawsze czytelny.</li>
+<li>Wszystkie nowe i zmodyfikowane teksty mają tłumaczenia PL, EN i PT.</li>
+<li>Stany puste, ładowania, błędów i sukcesu są spójne i wskazują następny krok.</li>
+<li>Komponenty niestandardowe działają w jasnym i ciemnym motywie.</li>
+<li>Istniejące testy uprawnień i tenant isolation przechodzą bez regresji.</li>
+</ul>
+<h2 id="ryzyka">Ryzyka</h2>
+<ul>
+<li>Duży zakres może prowadzić do niespójności, jeśli moduły będą migrowane równolegle bez zatwierdzonego fundamentu.</li>
+<li>Zmiana nawigacji może utrudnić pracę dotychczasowym użytkownikom; potrzebne jest wdrożenie etapowe i czytelne nazewnictwo.</li>
+<li>Moduły finansowe i HMRC wymagają szczególnej ostrożności oraz zachowania obecnych bramek bezpieczeństwa.</li>
+<li>Niestandardowe widoki Blade mogą wymagać większego nakładu niż standardowe Resources Filament.</li>
+<li>Migracja tekstów do tłumaczeń może ujawnić istniejące różnice znaczeniowe pomiędzy modułami.</li>
+</ul>
+<h2 id="decyzje">Decyzje</h2>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Decyzja</th>
+<th>Uzasadnienie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-11-13</td>
+<td>Najpierw architektura informacji i prototyp, później wdrożenie</td>
+<td>Głównym problemem jest struktura panelu, a nie tylko jego warstwa wizualna.</td>
+</tr>
+<tr>
+<td>2026-11-13</td>
+<td>Wdrożenie modułami, zaczynając od CRM i projektów</td>
+<td>Pozwala zweryfikować wzorce na najczęściej używanych procesach przed migracją całego panelu.</td>
+</tr>
+<tr>
+<td>2026-11-13</td>
+<td>Zachować Filament jako fundament</td>
+<td>Obecna baza komponentów jest stabilna; przebudowa od zera zwiększyłaby ryzyko i koszt.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="backlog-odkryć">Backlog odkryć</h2>
+<ul>
+<li><input type="checkbox" id="checkbox60"><label for="checkbox60">Ustalić, czy globalne wyszukiwanie ma obejmować tylko strony, czy również rekordy domenowe.</label></li>
+<li><input type="checkbox" id="checkbox61"><label for="checkbox61">Ustalić priorytet domyślnego dashboardu dla każdej roli.</label></li>
+<li><input type="checkbox" id="checkbox62"><label for="checkbox62">Zdecydować, czy szablony pozostają przy procesach, czy trafiają do wspólnej sekcji konfiguracji.</label></li>
+<li><input type="checkbox" id="checkbox63"><label for="checkbox63">Zweryfikować potrzebę oddzielnego trybu operatorskiego dla SaaS, bezpieczeństwa i narzędzi systemowych.</label></li>
+<li><input type="checkbox" id="checkbox64"><label for="checkbox64">Ustalić sposób komunikowania poziomego przewijania pipeline’u i szerokich tabel.</label></li>
+</ul>
+<h2 id="dziennik-zmian">Dziennik zmian</h2>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Zmiana</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-11-13</td>
+<td>Utworzono dokument na podstawie audytu menu, topbara, dashboardu, list, formularzy, pipeline’u, raportów i widoków mobilnych.</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>

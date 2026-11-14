@@ -2,15 +2,19 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\AccountProfilePage;
 use App\Filament\Pages\AdminDashboard;
+use App\Filament\Support\AdminGlobalSearchProvider;
+use App\Filament\Support\AdminNavigation;
 use App\Models\LeadNote;
 use App\Support\PermissionHelper;
+use Filament\Actions\Action;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationBuilder;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -47,41 +51,48 @@ class AdminPanelProvider extends PanelProvider
                 'gray' => Color::Zinc,
             ])
             ->sidebarCollapsibleOnDesktop()
-            ->renderHook(
-                PanelsRenderHook::TOPBAR_END,
-                fn (): View => view('filament.components.business-switcher'),
+            ->sidebarWidth('17rem')
+            ->globalSearch(AdminGlobalSearchProvider::class)
+            ->globalSearchDebounce('300ms')
+            ->globalSearchKeyBindings(['ctrl+k', 'command+k'])
+            ->globalSearchFieldKeyBindingSuffix()
+            ->navigation(
+                fn (NavigationBuilder $builder): NavigationBuilder => AdminNavigation::build($builder),
             )
+            ->userMenuItems([
+                'profile' => fn (): Action => Action::make('profile')
+                    ->label(__('admin.account.profile'))
+                    ->icon('heroicon-o-user-circle')
+                    ->url(AccountProfilePage::getUrl())
+                    ->visible(AccountProfilePage::canAccess()),
+            ])
             ->renderHook(
-                PanelsRenderHook::TOPBAR_END,
+                PanelsRenderHook::GLOBAL_SEARCH_AFTER,
                 function (): View|HtmlString {
                     $user = auth()->user();
                     $business = currentBusiness();
 
-                    if (! $user || ! $business || ! PermissionHelper::allows($user, 'view_leads')) {
+                    if (! $user || ! $business) {
                         return new HtmlString('');
                     }
 
-                    $pinnedNotes = LeadNote::where('is_pinned', true)
-                        ->whereHas('lead', fn ($query) => $query->where('business_id', $business->id))
-                        ->with('lead')
-                        ->orderByDesc('created_at')
-                        ->limit(15)
-                        ->get();
+                    $pinnedNotes = collect();
 
-                    return view('filament.components.pinned-notes', compact('pinnedNotes'));
+                    if (PermissionHelper::allows($user, 'view_leads')) {
+                        $pinnedNotes = LeadNote::where('is_pinned', true)
+                            ->whereHas('lead', fn ($query) => $query->where('business_id', $business->id))
+                            ->with(['lead', 'user'])
+                            ->orderByDesc('created_at')
+                            ->limit(15)
+                            ->get();
+                    }
+
+                    return view('filament.components.topbar-actions', [
+                        'canViewPinnedNotes' => PermissionHelper::allows($user, 'view_leads'),
+                        'pinnedNotes' => $pinnedNotes,
+                    ]);
                 },
             )
-            ->navigationGroups([
-                NavigationGroup::make('CRM'),
-                NavigationGroup::make('Sales'),
-                NavigationGroup::make('Projects'),
-                NavigationGroup::make('Finance'),
-                NavigationGroup::make('Marketing'),
-                NavigationGroup::make('Automation'),
-                NavigationGroup::make('Reports')->collapsed(),
-                NavigationGroup::make('SaaS Billing')->collapsed(),
-                NavigationGroup::make('Settings')->collapsed(),
-            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->databaseNotifications()

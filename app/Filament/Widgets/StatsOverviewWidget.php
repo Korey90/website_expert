@@ -32,16 +32,18 @@ class StatsOverviewWidget extends BaseWidget
 
         if (PermissionHelper::allows($user, 'view_projects')) {
             $activeProjects = Project::where('status', 'active')->count();
-            $stats[] = Stat::make('Active Projects', $activeProjects)
-                ->description('Currently in progress')
+            $stats[] = Stat::make(__('admin.dashboard.stats.active_projects.label'), $activeProjects)
+                ->description(__('admin.dashboard.stats.active_projects.description'))
                 ->icon('heroicon-o-briefcase')
                 ->color('primary');
         }
 
         if (PermissionHelper::allows($user, 'view_leads')) {
             $newLeads = Lead::whereNull('deleted_at')->whereMonth('created_at', now()->month)->count();
-            $stats[] = Stat::make('New Leads This Month', $newLeads)
-                ->description('Leads created in '.now()->format('F'))
+            $stats[] = Stat::make(__('admin.dashboard.stats.new_leads.label'), $newLeads)
+                ->description(__('admin.dashboard.stats.new_leads.description', [
+                    'month' => now()->translatedFormat('F'),
+                ]))
                 ->icon('heroicon-o-funnel')
                 ->color('info');
         }
@@ -54,13 +56,15 @@ class StatsOverviewWidget extends BaseWidget
                 ->whereYear('updated_at', now()->year)
                 ->get(['currency', 'total']));
 
-            $stats[] = Stat::make('Overdue Invoices', $overdueInvoices)
-                ->description('Require immediate attention')
+            $stats[] = Stat::make(__('admin.dashboard.stats.overdue_invoices.label'), $overdueInvoices)
+                ->description(__('admin.dashboard.stats.overdue_invoices.description'))
                 ->icon('heroicon-o-exclamation-triangle')
                 ->color($overdueInvoices > 0 ? 'danger' : 'success');
 
-            $stats[] = Stat::make('Revenue This Month', $money->formatGrouped($monthRevenue))
-                ->description('Paid invoices in '.now()->format('F').', grouped per currency')
+            $stats[] = Stat::make(__('admin.dashboard.stats.monthly_revenue.label'), $money->formatGrouped($monthRevenue))
+                ->description(__('admin.dashboard.stats.monthly_revenue.description', [
+                    'month' => now()->translatedFormat('F'),
+                ]))
                 ->icon('heroicon-o-banknotes')
                 ->color('success');
         }

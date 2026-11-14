@@ -10,6 +10,11 @@ class ListEmailTemplates extends ListRecords
 {
     protected static string $resource = EmailTemplateResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.marketing.email_templates.list_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [CreateAction::make()];

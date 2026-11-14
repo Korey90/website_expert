@@ -10,6 +10,11 @@ class ListContracts extends ListRecords
 {
     protected static string $resource = ContractResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.sales_documents.contracts.list_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

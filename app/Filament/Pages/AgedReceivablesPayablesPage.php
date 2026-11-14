@@ -29,6 +29,11 @@ class AgedReceivablesPayablesPage extends BasePage
         return __('finance.aged_receivables_payables.title');
     }
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.reports.aged_balances');
+    }
+
     public function mount(): void
     {
         $this->asOf = today()->toDateString();

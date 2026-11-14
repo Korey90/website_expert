@@ -11,6 +11,11 @@ class ViewSiteSection extends ViewRecord
 {
     protected static string $resource = SiteSectionResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.marketing.sections.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

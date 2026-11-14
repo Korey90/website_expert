@@ -11,6 +11,11 @@ class EditBankAccount extends EditRecord
 {
     protected static string $resource = BankAccountResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.banking.accounts.edit_subheading');
+    }
+
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $data['account_number'] = null;

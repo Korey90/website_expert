@@ -10,9 +10,15 @@ class CreatePage extends CreateRecord
 {
     protected static string $resource = PageResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.marketing.pages.create_subheading');
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['created_by'] = Auth::id();
+
         return $data;
     }
 }

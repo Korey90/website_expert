@@ -18,7 +18,12 @@ class ProjectDeadlinesWidget extends BaseWidget
 {
     public static function canView(): bool
     {
-        return PermissionHelper::allows(auth()->user(), 'view_projects');
+        return PermissionHelper::allows(auth()->user(), 'view_projects')
+            && Project::withoutTrashed()
+                ->whereIn('status', ['active', 'on_hold'])
+                ->whereNotNull('deadline')
+                ->where('deadline', '<=', now()->addDays(14))
+                ->exists();
     }
 
     protected static ?int $sort = 9;
@@ -27,7 +32,10 @@ class ProjectDeadlinesWidget extends BaseWidget
 
     protected static bool $isLazy = true;
 
-    protected static ?string $heading = 'Upcoming & Overdue Deadlines';
+    public function getTableHeading(): string
+    {
+        return __('admin.dashboard.widgets.project_deadlines.heading');
+    }
 
     public function table(Table $table): Table
     {
