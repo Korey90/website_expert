@@ -23,6 +23,8 @@ class PlanResource extends BaseResource
 {
     protected static ?string $model = Plan::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-tag';
 
     protected static \UnitEnum|string|null $navigationGroup = 'SaaS Billing';
@@ -32,6 +34,11 @@ class PlanResource extends BaseResource
     protected static ?string $label = 'Plan';
 
     protected static ?string $pluralLabel = 'Plans';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'slug'];
+    }
 
     // -------------------------------------------------------------------------
     // Form (Create / Edit)
@@ -289,18 +296,21 @@ class PlanResource extends BaseResource
             ->columns([
                 Tables\Columns\TextColumn::make('sort_order')
                     ->label('#')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('xl'),
 
                 Tables\Columns\TextColumn::make('name')
                     ->label('Plan')
                     ->description(fn ($record) => $record->description)
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
 
                 Tables\Columns\TextColumn::make('slug')
                     ->label('Slug')
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')
+                    ->visibleFrom('md'),
 
                 Tables\Columns\TextColumn::make('monthly_price')
                     ->label('Monthly')
@@ -309,27 +319,32 @@ class PlanResource extends BaseResource
                 Tables\Columns\TextColumn::make('max_landing_pages')
                     ->label('Max LPs')
                     ->formatStateUsing(fn ($state) => $state === null ? '∞' : $state)
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->visibleFrom('lg'),
 
                 Tables\Columns\TextColumn::make('max_ai_per_month')
                     ->label('Max AI/mo')
                     ->formatStateUsing(fn ($state) => $state === null ? '∞' : $state)
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->visibleFrom('xl'),
 
                 Tables\Columns\IconColumn::make('multi_user')
                     ->label('Multi-user')
                     ->boolean()
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->visibleFrom('lg'),
 
                 Tables\Columns\IconColumn::make('custom_domain')
                     ->label('Custom Domain')
                     ->boolean()
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->visibleFrom('xl'),
 
                 Tables\Columns\IconColumn::make('ab_testing')
                     ->label('A/B Test')
                     ->boolean()
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->visibleFrom('xl'),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Active')
@@ -344,7 +359,11 @@ class PlanResource extends BaseResource
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
-            ]);
+            ])
+            ->recordUrl(fn (Plan $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateIcon('heroicon-o-tag')
+            ->emptyStateHeading(__('admin.migration.administration.plans.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.administration.plans.empty_description'));
     }
 
     // -------------------------------------------------------------------------

@@ -10,6 +10,11 @@ class ViewSubscription extends ViewRecord
 {
     protected static string $resource = SubscriptionResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.subscriptions.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         $record = $this->getRecord();
@@ -22,7 +27,7 @@ class ViewSubscription extends ViewRecord
                 ->icon('heroicon-o-arrow-top-right-on-square')
                 ->color('gray')
                 ->url(
-                    'https://dashboard.stripe.com/subscriptions/' . $record->stripe_subscription_id,
+                    'https://dashboard.stripe.com/subscriptions/'.$record->stripe_subscription_id,
                     shouldOpenInNewTab: true
                 );
         }

@@ -1,6 +1,6 @@
 # Plan przebudowy interfejsu panelu administracyjnego
 
-**Status:** etap 5 w toku — fale finansowa, marketing/CMS/SEO oraz automatyzacje zakończone
+**Status:** etap 5 w toku — fala 4, pakiety administracji dostępem i SaaS Billing zakończone
 **Zakres:** wszystkie widoki pod `/admin/*`  
 **Data utworzenia:** 2026-11-13  
 **Ostatnia aktualizacja:** 2026-11-14
@@ -274,11 +274,13 @@ Walidacja wykonana w ramach etapu: build produkcyjny Vite, kompilacja Blade, tes
 
 #### Fala 4 — administracja i narzędzia systemowe
 
-- [ ] Użytkownicy, role i sesje.
-- [ ] SaaS Billing.
+- [x] Użytkownicy, role, uprawnienia i sesje — responsywne listy, kontekst stron, wyszukiwanie rekordów oraz jawnie zabezpieczone akcje unieważniania sesji.
+- [x] SaaS Billing — firmy, plany i subskrypcje mają kontekst operacyjny, responsywne listy, wyszukiwanie oraz bezpieczne skróty do szczegółów i Stripe.
 - [ ] Integracje i ustawienia.
 - [ ] Bezpieczeństwo.
 - [ ] Log Viewer, Job Manager i pozostałe narzędzia operatorskie.
+
+**Pakiety 1–2 zakończone:** siedem list administracji dostępem i SaaS Billing zweryfikowano przy 1440 i 390 px.
 
 **Rezultat:** wszystkie strony `/admin/*` korzystają ze wspólnej architektury i standardów interfejsu.
 
@@ -363,4 +365,6 @@ Walidacja wykonana w ramach etapu: build produkcyjny Vite, kompilacja Blade, tes
 | 2026-11-14 | Zakończono pierwszą falę etapu 5. Osiem raportów finansowych otrzymało spójny kontekst operacyjny; smoke test raportów przy 1440/390 px potwierdził brak overflow i błędów JavaScript. Wspólna regresja pięciu pakietów finansowych oraz RBAC/tenant: 20 testów / 1252 asercje. Łącznie zweryfikowano 26 tras fali finansowej na desktopie i telefonie. |
 | 2026-11-14 | Zakończono drugą falę etapu 5: nawigacja publiczna, landing pages, CMS, artykuły, usługi, portfolio, komunikacja e-mail/SMS, monitoring pozycji i mapa strony korzystają ze spójnego kontekstu, responsywnych list, bezpiecznych linków i użytecznych pustych stanów. Mapa strony została przetłumaczona w PL/EN/PT, a monitoring pozycji zachował charakter tylko do odczytu. Smoke test 12 tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. Regresja interfejsu oraz RBAC/tenant: 18 testów / 1222 asercje; Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic poprawne. |
 | 2026-11-14 | Zakończono trzecią falę etapu 5: reguły, triggery i logi automatyzacji otrzymały spójny kontekst, responsywne listy, wyszukiwanie i puste stany. Testowanie reguł jest widoczne i wykonywalne wyłącznie z uprawnieniem edycji; czyszczenie starych logów przeniesiono z mylącej akcji zbiorczej do zabezpieczonej akcji nagłówka. Smoke test pięciu tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. Regresja UI, silnika automatyzacji oraz RBAC/tenant: 33 testy / 1221 asercji; Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic poprawne. |
+| 2026-11-14 | Rozpoczęto czwartą falę etapu 5 i ukończono pakiet administracji dostępem: użytkownicy, role, uprawnienia i sesje mają spójny kontekst, responsywne listy, wyszukiwanie i puste stany. Akcje usuwania nieaktywnych i gościnnych sesji przeniesiono do czytelnych akcji nagłówka, a wszystkie niestandardowe mutacje sesji respektują `revoke_sessions` także po stronie serwera. Smoke test czterech tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. Regresja UI oraz RBAC/tenant: 17 testów / 1201 asercji. |
+| 2026-11-14 | Ukończono pakiet SaaS Billing: firmy, plany i subskrypcje Stripe mają kontekst operacyjny, responsywne listy, globalne wyszukiwanie, puste stany i klikalne rekordy. Nie zmieniono logiki planów, tenant isolation ani przepływów Stripe. Smoke test trzech list przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. Wspólna regresja dwóch pakietów administracyjnych oraz RBAC/tenant: 18 testów / 1211 asercji; Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic poprawne. |
 

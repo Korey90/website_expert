@@ -10,7 +10,6 @@ use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -19,11 +18,23 @@ use Filament\Tables\Table;
 class BusinessResource extends BaseResource
 {
     protected static ?string $model = Business::class;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-building-storefront';
+
     protected static \UnitEnum|string|null $navigationGroup = 'SaaS Billing';
+
     protected static ?int $navigationSort = 2;
+
     protected static ?string $label = 'Business';
+
     protected static ?string $pluralLabel = 'Businesses';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'slug'];
+    }
 
     // -------------------------------------------------------------------------
     // Form (Edit)
@@ -92,11 +103,11 @@ class BusinessResource extends BaseResource
                     Forms\Components\Select::make('stripe_subscription_status')
                         ->label('Stripe Subscription Status')
                         ->options([
-                            'active'    => 'Active',
-                            'trialing'  => 'Trialing',
-                            'past_due'  => 'Past Due',
-                            'canceled'  => 'Canceled',
-                            'ended'     => 'Ended',
+                            'active' => 'Active',
+                            'trialing' => 'Trialing',
+                            'past_due' => 'Past Due',
+                            'canceled' => 'Canceled',
+                            'ended' => 'Ended',
                         ])
                         ->nullable(),
                 ]),
@@ -142,10 +153,10 @@ class BusinessResource extends BaseResource
                         ->label('Plan')
                         ->badge()
                         ->color(fn ($state) => match ($state) {
-                            'free'   => 'gray',
-                            'pro'    => 'info',
+                            'free' => 'gray',
+                            'pro' => 'info',
                             'agency' => 'success',
-                            default  => 'gray',
+                            default => 'gray',
                         })
                         ->formatStateUsing(fn ($state) => PlanService::PLANS[$state]['name'] ?? ucfirst((string) $state)),
 
@@ -153,11 +164,11 @@ class BusinessResource extends BaseResource
                         ->label('Stripe Status')
                         ->badge()
                         ->color(fn ($state) => match ($state) {
-                            'active'            => 'success',
-                            'trialing'          => 'info',
-                            'past_due'          => 'warning',
+                            'active' => 'success',
+                            'trialing' => 'info',
+                            'past_due' => 'warning',
                             'canceled', 'ended' => 'danger',
-                            default             => 'gray',
+                            default => 'gray',
                         })
                         ->formatStateUsing(fn ($state) => $state ? ucfirst((string) $state) : 'None'),
 
@@ -204,23 +215,25 @@ class BusinessResource extends BaseResource
                     ->label('Business')
                     ->description(fn ($record) => $record->slug)
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
 
                 Tables\Columns\TextColumn::make('locale')
                     ->label('Locale')
                     ->badge()
                     ->color('gray')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('md'),
 
                 Tables\Columns\TextColumn::make('plan')
                     ->label('Plan')
                     ->badge()
                     ->color(fn ($state) => match ($state) {
-                        'free'   => 'gray',
-                        'basic'  => 'warning',
-                        'pro'    => 'info',
+                        'free' => 'gray',
+                        'basic' => 'warning',
+                        'pro' => 'info',
                         'agency' => 'success',
-                        default  => 'gray',
+                        default => 'gray',
                     })
                     ->formatStateUsing(fn ($state) => PlanService::PLANS[$state]['name'] ?? ucfirst((string) $state))
                     ->sortable(),
@@ -228,7 +241,8 @@ class BusinessResource extends BaseResource
                 Tables\Columns\TextColumn::make('landingPages_count')
                     ->label('LPs')
                     ->counts('landingPages')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('lg'),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Active')
@@ -240,12 +254,14 @@ class BusinessResource extends BaseResource
                     ->date()
                     ->placeholder('—')
                     ->sortable()
+                    ->visibleFrom('xl')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Registered')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('xl'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('plan')
@@ -264,7 +280,11 @@ class BusinessResource extends BaseResource
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),
-            ]);
+            ])
+            ->recordUrl(fn (Business $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateIcon('heroicon-o-building-storefront')
+            ->emptyStateHeading(__('admin.migration.administration.businesses.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.administration.businesses.empty_description'));
     }
 
     // -------------------------------------------------------------------------
@@ -274,9 +294,9 @@ class BusinessResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListBusinesses::route('/'),
-            'view'   => Pages\ViewBusiness::route('/{record}'),
-            'edit'   => Pages\EditBusiness::route('/{record}/edit'),
+            'index' => Pages\ListBusinesses::route('/'),
+            'view' => Pages\ViewBusiness::route('/{record}'),
+            'edit' => Pages\EditBusiness::route('/{record}/edit'),
         ];
     }
 }

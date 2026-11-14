@@ -9,21 +9,33 @@ use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class SubscriptionResource extends BaseResource
 {
     protected static ?string $model = Business::class;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-credit-card';
+
     protected static \UnitEnum|string|null $navigationGroup = 'SaaS Billing';
+
     protected static ?int $navigationSort = 3;
+
     protected static ?string $label = 'Subscription';
+
     protected static ?string $pluralLabel = 'Stripe Subscriptions';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'stripe_customer_id', 'stripe_subscription_id'];
+    }
 
     // Show only businesses that have ever had a Stripe subscription
     public static function getEloquentQuery(): Builder
@@ -45,22 +57,22 @@ class SubscriptionResource extends BaseResource
                         ->label('Stripe Status')
                         ->badge()
                         ->color(fn ($state) => match ($state) {
-                            'active'            => 'success',
-                            'trialing'          => 'info',
-                            'past_due'          => 'warning',
+                            'active' => 'success',
+                            'trialing' => 'info',
+                            'past_due' => 'warning',
                             'canceled', 'ended' => 'danger',
-                            default             => 'gray',
+                            default => 'gray',
                         }),
 
                     TextEntry::make('plan')
                         ->label('Plan')
                         ->badge()
                         ->color(fn ($state) => match ($state) {
-                            'free'   => 'gray',
-                            'basic'  => 'warning',
-                            'pro'    => 'info',
+                            'free' => 'gray',
+                            'basic' => 'warning',
+                            'pro' => 'info',
                             'agency' => 'success',
-                            default  => 'gray',
+                            default => 'gray',
                         })
                         ->formatStateUsing(fn ($state) => PlanService::PLANS[$state]['name'] ?? ucfirst((string) $state)),
 
@@ -119,17 +131,18 @@ class SubscriptionResource extends BaseResource
                     ->label('Business')
                     ->description(fn ($record) => $record->slug)
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
 
                 Tables\Columns\TextColumn::make('stripe_subscription_status')
                     ->label('Stripe Status')
                     ->badge()
                     ->color(fn ($state) => match ($state) {
-                        'active'            => 'success',
-                        'trialing'          => 'info',
-                        'past_due'          => 'warning',
+                        'active' => 'success',
+                        'trialing' => 'info',
+                        'past_due' => 'warning',
                         'canceled', 'ended' => 'danger',
-                        default             => 'gray',
+                        default => 'gray',
                     })
                     ->formatStateUsing(fn ($state) => $state ? ucfirst(str_replace('_', ' ', (string) $state)) : 'None')
                     ->sortable(),
@@ -138,11 +151,11 @@ class SubscriptionResource extends BaseResource
                     ->label('Plan')
                     ->badge()
                     ->color(fn ($state) => match ($state) {
-                        'free'   => 'gray',
-                        'basic'  => 'warning',
-                        'pro'    => 'info',
+                        'free' => 'gray',
+                        'basic' => 'warning',
+                        'pro' => 'info',
                         'agency' => 'success',
-                        default  => 'gray',
+                        default => 'gray',
                     })
                     ->formatStateUsing(fn ($state) => PlanService::PLANS[$state]['name'] ?? ucfirst((string) $state))
                     ->sortable(),
@@ -153,7 +166,8 @@ class SubscriptionResource extends BaseResource
                     ->placeholder('—')
                     ->copyable()
                     ->limit(20)
-                    ->tooltip(fn ($record) => $record->stripe_subscription_id),
+                    ->tooltip(fn ($record) => $record->stripe_subscription_id)
+                    ->visibleFrom('lg'),
 
                 Tables\Columns\TextColumn::make('stripe_customer_id')
                     ->label('Stripe Customer ID')
@@ -162,28 +176,31 @@ class SubscriptionResource extends BaseResource
                     ->copyable()
                     ->limit(20)
                     ->tooltip(fn ($record) => $record->stripe_customer_id)
+                    ->visibleFrom('xl')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('trial_ends_at')
                     ->label('Trial Ends')
                     ->date()
                     ->placeholder('—')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('md'),
 
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Last Event')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('xl'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('stripe_subscription_status')
                     ->label('Stripe Status')
                     ->options([
-                        'active'    => 'Active',
-                        'trialing'  => 'Trialing',
-                        'past_due'  => 'Past Due',
-                        'canceled'  => 'Canceled',
-                        'ended'     => 'Ended',
+                        'active' => 'Active',
+                        'trialing' => 'Trialing',
+                        'past_due' => 'Past Due',
+                        'canceled' => 'Canceled',
+                        'ended' => 'Ended',
                     ]),
 
                 Tables\Filters\SelectFilter::make('plan')
@@ -206,7 +223,11 @@ class SubscriptionResource extends BaseResource
                     ->openUrlInNewTab()
                     ->visible(fn ($record) => (bool) $record->stripe_customer_id),
             ])
-            ->bulkActions([]);
+            ->bulkActions([])
+            ->recordUrl(fn (Business $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateIcon('heroicon-o-credit-card')
+            ->emptyStateHeading(__('admin.migration.administration.subscriptions.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.administration.subscriptions.empty_description'));
     }
 
     // -------------------------------------------------------------------------
@@ -217,7 +238,7 @@ class SubscriptionResource extends BaseResource
     {
         return [
             'index' => Pages\ListSubscriptions::route('/'),
-            'view'  => Pages\ViewSubscription::route('/{record}'),
+            'view' => Pages\ViewSubscription::route('/{record}'),
         ];
     }
 
@@ -230,7 +251,7 @@ class SubscriptionResource extends BaseResource
         return false;
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return false;
     }

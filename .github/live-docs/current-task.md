@@ -1,6 +1,6 @@
 # Current Task
 
-**Status:** W toku — etap 5, fale finansowa, marketing/CMS/SEO oraz automatyzacje zakończone
+**Status:** W toku — etap 5, fala 4; administracja dostępem i SaaS Billing zakończone
 **Zadanie:** Spójny i intuicyjny interfejs panelu administracyjnego
 **Data rozpoczęcia:** 2026-11-13
 **Plan nadrzędny:** `docs/plans/admin-ui-redesign-plan.md`
@@ -65,7 +65,15 @@
   - [x] Testowanie reguł i czyszczenie starych logów respektują istniejące uprawnienia.
   - [x] Smoke test pięciu tras przy 1440/390 px oraz regresja 33 testów / 1221 asercji.
   - [x] Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic zakończone poprawnie.
-- [ ] Rozpocząć falę 4: administracja i narzędzia systemowe.
+- [ ] Kontynuować falę 4: administracja i narzędzia systemowe.
+  - [x] Użytkownicy, role, uprawnienia i sesje.
+  - [x] Zabezpieczone akcje unieważniania sesji oraz smoke test czterech list przy 1440/390 px.
+  - [x] Regresja interfejsu i dostępu: 17 testów / 1201 asercji.
+  - [x] SaaS Billing: firmy, plany i subskrypcje; smoke test trzech list przy 1440/390 px.
+  - [x] Wspólna regresja dwóch pakietów administracyjnych: 18 testów / 1211 asercji.
+  - [x] Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic zakończone poprawnie.
+  - [ ] Integracje i ustawienia firmy.
+  - [ ] Bezpieczeństwo i narzędzia operatorskie.
 
 Źródło prawdy i dziennik postępu: `docs/plans/admin-ui-redesign-plan.md`.
 

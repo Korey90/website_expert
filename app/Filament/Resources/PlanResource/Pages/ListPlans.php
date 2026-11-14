@@ -10,6 +10,11 @@ class ListPlans extends ListRecords
 {
     protected static string $resource = PlanResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.plans.list_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

@@ -10,6 +10,11 @@ class ViewPlan extends ViewRecord
 {
     protected static string $resource = PlanResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.plans.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

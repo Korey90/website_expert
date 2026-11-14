@@ -12,6 +12,11 @@ class EditPlan extends EditRecord
 {
     protected static string $resource = PlanResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.plans.edit_subheading');
+    }
+
     protected function afterSave(): void
     {
         PlanService::clearCache();

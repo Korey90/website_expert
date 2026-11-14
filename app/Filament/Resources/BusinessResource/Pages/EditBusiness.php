@@ -10,6 +10,11 @@ class EditBusiness extends EditRecord
 {
     protected static string $resource = BusinessResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.businesses.edit_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

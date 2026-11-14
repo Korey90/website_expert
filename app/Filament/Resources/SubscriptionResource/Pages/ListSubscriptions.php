@@ -9,6 +9,11 @@ class ListSubscriptions extends ListRecords
 {
     protected static string $resource = SubscriptionResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.subscriptions.list_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [];
