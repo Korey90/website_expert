@@ -10,6 +10,11 @@ class EditPermission extends EditRecord
 {
     protected static string $resource = PermissionResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.permissions.edit_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

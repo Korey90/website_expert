@@ -19,11 +19,18 @@ class UserResource extends BaseResource
 {
     protected static ?string $model = User::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 1;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email'];
+    }
 
     public static function form(Schema $form): Schema
     {
@@ -63,11 +70,24 @@ class UserResource extends BaseResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('email')->searchable(),
-                Tables\Columns\TextColumn::make('roles.name')->badge()->separator(','),
+                Tables\Columns\TextColumn::make('name')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold')
+                    ->description(fn (User $record): string => $record->email),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable()
+                    ->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->badge()
+                    ->separator(',')
+                    ->visibleFrom('md'),
                 Tables\Columns\IconColumn::make('is_active')->boolean(),
-                Tables\Columns\TextColumn::make('last_login_at')->dateTime()->sortable(),
+                Tables\Columns\TextColumn::make('last_login_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->visibleFrom('xl')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('roles')
@@ -80,7 +100,11 @@ class UserResource extends BaseResource
             ])
             ->bulkActions([
                 BulkActionGroup::make([DeleteBulkAction::make()]),
-            ]);
+            ])
+            ->recordUrl(fn (User $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateIcon('heroicon-o-users')
+            ->emptyStateHeading(__('admin.migration.administration.users.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.administration.users.empty_description'));
     }
 
     public static function getPages(): array

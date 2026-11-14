@@ -1,6 +1,6 @@
 # Plan przebudowy interfejsu panelu administracyjnego
 
-**Status:** etap 5 w toku — fale finansowa oraz marketing/CMS/SEO zakończone
+**Status:** etap 5 w toku — fale finansowa, marketing/CMS/SEO oraz automatyzacje zakończone
 **Zakres:** wszystkie widoki pod `/admin/*`  
 **Data utworzenia:** 2026-11-13  
 **Ostatnia aktualizacja:** 2026-11-14
@@ -266,9 +266,11 @@ Walidacja wykonana w ramach etapu: build produkcyjny Vite, kompilacja Blade, tes
 
 #### Fala 3 — automatyzacje
 
-- [ ] Reguły.
-- [ ] Triggery.
-- [ ] Logi.
+- [x] Reguły — spójny kontekst, responsywna lista, czytelniejszy formularz i kontrolowane testowanie zgodne z RBAC.
+- [x] Triggery — kontekst stron, wyszukiwanie, responsywna lista i rozróżnienie zdarzeń systemowych od własnych.
+- [x] Logi — audytowalna lista i szczegóły, bezpieczne linki do leadów oraz jednoznaczna akcja czyszczenia wpisów starszych niż 30 dni.
+
+**Fala 3 zakończona:** pięć reprezentatywnych tras automatyzacji zweryfikowano przy 1440 i 390 px.
 
 #### Fala 4 — administracja i narzędzia systemowe
 
@@ -360,4 +362,5 @@ Walidacja wykonana w ramach etapu: build produkcyjny Vite, kompilacja Blade, tes
 | 2026-11-14 | Ukończono pakiet księgowości, VAT i HMRC: pięć zasobów tabelarycznych korzysta ze wspólnego wzorca responsywności, wyszukiwania i pustych stanów, a księga główna oraz HMRC mają kontekstowe opisy bez zmian w kontrolowanych workflow. Testy interfejsu pakietu: 2/18; smoke test siedmiu tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. |
 | 2026-11-14 | Zakończono pierwszą falę etapu 5. Osiem raportów finansowych otrzymało spójny kontekst operacyjny; smoke test raportów przy 1440/390 px potwierdził brak overflow i błędów JavaScript. Wspólna regresja pięciu pakietów finansowych oraz RBAC/tenant: 20 testów / 1252 asercje. Łącznie zweryfikowano 26 tras fali finansowej na desktopie i telefonie. |
 | 2026-11-14 | Zakończono drugą falę etapu 5: nawigacja publiczna, landing pages, CMS, artykuły, usługi, portfolio, komunikacja e-mail/SMS, monitoring pozycji i mapa strony korzystają ze spójnego kontekstu, responsywnych list, bezpiecznych linków i użytecznych pustych stanów. Mapa strony została przetłumaczona w PL/EN/PT, a monitoring pozycji zachował charakter tylko do odczytu. Smoke test 12 tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. Regresja interfejsu oraz RBAC/tenant: 18 testów / 1222 asercje; Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic poprawne. |
+| 2026-11-14 | Zakończono trzecią falę etapu 5: reguły, triggery i logi automatyzacji otrzymały spójny kontekst, responsywne listy, wyszukiwanie i puste stany. Testowanie reguł jest widoczne i wykonywalne wyłącznie z uprawnieniem edycji; czyszczenie starych logów przeniesiono z mylącej akcji zbiorczej do zabezpieczonej akcji nagłówka. Smoke test pięciu tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. Regresja UI, silnika automatyzacji oraz RBAC/tenant: 33 testy / 1221 asercji; Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic poprawne. |
 

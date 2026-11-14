@@ -10,6 +10,11 @@ class EditAutomationTrigger extends EditRecord
 {
     protected static string $resource = AutomationTriggerResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.automation.triggers.edit_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

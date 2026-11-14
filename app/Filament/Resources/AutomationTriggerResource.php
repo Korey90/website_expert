@@ -11,7 +11,6 @@ use Filament\Forms;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -20,10 +19,21 @@ use Filament\Tables\Table;
 class AutomationTriggerResource extends BaseResource
 {
     protected static ?string $model = AutomationTrigger::class;
+
+    protected static ?string $recordTitleAttribute = 'label';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-bolt';
+
     protected static \UnitEnum|string|null $navigationGroup = 'Automation';
+
     protected static ?string $navigationLabel = 'Automation Triggers';
+
     protected static ?int $navigationSort = 2;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['key', 'label', 'group'];
+    }
 
     // ── Form ─────────────────────────────────────────────────────────────────
 
@@ -50,12 +60,12 @@ class AutomationTriggerResource extends BaseResource
                     Forms\Components\Select::make('group')
                         ->label('Group')
                         ->options([
-                            'Leads'     => 'Leads',
-                            'Projects'  => 'Projects',
-                            'Invoices'  => 'Invoices',
-                            'Quotes'    => 'Quotes',
+                            'Leads' => 'Leads',
+                            'Projects' => 'Projects',
+                            'Invoices' => 'Invoices',
+                            'Quotes' => 'Quotes',
                             'Contracts' => 'Contracts',
-                            'Custom'    => 'Custom',
+                            'Custom' => 'Custom',
                         ])
                         ->createOptionForm([
                             Forms\Components\TextInput::make('label')->required(),
@@ -116,10 +126,9 @@ class AutomationTriggerResource extends BaseResource
                 ->schema([
                     KeyValueEntry::make('variables')
                         ->label('')
-                        ->getStateUsing(fn ($record) =>
-                            collect($record->variables ?? [])
-                                ->mapWithKeys(fn ($v) => ['{' . ($v['name'] ?? '') . '}' => $v['description'] ?? ''])
-                                ->toArray()
+                        ->getStateUsing(fn ($record) => collect($record->variables ?? [])
+                            ->mapWithKeys(fn ($v) => ['{'.($v['name'] ?? '').'}' => $v['description'] ?? ''])
+                            ->toArray()
                         ),
                 ])
                 ->collapsible(),
@@ -138,15 +147,18 @@ class AutomationTriggerResource extends BaseResource
                     ->searchable()
                     ->copyable(),
                 Tables\Columns\TextColumn::make('label')
-                    ->searchable(),
+                    ->searchable()
+                    ->weight('bold'),
                 Tables\Columns\TextColumn::make('group')
                     ->badge()
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->visibleFrom('md'),
                 Tables\Columns\IconColumn::make('is_system')
                     ->label('System')
                     ->boolean()
                     ->trueIcon('heroicon-o-lock-closed')
-                    ->falseIcon('heroicon-o-pencil-square'),
+                    ->falseIcon('heroicon-o-pencil-square')
+                    ->visibleFrom('lg'),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean(),
@@ -154,7 +166,8 @@ class AutomationTriggerResource extends BaseResource
                     ->label('Variables')
                     ->getStateUsing(fn ($record) => count($record->variables ?? []))
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')
+                    ->visibleFrom('xl'),
             ])
             ->defaultSort('group')
             ->groups(['group'])
@@ -171,16 +184,20 @@ class AutomationTriggerResource extends BaseResource
                     ->visible(fn ($record) => $record->is_system),
                 DeleteAction::make()
                     ->visible(fn ($record) => ! $record->is_system),
-            ]);
+            ])
+            ->recordUrl(fn (AutomationTrigger $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateIcon('heroicon-o-bolt')
+            ->emptyStateHeading(__('admin.migration.automation.triggers.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.automation.triggers.empty_description'));
     }
 
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListAutomationTriggers::route('/'),
+            'index' => Pages\ListAutomationTriggers::route('/'),
             'create' => Pages\CreateAutomationTrigger::route('/create'),
-            'view'   => Pages\ViewAutomationTrigger::route('/{record}'),
-            'edit'   => Pages\EditAutomationTrigger::route('/{record}/edit'),
+            'view' => Pages\ViewAutomationTrigger::route('/{record}'),
+            'edit' => Pages\EditAutomationTrigger::route('/{record}/edit'),
         ];
     }
 }

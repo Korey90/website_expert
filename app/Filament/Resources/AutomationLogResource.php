@@ -5,24 +5,35 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AutomationLogResource\Pages;
 use App\Models\AutomationLog;
 use App\Models\AutomationTrigger;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Resource;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 class AutomationLogResource extends BaseResource
 {
     protected static ?string $model = AutomationLog::class;
+
+    protected static ?string $recordTitleAttribute = 'trigger_event';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-list';
+
     protected static \UnitEnum|string|null $navigationGroup = 'Automation';
+
     protected static ?string $navigationLabel = 'Automation Logs';
+
     protected static ?int $navigationSort = 3;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['trigger_event', 'status', 'automationRule.name'];
+    }
 
     public static function form(Schema $form): Schema
     {
@@ -43,9 +54,9 @@ class AutomationLogResource extends BaseResource
                         ->color(fn ($state) => match ($state) {
                             'success' => 'success',
                             'partial' => 'warning',
-                            'failed'  => 'danger',
-                            'test'    => 'info',
-                            default   => 'gray',
+                            'failed' => 'danger',
+                            'test' => 'info',
+                            default => 'gray',
                         }),
                     TextEntry::make('source')->badge(),
                     TextEntry::make('executed_at')->dateTime('d M Y H:i:s')->label('Executed at'),
@@ -81,11 +92,13 @@ class AutomationLogResource extends BaseResource
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->sortable()
-                    ->width('60px'),
+                    ->width('60px')
+                    ->visibleFrom('md'),
                 Tables\Columns\TextColumn::make('automationRule.name')
                     ->label('Rule')
                     ->searchable()
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->weight('bold'),
                 Tables\Columns\TextColumn::make('trigger_event')
                     ->badge()
                     ->formatStateUsing(fn ($s) => AutomationTrigger::labelFor($s))
@@ -94,8 +107,8 @@ class AutomationLogResource extends BaseResource
                     ->colors([
                         'success' => 'success',
                         'partial' => 'warning',
-                        'failed'  => 'danger',
-                        'test'    => 'info',
+                        'failed' => 'danger',
+                        'test' => 'info',
                     ]),
                 Tables\Columns\TextColumn::make('source')
                     ->badge()
@@ -103,18 +116,21 @@ class AutomationLogResource extends BaseResource
                 Tables\Columns\TextColumn::make('lead.title')
                     ->label('Lead')
                     ->placeholder('—')
-                    ->url(fn ($record) => $record->lead_id
-                        ? route('filament.admin.resources.leads.view', $record->lead_id)
+                    ->visibleFrom('lg')
+                    ->url(fn (AutomationLog $record): ?string => $record->lead && LeadResource::canView($record->lead)
+                        ? LeadResource::getUrl('view', ['record' => $record->lead])
                         : null),
                 Tables\Columns\TextColumn::make('actions_count')
                     ->label('Actions')
                     ->getStateUsing(fn ($record) => count($record->actions_executed ?? []))
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')
+                    ->visibleFrom('xl'),
                 Tables\Columns\TextColumn::make('executed_at')
                     ->label('Executed')
                     ->dateTime('d M Y H:i')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('md'),
             ])
             ->defaultSort('executed_at', 'desc')
             ->filters([
@@ -122,25 +138,25 @@ class AutomationLogResource extends BaseResource
                     ->options([
                         'success' => 'Success',
                         'partial' => 'Partial',
-                        'failed'  => 'Failed',
-                        'test'    => 'Test',
+                        'failed' => 'Failed',
+                        'test' => 'Test',
                     ]),
                 Tables\Filters\SelectFilter::make('source')
                     ->options([
                         'automation' => 'Automation',
-                        'test'       => 'Test Run',
+                        'test' => 'Test Run',
                     ]),
                 Tables\Filters\SelectFilter::make('trigger_event')
                     ->options(fn () => AutomationTrigger::getOptions())
                     ->label('Trigger Event'),
                 Tables\Filters\Filter::make('executed_at')
                     ->form([
-                        \Filament\Forms\Components\DatePicker::make('from')->label('From'),
-                        \Filament\Forms\Components\DatePicker::make('until')->label('Until'),
+                        DatePicker::make('from')->label('From'),
+                        DatePicker::make('until')->label('Until'),
                     ])
                     ->query(function ($query, array $data) {
                         return $query
-                            ->when($data['from'],  fn ($q, $v) => $q->whereDate('executed_at', '>=', $v))
+                            ->when($data['from'], fn ($q, $v) => $q->whereDate('executed_at', '>=', $v))
                             ->when($data['until'], fn ($q, $v) => $q->whereDate('executed_at', '<=', $v));
                     }),
             ])
@@ -151,22 +167,19 @@ class AutomationLogResource extends BaseResource
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    \Filament\Actions\Action::make('delete_older_30')
-                        ->label('Delete older than 30 days')
-                        ->icon('heroicon-o-trash')
-                        ->color('danger')
-                        ->requiresConfirmation()
-                        ->deselectRecordsAfterCompletion()
-                        ->action(fn () => AutomationLog::olderThanDays(30)->delete()),
                 ]),
-            ]);
+            ])
+            ->recordUrl(fn (AutomationLog $record): string => static::getUrl('view', ['record' => $record]))
+            ->emptyStateIcon('heroicon-o-clipboard-document-list')
+            ->emptyStateHeading(__('admin.migration.automation.logs.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.automation.logs.empty_description'));
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListAutomationLogs::route('/'),
-            'view'  => Pages\ViewAutomationLog::route('/{record}'),
+            'view' => Pages\ViewAutomationLog::route('/{record}'),
         ];
     }
 

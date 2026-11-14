@@ -12,6 +12,11 @@ class ListRoles extends ListRecords
 {
     protected static string $resource = RoleResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.roles.list_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

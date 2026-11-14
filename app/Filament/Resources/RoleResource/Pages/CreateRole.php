@@ -9,6 +9,11 @@ class CreateRole extends CreateRecord
 {
     protected static string $resource = RoleResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.roles.create_subheading');
+    }
+
     /**
      * Strip perms_* keys so Eloquent doesn't try to fill unknown columns.
      */
@@ -19,6 +24,7 @@ class CreateRole extends CreateRecord
                 unset($data[$key]);
             }
         }
+
         return $data;
     }
 

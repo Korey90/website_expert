@@ -1,6 +1,6 @@
 # Current Task
 
-**Status:** W toku — etap 5, fale finansowa oraz marketing/CMS/SEO zakończone
+**Status:** W toku — etap 5, fale finansowa, marketing/CMS/SEO oraz automatyzacje zakończone
 **Zadanie:** Spójny i intuicyjny interfejs panelu administracyjnego
 **Data rozpoczęcia:** 2026-11-13
 **Plan nadrzędny:** `docs/plans/admin-ui-redesign-plan.md`
@@ -60,7 +60,12 @@
   - [x] Szablony e-mail/SMS, monitoring pozycji i mapa strony.
   - [x] Testy renderowania oraz smoke test 12 tras przy 1440/390 px.
   - [x] Regresja interfejsu i dostępu: 18 testów / 1222 asercje; Pint, Blade, ESLint i tłumaczenia poprawne.
-- [ ] Rozpocząć falę 3: automatyzacje.
+- [x] Zakończyć falę 3: automatyzacje.
+  - [x] Reguły, triggery i logi korzystają ze spójnego, responsywnego wzorca interfejsu.
+  - [x] Testowanie reguł i czyszczenie starych logów respektują istniejące uprawnienia.
+  - [x] Smoke test pięciu tras przy 1440/390 px oraz regresja 33 testów / 1221 asercji.
+  - [x] Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic zakończone poprawnie.
+- [ ] Rozpocząć falę 4: administracja i narzędzia systemowe.
 
 Źródło prawdy i dziennik postępu: `docs/plans/admin-ui-redesign-plan.md`.
 

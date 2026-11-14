@@ -4,6 +4,7 @@ namespace App\Filament\Resources\AutomationRuleResource\Pages;
 
 use App\Filament\Resources\AutomationRuleResource;
 use App\Jobs\ProcessAutomationJob;
+use App\Models\AutomationRule;
 use App\Models\Lead;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -20,6 +21,11 @@ class ViewAutomationRule extends ViewRecord
 {
     protected static string $resource = AutomationRuleResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.automation.rules.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -30,6 +36,7 @@ class ViewAutomationRule extends ViewRecord
                 ->modalHeading('Test Automation Rule')
                 ->modalDescription('Run this rule with real or mock data. Enable dry-run to skip actual SMS/email sending.')
                 ->modalWidth('lg')
+                ->visible(fn (): bool => AutomationRuleResource::canEdit($this->getRecord()))
                 ->form([
                     Radio::make('mode')
                         ->label('Data source')
@@ -82,37 +89,39 @@ class ViewAutomationRule extends ViewRecord
                         ->helperText('Uncheck only if you want to send a real message during testing.'),
                 ])
                 ->action(function (array $data): void {
-                    /** @var \App\Models\AutomationRule $rule */
-                    $rule    = $this->getRecord();
-                    $dryRun  = (bool) ($data['dry_run'] ?? true);
+                    /** @var AutomationRule $rule */
+                    $rule = $this->getRecord();
+                    abort_unless(AutomationRuleResource::canEdit($rule), 403);
+
+                    $dryRun = (bool) ($data['dry_run'] ?? true);
 
                     if ($data['mode'] === 'real' && ! empty($data['lead_id'])) {
-                        $lead    = Lead::find($data['lead_id']);
+                        $lead = Lead::find($data['lead_id']);
                         $context = [
-                            'lead_id'     => $lead?->id,
-                            'client_id'   => $lead?->client_id,
+                            'lead_id' => $lead?->id,
+                            'client_id' => $lead?->client_id,
                             'business_id' => $lead?->business_id,
-                            'source'      => $lead?->source,
+                            'source' => $lead?->source,
                         ];
                     } else {
                         $context = [
-                            'lead_id'      => null,
-                            'client_id'    => null,
-                            'business_id'  => null,
-                            'source'       => $data['mock_source'] ?? 'service_cta',
-                            '_mock'        => true,
-                            'lead_title'   => $data['mock_lead_title'] ?? 'Test Lead',
-                            'client_name'  => $data['mock_client_name'] ?? 'Jan Kowalski',
+                            'lead_id' => null,
+                            'client_id' => null,
+                            'business_id' => null,
+                            'source' => $data['mock_source'] ?? 'service_cta',
+                            '_mock' => true,
+                            'lead_title' => $data['mock_lead_title'] ?? 'Test Lead',
+                            'client_name' => $data['mock_client_name'] ?? 'Jan Kowalski',
                             'company_name' => $data['mock_company_name'] ?? 'Test Sp. z o.o.',
                         ];
                     }
 
                     ProcessAutomationJob::dispatchSync(
                         triggerEvent: $rule->trigger_event,
-                        context:      $context,
+                        context: $context,
                         singleRuleId: $rule->id,
-                        dryRun:       $dryRun,
-                        source:       'test',
+                        dryRun: $dryRun,
+                        source: 'test',
                     );
 
                     Notification::make()

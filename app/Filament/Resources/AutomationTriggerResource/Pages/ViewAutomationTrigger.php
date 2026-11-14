@@ -11,6 +11,11 @@ class ViewAutomationTrigger extends ViewRecord
 {
     protected static string $resource = AutomationTriggerResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.automation.triggers.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

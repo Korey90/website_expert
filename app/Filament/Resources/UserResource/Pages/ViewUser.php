@@ -11,6 +11,11 @@ class ViewUser extends ViewRecord
 {
     protected static string $resource = UserResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.users.view_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
