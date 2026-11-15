@@ -4,7 +4,7 @@
 
         <div>
             <x-filament::button type="submit" icon="heroicon-o-check">
-                Save settings
+                {{ __('admin.migration.administration.settings.save') }}
             </x-filament::button>
         </div>
     </form>

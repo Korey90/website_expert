@@ -6,23 +6,29 @@ use App\Actions\Admin\ParseLogFileAction;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LogViewerPage extends BasePage
 {
     protected string $view = 'filament.pages.log-viewer';
 
-    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-document-text';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Settings';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+
     protected static ?string $navigationLabel = 'Log Viewer';
-    protected static ?int    $navigationSort  = 20;
+
+    protected static ?int $navigationSort = 20;
 
     public string $selectedFile = '';
-    public string $levelFilter  = 'ALL';
-    public string $search       = '';
-    public int    $perPage      = 50;
-    public int    $page         = 1;
+
+    public string $levelFilter = 'ALL';
+
+    public string $search = '';
+
+    public int $perPage = 50;
+
+    public int $page = 1;
 
     public function mount(): void
     {
@@ -53,7 +59,7 @@ class LogViewerPage extends BasePage
             return collect();
         }
 
-        $filePath = storage_path('logs/' . basename($this->selectedFile));
+        $filePath = storage_path('logs/'.basename($this->selectedFile));
 
         return app(ParseLogFileAction::class)
             ->execute($filePath, $this->levelFilter, $this->search);
@@ -61,15 +67,15 @@ class LogViewerPage extends BasePage
 
     public function paginatedEntries(): array
     {
-        $all    = $this->entries();
-        $total  = $all->count();
+        $all = $this->entries();
+        $total = $all->count();
         $offset = ($this->page - 1) * $this->perPage;
 
         return [
-            'items'      => $all->slice($offset, $this->perPage)->values()->all(),
-            'total'      => $total,
-            'page'       => $this->page,
-            'perPage'    => $this->perPage,
+            'items' => $all->slice($offset, $this->perPage)->values()->all(),
+            'total' => $total,
+            'page' => $this->page,
+            'perPage' => $this->perPage,
             'totalPages' => (int) ceil($total / $this->perPage),
         ];
     }
@@ -106,53 +112,73 @@ class LogViewerPage extends BasePage
 
     public function downloadLog(): StreamedResponse
     {
+        abort_unless(static::canAccess(), 403);
+
         $filename = basename($this->selectedFile);
-        $filePath = storage_path('logs/' . $filename);
+        $filePath = storage_path('logs/'.$filename);
 
         abort_unless(file_exists($filePath), 404);
 
-        return response()->streamDownload(function () use ($filePath) {
+        return response()->streamDownload(function () use ($filePath): void {
             readfile($filePath);
-        }, $filename, ['Content-Type' => 'text/plain']);
+        }, $filename, [
+            'Content-Type' => 'text/plain',
+            'Cache-Control' => 'no-store, private',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    public function getTitle(): string
+    {
+        return __('admin.migration.administration.log_viewer.title');
+    }
+
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.log_viewer.subheading');
     }
 
     protected function getHeaderActions(): array
     {
         return [
             Action::make('refresh')
-                ->label('Refresh')
+                ->label(__('admin.migration.administration.log_viewer.refresh'))
                 ->icon('heroicon-o-arrow-path')
                 ->color('gray')
                 ->action(function () {
                     $this->page = 1;
                     Notification::make()
-                        ->title('Log refreshed')
+                        ->title(__('admin.migration.administration.log_viewer.refreshed'))
                         ->success()
                         ->send();
                 }),
 
             Action::make('download')
-                ->label('Download')
+                ->label(__('admin.migration.administration.log_viewer.download'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('gray')
+                ->visible(fn (): bool => $this->selectedFile !== '')
                 ->action(function () {
                     return $this->downloadLog();
                 }),
 
             Action::make('clearLog')
-                ->label('Clear Log')
+                ->label(__('admin.migration.administration.log_viewer.clear'))
                 ->icon('heroicon-o-trash')
                 ->color('danger')
+                ->visible(fn (): bool => $this->selectedFile !== '')
                 ->requiresConfirmation()
-                ->modalHeading('Clear log file?')
-                ->modalDescription('This will permanently delete all entries in the selected log file. This cannot be undone.')
-                ->modalSubmitActionLabel('Yes, clear it')
+                ->modalHeading(__('admin.migration.administration.log_viewer.clear_heading'))
+                ->modalDescription(__('admin.migration.administration.log_viewer.clear_description'))
+                ->modalSubmitActionLabel(__('admin.migration.administration.log_viewer.clear_submit'))
                 ->action(function () {
+                    abort_unless(static::canAccess(), 403);
+
                     if ($this->selectedFile === '') {
                         return;
                     }
 
-                    $filePath = storage_path('logs/' . basename($this->selectedFile));
+                    $filePath = storage_path('logs/'.basename($this->selectedFile));
 
                     abort_unless(file_exists($filePath), 404);
 
@@ -161,8 +187,8 @@ class LogViewerPage extends BasePage
                     $this->page = 1;
 
                     Notification::make()
-                        ->title('Log cleared')
-                        ->body("File {$this->selectedFile} has been cleared.")
+                        ->title(__('admin.migration.administration.log_viewer.cleared'))
+                        ->body(__('admin.migration.administration.log_viewer.cleared_description', ['file' => $this->selectedFile]))
                         ->success()
                         ->send();
                 }),

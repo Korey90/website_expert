@@ -6,7 +6,6 @@ use App\Models\Setting;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Notifications\Notification;
-use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -15,24 +14,32 @@ class TrackingSettingsPage extends BasePage
     protected string $view = 'filament.pages.tracking-settings';
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Settings';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+
     protected static ?string $navigationLabel = 'Tracking & Analytics';
-    protected static ?int    $navigationSort  = 11;
+
+    protected static ?int $navigationSort = 11;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.settings.tracking_subheading');
+    }
+
     public function mount(): void
     {
         $this->form->fill([
-            'gtm_enabled'            => (bool) Setting::get('gtm_enabled', false),
-            'gtm_id'                 => Setting::get('gtm_id', ''),
-            'ga4_enabled'            => (bool) Setting::get('ga4_enabled', false),
-            'ga4_id'                 => Setting::get('ga4_id', ''),
-            'pixel_enabled'          => (bool) Setting::get('pixel_enabled', false),
-            'pixel_id'               => Setting::get('pixel_id', ''),
-            'gads_enabled'           => (bool) Setting::get('gads_enabled', false),
-            'gads_id'                => Setting::get('gads_id', ''),
+            'gtm_enabled' => (bool) Setting::get('gtm_enabled', false),
+            'gtm_id' => Setting::get('gtm_id', ''),
+            'ga4_enabled' => (bool) Setting::get('ga4_enabled', false),
+            'ga4_id' => Setting::get('ga4_id', ''),
+            'pixel_enabled' => (bool) Setting::get('pixel_enabled', false),
+            'pixel_id' => Setting::get('pixel_id', ''),
+            'gads_enabled' => (bool) Setting::get('gads_enabled', false),
+            'gads_id' => Setting::get('gads_id', ''),
             'cookie_consent_enabled' => (bool) Setting::get('cookie_consent_enabled', true),
         ]);
     }
@@ -94,14 +101,14 @@ class TrackingSettingsPage extends BasePage
     {
         $data = $this->form->getState();
 
-        Setting::set('gtm_enabled',            $data['gtm_enabled']            ? '1' : '0', 'tracking');
-        Setting::set('gtm_id',                 $data['gtm_id'] ?? '',                        'tracking');
-        Setting::set('ga4_enabled',            $data['ga4_enabled']            ? '1' : '0', 'tracking');
-        Setting::set('ga4_id',                 $data['ga4_id'] ?? '',                        'tracking');
-        Setting::set('pixel_enabled',          $data['pixel_enabled']          ? '1' : '0', 'tracking');
-        Setting::set('pixel_id',               $data['pixel_id'] ?? '',                      'tracking');
-        Setting::set('gads_enabled',           $data['gads_enabled']           ? '1' : '0', 'tracking');
-        Setting::set('gads_id',                $data['gads_id'] ?? '',                       'tracking');
+        Setting::set('gtm_enabled', $data['gtm_enabled'] ? '1' : '0', 'tracking');
+        Setting::set('gtm_id', $data['gtm_id'] ?? '', 'tracking');
+        Setting::set('ga4_enabled', $data['ga4_enabled'] ? '1' : '0', 'tracking');
+        Setting::set('ga4_id', $data['ga4_id'] ?? '', 'tracking');
+        Setting::set('pixel_enabled', $data['pixel_enabled'] ? '1' : '0', 'tracking');
+        Setting::set('pixel_id', $data['pixel_id'] ?? '', 'tracking');
+        Setting::set('gads_enabled', $data['gads_enabled'] ? '1' : '0', 'tracking');
+        Setting::set('gads_id', $data['gads_id'] ?? '', 'tracking');
         Setting::set('cookie_consent_enabled', $data['cookie_consent_enabled'] ? '1' : '0', 'tracking');
 
         Notification::make()

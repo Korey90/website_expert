@@ -47,7 +47,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Website Expert NI')
             ->favicon(asset('favicon.ico'))
             ->colors([
-                'primary' => Color::hex('#ff2b17'),
+                'primary' => Color::hex('#f04b37'),
                 'gray' => Color::Zinc,
             ])
             ->sidebarCollapsibleOnDesktop()
@@ -107,11 +107,13 @@ class AdminPanelProvider extends PanelProvider
                     $config = json_encode(['userId' => $userId]);
                     $src = Vite::asset('resources/js/admin/notifications.js');
                     $fraudContext = view('filament.components.hmrc-fraud-context')->render();
+                    $navigationState = view('filament.components.navigation-state')->render();
 
                     return new HtmlString(
                         "<script data-navigate-once>window.AdminPanelConfig = {$config};</script>".
                         "<script data-navigate-once src=\"{$src}\"></script>".
-                        $fraudContext
+                        $fraudContext.
+                        $navigationState
                     );
                 },
             )

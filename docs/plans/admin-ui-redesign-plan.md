@@ -1,9 +1,9 @@
 # Plan przebudowy interfejsu panelu administracyjnego
 
-**Status:** etap 5 w toku — fala 4, pakiety administracji dostępem i SaaS Billing zakończone
+**Status:** etap 5 zakończony — wszystkie fale migracji korzystają ze wspólnej powłoki i wzorców zatwierdzonego prototypu; następny etap: walidacja i wdrożenie
 **Zakres:** wszystkie widoki pod `/admin/*`  
 **Data utworzenia:** 2026-11-13  
-**Ostatnia aktualizacja:** 2026-11-14
+**Ostatnia aktualizacja:** 2026-11-15
 **Właściciel dokumentu:** zespół projektu Website Expert  
 **Źródło prawdy:** ten dokument
 
@@ -242,7 +242,16 @@ Walidacja wykonana w ramach etapu: build produkcyjny Vite, kompilacja Blade, tes
 ### Etap 5 — migracja pozostałych modułów
 
 **Szacunek:** 10–15 dni  
-**Status:** w toku
+**Status:** zakończone
+
+#### Korekta globalnej powłoki po przeglądzie użytkownika
+
+- [x] Przenieść do `/admin/*` geometrię zatwierdzonego prototypu: pełnowysokościowe menu 272 px, belkę 72 px i treść o maksymalnej szerokości 1320 px.
+- [x] Wdrożyć prototypowe tokeny powierzchni, koralowego akcentu, obramowań, promieni, cieni, nagłówków, przycisków, formularzy i tabel.
+- [x] Zwinąć nieaktywne grupy menu; aktywna sekcja pozostaje rozwinięta, a wszystkie siedem grup zachowuje RBAC.
+- [x] Dopasować szufladę mobilną, belkę 64 px, akcje nagłówka i listy kart przy 390 px.
+- [x] Zweryfikować dashboard przy 1440 px oraz listę leadów przy 390 px w jasnym i ciemnym motywie: brak overflow i błędów JavaScript.
+- [x] Walidacja techniczna: 13 testów / 92 asercje, Pint, Blade, ESLint, build Vite i kontrola różnic poprawne.
 
 #### Fala 1 — finanse i raporty
 
@@ -276,11 +285,11 @@ Walidacja wykonana w ramach etapu: build produkcyjny Vite, kompilacja Blade, tes
 
 - [x] Użytkownicy, role, uprawnienia i sesje — responsywne listy, kontekst stron, wyszukiwanie rekordów oraz jawnie zabezpieczone akcje unieważniania sesji.
 - [x] SaaS Billing — firmy, plany i subskrypcje mają kontekst operacyjny, responsywne listy, wyszukiwanie oraz bezpieczne skróty do szczegółów i Stripe.
-- [ ] Integracje i ustawienia.
-- [ ] Bezpieczeństwo.
-- [ ] Log Viewer, Job Manager i pozostałe narzędzia operatorskie.
+- [x] Integracje i ustawienia — poczta/SMS/domeny, płatności, tracking, dane prawne oraz kalkulator mają kontekst operacyjny, dostępne układy mobilne i spójne tłumaczenia.
+- [x] Bezpieczeństwo — zdarzenia mają kontekst operacyjny, statystyki, responsywną listę, tłumaczenia i serwerową kontrolę akcji mutujących.
+- [x] Log Viewer, Job Manager i pozostałe narzędzia operatorskie — wspólny układ, dostępne filtry i dialogi, lokalnie przewijane tabele oraz jawne bramki uprawnień dla każdej mutacji.
 
-**Pakiety 1–2 zakończone:** siedem list administracji dostępem i SaaS Billing zweryfikowano przy 1440 i 390 px.
+**Fala 4 zakończona:** 18 tras administracji dostępem, SaaS Billing, ustawień, bezpieczeństwa i narzędzi operatorskich zweryfikowano przy 1440 i 390 px. Końcowa regresja administracji: 40 testów / 1314 asercji.
 
 **Rezultat:** wszystkie strony `/admin/*` korzystają ze wspólnej architektury i standardów interfejsu.
 
@@ -335,14 +344,17 @@ Walidacja wykonana w ramach etapu: build produkcyjny Vite, kompilacja Blade, tes
 | 2026-11-13 | Szybkie tworzenie pozostaje w topbarze | Lista akcji jest wyliczana z `canCreate()`, więc użytkownik nie zobaczy operacji bez uprawnień. |
 | 2026-11-14 | Niestandardowe mutacje szczegółów i pipeline’u wymagają `canEdit()` również po stronie serwera | Widoczność elementu interfejsu nie jest granicą bezpieczeństwa; bezpośrednie wywołanie Livewire musi kończyć się 403 dla roli tylko do odczytu. |
 | 2026-11-14 | Modale pipeline’u korzystają z natywnej powłoki Filament bez teleportacji DOM | Zapewnia to focus trap, Escape, ARIA i stabilne animacje w obrębie niestandardowej strony Livewire. |
+| 2026-11-14 | Globalna powłoka `/admin/*` odwzorowuje zatwierdzony prototyp, a nie domyślną geometrię Filament | Po informacji użytkownika, że zmiany są niewidoczne, priorytetem stała się jednoznaczna zgodność wizualna menu, belki i treści; Filament pozostaje fundamentem zachowania i dostępności. |
+| 2026-11-15 | Narzędzia operatorskie korzystają ze wspólnego wzorca wewnątrz Administracji, bez osobnego trybu panelu | Spójny układ statusów, filtrów, tabel i dialogów wystarcza do odróżnienia zadań operatorskich, a istniejące uprawnienia nadal ograniczają widoczność i wykonanie każdej mutacji. |
+| 2026-11-15 | Rozwinięcie aktywnej grupy nawigacji jest przywracane po każdej nawigacji Livewire | Zapamiętany stan zwinięcia nie może ukrywać bieżącej lokalizacji użytkownika; pozostałe nieaktywne grupy nadal zachowują ustawiony stan. |
 
 ## Backlog odkryć
 
 - [x] Ustalić, czy globalne wyszukiwanie ma obejmować tylko strony, czy również rekordy domenowe.
 - [ ] Ustalić priorytet domyślnego dashboardu dla każdej roli.
 - [x] Zdecydować, czy szablony pozostają przy procesach, czy trafiają do wspólnej sekcji konfiguracji.
-- [ ] Zweryfikować potrzebę oddzielnego trybu operatorskiego dla SaaS, bezpieczeństwa i narzędzi systemowych.
-- [ ] Ustalić sposób komunikowania poziomego przewijania pipeline’u i szerokich tabel.
+- [x] Zweryfikować potrzebę oddzielnego trybu operatorskiego dla SaaS, bezpieczeństwa i narzędzi systemowych — pozostają w Administracji, ale korzystają ze wspólnego wzorca operatorskiego.
+- [x] Ustalić sposób komunikowania poziomego przewijania pipeline’u i szerokich tabel — fokusowalny region, widoczny lokalny scroll i brak overflow dokumentu.
 - [x] Naprawić błąd inicjalizacji pustych datasetów wykresów dashboardu (`normalizeDatasets`).
 
 ## Dziennik zmian
@@ -367,4 +379,7 @@ Walidacja wykonana w ramach etapu: build produkcyjny Vite, kompilacja Blade, tes
 | 2026-11-14 | Zakończono trzecią falę etapu 5: reguły, triggery i logi automatyzacji otrzymały spójny kontekst, responsywne listy, wyszukiwanie i puste stany. Testowanie reguł jest widoczne i wykonywalne wyłącznie z uprawnieniem edycji; czyszczenie starych logów przeniesiono z mylącej akcji zbiorczej do zabezpieczonej akcji nagłówka. Smoke test pięciu tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. Regresja UI, silnika automatyzacji oraz RBAC/tenant: 33 testy / 1221 asercji; Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic poprawne. |
 | 2026-11-14 | Rozpoczęto czwartą falę etapu 5 i ukończono pakiet administracji dostępem: użytkownicy, role, uprawnienia i sesje mają spójny kontekst, responsywne listy, wyszukiwanie i puste stany. Akcje usuwania nieaktywnych i gościnnych sesji przeniesiono do czytelnych akcji nagłówka, a wszystkie niestandardowe mutacje sesji respektują `revoke_sessions` także po stronie serwera. Smoke test czterech tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. Regresja UI oraz RBAC/tenant: 17 testów / 1201 asercji. |
 | 2026-11-14 | Ukończono pakiet SaaS Billing: firmy, plany i subskrypcje Stripe mają kontekst operacyjny, responsywne listy, globalne wyszukiwanie, puste stany i klikalne rekordy. Nie zmieniono logiki planów, tenant isolation ani przepływów Stripe. Smoke test trzech list przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. Wspólna regresja dwóch pakietów administracyjnych oraz RBAC/tenant: 18 testów / 1211 asercji; Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic poprawne. |
+| 2026-11-14 | Ukończono pakiet integracji i ustawień: konfiguracja poczty/SMS/domen, płatności, tracking, dane prawne oraz hub kalkulatora mają kontekst operacyjny i spójne tłumaczenia. Zakładki kalkulatora są dostępne i bezpiecznie przewijane na telefonie; trzy bezpośrednie zasoby kalkulatora mają responsywne listy, wyszukiwanie i puste stany, a mutacje widgetów wymagają `manage_calculator`. Smoke test ośmiu tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. Wspólna regresja trzech pakietów fali 4 oraz RBAC/tenant: 20 testów / 1237 asercji; Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic poprawne. |
+| 2026-11-14 | Po przeglądzie użytkownika wykonano globalną korektę zgodności z prototypem: sidebar ma 272 px i pełną wysokość, topbar 72 px, nieaktywne grupy są zwinięte, a canvas, karty, tabele, formularze i koralowy akcent korzystają z zatwierdzonych tokenów. Na telefonie działa 64-pikselowa belka i szuflada menu. Dashboard 1440 px oraz leady 390 px w jasnym i ciemnym motywie nie mają overflow ani błędów JavaScript. Walidacja: 13 testów / 92 asercje, Pint, Blade, ESLint, produkcyjny build i `git diff --check` poprawne. |
+| 2026-11-15 | Zakończono etap 5 oraz falę 4: Security Events otrzymało statystyki, kontekst, tłumaczenia i zabezpieczone akcje, a Log Viewer i Job Manager wspólny responsywny wzorzec operatorski z dostępnymi dialogami i lokalnym przewijaniem tabel. Naprawiono też utrwalony stan menu, aby aktywna grupa Administracja zawsze pozostawała rozwinięta. Smoke test 1440/390 px oraz jasnego i ciemnego motywu: brak overflow dokumentu i błędów JavaScript; na telefonie tabele przewijają się lokalnie. Regresja administracji: 40 testów / 1314 asercji; Pint, Blade, ESLint, produkcyjny build i kontrola różnic poprawne. |
 

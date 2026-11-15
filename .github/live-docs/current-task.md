@@ -1,6 +1,6 @@
 # Current Task
 
-**Status:** W toku — etap 5, fala 4; administracja dostępem i SaaS Billing zakończone
+**Status:** W toku — etap 5 zakończony; następny etap: pełna walidacja i kontrolowane wdrożenie
 **Zadanie:** Spójny i intuicyjny interfejs panelu administracyjnego
 **Data rozpoczęcia:** 2026-11-13
 **Plan nadrzędny:** `docs/plans/admin-ui-redesign-plan.md`
@@ -18,6 +18,11 @@
 - [x] Wdrożenie tokenów motywu i tłumaczeń PL/EN/PT.
 - [x] Testy nawigacji, uprawnień i tenant isolation oraz smoke test 1440/390 px.
 - [x] Końcowa walidacja ciemnego motywu i stanów interaktywnych fundamentu.
+- [x] Skorygować globalną powłokę po przeglądzie użytkownika tak, aby wyraźnie odpowiadała zatwierdzonemu prototypowi.
+  - [x] Pełnowysokościowe menu 272 px, belka 72 px, treść do 1320 px oraz prototypowe tokeny kart, tabel, formularzy i przycisków.
+  - [x] Nieaktywne grupy menu zwinięte, aktywna rozwinięta; zachowane siedem grup, RBAC i zwijanie całego sidebara.
+  - [x] Mobilna szuflada i belka 64 px; dashboard 1440 px oraz leady 390 px light/dark bez overflow i błędów JavaScript.
+  - [x] Walidacja: 13 testów / 92 asercje, Pint, Blade, ESLint, produkcyjny build i kontrola różnic poprawne.
 - [x] Rozpoczęcie pilotażu CRM i projektów (etap 4).
 - [x] Odchudzić dashboard i ukrywać widgety bez danych do działania.
 - [x] Naprawić strukturę datasetu wykresu przychodów.
@@ -65,15 +70,23 @@
   - [x] Testowanie reguł i czyszczenie starych logów respektują istniejące uprawnienia.
   - [x] Smoke test pięciu tras przy 1440/390 px oraz regresja 33 testów / 1221 asercji.
   - [x] Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic zakończone poprawnie.
-- [ ] Kontynuować falę 4: administracja i narzędzia systemowe.
+- [x] Zakończyć falę 4: administracja i narzędzia systemowe.
   - [x] Użytkownicy, role, uprawnienia i sesje.
   - [x] Zabezpieczone akcje unieważniania sesji oraz smoke test czterech list przy 1440/390 px.
   - [x] Regresja interfejsu i dostępu: 17 testów / 1201 asercji.
   - [x] SaaS Billing: firmy, plany i subskrypcje; smoke test trzech list przy 1440/390 px.
   - [x] Wspólna regresja dwóch pakietów administracyjnych: 18 testów / 1211 asercji.
   - [x] Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic zakończone poprawnie.
-  - [ ] Integracje i ustawienia firmy.
-  - [ ] Bezpieczeństwo i narzędzia operatorskie.
+  - [x] Integracje i ustawienia firmy: poczta/SMS/domeny, płatności, tracking i dane prawne.
+  - [x] Hub oraz trzy bezpośrednie zasoby kalkulatora; smoke test ośmiu tras przy 1440/390 px.
+  - [x] Wspólna regresja trzech pakietów administracyjnych: 20 testów / 1237 asercji.
+  - [x] Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic zakończone poprawnie.
+  - [x] Bezpieczeństwo: statystyki, responsywna lista, tłumaczenia i serwerowe bramki mutacji.
+  - [x] Log Viewer i Job Manager: wspólny wzorzec operatorski, dostępne dialogi oraz lokalnie przewijane tabele.
+  - [x] Aktywna grupa Administracja pozostaje rozwinięta po nawigacji Livewire.
+  - [x] Smoke test 1440/390 px, jasny/ciemny motyw oraz regresja 40 testów / 1314 asercji.
+  - [x] Pint, Blade, ESLint, produkcyjny build i kontrola różnic zakończone poprawnie.
+- [ ] Rozpocząć etap 6: pełna walidacja szerokości, motywów, dostępności, tłumaczeń, ról i procesów krytycznych.
 
 Źródło prawdy i dziennik postępu: `docs/plans/admin-ui-redesign-plan.md`.
 

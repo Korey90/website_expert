@@ -10,6 +10,11 @@ class ListCalculatorStrings extends ListRecords
 {
     protected static string $resource = CalculatorStringsResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.calculator.strings.list_subheading');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

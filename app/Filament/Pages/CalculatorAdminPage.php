@@ -2,16 +2,24 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
-
 class CalculatorAdminPage extends BasePage
 {
     protected string $view = 'filament.pages.calculator-admin';
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-calculator';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Settings';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+
     protected static ?string $navigationLabel = 'Calculator';
-    protected static ?int    $navigationSort  = 5;
-    protected static ?string $title           = 'Calculator Management';
-    protected static ?string $slug            = 'calculator';
+
+    protected static ?int $navigationSort = 5;
+
+    protected static ?string $title = 'Calculator Management';
+
+    protected static ?string $slug = 'calculator';
+
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.calculator.subheading');
+    }
 }

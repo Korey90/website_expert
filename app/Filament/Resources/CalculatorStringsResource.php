@@ -9,18 +9,29 @@ use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
 class CalculatorStringsResource extends BaseResource
 {
     protected static ?string $model = CalculatorString::class;
+
+    protected static ?string $recordTitleAttribute = 'key';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-language';
+
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+
     protected static ?string $navigationLabel = 'Calculator Strings';
+
     protected static ?int $navigationSort = 8;
+
     protected static bool $shouldRegisterNavigation = false;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['key', 'value_en', 'value_pl', 'value_pt'];
+    }
 
     public static function form(Schema $form): Schema
     {
@@ -36,10 +47,10 @@ class CalculatorStringsResource extends BaseResource
                         ->columnSpan(1),
                     Forms\Components\Select::make('group')
                         ->options([
-                            'header'       => 'Header',
-                            'navigation'   => 'Navigation',
-                            'misc_labels'  => 'Misc Labels',
-                            'result_page'  => 'Result Page',
+                            'header' => 'Header',
+                            'navigation' => 'Navigation',
+                            'misc_labels' => 'Misc Labels',
+                            'result_page' => 'Result Page',
                             'contact_form' => 'Contact Form',
                         ])
                         ->required()
@@ -87,19 +98,21 @@ class CalculatorStringsResource extends BaseResource
             ->columns([
                 Tables\Columns\TextColumn::make('group')
                     ->badge()
-                    ->color(fn(string $state) => match ($state) {
-                        'header'       => 'info',
-                        'navigation'   => 'warning',
-                        'misc_labels'  => 'gray',
-                        'result_page'  => 'success',
+                    ->color(fn (string $state) => match ($state) {
+                        'header' => 'info',
+                        'navigation' => 'warning',
+                        'misc_labels' => 'gray',
+                        'result_page' => 'success',
                         'contact_form' => 'danger',
-                        default        => 'gray',
+                        default => 'gray',
                     })
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('md'),
                 Tables\Columns\TextColumn::make('key')
                     ->searchable()
                     ->fontFamily('mono')
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
                 Tables\Columns\TextColumn::make('value_en')
                     ->label('EN')
                     ->limit(50)
@@ -107,38 +120,47 @@ class CalculatorStringsResource extends BaseResource
                 Tables\Columns\TextColumn::make('value_pl')
                     ->label('PL')
                     ->limit(40)
-                    ->toggleable(),
+                    ->toggleable()
+                    ->visibleFrom('md'),
                 Tables\Columns\TextColumn::make('value_pt')
                     ->label('PT')
                     ->limit(40)
-                    ->toggleable(),
+                    ->toggleable()
+                    ->visibleFrom('lg'),
                 Tables\Columns\TextColumn::make('sort_order')
                     ->sortable()
-                    ->label('Order'),
+                    ->label('Order')
+                    ->visibleFrom('xl'),
             ])
             ->defaultSort('sort_order')
             ->filters([
                 Tables\Filters\SelectFilter::make('group')
                     ->options([
-                        'header'       => 'Header',
-                        'navigation'   => 'Navigation',
-                        'misc_labels'  => 'Misc Labels',
-                        'result_page'  => 'Result Page',
+                        'header' => 'Header',
+                        'navigation' => 'Navigation',
+                        'misc_labels' => 'Misc Labels',
+                        'result_page' => 'Result Page',
                         'contact_form' => 'Contact Form',
                     ]),
             ])
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
-            ]);
+            ])
+            ->recordUrl(fn (CalculatorString $record): ?string => static::canEdit($record)
+                ? static::getUrl('edit', ['record' => $record])
+                : null)
+            ->emptyStateIcon('heroicon-o-language')
+            ->emptyStateHeading(__('admin.migration.administration.calculator.strings.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.administration.calculator.strings.empty_description'));
     }
 
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListCalculatorStrings::route('/'),
+            'index' => Pages\ListCalculatorStrings::route('/'),
             'create' => Pages\CreateCalculatorString::route('/create'),
-            'edit'   => Pages\EditCalculatorString::route('/{record}/edit'),
+            'edit' => Pages\EditCalculatorString::route('/{record}/edit'),
         ];
     }
 }

@@ -11,18 +11,29 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
 class CalculatorStepsResource extends BaseResource
 {
     protected static ?string $model = CalculatorStep::class;
+
+    protected static ?string $recordTitleAttribute = 'question_en';
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-queue-list';
+
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+
     protected static ?string $navigationLabel = 'Calculator Steps';
+
     protected static ?int $navigationSort = 6;
+
     protected static bool $shouldRegisterNavigation = false;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['question_en', 'question_pl', 'question_pt'];
+    }
 
     public static function form(Schema $form): Schema
     {
@@ -98,38 +109,48 @@ class CalculatorStepsResource extends BaseResource
                 Tables\Columns\TextColumn::make('question_en')
                     ->label('Question (EN)')
                     ->limit(60)
-                    ->searchable(),
+                    ->searchable()
+                    ->weight('bold'),
                 Tables\Columns\TextColumn::make('question_pl')
                     ->label('Question (PL)')
                     ->limit(50)
                     ->toggleable()
-                    ->searchable(),
+                    ->searchable()
+                    ->visibleFrom('md'),
                 Tables\Columns\TextColumn::make('question_pt')
                     ->label('Question (PT)')
                     ->limit(50)
                     ->toggleable()
-                    ->searchable(),
+                    ->searchable()
+                    ->visibleFrom('lg'),
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
                     ->label('Active'),
                 Tables\Columns\TextColumn::make('sort_order')
                     ->sortable()
-                    ->label('Order'),
+                    ->label('Order')
+                    ->visibleFrom('xl'),
             ])
             ->defaultSort('sort_order')
             ->reorderable('sort_order')
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
-            ]);
+            ])
+            ->recordUrl(fn (CalculatorStep $record): ?string => static::canEdit($record)
+                ? static::getUrl('edit', ['record' => $record])
+                : null)
+            ->emptyStateIcon('heroicon-o-queue-list')
+            ->emptyStateHeading(__('admin.migration.administration.calculator.steps.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.administration.calculator.steps.empty_description'));
     }
 
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListCalculatorSteps::route('/'),
+            'index' => Pages\ListCalculatorSteps::route('/'),
             'create' => Pages\CreateCalculatorStep::route('/create'),
-            'edit'   => Pages\EditCalculatorStep::route('/{record}/edit'),
+            'edit' => Pages\EditCalculatorStep::route('/{record}/edit'),
         ];
     }
 }

@@ -1,4 +1,16 @@
-<?php namespace App\Filament\Resources\CalculatorPricingResource\Pages;
+<?php
+
+namespace App\Filament\Resources\CalculatorPricingResource\Pages;
+
 use App\Filament\Resources\CalculatorPricingResource;
 use Filament\Resources\Pages\CreateRecord;
-class CreateCalculatorPricing extends CreateRecord { protected static string $resource = CalculatorPricingResource::class; }
+
+class CreateCalculatorPricing extends CreateRecord
+{
+    protected static string $resource = CalculatorPricingResource::class;
+
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.calculator.pricing.create_subheading');
+    }
+}

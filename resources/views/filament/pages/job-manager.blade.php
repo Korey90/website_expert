@@ -1,14 +1,14 @@
 <x-filament-panels::page>
-    <div class="space-y-4">
+    <div class="admin-operator-page">
 
         {{-- ================================================================
              QUEUE STATUS BAR
         ================================================================ --}}
         @php $status = $this->queueStatus(); @endphp
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="admin-operator-stats">
 
             {{-- Worker status --}}
-            <div class="rounded-xl border p-4 flex items-center gap-3
+            <div class="admin-operator-stat rounded-xl border p-4 flex items-center gap-3
                 {{ $status['worker_active']
                     ? 'border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20'
                     : 'border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20' }}">
@@ -31,7 +31,7 @@
             </div>
 
             {{-- Pending --}}
-            <div class="rounded-xl border border-yellow-200 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20 p-4 flex items-center gap-3">
+            <div class="admin-operator-stat rounded-xl border border-yellow-200 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20 p-4 flex items-center gap-3">
                 <x-heroicon-o-clock class="w-7 h-7 text-yellow-500 shrink-0" />
                 <div>
                     <p class="text-2xl font-bold text-yellow-700 dark:text-yellow-300 leading-none">{{ $status['total_pending'] }}</p>
@@ -40,7 +40,7 @@
             </div>
 
             {{-- Active --}}
-            <div class="rounded-xl border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-4 flex items-center gap-3">
+            <div class="admin-operator-stat rounded-xl border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-4 flex items-center gap-3">
                 <x-heroicon-o-bolt class="w-7 h-7 text-blue-500 shrink-0" />
                 <div>
                     <p class="text-2xl font-bold text-blue-700 dark:text-blue-300 leading-none">{{ $status['active'] }}</p>
@@ -49,7 +49,7 @@
             </div>
 
             {{-- Failed --}}
-            <div class="rounded-xl border {{ $status['total_failed'] > 0 ? 'border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40' }} p-4 flex items-center gap-3">
+            <div class="admin-operator-stat rounded-xl border {{ $status['total_failed'] > 0 ? 'border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40' }} p-4 flex items-center gap-3">
                 <x-heroicon-o-x-circle class="w-7 h-7 {{ $status['total_failed'] > 0 ? 'text-red-500' : 'text-gray-400' }} shrink-0" />
                 <div>
                     <p class="text-2xl font-bold {{ $status['total_failed'] > 0 ? 'text-red-700 dark:text-red-300' : 'text-gray-600 dark:text-gray-300' }} leading-none">{{ $status['total_failed'] }}</p>
@@ -67,7 +67,7 @@
         @if(count($status['by_queue']) > 0)
             <x-filament::section :collapsible="true" :collapsed="true">
                 <x-slot name="heading">{{ __('jobs.queues_breakdown') }}</x-slot>
-                <div class="overflow-x-auto">
+                <div class="admin-operator-table-scroll overflow-x-auto" tabindex="0" role="region" aria-label="{{ __('jobs.table_label') }}">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b border-gray-200 dark:border-gray-700 text-left">
@@ -105,7 +105,7 @@
         {{-- ================================================================
              TABS
         ================================================================ --}}
-        <div class="flex gap-1 border-b border-gray-200 dark:border-gray-700">
+        <div class="admin-operator-tabs" role="tablist" aria-label="{{ __('jobs.tabs_label') }}">
             @php
                 $tabs = [
                     'failed'  => [
@@ -127,7 +127,10 @@
             @endphp
             @foreach($tabs as $tabKey => $tab)
                 <button
+                    type="button"
                     wire:click="switchTab('{{ $tabKey }}')"
+                    role="tab"
+                    aria-selected="{{ $activeTab === $tabKey ? 'true' : 'false' }}"
                     class="px-4 py-2.5 text-sm font-medium border-b-2 transition -mb-px
                         {{ $activeTab === $tabKey
                             ? $tab['color'] . ' ' . str_replace('text-', 'border-', explode(' ', $tab['color'])[0])
@@ -148,7 +151,7 @@
              FILTERS BAR (shared)
         ================================================================ --}}
         <x-filament::section>
-            <div class="flex flex-wrap items-end gap-4">
+            <div class="admin-operator-filters">
 
                 {{-- Queue filter (not on batches tab) --}}
                 @if($activeTab !== 'batches')
@@ -157,13 +160,13 @@
                             ? $this->failedJobQueues()
                             : $this->pendingJobQueues();
                     @endphp
-                    <div class="min-w-44">
+                    <div class="admin-operator-field admin-operator-field--compact">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ __('jobs.queue') }}
                         </label>
                         <select
                             wire:model.live="queueFilter"
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            class="admin-operator-control"
                         >
                             <option value="">— {{ __('jobs.all_queues') }} —</option>
                             @foreach($queues as $q)
@@ -174,7 +177,7 @@
                 @endif
 
                 {{-- Search --}}
-                <div class="flex-1 min-w-56">
+                <div class="admin-operator-field">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ __('jobs.search') }}
                     </label>
@@ -182,7 +185,7 @@
                         type="text"
                         wire:model.live.debounce.400ms="search"
                         placeholder="{{ __('jobs.search_placeholder') }}"
-                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        class="admin-operator-control"
                     />
                 </div>
 
@@ -224,11 +227,13 @@
                 </x-slot>
 
                 @if($failed->isEmpty())
-                    <p class="text-sm text-gray-500 dark:text-gray-400 py-6 text-center">
-                        {{ __('jobs.no_failed') }}
-                    </p>
+                    <div class="admin-operator-empty">
+                        <x-heroicon-o-check-circle class="admin-operator-empty-icon" />
+                        <p class="admin-operator-empty-title">{{ __('jobs.no_failed') }}</p>
+                        <p class="admin-operator-empty-description">{{ __('jobs.no_failed_hint') }}</p>
+                    </div>
                 @else
-                    <div class="overflow-x-auto">
+                    <div class="admin-operator-table-scroll overflow-x-auto" tabindex="0" role="region" aria-label="{{ __('jobs.table_label') }}">
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="border-b border-gray-200 dark:border-gray-700 text-left">
@@ -319,11 +324,13 @@
                 </x-slot>
 
                 @if($pending->isEmpty())
-                    <p class="text-sm text-gray-500 dark:text-gray-400 py-6 text-center">
-                        {{ __('jobs.no_pending') }}
-                    </p>
+                    <div class="admin-operator-empty">
+                        <x-heroicon-o-inbox class="admin-operator-empty-icon" />
+                        <p class="admin-operator-empty-title">{{ __('jobs.no_pending') }}</p>
+                        <p class="admin-operator-empty-description">{{ __('jobs.no_pending_hint') }}</p>
+                    </div>
                 @else
-                    <div class="overflow-x-auto">
+                    <div class="admin-operator-table-scroll overflow-x-auto" tabindex="0" role="region" aria-label="{{ __('jobs.table_label') }}">
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="border-b border-gray-200 dark:border-gray-700 text-left">
@@ -414,11 +421,13 @@
                 </x-slot>
 
                 @if($batches->isEmpty())
-                    <p class="text-sm text-gray-500 dark:text-gray-400 py-6 text-center">
-                        {{ __('jobs.no_batches') }}
-                    </p>
+                    <div class="admin-operator-empty">
+                        <x-heroicon-o-square-3-stack-3d class="admin-operator-empty-icon" />
+                        <p class="admin-operator-empty-title">{{ __('jobs.no_batches') }}</p>
+                        <p class="admin-operator-empty-description">{{ __('jobs.no_batches_hint') }}</p>
+                    </div>
                 @else
-                    <div class="overflow-x-auto">
+                    <div class="admin-operator-table-scroll overflow-x-auto" tabindex="0" role="region" aria-label="{{ __('jobs.table_label') }}">
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="border-b border-gray-200 dark:border-gray-700 text-left">
@@ -517,15 +526,20 @@
             <div
                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
                 wire:click.self="closeModal"
+                x-data
+                x-on:keydown.escape.window="$wire.closeModal()"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="admin-job-payload-title"
             >
                 <div class="relative w-full max-w-3xl max-h-[80vh] flex flex-col rounded-xl bg-white dark:bg-gray-900 shadow-2xl">
 
                     {{-- Header --}}
                     <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                        <h3 id="admin-job-payload-title" class="text-sm font-semibold text-gray-800 dark:text-gray-100">
                             {{ $modalTitle }}
                         </h3>
-                        <button wire:click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+                        <button type="button" wire:click="closeModal" aria-label="{{ __('jobs.close') }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
                             <x-heroicon-o-x-mark class="w-5 h-5" />
                         </button>
                     </div>
@@ -543,12 +557,20 @@
              FLUSH CONFIRM MODAL
         ================================================================ --}}
         @if($showConfirmFlush)
-            <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+            <div
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+                x-data
+                x-on:keydown.escape.window="$wire.cancelFlush()"
+                role="alertdialog"
+                aria-modal="true"
+                aria-labelledby="admin-job-flush-title"
+                aria-describedby="admin-job-flush-description"
+            >
                 <div class="w-full max-w-md rounded-xl bg-white dark:bg-gray-900 shadow-2xl p-6 space-y-4">
-                    <h3 class="text-base font-semibold text-gray-800 dark:text-gray-100">
+                    <h3 id="admin-job-flush-title" class="text-base font-semibold text-gray-800 dark:text-gray-100">
                         {{ __('jobs.flush_confirm_title') }}
                     </h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <p id="admin-job-flush-description" class="text-sm text-gray-500 dark:text-gray-400">
                         {{ __('jobs.flush_confirm_body') }}
                     </p>
                     <div class="flex justify-end gap-3 pt-2">

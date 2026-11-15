@@ -271,7 +271,10 @@ class AdminNavigation
         return NavigationGroup::make(__($labelKey))
             ->icon($icon)
             ->items($items)
-            ->collapsible();
+            ->collapsible()
+            ->collapsed(fn (): bool => ! collect($items)->contains(
+                fn (NavigationItem $item): bool => $item->isActive() || $item->isChildItemsActive()
+            ));
     }
 
     /** @param array<NavigationItem|null> $children */

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Pages\CalculatorAdminPage;
 use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\CalculatorPricing;
 use Filament\Actions\Action;
@@ -134,35 +135,44 @@ class CalculatorPricingTableWidget extends BaseWidget
             ->columns([
                 Tables\Columns\TextColumn::make('category')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('md'),
                 Tables\Columns\TextColumn::make('key')
                     ->fontFamily('mono')
-                    ->searchable(),
+                    ->searchable()
+                    ->visibleFrom('md'),
                 Tables\Columns\TextColumn::make('currency')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('lg'),
                 Tables\Columns\TextColumn::make('icon')
-                    ->label('Icon'),
+                    ->label('Icon')
+                    ->visibleFrom('xl'),
                 Tables\Columns\TextColumn::make('label')
                     ->label('Label (EN)')
-                    ->searchable(),
+                    ->searchable()
+                    ->weight('bold'),
                 Tables\Columns\TextColumn::make('label_pl')
                     ->label('PL')
-                    ->toggleable(),
+                    ->toggleable()
+                    ->visibleFrom('lg'),
                 Tables\Columns\TextColumn::make('label_pt')
                     ->label('PT')
-                    ->toggleable(),
+                    ->toggleable()
+                    ->visibleFrom('xl'),
                 Tables\Columns\TextColumn::make('base_cost')
                     ->money(fn (CalculatorPricing $record) => FilamentCurrency::tableCurrency($record))
                     ->label('Base Cost'),
                 Tables\Columns\TextColumn::make('multiplier')
-                    ->label('×'),
+                    ->label('×')
+                    ->visibleFrom('lg'),
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
                     ->label('Active'),
                 Tables\Columns\TextColumn::make('sort_order')
                     ->sortable()
-                    ->label('Order'),
+                    ->label('Order')
+                    ->visibleFrom('xl'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
@@ -182,7 +192,11 @@ class CalculatorPricingTableWidget extends BaseWidget
                     ->label('Add Pricing Option')
                     ->icon('heroicon-o-plus')
                     ->form($this->pricingForm())
-                    ->action(fn (array $data) => CalculatorPricing::create($data)),
+                    ->visible(fn (): bool => CalculatorAdminPage::canAccess())
+                    ->action(function (array $data): void {
+                        abort_unless(CalculatorAdminPage::canAccess(), 403);
+                        CalculatorPricing::create($data);
+                    }),
             ])
             ->recordActions([
                 Action::make('edit')
@@ -190,8 +204,16 @@ class CalculatorPricingTableWidget extends BaseWidget
                     ->label('Edit')
                     ->fillForm(fn ($record) => $record->toArray())
                     ->form($this->pricingForm())
-                    ->action(fn ($record, array $data) => $record->update($data)),
-                DeleteAction::make(),
-            ]);
+                    ->visible(fn (): bool => CalculatorAdminPage::canAccess())
+                    ->action(function ($record, array $data): void {
+                        abort_unless(CalculatorAdminPage::canAccess(), 403);
+                        $record->update($data);
+                    }),
+                DeleteAction::make()
+                    ->visible(fn (): bool => CalculatorAdminPage::canAccess()),
+            ])
+            ->emptyStateIcon('heroicon-o-calculator')
+            ->emptyStateHeading(__('admin.migration.administration.calculator.pricing.empty_heading'))
+            ->emptyStateDescription(__('admin.migration.administration.calculator.pricing.empty_description'));
     }
 }

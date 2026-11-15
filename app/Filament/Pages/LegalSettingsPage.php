@@ -24,6 +24,11 @@ class LegalSettingsPage extends BasePage
     /** @var array<string, mixed>|null */
     public ?array $data = [];
 
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.settings.legal_subheading');
+    }
+
     public function mount(): void
     {
         $this->form->fill([

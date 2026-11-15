@@ -7,49 +7,58 @@ use App\Services\SmsService;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Notifications\Notification;
-use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
 class IntegrationSettingsPage extends BasePage
 {
     protected string $view = 'filament.pages.integration-settings';
 
-    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-puzzle-piece';
-    protected static \UnitEnum|string|null   $navigationGroup = 'Settings';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-puzzle-piece';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+
     protected static ?string $navigationLabel = 'Integrations';
-    protected static ?int    $navigationSort  = 12;
+
+    protected static ?int $navigationSort = 12;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];
+
+    public function getSubheading(): ?string
+    {
+        return __('admin.migration.administration.settings.integrations_subheading');
+    }
 
     public function mount(): void
     {
         $this->form->fill([
             // SMTP
-            'mail_mailer'    => Setting::get('mail_mailer',    config('mail.default', 'smtp')),
-            'mail_host'      => Setting::get('mail_host',      config('mail.mailers.smtp.host', '')),
-            'mail_port'      => Setting::get('mail_port',      config('mail.mailers.smtp.port', 587)),
-            'mail_username'  => Setting::get('mail_username',  config('mail.mailers.smtp.username', '')),
-            'mail_password'  => Setting::get('mail_password',  ''),
-            'mail_from'      => Setting::get('mail_from',      config('mail.from.address', '')),
+            'mail_mailer' => Setting::get('mail_mailer', config('mail.default', 'smtp')),
+            'mail_host' => Setting::get('mail_host', config('mail.mailers.smtp.host', '')),
+            'mail_port' => Setting::get('mail_port', config('mail.mailers.smtp.port', 587)),
+            'mail_username' => Setting::get('mail_username', config('mail.mailers.smtp.username', '')),
+            'mail_password' => Setting::get('mail_password', ''),
+            'mail_from' => Setting::get('mail_from', config('mail.from.address', '')),
             'mail_from_name' => Setting::get('mail_from_name', config('mail.from.name', '')),
-            'mail_encryption'=> Setting::get('mail_encryption',config('mail.mailers.smtp.encryption', 'tls')),
+            'mail_encryption' => Setting::get('mail_encryption', config('mail.mailers.smtp.encryption', 'tls')),
 
             // Twilio SMS
-            'twilio_enabled'  => (bool) Setting::get('twilio_enabled', false),
-            'twilio_sid'      => Setting::get('twilio_sid',        config('services.twilio.sid',  '')),
-            'twilio_token'    => Setting::get('twilio_token',      ''),
-            'twilio_from'     => Setting::get('twilio_from',       config('services.twilio.from', '')),
-            'sms_test_number' => Setting::get('sms_test_number',   ''),
+            'twilio_enabled' => (bool) Setting::get('twilio_enabled', false),
+            'twilio_sid' => Setting::get('twilio_sid', config('services.twilio.sid', '')),
+            'twilio_token' => Setting::get('twilio_token', ''),
+            'twilio_from' => Setting::get('twilio_from', config('services.twilio.from', '')),
+            'sms_test_number' => Setting::get('sms_test_number', ''),
 
             // Openprovider Domain Registrar
-            'op_provider'    => Setting::get('op_provider',    config('services.domain_registrar.provider', 'manual')),
-            'op_username'    => Setting::get('op_username',    config('services.domain_registrar.openprovider.username', '')),
-            'op_password'    => Setting::get('op_password',    ''),
+            'op_provider' => Setting::get('op_provider', config('services.domain_registrar.provider', 'manual')),
+            'op_username' => Setting::get('op_username', config('services.domain_registrar.openprovider.username', '')),
+            'op_password' => Setting::get('op_password', ''),
             'op_reseller_id' => Setting::get('op_reseller_id', config('services.domain_registrar.openprovider.reseller_id', '')),
-            'op_sandbox'     => (bool) Setting::get('op_sandbox', config('services.domain_registrar.openprovider.sandbox', true)),
+            'op_sandbox' => (bool) Setting::get('op_sandbox', config('services.domain_registrar.openprovider.sandbox', true)),
 
             // Domain Pricing — Margins
             'domain_default_margin' => (float) Setting::get('domain_default_margin', 50),
@@ -66,12 +75,12 @@ class IntegrationSettingsPage extends BasePage
                         Forms\Components\Select::make('mail_mailer')
                             ->label('Mail driver')
                             ->options([
-                                'smtp'     => 'SMTP',
+                                'smtp' => 'SMTP',
                                 'postmark' => 'Postmark',
-                                'resend'   => 'Resend',
-                                'mailgun'  => 'Mailgun',
-                                'ses'      => 'Amazon SES',
-                                'log'      => 'Log (testing)',
+                                'resend' => 'Resend',
+                                'mailgun' => 'Mailgun',
+                                'ses' => 'Amazon SES',
+                                'log' => 'Log (testing)',
                             ])
                             ->required(),
 
@@ -89,9 +98,9 @@ class IntegrationSettingsPage extends BasePage
                         Forms\Components\Select::make('mail_encryption')
                             ->label('Encryption')
                             ->options([
-                                'tls'  => 'TLS (STARTTLS)',
-                                'ssl'  => 'SSL',
-                                ''     => 'None',
+                                'tls' => 'TLS (STARTTLS)',
+                                'ssl' => 'SSL',
+                                '' => 'None',
                             ])
                             ->visible(fn ($get) => $get('mail_mailer') === 'smtp'),
 
@@ -163,7 +172,7 @@ class IntegrationSettingsPage extends BasePage
                         Forms\Components\Select::make('op_provider')
                             ->label('Active registrar')
                             ->options([
-                                'manual'       => 'Manual (admin registers domains manually)',
+                                'manual' => 'Manual (admin registers domains manually)',
                                 'openprovider' => 'Openprovider API',
                             ])
                             ->required()
@@ -196,13 +205,13 @@ class IntegrationSettingsPage extends BasePage
         $data = $this->form->getState();
 
         // SMTP settings
-        Setting::set('mail_mailer',    $data['mail_mailer']    ?? 'smtp',  'integrations');
-        Setting::set('mail_host',      $data['mail_host']      ?? '',       'integrations');
-        Setting::set('mail_port',      $data['mail_port']      ?? '587',    'integrations');
-        Setting::set('mail_encryption',$data['mail_encryption']?? 'tls',   'integrations');
-        Setting::set('mail_username',  $data['mail_username']  ?? '',       'integrations');
-        Setting::set('mail_from',      $data['mail_from']      ?? '',       'integrations');
-        Setting::set('mail_from_name', $data['mail_from_name'] ?? '',       'integrations');
+        Setting::set('mail_mailer', $data['mail_mailer'] ?? 'smtp', 'integrations');
+        Setting::set('mail_host', $data['mail_host'] ?? '', 'integrations');
+        Setting::set('mail_port', $data['mail_port'] ?? '587', 'integrations');
+        Setting::set('mail_encryption', $data['mail_encryption'] ?? 'tls', 'integrations');
+        Setting::set('mail_username', $data['mail_username'] ?? '', 'integrations');
+        Setting::set('mail_from', $data['mail_from'] ?? '', 'integrations');
+        Setting::set('mail_from_name', $data['mail_from_name'] ?? '', 'integrations');
 
         // Only overwrite password if a new value was provided
         if (! empty($data['mail_password'])) {
@@ -211,8 +220,8 @@ class IntegrationSettingsPage extends BasePage
 
         // Twilio settings
         Setting::set('twilio_enabled', $data['twilio_enabled'] ? '1' : '0', 'integrations');
-        Setting::set('twilio_sid',     $data['twilio_sid']     ?? '',        'integrations');
-        Setting::set('twilio_from',    $data['twilio_from']    ?? '',        'integrations');
+        Setting::set('twilio_sid', $data['twilio_sid'] ?? '', 'integrations');
+        Setting::set('twilio_from', $data['twilio_from'] ?? '', 'integrations');
 
         if (! empty($data['twilio_token'])) {
             Setting::set('twilio_token', $data['twilio_token'], 'integrations');
@@ -221,10 +230,10 @@ class IntegrationSettingsPage extends BasePage
         Setting::set('sms_test_number', $data['sms_test_number'] ?? '', 'integrations');
 
         // Openprovider settings
-        Setting::set('op_provider',    $data['op_provider']    ?? 'manual', 'integrations');
-        Setting::set('op_username',    $data['op_username']    ?? '',        'integrations');
-        Setting::set('op_reseller_id', $data['op_reseller_id'] ?? '',        'integrations');
-        Setting::set('op_sandbox',     $data['op_sandbox'] ? '1' : '0',     'integrations');
+        Setting::set('op_provider', $data['op_provider'] ?? 'manual', 'integrations');
+        Setting::set('op_username', $data['op_username'] ?? '', 'integrations');
+        Setting::set('op_reseller_id', $data['op_reseller_id'] ?? '', 'integrations');
+        Setting::set('op_sandbox', $data['op_sandbox'] ? '1' : '0', 'integrations');
 
         if (! empty($data['op_password'])) {
             Setting::set('op_password', $data['op_password'], 'integrations');
@@ -247,6 +256,7 @@ class IntegrationSettingsPage extends BasePage
         $to = Setting::get('mail_from', config('mail.from.address', ''));
         if (! $to) {
             Notification::make()->title('No from-address configured')->danger()->send();
+
             return;
         }
 
@@ -254,9 +264,9 @@ class IntegrationSettingsPage extends BasePage
             Mail::raw('This is a test email from WebsiteExpert Integration Settings.', function ($msg) use ($to) {
                 $msg->to($to)->subject('Test Email — WebsiteExpert');
             });
-            Notification::make()->title('Test email sent to ' . $to)->success()->send();
+            Notification::make()->title('Test email sent to '.$to)->success()->send();
         } catch (\Throwable $e) {
-            Notification::make()->title('Failed: ' . $e->getMessage())->danger()->send();
+            Notification::make()->title('Failed: '.$e->getMessage())->danger()->send();
         }
     }
 
@@ -269,13 +279,14 @@ class IntegrationSettingsPage extends BasePage
                 ->body('Enter your mobile number in the "Test phone number" field and save first.')
                 ->danger()
                 ->send();
+
             return;
         }
 
         $sent = app(SmsService::class)->send($to, 'Test SMS from WebsiteExpert. Integration is working! ✅');
 
         if ($sent) {
-            Notification::make()->title('Test SMS sent to ' . $to)->success()->send();
+            Notification::make()->title('Test SMS sent to '.$to)->success()->send();
         } else {
             Notification::make()->title('SMS failed — check credentials and logs')->danger()->send();
         }
@@ -284,12 +295,12 @@ class IntegrationSettingsPage extends BasePage
     public function testOpenproviderConnection(): void
     {
         // Build a temporary client using the values currently in the form (not yet saved)
-        $data     = $this->form->getState();
+        $data = $this->form->getState();
         $username = $data['op_username'] ?? '';
         $password = ! empty($data['op_password'])
             ? $data['op_password']
             : Setting::get('op_password', '');
-        $sandbox  = (bool) ($data['op_sandbox'] ?? true);
+        $sandbox = (bool) ($data['op_sandbox'] ?? true);
 
         if (! $username || ! $password) {
             Notification::make()
@@ -297,6 +308,7 @@ class IntegrationSettingsPage extends BasePage
                 ->body('Enter your Openprovider username and password before testing.')
                 ->danger()
                 ->send();
+
             return;
         }
 
@@ -305,18 +317,18 @@ class IntegrationSettingsPage extends BasePage
             : 'https://api.openprovider.eu/v1beta';
 
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(15)
+            $response = Http::timeout(15)
                 ->post("{$baseUrl}/auth/login", [
                     'username' => $username,
                     'password' => $password,
-                    'ip'       => '0.0.0.0',
+                    'ip' => '0.0.0.0',
                 ]);
 
             $json = $response->json();
 
             if ($response->successful() && ($json['code'] ?? -1) === 0) {
                 // Bust cached token so next real request uses the fresh one
-                \Illuminate\Support\Facades\Cache::forget('openprovider_api_token');
+                Cache::forget('openprovider_api_token');
 
                 Notification::make()
                     ->title('Connection successful')
