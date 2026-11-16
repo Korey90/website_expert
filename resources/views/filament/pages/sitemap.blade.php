@@ -3,9 +3,10 @@
 
         {{-- Sitemap URL card --}}
         <x-filament::section>
-            <x-slot name="heading">{{ __('admin.migration.marketing.sitemap.url_heading') }}</x-slot>
+            <x-slot name="heading">Sitemap URL</x-slot>
             <x-slot name="description">
-                {{ __('admin.migration.marketing.sitemap.url_description') }}
+                Generated dynamically from the database and cached for 1 hour.
+                Use the <strong>Refresh Sitemap</strong> button above to clear the cache and ping search engines.
             </x-slot>
 
             <a
@@ -23,17 +24,17 @@
 
         {{-- What's included --}}
         <x-filament::section>
-            <x-slot name="heading">{{ __('admin.migration.marketing.sitemap.included_heading') }}</x-slot>
+            <x-slot name="heading">What's included</x-slot>
             <x-slot name="description">
-                {{ __('admin.migration.marketing.sitemap.included_description') }}
+                Items are excluded automatically when marked inactive in their respective resources.
             </x-slot>
 
             <ul class="space-y-3">
                 @foreach([
-                    ['label' => __('admin.migration.marketing.sitemap.static_pages'), 'items' => ['/', '/calculate']],
-                    ['label' => __('admin.migration.marketing.sitemap.portfolio'), 'items' => ['/portfolio', '/portfolio/{slug} — ' . __('admin.migration.marketing.sitemap.active_featured_projects')]],
-                    ['label' => __('admin.migration.marketing.sitemap.services'), 'items' => ['/services', '/services/{slug} — ' . __('admin.migration.marketing.sitemap.active_services')]],
-                    ['label' => __('admin.migration.marketing.sitemap.cms_pages'), 'items' => ['/p/{slug} — ' . __('admin.migration.marketing.sitemap.cms_examples')]],
+                    ['label' => 'Static pages',   'items' => ['/', '/calculate']],
+                    ['label' => 'Portfolio',       'items' => ['/portfolio', '/portfolio/{slug} — active featured projects']],
+                    ['label' => 'Services',        'items' => ['/services', '/services/{slug} — active services']],
+                    ['label' => 'CMS pages',       'items' => ['/p/{slug} — privacy policy, terms & conditions, cookies…']],
                 ] as $group)
                     <li>
                         <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5">

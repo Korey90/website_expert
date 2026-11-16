@@ -9,6 +9,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -18,8 +19,6 @@ use Spatie\Permission\Models\Permission;
 class PermissionResource extends BaseResource
 {
     protected static ?string $model = Permission::class;
-
-    protected static ?string $recordTitleAttribute = 'name';
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-key';
 
@@ -32,11 +31,6 @@ class PermissionResource extends BaseResource
     protected static ?string $pluralModelLabel = 'Permissions';
 
     protected static ?int $navigationSort = 3;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name'];
-    }
 
     public static function form(Schema $form): Schema
     {
@@ -83,13 +77,11 @@ class PermissionResource extends BaseResource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('guard_name')
                     ->label('Guard')
                     ->badge()
-                    ->color('gray')
-                    ->visibleFrom('md'),
+                    ->color('gray'),
                 Tables\Columns\TextColumn::make('roles_count')
                     ->label('Roles')
                     ->counts('roles')
@@ -98,9 +90,7 @@ class PermissionResource extends BaseResource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created')
                     ->date('d.m.Y')
-                    ->sortable()
-                    ->visibleFrom('xl')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
             ])
             ->actions([
                 EditAction::make(),
@@ -111,21 +101,15 @@ class PermissionResource extends BaseResource
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->recordUrl(fn (Permission $record): ?string => static::canEdit($record)
-                ? static::getUrl('edit', ['record' => $record])
-                : null)
-            ->emptyStateIcon('heroicon-o-key')
-            ->emptyStateHeading(__('admin.migration.administration.permissions.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.administration.permissions.empty_description'))
             ->defaultSort('name');
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPermissions::route('/'),
+            'index'  => Pages\ListPermissions::route('/'),
             'create' => Pages\CreatePermission::route('/create'),
-            'edit' => Pages\EditPermission::route('/{record}/edit'),
+            'edit'   => Pages\EditPermission::route('/{record}/edit'),
         ];
     }
 }

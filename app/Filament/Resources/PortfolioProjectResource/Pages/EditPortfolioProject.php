@@ -15,11 +15,6 @@ class EditPortfolioProject extends EditRecord
 {
     protected static string $resource = PortfolioProjectResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.marketing.portfolio.edit_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [
@@ -36,10 +31,10 @@ class EditPortfolioProject extends EditRecord
                     $record = $this->getRecord();
 
                     $source = [
-                        'title' => $record->getTranslation('title', 'pl'),
-                        'tag' => $record->getTranslation('tag', 'pl'),
+                        'title'       => $record->getTranslation('title', 'pl'),
+                        'tag'         => $record->getTranslation('tag', 'pl'),
                         'description' => $record->getTranslation('description', 'pl'),
-                        'result' => $record->getTranslation('result', 'pl'),
+                        'result'      => $record->getTranslation('result', 'pl'),
                     ];
 
                     if (empty(array_filter($source))) {
@@ -65,10 +60,10 @@ class EditPortfolioProject extends EditRecord
                     }
 
                     foreach (['en', 'pt'] as $locale) {
-                        $record->setTranslation('title', $locale, $translations[$locale]['title']);
-                        $record->setTranslation('tag', $locale, $translations[$locale]['tag']);
+                        $record->setTranslation('title',       $locale, $translations[$locale]['title']);
+                        $record->setTranslation('tag',         $locale, $translations[$locale]['tag']);
                         $record->setTranslation('description', $locale, $translations[$locale]['description']);
-                        $record->setTranslation('result', $locale, $translations[$locale]['result']);
+                        $record->setTranslation('result',      $locale, $translations[$locale]['result']);
                     }
                     $record->save();
 
@@ -86,3 +81,4 @@ class EditPortfolioProject extends EditRecord
         ];
     }
 }
+

@@ -8,9 +8,4 @@ use Filament\Resources\Pages\ListRecords;
 class ListServiceItems extends ListRecords
 {
     protected static string $resource = ServiceItemResource::class;
-
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.marketing.services.list_subheading');
-    }
 }

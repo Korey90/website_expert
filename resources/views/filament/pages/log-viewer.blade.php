@@ -1,115 +1,145 @@
 <x-filament-panels::page>
-    <div class="admin-operator-page">
-        <x-filament::section class="admin-operator-filter-card">
-            <x-slot name="heading">{{ __('admin.migration.administration.log_viewer.filters_heading') }}</x-slot>
-            <x-slot name="description">{{ __('admin.migration.administration.log_viewer.filters_description') }}</x-slot>
+    <div class="space-y-4">
 
-            <div class="admin-operator-filters">
-                <label class="admin-operator-field">
-                    <span>{{ __('admin.migration.administration.log_viewer.file') }}</span>
-                    <select wire:model.live="selectedFile" class="admin-operator-control">
+        {{-- Filters bar --}}
+        <x-filament::section>
+            <div class="flex flex-wrap items-end gap-4">
+
+                {{-- File selector --}}
+                <div class="flex-1 min-w-48">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Log file
+                    </label>
+                    <select
+                        wire:model.live="selectedFile"
+                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
                         @forelse($this->logFiles() as $file)
                             <option value="{{ $file }}">{{ $file }}</option>
                         @empty
-                            <option value="">{{ __('admin.migration.administration.log_viewer.no_files') }}</option>
+                            <option value="">— no log files —</option>
                         @endforelse
                     </select>
-                </label>
+                </div>
 
-                <label class="admin-operator-field admin-operator-field--compact">
-                    <span>{{ __('admin.migration.administration.log_viewer.level') }}</span>
-                    <select wire:model.live="levelFilter" class="admin-operator-control">
+                {{-- Level filter --}}
+                <div class="min-w-36">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Level
+                    </label>
+                    <select
+                        wire:model.live="levelFilter"
+                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
                         @foreach($this->levels() as $level)
                             <option value="{{ $level }}">{{ $level }}</option>
                         @endforeach
                     </select>
-                </label>
+                </div>
 
-                <label class="admin-operator-field">
-                    <span>{{ __('admin.migration.administration.log_viewer.search') }}</span>
+                {{-- Search --}}
+                <div class="flex-1 min-w-56">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Search
+                    </label>
                     <input
-                        type="search"
+                        type="text"
                         wire:model.live.debounce.400ms="search"
-                        placeholder="{{ __('admin.migration.administration.log_viewer.search_placeholder') }}"
-                        class="admin-operator-control"
+                        placeholder="Filter by message…"
+                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                     />
-                </label>
+                </div>
+
             </div>
         </x-filament::section>
 
+        {{-- Log table --}}
         @php
             $data = $this->paginatedEntries();
         @endphp
 
         <x-filament::section>
-            <x-slot name="heading">{{ __('admin.migration.administration.log_viewer.entries') }}</x-slot>
-            <x-slot name="description">
-                {{ trans_choice('admin.migration.administration.log_viewer.entries_count', $data['total'], ['count' => number_format($data['total'])]) }}
+            <x-slot name="heading">
+                Entries
+                <span class="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                    ({{ number_format($data['total']) }} total)
+                </span>
             </x-slot>
 
             @if(count($data['items']) === 0)
-                <div class="admin-operator-empty">
-                    <x-heroicon-o-document-magnifying-glass class="admin-operator-empty-icon" />
-                    <p class="admin-operator-empty-title">{{ __('admin.migration.administration.log_viewer.empty_heading') }}</p>
-                    <p class="admin-operator-empty-description">{{ __('admin.migration.administration.log_viewer.empty_description') }}</p>
-                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">No log entries found.</p>
             @else
-                <div
-                    class="admin-operator-table-scroll"
-                    tabindex="0"
-                    role="region"
-                    aria-label="{{ __('admin.migration.administration.log_viewer.table_label') }}"
-                >
-                    <table class="admin-operator-table admin-operator-table--logs">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
                         <thead>
-                            <tr>
-                                <th>{{ __('admin.migration.administration.log_viewer.datetime') }}</th>
-                                <th>{{ __('admin.migration.administration.log_viewer.level') }}</th>
-                                <th>{{ __('admin.migration.administration.log_viewer.message') }}</th>
+                            <tr class="border-b border-gray-200 dark:border-gray-700 text-left">
+                                <th class="py-2 pr-4 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap w-44">Date / Time</th>
+                                <th class="py-2 pr-4 font-semibold text-gray-600 dark:text-gray-400 w-24">Level</th>
+                                <th class="py-2 font-semibold text-gray-600 dark:text-gray-400">Message</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                             @foreach($data['items'] as $entry)
-                                <tr>
-                                    <td class="admin-operator-mono admin-operator-nowrap">{{ $entry['datetime'] ?: '—' }}</td>
-                                    <td>
+                                <tr class="align-top hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                    <td class="py-2 pr-4 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap font-mono">
+                                        {{ $entry['datetime'] ?: '—' }}
+                                    </td>
+                                    <td class="py-2 pr-4">
                                         @php
                                             $badgeClass = match(strtoupper($entry['level'])) {
-                                                'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY' => 'admin-operator-badge--danger',
-                                                'WARNING' => 'admin-operator-badge--warning',
-                                                'NOTICE', 'INFO' => 'admin-operator-badge--info',
-                                                default => 'admin-operator-badge--neutral',
+                                                'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY' =>
+                                                    'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+                                                'WARNING' =>
+                                                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+                                                'NOTICE', 'INFO' =>
+                                                    'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+                                                'DEBUG' =>
+                                                    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
+                                                default =>
+                                                    'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
                                             };
                                         @endphp
-                                        <span class="admin-operator-badge {{ $badgeClass }}">{{ $entry['level'] }}</span>
+                                        <span class="inline-block rounded px-1.5 py-0.5 text-xs font-semibold {{ $badgeClass }}">
+                                            {{ $entry['level'] }}
+                                        </span>
                                     </td>
-                                    <td><pre class="admin-operator-log-message">{{ $entry['message'] }}</pre></td>
+                                    <td class="py-2">
+                                        <p class="font-mono text-xs text-gray-800 dark:text-gray-200 break-all whitespace-pre-wrap leading-relaxed">{{ $entry['message'] }}</p>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
 
+                {{-- Pagination --}}
                 @if($data['totalPages'] > 1)
-                    <nav class="admin-operator-pagination" aria-label="{{ __('admin.migration.administration.log_viewer.pagination_label') }}">
+                    <div class="mt-4 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                         <span>
-                            {{ __('admin.migration.administration.log_viewer.page_status', [
-                                'page' => $data['page'],
-                                'pages' => $data['totalPages'],
-                                'count' => number_format($data['total']),
-                            ]) }}
+                            Page {{ $data['page'] }} of {{ $data['totalPages'] }}
+                            &nbsp;&middot;&nbsp;
+                            {{ number_format($data['total']) }} entries
                         </span>
-                        <div>
-                            <button type="button" wire:click="previousPage" @disabled($data['page'] <= 1) class="admin-operator-button">
-                                {{ __('admin.migration.administration.log_viewer.previous') }}
+                        <div class="flex gap-2">
+                            <button
+                                wire:click="previousPage"
+                                @if($data['page'] <= 1) disabled @endif
+                                class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                            >
+                                &larr; Prev
                             </button>
-                            <button type="button" wire:click="nextPage" @disabled($data['page'] >= $data['totalPages']) class="admin-operator-button">
-                                {{ __('admin.migration.administration.log_viewer.next') }}
+                            <button
+                                wire:click="nextPage"
+                                @if($data['page'] >= $data['totalPages']) disabled @endif
+                                class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                            >
+                                Next &rarr;
                             </button>
                         </div>
-                    </nav>
+                    </div>
                 @endif
             @endif
         </x-filament::section>
+
     </div>
 </x-filament-panels::page>

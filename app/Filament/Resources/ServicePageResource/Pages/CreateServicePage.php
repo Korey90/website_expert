@@ -10,11 +10,6 @@ class CreateServicePage extends CreateRecord
 {
     protected static string $resource = ServicePageResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.marketing.service_pages.create_subheading');
-    }
-
     protected function afterCreate(): void
     {
         /** @var ServicePage $page */
@@ -23,11 +18,11 @@ class CreateServicePage extends CreateRecord
         foreach (collect($this->data['blocks'] ?? [])->values() as $index => $blockData) {
             $page->blocks()->create([
                 'service_page_id' => $page->id,
-                'type' => $blockData['type'] ?? 'hero',
-                'sort_order' => $index + 1,
-                'is_active' => (bool) ($blockData['is_active'] ?? true),
-                'content' => self::normalizeContent(is_array($blockData['content'] ?? null) ? $blockData['content'] : []),
-                'settings' => is_array($blockData['settings'] ?? null) ? $blockData['settings'] : [],
+                'type'            => $blockData['type'] ?? 'hero',
+                'sort_order'      => $index + 1,
+                'is_active'       => (bool) ($blockData['is_active'] ?? true),
+                'content'         => self::normalizeContent(is_array($blockData['content'] ?? null) ? $blockData['content'] : []),
+                'settings'        => is_array($blockData['settings'] ?? null) ? $blockData['settings'] : [],
             ]);
         }
     }
@@ -40,7 +35,7 @@ class CreateServicePage extends CreateRecord
     private static function normalizeContent(array $content): array
     {
         foreach ($content as $key => $value) {
-            if (! is_array($value)) {
+            if (!is_array($value)) {
                 continue;
             }
 
@@ -48,33 +43,30 @@ class CreateServicePage extends CreateRecord
                 continue;
             }
 
-            if (! array_is_list($value)) {
+            if (!array_is_list($value)) {
                 $firstVal = array_values($value)[0] ?? null;
 
                 if (is_string($firstVal) && str_contains((string) $firstVal, '/')) {
                     $content[$key] = $firstVal;
-
                     continue;
                 }
 
                 if (is_array($firstVal)) {
                     $content[$key] = array_values(array_map(
-                        fn (array $item) => self::normalizeContent($item),
+                        fn(array $item) => self::normalizeContent($item),
                         array_filter($value, 'is_array')
                     ));
-
                     continue;
                 }
             }
 
             if (array_is_list($value)) {
                 $content[$key] = array_map(
-                    fn ($item) => is_array($item) ? self::normalizeContent($item) : $item,
+                    fn($item) => is_array($item) ? self::normalizeContent($item) : $item,
                     $value
                 );
             }
         }
-
         return $content;
     }
 }

@@ -10,11 +10,6 @@ class EditLedgerAccount extends EditRecord
 {
     protected static string $resource = LedgerAccountResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.accounting.ledger_accounts.edit_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [DeleteAction::make()];

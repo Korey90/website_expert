@@ -12,11 +12,6 @@ class ListPermissions extends ListRecords
 {
     protected static string $resource = PermissionResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.administration.permissions.list_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [

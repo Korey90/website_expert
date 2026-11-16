@@ -18,8 +18,6 @@ class CalculatorPricingResource extends BaseResource
 {
     protected static ?string $model = CalculatorPricing::class;
 
-    protected static ?string $recordTitleAttribute = 'label';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-calculator';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
@@ -29,11 +27,6 @@ class CalculatorPricingResource extends BaseResource
     protected static ?int $navigationSort = 7;
 
     protected static bool $shouldRegisterNavigation = false;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['key', 'label', 'label_pl', 'label_pt', 'category'];
-    }
 
     public static function form(Schema $form): Schema
     {
@@ -113,16 +106,16 @@ class CalculatorPricingResource extends BaseResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('category')->badge()->sortable()->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('key')->searchable()->fontFamily('mono')->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('currency')->badge()->sortable()->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('icon')->label('Icon')->visibleFrom('xl'),
-                Tables\Columns\TextColumn::make('label')->searchable()->label('Label (EN)')->weight('bold'),
+                Tables\Columns\TextColumn::make('category')->badge()->sortable(),
+                Tables\Columns\TextColumn::make('key')->searchable(),
+                Tables\Columns\TextColumn::make('currency')->badge()->sortable(),
+                Tables\Columns\TextColumn::make('icon')->label('Icon'),
+                Tables\Columns\TextColumn::make('label')->searchable()->label('Label (EN)'),
                 Tables\Columns\TextColumn::make('base_cost')->money(fn (CalculatorPricing $record) => FilamentCurrency::tableCurrency($record))->label('Base Cost'),
-                Tables\Columns\TextColumn::make('multiplier')->label('Multiplier')->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('monthly_cost')->money(fn (CalculatorPricing $record) => FilamentCurrency::tableCurrency($record))->visibleFrom('xl'),
+                Tables\Columns\TextColumn::make('multiplier')->label('Multiplier'),
+                Tables\Columns\TextColumn::make('monthly_cost')->money(fn (CalculatorPricing $record) => FilamentCurrency::tableCurrency($record)),
                 Tables\Columns\IconColumn::make('is_active')->boolean(),
-                Tables\Columns\TextColumn::make('sort_order')->sortable()->visibleFrom('xl'),
+                Tables\Columns\TextColumn::make('sort_order')->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
@@ -138,10 +131,6 @@ class CalculatorPricingResource extends BaseResource
                     ]),
             ])
             ->actions([ViewAction::make(), EditAction::make(), DeleteAction::make()])
-            ->recordUrl(fn (CalculatorPricing $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-calculator')
-            ->emptyStateHeading(__('admin.migration.administration.calculator.pricing.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.administration.calculator.pricing.empty_description'))
             ->reorderable('sort_order')
             ->defaultSort('sort_order');
     }

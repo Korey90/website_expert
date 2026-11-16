@@ -19,8 +19,6 @@ class LedgerAccountResource extends BaseResource
 {
     protected static ?string $model = LedgerAccount::class;
 
-    protected static ?string $recordTitleAttribute = 'code';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-book-open';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
@@ -40,12 +38,6 @@ class LedgerAccountResource extends BaseResource
     public static function getPluralModelLabel(): string
     {
         return __('finance.ledger_accounts.plural');
-    }
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['code', 'name'];
     }
 
     public static function form(Schema $schema): Schema
@@ -90,10 +82,10 @@ class LedgerAccountResource extends BaseResource
                 Tables\Columns\TextColumn::make('code')->label(__('finance.ledger_accounts.fields.code'))->searchable()->sortable()->weight('bold'),
                 Tables\Columns\TextColumn::make('name')->label(__('finance.ledger_accounts.fields.name'))->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('type')->label(__('finance.ledger_accounts.fields.type'))->badge()->formatStateUsing(fn (string $state): string => __('finance.ledger_accounts.types.'.$state)),
-                Tables\Columns\TextColumn::make('parent.code')->label(__('finance.ledger_accounts.fields.parent'))->placeholder('—')->visibleFrom('lg'),
-                Tables\Columns\IconColumn::make('is_postable')->label(__('finance.ledger_accounts.fields.is_postable'))->boolean()->visibleFrom('md'),
-                Tables\Columns\IconColumn::make('is_active')->label(__('finance.ledger_accounts.fields.is_active'))->boolean()->visibleFrom('md'),
-                Tables\Columns\IconColumn::make('is_system')->label(__('finance.ledger_accounts.fields.is_system'))->boolean()->visibleFrom('xl')->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('parent.code')->label(__('finance.ledger_accounts.fields.parent'))->placeholder('—'),
+                Tables\Columns\IconColumn::make('is_postable')->label(__('finance.ledger_accounts.fields.is_postable'))->boolean(),
+                Tables\Columns\IconColumn::make('is_active')->label(__('finance.ledger_accounts.fields.is_active'))->boolean(),
+                Tables\Columns\IconColumn::make('is_system')->label(__('finance.ledger_accounts.fields.is_system'))->boolean(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')->options(collect(LedgerAccount::TYPES)->mapWithKeys(fn (string $type): array => [$type => __('finance.ledger_accounts.types.'.$type)])->all()),
@@ -101,12 +93,6 @@ class LedgerAccountResource extends BaseResource
             ])
             ->actions([EditAction::make(), DeleteAction::make()])
             ->bulkActions([BulkActionGroup::make([DeleteBulkAction::make()])])
-            ->recordUrl(fn (LedgerAccount $record): ?string => static::canEdit($record)
-                ? static::getUrl('edit', ['record' => $record])
-                : null)
-            ->emptyStateIcon('heroicon-o-book-open')
-            ->emptyStateHeading(__('admin.migration.accounting.ledger_accounts.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.accounting.ledger_accounts.empty_description'))
             ->defaultSort('code');
     }
 

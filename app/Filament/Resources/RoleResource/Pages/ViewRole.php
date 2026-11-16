@@ -13,11 +13,6 @@ class ViewRole extends ViewRecord
 
     protected string $view = 'filament.resources.role-resource.pages.view-role';
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.administration.roles.view_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [

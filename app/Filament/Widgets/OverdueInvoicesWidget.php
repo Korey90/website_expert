@@ -14,8 +14,7 @@ class OverdueInvoicesWidget extends BaseWidget
 {
     public static function canView(): bool
     {
-        return PermissionHelper::allows(auth()->user(), 'view_invoices')
-            && Invoice::withoutTrashed()->whereIn('status', ['overdue', 'sent', 'partially_paid'])->exists();
+        return PermissionHelper::allows(auth()->user(), 'view_invoices');
     }
 
     protected static ?int $sort = 7;
@@ -24,10 +23,7 @@ class OverdueInvoicesWidget extends BaseWidget
 
     protected static bool $isLazy = true;
 
-    public function getTableHeading(): string
-    {
-        return __('admin.dashboard.widgets.overdue_invoices.heading');
-    }
+    protected static ?string $heading = 'Overdue & Unpaid Invoices';
 
     public function table(Table $table): Table
     {

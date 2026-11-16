@@ -4,8 +4,6 @@ namespace App\Filament\Pages;
 
 use App\Models\NavItem;
 use App\Models\Setting;
-use App\Models\SiteSection;
-use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -16,7 +14,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\Size;
 use Filament\Tables;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -30,34 +27,26 @@ class NavbarSettingsPage extends BasePage implements HasTable
 
     protected static ?string $slug = 'navbar';
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-bars-3';
-
-    protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
-
+    protected static \BackedEnum|string|null $navigationIcon  = 'heroicon-o-bars-3';
+    protected static \UnitEnum|string|null   $navigationGroup = 'Marketing';
     protected static ?string $navigationLabel = 'Navigation Menu';
-
-    protected static ?int $navigationSort = 0;
+    protected static ?int    $navigationSort  = 0;
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.marketing.navigation.subheading');
-    }
-
     public function mount(): void
     {
         $this->form->fill([
-            'brand_name' => Setting::get('nav_brand_name', 'WebsiteExpert'),
-            'cta_href' => Setting::get('nav_cta_href', '#contact'),
-            'cta_text_pl' => Setting::get('nav_cta_text_pl', 'Bezpłatna wycena'),
-            'cta_text_en' => Setting::get('nav_cta_text_en', 'Free Quote'),
-            'cta_text_pt' => Setting::get('nav_cta_text_pt', 'Orçamento Gratuito'),
-            'show_cta_button' => (bool) Setting::get('nav_show_cta_button', true),
-            'show_lang_switcher' => (bool) Setting::get('nav_show_lang_switcher', true),
-            'show_theme_toggle' => (bool) Setting::get('nav_show_theme_toggle', true),
-            'show_client_portal' => (bool) Setting::get('nav_show_client_portal', true),
+            'brand_name'          => Setting::get('nav_brand_name',          'WebsiteExpert'),
+            'cta_href'            => Setting::get('nav_cta_href',            '#contact'),
+            'cta_text_pl'         => Setting::get('nav_cta_text_pl',         'Bezpłatna wycena'),
+            'cta_text_en'         => Setting::get('nav_cta_text_en',         'Free Quote'),
+            'cta_text_pt'         => Setting::get('nav_cta_text_pt',         'Orçamento Gratuito'),
+            'show_cta_button'     => (bool) Setting::get('nav_show_cta_button',     true),
+            'show_lang_switcher'  => (bool) Setting::get('nav_show_lang_switcher',  true),
+            'show_theme_toggle'   => (bool) Setting::get('nav_show_theme_toggle',   true),
+            'show_client_portal'  => (bool) Setting::get('nav_show_client_portal',  true),
         ]);
     }
 
@@ -101,13 +90,13 @@ class NavbarSettingsPage extends BasePage implements HasTable
                     ->description('Call-to-action button displayed on the right side of the navbar.')
                     ->columns(2)
                     ->headerActions([
-                        Action::make('toggle_cta_button')
+                        \Filament\Actions\Action::make('toggle_cta_button')
                             ->label(fn () => ($this->data['show_cta_button'] ?? true) ? 'Enabled' : 'Disabled')
                             ->icon(fn () => ($this->data['show_cta_button'] ?? true) ? 'heroicon-o-eye' : 'heroicon-o-eye-slash')
                             ->color(fn () => ($this->data['show_cta_button'] ?? true) ? 'success' : 'gray')
-                            ->size(Size::Small)
+                            ->size(\Filament\Support\Enums\Size::Small)
                             ->action(function () {
-                                $this->data['show_cta_button'] = ! ($this->data['show_cta_button'] ?? true);
+                                $this->data['show_cta_button'] = !($this->data['show_cta_button'] ?? true);
                             }),
                     ])
                     ->schema([
@@ -137,15 +126,15 @@ class NavbarSettingsPage extends BasePage implements HasTable
     {
         $data = $this->form->getState();
 
-        Setting::set('nav_brand_name', $data['brand_name'] ?? 'WebsiteExpert', 'navbar');
-        Setting::set('nav_cta_href', $data['cta_href'] ?? '#contact', 'navbar');
-        Setting::set('nav_cta_text_pl', $data['cta_text_pl'] ?? '', 'navbar');
-        Setting::set('nav_cta_text_en', $data['cta_text_en'] ?? '', 'navbar');
-        Setting::set('nav_cta_text_pt', $data['cta_text_pt'] ?? '', 'navbar');
-        Setting::set('nav_show_cta_button', $data['show_cta_button'] ?? true, 'navbar');
-        Setting::set('nav_show_lang_switcher', $data['show_lang_switcher'] ?? true, 'navbar');
-        Setting::set('nav_show_theme_toggle', $data['show_theme_toggle'] ?? true, 'navbar');
-        Setting::set('nav_show_client_portal', $data['show_client_portal'] ?? true, 'navbar');
+        Setting::set('nav_brand_name',         $data['brand_name']         ?? 'WebsiteExpert', 'navbar');
+        Setting::set('nav_cta_href',           $data['cta_href']           ?? '#contact',       'navbar');
+        Setting::set('nav_cta_text_pl',        $data['cta_text_pl']        ?? '',               'navbar');
+        Setting::set('nav_cta_text_en',        $data['cta_text_en']        ?? '',               'navbar');
+        Setting::set('nav_cta_text_pt',        $data['cta_text_pt']        ?? '',               'navbar');
+        Setting::set('nav_show_cta_button',    $data['show_cta_button']    ?? true,             'navbar');
+        Setting::set('nav_show_lang_switcher', $data['show_lang_switcher'] ?? true,             'navbar');
+        Setting::set('nav_show_theme_toggle',  $data['show_theme_toggle']  ?? true,             'navbar');
+        Setting::set('nav_show_client_portal', $data['show_client_portal'] ?? true,             'navbar');
 
         Notification::make()
             ->title('Navbar settings saved')
@@ -189,7 +178,7 @@ class NavbarSettingsPage extends BasePage implements HasTable
                         ->nullable()
                         ->searchable()
                         ->options(function () {
-                            return SiteSection::orderBy('sort_order')
+                            return \App\Models\SiteSection::orderBy('sort_order')
                                 ->pluck('key', 'key')
                                 ->toArray();
                         })
@@ -222,36 +211,29 @@ class NavbarSettingsPage extends BasePage implements HasTable
                 Tables\Columns\TextColumn::make('sort_order')
                     ->label('#')
                     ->sortable()
-                    ->visibleFrom('md')
                     ->width('50px'),
 
                 Tables\Columns\TextColumn::make('label_display')
                     ->label('Label')
                     ->getStateUsing(function (NavItem $record): string {
                         $locale = app()->getLocale();
-
                         return $record->getTranslation('label', $locale)
                             ?: $record->getTranslation('label', 'en')
                             ?: '—';
-                    })
-                    ->weight('bold'),
+                    }),
 
                 Tables\Columns\TextColumn::make('href')
                     ->label('URL')
-                    ->limit(40)
-                    ->visibleFrom('md'),
+                    ->limit(40),
 
                 Tables\Columns\BadgeColumn::make('section_key')
                     ->label('Section Key')
                     ->color('info')
-                    ->placeholder('—')
-                    ->visibleFrom('lg'),
+                    ->placeholder('—'),
 
                 Tables\Columns\IconColumn::make('open_in_new_tab')
                     ->label('New Tab')
-                    ->boolean()
-                    ->visibleFrom('xl')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->boolean(),
 
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->label('Active'),
@@ -274,8 +256,8 @@ class NavbarSettingsPage extends BasePage implements HasTable
             ->bulkActions([
                 DeleteBulkAction::make(),
             ])
-            ->emptyStateIcon('heroicon-o-bars-3')
-            ->emptyStateHeading(__('admin.migration.marketing.navigation.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.marketing.navigation.empty_description'));
+            ->emptyStateHeading('No menu items yet')
+            ->emptyStateDescription('Add your first navigation link using the button above.');
     }
 }
+

@@ -32,11 +32,6 @@ class ManagementCashFlowPage extends BasePage
         return __('finance.management_cash_flow.title');
     }
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.reports.cash_flow');
-    }
-
     public function mount(): void
     {
         $period = AccountingPeriod::query()

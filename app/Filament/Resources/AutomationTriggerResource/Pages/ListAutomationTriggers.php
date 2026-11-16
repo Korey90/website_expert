@@ -10,11 +10,6 @@ class ListAutomationTriggers extends ListRecords
 {
     protected static string $resource = AutomationTriggerResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.automation.triggers.list_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [Actions\CreateAction::make()];

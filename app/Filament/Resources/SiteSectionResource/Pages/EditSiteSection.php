@@ -10,11 +10,6 @@ class EditSiteSection extends EditRecord
 {
     protected static string $resource = SiteSectionResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.marketing.sections.edit_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [DeleteAction::make()];
@@ -42,8 +37,8 @@ class EditSiteSection extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $record = $this->getRecord();
-        $existing = $record->extra ?? [];
+        $record    = $this->getRecord();
+        $existing  = $record->extra ?? [];
         $submitted = $data['extra'] ?? [];
 
         // For sections using the KeyValue fallback panel, extra_kv holds

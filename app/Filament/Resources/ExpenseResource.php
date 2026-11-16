@@ -37,8 +37,6 @@ class ExpenseResource extends BaseResource
 {
     protected static ?string $model = Expense::class;
 
-    protected static ?string $recordTitleAttribute = 'business_purpose';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-receipt-percent';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
@@ -58,12 +56,6 @@ class ExpenseResource extends BaseResource
     public static function getPluralModelLabel(): string
     {
         return __('finance.expenses.plural');
-    }
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['supplier_invoice_number', 'supplier.name', 'business_purpose'];
     }
 
     public static function form(Schema $schema): Schema
@@ -346,13 +338,13 @@ class ExpenseResource extends BaseResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('supplier_invoice_number')->label(__('finance.expenses.fields.supplier_invoice_number'))->searchable()->sortable()->placeholder('—')->weight('bold'),
-                Tables\Columns\TextColumn::make('supplier.name')->label(__('finance.expenses.fields.supplier'))->searchable()->sortable()->placeholder('—')->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('supplier.name')->label(__('finance.expenses.fields.supplier'))->searchable()->sortable()->placeholder('—'),
+                Tables\Columns\TextColumn::make('supplier_invoice_number')->label(__('finance.expenses.fields.supplier_invoice_number'))->searchable()->sortable()->placeholder('—'),
                 Tables\Columns\TextColumn::make('status')->label(__('finance.expenses.fields.status'))->badge()->formatStateUsing(fn (string $state): string => __('finance.expenses.statuses.'.$state))->color(fn (string $state): string => self::statusColor($state)),
                 Tables\Columns\TextColumn::make('total')->label(__('finance.expenses.fields.total'))->money(fn (Expense $record): string => FilamentCurrency::tableCurrency($record))->sortable(),
-                Tables\Columns\TextColumn::make('amount_due')->label(__('finance.expenses.fields.amount_due'))->money(fn (Expense $record): string => FilamentCurrency::tableCurrency($record))->sortable()->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('issue_date')->label(__('finance.expenses.fields.issue_date'))->date()->sortable()->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('due_date')->label(__('finance.expenses.fields.due_date'))->date()->sortable()->placeholder('—')->visibleFrom('xl')->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('amount_due')->label(__('finance.expenses.fields.amount_due'))->money(fn (Expense $record): string => FilamentCurrency::tableCurrency($record))->sortable(),
+                Tables\Columns\TextColumn::make('issue_date')->label(__('finance.expenses.fields.issue_date'))->date()->sortable(),
+                Tables\Columns\TextColumn::make('due_date')->label(__('finance.expenses.fields.due_date'))->date()->sortable()->placeholder('—'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('supplier_id')->label(__('finance.expenses.fields.supplier'))->relationship('supplier', 'name')->searchable()->preload(),
@@ -371,10 +363,6 @@ class ExpenseResource extends BaseResource
                     RestoreBulkAction::make(),
                 ]),
             ])
-            ->recordUrl(fn (Expense $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-receipt-percent')
-            ->emptyStateHeading(__('admin.migration.procurement.expenses.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.procurement.expenses.empty_description'))
             ->defaultSort('issue_date', 'desc');
     }
 

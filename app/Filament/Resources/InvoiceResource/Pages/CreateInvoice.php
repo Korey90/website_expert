@@ -11,11 +11,6 @@ class CreateInvoice extends CreateRecord
 {
     protected static string $resource = InvoiceResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.sales_documents.invoices.create_subheading');
-    }
-
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['created_by'] = Auth::id();

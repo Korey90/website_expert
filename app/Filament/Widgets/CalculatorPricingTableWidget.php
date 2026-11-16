@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Pages\CalculatorAdminPage;
 use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\CalculatorPricing;
 use Filament\Actions\Action;
@@ -135,44 +134,35 @@ class CalculatorPricingTableWidget extends BaseWidget
             ->columns([
                 Tables\Columns\TextColumn::make('category')
                     ->badge()
-                    ->sortable()
-                    ->visibleFrom('md'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('key')
                     ->fontFamily('mono')
-                    ->searchable()
-                    ->visibleFrom('md'),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('currency')
                     ->badge()
-                    ->sortable()
-                    ->visibleFrom('lg'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('icon')
-                    ->label('Icon')
-                    ->visibleFrom('xl'),
+                    ->label('Icon'),
                 Tables\Columns\TextColumn::make('label')
                     ->label('Label (EN)')
-                    ->searchable()
-                    ->weight('bold'),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('label_pl')
                     ->label('PL')
-                    ->toggleable()
-                    ->visibleFrom('lg'),
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('label_pt')
                     ->label('PT')
-                    ->toggleable()
-                    ->visibleFrom('xl'),
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('base_cost')
                     ->money(fn (CalculatorPricing $record) => FilamentCurrency::tableCurrency($record))
                     ->label('Base Cost'),
                 Tables\Columns\TextColumn::make('multiplier')
-                    ->label('×')
-                    ->visibleFrom('lg'),
+                    ->label('×'),
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
                     ->label('Active'),
                 Tables\Columns\TextColumn::make('sort_order')
                     ->sortable()
-                    ->label('Order')
-                    ->visibleFrom('xl'),
+                    ->label('Order'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
@@ -192,11 +182,7 @@ class CalculatorPricingTableWidget extends BaseWidget
                     ->label('Add Pricing Option')
                     ->icon('heroicon-o-plus')
                     ->form($this->pricingForm())
-                    ->visible(fn (): bool => CalculatorAdminPage::canAccess())
-                    ->action(function (array $data): void {
-                        abort_unless(CalculatorAdminPage::canAccess(), 403);
-                        CalculatorPricing::create($data);
-                    }),
+                    ->action(fn (array $data) => CalculatorPricing::create($data)),
             ])
             ->recordActions([
                 Action::make('edit')
@@ -204,16 +190,8 @@ class CalculatorPricingTableWidget extends BaseWidget
                     ->label('Edit')
                     ->fillForm(fn ($record) => $record->toArray())
                     ->form($this->pricingForm())
-                    ->visible(fn (): bool => CalculatorAdminPage::canAccess())
-                    ->action(function ($record, array $data): void {
-                        abort_unless(CalculatorAdminPage::canAccess(), 403);
-                        $record->update($data);
-                    }),
-                DeleteAction::make()
-                    ->visible(fn (): bool => CalculatorAdminPage::canAccess()),
-            ])
-            ->emptyStateIcon('heroicon-o-calculator')
-            ->emptyStateHeading(__('admin.migration.administration.calculator.pricing.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.administration.calculator.pricing.empty_description'));
+                    ->action(fn ($record, array $data) => $record->update($data)),
+                DeleteAction::make(),
+            ]);
     }
 }

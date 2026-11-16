@@ -18,8 +18,6 @@ class ArticleResource extends BaseResource
 {
     protected static ?string $model = Article::class;
 
-    protected static ?string $recordTitleAttribute = 'slug';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-newspaper';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
@@ -31,12 +29,6 @@ class ArticleResource extends BaseResource
     protected static ?string $pluralLabel = 'Articles';
 
     protected static ?int $navigationSort = 8;
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['slug', 'category'];
-    }
 
     public static function form(Schema $form): Schema
     {
@@ -142,6 +134,7 @@ class ArticleResource extends BaseResource
     {
         return $table
             ->defaultSort('published_at', 'desc')
+            ->recordUrl(null)
             ->columns([
                 Tables\Columns\TextColumn::make('title_en_display')
                     ->label('Title (EN)')
@@ -149,14 +142,12 @@ class ArticleResource extends BaseResource
                     ->searchable(query: function ($query, string $value) {
                         $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(title, '$.en')) LIKE ?", ["%{$value}%"]);
                     })
-                    ->limit(50)
-                    ->weight('bold'),
+                    ->limit(50),
 
                 Tables\Columns\TextColumn::make('category')
                     ->label('Category')
                     ->badge()
-                    ->color('gray')
-                    ->visibleFrom('md'),
+                    ->color('gray'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -167,8 +158,7 @@ class ArticleResource extends BaseResource
                     ->label('Published')
                     ->dateTime('d M Y')
                     ->placeholder('—')
-                    ->sortable()
-                    ->visibleFrom('md'),
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -180,13 +170,7 @@ class ArticleResource extends BaseResource
             ])
             ->bulkActions([
                 DeleteBulkAction::make(),
-            ])
-            ->recordUrl(fn (Article $record): ?string => static::canEdit($record)
-                ? static::getUrl('edit', ['record' => $record])
-                : null)
-            ->emptyStateIcon('heroicon-o-newspaper')
-            ->emptyStateHeading(__('admin.migration.marketing.articles.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.marketing.articles.empty_description'));
+            ]);
     }
 
     public static function getPages(): array

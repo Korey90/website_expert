@@ -30,11 +30,6 @@ class ViewVatReturn extends ViewRecord
 {
     protected static string $resource = VatReturnResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.accounting.vat_returns.view_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         /** @var VatReturn $return */

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\EmailTemplateResource\Pages;
-use App\Forms\Components\TinyEditor;
 use App\Models\EmailTemplate;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -15,28 +14,19 @@ use Filament\Schemas\Components\Html;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use App\Forms\Components\TinyEditor;
 use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
 class EmailTemplateResource extends BaseResource
 {
     protected static ?string $model = EmailTemplate::class;
-
-    protected static ?string $recordTitleAttribute = 'name';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-envelope';
-
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
-
     protected static ?string $navigationLabel = 'Email Templates';
-
     protected static ?int $navigationSort = 2;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'slug'];
-    }
 
     public static function infolist(Schema $schema): Schema
     {
@@ -50,16 +40,17 @@ class EmailTemplateResource extends BaseResource
                     ->weight('bold')
                     ->columnSpanFull(),
 
-                Html::make(fn ($record) => '<div style="border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;background:#f1f5f9;">'
-                    .'<div style="background:#f8fafc;padding:8px 16px;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b;font-family:monospace;display:flex;align-items:center;gap:8px;">'
-                    .'<span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block;"></span>'
-                    .'<span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block;margin:0 2px;"></span>'
-                    .'<span style="width:10px;height:10px;border-radius:50%;background:#10b981;display:inline-block;"></span>'
-                    .'<span style="margin-left:8px;">Email Preview – '.strtoupper($code).'</span>'
-                    .'<a href="'.route('admin.email-preview', [$record->id, $code]).'" target="_blank" style="margin-left:auto;color:#4F46E5;text-decoration:none;font-size:11px;font-family:sans-serif;">&#8599; open full page</a>'
-                    .'</div>'
-                    .'<iframe src="'.route('admin.email-preview', [$record->id, $code]).'" loading="lazy" style="width:100%;height:560px;border:none;display:block;"></iframe>'
-                    .'</div>'
+                Html::make(fn ($record) =>
+                    '<div style="border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;background:#f1f5f9;">'
+                    . '<div style="background:#f8fafc;padding:8px 16px;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b;font-family:monospace;display:flex;align-items:center;gap:8px;">'
+                    . '<span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block;"></span>'
+                    . '<span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block;margin:0 2px;"></span>'
+                    . '<span style="width:10px;height:10px;border-radius:50%;background:#10b981;display:inline-block;"></span>'
+                    . '<span style="margin-left:8px;">Email Preview – ' . strtoupper($code) . '</span>'
+                    . '<a href="' . route('admin.email-preview', [$record->id, $code]) . '" target="_blank" style="margin-left:auto;color:#4F46E5;text-decoration:none;font-size:11px;font-family:sans-serif;">&#8599; open full page</a>'
+                    . '</div>'
+                    . '<iframe src="' . route('admin.email-preview', [$record->id, $code]) . '" loading="lazy" style="width:100%;height:560px;border:none;display:block;"></iframe>'
+                    . '</div>'
                 )->columnSpanFull(),
 
                 TextEntry::make("body_text.{$code}")
@@ -178,28 +169,23 @@ class EmailTemplateResource extends BaseResource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable()
                     ->copyable()
                     ->badge()
-                    ->color('gray')
-                    ->visibleFrom('md'),
+                    ->color('gray'),
                 Tables\Columns\TextColumn::make('subject.en')
                     ->label('Subject (EN)')
                     ->searchable()
-                    ->limit(50)
-                    ->visibleFrom('lg'),
+                    ->limit(50),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Last Updated')
                     ->date()
-                    ->sortable()
-                    ->visibleFrom('xl')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
@@ -212,20 +198,17 @@ class EmailTemplateResource extends BaseResource
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->recordUrl(fn (EmailTemplate $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-envelope')
-            ->emptyStateHeading(__('admin.migration.marketing.email_templates.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.marketing.email_templates.empty_description'))
             ->defaultSort('name');
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListEmailTemplates::route('/'),
+            'index'  => Pages\ListEmailTemplates::route('/'),
             'create' => Pages\CreateEmailTemplate::route('/create'),
-            'view' => Pages\ViewEmailTemplate::route('/{record}'),
-            'edit' => Pages\EditEmailTemplate::route('/{record}/edit'),
+            'view'   => Pages\ViewEmailTemplate::route('/{record}'),
+            'edit'   => Pages\EditEmailTemplate::route('/{record}/edit'),
         ];
     }
 }
+

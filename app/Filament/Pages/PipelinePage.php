@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Resources\LeadResource;
 use App\Mail\ClientEmailMail;
 use App\Models\EmailTemplate;
 use App\Models\Lead;
@@ -63,14 +62,14 @@ class PipelinePage extends BasePage
 
     public function getTitle(): string
     {
-        return __('admin.pilot.pipeline.title');
+        return 'Sales Pipeline';
     }
 
     public function getBreadcrumbs(): array
     {
         return [
-            route('filament.admin.resources.leads.index') => __('admin.navigation.items.leads'),
-            __('admin.pilot.pipeline.title'),
+            route('filament.admin.resources.leads.index') => 'Leads',
+            'Sales Pipeline',
         ];
     }
 
@@ -78,15 +77,14 @@ class PipelinePage extends BasePage
     {
         return [
             Action::make('list_view')
-                ->label(__('admin.pilot.pipeline.list_view'))
+                ->label('List View')
                 ->icon('heroicon-o-list-bullet')
                 ->color('gray')
                 ->url(route('filament.admin.resources.leads.index')),
             Action::make('new_lead')
-                ->label(__('admin.quick_create.lead'))
+                ->label('New Lead')
                 ->icon('heroicon-o-plus')
                 ->color('primary')
-                ->visible(LeadResource::canCreate())
                 ->url(route('filament.admin.resources.leads.create')),
         ];
     }
@@ -147,7 +145,7 @@ class PipelinePage extends BasePage
 
     public function moveStage(int $leadId, string $direction): void
     {
-        $lead = $this->editableLead($leadId);
+        $lead = Lead::findOrFail($leadId);
         $stages = PipelineStage::orderBy('order')->get()->keyBy('id');
         $ids = $stages->keys()->toArray();
         $idx = array_search($lead->pipeline_stage_id, $ids);
@@ -175,14 +173,13 @@ class PipelinePage extends BasePage
 
     public function markWon(int $leadId): void
     {
-        $lead = $this->editableLead($leadId);
         $stage = PipelineStage::where('is_won', true)->first();
         if (! $stage) {
             Notification::make()->title('No "Won" stage configured')->warning()->send();
 
             return;
         }
-        $lead->update([
+        Lead::findOrFail($leadId)->update([
             'pipeline_stage_id' => $stage->id,
             'won_at' => now(),
         ]);
@@ -194,14 +191,13 @@ class PipelinePage extends BasePage
 
     public function markLost(int $leadId): void
     {
-        $lead = $this->editableLead($leadId);
         $stage = PipelineStage::where('is_lost', true)->first();
         if (! $stage) {
             Notification::make()->title('No "Lost" stage configured')->warning()->send();
 
             return;
         }
-        $lead->update([
+        Lead::findOrFail($leadId)->update([
             'pipeline_stage_id' => $stage->id,
             'lost_at' => now(),
         ]);
@@ -215,7 +211,7 @@ class PipelinePage extends BasePage
 
     public function convertToProject(int $leadId): void
     {
-        $lead = $this->editableLead($leadId)->load('client');
+        $lead = Lead::with('client')->findOrFail($leadId);
 
         if ($lead->project()->exists()) {
             Notification::make()->title('Project already exists for this lead')->warning()->send();
@@ -246,13 +242,11 @@ class PipelinePage extends BasePage
 
     public function openEmailModal(int $leadId): void
     {
-        $this->editableLead($leadId);
         $this->emailLeadId = $leadId;
         $this->emailTemplateId = null;
         $this->emailSubject = '';
         $this->emailBody = '';
         $this->showEmailModal = true;
-        $this->dispatch('open-modal', id: 'pipeline-email');
     }
 
     public function updatedEmailTemplateId(string|int|null $value): void
@@ -299,7 +293,7 @@ class PipelinePage extends BasePage
             'emailBody' => ['required', 'string'],
         ]);
 
-        $lead = $this->editableLead((int) $this->emailLeadId)->load('client');
+        $lead = Lead::with('client')->findOrFail($this->emailLeadId);
         $toEmail = $lead->client?->primary_contact_email;
 
         if (! $toEmail) {
@@ -316,28 +310,24 @@ class PipelinePage extends BasePage
         ]);
 
         $this->showEmailModal = false;
-        $this->dispatch('close-modal', id: 'pipeline-email');
         Notification::make()->title("Email queued for {$toEmail}")->success()->send();
     }
 
     // ── Note modal ────────────────────────────────────────────────────────
 
-    public function openNoteModal(int $leadId): void
+    public function openNoteModal(int $leadId, string $title): void
     {
-        $lead = $this->editableLead($leadId);
         $this->noteLeadId = $leadId;
-        $this->noteLeadTitle = $lead->title;
+        $this->noteLeadTitle = $title;
         $this->newNoteText = '';
         $this->editNoteId = null;
         $this->editNoteText = '';
         $this->showNoteModal = true;
-        $this->dispatch('open-modal', id: 'pipeline-notes');
     }
 
     public function addNote(): void
     {
         $this->validate(['newNoteText' => ['required', 'string', 'max:10000']]);
-        $this->editableLead((int) $this->noteLeadId);
 
         LeadNote::create([
             'lead_id' => $this->noteLeadId,
@@ -356,7 +346,6 @@ class PipelinePage extends BasePage
     public function startEditNote(int $noteId): void
     {
         $note = LeadNote::findOrFail($noteId);
-        $this->editableLead($note->lead_id);
         $this->editNoteId = $noteId;
         $this->editNoteText = $note->content;
     }
@@ -365,9 +354,7 @@ class PipelinePage extends BasePage
     {
         $this->validate(['editNoteText' => ['required', 'string', 'max:10000']]);
 
-        $note = LeadNote::findOrFail($this->editNoteId);
-        $this->editableLead($note->lead_id);
-        $note->update(['content' => $this->editNoteText]);
+        LeadNote::findOrFail($this->editNoteId)->update(['content' => $this->editNoteText]);
 
         $this->editNoteId = null;
         $this->editNoteText = '';
@@ -382,16 +369,13 @@ class PipelinePage extends BasePage
 
     public function deleteNote(int $noteId): void
     {
-        $note = LeadNote::findOrFail($noteId);
-        $this->editableLead($note->lead_id);
-        $note->delete();
+        LeadNote::findOrFail($noteId)->delete();
         Notification::make()->title('Note deleted')->success()->send();
     }
 
     public function togglePinNote(int $noteId): void
     {
         $note = LeadNote::findOrFail($noteId);
-        $this->editableLead($note->lead_id);
         $note->update(['is_pinned' => ! $note->is_pinned]);
     }
 
@@ -400,7 +384,7 @@ class PipelinePage extends BasePage
     public function assignToSelf(int $leadId): void
     {
         $user = Auth::user();
-        $this->editableLead($leadId)->update(['assigned_to' => $user->id]);
+        Lead::findOrFail($leadId)->update(['assigned_to' => $user->id]);
 
         LeadActivity::log($leadId, 'assigned', "Assigned to {$user->name}", [
             'user_id' => $user->id,
@@ -413,7 +397,6 @@ class PipelinePage extends BasePage
     public function deleteLead(int $leadId): void
     {
         $lead = Lead::findOrFail($leadId);
-        abort_unless(LeadResource::canDelete($lead), 403);
 
         LeadActivity::log($leadId, 'deleted', 'Lead deleted (soft)');
 
@@ -423,22 +406,10 @@ class PipelinePage extends BasePage
 
     // ── History modal ─────────────────────────────────────────────────────
 
-    public function openHistoryModal(int $leadId): void
+    public function openHistoryModal(int $leadId, string $title): void
     {
-        $lead = Lead::findOrFail($leadId);
-        abort_unless(LeadResource::canView($lead), 403);
         $this->historyLeadId = $leadId;
-        $this->historyLeadTitle = $lead->title;
+        $this->historyLeadTitle = $title;
         $this->showHistoryModal = true;
-        $this->dispatch('open-modal', id: 'pipeline-history');
-    }
-
-    private function editableLead(int $leadId): Lead
-    {
-        $lead = Lead::findOrFail($leadId);
-
-        abort_unless(LeadResource::canEdit($lead), 403);
-
-        return $lead;
     }
 }

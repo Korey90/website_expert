@@ -10,11 +10,6 @@ class ViewAutomationLog extends ViewRecord
 {
     protected static string $resource = AutomationLogResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.automation.logs.view_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [

@@ -21,11 +21,6 @@ class ViewVatAdjustment extends ViewRecord
 {
     protected static string $resource = VatAdjustmentResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.accounting.vat_adjustments.view_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         /** @var VatAdjustment $adjustment */

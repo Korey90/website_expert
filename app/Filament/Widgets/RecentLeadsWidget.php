@@ -14,8 +14,7 @@ class RecentLeadsWidget extends BaseWidget
 {
     public static function canView(): bool
     {
-        return PermissionHelper::allows(auth()->user(), 'view_leads')
-            && Lead::withoutTrashed()->exists();
+        return PermissionHelper::allows(auth()->user(), 'view_leads');
     }
 
     protected static ?int $sort = 8;
@@ -24,10 +23,7 @@ class RecentLeadsWidget extends BaseWidget
 
     protected static bool $isLazy = true;
 
-    public function getTableHeading(): string
-    {
-        return __('admin.dashboard.widgets.recent_leads.heading');
-    }
+    protected static ?string $heading = 'Recent Leads';
 
     public function table(Table $table): Table
     {

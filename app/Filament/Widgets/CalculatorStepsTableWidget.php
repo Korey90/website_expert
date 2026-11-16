@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Pages\CalculatorAdminPage;
 use App\Models\CalculatorStep;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -19,7 +18,6 @@ class CalculatorStepsTableWidget extends BaseWidget
     protected static bool $isDiscoverable = false;
 
     protected static ?string $heading = 'Steps — questions & hints per step';
-
     protected int|string|array $columnSpan = 'full';
 
     private function stepForm(): array
@@ -98,36 +96,28 @@ class CalculatorStepsTableWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('question_en')
                     ->label('EN')
                     ->limit(60)
-                    ->searchable()
-                    ->weight('bold'),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('question_pl')
                     ->label('PL')
                     ->limit(50)
-                    ->toggleable()
-                    ->visibleFrom('md'),
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('question_pt')
                     ->label('PT')
                     ->limit(50)
-                    ->toggleable()
-                    ->visibleFrom('lg'),
+                    ->toggleable(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
                     ->label('Active'),
                 Tables\Columns\TextColumn::make('sort_order')
                     ->sortable()
-                    ->label('Order')
-                    ->visibleFrom('xl'),
+                    ->label('Order'),
             ])
             ->headerActions([
                 Action::make('create')
                     ->label('Add Step')
                     ->icon('heroicon-o-plus')
                     ->form($this->stepForm())
-                    ->visible(fn (): bool => CalculatorAdminPage::canAccess())
-                    ->action(function (array $data): void {
-                        abort_unless(CalculatorAdminPage::canAccess(), 403);
-                        CalculatorStep::create($data);
-                    }),
+                    ->action(fn (array $data) => CalculatorStep::create($data)),
             ])
             ->recordActions([
                 Action::make('edit')
@@ -135,16 +125,8 @@ class CalculatorStepsTableWidget extends BaseWidget
                     ->label('Edit')
                     ->fillForm(fn ($record) => $record->toArray())
                     ->form($this->stepForm())
-                    ->visible(fn (): bool => CalculatorAdminPage::canAccess())
-                    ->action(function ($record, array $data): void {
-                        abort_unless(CalculatorAdminPage::canAccess(), 403);
-                        $record->update($data);
-                    }),
-                DeleteAction::make()
-                    ->visible(fn (): bool => CalculatorAdminPage::canAccess()),
-            ])
-            ->emptyStateIcon('heroicon-o-queue-list')
-            ->emptyStateHeading(__('admin.migration.administration.calculator.steps.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.administration.calculator.steps.empty_description'));
+                    ->action(fn ($record, array $data) => $record->update($data)),
+                DeleteAction::make(),
+            ]);
     }
 }

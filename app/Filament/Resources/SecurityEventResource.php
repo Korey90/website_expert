@@ -14,7 +14,6 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Collection;
 
 class SecurityEventResource extends BaseResource
 {
@@ -39,14 +38,13 @@ class SecurityEventResource extends BaseResource
             ->defaultSort('banned_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('ip')
-                    ->label(__('admin.migration.administration.security.ip'))
+                    ->label('IP')
                     ->searchable()
                     ->copyable()
-                    ->fontFamily('mono')
-                    ->weight('medium'),
+                    ->fontFamily('mono'),
 
                 Tables\Columns\TextColumn::make('action')
-                    ->label(__('admin.migration.administration.security.status'))
+                    ->label('Status')
                     ->badge()
                     ->color(fn (string $state) => match ($state) {
                         'banned' => 'danger',
@@ -54,106 +52,89 @@ class SecurityEventResource extends BaseResource
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state) => match ($state) {
-                        'banned' => __('admin.migration.administration.security.banned'),
-                        'unbanned' => __('admin.migration.administration.security.unbanned'),
+                        'banned' => 'Zbanowany',
+                        'unbanned' => 'Odbanowany',
                         default => $state,
                     }),
 
                 Tables\Columns\TextColumn::make('attack_type')
-                    ->label(__('admin.migration.administration.security.attack_type'))
+                    ->label('Typ ataku')
                     ->badge()
                     ->color('warning')
-                    ->searchable()
-                    ->wrap(),
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('country')
-                    ->label(__('admin.migration.administration.security.location'))
+                    ->label('Kraj')
                     ->formatStateUsing(fn ($state, $record) => implode(', ', array_filter([$state, $record->city])))
-                    ->placeholder('—')
-                    ->visibleFrom('md'),
+                    ->placeholder('—'),
 
                 Tables\Columns\TextColumn::make('isp')
-                    ->label(__('admin.migration.administration.security.isp'))
+                    ->label('ISP')
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('failures')
-                    ->label(__('admin.migration.administration.security.attempts'))
+                    ->label('Prób')
                     ->numeric()
-                    ->sortable()
-                    ->visibleFrom('md'),
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('jail')
-                    ->label(__('admin.migration.administration.security.jail'))
+                    ->label('Jail')
                     ->badge()
                     ->color('gray')
-                    ->visibleFrom('xl')
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\IconColumn::make('reported_to_abuseipdb_at')
-                    ->label(__('admin.migration.administration.security.reported'))
+                    ->label('AbuseIPDB')
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-minus-circle')
                     ->trueColor('success')
-                    ->falseColor('gray')
-                    ->visibleFrom('lg'),
+                    ->falseColor('gray'),
 
                 Tables\Columns\TextColumn::make('banned_at')
-                    ->label(__('admin.migration.administration.security.time'))
+                    ->label('Czas')
                     ->dateTime('d.m.Y H:i')
-                    ->since()
-                    ->sortable()
-                    ->visibleFrom('sm'),
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('action')
-                    ->label(__('admin.migration.administration.security.status'))
                     ->options([
-                        'banned' => __('admin.migration.administration.security.banned'),
-                        'unbanned' => __('admin.migration.administration.security.unbanned'),
+                        'banned' => 'Zbanowany',
+                        'unbanned' => 'Odbanowany',
                     ]),
                 Tables\Filters\SelectFilter::make('jail')
-                    ->label(__('admin.migration.administration.security.jail'))
                     ->options(fn () => SecurityEvent::query()->distinct()->pluck('jail', 'jail')->toArray()),
                 Tables\Filters\Filter::make('not_reported')
-                    ->label(__('admin.migration.administration.security.not_reported'))
+                    ->label('Niezgłoszone do AbuseIPDB')
                     ->query(fn ($query) => $query->whereNull('reported_to_abuseipdb_at')->where('action', 'banned')),
             ])
             ->recordActions([
                 Action::make('unban')
-                    ->label(__('admin.migration.administration.security.unban'))
+                    ->label('Odbanuj')
                     ->icon('heroicon-o-lock-open')
                     ->color('success')
                     ->visible(fn (SecurityEvent $record) => $record->action === 'banned' && ! $record->isUnbanned()
                         && PermissionHelper::allows(auth()->user(), 'manage_security_events'))
                     ->requiresConfirmation()
                     ->action(function (SecurityEvent $record) {
-                        abort_unless(PermissionHelper::allows(auth()->user(), 'manage_security_events'), 403);
-
                         $success = app(Fail2banService::class)->unban($record->ip, $record->jail);
                         if ($success) {
                             $record->update(['action' => 'unbanned', 'unbanned_at' => now()]);
-                            Notification::make()->title(__('admin.migration.administration.security.unban_success'))->success()->send();
+                            Notification::make()->title('IP odbanowane')->success()->send();
                         } else {
-                            Notification::make()
-                                ->title(__('admin.migration.administration.security.unban_failed'))
-                                ->body(__('admin.migration.administration.security.unban_failed_description'))
-                                ->danger()
-                                ->send();
+                            Notification::make()->title('Błąd odbanowania')->body('Sprawdź czy www-data ma sudo dla fail2ban-client.')->danger()->send();
                         }
                     }),
 
                 Action::make('report_abuseipdb')
-                    ->label(__('admin.migration.administration.security.report'))
+                    ->label('Zgłoś AbuseIPDB')
                     ->icon('heroicon-o-flag')
                     ->color('warning')
                     ->visible(fn (SecurityEvent $record) => ! $record->isReported()
                         && PermissionHelper::allows(auth()->user(), 'manage_security_events'))
                     ->requiresConfirmation()
                     ->action(function (SecurityEvent $record) {
-                        abort_unless(PermissionHelper::allows(auth()->user(), 'manage_security_events'), 403);
-
                         $success = app(AbuseIpdbService::class)->report(
                             $record->ip,
                             $record->jail,
@@ -161,45 +142,37 @@ class SecurityEventResource extends BaseResource
                         );
                         if ($success) {
                             $record->update(['reported_to_abuseipdb_at' => now()]);
-                            Notification::make()->title(__('admin.migration.administration.security.report_success'))->success()->send();
+                            Notification::make()->title('Zgłoszono do AbuseIPDB')->success()->send();
                         } else {
-                            Notification::make()
-                                ->title(__('admin.migration.administration.security.report_failed'))
-                                ->body(__('admin.migration.administration.security.report_failed_description'))
-                                ->danger()
-                                ->send();
+                            Notification::make()->title('Błąd zgłoszenia')->body('Sprawdź klucz ABUSEIPDB_API_KEY w .env')->danger()->send();
                         }
                     }),
 
                 Action::make('ban_again')
-                    ->label(__('admin.migration.administration.security.ban_again'))
+                    ->label('Zbanuj ponownie')
                     ->icon('heroicon-o-lock-closed')
                     ->color('danger')
                     ->visible(fn (SecurityEvent $record) => $record->isUnbanned()
                         && PermissionHelper::allows(auth()->user(), 'manage_security_events'))
                     ->requiresConfirmation()
                     ->action(function (SecurityEvent $record) {
-                        abort_unless(PermissionHelper::allows(auth()->user(), 'manage_security_events'), 403);
-
                         $success = app(Fail2banService::class)->ban($record->ip, $record->jail);
                         if ($success) {
                             $record->update(['action' => 'banned', 'unbanned_at' => null, 'banned_at' => now()]);
-                            Notification::make()->title(__('admin.migration.administration.security.ban_success'))->success()->send();
+                            Notification::make()->title('IP zbanowane ponownie')->success()->send();
                         } else {
-                            Notification::make()->title(__('admin.migration.administration.security.ban_failed'))->danger()->send();
+                            Notification::make()->title('Błąd banowania')->danger()->send();
                         }
                     }),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     BulkAction::make('bulk_report_abuseipdb')
-                        ->label(__('admin.migration.administration.security.report_selected'))
+                        ->label('Zgłoś zaznaczone do AbuseIPDB')
                         ->icon('heroicon-o-flag')
                         ->visible(fn () => PermissionHelper::allows(auth()->user(), 'manage_security_events'))
                         ->requiresConfirmation()
-                        ->action(function (Collection $records) {
-                            abort_unless(PermissionHelper::allows(auth()->user(), 'manage_security_events'), 403);
-
+                        ->action(function ($records) {
                             $service = app(AbuseIpdbService::class);
                             $reported = 0;
                             foreach ($records as $record) {
@@ -211,20 +184,10 @@ class SecurityEventResource extends BaseResource
                                     $reported++;
                                 }
                             }
-                            Notification::make()
-                                ->title(trans_choice('admin.migration.administration.security.reported_count', $reported, ['count' => $reported]))
-                                ->success()
-                                ->send();
-                        })
-                        ->deselectRecordsAfterCompletion(),
+                            Notification::make()->title("Zgłoszono {$reported} IP")->success()->send();
+                        }),
                 ]),
-            ])
-            ->emptyStateIcon('heroicon-o-shield-check')
-            ->emptyStateHeading(__('admin.migration.administration.security.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.administration.security.empty_description'))
-            ->searchPlaceholder(__('admin.migration.administration.security.search_placeholder'))
-            ->striped()
-            ->poll('30s');
+            ]);
     }
 
     public static function getPages(): array
@@ -232,10 +195,5 @@ class SecurityEventResource extends BaseResource
         return [
             'index' => ListSecurityEvents::route('/'),
         ];
-    }
-
-    public static function canCreate(): bool
-    {
-        return false;
     }
 }

@@ -9,11 +9,6 @@ class ListCreditNotes extends ListRecords
 {
     protected static string $resource = CreditNoteResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.sales_documents.credit_notes.list_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [];

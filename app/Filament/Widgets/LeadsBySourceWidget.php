@@ -20,17 +20,11 @@ class LeadsBySourceWidget extends ChartWidget
 
     protected string $color = 'info';
 
+    protected ?string $heading = 'Leads by Source';
+
+    protected ?string $description = 'All-time lead distribution by source';
+
     protected ?string $maxHeight = '260px';
-
-    public function getHeading(): ?string
-    {
-        return __('admin.dashboard.widgets.leads_by_source.heading');
-    }
-
-    public function getDescription(): ?string
-    {
-        return __('admin.dashboard.widgets.leads_by_source.description');
-    }
 
     protected function getType(): string
     {

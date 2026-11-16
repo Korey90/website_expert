@@ -11,14 +11,9 @@ class ViewBusiness extends ViewRecord
 {
     protected static string $resource = BusinessResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.administration.businesses.view_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
-        $record = $this->getRecord();
+        $record  = $this->getRecord();
         $actions = [EditAction::make()];
 
         if ($record->stripe_customer_id) {
@@ -27,7 +22,7 @@ class ViewBusiness extends ViewRecord
                 ->icon('heroicon-o-arrow-top-right-on-square')
                 ->color('gray')
                 ->url(
-                    'https://dashboard.stripe.com/customers/'.$record->stripe_customer_id,
+                    'https://dashboard.stripe.com/customers/' . $record->stripe_customer_id,
                     shouldOpenInNewTab: true
                 );
         }
@@ -38,7 +33,7 @@ class ViewBusiness extends ViewRecord
                 ->icon('heroicon-o-arrow-top-right-on-square')
                 ->color('gray')
                 ->url(
-                    'https://dashboard.stripe.com/subscriptions/'.$record->stripe_subscription_id,
+                    'https://dashboard.stripe.com/subscriptions/' . $record->stripe_subscription_id,
                     shouldOpenInNewTab: true
                 );
         }

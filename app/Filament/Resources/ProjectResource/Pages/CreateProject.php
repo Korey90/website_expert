@@ -1,21 +1,11 @@
-<?php
-
-namespace App\Filament\Resources\ProjectResource\Pages;
-
+<?php namespace App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Resources\ProjectResource;
 use App\Models\ProjectPhase;
 use App\Models\ProjectTask;
 use App\Models\ProjectTemplate;
 use Filament\Resources\Pages\CreateRecord;
-
-class CreateProject extends CreateRecord
-{
+class CreateProject extends CreateRecord {
     protected static string $resource = ProjectResource::class;
-
-    public function getSubheading(): ?string
-    {
-        return __('admin.pilot.projects.create_subheading');
-    }
 
     protected function afterCreate(): void
     {
@@ -25,22 +15,22 @@ class CreateProject extends CreateRecord
             if ($template) {
                 foreach ($template->phases as $phase) {
                     $createdPhase = ProjectPhase::create([
-                        'project_id' => $record->id,
-                        'name' => $phase['name'],
+                        'project_id'  => $record->id,
+                        'name'        => $phase['name'],
                         'description' => $phase['description'] ?? null,
-                        'order' => $phase['order'],
-                        'status' => 'pending',
+                        'order'       => $phase['order'],
+                        'status'      => 'pending',
                     ]);
 
                     foreach ($phase['tasks'] ?? [] as $i => $task) {
                         ProjectTask::create([
-                            'project_id' => $record->id,
-                            'phase_id' => $createdPhase->id,
-                            'title' => $task['title'],
+                            'project_id'  => $record->id,
+                            'phase_id'    => $createdPhase->id,
+                            'title'       => $task['title'],
                             'description' => $task['description'] ?? null,
-                            'priority' => $task['priority'] ?? 'medium',
-                            'status' => 'todo',
-                            'order' => $i + 1,
+                            'priority'    => $task['priority'] ?? 'medium',
+                            'status'      => 'todo',
+                            'order'       => $i + 1,
                         ]);
                     }
                 }

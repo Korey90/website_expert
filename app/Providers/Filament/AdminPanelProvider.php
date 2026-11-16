@@ -2,19 +2,15 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Pages\AccountProfilePage;
 use App\Filament\Pages\AdminDashboard;
-use App\Filament\Support\AdminGlobalSearchProvider;
-use App\Filament\Support\AdminNavigation;
 use App\Models\LeadNote;
 use App\Support\PermissionHelper;
-use Filament\Actions\Action;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\NavigationBuilder;
+use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -47,52 +43,45 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Website Expert NI')
             ->favicon(asset('favicon.ico'))
             ->colors([
-                'primary' => Color::hex('#f04b37'),
+                'primary' => Color::hex('#ff2b17'),
                 'gray' => Color::Zinc,
             ])
             ->sidebarCollapsibleOnDesktop()
-            ->sidebarWidth('17rem')
-            ->globalSearch(AdminGlobalSearchProvider::class)
-            ->globalSearchDebounce('300ms')
-            ->globalSearchKeyBindings(['ctrl+k', 'command+k'])
-            ->globalSearchFieldKeyBindingSuffix()
-            ->navigation(
-                fn (NavigationBuilder $builder): NavigationBuilder => AdminNavigation::build($builder),
-            )
-            ->userMenuItems([
-                'profile' => fn (): Action => Action::make('profile')
-                    ->label(__('admin.account.profile'))
-                    ->icon('heroicon-o-user-circle')
-                    ->url(AccountProfilePage::getUrl())
-                    ->visible(AccountProfilePage::canAccess()),
-            ])
             ->renderHook(
-                PanelsRenderHook::GLOBAL_SEARCH_AFTER,
+                PanelsRenderHook::TOPBAR_END,
+                fn (): View => view('filament.components.business-switcher'),
+            )
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_END,
                 function (): View|HtmlString {
                     $user = auth()->user();
                     $business = currentBusiness();
 
-                    if (! $user || ! $business) {
+                    if (! $user || ! $business || ! PermissionHelper::allows($user, 'view_leads')) {
                         return new HtmlString('');
                     }
 
-                    $pinnedNotes = collect();
+                    $pinnedNotes = LeadNote::where('is_pinned', true)
+                        ->whereHas('lead', fn ($query) => $query->where('business_id', $business->id))
+                        ->with('lead')
+                        ->orderByDesc('created_at')
+                        ->limit(15)
+                        ->get();
 
-                    if (PermissionHelper::allows($user, 'view_leads')) {
-                        $pinnedNotes = LeadNote::where('is_pinned', true)
-                            ->whereHas('lead', fn ($query) => $query->where('business_id', $business->id))
-                            ->with(['lead', 'user'])
-                            ->orderByDesc('created_at')
-                            ->limit(15)
-                            ->get();
-                    }
-
-                    return view('filament.components.topbar-actions', [
-                        'canViewPinnedNotes' => PermissionHelper::allows($user, 'view_leads'),
-                        'pinnedNotes' => $pinnedNotes,
-                    ]);
+                    return view('filament.components.pinned-notes', compact('pinnedNotes'));
                 },
             )
+            ->navigationGroups([
+                NavigationGroup::make('CRM'),
+                NavigationGroup::make('Sales'),
+                NavigationGroup::make('Projects'),
+                NavigationGroup::make('Finance'),
+                NavigationGroup::make('Marketing'),
+                NavigationGroup::make('Automation'),
+                NavigationGroup::make('Reports')->collapsed(),
+                NavigationGroup::make('SaaS Billing')->collapsed(),
+                NavigationGroup::make('Settings')->collapsed(),
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->databaseNotifications()
@@ -107,13 +96,11 @@ class AdminPanelProvider extends PanelProvider
                     $config = json_encode(['userId' => $userId]);
                     $src = Vite::asset('resources/js/admin/notifications.js');
                     $fraudContext = view('filament.components.hmrc-fraud-context')->render();
-                    $navigationState = view('filament.components.navigation-state')->render();
 
                     return new HtmlString(
                         "<script data-navigate-once>window.AdminPanelConfig = {$config};</script>".
                         "<script data-navigate-once src=\"{$src}\"></script>".
-                        $fraudContext.
-                        $navigationState
+                        $fraudContext
                     );
                 },
             )

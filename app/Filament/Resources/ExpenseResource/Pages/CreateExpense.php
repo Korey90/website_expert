@@ -11,11 +11,6 @@ class CreateExpense extends CreateRecord
 {
     protected static string $resource = ExpenseResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.procurement.expenses.create_subheading');
-    }
-
     protected function handleRecordCreation(array $data): Model
     {
         return app(CreateExpenseAction::class)->execute(currentBusiness(), auth()->user(), $data);

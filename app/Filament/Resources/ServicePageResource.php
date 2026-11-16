@@ -29,8 +29,6 @@ class ServicePageResource extends BaseResource
 {
     protected static ?string $model = ServicePage::class;
 
-    protected static ?string $recordTitleAttribute = 'slug';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-paint-brush';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
@@ -42,12 +40,6 @@ class ServicePageResource extends BaseResource
     protected static ?string $pluralLabel = 'Service Pages';
 
     protected static ?int $navigationSort = 5;
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['slug'];
-    }
 
     // -------------------------------------------------------------------------
     // Form
@@ -1187,8 +1179,7 @@ class ServicePageResource extends BaseResource
                     ->label('Title (EN)')
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', 'en', false) ?: '—')
                     ->searchable(query: fn ($query, $search) => $query->whereRaw("JSON_EXTRACT(title, '$.en') LIKE ?", ["%{$search}%"])
-                    )
-                    ->visibleFrom('md'),
+                    ),
 
                 Tables\Columns\IconColumn::make('is_published')
                     ->label('Published')
@@ -1196,20 +1187,17 @@ class ServicePageResource extends BaseResource
 
                 Tables\Columns\IconColumn::make('show_in_nav')
                     ->label('In Nav')
-                    ->boolean()
-                    ->visibleFrom('md'),
+                    ->boolean(),
 
                 Tables\Columns\TextColumn::make('blocks_count')
                     ->label('Blocks')
                     ->counts('blocks')
                     ->badge()
-                    ->color('gray')
-                    ->visibleFrom('lg'),
+                    ->color('gray'),
 
                 Tables\Columns\TextColumn::make('sort_order')
                     ->label('Order')
-                    ->sortable()
-                    ->visibleFrom('lg'),
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Updated')
@@ -1230,12 +1218,6 @@ class ServicePageResource extends BaseResource
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->recordUrl(fn (ServicePage $record): ?string => static::canEdit($record)
-                ? static::getUrl('edit', ['record' => $record])
-                : null)
-            ->emptyStateIcon('heroicon-o-paint-brush')
-            ->emptyStateHeading(__('admin.migration.marketing.service_pages.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.marketing.service_pages.empty_description'))
             ->defaultSort('sort_order');
     }
 

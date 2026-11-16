@@ -10,11 +10,6 @@ class EditRole extends EditRecord
 {
     protected static string $resource = RoleResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.administration.roles.edit_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [DeleteAction::make()];

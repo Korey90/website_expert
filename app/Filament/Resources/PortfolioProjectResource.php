@@ -4,40 +4,28 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PortfolioProjectResource\Pages;
 use App\Models\PortfolioProject;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Forms;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Illuminate\Support\Facades\Storage;
 
 class PortfolioProjectResource extends BaseResource
 {
     protected static ?string $model = PortfolioProject::class;
-
-    protected static ?string $recordTitleAttribute = 'slug';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-photo';
-
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
-
     protected static ?string $navigationLabel = 'Portfolio Projects';
-
     protected static ?string $label = 'Portfolio Project';
-
     protected static ?string $pluralLabel = 'Portfolio Projects';
-
     protected static ?int $navigationSort = 5;
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['slug', 'client_name'];
-    }
     // Form
     // -------------------------------------------------------------------------
 
@@ -153,7 +141,6 @@ class PortfolioProjectResource extends BaseResource
                 Tables\Columns\TextColumn::make('image_path')
                     ->label('Image')
                     ->html()
-                    ->visibleFrom('md')
                     ->getStateUsing(function (PortfolioProject $record): string {
                         $path = $record->image_path;
                         if (! $path) {
@@ -162,7 +149,6 @@ class PortfolioProjectResource extends BaseResource
                         $url = (str_starts_with($path, '/') || str_starts_with($path, 'http'))
                             ? $path
                             : Storage::disk('public')->url($path);
-
                         return "<img src=\"{$url}\" class=\"w-12 h-12 object-cover rounded\" loading=\"lazy\" />";
                     }),
 
@@ -172,26 +158,22 @@ class PortfolioProjectResource extends BaseResource
                     ->searchable(query: function ($query, string $value) {
                         $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(title, '$.en')) LIKE ?", ["%{$value}%"]);
                     })
-                    ->limit(40)
-                    ->weight('bold'),
+                    ->limit(40),
 
                 Tables\Columns\TextColumn::make('client_name')
                     ->label('Client')
                     ->searchable()
-                    ->sortable()
-                    ->visibleFrom('md'),
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('tag.en')
                     ->label('Tag')
                     ->badge()
-                    ->color('info')
-                    ->visibleFrom('md'),
+                    ->color('info'),
 
                 Tables\Columns\IconColumn::make('is_featured')
                     ->label('Featured')
                     ->boolean()
-                    ->sortable()
-                    ->visibleFrom('lg'),
+                    ->sortable(),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Active')
@@ -201,9 +183,7 @@ class PortfolioProjectResource extends BaseResource
                 Tables\Columns\TextColumn::make('sort_order')
                     ->label('#')
                     ->sortable()
-                    ->alignCenter()
-                    ->visibleFrom('xl')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->alignCenter(),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
@@ -219,12 +199,6 @@ class PortfolioProjectResource extends BaseResource
             ->bulkActions([
                 DeleteBulkAction::make(),
             ])
-            ->recordUrl(fn (PortfolioProject $record): ?string => static::canEdit($record)
-                ? static::getUrl('edit', ['record' => $record])
-                : null)
-            ->emptyStateIcon('heroicon-o-photo')
-            ->emptyStateHeading(__('admin.migration.marketing.portfolio.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.marketing.portfolio.empty_description'))
             ->reorderable('sort_order');
     }
 
@@ -235,9 +209,9 @@ class PortfolioProjectResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPortfolioProjects::route('/'),
+            'index'  => Pages\ListPortfolioProjects::route('/'),
             'create' => Pages\CreatePortfolioProject::route('/create'),
-            'edit' => Pages\EditPortfolioProject::route('/{record}/edit'),
+            'edit'   => Pages\EditPortfolioProject::route('/{record}/edit'),
         ];
     }
 }

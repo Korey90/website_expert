@@ -33,11 +33,6 @@ class ViewExpense extends ViewRecord
 {
     protected static string $resource = ExpenseResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.procurement.expenses.view_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         /** @var Expense $expense */

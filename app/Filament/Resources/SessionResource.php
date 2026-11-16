@@ -4,11 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SessionResource\Pages;
 use App\Models\Session;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -24,15 +26,10 @@ class SessionResource extends BaseResource
     protected static ?string $model = Session::class;
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-computer-desktop';
-
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
-
     protected static ?int $navigationSort = 4;
-
     protected static ?string $navigationLabel = 'Active Sessions';
-
     protected static ?string $modelLabel = 'Session';
-
     protected static ?string $pluralModelLabel = 'Sessions';
 
     // Sessions are read-only — no create / edit
@@ -58,37 +55,37 @@ class SessionResource extends BaseResource
                     ->searchable()
                     ->copyable()
                     ->badge()
-                    ->color('gray')
-                    ->visibleFrom('md'),
+                    ->color('gray'),
 
                 TextColumn::make('browser')
                     ->label('Browser')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'Chrome' => 'info',
+                        'Chrome'  => 'info',
                         'Firefox' => 'warning',
-                        'Safari' => 'primary',
-                        'Edge' => 'success',
-                        'Opera' => 'danger',
-                        default => 'gray',
+                        'Safari'  => 'primary',
+                        'Edge'    => 'success',
+                        'Opera'   => 'danger',
+                        default   => 'gray',
                     }),
 
                 TextColumn::make('device_type')
                     ->label('Device')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'Mobile' => 'warning',
-                        'Tablet' => 'info',
-                        default => 'gray',
-                    })
-                    ->visibleFrom('lg'),
+                        'Mobile'  => 'warning',
+                        'Tablet'  => 'info',
+                        default   => 'gray',
+                    }),
 
                 TextColumn::make('last_activity_at')
                     ->label('Last Active')
                     ->dateTime('Y-m-d H:i:s')
-                    ->description(fn (Session $record): string => Carbon::createFromTimestamp($record->last_activity)->diffForHumans()
+                    ->description(fn (Session $record): string =>
+                        Carbon::createFromTimestamp($record->last_activity)->diffForHumans()
                     )
-                    ->sortable(query: fn (Builder $query, string $direction) => $query->orderBy('last_activity', $direction)
+                    ->sortable(query: fn (Builder $query, string $direction) =>
+                        $query->orderBy('last_activity', $direction)
                     ),
 
                 TextColumn::make('id')
@@ -97,9 +94,7 @@ class SessionResource extends BaseResource
                     ->copyable()
                     ->copyMessage('Session ID copied')
                     ->fontFamily('mono')
-                    ->color('gray')
-                    ->visibleFrom('xl')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->color('gray'),
 
                 IconColumn::make('is_current')
                     ->label('Current')
@@ -116,7 +111,7 @@ class SessionResource extends BaseResource
                     ->trueLabel('Authenticated users')
                     ->falseLabel('Guest sessions')
                     ->queries(
-                        true: fn (Builder $query) => $query->whereNotNull('user_id'),
+                        true:  fn (Builder $query) => $query->whereNotNull('user_id'),
                         false: fn (Builder $query) => $query->whereNull('user_id'),
                     ),
 
@@ -128,7 +123,8 @@ class SessionResource extends BaseResource
 
                 Filter::make('active')
                     ->label('Active (last 2 hours)')
-                    ->query(fn (Builder $query) => $query->where('last_activity', '>=', now()->subHours(2)->timestamp)
+                    ->query(fn (Builder $query) =>
+                        $query->where('last_activity', '>=', now()->subHours(2)->timestamp)
                     ),
             ])
             ->actions([
@@ -140,10 +136,7 @@ class SessionResource extends BaseResource
                     ->modalHeading('Revoke session?')
                     ->modalDescription('The user will be immediately logged out of this session.')
                     ->modalSubmitActionLabel('Revoke')
-                    ->visible(fn (Session $record): bool => static::canDelete($record))
                     ->action(function (Session $record): void {
-                        abort_unless(static::canDelete($record), 403);
-
                         $record->delete();
                         Notification::make()
                             ->title('Session revoked')
@@ -161,23 +154,35 @@ class SessionResource extends BaseResource
                         ->modalHeading('Revoke selected sessions?')
                         ->modalDescription('All selected users will be immediately logged out.')
                         ->modalSubmitActionLabel('Revoke')
-                        ->visible(fn (): bool => static::canDeleteAny())
                         ->action(function (Collection $records): void {
-                            abort_unless(static::canDeleteAny(), 403);
-
                             $records->each->delete();
                             Notification::make()
                                 ->title('Sessions revoked')
-                                ->body($records->count().' session(s) have been revoked.')
+                                ->body($records->count() . ' session(s) have been revoked.')
+                                ->success()
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+
+                    BulkAction::make('revoke_guest')
+                        ->label('Revoke all guest sessions')
+                        ->icon('heroicon-o-trash')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->modalHeading('Revoke all guest sessions?')
+                        ->modalSubmitActionLabel('Revoke all guests')
+                        ->action(function (): void {
+                            $count = Session::whereNull('user_id')->count();
+                            Session::whereNull('user_id')->delete();
+                            Notification::make()
+                                ->title('Guest sessions cleared')
+                                ->body("{$count} guest session(s) removed.")
                                 ->success()
                                 ->send();
                         })
                         ->deselectRecordsAfterCompletion(),
                 ]),
             ])
-            ->emptyStateIcon('heroicon-o-computer-desktop')
-            ->emptyStateHeading(__('admin.migration.administration.sessions.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.administration.sessions.empty_description'))
             ->striped()
             ->poll('30s');
     }

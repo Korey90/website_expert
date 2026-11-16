@@ -19,8 +19,6 @@ class RoleResource extends BaseResource
 {
     protected static ?string $model = Role::class;
 
-    protected static ?string $recordTitleAttribute = 'name';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Settings';
@@ -28,11 +26,6 @@ class RoleResource extends BaseResource
     protected static ?string $navigationLabel = 'Roles & Permissions';
 
     protected static ?int $navigationSort = 2;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name'];
-    }
 
     /**
      * Group definitions shared between form() and EditRole/CreateRole pages.
@@ -149,13 +142,11 @@ class RoleResource extends BaseResource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('guard_name')
                     ->label('Guard')
                     ->badge()
-                    ->color('gray')
-                    ->visibleFrom('md'),
+                    ->color('gray'),
                 Tables\Columns\TextColumn::make('permissions_count')
                     ->label('Permissions')
                     ->counts('permissions')
@@ -165,20 +156,13 @@ class RoleResource extends BaseResource
                     ->label('Users')
                     ->counts('users')
                     ->badge()
-                    ->color('info')
-                    ->visibleFrom('md'),
+                    ->color('info'),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Updated')
                     ->date()
-                    ->sortable()
-                    ->visibleFrom('xl')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
             ])
             ->actions([ViewAction::make(), EditAction::make(), DeleteAction::make()])
-            ->recordUrl(fn (Role $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-shield-check')
-            ->emptyStateHeading(__('admin.migration.administration.roles.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.administration.roles.empty_description'))
             ->defaultSort('name');
     }
 

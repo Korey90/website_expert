@@ -33,11 +33,6 @@ class ExpenseReportPage extends BasePage
         return __('finance.expense_report.title');
     }
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.reports.expenses');
-    }
-
     public function mount(): void
     {
         $this->dateFrom = now()->startOfYear()->toDateString();

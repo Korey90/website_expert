@@ -20,8 +20,6 @@ class BankAccountResource extends BaseResource
 {
     protected static ?string $model = BankAccount::class;
 
-    protected static ?string $recordTitleAttribute = 'name';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-building-library';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
@@ -41,12 +39,6 @@ class BankAccountResource extends BaseResource
     public static function getPluralModelLabel(): string
     {
         return __('finance.bank_accounts.plural');
-    }
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'bank_name', 'masked_account_number'];
     }
 
     public static function form(Schema $schema): Schema
@@ -156,15 +148,15 @@ class BankAccountResource extends BaseResource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label(__('finance.bank_accounts.fields.name'))->searchable()->sortable()->weight('bold'),
-                Tables\Columns\TextColumn::make('bank_name')->label(__('finance.bank_accounts.fields.bank_name'))->searchable()->sortable()->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('masked_account_number')->label(__('finance.bank_accounts.fields.account_number'))->fontFamily('mono')->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('masked_sort_code')->label(__('finance.bank_accounts.fields.sort_code'))->fontFamily('mono')->visibleFrom('xl')->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('bank_name')->label(__('finance.bank_accounts.fields.bank_name'))->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('masked_account_number')->label(__('finance.bank_accounts.fields.account_number'))->fontFamily('mono'),
+                Tables\Columns\TextColumn::make('masked_sort_code')->label(__('finance.bank_accounts.fields.sort_code'))->fontFamily('mono'),
                 Tables\Columns\TextColumn::make('currency')->label(__('finance.bank_accounts.fields.currency'))->badge()->sortable(),
-                Tables\Columns\TextColumn::make('ledgerAccount.code')->label(__('finance.bank_accounts.fields.ledger_account'))->sortable()->visibleFrom('xl')->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('ledgerAccount.code')->label(__('finance.bank_accounts.fields.ledger_account'))->sortable(),
                 Tables\Columns\TextColumn::make('status')->label(__('finance.bank_accounts.fields.status'))->badge()
                     ->formatStateUsing(fn (string $state): string => __('finance.bank_accounts.statuses.'.$state))
                     ->color(fn (string $state): string => $state === BankAccount::STATUS_ACTIVE ? 'success' : 'gray'),
-                Tables\Columns\TextColumn::make('last_synced_at')->label(__('finance.bank_accounts.fields.last_synced_at'))->dateTime()->placeholder(__('finance.bank_accounts.never_synced'))->sortable()->visibleFrom('lg'),
+                Tables\Columns\TextColumn::make('last_synced_at')->label(__('finance.bank_accounts.fields.last_synced_at'))->dateTime()->placeholder(__('finance.bank_accounts.never_synced'))->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->options([
@@ -174,10 +166,6 @@ class BankAccountResource extends BaseResource
                 Tables\Filters\SelectFilter::make('currency')->options(fn (): array => FilamentCurrency::options()),
             ])
             ->actions([ViewAction::make(), EditAction::make()])
-            ->recordUrl(fn (BankAccount $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-building-library')
-            ->emptyStateHeading(__('admin.migration.banking.accounts.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.banking.accounts.empty_description'))
             ->defaultSort('name');
     }
 

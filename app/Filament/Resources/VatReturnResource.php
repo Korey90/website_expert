@@ -19,8 +19,6 @@ class VatReturnResource extends BaseResource
 {
     protected static ?string $model = VatReturn::class;
 
-    protected static ?string $recordTitleAttribute = 'number';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
@@ -40,12 +38,6 @@ class VatReturnResource extends BaseResource
     public static function getPluralModelLabel(): string
     {
         return __('finance.vat_returns.plural');
-    }
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['number'];
     }
 
     public static function infolist(Schema $schema): Schema
@@ -146,14 +138,14 @@ class VatReturnResource extends BaseResource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('number')->label(__('finance.vat_returns.fields.number'))->searchable()->sortable()->weight('bold'),
-                Tables\Columns\TextColumn::make('period_from')->label(__('finance.vat_returns.fields.period_from'))->date()->sortable()->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('period_to')->label(__('finance.vat_returns.fields.period_to'))->date()->sortable()->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('period_from')->label(__('finance.vat_returns.fields.period_from'))->date()->sortable(),
+                Tables\Columns\TextColumn::make('period_to')->label(__('finance.vat_returns.fields.period_to'))->date()->sortable(),
                 Tables\Columns\TextColumn::make('status')->label(__('finance.vat_returns.fields.status'))->badge()
                     ->formatStateUsing(fn (string $state): string => __('finance.vat_returns.statuses.'.$state))
                     ->color(fn (string $state): string => self::statusColor($state)),
-                Tables\Columns\TextColumn::make('source_journal_count')->label(__('finance.vat_returns.fields.source_journal_count'))->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('warning_count')->label(__('finance.vat_returns.fields.warning_count'))->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('created_at')->label(__('finance.vat_returns.fields.created_at'))->dateTime()->sortable()->visibleFrom('xl')->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('source_journal_count')->label(__('finance.vat_returns.fields.source_journal_count')),
+                Tables\Columns\TextColumn::make('warning_count')->label(__('finance.vat_returns.fields.warning_count')),
+                Tables\Columns\TextColumn::make('created_at')->label(__('finance.vat_returns.fields.created_at'))->dateTime()->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->options(collect(VatReturn::statuses())->mapWithKeys(
@@ -161,10 +153,6 @@ class VatReturnResource extends BaseResource
                 )->all()),
             ])
             ->actions([ViewAction::make()])
-            ->recordUrl(fn (VatReturn $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-shield-check')
-            ->emptyStateHeading(__('admin.migration.accounting.vat_returns.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.accounting.vat_returns.empty_description'))
             ->defaultSort('period_to', 'desc');
     }
 

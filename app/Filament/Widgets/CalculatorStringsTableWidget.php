@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Pages\CalculatorAdminPage;
 use App\Models\CalculatorString;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -17,7 +16,6 @@ class CalculatorStringsTableWidget extends BaseWidget
     protected static bool $isDiscoverable = false;
 
     protected static ?string $heading = 'UI Strings — all text labels by language';
-
     protected int|string|array $columnSpan = 'full';
 
     private function stringForm(): array
@@ -34,10 +32,10 @@ class CalculatorStringsTableWidget extends BaseWidget
                         ->columnSpan(1),
                     Forms\Components\Select::make('group')
                         ->options([
-                            'header' => 'Header',
-                            'navigation' => 'Navigation',
-                            'misc_labels' => 'Misc Labels',
-                            'result_page' => 'Result Page',
+                            'header'       => 'Header',
+                            'navigation'   => 'Navigation',
+                            'misc_labels'  => 'Misc Labels',
+                            'result_page'  => 'Result Page',
                             'contact_form' => 'Contact Form',
                         ])
                         ->required()
@@ -86,20 +84,18 @@ class CalculatorStringsTableWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('group')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'header' => 'info',
-                        'navigation' => 'warning',
-                        'misc_labels' => 'gray',
-                        'result_page' => 'success',
+                        'header'       => 'info',
+                        'navigation'   => 'warning',
+                        'misc_labels'  => 'gray',
+                        'result_page'  => 'success',
                         'contact_form' => 'danger',
-                        default => 'gray',
+                        default        => 'gray',
                     })
-                    ->sortable()
-                    ->visibleFrom('md'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('key')
                     ->fontFamily('mono')
                     ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('value_en')
                     ->label('EN')
                     ->limit(50)
@@ -107,25 +103,22 @@ class CalculatorStringsTableWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('value_pl')
                     ->label('PL')
                     ->limit(40)
-                    ->toggleable()
-                    ->visibleFrom('md'),
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('value_pt')
                     ->label('PT')
                     ->limit(40)
-                    ->toggleable()
-                    ->visibleFrom('lg'),
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('sort_order')
                     ->sortable()
-                    ->label('Order')
-                    ->visibleFrom('xl'),
+                    ->label('Order'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('group')
                     ->options([
-                        'header' => 'Header',
-                        'navigation' => 'Navigation',
-                        'misc_labels' => 'Misc Labels',
-                        'result_page' => 'Result Page',
+                        'header'       => 'Header',
+                        'navigation'   => 'Navigation',
+                        'misc_labels'  => 'Misc Labels',
+                        'result_page'  => 'Result Page',
                         'contact_form' => 'Contact Form',
                     ]),
             ])
@@ -134,11 +127,7 @@ class CalculatorStringsTableWidget extends BaseWidget
                     ->label('Add String')
                     ->icon('heroicon-o-plus')
                     ->form($this->stringForm())
-                    ->visible(fn (): bool => CalculatorAdminPage::canAccess())
-                    ->action(function (array $data): void {
-                        abort_unless(CalculatorAdminPage::canAccess(), 403);
-                        CalculatorString::create($data);
-                    }),
+                    ->action(fn (array $data) => CalculatorString::create($data)),
             ])
             ->recordActions([
                 Action::make('edit')
@@ -146,16 +135,8 @@ class CalculatorStringsTableWidget extends BaseWidget
                     ->label('Edit')
                     ->fillForm(fn ($record) => $record->toArray())
                     ->form($this->stringForm())
-                    ->visible(fn (): bool => CalculatorAdminPage::canAccess())
-                    ->action(function ($record, array $data): void {
-                        abort_unless(CalculatorAdminPage::canAccess(), 403);
-                        $record->update($data);
-                    }),
-                DeleteAction::make()
-                    ->visible(fn (): bool => CalculatorAdminPage::canAccess()),
-            ])
-            ->emptyStateIcon('heroicon-o-language')
-            ->emptyStateHeading(__('admin.migration.administration.calculator.strings.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.administration.calculator.strings.empty_description'));
+                    ->action(fn ($record, array $data) => $record->update($data)),
+                DeleteAction::make(),
+            ]);
     }
 }

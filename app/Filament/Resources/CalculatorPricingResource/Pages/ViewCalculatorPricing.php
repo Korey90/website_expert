@@ -11,11 +11,6 @@ class ViewCalculatorPricing extends ViewRecord
 {
     protected static string $resource = CalculatorPricingResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.administration.calculator.pricing.view_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [

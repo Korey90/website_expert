@@ -17,11 +17,6 @@ class ViewPayment extends ViewRecord
 {
     protected static string $resource = PaymentResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.banking.payments.view_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         /** @var Payment $payment */

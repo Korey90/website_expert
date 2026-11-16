@@ -8,9 +8,4 @@ use Filament\Resources\Pages\EditRecord;
 class EditServiceItem extends EditRecord
 {
     protected static string $resource = ServiceItemResource::class;
-
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.marketing.services.edit_subheading');
-    }
 }

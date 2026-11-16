@@ -1,20 +1,9 @@
-<?php
-
-namespace App\Filament\Resources\ProjectResource\Pages;
-
+<?php namespace App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Resources\ProjectResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-
-class EditProject extends EditRecord
-{
+class EditProject extends EditRecord {
     protected static string $resource = ProjectResource::class;
-
-    public function getSubheading(): ?string
-    {
-        return __('admin.pilot.projects.edit_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [

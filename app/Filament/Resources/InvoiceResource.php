@@ -27,19 +27,11 @@ class InvoiceResource extends BaseResource
 {
     protected static ?string $model = Invoice::class;
 
-    protected static ?string $recordTitleAttribute = 'number';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
 
     protected static ?int $navigationSort = 1;
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['number', 'client.company_name'];
-    }
 
     public static function form(Schema $form): Schema
     {
@@ -158,13 +150,8 @@ class InvoiceResource extends BaseResource
                         ->disabled(),
                 ]),
 
-            Section::make(__('admin.migration.form.sections.notes_and_terms'))
-                ->columns(2)
-                ->columnSpanFull()
-                ->schema([
-                    Forms\Components\Textarea::make('notes')->rows(3),
-                    Forms\Components\Textarea::make('terms')->rows(3)->default('Payment due within 30 days of invoice date.'),
-                ]),
+            Forms\Components\Textarea::make('notes')->rows(3)->columnSpanFull(),
+            Forms\Components\Textarea::make('terms')->rows(3)->columnSpanFull()->default('Payment due within 30 days of invoice date.'),
         ]);
     }
 
@@ -172,41 +159,17 @@ class InvoiceResource extends BaseResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('number')
-                    ->label(__('admin.migration.sales_documents.columns.number'))
-                    ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
-                Tables\Columns\TextColumn::make('client.company_name')
-                    ->label(__('admin.migration.sales_documents.columns.client'))
-                    ->searchable()
-                    ->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('number')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('client.company_name')->label('Client')->searchable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label(__('admin.pilot.common.status'))
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => __('admin.migration.sales_documents.statuses.'.$state))
                     ->color(fn ($state) => match ($state) {
                         'draft' => 'gray', 'sent' => 'info', 'partially_paid' => 'primary', 'paid' => 'success', 'overdue' => 'danger', 'cancelled' => 'warning', default => 'gray'
                     }),
-                Tables\Columns\TextColumn::make('total')
-                    ->label(__('admin.migration.sales_documents.columns.total'))
-                    ->money(fn (Invoice $record) => FilamentCurrency::tableCurrency($record))
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('amount_due')
-                    ->label(__('admin.migration.sales_documents.columns.amount_due'))
-                    ->money(fn (Invoice $record) => FilamentCurrency::tableCurrency($record))
-                    ->sortable()
-                    ->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('due_date')
-                    ->label(__('admin.migration.sales_documents.columns.due_date'))
-                    ->date()
-                    ->sortable()
-                    ->visibleFrom('md'),
-                Tables\Columns\IconColumn::make('sent_at')
-                    ->label(__('admin.migration.sales_documents.columns.sent'))
-                    ->boolean()
-                    ->visibleFrom('xl')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('total')->money(fn (Invoice $record) => FilamentCurrency::tableCurrency($record))->sortable(),
+                Tables\Columns\TextColumn::make('amount_due')->label('Due')->money(fn (Invoice $record) => FilamentCurrency::tableCurrency($record))->sortable(),
+                Tables\Columns\TextColumn::make('due_date')->date()->sortable(),
+                Tables\Columns\IconColumn::make('sent_at')->label('Sent')->boolean(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('client_id')
@@ -233,10 +196,6 @@ class InvoiceResource extends BaseResource
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->recordUrl(fn (Invoice $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-document-text')
-            ->emptyStateHeading(__('admin.migration.sales_documents.invoices.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.sales_documents.invoices.empty_description'))
             ->defaultSort('created_at', 'desc');
     }
 

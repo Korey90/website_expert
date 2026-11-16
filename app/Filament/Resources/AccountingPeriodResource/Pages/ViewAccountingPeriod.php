@@ -17,11 +17,6 @@ class ViewAccountingPeriod extends ViewRecord
 {
     protected static string $resource = AccountingPeriodResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.accounting.periods.view_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         /** @var AccountingPeriod $period */

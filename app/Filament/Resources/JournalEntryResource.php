@@ -23,8 +23,6 @@ class JournalEntryResource extends BaseResource
 {
     protected static ?string $model = JournalEntry::class;
 
-    protected static ?string $recordTitleAttribute = 'entry_number';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-book-open';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
@@ -44,12 +42,6 @@ class JournalEntryResource extends BaseResource
     public static function getPluralModelLabel(): string
     {
         return __('finance.journals.plural');
-    }
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['entry_number', 'description'];
     }
 
     public static function infolist(Schema $schema): Schema
@@ -126,14 +118,14 @@ class JournalEntryResource extends BaseResource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('entry_number')->label(__('finance.journals.fields.number'))->searchable()->sortable()->weight('bold'),
-                Tables\Columns\TextColumn::make('entry_date')->label(__('finance.journals.fields.date'))->date()->sortable()->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('accountingPeriod.name')->label(__('finance.journals.fields.period'))->sortable()->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('description')->label(__('finance.journals.fields.description'))->searchable()->limit(50)->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('entry_date')->label(__('finance.journals.fields.date'))->date()->sortable(),
+                Tables\Columns\TextColumn::make('accountingPeriod.name')->label(__('finance.journals.fields.period'))->sortable(),
+                Tables\Columns\TextColumn::make('description')->label(__('finance.journals.fields.description'))->searchable()->limit(50),
                 Tables\Columns\TextColumn::make('status')->label(__('finance.journals.fields.status'))->badge()
                     ->formatStateUsing(fn (string $state): string => __('finance.journals.statuses.'.$state))
                     ->color(fn (string $state): string => self::statusColor($state)),
                 Tables\Columns\TextColumn::make('debit_total')->label(__('finance.journals.fields.debit'))->money('GBP')->sortable(),
-                Tables\Columns\TextColumn::make('credit_total')->label(__('finance.journals.fields.credit'))->money('GBP')->sortable()->visibleFrom('lg')->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('credit_total')->label(__('finance.journals.fields.credit'))->money('GBP')->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -172,10 +164,6 @@ class JournalEntryResource extends BaseResource
                             ->whereHas('lines', fn (Builder $lines): Builder => $lines->where('ledger_account_id', $accountId)))),
             ])
             ->actions([ViewAction::make()])
-            ->recordUrl(fn (JournalEntry $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-book-open')
-            ->emptyStateHeading(__('admin.migration.accounting.journals.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.accounting.journals.empty_description'))
             ->defaultSort('entry_date', 'desc');
     }
 

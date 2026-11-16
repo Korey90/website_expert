@@ -18,12 +18,7 @@ class StaleLeadsWidget extends BaseWidget
 {
     public static function canView(): bool
     {
-        return PermissionHelper::allows(auth()->user(), 'view_leads')
-            && Lead::withoutTrashed()
-                ->whereNull('won_at')
-                ->whereNull('lost_at')
-                ->where('updated_at', '<', now()->subDays(7))
-                ->exists();
+        return PermissionHelper::allows(auth()->user(), 'view_leads');
     }
 
     protected static ?int $sort = 10;
@@ -32,10 +27,7 @@ class StaleLeadsWidget extends BaseWidget
 
     protected static bool $isLazy = true;
 
-    public function getTableHeading(): string
-    {
-        return __('admin.dashboard.widgets.stale_leads.heading');
-    }
+    protected static ?string $heading = 'Stale Leads — No Activity in 7+ Days';
 
     public function table(Table $table): Table
     {

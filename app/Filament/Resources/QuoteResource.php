@@ -26,19 +26,11 @@ class QuoteResource extends BaseResource
 {
     protected static ?string $model = Quote::class;
 
-    protected static ?string $recordTitleAttribute = 'number';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
 
     protected static ?int $navigationSort = 2;
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['number', 'client.company_name'];
-    }
 
     public static function form(Schema $form): Schema
     {
@@ -298,31 +290,15 @@ class QuoteResource extends BaseResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('number')
-                    ->label(__('admin.migration.sales_documents.columns.number'))
-                    ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
-                Tables\Columns\TextColumn::make('client.company_name')
-                    ->label(__('admin.migration.sales_documents.columns.client'))
-                    ->searchable()
-                    ->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('number')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('client.company_name')->label('Client')->searchable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label(__('admin.pilot.common.status'))
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => __('admin.migration.sales_documents.statuses.'.$state))
                     ->color(fn ($state) => match ($state) {
                         'draft' => 'gray', 'sent' => 'info', 'accepted' => 'success', 'rejected' => 'danger', 'expired' => 'warning', default => 'gray'
                     }),
-                Tables\Columns\TextColumn::make('total')
-                    ->label(__('admin.migration.sales_documents.columns.total'))
-                    ->money(fn (Quote $record) => FilamentCurrency::tableCurrency($record))
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('valid_until')
-                    ->label(__('admin.migration.sales_documents.columns.valid_until'))
-                    ->date()
-                    ->sortable()
-                    ->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('total')->money(fn (Quote $record) => FilamentCurrency::tableCurrency($record))->sortable(),
+                Tables\Columns\TextColumn::make('valid_until')->date()->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('client_id')
@@ -335,10 +311,6 @@ class QuoteResource extends BaseResource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([ViewAction::make(), EditAction::make(), DeleteAction::make()])
-            ->recordUrl(fn (Quote $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-clipboard-document-list')
-            ->emptyStateHeading(__('admin.migration.sales_documents.quotes.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.sales_documents.quotes.empty_description'))
             ->defaultSort('created_at', 'desc');
     }
 

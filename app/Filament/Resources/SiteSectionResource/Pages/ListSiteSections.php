@@ -10,11 +10,6 @@ class ListSiteSections extends ListRecords
 {
     protected static string $resource = SiteSectionResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.marketing.sections.list_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [CreateAction::make()];

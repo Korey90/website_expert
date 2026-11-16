@@ -1,101 +1,10 @@
 # Current Task
 
-**Status:** W toku — lokalna walidacja etapu 6 zakończona; pozostaje kontrolowane wdrożenie i zebranie uwag
-**Zadanie:** Spójny i intuicyjny interfejs panelu administracyjnego
+**Status:** Zakończone — audyt wszystkich modułów i tras `/admin/*`
+**Zadanie:** RBAC, menu i izolacja tenantów w panelu administracyjnym
 **Data rozpoczęcia:** 2026-11-13
-**Plan nadrzędny:** `docs/plans/admin-ui-redesign-plan.md`
+**Plan nadrzędny:** audyt bezpieczeństwa panelu administracyjnego
 **Ochrona równoległej pracy:** nie modyfikować `resources/js/Pages/Landing/PlStronyInternetowe.tsx`.
-
-## Aktywny etap — Admin UI
-
-- [x] Audyt menu, topbara i reprezentatywnych widoków treści.
-- [x] Zatwierdzenie planu przebudowy przez użytkownika.
-- [x] Domknięcie architektury informacji i macierzy ról.
-- [x] Responsywny, klikalny prototyp powłoki panelu.
-- [x] Walidacja i zatwierdzenie prototypu przed zmianami w produkcyjnym `/admin/*`.
-- [x] Wdrożenie siedmiogrupowej nawigacji zgodnej z RBAC.
-- [x] Wdrożenie topbara: wyszukiwanie, szybkie tworzenie, workspace i przypięte notatki.
-- [x] Wdrożenie tokenów motywu i tłumaczeń PL/EN/PT.
-- [x] Testy nawigacji, uprawnień i tenant isolation oraz smoke test 1440/390 px.
-- [x] Końcowa walidacja ciemnego motywu i stanów interaktywnych fundamentu.
-- [x] Skorygować globalną powłokę po przeglądzie użytkownika tak, aby wyraźnie odpowiadała zatwierdzonemu prototypowi.
-  - [x] Pełnowysokościowe menu 272 px, belka 72 px, treść do 1320 px oraz prototypowe tokeny kart, tabel, formularzy i przycisków.
-  - [x] Nieaktywne grupy menu zwinięte, aktywna rozwinięta; zachowane siedem grup, RBAC i zwijanie całego sidebara.
-  - [x] Mobilna szuflada i belka 64 px; dashboard 1440 px oraz leady 390 px light/dark bez overflow i błędów JavaScript.
-  - [x] Walidacja: 13 testów / 92 asercje, Pint, Blade, ESLint, produkcyjny build i kontrola różnic poprawne.
-- [x] Rozpoczęcie pilotażu CRM i projektów (etap 4).
-- [x] Odchudzić dashboard i ukrywać widgety bez danych do działania.
-- [x] Naprawić strukturę datasetu wykresu przychodów.
-- [x] Ujednolicić responsywne listy klientów, leadów i projektów.
-- [x] Ujednolicić formularze i widoki szczegółowe klientów, leadów i projektów.
-  - [x] Dodać kontekstowe opisy oraz poprawić szerokość głównych sekcji formularzy leadów/projektów.
-  - [x] Uporządkować niestandardowe widoki szczegółowe projektu i zabezpieczyć mutacje szczegółów leadów/projektów.
-- [x] Przebudować pipeline i dodać czytelny sygnał przewijania poziomego.
-  - [x] Dostępny region przewijania, scroll snap, fokus i opis przewijania.
-  - [x] Ukryć i zablokować po stronie serwera akcje mutujące dla ról tylko do odczytu.
-  - [x] Ujednolicić modale na natywnej powłoce Filament.
-- [x] Zweryfikować zakończony pilot: testy RBAC/tenant, Pint, Blade, ESLint, build, zgodność PL/EN/PT i `git diff --check`.
-- [x] Smoke test ośmiu tras pilota przy 1440/390 px bez overflow i błędów JavaScript.
-- [x] Rozpocząć etap 5 od dokumentów sprzedażowych.
-  - [x] Responsywne listy faktur, wycen, umów i korekt.
-  - [x] Kontekstowe opisy list, formularzy i szczegółów.
-  - [x] Klikalne rekordy oraz użyteczne puste stany.
-  - [x] Dopasowanie własnych akcji wycen i umów do `canEdit()`/`canCreate()`.
-  - [x] Test renderowania, regresja RBAC/tenant i smoke test 1440/390 px.
-- [x] Ujednolicić zakupy i wydatki.
-  - [x] Responsywne listy wydatków, dostawców, wydatków cyklicznych i korekt zakupowych.
-  - [x] Kontekstowe opisy, klikalne rekordy, wyszukiwanie globalne i użyteczne puste stany.
-  - [x] Regresja obu pakietów finansowych oraz smoke test 1440/390 px.
-- [x] Ujednolicić bankowość.
-  - [x] Responsywne i klikalne listy rachunków, transakcji oraz płatności.
-  - [x] Kontekst stron, wyszukiwanie globalne i użyteczne puste stany.
-  - [x] Regresja całej dotychczasowej fali finansowej oraz smoke test 1440/390 px.
-- [x] Ujednolicić księgowość, VAT i HMRC.
-  - [x] Responsywne listy planu kont, okresów, korekt VAT, dzienników i deklaracji VAT.
-  - [x] Kontekst stron, klikalne rekordy, wyszukiwanie globalne i puste stany.
-  - [x] Kontekst księgi głównej i połączenia HMRC bez zmian w workflow bezpieczeństwa.
-  - [x] Testy renderowania i smoke test siedmiu tras przy 1440/390 px.
-- [x] Domknąć falę finansową: raporty finansowe.
-  - [x] Kontekst operacyjny ośmiu raportów oraz zachowanie istniejących filtrów i eksportów.
-  - [x] Smoke test raportów przy 1440/390 px bez overflow i błędów JavaScript.
-  - [x] Wspólna regresja fali finansowej: 20 testów / 1252 asercje.
-- [x] Zakończyć falę 2: marketing, CMS i SEO.
-  - [x] Nawigacja publiczna, landing pages, strony CMS, sekcje i artykuły.
-  - [x] Katalog usług, strony usług i portfolio.
-  - [x] Szablony e-mail/SMS, monitoring pozycji i mapa strony.
-  - [x] Testy renderowania oraz smoke test 12 tras przy 1440/390 px.
-  - [x] Regresja interfejsu i dostępu: 18 testów / 1222 asercje; Pint, Blade, ESLint i tłumaczenia poprawne.
-- [x] Zakończyć falę 3: automatyzacje.
-  - [x] Reguły, triggery i logi korzystają ze spójnego, responsywnego wzorca interfejsu.
-  - [x] Testowanie reguł i czyszczenie starych logów respektują istniejące uprawnienia.
-  - [x] Smoke test pięciu tras przy 1440/390 px oraz regresja 33 testów / 1221 asercji.
-  - [x] Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic zakończone poprawnie.
-- [x] Zakończyć falę 4: administracja i narzędzia systemowe.
-  - [x] Użytkownicy, role, uprawnienia i sesje.
-  - [x] Zabezpieczone akcje unieważniania sesji oraz smoke test czterech list przy 1440/390 px.
-  - [x] Regresja interfejsu i dostępu: 17 testów / 1201 asercji.
-  - [x] SaaS Billing: firmy, plany i subskrypcje; smoke test trzech list przy 1440/390 px.
-  - [x] Wspólna regresja dwóch pakietów administracyjnych: 18 testów / 1211 asercji.
-  - [x] Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic zakończone poprawnie.
-  - [x] Integracje i ustawienia firmy: poczta/SMS/domeny, płatności, tracking i dane prawne.
-  - [x] Hub oraz trzy bezpośrednie zasoby kalkulatora; smoke test ośmiu tras przy 1440/390 px.
-  - [x] Wspólna regresja trzech pakietów administracyjnych: 20 testów / 1237 asercji.
-  - [x] Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic zakończone poprawnie.
-  - [x] Bezpieczeństwo: statystyki, responsywna lista, tłumaczenia i serwerowe bramki mutacji.
-  - [x] Log Viewer i Job Manager: wspólny wzorzec operatorski, dostępne dialogi oraz lokalnie przewijane tabele.
-  - [x] Aktywna grupa Administracja pozostaje rozwinięta po nawigacji Livewire.
-  - [x] Smoke test 1440/390 px, jasny/ciemny motyw oraz regresja 40 testów / 1314 asercji.
-  - [x] Pint, Blade, ESLint, produkcyjny build i kontrola różnic zakończone poprawnie.
-- [x] Zakończyć lokalną walidację etapu 6.
-  - [x] 66 renderów przy 390/768/1280/1440 px, w jasnym i ciemnym motywie, bez overflow dokumentu.
-  - [x] Audyt klawiatury, fokusu, kontrastu, etykiet i ARIA; poprawione etykiety Job Managera oraz `Escape` mobilnego drawera.
-  - [x] Kontrakt wszystkich katalogów PL/PT względem EN.
-  - [x] Regresja RBAC/tenant/UI: 102 testy / 1622 asercje; frontend 16/16.
-  - [x] Pint, Blade, ESLint i produkcyjny build zakończone poprawnie.
-- [ ] Wdrożyć warstwę UI etapowo z możliwością szybkiego wycofania.
-- [ ] Zebrać uwagi po wdrożeniu i zamknąć backlog krytyczny.
-
-Źródło prawdy i dziennik postępu: `docs/plans/admin-ui-redesign-plan.md`.
 
 ## Delta Analysis: RBAC i tenant isolation panelu `/admin/*`
 

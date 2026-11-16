@@ -17,8 +17,6 @@ class AccountingPeriodResource extends BaseResource
 {
     protected static ?string $model = AccountingPeriod::class;
 
-    protected static ?string $recordTitleAttribute = 'name';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-calendar-days';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
@@ -38,12 +36,6 @@ class AccountingPeriodResource extends BaseResource
     public static function getPluralModelLabel(): string
     {
         return __('finance.accounting_periods.plural');
-    }
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'financial_year'];
     }
 
     public static function form(Schema $schema): Schema
@@ -85,10 +77,10 @@ class AccountingPeriodResource extends BaseResource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label(__('finance.accounting_periods.fields.name'))->searchable()->sortable()->weight('bold'),
-                Tables\Columns\TextColumn::make('financial_year')->label(__('finance.accounting_periods.fields.financial_year'))->sortable()->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('period_number')->label(__('finance.accounting_periods.fields.period_number'))->placeholder('—')->sortable()->visibleFrom('lg')->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('start_date')->label(__('finance.accounting_periods.fields.start_date'))->date()->sortable()->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('end_date')->label(__('finance.accounting_periods.fields.end_date'))->date()->sortable()->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('financial_year')->label(__('finance.accounting_periods.fields.financial_year'))->sortable(),
+                Tables\Columns\TextColumn::make('period_number')->label(__('finance.accounting_periods.fields.period_number'))->placeholder('—')->sortable(),
+                Tables\Columns\TextColumn::make('start_date')->label(__('finance.accounting_periods.fields.start_date'))->date()->sortable(),
+                Tables\Columns\TextColumn::make('end_date')->label(__('finance.accounting_periods.fields.end_date'))->date()->sortable(),
                 Tables\Columns\TextColumn::make('status')->label(__('finance.accounting_periods.fields.status'))->badge()->formatStateUsing(fn (string $state): string => __('finance.accounting_periods.statuses.'.$state))->color(fn (string $state): string => self::statusColor($state)),
             ])
             ->filters([
@@ -98,10 +90,6 @@ class AccountingPeriodResource extends BaseResource
                 ViewAction::make(),
                 EditAction::make()->visible(fn (AccountingPeriod $record): bool => $record->status === AccountingPeriod::STATUS_OPEN),
             ])
-            ->recordUrl(fn (AccountingPeriod $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-calendar-days')
-            ->emptyStateHeading(__('admin.migration.accounting.periods.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.accounting.periods.empty_description'))
             ->defaultSort('start_date', 'desc');
     }
 

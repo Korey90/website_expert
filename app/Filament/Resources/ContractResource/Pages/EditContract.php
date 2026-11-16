@@ -13,11 +13,6 @@ class EditContract extends EditRecord
 {
     protected static string $resource = ContractResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.sales_documents.contracts.edit_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [

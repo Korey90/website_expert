@@ -33,26 +33,17 @@ class LeadResource extends BaseResource
 {
     protected static ?string $model = Lead::class;
 
-    protected static ?string $recordTitleAttribute = 'title';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-funnel';
 
     protected static \UnitEnum|string|null $navigationGroup = 'CRM';
 
     protected static ?int $navigationSort = 2;
 
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['title', 'client.company_name'];
-    }
-
     public static function form(Schema $form): Schema
     {
         return $form->schema([
             Section::make('Lead Details')
                 ->columns(2)
-                ->columnSpanFull()
                 ->schema([
                     Forms\Components\TextInput::make('title')->required()->maxLength(255)->columnSpanFull(),
                     Forms\Components\Select::make('client_id')
@@ -89,21 +80,13 @@ class LeadResource extends BaseResource
 
             Section::make('Calculator Data')
                 ->collapsed()
-                ->columnSpanFull()
                 ->schema([
                     Forms\Components\KeyValue::make('calculator_data')
                         ->label('Calculator Configuration')
                         ->columnSpanFull(),
                 ]),
 
-            Section::make(__('admin.migration.form.sections.notes'))
-                ->columnSpanFull()
-                ->schema([
-                    Forms\Components\Textarea::make('notes')
-                        ->hiddenLabel()
-                        ->rows(4)
-                        ->columnSpanFull(),
-                ]),
+            Forms\Components\Textarea::make('notes')->rows(4)->columnSpanFull(),
         ]);
     }
 
@@ -111,35 +94,12 @@ class LeadResource extends BaseResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')
-                    ->label(__('admin.pilot.leads.columns.lead'))
-                    ->searchable()
-                    ->sortable()
-                    ->weight('semibold'),
-                Tables\Columns\TextColumn::make('business.name')
-                    ->label(__('admin.pilot.common.business'))
-                    ->searchable()
-                    ->sortable()
-                    ->placeholder('—')
-                    ->visibleFrom('xl')
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('client.company_name')
-                    ->label(__('admin.pilot.common.client'))
-                    ->searchable()
-                    ->sortable()
-                    ->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('stage.name')
-                    ->label(__('admin.pilot.leads.columns.stage'))
-                    ->badge(),
-                Tables\Columns\TextColumn::make('value')
-                    ->label(__('admin.pilot.leads.columns.value'))
-                    ->money(fn (Lead $record) => FilamentCurrency::tableCurrency($record))
-                    ->sortable()
-                    ->visibleFrom('sm'),
-                Tables\Columns\TextColumn::make('source')
-                    ->label(__('admin.pilot.leads.columns.source'))
-                    ->badge()
-                    ->visibleFrom('lg'),
+                Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('business.name')->label('Business')->searchable()->sortable()->placeholder('—'),
+                Tables\Columns\TextColumn::make('client.company_name')->label('Client')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('stage.name')->label('Stage')->badge(),
+                Tables\Columns\TextColumn::make('value')->money(fn (Lead $record) => FilamentCurrency::tableCurrency($record))->sortable(),
+                Tables\Columns\TextColumn::make('source')->badge(),
                 Tables\Columns\TextColumn::make('leadSource.type')
                     ->label('Source Type')
                     ->badge()
@@ -150,29 +110,15 @@ class LeadResource extends BaseResource
                         'api' => 'purple',
                         default => 'gray',
                     })
-                    ->placeholder('—')
-                    ->visibleFrom('lg')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->placeholder('—'),
                 Tables\Columns\TextColumn::make('leadSource.landingPage.title')
                     ->label('Landing Page')
                     ->placeholder('—')
                     ->searchable()
-                    ->visibleFrom('lg')
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('assignedTo.name')
-                    ->label(__('admin.pilot.common.assigned'))
-                    ->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('expected_close_date')
-                    ->label(__('admin.pilot.leads.columns.expected_close'))
-                    ->date()
-                    ->sortable()
-                    ->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('admin.pilot.common.added'))
-                    ->date()
-                    ->sortable()
-                    ->visibleFrom('md')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('assignedTo.name')->label('Assigned'),
+                Tables\Columns\TextColumn::make('expected_close_date')->date()->sortable(),
+                Tables\Columns\TextColumn::make('created_at')->date()->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('client_id')
@@ -337,10 +283,6 @@ class LeadResource extends BaseResource
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->recordUrl(fn (Lead $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateHeading(__('admin.pilot.leads.empty.heading'))
-            ->emptyStateDescription(__('admin.pilot.leads.empty.description'))
-            ->emptyStateIcon('heroicon-o-funnel')
             ->defaultSort('created_at', 'desc');
     }
 

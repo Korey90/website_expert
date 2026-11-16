@@ -24,8 +24,6 @@ class SupplierResource extends BaseResource
 {
     protected static ?string $model = Supplier::class;
 
-    protected static ?string $recordTitleAttribute = 'name';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-truck';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
@@ -45,12 +43,6 @@ class SupplierResource extends BaseResource
     public static function getPluralModelLabel(): string
     {
         return __('finance.suppliers.plural');
-    }
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'contact_name', 'contact_email', 'vat_number'];
     }
 
     public static function form(Schema $schema): Schema
@@ -189,10 +181,10 @@ class SupplierResource extends BaseResource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label(__('finance.suppliers.fields.name'))->searchable()->sortable()->weight('bold'),
-                Tables\Columns\TextColumn::make('contact_name')->label(__('finance.suppliers.fields.contact_name'))->searchable()->placeholder('—')->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('contact_email')->label(__('finance.suppliers.fields.contact_email'))->searchable()->copyable()->placeholder('—')->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('vat_number')->label(__('finance.suppliers.fields.vat_number'))->searchable()->placeholder('—')->visibleFrom('xl')->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('default_currency')->label(__('finance.suppliers.fields.default_currency'))->badge()->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('contact_name')->label(__('finance.suppliers.fields.contact_name'))->searchable()->placeholder('—'),
+                Tables\Columns\TextColumn::make('contact_email')->label(__('finance.suppliers.fields.contact_email'))->searchable()->copyable()->placeholder('—'),
+                Tables\Columns\TextColumn::make('vat_number')->label(__('finance.suppliers.fields.vat_number'))->searchable()->placeholder('—'),
+                Tables\Columns\TextColumn::make('default_currency')->label(__('finance.suppliers.fields.default_currency'))->badge(),
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('finance.suppliers.fields.status'))
                     ->badge()
@@ -217,10 +209,6 @@ class SupplierResource extends BaseResource
                     RestoreBulkAction::make(),
                 ]),
             ])
-            ->recordUrl(fn (Supplier $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-truck')
-            ->emptyStateHeading(__('admin.migration.procurement.suppliers.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.procurement.suppliers.empty_description'))
             ->defaultSort('name');
     }
 

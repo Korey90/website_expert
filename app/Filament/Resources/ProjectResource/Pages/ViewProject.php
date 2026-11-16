@@ -33,15 +33,8 @@ class ViewProject extends ViewRecord
 {
     protected static string $resource = ProjectResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.pilot.projects.view_subheading');
-    }
-
     public function updateProjectStatus(string $status): void
     {
-        abort_unless(ProjectResource::canEdit($this->record), 403);
-
         $allowed = ['active', 'on_hold', 'completed', 'cancelled'];
         if (! in_array($status, $allowed, true)) {
             return;
@@ -56,10 +49,10 @@ class ViewProject extends ViewRecord
         $this->record->refresh();
 
         $messages = [
-            'active' => ['title' => __('admin.pilot.projects.notifications.active'), 'color' => 'success'],
-            'on_hold' => ['title' => __('admin.pilot.projects.notifications.on_hold'), 'color' => 'warning'],
-            'completed' => ['title' => __('admin.pilot.projects.notifications.completed'), 'color' => 'success'],
-            'cancelled' => ['title' => __('admin.pilot.projects.notifications.cancelled'), 'color' => 'danger'],
+            'active' => ['title' => 'Project is now Active',     'color' => 'success'],
+            'on_hold' => ['title' => 'Project put on hold',       'color' => 'warning'],
+            'completed' => ['title' => 'Project marked as Completed 🎉', 'color' => 'success'],
+            'cancelled' => ['title' => 'Project cancelled',         'color' => 'danger'],
         ];
 
         $msg = $messages[$status];
@@ -68,8 +61,6 @@ class ViewProject extends ViewRecord
 
     public function updatePhaseStatus(int $phaseId, string $status): void
     {
-        abort_unless(ProjectResource::canEdit($this->record), 403);
-
         $allowed = ['pending', 'in_progress', 'completed', 'cancelled'];
         if (! in_array($status, $allowed, true)) {
             return;
@@ -82,7 +73,7 @@ class ViewProject extends ViewRecord
         $this->record->refresh();
 
         Notification::make()
-            ->title(__('admin.pilot.projects.notifications.phase_updated'))
+            ->title('Phase status updated')
             ->success()
             ->send();
     }
@@ -92,23 +83,30 @@ class ViewProject extends ViewRecord
         $title = e($this->record->title ?? '—');
 
         $serviceLabels = [
-            'wizytowka' => __('admin.pilot.projects.services.business_card'),
-            'landing' => __('admin.pilot.projects.services.landing_page'),
-            'ecommerce' => __('admin.pilot.projects.services.ecommerce'),
-            'aplikacja' => __('admin.pilot.projects.services.web_application'),
-            'seo' => __('admin.pilot.projects.services.seo'),
+            'wizytowka' => 'Business Card',
+            'landing' => 'Landing Page',
+            'ecommerce' => 'E-Commerce',
+            'aplikacja' => 'Web Application',
+            'seo' => 'SEO',
+        ];
+        $serviceColors = [
+            'wizytowka' => ['bg' => 'rgba(56,189,248,0.15)',  'text' => '#38bdf8', 'border' => 'rgba(56,189,248,0.3)'],
+            'landing' => ['bg' => 'rgba(129,140,248,0.15)', 'text' => '#818cf8', 'border' => 'rgba(129,140,248,0.3)'],
+            'ecommerce' => ['bg' => 'rgba(52,211,153,0.15)',  'text' => '#34d399', 'border' => 'rgba(52,211,153,0.3)'],
+            'aplikacja' => ['bg' => 'rgba(251,191,36,0.15)',  'text' => '#fbbf24', 'border' => 'rgba(251,191,36,0.3)'],
+            'seo' => ['bg' => 'rgba(167,139,250,0.15)', 'text' => '#a78bfa', 'border' => 'rgba(167,139,250,0.3)'],
         ];
 
         $type = $this->record->service_type;
         $label = $serviceLabels[$type] ?? ($type ? ucfirst($type) : null);
-        $badgeModifier = in_array($type, array_keys($serviceLabels), true) ? $type : 'default';
+        $colors = $serviceColors[$type] ?? ['bg' => 'rgba(255,255,255,0.08)', 'text' => '#94a3b8', 'border' => 'rgba(255,255,255,0.15)'];
 
         $badge = $label
-            ? '<span class="admin-project-service-badge admin-project-service-badge--'.e($badgeModifier).'">'.e($label).'</span>'
+            ? '<span style="display:inline-flex;align-items:center;vertical-align:middle;margin-left:10px;padding:3px 11px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.4px;background:'.$colors['bg'].';color:'.$colors['text'].';border:1px solid '.$colors['border'].';">'.e($label).'</span>'
             : '';
 
         return new HtmlString(
-            '<span class="admin-record-heading"><span>'.$title.'</span>'.$badge.'</span>'
+            '<span style="vertical-align:middle;">'.$title.'</span>'.$badge
         );
     }
 

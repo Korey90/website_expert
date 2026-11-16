@@ -80,8 +80,8 @@ class JobManagerPage extends BasePage
         foreach ($pending as $row) {
             $byQueue[$row->queue] = [
                 'pending' => (int) $row->total - (int) $row->active,
-                'active' => (int) $row->active,
-                'failed' => (int) ($failed->get($row->queue)?->total ?? 0),
+                'active'  => (int) $row->active,
+                'failed'  => (int) ($failed->get($row->queue)?->total ?? 0),
             ];
         }
 
@@ -92,9 +92,9 @@ class JobManagerPage extends BasePage
             }
         }
 
-        $totalActive = (int) DB::table('jobs')->whereNotNull('reserved_at')->count();
+        $totalActive  = (int) DB::table('jobs')->whereNotNull('reserved_at')->count();
         $totalPending = (int) DB::table('jobs')->count();
-        $totalFailed = (int) DB::table('failed_jobs')->count();
+        $totalFailed  = (int) DB::table('failed_jobs')->count();
 
         // A worker is "likely active" if there is any reserved job OR a job
         // was reserved within the last 2 minutes (worker finished and released it).
@@ -104,12 +104,12 @@ class JobManagerPage extends BasePage
         $lastFailed = DB::table('failed_jobs')->max('failed_at');
 
         return [
-            'total_pending' => $totalPending,
-            'active' => $totalActive,
-            'total_failed' => $totalFailed,
-            'worker_active' => $workerActive,
+            'total_pending'  => $totalPending,
+            'active'         => $totalActive,
+            'total_failed'   => $totalFailed,
+            'worker_active'  => $workerActive,
             'last_failed_at' => $lastFailed,
-            'by_queue' => ksort($byQueue) ? $byQueue : $byQueue,
+            'by_queue'       => ksort($byQueue) ? $byQueue : $byQueue,
         ];
     }
 
@@ -119,8 +119,6 @@ class JobManagerPage extends BasePage
 
     public function switchTab(string $tab): void
     {
-        abort_unless(in_array($tab, ['failed', 'pending', 'batches'], true), 404);
-
         $this->activeTab = $tab;
         $this->page = 1;
         $this->queueFilter = '';
@@ -225,7 +223,7 @@ class JobManagerPage extends BasePage
         $this->modalContent = $decoded !== null
             ? json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
             : $job->payload;
-        $this->modalTitle = __('jobs.payload').' #'.$id;
+        $this->modalTitle = 'Payload #' . $id;
         $this->showPayloadModal = true;
     }
 
@@ -233,7 +231,7 @@ class JobManagerPage extends BasePage
     {
         $job = FailedJob::findOrFail($id);
         $this->modalContent = $job->exception;
-        $this->modalTitle = __('jobs.exception').' #'.$id;
+        $this->modalTitle = __('jobs.exception') . ' #' . $id;
         $this->showPayloadModal = true;
     }
 
@@ -244,7 +242,7 @@ class JobManagerPage extends BasePage
         $this->modalContent = $decoded !== null
             ? json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
             : $job->payload;
-        $this->modalTitle = __('jobs.payload').' #'.$id;
+        $this->modalTitle = 'Payload #' . $id;
         $this->showPayloadModal = true;
     }
 
@@ -261,8 +259,6 @@ class JobManagerPage extends BasePage
 
     public function retryJob(string $uuid): void
     {
-        $this->authorizeOperator();
-
         app(RetryFailedJobAction::class)->execute($uuid);
 
         Notification::make()
@@ -273,8 +269,6 @@ class JobManagerPage extends BasePage
 
     public function retryAll(): void
     {
-        $this->authorizeOperator();
-
         app(RetryFailedJobAction::class)->retryAll();
 
         Notification::make()
@@ -285,8 +279,6 @@ class JobManagerPage extends BasePage
 
     public function deleteFailedJob(string $uuid): void
     {
-        $this->authorizeOperator();
-
         app(DeleteFailedJobAction::class)->execute($uuid);
 
         Notification::make()
@@ -307,8 +299,6 @@ class JobManagerPage extends BasePage
 
     public function flushAllFailed(): void
     {
-        $this->authorizeOperator();
-
         app(FlushFailedJobsAction::class)->execute();
 
         $this->showConfirmFlush = false;
@@ -325,8 +315,6 @@ class JobManagerPage extends BasePage
 
     public function deletePendingJob(int $id): void
     {
-        $this->authorizeOperator();
-
         app(DeletePendingJobAction::class)->execute($id);
 
         Notification::make()
@@ -341,8 +329,6 @@ class JobManagerPage extends BasePage
 
     public function cancelBatch(string $batchId): void
     {
-        $this->authorizeOperator();
-
         $result = app(CancelJobBatchAction::class)->execute($batchId);
 
         if ($result) {
@@ -360,8 +346,6 @@ class JobManagerPage extends BasePage
 
     public function deleteBatch(string $batchId): void
     {
-        $this->authorizeOperator();
-
         app(CancelJobBatchAction::class)->deleteBatch($batchId);
 
         Notification::make()
@@ -394,8 +378,6 @@ class JobManagerPage extends BasePage
 
     public function restartWorkers(): void
     {
-        $this->authorizeOperator();
-
         Artisan::call('queue:restart');
 
         Notification::make()
@@ -403,21 +385,6 @@ class JobManagerPage extends BasePage
             ->body(__('jobs.restart_body'))
             ->success()
             ->send();
-    }
-
-    public function getTitle(): string
-    {
-        return __('jobs.title');
-    }
-
-    public function getSubheading(): ?string
-    {
-        return __('jobs.subheading');
-    }
-
-    private function authorizeOperator(): void
-    {
-        abort_unless(static::canAccess(), 403);
     }
 
     protected function getHeaderActions(): array

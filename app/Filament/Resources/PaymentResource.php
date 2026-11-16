@@ -16,7 +16,6 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 
 class PaymentResource extends BaseResource
 {
@@ -29,17 +28,6 @@ class PaymentResource extends BaseResource
     protected static ?string $navigationLabel = 'Payments';
 
     protected static ?int $navigationSort = 8;
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['reference', 'invoice.number', 'invoice.client.company_name'];
-    }
-
-    public static function getGlobalSearchResultTitle(Model $record): string
-    {
-        return $record->reference ?: $record->invoice?->number ?: '#'.$record->getKey();
-    }
 
     public static function form(Schema $form): Schema
     {
@@ -149,7 +137,6 @@ class PaymentResource extends BaseResource
                     ->label('Invoice')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold')
                     ->url(fn (Payment $r) => $r->invoice_id
                         ? route('filament.admin.resources.invoices.view', $r->invoice_id)
                         : null),
@@ -157,8 +144,7 @@ class PaymentResource extends BaseResource
                 Tables\Columns\TextColumn::make('invoice.client.company_name')
                     ->label('Client')
                     ->searchable()
-                    ->sortable()
-                    ->visibleFrom('md'),
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('amount')
                     ->money(fn (Payment $r) => $r->currency ?? 'GBP')
@@ -168,7 +154,6 @@ class PaymentResource extends BaseResource
                     ->label('Cash value (GBP)')
                     ->money('GBP')
                     ->sortable()
-                    ->visibleFrom('xl')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('realised_fx_gbp')
@@ -176,11 +161,9 @@ class PaymentResource extends BaseResource
                     ->money('GBP')
                     ->color(fn (mixed $state): string => (float) $state > 0 ? 'success' : ((float) $state < 0 ? 'danger' : 'gray'))
                     ->sortable()
-                    ->visibleFrom('xl')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
 
                 Tables\Columns\BadgeColumn::make('method')
-                    ->visibleFrom('md')
                     ->colors([
                         'primary' => 'stripe',
                         'warning' => 'payu',
@@ -209,14 +192,12 @@ class PaymentResource extends BaseResource
                 Tables\Columns\TextColumn::make('paid_at')
                     ->label('Paid at')
                     ->dateTime('d M Y, H:i')
-                    ->sortable()
-                    ->visibleFrom('md'),
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('d M Y')
                     ->sortable()
-                    ->visibleFrom('xl')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('created_at', 'desc')
@@ -245,11 +226,7 @@ class PaymentResource extends BaseResource
             ])
             ->bulkActions([
                 DeleteBulkAction::make(),
-            ])
-            ->recordUrl(fn (Payment $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-credit-card')
-            ->emptyStateHeading(__('admin.migration.banking.payments.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.banking.payments.empty_description'));
+            ]);
     }
 
     public static function getRelationManagers(): array

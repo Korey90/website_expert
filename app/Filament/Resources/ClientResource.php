@@ -28,19 +28,11 @@ class ClientResource extends BaseResource
 {
     protected static ?string $model = Client::class;
 
-    protected static ?string $recordTitleAttribute = 'company_name';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-building-office-2';
 
     protected static \UnitEnum|string|null $navigationGroup = 'CRM';
 
     protected static ?int $navigationSort = 1;
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['company_name', 'trading_name', 'primary_contact_email'];
-    }
 
     public static function infolist(Schema $schema): Schema
     {
@@ -300,45 +292,21 @@ class ClientResource extends BaseResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('company_name')
-                    ->label(__('admin.pilot.clients.columns.company'))
-                    ->searchable()
-                    ->sortable()
-                    ->weight('semibold'),
-                Tables\Columns\TextColumn::make('primary_contact_email')
-                    ->label(__('admin.pilot.clients.columns.email'))
-                    ->searchable()
-                    ->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('company_name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('primary_contact_email')->label('Email')->searchable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label(__('admin.pilot.common.status'))
                     ->badge()
                     ->color(fn ($state) => match ($state) {
                         'prospect' => 'gray', 'active' => 'success', 'inactive' => 'warning', 'archived' => 'danger', default => 'gray'
                     }),
                 Tables\Columns\ToggleColumn::make('portal_access')
-                    ->label(__('admin.pilot.clients.columns.portal_access'))
+                    ->label('Portal Access')
                     ->getStateUsing(fn (Client $record): bool => $record->portalAccesses()->exists())
-                    ->disabled()
-                    ->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('city')
-                    ->label(__('admin.pilot.clients.columns.city'))
-                    ->sortable()
-                    ->visibleFrom('xl'),
-                Tables\Columns\TextColumn::make('lifetime_value')
-                    ->label(__('admin.pilot.clients.columns.ltv'))
-                    ->money(fn (Client $record) => FilamentCurrency::tableCurrency($record))
-                    ->sortable()
-                    ->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('assignedTo.name')
-                    ->label(__('admin.pilot.common.assigned'))
-                    ->sortable()
-                    ->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('admin.pilot.common.added'))
-                    ->date()
-                    ->sortable()
-                    ->visibleFrom('md')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->disabled(),
+                Tables\Columns\TextColumn::make('city')->sortable(),
+                Tables\Columns\TextColumn::make('lifetime_value')->label('LTV')->money(fn (Client $record) => FilamentCurrency::tableCurrency($record))->sortable(),
+                Tables\Columns\TextColumn::make('assignedTo.name')->label('Assigned')->sortable(),
+                Tables\Columns\TextColumn::make('created_at')->label('Added')->date()->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -357,10 +325,6 @@ class ClientResource extends BaseResource
                     RestoreBulkAction::make(),
                 ]),
             ])
-            ->recordUrl(fn (Client $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateHeading(__('admin.pilot.clients.empty.heading'))
-            ->emptyStateDescription(__('admin.pilot.clients.empty.description'))
-            ->emptyStateIcon('heroicon-o-building-office-2')
             ->defaultSort('created_at', 'desc');
     }
 

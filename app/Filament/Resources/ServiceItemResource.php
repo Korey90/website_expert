@@ -21,8 +21,6 @@ class ServiceItemResource extends BaseResource
 {
     protected static ?string $model = ServiceItem::class;
 
-    protected static ?string $recordTitleAttribute = 'slug';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-wrench-screwdriver';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
@@ -34,12 +32,6 @@ class ServiceItemResource extends BaseResource
     protected static ?string $pluralLabel = 'Services';
 
     protected static ?int $navigationSort = 4;
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['slug'];
-    }
 
     // -------------------------------------------------------------------------
     // Form
@@ -280,12 +272,12 @@ class ServiceItemResource extends BaseResource
     {
         return $table
             ->defaultSort('sort_order')
+            ->recordUrl(null)
             ->columns([
                 Tables\Columns\TextColumn::make('icon')
                     ->label('Icon')
                     ->badge()
-                    ->color('gray')
-                    ->visibleFrom('md'),
+                    ->color('gray'),
 
                 Tables\Columns\TextColumn::make('title_en_display')
                     ->label('Title (EN)')
@@ -293,20 +285,16 @@ class ServiceItemResource extends BaseResource
                     ->searchable(query: function ($query, string $value) {
                         $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(title, '$.en')) LIKE ?", ["%{$value}%"]);
                     })
-                    ->limit(45)
-                    ->weight('bold'),
+                    ->limit(45),
 
                 Tables\Columns\TextColumn::make('price_book_display')
                     ->label('Price Book')
                     ->getStateUsing(fn (ServiceItem $item): string => self::formatPriceBook($item))
-                    ->wrap()
-                    ->visibleFrom('md'),
+                    ->wrap(),
 
                 Tables\Columns\TextInputColumn::make('price_from')
                     ->label('Legacy Price')
                     ->sortable()
-                    ->visibleFrom('lg')
-                    ->disabled(fn (ServiceItem $record): bool => ! static::canEdit($record))
                     ->afterStateUpdated(function (ServiceItem $record, ?string $state): void {
                         $record->save();
                         Notification::make()
@@ -319,8 +307,7 @@ class ServiceItemResource extends BaseResource
                 Tables\Columns\IconColumn::make('is_featured')
                     ->label('Featured')
                     ->boolean()
-                    ->sortable()
-                    ->visibleFrom('md'),
+                    ->sortable(),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Active')
@@ -330,9 +317,7 @@ class ServiceItemResource extends BaseResource
                 Tables\Columns\TextColumn::make('sort_order')
                     ->label('#')
                     ->sortable()
-                    ->alignCenter()
-                    ->visibleFrom('xl')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->alignCenter(),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
@@ -348,12 +333,6 @@ class ServiceItemResource extends BaseResource
             ->bulkActions([
                 DeleteBulkAction::make(),
             ])
-            ->recordUrl(fn (ServiceItem $record): ?string => static::canEdit($record)
-                ? static::getUrl('edit', ['record' => $record])
-                : null)
-            ->emptyStateIcon('heroicon-o-wrench-screwdriver')
-            ->emptyStateHeading(__('admin.migration.marketing.services.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.marketing.services.empty_description'))
             ->reorderable('sort_order');
     }
 

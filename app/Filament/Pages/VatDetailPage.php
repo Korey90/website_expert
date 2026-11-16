@@ -39,11 +39,6 @@ class VatDetailPage extends BasePage
         return __('finance.vat_detail.title');
     }
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.reports.vat_detail');
-    }
-
     public function mount(): void
     {
         $period = AccountingPeriod::query()

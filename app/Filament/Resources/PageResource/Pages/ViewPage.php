@@ -13,11 +13,6 @@ class ViewPage extends ViewRecord
 {
     protected static string $resource = PageResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.marketing.pages.view_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [

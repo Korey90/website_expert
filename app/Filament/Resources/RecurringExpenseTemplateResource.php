@@ -27,8 +27,6 @@ class RecurringExpenseTemplateResource extends BaseResource
 {
     protected static ?string $model = RecurringExpenseTemplate::class;
 
-    protected static ?string $recordTitleAttribute = 'name';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-arrow-path';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
@@ -48,12 +46,6 @@ class RecurringExpenseTemplateResource extends BaseResource
     public static function getPluralModelLabel(): string
     {
         return __('finance.recurring_expenses.plural');
-    }
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'supplier.name', 'business_purpose'];
     }
 
     public static function form(Schema $schema): Schema
@@ -112,12 +104,12 @@ class RecurringExpenseTemplateResource extends BaseResource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->label(__('finance.recurring_expenses.fields.name'))->searchable()->sortable()->weight('bold'),
-                Tables\Columns\TextColumn::make('supplier.name')->label(__('finance.expenses.fields.supplier'))->placeholder('—')->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('name')->label(__('finance.recurring_expenses.fields.name'))->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('supplier.name')->label(__('finance.expenses.fields.supplier'))->placeholder('—'),
                 Tables\Columns\TextColumn::make('status')->label(__('finance.recurring_expenses.fields.status'))->badge()->formatStateUsing(fn (string $state): string => __('finance.recurring_expenses.statuses.'.$state)),
-                Tables\Columns\TextColumn::make('frequency')->label(__('finance.recurring_expenses.fields.frequency'))->formatStateUsing(fn (string $state): string => __('finance.recurring_expenses.frequencies.'.$state))->visibleFrom('md'),
+                Tables\Columns\TextColumn::make('frequency')->label(__('finance.recurring_expenses.fields.frequency'))->formatStateUsing(fn (string $state): string => __('finance.recurring_expenses.frequencies.'.$state)),
                 Tables\Columns\TextColumn::make('next_run_date')->label(__('finance.recurring_expenses.fields.next_run_date'))->date()->sortable(),
-                Tables\Columns\TextColumn::make('generated_expenses_count')->label(__('finance.recurring_expenses.fields.generated'))->counts('generatedExpenses')->visibleFrom('lg')->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('generated_expenses_count')->label(__('finance.recurring_expenses.fields.generated'))->counts('generatedExpenses'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->options(collect(RecurringExpenseTemplate::statuses())->mapWithKeys(fn (string $status): array => [$status => __('finance.recurring_expenses.statuses.'.$status)])->all()),
@@ -125,12 +117,6 @@ class RecurringExpenseTemplateResource extends BaseResource
             ])
             ->actions([EditAction::make(), DeleteAction::make(), RestoreAction::make()])
             ->bulkActions([BulkActionGroup::make([DeleteBulkAction::make(), RestoreBulkAction::make()])])
-            ->recordUrl(fn (RecurringExpenseTemplate $record): ?string => static::canEdit($record)
-                ? static::getUrl('edit', ['record' => $record])
-                : null)
-            ->emptyStateIcon('heroicon-o-arrow-path')
-            ->emptyStateHeading(__('admin.migration.procurement.recurring_expenses.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.procurement.recurring_expenses.empty_description'))
             ->defaultSort('next_run_date');
     }
 

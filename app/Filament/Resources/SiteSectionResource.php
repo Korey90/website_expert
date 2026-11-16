@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SiteSectionResource\Pages;
 use App\Forms\Components\TinyEditor;
+use App\Filament\Resources\SiteSectionResource\Pages;
 use App\Models\SiteSection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -15,28 +15,17 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
 class SiteSectionResource extends BaseResource
 {
     protected static ?string $model = SiteSection::class;
-
-    protected static ?string $recordTitleAttribute = 'label';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';
-
     protected static \UnitEnum|string|null $navigationGroup = 'Marketing';
-
     protected static ?string $navigationLabel = 'Front-end Sections';
-
     protected static ?int $navigationSort = 6;
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['key', 'label'];
-    }
 
     public static function infolist(Schema $schema): Schema
     {
@@ -714,8 +703,7 @@ class SiteSectionResource extends BaseResource
             ->columns([
                 Tables\Columns\TextColumn::make('sort_order')
                     ->label('#')
-                    ->sortable()
-                    ->visibleFrom('md'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('key')
                     ->badge()
                     ->color('gray')
@@ -723,21 +711,17 @@ class SiteSectionResource extends BaseResource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('label')
                     ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('title')
                     ->label('Heading')
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', 'en'))
-                    ->limit(40)
-                    ->visibleFrom('md'),
+                    ->limit(40),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->label('Active'),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Updated')
                     ->date()
-                    ->sortable()
-                    ->visibleFrom('lg')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
             ])
             ->defaultSort('sort_order')
             ->reorderable('sort_order')
@@ -747,20 +731,16 @@ class SiteSectionResource extends BaseResource
                     ->label('Status')
                     ->trueLabel('Visible')
                     ->falseLabel('Hidden'),
-            ])
-            ->recordUrl(fn (SiteSection $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-squares-2x2')
-            ->emptyStateHeading(__('admin.migration.marketing.sections.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.marketing.sections.empty_description'));
+            ]);
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSiteSections::route('/'),
+            'index'  => Pages\ListSiteSections::route('/'),
             'create' => Pages\CreateSiteSection::route('/create'),
-            'view' => Pages\ViewSiteSection::route('/{record}'),
-            'edit' => Pages\EditSiteSection::route('/{record}/edit'),
+            'view'   => Pages\ViewSiteSection::route('/{record}'),
+            'edit'   => Pages\EditSiteSection::route('/{record}/edit'),
         ];
     }
 }

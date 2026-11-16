@@ -1,22 +1,7 @@
-<?php
-
-namespace App\Filament\Resources\CalculatorPricingResource\Pages;
-
+<?php namespace App\Filament\Resources\CalculatorPricingResource\Pages;
 use App\Filament\Resources\CalculatorPricingResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
-
-class ListCalculatorPricings extends ListRecords
-{
+use Filament\Actions; use Filament\Resources\Pages\ListRecords;
+class ListCalculatorPricings extends ListRecords {
     protected static string $resource = CalculatorPricingResource::class;
-
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.administration.calculator.pricing.list_subheading');
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [Actions\CreateAction::make()];
-    }
+    protected function getHeaderActions(): array { return [Actions\CreateAction::make()]; }
 }

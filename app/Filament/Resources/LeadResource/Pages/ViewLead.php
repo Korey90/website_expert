@@ -50,11 +50,6 @@ class ViewLead extends ViewRecord
 
     protected string $view = 'filament.pages.view-lead';
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.pilot.leads.view_subheading');
-    }
-
     // ── Email modal ───────────────────────────────────────────────────────────
     public bool $showEmailModal = false;
 
@@ -381,8 +376,6 @@ class ViewLead extends ViewRecord
 
     public function createLeadEvent(): void
     {
-        $this->authorizeLeadMutation();
-
         $v = Validator::make(
             ['title' => $this->evTitle, 'type' => $this->evType, 'date' => $this->evDate],
             [
@@ -423,8 +416,6 @@ class ViewLead extends ViewRecord
 
     public function deleteLeadEvent(int $id): void
     {
-        $this->authorizeLeadMutation();
-
         $event = CalendarEvent::where('related_type', Lead::class)
             ->where('related_id', $this->record->id)
             ->where('business_id', $this->record->business_id)
@@ -440,8 +431,6 @@ class ViewLead extends ViewRecord
 
     public function toggleLeadEventDone(int $id): void
     {
-        $this->authorizeLeadMutation();
-
         $event = CalendarEvent::where('related_type', Lead::class)
             ->where('related_id', $this->record->id)
             ->where('business_id', $this->record->business_id)
@@ -500,8 +489,6 @@ class ViewLead extends ViewRecord
 
     public function sendEmail(): void
     {
-        $this->authorizeLeadMutation();
-
         $this->validate([
             'emailSubject' => ['required', 'string', 'max:255'],
             'emailBody' => ['required', 'string'],
@@ -590,8 +577,6 @@ class ViewLead extends ViewRecord
 
     public function sendSmsFromLead(): void
     {
-        $this->authorizeLeadMutation();
-
         $this->validate([
             'smsMessage' => ['required', 'string', 'max:1600'],
         ]);
@@ -624,8 +609,6 @@ class ViewLead extends ViewRecord
 
     public function addNote(): void
     {
-        $this->authorizeLeadMutation();
-
         $this->validate(['newNoteText' => ['required', 'string', 'max:10000']]);
 
         LeadNote::create([
@@ -651,8 +634,6 @@ class ViewLead extends ViewRecord
 
     public function saveEditNote(): void
     {
-        $this->authorizeLeadMutation();
-
         $this->validate(['editNoteText' => ['required', 'string', 'max:10000']]);
 
         LeadNote::findOrFail($this->editNoteId)->update(['content' => $this->editNoteText]);
@@ -670,16 +651,12 @@ class ViewLead extends ViewRecord
 
     public function deleteNote(int $noteId): void
     {
-        $this->authorizeLeadMutation();
-
         LeadNote::findOrFail($noteId)->delete();
         Notification::make()->title('Note deleted')->success()->send();
     }
 
     public function togglePinNote(int $noteId): void
     {
-        $this->authorizeLeadMutation();
-
         $note = LeadNote::findOrFail($noteId);
         $note->update(['is_pinned' => ! $note->is_pinned]);
     }
@@ -713,8 +690,6 @@ class ViewLead extends ViewRecord
 
     public function toggleChecklistItem(int $index): void
     {
-        $this->authorizeLeadMutation();
-
         // Prevent toggling auto-satisfied items
         $checklist = $this->record->stage?->checklist ?? [];
         $condition = $checklist[$index]['condition'] ?? null;
@@ -783,8 +758,6 @@ class ViewLead extends ViewRecord
 
     public function saveChecklistModal(): void
     {
-        $this->authorizeLeadMutation();
-
         $lead = $this->record;
 
         switch ($this->checklistModalCondition) {
@@ -930,8 +903,6 @@ class ViewLead extends ViewRecord
 
     public function saveProposalDraft(bool $sendNow = false): void
     {
-        $this->authorizeLeadMutation();
-
         $this->validate([
             'proposalItems' => ['required', 'array', 'min:1'],
             'proposalItems.*.description' => ['required', 'string', 'max:500'],
@@ -993,15 +964,11 @@ class ViewLead extends ViewRecord
 
     public function sendProposal(): void
     {
-        $this->authorizeLeadMutation();
-
         $this->saveProposalDraft(sendNow: true);
     }
 
     public function sendExistingDraft(): void
     {
-        $this->authorizeLeadMutation();
-
         $quote = Quote::where('lead_id', $this->record->id)
             ->where('status', 'draft')
             ->latest()
@@ -1058,8 +1025,6 @@ class ViewLead extends ViewRecord
 
     public function moveStage(string $direction): void
     {
-        $this->authorizeLeadMutation();
-
         $stages = PipelineStage::orderBy('order')->get()->keyBy('id');
         $ids = $stages->keys()->toArray();
         $idx = array_search($this->record->pipeline_stage_id, $ids);
@@ -1088,8 +1053,6 @@ class ViewLead extends ViewRecord
 
     public function markWon(): void
     {
-        $this->authorizeLeadMutation();
-
         $stage = PipelineStage::where('is_won', true)->first();
         if (! $stage) {
             Notification::make()->title('No "Won" stage configured')->warning()->send();
@@ -1104,8 +1067,6 @@ class ViewLead extends ViewRecord
 
     public function markLost(): void
     {
-        $this->authorizeLeadMutation();
-
         $stage = PipelineStage::where('is_lost', true)->first();
         if (! $stage) {
             Notification::make()->title('No "Lost" stage configured')->warning()->send();
@@ -1120,8 +1081,6 @@ class ViewLead extends ViewRecord
 
     public function convertToProject(): void
     {
-        $this->authorizeLeadMutation();
-
         if ($this->record->project()->exists()) {
             Notification::make()->title('Project already exists for this lead')->warning()->send();
 
@@ -1150,8 +1109,6 @@ class ViewLead extends ViewRecord
 
     public function assignToSelf(): void
     {
-        $this->authorizeLeadMutation();
-
         $user = Auth::user();
         $this->record->update(['assigned_to' => $user->id]);
         $this->record->refresh();
@@ -1160,10 +1117,5 @@ class ViewLead extends ViewRecord
             'user_name' => $user->name,
         ]);
         Notification::make()->title('Lead assigned to you')->success()->send();
-    }
-
-    private function authorizeLeadMutation(): void
-    {
-        abort_unless(LeadResource::canEdit($this->record), 403);
     }
 }

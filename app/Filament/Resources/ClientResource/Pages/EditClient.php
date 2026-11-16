@@ -12,11 +12,6 @@ class EditClient extends EditRecord
 {
     protected static string $resource = ClientResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.pilot.clients.edit_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [DeleteAction::make(), ForceDeleteAction::make(), RestoreAction::make()];

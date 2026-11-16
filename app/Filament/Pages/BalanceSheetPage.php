@@ -32,11 +32,6 @@ class BalanceSheetPage extends BasePage
         return __('finance.balance_sheet.title');
     }
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.reports.balance_sheet');
-    }
-
     public function mount(): void
     {
         $period = AccountingPeriod::query()

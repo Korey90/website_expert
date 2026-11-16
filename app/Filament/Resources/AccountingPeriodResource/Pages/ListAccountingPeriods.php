@@ -10,11 +10,6 @@ class ListAccountingPeriods extends ListRecords
 {
     protected static string $resource = AccountingPeriodResource::class;
 
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.accounting.periods.list_subheading');
-    }
-
     protected function getHeaderActions(): array
     {
         return [CreateAction::make()];

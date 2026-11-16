@@ -8,9 +8,4 @@ use Filament\Resources\Pages\ListRecords;
 class ListPortfolioProjects extends ListRecords
 {
     protected static string $resource = PortfolioProjectResource::class;
-
-    public function getSubheading(): ?string
-    {
-        return __('admin.migration.marketing.portfolio.list_subheading');
-    }
 }

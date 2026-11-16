@@ -26,8 +26,6 @@ class VatAdjustmentResource extends BaseResource
 {
     protected static ?string $model = VatAdjustment::class;
 
-    protected static ?string $recordTitleAttribute = 'number';
-
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-adjustments-horizontal';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Finance';
@@ -47,12 +45,6 @@ class VatAdjustmentResource extends BaseResource
     public static function getPluralModelLabel(): string
     {
         return __('finance.vat_adjustments.plural');
-    }
-
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['number', 'reason', 'hmrc_reference'];
     }
 
     public static function form(Schema $schema): Schema
@@ -245,10 +237,10 @@ class VatAdjustmentResource extends BaseResource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('number')->label(__('finance.vat_adjustments.fields.number'))->searchable()->sortable()->weight('bold'),
-                Tables\Columns\TextColumn::make('effective_date')->label(__('finance.vat_adjustments.fields.effective_date'))->date()->sortable()->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('adjustment_type')->label(__('finance.vat_adjustments.fields.adjustment_type'))->formatStateUsing(fn (string $state): string => __('finance.vat_adjustments.types.'.$state))->visibleFrom('md'),
-                Tables\Columns\TextColumn::make('vat_side')->label(__('finance.vat_adjustments.fields.vat_side'))->badge()->formatStateUsing(fn (string $state): string => __('finance.vat_adjustments.sides.'.$state))->visibleFrom('lg'),
-                Tables\Columns\TextColumn::make('direction')->label(__('finance.vat_adjustments.fields.direction'))->badge()->formatStateUsing(fn (string $state): string => __('finance.vat_adjustments.directions.'.$state))->visibleFrom('xl')->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('effective_date')->label(__('finance.vat_adjustments.fields.effective_date'))->date()->sortable(),
+                Tables\Columns\TextColumn::make('adjustment_type')->label(__('finance.vat_adjustments.fields.adjustment_type'))->formatStateUsing(fn (string $state): string => __('finance.vat_adjustments.types.'.$state)),
+                Tables\Columns\TextColumn::make('vat_side')->label(__('finance.vat_adjustments.fields.vat_side'))->badge()->formatStateUsing(fn (string $state): string => __('finance.vat_adjustments.sides.'.$state)),
+                Tables\Columns\TextColumn::make('direction')->label(__('finance.vat_adjustments.fields.direction'))->badge()->formatStateUsing(fn (string $state): string => __('finance.vat_adjustments.directions.'.$state)),
                 Tables\Columns\TextColumn::make('amount_gbp')->label(__('finance.vat_adjustments.fields.amount_gbp'))->money('GBP')->sortable(),
                 Tables\Columns\TextColumn::make('status')->label(__('finance.vat_adjustments.fields.status'))->badge()->formatStateUsing(fn (string $state): string => __('finance.vat_adjustments.statuses.'.$state))->color(fn (string $state): string => self::statusColor($state)),
             ])
@@ -258,10 +250,6 @@ class VatAdjustmentResource extends BaseResource
                 Tables\Filters\SelectFilter::make('vat_side')->options(self::translatedOptions('sides', VatAdjustment::sides())),
             ])
             ->actions([ViewAction::make(), EditAction::make()])
-            ->recordUrl(fn (VatAdjustment $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateIcon('heroicon-o-adjustments-horizontal')
-            ->emptyStateHeading(__('admin.migration.accounting.vat_adjustments.empty_heading'))
-            ->emptyStateDescription(__('admin.migration.accounting.vat_adjustments.empty_description'))
             ->defaultSort('effective_date', 'desc');
     }
 
