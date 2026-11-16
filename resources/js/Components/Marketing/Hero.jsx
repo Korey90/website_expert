@@ -100,7 +100,7 @@ export default function Hero({ data }) {
             <div className="absolute top-1/4 right-0 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none hidden md:block" aria-hidden="true" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-500/5 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
 
-            <div className="relative mx-auto max-w-7xl p-4 grid lg:grid-cols-5 gap-1 items-center border">
+            <div className="relative mx-auto max-w-7xl p-4 grid lg:grid-cols-5 gap-1 items-center">
                 {/* Text */}
                 <div className='col-span-3'>
                     {badgeText && (
