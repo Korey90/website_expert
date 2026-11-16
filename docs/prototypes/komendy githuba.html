@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>komendy githuba.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="git-i-github--najczęściej-używane-komendy"><strong>Git i GitHub – najczęściej używane komendy</strong></h1>
+<p>Praktyczna ściągawka Git i GitHub dla programistów pracujących z Laravel, React i Tailwind CSS.</p>
+<h2 id="1-podstawowe-komendy-git"><strong>1. Podstawowe komendy Git</strong></h2>
+<table>
+<thead>
+<tr>
+<th>Komenda</th>
+<th>Opis</th>
+<th>Praktyczna sytuacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git init</code></td>
+<td>Inicjalizuje nowe lokalne repozytorium Git.</td>
+<td>Tworzysz nowy projekt Laravel i chcesz rozpocząć śledzenie zmian w kodzie.</td>
+</tr>
+<tr>
+<td><code>git clone &lt;url&gt;</code></td>
+<td>Klonuje zdalne repozytorium na komputer.</td>
+<td>Dołączasz do projektu zespołowego i pobierasz kod z GitHuba.</td>
+</tr>
+<tr>
+<td><code>git status</code></td>
+<td>Wyświetla aktualny stan repozytorium.</td>
+<td>Chcesz sprawdzić, które pliki zmodyfikowałeś przed utworzeniem commita.</td>
+</tr>
+<tr>
+<td><code>git add .</code></td>
+<td>Dodaje wszystkie zmiany do staging.</td>
+<td>Zakończyłeś pracę nad funkcjonalnością i chcesz przygotować wszystkie zmiany do commita.</td>
+</tr>
+<tr>
+<td><code>git add &lt;plik&gt;</code></td>
+<td>Dodaje wybrany plik do staging.</td>
+<td>Zmodyfikowałeś kilka plików, ale chcesz zatwierdzić tylko jeden z nich.</td>
+</tr>
+<tr>
+<td><code>git commit -m &quot;opis&quot;</code></td>
+<td>Zapisuje przygotowane zmiany w historii repozytorium.</td>
+<td>Dodałeś formularz logowania i zapisujesz zmiany jako <code>feat: add login form</code>.</td>
+</tr>
+<tr>
+<td><code>git log</code></td>
+<td>Wyświetla historię commitów.</td>
+<td>Chcesz sprawdzić, jakie zmiany zostały wcześniej wprowadzone w projekcie.</td>
+</tr>
+<tr>
+<td><code>git log --oneline</code></td>
+<td>Wyświetla skróconą historię commitów.</td>
+<td>Potrzebujesz szybko znaleźć identyfikator konkretnego commita.</td>
+</tr>
+<tr>
+<td><code>git diff</code></td>
+<td>Pokazuje zmiany, które nie zostały dodane do staging.</td>
+<td>Chcesz zobaczyć dokładnie, jakie linie kodu zmieniłeś.</td>
+</tr>
+<tr>
+<td><code>git diff --staged</code></td>
+<td>Pokazuje zmiany dodane do staging.</td>
+<td>Sprawdzasz zawartość przygotowanego commita, zanim go zapiszesz.</td>
+</tr>
+</tbody>
+</table>
+<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+<h2 id="2-zarządzanie-branchami"><strong>2. Zarządzanie branchami</strong></h2>
+<table>
+<thead>
+<tr>
+<th>Komenda</th>
+<th>Opis</th>
+<th>Praktyczna sytuacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git branch</code></td>
+<td>Wyświetla lokalne branche.</td>
+<td>Chcesz sprawdzić, jakie branche istnieją w repozytorium.</td>
+</tr>
+<tr>
+<td><code>git branch &lt;nazwa&gt;</code></td>
+<td>Tworzy nowy branch bez przełączania na niego.</td>
+<td>Przygotowujesz branch dla kolejnej funkcjonalności.</td>
+</tr>
+<tr>
+<td><code>git switch &lt;nazwa&gt;</code></td>
+<td>Przełącza na istniejący branch.</td>
+<td>Kończysz pracę nad panelem administratora i wracasz na <code>main</code>.</td>
+</tr>
+<tr>
+<td><code>git switch -c &lt;nazwa&gt;</code></td>
+<td>Tworzy nowy branch i od razu na niego przełącza.</td>
+<td>Rozpoczynasz pracę nad logowaniem: <code>git switch -c feature/auth</code>.</td>
+</tr>
+<tr>
+<td><code>git branch -d &lt;nazwa&gt;</code></td>
+<td>Usuwa lokalny branch, jeśli jego zmiany zostały scalone.</td>
+<td>Pull Request został zaakceptowany i usuwasz niepotrzebny branch.</td>
+</tr>
+<tr>
+<td><code>git branch -D &lt;nazwa&gt;</code></td>
+<td>Wymusza usunięcie lokalnego brancha.</td>
+<td>Porzuciłeś eksperymentalną funkcjonalność i chcesz usunąć jej branch.</td>
+</tr>
+<tr>
+<td><code>git merge &lt;branch&gt;</code></td>
+<td>Scala wskazany branch z aktualnym.</td>
+<td>Chcesz połączyć ukończoną funkcjonalność z branchem <code>develop</code>.</td>
+</tr>
+<tr>
+<td><code>git rebase &lt;branch&gt;</code></td>
+<td>Przenosi commity aktualnego brancha na koniec wskazanego brancha.</td>
+<td>Twój branch jest nieaktualny i chcesz oprzeć go na najnowszym <code>main</code>.</td>
+</tr>
+</tbody>
+</table>
+<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+<h2 id="3-praca-ze-zdalnym-repozytorium-github"><strong>3. Praca ze zdalnym repozytorium GitHub</strong></h2>
+<table>
+<thead>
+<tr>
+<th>Komenda</th>
+<th>Opis</th>
+<th>Praktyczna sytuacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git remote -v</code></td>
+<td>Wyświetla skonfigurowane zdalne repozytoria.</td>
+<td>Sprawdzasz, z którym repozytorium GitHub połączony jest projekt.</td>
+</tr>
+<tr>
+<td><code>git remote add origin &lt;url&gt;</code></td>
+<td>Dodaje zdalne repozytorium o nazwie <code>origin</code>.</td>
+<td>Utworzyłeś lokalnie projekt React i chcesz połączyć go z GitHubem.</td>
+</tr>
+<tr>
+<td><code>git fetch</code></td>
+<td>Pobiera informacje o zmianach ze zdalnego repozytorium bez ich scalania.</td>
+<td>Chcesz sprawdzić, co zmienili inni programiści, bez modyfikowania lokalnego kodu.</td>
+</tr>
+<tr>
+<td><code>git pull</code></td>
+<td>Pobiera i integruje zmiany ze śledzonego zdalnego brancha.</td>
+<td>Rozpoczynasz pracę i aktualizujesz swój branch.</td>
+</tr>
+<tr>
+<td><code>git pull origin main</code></td>
+<td>Pobiera i integruje zmiany z <code>origin/main</code> do aktualnego brancha.</td>
+<td>Chcesz wprowadzić aktualizacje z <code>main</code> do brancha, nad którym pracujesz.</td>
+</tr>
+<tr>
+<td><code>git push</code></td>
+<td>Wysyła lokalne commity do skonfigurowanego zdalnego brancha.</td>
+<td>Zakończyłeś pracę i wysyłasz commity na GitHub.</td>
+</tr>
+<tr>
+<td><code>git push origin main</code></td>
+<td>Wysyła lokalny branch <code>main</code> do zdalnego repozytorium.</td>
+<td>Aktualizujesz główny branch projektu, jeśli masz do niego uprawnienia.</td>
+</tr>
+<tr>
+<td><code>git push -u origin &lt;branch&gt;</code></td>
+<td>Wysyła branch i konfiguruje jego śledzenie.</td>
+<td>Pierwszy raz publikujesz branch <code>feature/user-profile</code> na GitHubie.</td>
+</tr>
+<tr>
+<td><code>git push origin --delete &lt;branch&gt;</code></td>
+<td>Usuwa branch ze zdalnego repozytorium.</td>
+<td>Po zaakceptowaniu Pull Requesta sprzątasz stare branche na GitHubie.</td>
+</tr>
+</tbody>
+</table>
+<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+<br /><br /><br /><br /><br /><br /><br /><br /><br />
+<h2 id="4-cofanie-zmian-i-naprawianie-błędów"><strong>4. Cofanie zmian i naprawianie błędów</strong></h2>
+<table>
+<thead>
+<tr>
+<th>Komenda</th>
+<th>Opis</th>
+<th>Praktyczna sytuacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git restore &lt;plik&gt;</code></td>
+<td>Przywraca plik do stanu z indeksu, odrzucając zmiany w katalogu roboczym.</td>
+<td>Przypadkowo zmodyfikowałeś komponent React i chcesz cofnąć niezapisane zmiany.</td>
+</tr>
+<tr>
+<td><code>git restore --staged &lt;plik&gt;</code></td>
+<td>Usuwa plik ze staging, ale zachowuje jego zmiany.</td>
+<td>Przypadkowo dodałeś plik konfiguracyjny do przygotowywanego commita.</td>
+</tr>
+<tr>
+<td><code>git reset --soft HEAD~1</code></td>
+<td>Cofa ostatni commit, pozostawiając jego zmiany w staging.</td>
+<td>Utworzyłeś commit z błędnym opisem i chcesz przygotować go ponownie.</td>
+</tr>
+<tr>
+<td><code>git reset --hard HEAD~1</code></td>
+<td>Cofa ostatni commit i odrzuca zmiany w śledzonych plikach do wskazanego stanu.</td>
+<td>Chcesz całkowicie wycofać ostatni lokalny commit, świadomie rezygnując z jego zmian.</td>
+</tr>
+<tr>
+<td><code>git revert &lt;hash&gt;</code></td>
+<td>Tworzy nowy commit odwracający zmiany wskazanego commita.</td>
+<td>Błędna funkcjonalność została wysłana na współdzielony branch i musisz ją bezpiecznie wycofać.</td>
+</tr>
+<tr>
+<td><code>git cherry-pick &lt;hash&gt;</code></td>
+<td>Przenosi zmiany z wybranego commita na aktualny branch.</td>
+<td>Poprawka błędu znajduje się na innym branchu i chcesz przenieść tylko ten commit.</td>
+</tr>
+<tr>
+<td><code>git show &lt;hash&gt;</code></td>
+<td>Wyświetla szczegóły wskazanego commita.</td>
+<td>Analizujesz, jakie zmiany spowodowały błąd w aplikacji.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-tymczasowe-zapisywanie-zmian--stash"><strong>5. Tymczasowe zapisywanie zmian – stash</strong></h2>
+<table>
+<thead>
+<tr>
+<th>Komenda</th>
+<th>Opis</th>
+<th>Praktyczna sytuacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git stash</code></td>
+<td>Tymczasowo zapisuje lokalne zmiany w śledzonych plikach.</td>
+<td>Pracujesz nad dashboardem, ale musisz pilnie przełączyć się na branch z poprawką błędu.</td>
+</tr>
+<tr>
+<td><code>git stash list</code></td>
+<td>Wyświetla zapisane zestawy zmian.</td>
+<td>Chcesz sprawdzić, jakie niedokończone prace wcześniej odłożyłeś.</td>
+</tr>
+<tr>
+<td><code>git stash pop</code></td>
+<td>Przywraca zapisane zmiany i usuwa wpis ze stash po udanym zastosowaniu.</td>
+<td>Wracasz do pracy nad dashboardem i przywracasz poprzednie zmiany.</td>
+</tr>
+<tr>
+<td><code>git stash apply</code></td>
+<td>Przywraca zmiany, zachowując wpis w stash.</td>
+<td>Chcesz zastosować zapisane zmiany bez usuwania ich kopii ze stash.</td>
+</tr>
+<tr>
+<td><code>git stash -u</code></td>
+<td>Zapisuje zmiany również w nowych, nieśledzonych plikach.</td>
+<td>Utworzyłeś nowy komponent React, ale musisz tymczasowo odłożyć całą pracę.</td>
+</tr>
+</tbody>
+</table>
+<br /><br /><br /><br /><br /><br /><br />
+<h2 id="6-tagi-i-wersjonowanie-aplikacji"><strong>6. Tagi i wersjonowanie aplikacji</strong></h2>
+<table>
+<thead>
+<tr>
+<th>Komenda</th>
+<th>Opis</th>
+<th>Praktyczna sytuacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git tag</code></td>
+<td>Wyświetla listę lokalnych tagów.</td>
+<td>Sprawdzasz wcześniejsze wersje aplikacji.</td>
+</tr>
+<tr>
+<td><code>git tag &lt;wersja&gt;</code></td>
+<td>Tworzy tag wskazujący na aktualny commit.</td>
+<td>Oznaczasz pierwsze stabilne wydanie aplikacji jako <code>v1.0.0</code>.</td>
+</tr>
+<tr>
+<td><code>git push origin &lt;tag&gt;</code></td>
+<td>Wysyła wskazany tag na GitHub.</td>
+<td>Publikujesz oznaczenie wersji aplikacji, która trafiła na produkcję.</td>
+</tr>
+<tr>
+<td><code>git tag -d &lt;wersja&gt;</code></td>
+<td>Usuwa lokalny tag.</td>
+<td>Przez pomyłkę utworzyłeś tag z niepoprawnym numerem wersji.</td>
+</tr>
+<tr>
+<td><code>git push origin --tags</code></td>
+<td>Wysyła wszystkie lokalne tagi, których nie ma na zdalnym repozytorium.</td>
+<td>Chcesz opublikować kilka przygotowanych tagów wersji.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7-zarządzanie-plikami-i-analiza-historii"><strong>7. Zarządzanie plikami i analiza historii</strong></h2>
+<table>
+<thead>
+<tr>
+<th>Komenda</th>
+<th>Opis</th>
+<th>Praktyczna sytuacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git rm &lt;plik&gt;</code></td>
+<td>Usuwa plik i przygotowuje jego usunięcie do commita.</td>
+<td>Usuwasz nieużywany kontroler Laravel.</td>
+</tr>
+<tr>
+<td><code>git rm --cached &lt;plik&gt;</code></td>
+<td>Przestaje śledzić plik bez usuwania go z dysku.</td>
+<td>Przypadkowo dodałeś <code>.env</code> do repozytorium i chcesz przestać go śledzić.</td>
+</tr>
+<tr>
+<td><code>git mv &lt;stara&gt; &lt;nowa&gt;</code></td>
+<td>Przenosi plik lub zmienia jego nazwę.</td>
+<td>Zmieniasz nazwę komponentu z <code>User.jsx</code> na <code>UserProfile.jsx</code>.</td>
+</tr>
+<tr>
+<td><code>git blame &lt;plik&gt;</code></td>
+<td>Pokazuje, który commit ostatnio zmienił poszczególne linie pliku.</td>
+<td>Szukasz źródła błędu w serwisie Laravel.</td>
+</tr>
+<tr>
+<td><code>git log --graph --oneline --all</code></td>
+<td>Wyświetla graficzną historię commitów i branchy.</td>
+<td>Analizujesz, jak poszczególne funkcjonalności zostały scalone.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="8-konfiguracja-git"><strong>8. Konfiguracja Git</strong></h2>
+<table>
+<thead>
+<tr>
+<th>Komenda</th>
+<th>Opis</th>
+<th>Praktyczna sytuacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git config --global user.name &quot;Imię&quot;</code></td>
+<td>Ustawia globalną nazwę autora commitów.</td>
+<td>Konfigurujesz Git po instalacji na nowym komputerze.</td>
+</tr>
+<tr>
+<td><code>git config --global user.email &quot;email&quot;</code></td>
+<td>Ustawia globalny adres e-mail autora commitów.</td>
+<td>Chcesz, aby Twoje commity były powiązane z kontem GitHub.</td>
+</tr>
+<tr>
+<td><code>git config --list</code></td>
+<td>Wyświetla aktywną konfigurację Git.</td>
+<td>Sprawdzasz, jakie ustawienia obowiązują w repozytorium.</td>
+</tr>
+<tr>
+<td><code>git config --global init.defaultBranch main</code></td>
+<td>Ustawia <code>main</code> jako domyślny branch nowych repozytoriów.</td>
+<td>Chcesz używać spójnego nazewnictwa we wszystkich nowych projektach.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="9-github-cli--zarządzanie-githubem-z-terminala"><strong>9. GitHub CLI – zarządzanie GitHubem z terminala</strong></h2>
+<table>
+<thead>
+<tr>
+<th>Komenda</th>
+<th>Opis</th>
+<th>Praktyczna sytuacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gh auth login</code></td>
+<td>Loguje do GitHuba za pomocą GitHub CLI.</td>
+<td>Konfigurujesz dostęp do GitHuba z terminala.</td>
+</tr>
+<tr>
+<td><code>gh repo create</code></td>
+<td>Tworzy nowe repozytorium na GitHubie.</td>
+<td>Rozpoczynasz projekt Laravel i chcesz utworzyć repozytorium bez korzystania z przeglądarki.</td>
+</tr>
+<tr>
+<td><code>gh repo view --web</code></td>
+<td>Otwiera aktualne repozytorium w przeglądarce.</td>
+<td>Chcesz szybko przejść do projektu na GitHubie.</td>
+</tr>
+<tr>
+<td><code>gh pr create</code></td>
+<td>Tworzy Pull Request.</td>
+<td>Ukończyłeś funkcjonalność logowania i przekazujesz ją do code review.</td>
+</tr>
+<tr>
+<td><code>gh pr list</code></td>
+<td>Wyświetla listę Pull Requestów.</td>
+<td>Sprawdzasz, jakie zmiany oczekują na review.</td>
+</tr>
+<tr>
+<td><code>gh pr view &lt;numer&gt;</code></td>
+<td>Wyświetla szczegóły wskazanego Pull Requesta.</td>
+<td>Sprawdzasz opis i stan Pull Requesta.</td>
+</tr>
+<tr>
+<td><code>gh pr checkout &lt;numer&gt;</code></td>
+<td>Pobiera branch powiązany z Pull Requestem i przełącza się na niego.</td>
+<td>Chcesz lokalnie przetestować kod innego programisty.</td>
+</tr>
+<tr>
+<td><code>gh pr merge &lt;numer&gt;</code></td>
+<td>Scala wskazany Pull Request.</td>
+<td>Code review zostało zaakceptowane i łączysz zmiany z branchem docelowym.</td>
+</tr>
+<tr>
+<td><code>gh issue list</code></td>
+<td>Wyświetla listę zgłoszeń Issue.</td>
+<td>Szukasz zadań lub błędów do naprawienia.</td>
+</tr>
+<tr>
+<td><code>gh issue create</code></td>
+<td>Tworzy nowe Issue.</td>
+<td>Zgłaszasz błąd w panelu administratora.</td>
+</tr>
+</tbody>
+</table>
+<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+<br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+<h2 id="10-praktyczny-workflow-w-projekcie-laravel--react"><strong>10. Praktyczny workflow w projekcie Laravel + React</strong></h2>
+<pre class="hljs"><code><div># 1. Przejdź na główny branch
+git switch main
+
+# 2. Pobierz najnowsze zmiany
+git pull origin main
+
+# 3. Utwórz branch dla nowej funkcjonalności
+git switch -c feature/user-authentication
+
+# 4. Wprowadź zmiany w kodzie Laravel i React
+
+# 5. Sprawdź zmodyfikowane pliki
+git status
+
+# 6. Sprawdź dokładne zmiany
+git diff
+
+# 7. Dodaj pliki do staging
+git add .
+
+# 8. Utwórz commit
+git commit -m &quot;feat: add user authentication&quot;
+
+# 9. Opublikuj branch na GitHubie
+git push -u origin feature/user-authentication
+
+# 10. Utwórz Pull Request
+gh pr create
+
+# 11. Po scaleniu PR wróć na main
+git switch main
+
+# 12. Pobierz scalone zmiany
+git pull origin main
+
+# 13. Usuń niepotrzebny lokalny branch
+git branch -d feature/user-authentication
+</div></code></pre>
+<p><strong>Dobre praktyki w projektach zespołowych:</strong> pracuj na osobnych branchach, twórz małe i czytelne commity, używaj Pull Requestów do code review oraz unikaj bezpośredniego wprowadzania zmian na <code>main</code>.</p>
+<p><strong>Ważne:</strong> <code>git reset --hard</code> może bezpowrotnie usunąć lokalne zmiany. Z kolei usunięcie <code>.env</code> z aktualnego indeksu Git nie usuwa sekretów z wcześniejszych commitów — ujawnione dane dostępowe należy zmienić.</p>
+
+</body>
+</html>
