@@ -20,9 +20,32 @@
             });
         };
 
+        const closeMobileNavigationOnEscape = (event) => {
+            if (event.key !== 'Escape' || event.defaultPrevented) {
+                return;
+            }
+
+            const visibleDialog = Array.from(document.querySelectorAll('[role="dialog"], [role="alertdialog"]'))
+                .some((dialog) => dialog.getClientRects().length > 0);
+            const sidebar = document.querySelector('.fi-sidebar.fi-sidebar-open');
+            const closeButton = document.querySelector('.fi-topbar-close-sidebar-btn');
+
+            if (visibleDialog || ! sidebar || ! closeButton?.getClientRects().length) {
+                return;
+            }
+
+            event.preventDefault();
+            closeButton.click();
+
+            window.setTimeout(() => {
+                document.querySelector('.fi-topbar-open-sidebar-btn')?.focus();
+            }, 50);
+        };
+
         document.addEventListener('alpine:initialized', expandActiveNavigationGroup);
         document.addEventListener('DOMContentLoaded', expandActiveNavigationGroup);
         document.addEventListener('livewire:navigated', expandActiveNavigationGroup);
+        document.addEventListener('keydown', closeMobileNavigationOnEscape);
         expandActiveNavigationGroup();
     })();
 </script>

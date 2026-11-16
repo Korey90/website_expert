@@ -134,6 +134,9 @@ return [
         ],
     ],
     'migration' => [
+        'form' => [
+            'sections' => ['notes' => 'Notas', 'notes_and_terms' => 'Notas e termos'],
+        ],
         'sales_documents' => [
             'columns' => [
                 'number' => 'Número', 'title' => 'Título', 'client' => 'Cliente', 'total' => 'Total', 'value' => 'Valor',

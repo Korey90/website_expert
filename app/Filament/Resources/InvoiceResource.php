@@ -158,8 +158,13 @@ class InvoiceResource extends BaseResource
                         ->disabled(),
                 ]),
 
-            Forms\Components\Textarea::make('notes')->rows(3)->columnSpanFull(),
-            Forms\Components\Textarea::make('terms')->rows(3)->columnSpanFull()->default('Payment due within 30 days of invoice date.'),
+            Section::make(__('admin.migration.form.sections.notes_and_terms'))
+                ->columns(2)
+                ->columnSpanFull()
+                ->schema([
+                    Forms\Components\Textarea::make('notes')->rows(3),
+                    Forms\Components\Textarea::make('terms')->rows(3)->default('Payment due within 30 days of invoice date.'),
+                ]),
         ]);
     }
 

@@ -96,7 +96,14 @@ class LeadResource extends BaseResource
                         ->columnSpanFull(),
                 ]),
 
-            Forms\Components\Textarea::make('notes')->rows(4)->columnSpanFull(),
+            Section::make(__('admin.migration.form.sections.notes'))
+                ->columnSpanFull()
+                ->schema([
+                    Forms\Components\Textarea::make('notes')
+                        ->hiddenLabel()
+                        ->rows(4)
+                        ->columnSpanFull(),
+                ]),
         ]);
     }
 

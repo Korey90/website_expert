@@ -161,10 +161,11 @@
                             : $this->pendingJobQueues();
                     @endphp
                     <div class="admin-operator-field admin-operator-field--compact">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label for="job-manager-queue-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ __('jobs.queue') }}
                         </label>
                         <select
+                            id="job-manager-queue-filter"
                             wire:model.live="queueFilter"
                             class="admin-operator-control"
                         >
@@ -178,10 +179,11 @@
 
                 {{-- Search --}}
                 <div class="admin-operator-field">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label for="job-manager-search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ __('jobs.search') }}
                     </label>
                     <input
+                        id="job-manager-search"
                         type="text"
                         wire:model.live.debounce.400ms="search"
                         placeholder="{{ __('jobs.search_placeholder') }}"

@@ -42,6 +42,11 @@
     font-size: 0.875rem;
 }
 
+.fi-body :is(a, button, input, select, textarea, [tabindex="0"]):focus-visible {
+    outline: 2px solid var(--admin-brand-500);
+    outline-offset: 2px;
+}
+
 .fi-topbar-ctn {
     margin-inline-start: var(--sidebar-width);
 }
@@ -58,6 +63,10 @@
 
 .fi-topbar-start {
     margin-inline-end: 1.5rem;
+}
+
+.fi-topbar-start > a:has(.fi-logo) {
+    display: none;
 }
 
 .fi-topbar-start .fi-logo {
@@ -276,6 +285,67 @@
 .fi-input-wrp:focus-within {
     border-color: var(--admin-brand-500);
     box-shadow: 0 0 0 3px rgb(240 75 55 / 0.14);
+}
+
+/* Desktop-first create/edit form system — mirrors the approved form prototype. */
+:is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-sc-form {
+    min-width: 0;
+}
+
+:is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-sc-form .fi-sc-has-gap {
+    gap: 1.125rem;
+}
+
+:is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-sc-form .fi-input-wrp {
+    min-height: 2.625rem;
+}
+
+:is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-sc-form .fi-fo-field-label-content {
+    font-size: 0.75rem;
+    font-weight: 650;
+}
+
+:is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-sc-form .fi-fo-field-helper-text {
+    color: var(--admin-text-muted);
+    font-size: 0.6875rem;
+    line-height: 1.45;
+}
+
+:is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-sc-form .fi-grid-col:has(> .fi-sc-component > .fi-sc-section > .fi-section) {
+    grid-column: 1 / -1 !important;
+}
+
+:is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-sc-form > .fi-sc > .fi-grid-col > .fi-sc-component > .fi-sc:not(:has(> .fi-grid-col > .fi-sc-component > .fi-sc-section > .fi-section)) {
+    padding: 1.25rem;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-card);
+    background: var(--admin-surface);
+    box-shadow: var(--admin-shadow-card);
+}
+
+:is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-sc-form > .fi-sc > .fi-grid-col > .fi-sc-component > .fi-sc-actions {
+    position: sticky;
+    bottom: 1rem;
+    z-index: 20;
+    justify-content: flex-end;
+    padding: 0.75rem;
+    border: 1px solid var(--admin-border);
+    border-radius: 0.8125rem;
+    background: color-mix(in srgb, var(--admin-surface) 94%, transparent);
+    box-shadow: var(--admin-shadow-popover);
+    backdrop-filter: blur(12px);
+}
+
+:is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-sc-form > .fi-sc > .fi-grid-col > .fi-sc-component > .fi-sc-actions > .fi-ac {
+    width: 100%;
+    justify-content: flex-end;
+}
+
+:is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-fo-repeater-item {
+    border-color: var(--admin-border);
+    border-radius: 0.75rem;
+    background: var(--admin-surface-subtle);
+    box-shadow: none;
 }
 
 .fi-section:not(.fi-section-not-contained) > .fi-section-header,
@@ -1321,6 +1391,19 @@
     .fi-page-header-main-ctn {
         gap: 1.25rem;
         padding-block: 1.25rem 2.25rem;
+    }
+
+    :is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-sc-form > .fi-sc > .fi-grid-col > .fi-sc-component > .fi-sc-actions {
+        bottom: 0.5rem;
+        padding: 0.625rem;
+    }
+
+    :is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-sc-form > .fi-sc > .fi-grid-col > .fi-sc-component > .fi-sc-actions > .fi-ac {
+        flex-wrap: wrap;
+    }
+
+    :is(.fi-resource-create-record-page, .fi-resource-edit-record-page) .fi-sc-form > .fi-sc > .fi-grid-col > .fi-sc-component > .fi-sc-actions .fi-btn {
+        flex: 1 1 8rem;
     }
 
     .fi-header {

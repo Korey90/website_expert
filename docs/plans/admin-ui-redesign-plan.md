@@ -1,6 +1,6 @@
 # Plan przebudowy interfejsu panelu administracyjnego
 
-**Status:** etap 5 zakończony — wszystkie fale migracji korzystają ze wspólnej powłoki i wzorców zatwierdzonego prototypu; następny etap: walidacja i wdrożenie
+**Status:** etap 6 w toku — lokalna walidacja przedwdrożeniowa zakończona; pozostaje kontrolowane wdrożenie i zebranie uwag
 **Zakres:** wszystkie widoki pod `/admin/*`  
 **Data utworzenia:** 2026-11-13  
 **Ostatnia aktualizacja:** 2026-11-15
@@ -296,17 +296,19 @@ Walidacja wykonana w ramach etapu: build produkcyjny Vite, kompilacja Blade, tes
 ### Etap 6 — walidacja i wdrożenie
 
 **Szacunek:** 3–5 dni  
-**Status:** do wykonania
+**Status:** w toku — walidacja lokalna zakończona
 
-- [ ] Sprawdzić szerokości 390, 768, 1280 i 1440 px.
-- [ ] Sprawdzić jasny i ciemny motyw.
-- [ ] Sprawdzić obsługę klawiatury, focus, kontrast i ARIA.
-- [ ] Zweryfikować wszystkie teksty PL, EN i PT.
-- [ ] Uruchomić testy ról, uprawnień i izolacji tenantów.
-- [ ] Uruchomić testy Filament/PHPUnit oraz produkcyjny build.
-- [ ] Przeprowadzić smoke test najważniejszych procesów.
+- [x] Sprawdzić szerokości 390, 768, 1280 i 1440 px.
+- [x] Sprawdzić jasny i ciemny motyw.
+- [x] Sprawdzić obsługę klawiatury, focus, kontrast i ARIA.
+- [x] Zweryfikować wszystkie teksty PL, EN i PT.
+- [x] Uruchomić testy ról, uprawnień i izolacji tenantów.
+- [x] Uruchomić testy Filament/PHPUnit oraz produkcyjny build.
+- [x] Przeprowadzić smoke test najważniejszych procesów.
 - [ ] Wdrożyć etapowo z możliwością szybkiego wycofania warstwy UI.
 - [ ] Zebrać uwagi po wdrożeniu i zamknąć backlog krytyczny.
+
+Walidacja lokalna objęła 66 renderów przeglądarkowych w czterech szerokościach i obu motywach, 12 audytów dostępności archetypów oraz nawigację klawiaturą. Naprawiono programowe etykiety filtrów Job Managera, spójny fokus klawiaturowy, niewidoczny fokusowalny link topbara i obsługę `Escape` mobilnego drawera z przywróceniem fokusu. Regresja końcowa: 102 testy PHP / 1622 asercje oraz 16 testów frontendowych; kontrakt pilnuje zgodności wszystkich katalogów PL/PT z EN.
 
 **Rezultat:** zweryfikowany i wdrożony panel bez regresji funkcjonalnych oraz bezpieczeństwa.
 
@@ -347,6 +349,8 @@ Walidacja wykonana w ramach etapu: build produkcyjny Vite, kompilacja Blade, tes
 | 2026-11-14 | Globalna powłoka `/admin/*` odwzorowuje zatwierdzony prototyp, a nie domyślną geometrię Filament | Po informacji użytkownika, że zmiany są niewidoczne, priorytetem stała się jednoznaczna zgodność wizualna menu, belki i treści; Filament pozostaje fundamentem zachowania i dostępności. |
 | 2026-11-15 | Narzędzia operatorskie korzystają ze wspólnego wzorca wewnątrz Administracji, bez osobnego trybu panelu | Spójny układ statusów, filtrów, tabel i dialogów wystarcza do odróżnienia zadań operatorskich, a istniejące uprawnienia nadal ograniczają widoczność i wykonanie każdej mutacji. |
 | 2026-11-15 | Rozwinięcie aktywnej grupy nawigacji jest przywracane po każdej nawigacji Livewire | Zapamiętany stan zwinięcia nie może ukrywać bieżącej lokalizacji użytkownika; pozostałe nieaktywne grupy nadal zachowują ustawiony stan. |
+| 2026-11-15 | Każdy interaktywny element panelu otrzymuje jednolity koralowy wskaźnik `:focus-visible` | Widoczność fokusu nie może zależeć od lokalnych styli komponentu; globalny wzorzec obejmuje także linki nawigacji i niestandardowe regiony. |
+| 2026-11-15 | Mobilny drawer zamyka się klawiszem `Escape` i przywraca fokus wyzwalaczowi | Użytkownik klawiatury musi móc opuścić nawigację bez przechodzenia przez całą jej zawartość; aktywne dialogi zachowują pierwszeństwo obsługi `Escape`. |
 
 ## Backlog odkryć
 
@@ -382,4 +386,5 @@ Walidacja wykonana w ramach etapu: build produkcyjny Vite, kompilacja Blade, tes
 | 2026-11-14 | Ukończono pakiet integracji i ustawień: konfiguracja poczty/SMS/domen, płatności, tracking, dane prawne oraz hub kalkulatora mają kontekst operacyjny i spójne tłumaczenia. Zakładki kalkulatora są dostępne i bezpiecznie przewijane na telefonie; trzy bezpośrednie zasoby kalkulatora mają responsywne listy, wyszukiwanie i puste stany, a mutacje widgetów wymagają `manage_calculator`. Smoke test ośmiu tras przy 1440/390 px: HTTP 200, brak overflow i błędów JavaScript. Wspólna regresja trzech pakietów fali 4 oraz RBAC/tenant: 20 testów / 1237 asercji; Pint, Blade, ESLint, zgodność tłumaczeń i kontrola różnic poprawne. |
 | 2026-11-14 | Po przeglądzie użytkownika wykonano globalną korektę zgodności z prototypem: sidebar ma 272 px i pełną wysokość, topbar 72 px, nieaktywne grupy są zwinięte, a canvas, karty, tabele, formularze i koralowy akcent korzystają z zatwierdzonych tokenów. Na telefonie działa 64-pikselowa belka i szuflada menu. Dashboard 1440 px oraz leady 390 px w jasnym i ciemnym motywie nie mają overflow ani błędów JavaScript. Walidacja: 13 testów / 92 asercje, Pint, Blade, ESLint, produkcyjny build i `git diff --check` poprawne. |
 | 2026-11-15 | Zakończono etap 5 oraz falę 4: Security Events otrzymało statystyki, kontekst, tłumaczenia i zabezpieczone akcje, a Log Viewer i Job Manager wspólny responsywny wzorzec operatorski z dostępnymi dialogami i lokalnym przewijaniem tabel. Naprawiono też utrwalony stan menu, aby aktywna grupa Administracja zawsze pozostawała rozwinięta. Smoke test 1440/390 px oraz jasnego i ciemnego motywu: brak overflow dokumentu i błędów JavaScript; na telefonie tabele przewijają się lokalnie. Regresja administracji: 40 testów / 1314 asercji; Pint, Blade, ESLint, produkcyjny build i kontrola różnic poprawne. |
+| 2026-11-15 | Zakończono lokalną walidację przedwdrożeniową etapu 6. Wykonano 66 renderów reprezentatywnych procesów przy 390/768/1280/1440 px w jasnym i ciemnym motywie oraz 12 audytów etykiet, ARIA i kontrastu. Naprawiono etykiety Job Managera, globalny fokus, ukryty link topbara i obsługę `Escape` drawera. Regresja RBAC/tenant/UI: 102 testy / 1622 asercje; frontend 16/16. Kontrakt lokalizacji sprawdza komplet wszystkich katalogów PL i PT względem EN. Do wykonania pozostają wyłącznie kontrolowane wdrożenie i zebranie uwag. |
 

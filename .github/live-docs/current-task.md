@@ -1,6 +1,6 @@
 # Current Task
 
-**Status:** W toku — etap 5 zakończony; następny etap: pełna walidacja i kontrolowane wdrożenie
+**Status:** W toku — lokalna walidacja etapu 6 zakończona; pozostaje kontrolowane wdrożenie i zebranie uwag
 **Zadanie:** Spójny i intuicyjny interfejs panelu administracyjnego
 **Data rozpoczęcia:** 2026-11-13
 **Plan nadrzędny:** `docs/plans/admin-ui-redesign-plan.md`
@@ -86,7 +86,14 @@
   - [x] Aktywna grupa Administracja pozostaje rozwinięta po nawigacji Livewire.
   - [x] Smoke test 1440/390 px, jasny/ciemny motyw oraz regresja 40 testów / 1314 asercji.
   - [x] Pint, Blade, ESLint, produkcyjny build i kontrola różnic zakończone poprawnie.
-- [ ] Rozpocząć etap 6: pełna walidacja szerokości, motywów, dostępności, tłumaczeń, ról i procesów krytycznych.
+- [x] Zakończyć lokalną walidację etapu 6.
+  - [x] 66 renderów przy 390/768/1280/1440 px, w jasnym i ciemnym motywie, bez overflow dokumentu.
+  - [x] Audyt klawiatury, fokusu, kontrastu, etykiet i ARIA; poprawione etykiety Job Managera oraz `Escape` mobilnego drawera.
+  - [x] Kontrakt wszystkich katalogów PL/PT względem EN.
+  - [x] Regresja RBAC/tenant/UI: 102 testy / 1622 asercje; frontend 16/16.
+  - [x] Pint, Blade, ESLint i produkcyjny build zakończone poprawnie.
+- [ ] Wdrożyć warstwę UI etapowo z możliwością szybkiego wycofania.
+- [ ] Zebrać uwagi po wdrożeniu i zamknąć backlog krytyczny.
 
 Źródło prawdy i dziennik postępu: `docs/plans/admin-ui-redesign-plan.md`.
 
