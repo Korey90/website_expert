@@ -35,7 +35,7 @@ class PermissionResource extends BaseResource
     public static function form(Schema $form): Schema
     {
         return $form->schema([
-            Section::make()->columns(2)->schema([
+            Section::make()->columns(2)->columnSpanFull()->schema([
                 Forms\Components\TextInput::make('name')
                     ->label('Permission name')
                     ->required()

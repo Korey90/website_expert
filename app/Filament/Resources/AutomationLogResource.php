@@ -15,6 +15,8 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;  
 
 class AutomationLogResource extends BaseResource
 {
@@ -32,45 +34,61 @@ class AutomationLogResource extends BaseResource
     public static function infolist(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make('Summary')
-                ->columns(3)
-                ->schema([
-                    TextEntry::make('automationRule.name')->label('Rule')->placeholder('—'),
-                    TextEntry::make('trigger_event')
-                        ->badge()
-                        ->formatStateUsing(fn ($state) => AutomationTrigger::labelFor($state)),
-                    TextEntry::make('status')->badge()
-                        ->color(fn ($state) => match ($state) {
-                            'success' => 'success',
-                            'partial' => 'warning',
-                            'failed'  => 'danger',
-                            'test'    => 'info',
-                            default   => 'gray',
-                        }),
-                    TextEntry::make('source')->badge(),
-                    TextEntry::make('executed_at')->dateTime('d M Y H:i:s')->label('Executed at'),
-                    TextEntry::make('lead.title')->label('Lead')->placeholder('—'),
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Automation Summary')
+                        ->schema([
+                            Section::make('Summary')
+                                ->columns(3)
+                                ->schema([
+                                    TextEntry::make('automationRule.name')->label('Rule')->placeholder('—'),
+                                    TextEntry::make('trigger_event')
+                                        ->badge()
+                                        ->formatStateUsing(fn ($state) => AutomationTrigger::labelFor($state)),
+                                    TextEntry::make('status')->badge()
+                                        ->color(fn ($state) => match ($state) {
+                                            'success' => 'success',
+                                            'partial' => 'warning',
+                                            'failed'  => 'danger',
+                                            'test'    => 'info',
+                                            default   => 'gray',
+                                        }),
+                                    TextEntry::make('source')->badge(),
+                                    TextEntry::make('executed_at')->dateTime('d M Y H:i:s')->label('Executed at'),
+                                    TextEntry::make('lead.title')->label('Lead')->placeholder('—'),
+                                ]),
+                        ]),
+                    Tab::make('Context (trigger data)')
+                        ->schema([
+                            Section::make('Context (trigger data)')
+                                ->schema([
+                                    TextEntry::make('context')
+                                        ->label('')
+                                        ->fontFamily('mono')
+                                        ->getStateUsing(fn ($record) => json_encode($record->context ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+                    Tab::make('Actions Executed')
+                        ->schema([
+                            Section::make('Actions Executed')
+                                ->schema([
+                                    TextEntry::make('actions_executed')
+                                        ->label('')
+                                        ->fontFamily('mono')
+                                        ->getStateUsing(fn ($record) => json_encode($record->actions_executed ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+
                 ]),
 
-            Section::make('Context (trigger data)')
-                ->schema([
-                    TextEntry::make('context')
-                        ->label('')
-                        ->fontFamily('mono')
-                        ->getStateUsing(fn ($record) => json_encode($record->context ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))
-                        ->columnSpanFull(),
-                ])
-                ->collapsible(),
+            
 
-            Section::make('Actions Executed')
-                ->schema([
-                    TextEntry::make('actions_executed')
-                        ->label('')
-                        ->fontFamily('mono')
-                        ->getStateUsing(fn ($record) => json_encode($record->actions_executed ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))
-                        ->columnSpanFull(),
-                ])
-                ->collapsible(),
+            
+
+            
         ]);
     }
 

@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;  
 
 class ProjectTemplateResource extends BaseResource
 {
@@ -33,93 +35,105 @@ class ProjectTemplateResource extends BaseResource
     public static function form(Schema $form): Schema
     {
         return $form->schema([
-            Section::make('Template Details')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->required()
-                        ->maxLength(255)
-                        ->placeholder('e.g. Business Card Website')
-                        ->columnSpanFull(),
-
-                    Forms\Components\Select::make('service_type')
-                        ->options(self::$serviceTypes)
-                        ->required(),
-
-                    Forms\Components\Toggle::make('is_active')
-                        ->label('Active')
-                        ->default(true),
-
-                    Forms\Components\Textarea::make('description')
-                        ->rows(3)
-                        ->placeholder('Internal notes about when to use this template...')
-                        ->columnSpanFull(),
-                ]),
-
-            Section::make('Project Phases')
-                ->description('Phases will be auto-created (with status "pending") when this template is applied to a new project.')
-                ->schema([
-                    Forms\Components\Repeater::make('phases')
-                        ->label('')
-                        ->schema([
-                            Forms\Components\TextInput::make('name')
-                                ->required()
-                                ->placeholder('e.g. Discovery')
-                                ->columnSpan(3),
-
-                            Forms\Components\TextInput::make('order')
-                                ->numeric()
-                                ->required()
-                                ->default(1)
-                                ->columnSpan(1),
-
-                            Forms\Components\Textarea::make('description')
-                                ->rows(2)
-                                ->placeholder('Optional phase description...')
-                                ->columnSpanFull(),
-
-                            Forms\Components\Repeater::make('tasks')
-                                ->label('Default Tasks')
-                                ->helperText('These tasks will be automatically created when this phase is applied to a new project.')
+                    Tabs::make('Tabs')
+                        ->columnSpanFull()
+                        ->tabs([
+                            Tab::make('Template Details')
                                 ->schema([
-                                    Forms\Components\TextInput::make('title')
-                                        ->required()
-                                        ->placeholder('e.g. Gather client assets')
-                                        ->columnSpan(3),
+                                    Section::make('Template Details')
+                                        ->columns(2)
+                                        ->schema([
+                                            Forms\Components\TextInput::make('name')
+                                                ->required()
+                                                ->maxLength(255)
+                                                ->placeholder('e.g. Business Card Website')
+                                                ->columnSpanFull(),
 
-                                    Forms\Components\Select::make('priority')
-                                        ->options([
-                                            'low'    => 'Low',
-                                            'medium' => 'Medium',
-                                            'high'   => 'High',
-                                            'urgent' => 'Urgent',
-                                        ])
-                                        ->default('medium')
-                                        ->columnSpan(1),
+                                            Forms\Components\Select::make('service_type')
+                                                ->options(self::$serviceTypes)
+                                                ->required(),
 
-                                    Forms\Components\Textarea::make('description')
-                                        ->rows(2)
-                                        ->placeholder('Optional task description...')
-                                        ->columnSpanFull(),
-                                ])
-                                ->columns(4)
-                                ->defaultItems(0)
-                                ->addActionLabel('Add Task')
-                                ->collapsible()
-                                ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
-                                ->columnSpanFull(),
-                        ])
-                        ->columns(4)
-                        ->defaultItems(0)
-                        ->addActionLabel('Add Phase')
-                        ->reorderable('order')
-                        ->collapsible()
-                        ->itemLabel(fn (array $state): ?string =>
-                            isset($state['order'], $state['name'])
-                                ? $state['order'] . '. ' . $state['name'] . (! empty($state['tasks']) ? '  (' . count($state['tasks']) . ' tasks)' : '')
-                                : ($state['name'] ?? null)
-                        ),
-                ]),
+                                            Forms\Components\Toggle::make('is_active')
+                                                ->label('Active')
+                                                ->default(true),
+
+                                            Forms\Components\Textarea::make('description')
+                                                ->rows(3)
+                                                ->placeholder('Internal notes about when to use this template...')
+                                                ->columnSpanFull(),
+                                        ]),
+                                ]),
+                            Tab::make('Project Phases')
+                                ->schema([
+                                    Section::make('Project Phases')
+                                        ->description('Phases will be auto-created (with status "pending") when this template is applied to a new project.')
+                                        ->schema([
+                                            Forms\Components\Repeater::make('phases')
+                                                ->label('')
+                                                ->collapsed()
+                                                ->schema([
+                                                    Forms\Components\TextInput::make('name')
+                                                        ->required()
+                                                        ->placeholder('e.g. Discovery')
+                                                        ->columnSpan(3),
+
+                                                    Forms\Components\TextInput::make('order')
+                                                        ->numeric()
+                                                        ->required()
+                                                        ->default(1)
+                                                        ->columnSpan(1),
+
+                                                    Forms\Components\Textarea::make('description')
+                                                        ->rows(2)
+                                                        ->placeholder('Optional phase description...')
+                                                        ->columnSpanFull(),
+
+                                                    Forms\Components\Repeater::make('tasks')
+                                                        ->label('Default Tasks')
+                                                        ->collapsed()
+                                                        ->helperText('These tasks will be automatically created when this phase is applied to a new project.')
+                                                        ->schema([
+                                                            Forms\Components\TextInput::make('title')
+                                                                ->required()
+                                                                ->placeholder('e.g. Gather client assets')
+                                                                ->columnSpan(3),
+
+                                                            Forms\Components\Select::make('priority')
+                                                                ->options([
+                                                                    'low'    => 'Low',
+                                                                    'medium' => 'Medium',
+                                                                    'high'   => 'High',
+                                                                    'urgent' => 'Urgent',
+                                                                ])
+                                                                ->default('medium')
+                                                                ->columnSpan(1),
+
+                                                            Forms\Components\Textarea::make('description')
+                                                                ->rows(2)
+                                                                ->placeholder('Optional task description...')
+                                                                ->columnSpanFull(),
+                                                        ])
+                                                        ->columns(4)
+                                                        ->defaultItems(0)
+                                                        ->addActionLabel('Add Task')
+                                                        ->collapsible()
+                                                        ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                                                        ->columnSpanFull(),
+                                                ])
+                                                ->columns(4)
+                                                ->defaultItems(0)
+                                                ->addActionLabel('Add Phase')
+                                                ->reorderable('order')
+                                                ->collapsible()
+                                                ->itemLabel(fn (array $state): ?string =>
+                                                    isset($state['order'], $state['name'])
+                                                        ? $state['order'] . '. ' . $state['name'] . (! empty($state['tasks']) ? '  (' . count($state['tasks']) . ' tasks)' : '')
+                                                        : ($state['name'] ?? null)
+                                                ),
+                                        ]),
+                                ]),
+                        ]),
+
         ]);
     }
 

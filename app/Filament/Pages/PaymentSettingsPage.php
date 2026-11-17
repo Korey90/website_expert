@@ -11,6 +11,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Stripe\Balance;
 use Stripe\Stripe;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;  
 
 class PaymentSettingsPage extends BasePage
 {
@@ -50,74 +52,90 @@ class PaymentSettingsPage extends BasePage
 
     public function form(Schema $form): Schema
     {
-        return $form
-            ->schema([
-                Section::make('General')
+        return $form->schema([
+            Section::make('General')
                     ->schema([
                         Forms\Components\Select::make('payment_currency')
                             ->label('Default currency')
                             ->options(fn () => FilamentCurrency::options())
                             ->required(),
-                    ]),
+                    ])->collapsible(),
 
-                Section::make('Stripe')
-                    ->description('Accept card payments via Stripe Checkout. Get your keys at dashboard.stripe.com.')
-                    ->schema([
-                        Forms\Components\Toggle::make('stripe_enabled')
-                            ->label('Enable Stripe payments'),
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Stripe')
+                        ->schema([
+                            Section::make('Stripe')
+                                ->description('Accept card payments via Stripe Checkout. Get your keys at dashboard.stripe.com.')
+                                ->schema([
+                                    Forms\Components\Toggle::make('stripe_enabled')
+                                        ->label('Enable Stripe payments'),
 
-                        Forms\Components\TextInput::make('stripe_pk')
-                            ->label('Publishable Key')
-                            ->placeholder('pk_live_... or pk_test_...')
-                            ->helperText('Visible in your Stripe dashboard → Developers → API keys'),
+                                    Forms\Components\TextInput::make('stripe_pk')
+                                        ->label('Publishable Key')
+                                        ->placeholder('pk_live_... or pk_test_...')
+                                        ->helperText('Visible in your Stripe dashboard → Developers → API keys'),
 
-                        Forms\Components\TextInput::make('stripe_sk')
-                            ->label('Secret Key')
-                            ->password()
-                            ->revealable()
-                            ->placeholder('Leave blank to keep existing')
-                            ->helperText('Starts with sk_live_ or sk_test_'),
+                                    Forms\Components\TextInput::make('stripe_sk')
+                                        ->label('Secret Key')
+                                        ->password()
+                                        ->revealable()
+                                        ->placeholder('Leave blank to keep existing')
+                                        ->helperText('Starts with sk_live_ or sk_test_'),
 
-                        Forms\Components\TextInput::make('stripe_webhook_secret')
-                            ->label('Webhook Signing Secret')
-                            ->password()
-                            ->revealable()
-                            ->placeholder('Leave blank to keep existing')
-                            ->helperText('Stripe → Developers → Webhooks → your endpoint → Signing secret (whsec_...)'),
-                    ]),
+                                    Forms\Components\TextInput::make('stripe_webhook_secret')
+                                        ->label('Webhook Signing Secret')
+                                        ->password()
+                                        ->revealable()
+                                        ->placeholder('Leave blank to keep existing')
+                                        ->helperText('Stripe → Developers → Webhooks → your endpoint → Signing secret (whsec_...)'),
+                                ]),
+                        ]),
+                    Tab::make('Lead Details')
+                        ->schema([
+                            Section::make('PayU')
+                                ->description('Accept PayU payments (BLIK, bank transfers, cards). Register at secure.payu.com.')
+                                ->schema([
+                                    Forms\Components\Toggle::make('payu_enabled')
+                                        ->label('Enable PayU payments'),
 
-                Section::make('PayU')
-                    ->description('Accept PayU payments (BLIK, bank transfers, cards). Register at secure.payu.com.')
-                    ->schema([
-                        Forms\Components\Toggle::make('payu_enabled')
-                            ->label('Enable PayU payments'),
+                                    Forms\Components\Toggle::make('payu_sandbox')
+                                        ->label('Sandbox / test mode')
+                                        ->helperText('Use PayU sandbox environment (secure.snd.payu.com) for testing'),
 
-                        Forms\Components\Toggle::make('payu_sandbox')
-                            ->label('Sandbox / test mode')
-                            ->helperText('Use PayU sandbox environment (secure.snd.payu.com) for testing'),
+                                    Forms\Components\TextInput::make('payu_pos_id')
+                                        ->label('POS ID')
+                                        ->placeholder('123456')
+                                        ->helperText('From PayU panel → Point of Sales → POS ID'),
 
-                        Forms\Components\TextInput::make('payu_pos_id')
-                            ->label('POS ID')
-                            ->placeholder('123456')
-                            ->helperText('From PayU panel → Point of Sales → POS ID'),
+                                    Forms\Components\TextInput::make('payu_client_id')
+                                        ->label('OAuth2 Client ID')
+                                        ->placeholder('123456'),
 
-                        Forms\Components\TextInput::make('payu_client_id')
-                            ->label('OAuth2 Client ID')
-                            ->placeholder('123456'),
+                                    Forms\Components\TextInput::make('payu_md5_key')
+                                        ->label('Second key (MD5)')
+                                        ->password()
+                                        ->revealable()
+                                        ->placeholder('Leave blank to keep existing')
+                                        ->helperText('Used to verify IPN notification signatures'),
 
-                        Forms\Components\TextInput::make('payu_md5_key')
-                            ->label('Second key (MD5)')
-                            ->password()
-                            ->revealable()
-                            ->placeholder('Leave blank to keep existing')
-                            ->helperText('Used to verify IPN notification signatures'),
+                                    Forms\Components\TextInput::make('payu_client_secret')
+                                        ->label('OAuth2 Client Secret')
+                                        ->password()
+                                        ->revealable()
+                                        ->placeholder('Leave blank to keep existing'),
+                                ]),
+                        ]),
+                    
 
-                        Forms\Components\TextInput::make('payu_client_secret')
-                            ->label('OAuth2 Client Secret')
-                            ->password()
-                            ->revealable()
-                            ->placeholder('Leave blank to keep existing'),
-                    ]),
+                ]),
+
+                
+
+                
+
+                
             ])
             ->statePath('data');
     }

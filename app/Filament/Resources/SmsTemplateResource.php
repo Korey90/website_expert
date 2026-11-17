@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab; 
 
 class SmsTemplateResource extends BaseResource
 {
@@ -28,35 +30,46 @@ class SmsTemplateResource extends BaseResource
             ->implode("\n");
 
         return $form->schema([
-            Section::make('Template Details')
-                ->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->required()
-                        ->maxLength(255)
-                        ->placeholder('e.g. New Lead Welcome'),
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('SMS Template Details')
+                        ->schema([
+                            Section::make('Template Details')
+                                ->schema([
+                                    Forms\Components\TextInput::make('name')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->placeholder('e.g. New Lead Welcome'),
 
-                    Forms\Components\Toggle::make('is_active')
-                        ->default(true)
-                        ->label('Active'),
+                                    Forms\Components\Toggle::make('is_active')
+                                        ->default(true)
+                                        ->label('Active'),
 
-                    Forms\Components\Textarea::make('description')
-                        ->rows(2)
-                        ->placeholder('Internal notes about when to use this template...')
-                        ->columnSpanFull(),
-                ])
-                ->columns(2),
-
-            Section::make('Message Content')
-                ->description('Use {{variable}} placeholders. Max 160 chars = 1 SMS segment.')
-                ->schema([
-                    Forms\Components\Textarea::make('content')
-                        ->required()
-                        ->rows(5)
-                        ->maxLength(1600)
-                        ->placeholder("Hi {{client_name}}, thanks for reaching out to {{company_name}}. We'll be in touch shortly.")
-                        ->helperText("Available variables:\n{$vars}")
-                        ->columnSpanFull(),
+                                    Forms\Components\Textarea::make('description')
+                                        ->rows(6)
+                                        ->placeholder('Internal notes about when to use this template...')
+                                        ->columnSpanFull(),
+                                ])
+                                ->columns(2),
+                        ]),
+                    Tab::make('SMS Content')
+                        ->schema([
+                            Section::make('Message Content')
+                                ->description('Use {{variable}} placeholders. Max 160 chars = 1 SMS segment.')
+                                ->schema([
+                                    Forms\Components\Textarea::make('content')
+                                        ->required()
+                                        ->rows(12)
+                                        ->maxLength(1600)
+                                        ->placeholder("Hi {{client_name}}, thanks for reaching out to {{company_name}}. We'll be in touch shortly.")
+                                        ->helperText("Available variables:\n{$vars}")
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
                 ]),
+
+
         ]);
     }
 

@@ -12,13 +12,13 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Html;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 use App\Forms\Components\TinyEditor;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab; 
 
 class EmailTemplateResource extends BaseResource
 {
@@ -62,8 +62,10 @@ class EmailTemplateResource extends BaseResource
             ]);
 
         return $schema->schema([
-            Section::make()
+            Section::make('Email Template Info')
                 ->columns(4)
+                ->columnSpanFull()
+                ->collapsible()
                 ->schema([
                     TextEntry::make('name')
                         ->label('Template Name')
@@ -103,13 +105,22 @@ class EmailTemplateResource extends BaseResource
                         ->dateTime('d M Y, H:i'),
                 ]),
 
-            Tabs::make('Languages')
+            Section::make('Email Template Info')
+                ->columns(4)
                 ->columnSpanFull()
-                ->tabs([
-                    $langTab('en', '🇬🇧 English'),
-                    $langTab('pl', '🇵🇱 Polish'),
-                    $langTab('pt', '🇵🇹 Portuguese'),
+                ->collapsible()
+                ->schema([
+                    Tabs::make('Languages')
+                        ->columnSpanFull()
+                        ->tabs([
+                            $langTab('en', '🇬🇧 English'),
+                            $langTab('pl', '🇵🇱 Polish'),
+                            $langTab('pt', '🇵🇹 Portuguese'),
+                        ]),
                 ]),
+
+
+            
         ]);
     }
 
@@ -122,44 +133,55 @@ class EmailTemplateResource extends BaseResource
                 ->helperText('Supports variables: {{client_name}}, {{project_title}}, {{invoice_number}}, etc.'),
             TinyEditor::make("body_html.{$code}")
                 ->label('HTML Body')
-                ->columnSpanFull(),
+                ->columnSpanFull()
+                ->height(800),
             Forms\Components\Textarea::make("body_text.{$code}")
                 ->label('Plain Text Fallback')
-                ->rows(8)
+                ->rows(15)
                 ->columnSpanFull()
                 ->helperText('Fallback for email clients that do not support HTML.'),
         ]);
 
         return $form->schema([
-            Section::make('Template Details')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->label('Template Name')
-                        ->required()
-                        ->maxLength(255),
-                    Forms\Components\TextInput::make('slug')
-                        ->label('Slug (identifier)')
-                        ->required()
-                        ->unique(ignoreRecord: true)
-                        ->maxLength(100)
-                        ->helperText('Used in automation rules, e.g. welcome_email'),
-                    Forms\Components\Toggle::make('is_active')
-                        ->label('Active')
-                        ->default(true),
-                    Forms\Components\TagsInput::make('variables')
-                        ->label('Available Variables')
-                        ->helperText('List variables this template uses, e.g. client_name')
-                        ->placeholder('Add variable name'),
-                ]),
-
-            Tabs::make('Languages')
+            Tabs::make('Tabs')
                 ->columnSpanFull()
                 ->tabs([
-                    $langTab('en', '🇬🇧 English'),
-                    $langTab('pl', '🇵🇱 Polish'),
-                    $langTab('pt', '🇵🇹 Portuguese'),
+                    Tab::make('Email Template Details')
+                        ->schema([
+                            Section::make('Email Template Details')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('name')
+                                        ->label('Template Name')
+                                        ->required()
+                                        ->maxLength(255),
+                                    Forms\Components\TextInput::make('slug')
+                                        ->label('Slug (identifier)')
+                                        ->required()
+                                        ->unique(ignoreRecord: true)
+                                        ->maxLength(100)
+                                        ->helperText('Used in automation rules, e.g. welcome_email'),
+                                    Forms\Components\Toggle::make('is_active')
+                                        ->label('Active')
+                                        ->default(true),
+                                    Forms\Components\TagsInput::make('variables')
+                                        ->label('Available Variables')
+                                        ->helperText('List variables this template uses, e.g. client_name')
+                                        ->placeholder('Add variable name'),
+                                ]),
+                        ]),
+                    Tab::make('Template Content')
+                        ->schema([
+                            Tabs::make('Languages')
+                                ->columnSpanFull()
+                                ->tabs([
+                                    $langTab('pl', '🇵🇱 Polish'),
+                                    $langTab('en', '🇬🇧 English'),
+                                    $langTab('pt', '🇵🇹 Portuguese'),
+                                ]),
+                        ]),
                 ]),
+
         ]);
     }
 

@@ -78,37 +78,85 @@
                                 <th class="py-2 font-semibold text-gray-600 dark:text-gray-400">Message</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                            @foreach($data['items'] as $entry)
-                                <tr class="align-top hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                    <td class="py-2 pr-4 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap font-mono">
-                                        {{ $entry['datetime'] ?: '—' }}
-                                    </td>
-                                    <td class="py-2 pr-4">
-                                        @php
-                                            $badgeClass = match(strtoupper($entry['level'])) {
-                                                'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY' =>
-                                                    'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-                                                'WARNING' =>
-                                                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
-                                                'NOTICE', 'INFO' =>
-                                                    'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-                                                'DEBUG' =>
-                                                    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
-                                                default =>
-                                                    'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
-                                            };
-                                        @endphp
-                                        <span class="inline-block rounded px-1.5 py-0.5 text-xs font-semibold {{ $badgeClass }}">
-                                            {{ $entry['level'] }}
-                                        </span>
-                                    </td>
-                                    <td class="py-2">
-                                        <p class="font-mono text-xs text-gray-800 dark:text-gray-200 break-all whitespace-pre-wrap leading-relaxed">{{ $entry['message'] }}</p>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
+                        <tbody
+    x-data="{ expandedRow: null }"
+    class="divide-y divide-gray-100 dark:divide-gray-800"
+>
+    @foreach($data['items'] as $entry)
+
+        {{-- Main row --}}
+        <tr class="align-top hover:bg-gray-50 dark:hover:bg-gray-800/50">
+
+            {{-- Date --}}
+            <td class="py-2 pr-4 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap font-mono">
+                {{ $entry['datetime'] ?: '—' }}
+            </td>
+
+            {{-- Level --}}
+            <td class="py-2 pr-4">
+                @php
+                    $badgeClass = match(strtoupper($entry['level'])) {
+                        'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY' =>
+                            'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+                        'WARNING' =>
+                            'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+                        'NOTICE', 'INFO' =>
+                            'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+                        'DEBUG' =>
+                            'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
+                        default =>
+                            'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
+                    };
+                @endphp
+
+                <span class="inline-block rounded px-1.5 py-0.5 text-xs font-semibold {{ $badgeClass }}">
+                    {{ $entry['level'] }}
+                </span>
+            </td>
+
+            {{-- Message --}}
+            <td class="py-2">
+                <button
+                    type="button"
+                    @click="
+                        expandedRow = expandedRow === {{ $loop->index }}
+                            ? null
+                            : {{ $loop->index }}
+                    "
+                    :aria-expanded="expandedRow === {{ $loop->index }}"
+                    class="flex w-full items-center gap-2 text-left"
+                >
+                    <x-filament::icon
+                        icon="heroicon-o-chevron-right"
+                        class="w-4 h-4 shrink-0 text-gray-400"
+                        x-bind:class="{
+                            'rotate-90': expandedRow === {{ $loop->index }}
+                        }"
+                    />
+
+                    <span class="font-mono text-xs text-gray-800 dark:text-gray-200 line-clamp-1 break-all">
+                        {{ $entry['message'] }}
+                    </span>
+                </button>
+            </td>
+
+        </tr>
+
+        {{-- Expanded details --}}
+        <tr
+            x-cloak
+            x-show="expandedRow === {{ $loop->index }}"
+            class="bg-gray-50 dark:bg-gray-800/40"
+        >
+            <td colspan="3" class="p-4">
+                <div class="rounded-lg bg-gray-100 dark:bg-gray-900 p-4">
+                    <pre class="font-mono text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-all">{{ $entry['message'] }}</pre>
+                </div>
+            </td>
+        </tr>
+
+    @endforeach
+</tbody>
                     </table>
                 </div>
 

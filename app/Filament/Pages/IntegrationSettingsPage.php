@@ -11,6 +11,8 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Mail;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab; 
 
 class IntegrationSettingsPage extends BasePage
 {
@@ -58,135 +60,150 @@ class IntegrationSettingsPage extends BasePage
 
     public function form(Schema $form): Schema
     {
-        return $form
-            ->schema([
-                Section::make('Email / SMTP')
-                    ->description('Configure the outbound mail driver used for all system emails.')
-                    ->schema([
-                        Forms\Components\Select::make('mail_mailer')
-                            ->label('Mail driver')
-                            ->options([
-                                'smtp'     => 'SMTP',
-                                'postmark' => 'Postmark',
-                                'resend'   => 'Resend',
-                                'mailgun'  => 'Mailgun',
-                                'ses'      => 'Amazon SES',
-                                'log'      => 'Log (testing)',
-                            ])
-                            ->required(),
+        return $form->schema([
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Email / SMTP')
+                        ->schema([
+                            Section::make('Email / SMTP')
+                                ->description('Configure the outbound mail driver used for all system emails.')
+                                ->schema([
+                                    Forms\Components\Select::make('mail_mailer')
+                                        ->label('Mail driver')
+                                        ->options([
+                                            'smtp'     => 'SMTP',
+                                            'postmark' => 'Postmark',
+                                            'resend'   => 'Resend',
+                                            'mailgun'  => 'Mailgun',
+                                            'ses'      => 'Amazon SES',
+                                            'log'      => 'Log (testing)',
+                                        ])
+                                        ->required(),
 
-                        Forms\Components\TextInput::make('mail_host')
-                            ->label('SMTP Host')
-                            ->placeholder('smtp.example.com')
-                            ->visible(fn ($get) => $get('mail_mailer') === 'smtp'),
+                                    Forms\Components\TextInput::make('mail_host')
+                                        ->label('SMTP Host')
+                                        ->placeholder('smtp.example.com')
+                                        ->visible(fn ($get) => $get('mail_mailer') === 'smtp'),
 
-                        Forms\Components\TextInput::make('mail_port')
-                            ->label('SMTP Port')
-                            ->numeric()
-                            ->placeholder('587')
-                            ->visible(fn ($get) => $get('mail_mailer') === 'smtp'),
+                                    Forms\Components\TextInput::make('mail_port')
+                                        ->label('SMTP Port')
+                                        ->numeric()
+                                        ->placeholder('587')
+                                        ->visible(fn ($get) => $get('mail_mailer') === 'smtp'),
 
-                        Forms\Components\Select::make('mail_encryption')
-                            ->label('Encryption')
-                            ->options([
-                                'tls'  => 'TLS (STARTTLS)',
-                                'ssl'  => 'SSL',
-                                ''     => 'None',
-                            ])
-                            ->visible(fn ($get) => $get('mail_mailer') === 'smtp'),
+                                    Forms\Components\Select::make('mail_encryption')
+                                        ->label('Encryption')
+                                        ->options([
+                                            'tls'  => 'TLS (STARTTLS)',
+                                            'ssl'  => 'SSL',
+                                            ''     => 'None',
+                                        ])
+                                        ->visible(fn ($get) => $get('mail_mailer') === 'smtp'),
 
-                        Forms\Components\TextInput::make('mail_username')
-                            ->label('Username / API key')
-                            ->placeholder('user@example.com'),
+                                    Forms\Components\TextInput::make('mail_username')
+                                        ->label('Username / API key')
+                                        ->placeholder('user@example.com'),
 
-                        Forms\Components\TextInput::make('mail_password')
-                            ->label('Password / Secret')
-                            ->password()
-                            ->revealable()
-                            ->placeholder('Leave blank to keep existing'),
+                                    Forms\Components\TextInput::make('mail_password')
+                                        ->label('Password / Secret')
+                                        ->password()
+                                        ->revealable()
+                                        ->placeholder('Leave blank to keep existing'),
 
-                        Forms\Components\TextInput::make('mail_from')
-                            ->label('From address')
-                            ->email()
-                            ->required()
-                            ->placeholder('hello@yourdomain.com'),
+                                    Forms\Components\TextInput::make('mail_from')
+                                        ->label('From address')
+                                        ->email()
+                                        ->required()
+                                        ->placeholder('hello@yourdomain.com'),
 
-                        Forms\Components\TextInput::make('mail_from_name')
-                            ->label('From name')
-                            ->placeholder('WebsiteExpert'),
-                    ]),
+                                    Forms\Components\TextInput::make('mail_from_name')
+                                        ->label('From name')
+                                        ->placeholder('WebsiteExpert'),
+                                ]),
+                        ]),
+                    Tab::make('SMS / Twilio')
+                        ->schema([
+                            Section::make('SMS / Twilio')
+                                ->description('Send SMS notifications via Twilio. Get credentials at console.twilio.com.')
+                                ->schema([
+                                    Forms\Components\Toggle::make('twilio_enabled')
+                                        ->label('Enable SMS sending'),
 
-                Section::make('SMS / Twilio')
-                    ->description('Send SMS notifications via Twilio. Get credentials at console.twilio.com.')
-                    ->schema([
-                        Forms\Components\Toggle::make('twilio_enabled')
-                            ->label('Enable SMS sending'),
+                                    Forms\Components\TextInput::make('twilio_sid')
+                                        ->label('Account SID')
+                                        ->placeholder('ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'),
 
-                        Forms\Components\TextInput::make('twilio_sid')
-                            ->label('Account SID')
-                            ->placeholder('ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'),
+                                    Forms\Components\TextInput::make('twilio_token')
+                                        ->label('Auth Token')
+                                        ->password()
+                                        ->revealable()
+                                        ->placeholder('Leave blank to keep existing'),
 
-                        Forms\Components\TextInput::make('twilio_token')
-                            ->label('Auth Token')
-                            ->password()
-                            ->revealable()
-                            ->placeholder('Leave blank to keep existing'),
+                                    Forms\Components\TextInput::make('twilio_from')
+                                        ->label('From (phone number or sender name)')
+                                        ->placeholder('+44xxxxxxxxxx or WebsiteExpert')
+                                        ->helperText('Phone number in E.164 format (+44...) OR alphanumeric sender name (max 11 chars, e.g. "WebExpert"). Alphanumeric requires an activated Twilio account and UK registration.'),
 
-                        Forms\Components\TextInput::make('twilio_from')
-                            ->label('From (phone number or sender name)')
-                            ->placeholder('+44xxxxxxxxxx or WebsiteExpert')
-                            ->helperText('Phone number in E.164 format (+44...) OR alphanumeric sender name (max 11 chars, e.g. "WebExpert"). Alphanumeric requires an activated Twilio account and UK registration.'),
+                                    Forms\Components\TextInput::make('sms_test_number')
+                                        ->label('Test phone number')
+                                        ->placeholder('+44xxxxxxxxxx')
+                                        ->helperText('Your personal mobile — used only by the "Send test SMS" button.'),
+                                ]),
+                        ]),
+                    Tab::make('Domain Pricing — Margins')
+                        ->schema([
+                            Section::make('Domain Pricing — Margins')
+                                ->description('Default markup applied when syncing Openprovider wholesale prices to retail prices. Individual TLDs can override this in TLD Price List.')
+                                ->schema([
+                                    Forms\Components\TextInput::make('domain_default_margin')
+                                        ->label('Default margin (%)')
+                                        ->numeric()
+                                        ->step('0.5')
+                                        ->minValue(0)
+                                        ->maxValue(1000)
+                                        ->default(50)
+                                        ->suffix('%')
+                                        ->helperText('50% means retail = wholesale × 1.5. Applied when syncing prices from Openprovider for TLDs with margin set to 0.'),
+                                ]),
+                        ]),
+                    Tab::make('Lead Details')
+                        ->schema([
+                            Section::make('Domain Registrar — Openprovider')
+                                ->description('Openprovider reseller API credentials. Leave provider as "Manual" until you have tested the connection.')
+                                ->schema([
+                                    Forms\Components\Select::make('op_provider')
+                                        ->label('Active registrar')
+                                        ->options([
+                                            'manual'       => 'Manual (admin registers domains manually)',
+                                            'openprovider' => 'Openprovider API',
+                                        ])
+                                        ->required()
+                                        ->helperText('Switch to Openprovider only after verifying credentials with the test button.'),
 
-                        Forms\Components\TextInput::make('sms_test_number')
-                            ->label('Test phone number')
-                            ->placeholder('+44xxxxxxxxxx')
-                            ->helperText('Your personal mobile — used only by the "Send test SMS" button.'),
-                    ]),
+                                    Forms\Components\TextInput::make('op_username')
+                                        ->label('API username')
+                                        ->placeholder('sales@yourdomain.com'),
 
-                Section::make('Domain Pricing — Margins')
-                    ->description('Default markup applied when syncing Openprovider wholesale prices to retail prices. Individual TLDs can override this in TLD Price List.')
-                    ->schema([
-                        Forms\Components\TextInput::make('domain_default_margin')
-                            ->label('Default margin (%)')
-                            ->numeric()
-                            ->step('0.5')
-                            ->minValue(0)
-                            ->maxValue(1000)
-                            ->default(50)
-                            ->suffix('%')
-                            ->helperText('50% means retail = wholesale × 1.5. Applied when syncing prices from Openprovider for TLDs with margin set to 0.'),
-                    ]),
+                                    Forms\Components\TextInput::make('op_password')
+                                        ->label('API password')
+                                        ->password()
+                                        ->revealable()
+                                        ->placeholder('Leave blank to keep existing'),
 
-                Section::make('Domain Registrar — Openprovider')
-                    ->description('Openprovider reseller API credentials. Leave provider as "Manual" until you have tested the connection.')
-                    ->schema([
-                        Forms\Components\Select::make('op_provider')
-                            ->label('Active registrar')
-                            ->options([
-                                'manual'       => 'Manual (admin registers domains manually)',
-                                'openprovider' => 'Openprovider API',
-                            ])
-                            ->required()
-                            ->helperText('Switch to Openprovider only after verifying credentials with the test button.'),
+                                    Forms\Components\TextInput::make('op_reseller_id')
+                                        ->label('Reseller ID')
+                                        ->placeholder('319848'),
 
-                        Forms\Components\TextInput::make('op_username')
-                            ->label('API username')
-                            ->placeholder('sales@yourdomain.com'),
+                                    Forms\Components\Toggle::make('op_sandbox')
+                                        ->label('Use sandbox environment')
+                                        ->helperText('Enables the standard Openprovider sandbox (api.sandbox.openprovider.nl). Use this for testing. Disable only when you are ready to use the live production API.'),
+                                ]),
+                        ]),
+                
+                ]),           
 
-                        Forms\Components\TextInput::make('op_password')
-                            ->label('API password')
-                            ->password()
-                            ->revealable()
-                            ->placeholder('Leave blank to keep existing'),
-
-                        Forms\Components\TextInput::make('op_reseller_id')
-                            ->label('Reseller ID')
-                            ->placeholder('319848'),
-
-                        Forms\Components\Toggle::make('op_sandbox')
-                            ->label('Use sandbox environment')
-                            ->helperText('Enables the standard Openprovider sandbox (api.sandbox.openprovider.nl). Use this for testing. Disable only when you are ready to use the live production API.'),
-                    ]),
+                
             ])
             ->statePath('data');
     }

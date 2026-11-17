@@ -26,6 +26,8 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 
 class ContractResource extends BaseResource
 {
@@ -44,7 +46,7 @@ class ContractResource extends BaseResource
                 ->schema([
                     Forms\Components\Select::make('_template_id')
                         ->label('Contract Template')
-                        ->placeholder('— select a template to pre-fill the Terms field —')
+                        ->placeholder('— select a template to pre-fill the Terms fields —')
                         ->options(
                             ContractTemplate::where('is_active', true)
                                 ->orderByRaw("FIELD(language,'en','pl','pt')")
@@ -73,110 +75,124 @@ class ContractResource extends BaseResource
                         })
                         ->dehydrated(false)
                         ->columnSpanFull(),
-                ])
-                ->collapsible()
-                ->collapsed(),
+                ])->columnSpanFull(),
 
-            Section::make('Contract Details')
-                ->columns(3)
-                ->schema([
-                    Forms\Components\TextInput::make('number')
-                        ->label('Contract No.')
-                        ->default(fn () => Contract::nextNumber())
-                        ->required(),
-                    Forms\Components\TextInput::make('title')
-                        ->required()
-                        ->maxLength(255)
-                        ->columnSpan(2),
-                    Forms\Components\Select::make('client_id')
-                        ->label('Client')
-                        ->options(Client::withTrashed()->orderBy('company_name')->pluck('company_name', 'id'))
-                        ->searchable()
-                        ->required()
-                        ->default(fn () => request('client_id'))
-                        ->live(),
-                    Forms\Components\Select::make('project_id')
-                        ->label('Project')
-                        ->options(fn (Get $get) => Project::withTrashed()->when($get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
-                            ->orderBy('title')
-                            ->pluck('title', 'id')
-                        )
-                        ->searchable()
-                        ->nullable()
-                        ->default(fn () => request('project_id'))
-                        ->live()
-                        ->afterStateUpdated(function ($state, callable $set) {
-                            if (! $state) {
-                                return;
-                            }
-                            $project = Project::withTrashed()->find($state);
-                            if (! $project) {
-                                return;
-                            }
-                            $set('value', $project->budget);
-                            $set('currency', $project->currency);
-                        }),
-                    Forms\Components\Select::make('quote_id')
-                        ->label('Quote')
-                        ->options(fn (Get $get) => Quote::withTrashed()->when($get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
-                            ->orderBy('number')
-                            ->pluck('number', 'id')
-                        )
-                        ->searchable()
-                        ->nullable()
-                        ->default(fn () => request('quote_id')),
-                    Forms\Components\Select::make('status')
-                        ->options([
-                            'draft' => 'Draft',
-                            'sent' => 'Sent',
-                            'signed' => 'Signed',
-                            'expired' => 'Expired',
-                            'cancelled' => 'Cancelled',
-                        ])
-                        ->default('draft')
-                        ->required(),
-                    Forms\Components\Select::make('currency')
-                        ->options(fn () => FilamentCurrency::options())
-                        ->default(fn () => request('currency', FilamentCurrency::default()))
-                        ->required(),
-                    Forms\Components\TextInput::make('value')
-                        ->label('Contract Value')
-                        ->numeric()
-                        ->prefix(fn () => FilamentCurrency::symbol())
-                        ->default(fn () => request('value', 0)),
+
+
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Contract Details')
+                        ->schema([
+                            Section::make('Contract Details')
+                                ->columns(3)
+                                ->schema([
+                                    Forms\Components\TextInput::make('number')
+                                        ->label('Contract No.')
+                                        ->default(fn () => Contract::nextNumber())
+                                        ->required(),
+                                    Forms\Components\TextInput::make('title')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->columnSpan(2),
+                                    Forms\Components\Select::make('client_id')
+                                        ->label('Client')
+                                        ->options(Client::withTrashed()->orderBy('company_name')->pluck('company_name', 'id'))
+                                        ->searchable()
+                                        ->required()
+                                        ->default(fn () => request('client_id'))
+                                        ->live(),
+                                    Forms\Components\Select::make('project_id')
+                                        ->label('Project')
+                                        ->options(fn (Get $get) => Project::withTrashed()->when($get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
+                                            ->orderBy('title')
+                                            ->pluck('title', 'id')
+                                        )
+                                        ->searchable()
+                                        ->nullable()
+                                        ->default(fn () => request('project_id'))
+                                        ->live()
+                                        ->afterStateUpdated(function ($state, callable $set) {
+                                            if (! $state) {
+                                                return;
+                                            }
+                                            $project = Project::withTrashed()->find($state);
+                                            if (! $project) {
+                                                return;
+                                            }
+                                            $set('value', $project->budget);
+                                            $set('currency', $project->currency);
+                                        }),
+                                    Forms\Components\Select::make('quote_id')
+                                        ->label('Quote')
+                                        ->options(fn (Get $get) => Quote::withTrashed()->when($get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
+                                            ->orderBy('number')
+                                            ->pluck('number', 'id')
+                                        )
+                                        ->searchable()
+                                        ->nullable()
+                                        ->default(fn () => request('quote_id')),
+                                    Forms\Components\Select::make('status')
+                                        ->options([
+                                            'draft' => 'Draft',
+                                            'sent' => 'Sent',
+                                            'signed' => 'Signed',
+                                            'expired' => 'Expired',
+                                            'cancelled' => 'Cancelled',
+                                        ])
+                                        ->default('draft')
+                                        ->required(),
+                                    Forms\Components\Select::make('currency')
+                                        ->options(fn () => FilamentCurrency::options())
+                                        ->default(fn () => request('currency', FilamentCurrency::default()))
+                                        ->required(),
+                                    Forms\Components\TextInput::make('value')
+                                        ->label('Contract Value')
+                                        ->numeric()
+                                        ->prefix(fn () => FilamentCurrency::symbol())
+                                        ->default(fn () => request('value', 0)),
+                                ]),
+                        ]),
+                    Tab::make('Dates')
+                        ->schema([
+                            Section::make('Dates')
+                                ->columns(4)
+                                ->schema([
+                                    Forms\Components\DatePicker::make('starts_at')->label('Start date'),
+                                    Forms\Components\DatePicker::make('expires_at')->label('Expiry date'),
+                                    Forms\Components\DatePicker::make('sent_at')->label('Sent on'),
+                                    Forms\Components\DatePicker::make('signed_at')->label('Signed on'),
+                                ]),
+                        ]),
+                    Tab::make('Terms & Conditions')
+                        ->schema([
+                            Section::make('Terms & Conditions')
+                                ->schema([
+                                    Forms\Components\RichEditor::make('terms')
+                                        ->label('')
+                                        ->columnSpanFull()
+                                        ->fileAttachmentsDisk('public')
+                                        ->fileAttachmentsDirectory('contracts/attachments'),
+                                ]),
+                        ]),
+                    Tab::make('Attachments & Notes')
+                        ->schema([
+                            Section::make('Attachments & Notes')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\FileUpload::make('file_path')
+                                        ->label('Signed Contract PDF')
+                                        ->disk('public')
+                                        ->directory('contracts')
+                                        ->acceptedFileTypes(['application/pdf'])
+                                        ->maxSize(10240),
+                                    Forms\Components\Textarea::make('notes')
+                                        ->label('Internal notes')
+                                        ->rows(3),
+                                ]),
+                        ]),
                 ]),
 
-            Section::make('Dates')
-                ->columns(4)
-                ->schema([
-                    Forms\Components\DatePicker::make('starts_at')->label('Start date'),
-                    Forms\Components\DatePicker::make('expires_at')->label('Expiry date'),
-                    Forms\Components\DatePicker::make('sent_at')->label('Sent on'),
-                    Forms\Components\DatePicker::make('signed_at')->label('Signed on'),
-                ]),
-
-            Section::make('Terms & Conditions')
-                ->schema([
-                    Forms\Components\RichEditor::make('terms')
-                        ->label('')
-                        ->columnSpanFull()
-                        ->fileAttachmentsDisk('public')
-                        ->fileAttachmentsDirectory('contracts/attachments'),
-                ]),
-
-            Section::make('Attachments & Notes')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\FileUpload::make('file_path')
-                        ->label('Signed Contract PDF')
-                        ->disk('public')
-                        ->directory('contracts')
-                        ->acceptedFileTypes(['application/pdf'])
-                        ->maxSize(10240),
-                    Forms\Components\Textarea::make('notes')
-                        ->label('Internal notes')
-                        ->rows(4),
-                ]),
         ]);
     }
 

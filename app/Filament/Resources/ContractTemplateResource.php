@@ -20,6 +20,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab; 
 
 class ContractTemplateResource extends BaseResource
 {
@@ -198,41 +200,57 @@ HTML;
     public static function form(Schema $form): Schema
     {
         return $form->schema([
-            Section::make('Template Info')
-                ->columns(3)
-                ->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->required()
-                        ->maxLength(255)
-                        ->columnSpan(2),
-                    Forms\Components\Toggle::make('is_active')
-                        ->label('Active')
-                        ->default(true)
-                        ->columnSpan(1),
-                    Forms\Components\Select::make('type')
-                        ->options([
-                            'web_development' => 'Web Development Agreement',
-                            'maintenance' => 'Website Maintenance Agreement',
-                        ])
-                        ->required(),
-                    Forms\Components\Select::make('language')
-                        ->options([
-                            'en' => '🇬🇧 English',
-                            'pl' => '🇵🇱 Polish',
-                            'pt' => '🇵🇹 Portuguese',
-                        ])
-                        ->required(),
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Template Info')
+                        ->schema([
+                            Section::make('Template Info')
+                                ->columns(3)
+                                ->schema([
+                                    Forms\Components\TextInput::make('name')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->columnSpan(2),
+                                    Forms\Components\Toggle::make('is_active')
+                                        ->label('Active')
+                                        ->default(true)
+                                        ->columnSpan(1),
+                                    Forms\Components\Select::make('type')
+                                        ->options([
+                                            'web_development' => 'Web Development Agreement',
+                                            'maintenance' => 'Website Maintenance Agreement',
+                                        ])
+                                        ->required(),
+                                    Forms\Components\Select::make('language')
+                                        ->options([
+                                            'en' => '🇬🇧 English',
+                                            'pl' => '🇵🇱 Polish',
+                                            'pt' => '🇵🇹 Portuguese',
+                                        ])
+                                        ->required(),
+                                ]),
+                        ]),
+                    Tab::make('Template Content')
+                        ->schema([
+                            Section::make('Template Content')
+                                ->schema([
+                                    Forms\Components\RichEditor::make('content')
+                                        ->label('')
+                                        ->columnSpanFull()
+                                        ->fileAttachmentsDisk('public')
+                                        ->fileAttachmentsDirectory('contract-templates')
+                                        ->helperText('Use {{legal.company_name}}, {{legal.company_email}}, {{legal.deposit_percent}}, {{legal.payment_terms_days}} etc. as dynamic placeholders.'),
+                                ]),
+                        ]),
+
                 ]),
 
-            Section::make('Content')
-                ->schema([
-                    Forms\Components\RichEditor::make('content')
-                        ->label('')
-                        ->columnSpanFull()
-                        ->fileAttachmentsDisk('public')
-                        ->fileAttachmentsDirectory('contract-templates')
-                        ->helperText('Use {{legal.company_name}}, {{legal.company_email}}, {{legal.deposit_percent}}, {{legal.payment_terms_days}} etc. as dynamic placeholders.'),
-                ]),
+
+
+            
+
+            
         ]);
     }
 

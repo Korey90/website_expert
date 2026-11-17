@@ -15,6 +15,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;  
 
 class SalesOfferTemplateResource extends BaseResource
 {
@@ -27,51 +29,62 @@ class SalesOfferTemplateResource extends BaseResource
     public static function form(Schema $form): Schema
     {
         return $form->schema([
-            Section::make('Template Details')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('title')
-                        ->required()
-                        ->maxLength(255)
-                        ->columnSpanFull(),
-
-                    Forms\Components\Select::make('service_slug')
-                        ->label('Service')
-                        ->options(
-                            fn () => ServiceItem::active()
-                                ->orderBy('sort_order')
-                                ->pluck('slug', 'slug')
-                                ->mapWithKeys(fn ($slug) => [$slug => $slug])
-                                ->toArray()
-                        )
-                        ->searchable()
-                        ->nullable(),
-
-                    Forms\Components\Select::make('language')
-                        ->options(['en' => 'English', 'pl' => 'Polish', 'pt' => 'Portuguese'])
-                        ->required()
-                        ->default('en'),
-
-                    Forms\Components\Toggle::make('is_active')
-                        ->default(true)
-                        ->inline(false),
-
-                    Forms\Components\Textarea::make('description')
-                        ->rows(2)
-                        ->columnSpanFull(),
-                ]),
-
-            Section::make('Offer Body')
-                ->description('Use {{client_name}}, {{company_name}}, {{lead_title}} as placeholders.')
-                ->schema([
-                    Forms\Components\MarkdownEditor::make('body')
-                        ->columnSpanFull()
-                        ->toolbarButtons([
-                            'bold', 'italic', 'heading', 'link',
-                            'bulletList', 'orderedList', 'blockquote',
-                            'codeBlock', 'undo', 'redo',
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Template Details')
+                        ->schema([
+                            Section::make('Template Details')
+                                ->schema([
+                                    Forms\Components\TextInput::make('title')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->columnSpanFull(),
+    
+                                    Forms\Components\Select::make('service_slug')
+                                        ->label('Service')
+                                        ->options(
+                                            fn () => ServiceItem::active()
+                                                ->orderBy('sort_order')
+                                                ->pluck('slug', 'slug')
+                                                ->mapWithKeys(fn ($slug) => [$slug => $slug])
+                                                ->toArray()
+                                        )
+                                        ->searchable()
+                                        ->nullable(),
+    
+                                    Forms\Components\Select::make('language')
+                                        ->options(['en' => 'English', 'pl' => 'Polish', 'pt' => 'Portuguese'])
+                                        ->required()
+                                        ->default('en'),
+    
+                                    Forms\Components\Toggle::make('is_active')
+                                        ->default(true)
+                                        ->inline(false),
+    
+                                    Forms\Components\Textarea::make('description')
+                                        ->rows(2)
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+                    Tab::make('Offer Body')
+                        ->schema([
+                            Section::make('Offer Body')
+                                ->description('Use {{client_name}}, {{company_name}}, {{lead_title}} as placeholders.')
+                                ->schema([
+                                    Forms\Components\MarkdownEditor::make('body')
+                                        ->columnSpanFull()
+                                        ->toolbarButtons([
+                                            'bold', 'italic', 'heading', 'link',
+                                            'bulletList', 'orderedList', 'blockquote',
+                                            'codeBlock', 'undo', 'redo',
+                                        ]),
+                                ]),
                         ]),
                 ]),
+
+
+
         ]);
     }
 

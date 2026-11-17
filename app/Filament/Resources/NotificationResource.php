@@ -21,6 +21,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;  
 
 class NotificationResource extends BaseResource
 {
@@ -41,7 +43,7 @@ class NotificationResource extends BaseResource
     public static function form(Schema $form): Schema
     {
         return $form->schema([
-            Section::make('Send Notification')->schema([
+            Section::make('Create Notification')->schema([
                 Forms\Components\Select::make('user_ids')
                     ->label('Recipients')
                     ->options(fn (): array => static::recipientQuery()
@@ -57,43 +59,55 @@ class NotificationResource extends BaseResource
                 Forms\Components\Textarea::make('body')
                     ->label('Message')
                     ->rows(3),
-            ]),
+            ])->columnSpanFull(),
         ]);
     }
 
     public static function infolist(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make('Notification Details')->columns(2)->schema([
-                TextEntry::make('notifiable.name')
-                    ->label('Recipient'),
-                TextEntry::make('created_at')
-                    ->label('Sent at')
-                    ->dateTime('d.m.Y H:i:s'),
-                TextEntry::make('data_title')
-                    ->label('Title')
-                    ->getStateUsing(fn ($record) => $record->data['title'] ?? '-'),
-                TextEntry::make('data_icon')
-                    ->label('Icon')
-                    ->getStateUsing(fn ($record) => $record->data['icon'] ?? '-'),
-                TextEntry::make('data_body')
-                    ->label('Message')
-                    ->getStateUsing(fn ($record) => $record->data['body'] ?? '—')
-                    ->columnSpanFull(),
-            ]),
-            Section::make('Status')->columns(3)->schema([
-                TextEntry::make('read_at')
-                    ->label('Read at')
-                    ->dateTime('d.m.Y H:i:s')
-                    ->placeholder('Not read'),
-                TextEntry::make('deleted_at')
-                    ->label('Dismissed at')
-                    ->dateTime('d.m.Y H:i:s')
-                    ->placeholder('Not dismissed'),
-                TextEntry::make('id')
-                    ->label('ID')
-                    ->copyable(),
-            ]),
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Notification Details')
+                        ->schema([
+                            Section::make('Notification Details')->columns(2)->schema([
+                                TextEntry::make('notifiable.name')
+                                    ->label('Recipient'),
+                                TextEntry::make('created_at')
+                                    ->label('Sent at')
+                                    ->dateTime('d.m.Y H:i:s'),
+                                TextEntry::make('data_title')
+                                    ->label('Title')
+                                    ->getStateUsing(fn ($record) => $record->data['title'] ?? '-'),
+                                TextEntry::make('data_icon')
+                                    ->label('Icon')
+                                    ->getStateUsing(fn ($record) => $record->data['icon'] ?? '-'),
+                                TextEntry::make('data_body')
+                                    ->label('Message')
+                                    ->getStateUsing(fn ($record) => $record->data['body'] ?? '—')
+                                    ->columnSpanFull(),
+                            ]),
+                        ]),
+                    Tab::make('Status')
+                        ->schema([
+                            Section::make('Status')->columns(3)->schema([
+                                TextEntry::make('read_at')
+                                    ->label('Read at')
+                                    ->dateTime('d.m.Y H:i:s')
+                                    ->placeholder('Not read'),
+                                TextEntry::make('deleted_at')
+                                    ->label('Dismissed at')
+                                    ->dateTime('d.m.Y H:i:s')
+                                    ->placeholder('Not dismissed'),
+                                TextEntry::make('id')
+                                    ->label('ID')
+                                    ->copyable(),
+                            ]),
+                        ]),
+                ]),
+            
+            
         ]);
     }
 

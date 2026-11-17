@@ -16,6 +16,8 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab; 
 
 class LandingPageResource extends BaseResource
 {
@@ -38,65 +40,77 @@ class LandingPageResource extends BaseResource
     public static function form(Schema $form): Schema
     {
         return $form->schema([
-            Section::make('Details')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('title')
-                        ->required()
-                        ->maxLength(255)
-                        ->columnSpanFull(),
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Details')
+                        ->schema([
+                            Section::make('Details')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('title')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->columnSpanFull(),
 
-                    Forms\Components\TextInput::make('slug')
-                        ->prefix('lp/')
-                        ->helperText('Leave blank to auto-generate from title.')
-                        ->maxLength(255)
-                        ->regex('/^[a-z0-9]+(?:-[a-z0-9]+)*$/')
-                        ->nullable(),
+                                    Forms\Components\TextInput::make('slug')
+                                        ->prefix('lp/')
+                                        ->helperText('Leave blank to auto-generate from title.')
+                                        ->maxLength(255)
+                                        ->regex('/^[a-z0-9]+(?:-[a-z0-9]+)*$/')
+                                        ->nullable(),
 
-                    Forms\Components\Select::make('language')
-                        ->options(['en' => 'English', 'pl' => 'Polski', 'pt' => 'Português'])
-                        ->default('en')
-                        ->required(),
+                                    Forms\Components\Select::make('language')
+                                        ->options(['en' => 'English', 'pl' => 'Polski', 'pt' => 'Português'])
+                                        ->default('en')
+                                        ->required(),
 
-                    Forms\Components\Select::make('status')
-                        ->options([
-                            LandingPage::STATUS_DRAFT => 'Draft',
-                            LandingPage::STATUS_PUBLISHED => 'Published',
-                            LandingPage::STATUS_ARCHIVED => 'Archived',
-                        ])
-                        ->default(LandingPage::STATUS_DRAFT)
-                        ->required(),
+                                    Forms\Components\Select::make('status')
+                                        ->options([
+                                            LandingPage::STATUS_DRAFT => 'Draft',
+                                            LandingPage::STATUS_PUBLISHED => 'Published',
+                                            LandingPage::STATUS_ARCHIVED => 'Archived',
+                                        ])
+                                        ->default(LandingPage::STATUS_DRAFT)
+                                        ->required(),
 
-                    Forms\Components\Select::make('template_key')
-                        ->label('Template')
-                        ->options(collect(config('landing_pages.templates', []))
-                            ->mapWithKeys(fn ($t, $k) => [$k => $t['label']]))
-                        ->nullable(),
+                                    Forms\Components\Select::make('template_key')
+                                        ->label('Template')
+                                        ->options(collect(config('landing_pages.templates', []))
+                                            ->mapWithKeys(fn ($t, $k) => [$k => $t['label']]))
+                                        ->nullable(),
 
-                    Forms\Components\Select::make('conversion_goal')
-                        ->label('Conversion Goal')
-                        ->options(config('landing_pages.conversion_goals', []))
-                        ->nullable(),
+                                    Forms\Components\Select::make('conversion_goal')
+                                        ->label('Conversion Goal')
+                                        ->options(config('landing_pages.conversion_goals', []))
+                                        ->nullable(),
 
-                    Forms\Components\Textarea::make('description')
-                        ->rows(2)
-                        ->maxLength(1000)
-                        ->columnSpanFull(),
+                                    Forms\Components\Textarea::make('description')
+                                        ->rows(2)
+                                        ->maxLength(1000)
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+                    Tab::make('Meta Data')
+                        ->schema([
+                            Section::make('Meta Data')
+                                ->schema([
+                                    Forms\Components\TextInput::make('meta_title')->maxLength(255),
+                                    Forms\Components\Textarea::make('meta_description')->rows(2)->maxLength(500),
+                                ]),
+                        ]),
+                    Tab::make('Custom CSS')
+                        ->schema([
+                            Section::make('Custom CSS')
+                                ->schema([
+                                    Forms\Components\Textarea::make('custom_css')->rows(6)->maxLength(10000)->columnSpanFull(),
+                                ]),
+                        ]),
+
                 ]),
 
-            Section::make('SEO')
-                ->collapsed()
-                ->columns(1)
-                ->schema([
-                    Forms\Components\TextInput::make('meta_title')->maxLength(255),
-                    Forms\Components\Textarea::make('meta_description')->rows(2)->maxLength(500),
-                ]),
 
-            Section::make('Custom CSS')
-                ->collapsed()
-                ->schema([
-                    Forms\Components\Textarea::make('custom_css')->rows(6)->maxLength(10000)->columnSpanFull(),
-                ]),
+            
         ]);
     }
 

@@ -18,6 +18,7 @@ use Filament\Tables;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\EmbeddedTable;
 
 class NavbarSettingsPage extends BasePage implements HasTable
 {
@@ -56,68 +57,84 @@ class NavbarSettingsPage extends BasePage implements HasTable
 
     public function form(Schema $form): Schema
     {
-        return $form
-            ->schema([
-                Section::make('Brand')
-                    ->columns(2)
-                    ->schema([
-                        Forms\Components\TextInput::make('brand_name')
-                            ->label('Brand Name')
-                            ->placeholder('WebsiteExpert')
-                            ->maxLength(60)
-                            ->columnSpanFull(),
-                    ]),
+        return $form->schema([
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Brand & Visibility')
+                        ->schema([
+                            Section::make('Brand')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('brand_name')
+                                        ->label('Brand Name')
+                                        ->placeholder('WebsiteExpert')
+                                        ->maxLength(60)
+                                        ->columnSpanFull(),
+                                ]),
 
-                Section::make('Visibility')
-                    ->description('Show or hide individual navbar elements.')
-                    ->columns(3)
-                    ->schema([
-                        Forms\Components\Toggle::make('show_lang_switcher')
-                            ->label('Language Switcher')
-                            ->default(true)
-                            ->inline(false),
-                        Forms\Components\Toggle::make('show_theme_toggle')
-                            ->label('Dark/Light Mode Toggle')
-                            ->default(true)
-                            ->inline(false),
-                        Forms\Components\Toggle::make('show_client_portal')
-                            ->label('Client Portal Button')
-                            ->default(true)
-                            ->inline(false),
-                    ]),
+                            Section::make('Visibility')
+                                ->description('Show or hide individual navbar elements.')
+                                ->columns(3)
+                                ->schema([
+                                    Forms\Components\Toggle::make('show_lang_switcher')
+                                        ->label('Language Switcher')
+                                        ->default(true)
+                                        ->inline(false),
+                                    Forms\Components\Toggle::make('show_theme_toggle')
+                                        ->label('Dark/Light Mode Toggle')
+                                        ->default(true)
+                                        ->inline(false),
+                                    Forms\Components\Toggle::make('show_client_portal')
+                                        ->label('Client Portal Button')
+                                        ->default(true)
+                                        ->inline(false),
+                                ]),
 
-                Section::make('CTA Button')
-                    ->description('Call-to-action button displayed on the right side of the navbar.')
-                    ->columns(2)
-                    ->headerActions([
-                        \Filament\Actions\Action::make('toggle_cta_button')
-                            ->label(fn () => ($this->data['show_cta_button'] ?? true) ? 'Enabled' : 'Disabled')
-                            ->icon(fn () => ($this->data['show_cta_button'] ?? true) ? 'heroicon-o-eye' : 'heroicon-o-eye-slash')
-                            ->color(fn () => ($this->data['show_cta_button'] ?? true) ? 'success' : 'gray')
-                            ->size(\Filament\Support\Enums\Size::Small)
-                            ->action(function () {
-                                $this->data['show_cta_button'] = !($this->data['show_cta_button'] ?? true);
-                            }),
-                    ])
-                    ->schema([
-                        Forms\Components\Hidden::make('show_cta_button'),
-                        Forms\Components\TextInput::make('cta_href')
-                            ->label('CTA URL / hash')
-                            ->placeholder('#contact')
-                            ->maxLength(200),
-                        Forms\Components\TextInput::make('cta_text_pl')
-                            ->label('Button text (PL)')
-                            ->placeholder('Bezpłatna wycena')
-                            ->maxLength(60),
-                        Forms\Components\TextInput::make('cta_text_en')
-                            ->label('Button text (EN)')
-                            ->placeholder('Free Quote')
-                            ->maxLength(60),
-                        Forms\Components\TextInput::make('cta_text_pt')
-                            ->label('Button text (PT)')
-                            ->placeholder('Orçamento Gratuito')
-                            ->maxLength(60),
-                    ]),
+                            Section::make('CTA Button')
+                                ->description('Call-to-action button displayed on the right side of the navbar.')
+                                ->columns(2)
+                                ->collapsed()
+                                ->headerActions([
+                                    \Filament\Actions\Action::make('toggle_cta_button')
+                                        ->label(fn () => ($this->data['show_cta_button'] ?? true) ? 'Enabled' : 'Disabled')
+                                        ->icon(fn () => ($this->data['show_cta_button'] ?? true) ? 'heroicon-o-eye' : 'heroicon-o-eye-slash')
+                                        ->color(fn () => ($this->data['show_cta_button'] ?? true) ? 'success' : 'gray')
+                                        ->size(\Filament\Support\Enums\Size::Small)
+                                        ->action(function () {
+                                            $this->data['show_cta_button'] = !($this->data['show_cta_button'] ?? true);
+                                        }),
+                                ])
+                                ->schema([
+                                    Forms\Components\Hidden::make('show_cta_button'),
+                                    Forms\Components\TextInput::make('cta_href')
+                                        ->label('CTA URL / hash')
+                                        ->placeholder('#contact')
+                                        ->maxLength(200),
+                                    Forms\Components\TextInput::make('cta_text_pl')
+                                        ->label('Button text (PL)')
+                                        ->placeholder('Bezpłatna wycena')
+                                        ->maxLength(60),
+                                    Forms\Components\TextInput::make('cta_text_en')
+                                        ->label('Button text (EN)')
+                                        ->placeholder('Free Quote')
+                                        ->maxLength(60),
+                                    Forms\Components\TextInput::make('cta_text_pt')
+                                        ->label('Button text (PT)')
+                                        ->placeholder('Orçamento Gratuito')
+                                        ->maxLength(60),
+                                ]),
+                        ]),
+                    Tab::make('Navigation Links')
+                        ->schema([
+                            EmbeddedTable::make()
+                                ->columnSpanFull(),
+                        ]),
+                ]),
+
+                
+
+                
             ])
             ->statePath('data');
     }
@@ -256,6 +273,8 @@ class NavbarSettingsPage extends BasePage implements HasTable
             ->bulkActions([
                 DeleteBulkAction::make(),
             ])
+            ->heading('Navigation Links')
+            ->description('Drag rows to reorder. Click "Add menu item" to create a new link.')
             ->emptyStateHeading('No menu items yet')
             ->emptyStateDescription('Add your first navigation link using the button above.');
     }

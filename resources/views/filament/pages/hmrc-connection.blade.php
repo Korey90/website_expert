@@ -2,11 +2,12 @@
     @php($summary = $this->getConnectionSummary())
 
     <div
-        class="grid gap-6 lg:grid-cols-2"
+        class="grid gap-4"
         x-data
         x-on:hmrc-vat-return-retrieved.window="$nextTick(() => document.getElementById('hmrc-vat-return-result')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))"
     >
-        <x-filament::section>
+
+        <x-filament::section class="lg:col-span-2" collapsible="true" :collapsed="true">
             <x-slot name="heading">{{ __('finance.hmrc_connection.sections.status') }}</x-slot>
             <x-slot name="description">{{ __('finance.hmrc_connection.subtitle') }}</x-slot>
 
@@ -48,7 +49,7 @@
             @endif
         </x-filament::section>
 
-        <x-filament::section>
+        <x-filament::section class="lg:col-span-2" collapsible="true" :collapsed="true">
             <x-slot name="heading">{{ __('finance.hmrc_connection.sections.security') }}</x-slot>
 
             <div class="space-y-4 text-sm text-gray-600 dark:text-gray-300">
@@ -58,7 +59,7 @@
             </div>
         </x-filament::section>
 
-        <x-filament::section>
+        <x-filament::section class="lg:col-span-2" collapsible="true" :collapsed="true">
             <x-slot name="heading">{{ __('finance.hmrc_connection.sections.fraud_prevention') }}</x-slot>
             <x-slot name="description">{{ __('finance.hmrc_connection.fraud_validation.description') }}</x-slot>
 
@@ -155,7 +156,7 @@
             </div>
         </x-filament::section>
 
-        <x-filament::section class="lg:col-span-2">
+        <x-filament::section class="lg:col-span-2" collapsible="true" :collapsed="true">
             <x-slot name="heading">{{ __('finance.hmrc_connection.obligations.title') }}</x-slot>
             <x-slot name="description">{{ __('finance.hmrc_connection.obligations.description') }}</x-slot>
 
@@ -205,7 +206,7 @@
             </p>
         </x-filament::section>
 
-        <x-filament::section id="hmrc-vat-return-result" class="scroll-mt-24 lg:col-span-2">
+        <x-filament::section id="hmrc-vat-return-result" collapsible="true" :collapsed="true" class="scroll-mt-24 lg:col-span-2">
             <x-slot name="heading">{{ __('finance.hmrc_connection.read.return_title') }}</x-slot>
             <x-slot name="description">{{ __('finance.hmrc_connection.read.return_description') }}</x-slot>
 
@@ -235,7 +236,7 @@
             @endif
         </x-filament::section>
 
-        <x-filament::section class="lg:col-span-2">
+        <x-filament::section class="lg:col-span-2" collapsible="true" :collapsed="true">
             <x-slot name="heading">{{ __('finance.hmrc_connection.read.account_title') }}</x-slot>
             <x-slot name="description">{{ __('finance.hmrc_connection.read.account_description') }}</x-slot>
 

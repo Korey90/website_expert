@@ -122,7 +122,8 @@ class VatAdjustmentResource extends BaseResource
                         ->rows(4)
                         ->required()
                         ->columnSpanFull(),
-                ]),
+                ])->columnSpanFull(),
+                
             Section::make(__('finance.vat_adjustments.sections.error_correction'))
                 ->description(__('finance.vat_adjustments.help.error_correction'))
                 ->columns(3)

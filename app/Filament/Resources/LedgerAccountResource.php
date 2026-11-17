@@ -71,7 +71,7 @@ class LedgerAccountResource extends BaseResource
                         ->searchable(),
                     Forms\Components\Toggle::make('is_postable')->label(__('finance.ledger_accounts.fields.is_postable'))->default(true),
                     Forms\Components\Toggle::make('is_active')->label(__('finance.ledger_accounts.fields.is_active'))->default(true),
-                ]),
+                ])->columnSpanFull(),
         ]);
     }
 

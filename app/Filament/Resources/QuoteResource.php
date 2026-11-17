@@ -121,8 +121,9 @@ class QuoteResource extends BaseResource
                                 ->schema([
                                     Forms\Components\Repeater::make('items')
                                         ->relationship()
+                                        ->collapsed()
                                         ->label('')
-                                        ->live()
+                                        ->live(onBlur: true)
                                         ->afterStateUpdated(fn (Get $get, Set $set) => static::recalculateTotals($get, $set, ''))
                                         ->schema([
                                             Forms\Components\TextInput::make('description')

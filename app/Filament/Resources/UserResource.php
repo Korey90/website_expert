@@ -30,6 +30,7 @@ class UserResource extends BaseResource
         return $form->schema([
             Section::make()
                 ->columns(2)
+                ->columnSpanFull()
                 ->schema([
                     Forms\Components\TextInput::make('name')->required()->maxLength(255),
                     Forms\Components\TextInput::make('email')->email()->required()->unique(ignoreRecord: true),

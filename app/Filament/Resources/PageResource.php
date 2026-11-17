@@ -142,84 +142,100 @@ class PageResource extends BaseResource
 
     public static function form(Schema $form): Schema
     {
-        $locales = config('languages', ['en' => 'English', 'pl' => 'Polski']);
+        $locales = config('languages', ['en' => 'English', 'pl' => 'Polski', 'pt' => 'Portugese']);
 
         return $form->schema([
-
-            Section::make('Page Settings')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('slug')
-                        ->required()
-                        ->unique(ignoreRecord: true)
-                        ->maxLength(255)
-                        ->helperText('URL: /p/{slug}'),
-                    Forms\Components\Select::make('type')
-                        ->options([
-                            'page'            => 'Page',
-                            'policy'          => 'Privacy Policy',
-                            'terms'           => 'Terms & Conditions',
-                            'cookie_policy'   => 'Cookie Policy',
-                            'accessibility'   => 'Accessibility Statement',
-                            'other'           => 'Other',
-                        ])
-                        ->default('page')
-                        ->required()
-                        ->live(),
-                    Forms\Components\Select::make('status')
-                        ->options(['draft' => 'Draft', 'published' => 'Published'])
-                        ->default('draft')
-                        ->required(),
-                    Forms\Components\TextInput::make('sort_order')->numeric()->default(0),
-                    Forms\Components\Toggle::make('show_in_footer')
-                        ->label('Show in footer navigation')
-                        ->default(false)
-                        ->columnSpanFull(),
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Page Settings')
+                        ->schema([
+                            Section::make('Page Settings')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('slug')
+                                        ->required()
+                                        ->unique(ignoreRecord: true)
+                                        ->maxLength(255)
+                                        ->helperText('URL: /p/{slug}'),
+                                    Forms\Components\Select::make('type')
+                                        ->options([
+                                            'page'            => 'Page',
+                                            'policy'          => 'Privacy Policy',
+                                            'terms'           => 'Terms & Conditions',
+                                            'cookie_policy'   => 'Cookie Policy',
+                                            'accessibility'   => 'Accessibility Statement',
+                                            'other'           => 'Other',
+                                        ])
+                                        ->default('page')
+                                        ->required()
+                                        ->live(),
+                                    Forms\Components\Select::make('status')
+                                        ->options(['draft' => 'Draft', 'published' => 'Published'])
+                                        ->default('draft')
+                                        ->required(),
+                                    Forms\Components\TextInput::make('sort_order')->numeric()->default(0),
+                                    Forms\Components\Toggle::make('show_in_footer')
+                                        ->label('Show in footer navigation')
+                                        ->default(false)
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+                    Tab::make('Document Metadata')
+                        ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('type') !== 'page')
+                        ->schema([
+                            Section::make('Document Metadata')
+                                ->description('Effective date and version override per-document. You can also set these globally in Settings → Legal & Company.')
+                                ->columns(2)
+                                ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('type') !== 'page')
+                                ->schema([
+                                    Forms\Components\DatePicker::make('effective_date')
+                                        ->label('Effective date')
+                                        ->displayFormat('d M Y')
+                                        ->helperText('Override the global effective date for this document'),
+                                    Forms\Components\TextInput::make('version')
+                                        ->label('Document version')
+                                        ->placeholder('e.g. 1.0, 2025-01')
+                                        ->maxLength(20),
+                                ]),
+                        ]),
+                    Tab::make('Page Content')
+                        ->schema([
+                            Section::make('Content')
+                                ->schema([
+                                    Tabs::make('Translations')
+                                        ->tabs(
+                                            array_map(
+                                                fn (string $locale, string $label) => Tab::make($label)
+                                                    ->schema([
+                                                        Forms\Components\TextInput::make("title.{$locale}")
+                                                            ->label("Title ({$locale})")
+                                                            ->required()
+                                                            ->maxLength(255),
+                                                        TinyEditor::make("content.{$locale}")
+                                                            ->label("Content ({$locale})"),
+                                                        Forms\Components\TextInput::make("meta_title.{$locale}")
+                                                            ->label("Meta title ({$locale})")
+                                                            ->maxLength(100),
+                                                        Forms\Components\Textarea::make("meta_description.{$locale}")
+                                                            ->label("Meta description ({$locale})")
+                                                            ->rows(2)
+                                                            ->maxLength(300),
+                                                    ]),
+                                                array_keys($locales),
+                                                array_values($locales),
+                                            )
+                                        )
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
                 ]),
 
-            Section::make('Document Metadata')
-                ->description('Effective date and version override per-document. You can also set these globally in Settings → Legal & Company.')
-                ->columns(2)
-                ->collapsed()
-                ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('type') !== 'page')
-                ->schema([
-                    Forms\Components\DatePicker::make('effective_date')
-                        ->label('Effective date')
-                        ->displayFormat('d M Y')
-                        ->helperText('Override the global effective date for this document'),
-                    Forms\Components\TextInput::make('version')
-                        ->label('Document version')
-                        ->placeholder('e.g. 1.0, 2025-01')
-                        ->maxLength(20),
-                ]),
+            
 
-            Section::make('Content')
-                ->schema([
-                    Tabs::make('Translations')
-                        ->tabs(
-                            array_map(
-                                fn (string $locale, string $label) => Tab::make($label)
-                                    ->schema([
-                                        Forms\Components\TextInput::make("title.{$locale}")
-                                            ->label("Title ({$locale})")
-                                            ->required()
-                                            ->maxLength(255),
-                                        TinyEditor::make("content.{$locale}")
-                                            ->label("Content ({$locale})"),
-                                        Forms\Components\TextInput::make("meta_title.{$locale}")
-                                            ->label("Meta title ({$locale})")
-                                            ->maxLength(100),
-                                        Forms\Components\Textarea::make("meta_description.{$locale}")
-                                            ->label("Meta description ({$locale})")
-                                            ->rows(2)
-                                            ->maxLength(300),
-                                    ]),
-                                array_keys($locales),
-                                array_values($locales),
-                            )
-                        )
-                        ->columnSpanFull(),
-                ]),
+            
+
+
         ]);
     }
 

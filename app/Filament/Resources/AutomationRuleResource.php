@@ -17,6 +17,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;  
 
 class AutomationRuleResource extends BaseResource
 {
@@ -57,154 +59,297 @@ class AutomationRuleResource extends BaseResource
     public static function form(Schema $form): Schema
     {
         return $form->schema([
-            Forms\Components\TextInput::make('name')->required()->maxLength(255),
-            Forms\Components\Select::make('trigger_event')
-                ->options(fn () => AutomationTrigger::where('is_active', true)
-                    ->orderBy('group')
-                    ->orderBy('label')
-                    ->get()
-                    ->groupBy('group')
-                    ->map(fn ($group) => $group->pluck('label', 'key'))
-                    ->toArray()
-                )
-                ->searchable()
-                ->required(),
-            Forms\Components\TextInput::make('delay_minutes')->numeric()->default(0)->helperText('0 = immediate'),
-            Forms\Components\Toggle::make('is_active')->default(true),
-
-            Section::make('Conditions')
-                ->description('All conditions must pass for actions to run. Leave empty to always trigger.')
-                ->schema([
-                    Forms\Components\Repeater::make('conditions')
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Automation details')
                         ->schema([
-                            Forms\Components\Select::make('field')
-                                ->label('Field')
-                                ->options([
-                                    'source'       => 'Lead Source',
-                                    'status'       => 'Status',
-                                    'stage_id'     => 'Stage ID',
-                                    'assignee_id'  => 'Assigned User ID',
-                                    'lead_id'      => 'Lead ID',
-                                    'client_id'    => 'Client ID',
-                                    'business_id'  => 'Business ID',
-                                    'utm_source'   => 'UTM Source',
-                                    'utm_medium'   => 'UTM Medium',
-                                    'utm_campaign' => 'UTM Campaign',
-                                ])
-                                ->required()
-                                ->searchable(),
-                            Forms\Components\Select::make('operator')
-                                ->label('Operator')
-                                ->options([
-                                    '='        => 'equals (=)',
-                                    '!='       => 'not equals (!=)',
-                                    '>'        => 'greater than (>)',
-                                    '<'        => 'less than (<)',
-                                    '>='       => 'greater or equal (>=)',
-                                    '<='       => 'less or equal (<=)',
-                                    'contains' => 'contains',
-                                ])
-                                ->default('=')
-                                ->required(),
-                            Forms\Components\TextInput::make('value')
-                                ->label('Value')
-                                ->placeholder('e.g. landing_page, service_cta, paid ...')
-                                ->required(),
-                        ])
-                        ->columns(3)
-                        ->addActionLabel('Add Condition')
-                        ->defaultItems(0)
-                        ->collapsible(),
-                ])
-                ->collapsible()
-                ->collapsed(),
-
-            Section::make('Actions')
-                ->schema([
-                    Forms\Components\Repeater::make('actions')
+                            Section::make('Automation details')
+                                ->schema([
+                                    Forms\Components\TextInput::make('name')->required()->maxLength(255),
+                                    Forms\Components\Select::make('trigger_event')
+                                        ->options(fn () => AutomationTrigger::where('is_active', true)
+                                            ->orderBy('group')
+                                            ->orderBy('label')
+                                            ->get()
+                                            ->groupBy('group')
+                                            ->map(fn ($group) => $group->pluck('label', 'key'))
+                                            ->toArray()
+                                        )
+                                        ->searchable()
+                                        ->required(),
+                                    Forms\Components\TextInput::make('delay_minutes')->numeric()->default(0)->helperText('0 = immediate'),
+                                    Forms\Components\Toggle::make('is_active')->default(true),
+                                ]),
+                        ]),
+                    Tab::make('Conditions')
+                        ->icon('heroicon-o-adjustments-horizontal')
                         ->schema([
-                            Forms\Components\Select::make('type')
-                                ->options([
-                                    'send_email'           => 'Send Email',
-                                    'send_sms'             => 'Send SMS',
-                                    'notify_admin'         => 'Notify Admin (Bell)',
-                                    'create_portal_access' => 'Create Portal Access',
-                                ])
-                                ->required()
-                                ->reactive(),
-                            Forms\Components\Select::make('to')
-                                ->options(['client' => 'Client', 'admin' => 'Admin', 'assigned_user' => 'Assigned User'])
-                                ->default('client')
-                                ->visible(fn (Get $get) => $get('type') !== 'notify_admin'),
-                            Forms\Components\Select::make('email_template_id')
-                                ->label('Email Template')
-                                ->options(fn () => EmailTemplate::where('is_active', true)->orderBy('name')->pluck('name', 'id'))
-                                ->searchable()
-                                ->visible(fn (Get $get) => $get('type') === 'send_email'),
-                            Forms\Components\Select::make('template_id')
-                                ->label('SMS Template')
-                                ->options(fn () => SmsTemplate::where('is_active', true)->orderBy('name')->pluck('name', 'id'))
-                                ->searchable()
-                                ->visible(fn (Get $get) => $get('type') === 'send_sms'),
-                            Forms\Components\TextInput::make('title')
-                                ->label('Notification Title')
-                                ->placeholder('New lead: {lead_title}')
-                                ->helperText('Placeholders: {lead_title}, {client_name}, {project_name}, {invoice_number}, {lead_id}, {project_id}, {invoice_id}')
-                                ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
-                            Forms\Components\Textarea::make('body')
-                                ->label('Notification Body')
-                                ->placeholder('{client_name} — {company_name}')
-                                ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
-                            Forms\Components\Checkbox::make('grant_workspace_access')
-                                ->label('Grant workspace access')
-                                ->helperText('Optional. Adds BusinessUser membership only when the client is linked to a business. Default remains portal-only.')
-                                ->default(false)
-                                ->visible(fn (Get $get) => $get('type') === 'create_portal_access'),
-                            Forms\Components\TextInput::make('url')
-                                ->label('Action URL')
-                                ->placeholder('/admin/leads/{lead_id}')
-                                ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
-                            Forms\Components\Select::make('icon')
-                                ->label('Icon')
-                                ->options([
-                                    'heroicon-o-bell'              => 'Bell',
-                                    'heroicon-o-user-plus'         => 'User Plus',
-                                    'heroicon-o-banknotes'         => 'Banknotes',
-                                    'heroicon-o-document-text'     => 'Document',
-                                    'heroicon-o-chat-bubble-left'  => 'Chat Bubble',
-                                    'heroicon-o-exclamation-triangle' => 'Warning',
-                                    'heroicon-o-check-circle'      => 'Check Circle',
-                                    'heroicon-o-arrow-path'        => 'Refresh / Automation',
-                                ])
-                                ->default('heroicon-o-bell')
-                                ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
-                            Forms\Components\Select::make('color')
-                                ->label('Color')
-                                ->options([
-                                    'primary' => 'Primary',
-                                    'success' => 'Success',
-                                    'warning' => 'Warning',
-                                    'danger'  => 'Danger',
-                                    'info'    => 'Info',
-                                    'gray'    => 'Gray',
-                                ])
-                                ->default('primary')
-                                ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
-                            Forms\Components\CheckboxList::make('roles')
-                                ->label('Notify Roles')
-                                ->options([
-                                    'admin'     => 'Admin',
-                                    'manager'   => 'Manager',
-                                    'developer' => 'Developer',
-                                ])
-                                ->default(['admin'])
-                                ->columns(3)
-                                ->visible(fn (Get $get) => $get('type') === 'notify_admin'),
-                        ])
-                        ->columns(2)
-                        ->defaultItems(1),
+                            Section::make('Conditions')
+                                ->description('All conditions must pass for actions to run. Leave empty to always trigger.')
+                                ->schema([
+                                    Forms\Components\Repeater::make('conditions')
+                                        ->label('Conditions')
+                                        ->schema([
+                                            Forms\Components\Select::make('field')
+                                                ->label('Field')
+                                                ->options([
+                                                    'source'       => 'Lead Source',
+                                                    'status'       => 'Status',
+                                                    'stage_id'     => 'Stage ID',
+                                                    'assignee_id'  => 'Assigned User ID',
+                                                    'lead_id'      => 'Lead ID',
+                                                    'client_id'    => 'Client ID',
+                                                    'business_id'  => 'Business ID',
+                                                    'utm_source'   => 'UTM Source',
+                                                    'utm_medium'   => 'UTM Medium',
+                                                    'utm_campaign' => 'UTM Campaign',
+                                                ])
+                                                ->required()
+                                                ->searchable()
+                                                ->live(),
+
+                                            Forms\Components\Select::make('operator')
+                                                ->label('Operator')
+                                                ->options([
+                                                    '='        => 'equals (=)',
+                                                    '!='       => 'not equals (!=)',
+                                                    '>'        => 'greater than (>)',
+                                                    '<'        => 'less than (<)',
+                                                    '>='       => 'greater or equal (>=)',
+                                                    '<='       => 'less or equal (<=)',
+                                                    'contains' => 'contains',
+                                                ])
+                                                ->default('=')
+                                                ->required()
+                                                ->live(),
+
+                                            Forms\Components\TextInput::make('value')
+                                                ->label('Value')
+                                                ->placeholder('e.g. landing_page, service_cta, paid ...')
+                                                ->required()
+                                                ->live(onBlur: true),
+                                        ])
+                                        ->columns(3)
+                                        ->itemLabel(function (array $state): string {
+                                            $fields = [
+                                                'source'       => 'Lead Source',
+                                                'status'       => 'Status',
+                                                'stage_id'     => 'Stage ID',
+                                                'assignee_id'  => 'Assigned User ID',
+                                                'lead_id'      => 'Lead ID',
+                                                'client_id'    => 'Client ID',
+                                                'business_id'  => 'Business ID',
+                                                'utm_source'   => 'UTM Source',
+                                                'utm_medium'   => 'UTM Medium',
+                                                'utm_campaign' => 'UTM Campaign',
+                                            ];
+
+                                            $field = $fields[$state['field'] ?? '']
+                                                ?? 'New Condition';
+
+                                            $operator = $state['operator'] ?? '=';
+                                            $value = trim((string) ($state['value'] ?? ''));
+
+                                            if ($value !== '') {
+                                                return "{$field} {$operator} {$value}";
+                                            }
+
+                                            return $field;
+                                        })
+                                        ->addActionLabel('Add Condition')
+                                        ->defaultItems(0)
+                                        ->reorderable()
+                                        ->collapsible()
+                                        ->collapsed()
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+                    Tab::make('Actions')
+                        ->icon('heroicon-o-bolt')
+                        ->schema([
+                            Section::make('Actions')
+                                ->schema([
+                                    Forms\Components\Repeater::make('actions')
+                                        ->label('Actions')
+                                        ->schema([
+                                            Forms\Components\Select::make('type')
+                                                ->label('Action Type')
+                                                ->options([
+                                                    'send_email'           => 'Send Email',
+                                                    'send_sms'             => 'Send SMS',
+                                                    'notify_admin'         => 'Notify Admin (Bell)',
+                                                    'create_portal_access' => 'Create Portal Access',
+                                                ])
+                                                ->required()
+                                                ->live(),
+                    
+                                            Forms\Components\Select::make('to')
+                                                ->label('Recipient')
+                                                ->options([
+                                                    'client'        => 'Client',
+                                                    'admin'         => 'Admin',
+                                                    'assigned_user' => 'Assigned User',
+                                                ])
+                                                ->default('client')
+                                                ->live()
+                                                ->visible(fn (Get $get) =>
+                                                    $get('type') !== 'notify_admin'
+                                                ),
+                    
+                                            Forms\Components\Select::make('email_template_id')
+                                                ->label('Email Template')
+                                                ->options(fn () =>
+                                                    EmailTemplate::where('is_active', true)
+                                                        ->orderBy('name')
+                                                        ->pluck('name', 'id')
+                                                )
+                                                ->searchable()
+                                                ->visible(fn (Get $get) =>
+                                                    $get('type') === 'send_email'
+                                                ),
+                    
+                                            Forms\Components\Select::make('template_id')
+                                                ->label('SMS Template')
+                                                ->options(fn () =>
+                                                    SmsTemplate::where('is_active', true)
+                                                        ->orderBy('name')
+                                                        ->pluck('name', 'id')
+                                                )
+                                                ->searchable()
+                                                ->visible(fn (Get $get) =>
+                                                    $get('type') === 'send_sms'
+                                                ),
+                    
+                                            Forms\Components\TextInput::make('title')
+                                                ->label('Notification Title')
+                                                ->placeholder('New lead: {lead_title}')
+                                                ->helperText(
+                                                    'Placeholders: {lead_title}, {client_name}, {project_name}, {invoice_number}, {lead_id}, {project_id}, {invoice_id}'
+                                                )
+                                                ->live(onBlur: true)
+                                                ->visible(fn (Get $get) =>
+                                                    $get('type') === 'notify_admin'
+                                                ),
+                    
+                                            Forms\Components\Textarea::make('body')
+                                                ->label('Notification Body')
+                                                ->placeholder('{client_name} — {company_name}')
+                                                ->visible(fn (Get $get) =>
+                                                    $get('type') === 'notify_admin'
+                                                ),
+                    
+                                            Forms\Components\Checkbox::make('grant_workspace_access')
+                                                ->label('Grant workspace access')
+                                                ->helperText(
+                                                    'Optional. Adds BusinessUser membership only when the client is linked to a business. Default remains portal-only.'
+                                                )
+                                                ->default(false)
+                                                ->visible(fn (Get $get) =>
+                                                    $get('type') === 'create_portal_access'
+                                                ),
+                    
+                                            Forms\Components\TextInput::make('url')
+                                                ->label('Action URL')
+                                                ->placeholder('/admin/leads/{lead_id}')
+                                                ->visible(fn (Get $get) =>
+                                                    $get('type') === 'notify_admin'
+                                                ),
+                    
+                                            Forms\Components\Select::make('icon')
+                                                ->label('Icon')
+                                                ->options([
+                                                    'heroicon-o-bell'                 => 'Bell',
+                                                    'heroicon-o-user-plus'            => 'User Plus',
+                                                    'heroicon-o-banknotes'            => 'Banknotes',
+                                                    'heroicon-o-document-text'        => 'Document',
+                                                    'heroicon-o-chat-bubble-left'     => 'Chat Bubble',
+                                                    'heroicon-o-exclamation-triangle' => 'Warning',
+                                                    'heroicon-o-check-circle'         => 'Check Circle',
+                                                    'heroicon-o-arrow-path'           => 'Refresh / Automation',
+                                                ])
+                                                ->default('heroicon-o-bell')
+                                                ->visible(fn (Get $get) =>
+                                                    $get('type') === 'notify_admin'
+                                                ),
+                    
+                                            Forms\Components\Select::make('color')
+                                                ->label('Color')
+                                                ->options([
+                                                    'primary' => 'Primary',
+                                                    'success' => 'Success',
+                                                    'warning' => 'Warning',
+                                                    'danger'  => 'Danger',
+                                                    'info'    => 'Info',
+                                                    'gray'    => 'Gray',
+                                                ])
+                                                ->default('primary')
+                                                ->visible(fn (Get $get) =>
+                                                    $get('type') === 'notify_admin'
+                                                ),
+                    
+                                            Forms\Components\CheckboxList::make('roles')
+                                                ->label('Notify Roles')
+                                                ->options([
+                                                    'admin'     => 'Admin',
+                                                    'manager'   => 'Manager',
+                                                    'developer' => 'Developer',
+                                                ])
+                                                ->default(['admin'])
+                                                ->columns(3)
+                                                ->visible(fn (Get $get) =>
+                                                    $get('type') === 'notify_admin'
+                                                ),
+                                        ])
+                                        ->columns(2)
+                                        ->itemLabel(function (array $state): string {
+                                            $types = [
+                                                'send_email'           => 'Send Email',
+                                                'send_sms'             => 'Send SMS',
+                                                'notify_admin'         => 'Notify Admin',
+                                                'create_portal_access' => 'Create Portal Access',
+                                            ];
+                    
+                                            $recipients = [
+                                                'client'        => 'Client',
+                                                'admin'         => 'Admin',
+                                                'assigned_user' => 'Assigned User',
+                                            ];
+                    
+                                            $type = $state['type'] ?? null;
+                    
+                                            $label = $types[$type ?? '']
+                                                ?? 'New Action';
+                    
+                                            if ($type === 'notify_admin') {
+                                                $title = trim((string) ($state['title'] ?? ''));
+                    
+                                                return $title !== ''
+                                                    ? "{$label} — {$title}"
+                                                    : $label;
+                                            }
+                    
+                                            if ($type !== null) {
+                                                $recipient = $recipients[$state['to'] ?? 'client']
+                                                    ?? 'Client';
+                    
+                                                return "{$label} → {$recipient}";
+                                            }
+                    
+                                            return $label;
+                                        })
+                                        ->addActionLabel('Add Action')
+                                        ->defaultItems(1)
+                                        ->reorderable()
+                                        ->collapsible()
+                                        ->collapsed()
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+
                 ]),
-        ]);
+
+            ]);
     }
 
     public static function table(Table $table): Table

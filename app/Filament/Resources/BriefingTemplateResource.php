@@ -15,6 +15,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab; 
 
 class BriefingTemplateResource extends BaseResource
 {
@@ -26,111 +28,117 @@ class BriefingTemplateResource extends BaseResource
 
     public static function form(Schema $form): Schema
     {
-        return $form->columns(1)->schema([
-            Section::make('Template Details')
-                ->columns(1)
-                ->collapsible()
-                ->collapsed()
-                ->schema([
-                    Forms\Components\TextInput::make('title')
-                        ->required()
-                        ->maxLength(255)
-                        ->columnSpanFull(),
-
-                    Forms\Components\Select::make('service_slug')
-                        ->label('Service')
-                        ->options(
-                            fn () => ServiceItem::active()
-                                ->orderBy('sort_order')
-                                ->pluck('slug', 'slug')
-                                ->mapWithKeys(fn ($slug) => [$slug => $slug])
-                                ->toArray()
-                        )
-                        ->searchable()
-                        ->nullable(),
-
-                    Forms\Components\Select::make('type')
-                        ->options([
-                            'discovery'      => 'Discovery',
-                            'qualification'  => 'Qualification',
-                            'proposal_input' => 'Proposal Input',
-                            'sales_offer'    => 'Sales Offer',
-                            'custom'         => 'Custom',
-                        ])
-                        ->required()
-                        ->default('discovery'),
-
-                    Forms\Components\Select::make('language')
-                        ->options(['en' => 'English', 'pl' => 'Polish', 'pt' => 'Portuguese'])
-                        ->required()
-                        ->default('en'),
-
-                    Forms\Components\Toggle::make('is_active')
-                        ->default(true)
-                        ->inline(false),
-
-                    Forms\Components\Textarea::make('description')
-                        ->rows(2)
-                        ->columnSpanFull(),
-                ]),
-
-            Section::make('Sections & Questions')
-                ->description('Define sections and questions for this briefing template.')
-                ->collapsible()
-                ->collapsed()
-                ->schema([
-                    Forms\Components\Repeater::make('sections')
+        return $form->schema([
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Template Details')
                         ->schema([
-                            Forms\Components\TextInput::make('title')
-                                ->label('Section title')
-                                ->required(),
-
-                            Forms\Components\TextInput::make('key')
-                                ->label('Section key (snake_case)')
-                                ->required()
-                                ->regex('/^[a-z_]+$/'),
-
-                            Forms\Components\Repeater::make('questions')
+                            Section::make('Template Details')
                                 ->schema([
-                                    Forms\Components\TextInput::make('key')
-                                        ->label('Question key')
+                                    Forms\Components\TextInput::make('title')
                                         ->required()
-                                        ->regex('/^[a-z_]+$/'),
+                                        ->maxLength(255)
+                                        ->columnSpanFull(),
 
-                                    Forms\Components\TextInput::make('label')
-                                        ->label('Question label')
-                                        ->required(),
+                                    Forms\Components\Select::make('service_slug')
+                                        ->label('Service')
+                                        ->options(
+                                            fn () => ServiceItem::active()
+                                                ->orderBy('sort_order')
+                                                ->pluck('slug', 'slug')
+                                                ->mapWithKeys(fn ($slug) => [$slug => $slug])
+                                                ->toArray()
+                                        )
+                                        ->searchable()
+                                        ->nullable(),
 
                                     Forms\Components\Select::make('type')
-                                        ->label('Field type')
                                         ->options([
-                                            'text'     => 'Text (single line)',
-                                            'textarea' => 'Textarea (multi-line)',
-                                            'select'   => 'Select (dropdown)',
-                                            'boolean'  => 'Yes / No',
-                                            'rating'   => 'Rating (1–5)',
+                                            'discovery'      => 'Discovery',
+                                            'qualification'  => 'Qualification',
+                                            'proposal_input' => 'Proposal Input',
+                                            'sales_offer'    => 'Sales Offer',
+                                            'custom'         => 'Custom',
                                         ])
-                                        ->default('text')
-                                        ->required(),
+                                        ->required()
+                                        ->default('discovery'),
 
-                                    Forms\Components\TextInput::make('placeholder')
-                                        ->label('Placeholder (optional)'),
+                                    Forms\Components\Select::make('language')
+                                        ->options(['en' => 'English', 'pl' => 'Polish', 'pt' => 'Portuguese'])
+                                        ->required()
+                                        ->default('en'),
 
-                                    Forms\Components\Toggle::make('required')
-                                        ->label('Required')
-                                        ->default(false)
+                                    Forms\Components\Toggle::make('is_active')
+                                        ->default(true)
                                         ->inline(false),
-                                ])
-                                ->columns(2)
-                                ->addActionLabel('Add question')
-                                ->collapsible()
-                                ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
-                        ])
-                        ->addActionLabel('Add section')
-                        ->collapsible()
-                        ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
-                        ->columnSpanFull(),
+
+                                    Forms\Components\Textarea::make('description')
+                                        ->rows(2)
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+                    Tab::make('Sections & Questions')
+                        ->schema([
+                            Section::make('Sections & Questions')
+                                ->description('Define sections and questions for this briefing template.')
+                                ->schema([
+                                    Forms\Components\Repeater::make('sections')
+                                        ->collapsed()
+                                        ->schema([
+                                            Forms\Components\TextInput::make('title')
+                                                ->label('Section title')
+                                                ->required(),
+
+                                            Forms\Components\TextInput::make('key')
+                                                ->label('Section key (snake_case)')
+                                                ->required()
+                                                ->regex('/^[a-z_]+$/'),
+
+                                            Forms\Components\Repeater::make('questions')
+                                                ->schema([
+                                                    Forms\Components\TextInput::make('key')
+                                                        ->label('Question key')
+                                                        ->required()
+                                                        ->regex('/^[a-z_]+$/'),
+
+                                                    Forms\Components\TextInput::make('label')
+                                                        ->label('Question label')
+                                                        ->required(),
+
+                                                    Forms\Components\Select::make('type')
+                                                        ->label('Field type')
+                                                        ->options([
+                                                            'text'     => 'Text (single line)',
+                                                            'textarea' => 'Textarea (multi-line)',
+                                                            'select'   => 'Select (dropdown)',
+                                                            'boolean'  => 'Yes / No',
+                                                            'rating'   => 'Rating (1–5)',
+                                                        ])
+                                                        ->default('text')
+                                                        ->required(),
+
+                                                    Forms\Components\TextInput::make('placeholder')
+                                                        ->label('Placeholder (optional)'),
+
+                                                    Forms\Components\Toggle::make('required')
+                                                        ->label('Required')
+                                                        ->default(false)
+                                                        ->inline(false),
+                                                ])
+                                                ->columns(2)
+                                                ->addActionLabel('Add question')
+                                                ->collapsible()
+                                                ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
+                                        ])
+                                        ->addActionLabel('Add section')
+                                        ->collapsible()
+                                        ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
                 ]),
+
         ]);
     }
 

@@ -266,7 +266,7 @@ return [
         'navigation' => 'Expenses', 'singular' => 'expense', 'plural' => 'expenses',
         'sections' => ['document' => 'Purchase document', 'exchange' => 'GBP exchange-rate snapshot', 'items' => 'Expense items', 'purpose' => 'Business purpose and notes', 'totals' => 'Totals'],
         'fields' => [
-            'supplier' => 'Supplier', 'supplier_invoice_number' => 'Supplier invoice number', 'status' => 'Status',
+            'supplier' => 'Supplier', 'supplier_invoice_number' => 'Supplier invoice number?', 'status' => 'Status',
             'currency' => 'Currency', 'issue_date' => 'Issue date', 'due_date' => 'Due date', 'received_date' => 'Received date',
             'payment_method' => 'Payment method', 'client' => 'Client', 'project' => 'Project', 'description' => 'Description',
             'quantity' => 'Quantity', 'unit_price' => 'Unit price', 'billable' => 'Billable', 'billable_client' => 'Billable client',

@@ -33,7 +33,7 @@ class PaymentResource extends BaseResource
     {
         return $form->schema([
             Section::make('Payment Details')
-                ->columns(2)
+                ->columns(6)
                 ->schema([
                     Forms\Components\Select::make('invoice_id')
                         ->label('Invoice')
@@ -52,7 +52,8 @@ class PaymentResource extends BaseResource
                             $set('exchange_rate_source', $invoice && strtoupper((string) $invoice->currency) !== 'GBP' ? 'manual' : 'identity');
                             $set('exchange_rate_date', today()->toDateString());
                         })
-                        ->required(),
+                        ->required()
+                        ->columnSpan(2),
 
                     Forms\Components\Select::make('method')
                         ->options([
@@ -63,19 +64,22 @@ class PaymentResource extends BaseResource
                             'cheque' => 'Cheque',
                             'other' => 'Other',
                         ])
-                        ->required(),
+                        ->required()
+                        ->columnSpan(2),
 
                     Forms\Components\TextInput::make('amount')
                         ->numeric()
                         ->prefix(fn () => FilamentCurrency::symbol())
-                        ->required(),
+                        ->required()
+                        ->columnSpan(2),
 
                     Forms\Components\Select::make('currency')
                         ->options(fn () => FilamentCurrency::options())
                         ->default(fn () => FilamentCurrency::default())
                         ->disabled()
                         ->dehydrated()
-                        ->required(),
+                        ->required()
+                        ->columnSpan(2),
 
                     Forms\Components\TextInput::make('gbp_exchange_rate')
                         ->label('Payment GBP exchange rate')
@@ -83,19 +87,22 @@ class PaymentResource extends BaseResource
                         ->minValue(0.00000001)
                         ->helperText('GBP value of one unit of the invoice currency at the payment date.')
                         ->visible(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
-                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP'),
+                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
+                        ->columnSpan(2),
 
                     Forms\Components\TextInput::make('exchange_rate_source')
                         ->label('Exchange-rate source')
                         ->default('manual')
                         ->visible(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
-                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP'),
+                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
+                        ->columnSpan(2),
 
                     Forms\Components\DatePicker::make('exchange_rate_date')
                         ->label('Exchange-rate date')
                         ->default(today())
                         ->visible(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
-                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP'),
+                        ->required(fn (Get $get): bool => strtoupper((string) $get('currency')) !== 'GBP')
+                        ->columnSpan(2),
 
                     Forms\Components\Select::make('status')
                         ->options([
@@ -107,25 +114,27 @@ class PaymentResource extends BaseResource
                         ->default('completed')
                         ->disabled()
                         ->dehydrated()
-                        ->required(),
+                        ->required()
+                        ->columnSpan(2),
 
                     Forms\Components\DateTimePicker::make('paid_at')
                         ->label('Paid at')
                         ->default(now())
-                        ->native(false),
+                        ->native(false)
+                        ->columnSpan(2),
 
                     Forms\Components\TextInput::make('reference')
                         ->label('Reference / Transaction ID')
-                        ->columnSpan(2),
+                        ->columnSpan(3),
 
                     Forms\Components\TextInput::make('stripe_payment_intent_id')
                         ->label('Stripe Payment Intent ID')
-                        ->columnSpan(2),
+                        ->columnSpan(3),
 
                     Forms\Components\Textarea::make('notes')
                         ->rows(3)
-                        ->columnSpan(2),
-                ]),
+                        ->columnSpan(3),
+                ])->columnSpanFull(),
         ]);
     }
 

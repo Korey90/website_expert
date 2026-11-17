@@ -28,6 +28,8 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;  
 
 class LeadResource extends BaseResource
 {
@@ -42,51 +44,68 @@ class LeadResource extends BaseResource
     public static function form(Schema $form): Schema
     {
         return $form->schema([
-            Section::make('Lead Details')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('title')->required()->maxLength(255)->columnSpanFull(),
-                    Forms\Components\Select::make('client_id')
-                        ->label('Client')
-                        ->options(Client::withTrashed()->pluck('company_name', 'id'))
-                        ->searchable()
-                        ->default(fn () => request('client_id') ? (int) request('client_id') : null)
-                        ->createOptionForm([
-                            Forms\Components\TextInput::make('company_name')->required(),
-                            Forms\Components\TextInput::make('primary_contact_email')->email(),
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Lead Details')
+                        ->schema([
+                            Section::make('Lead Details')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('title')->required()->maxLength(255)->columnSpanFull(),
+                                    Forms\Components\Select::make('client_id')
+                                        ->label('Client')
+                                        ->options(Client::withTrashed()->pluck('company_name', 'id'))
+                                        ->searchable()
+                                        ->default(fn () => request('client_id') ? (int) request('client_id') : null)
+                                        ->createOptionForm([
+                                            Forms\Components\TextInput::make('company_name')->required(),
+                                            Forms\Components\TextInput::make('primary_contact_email')->email(),
+                                        ]),
+                                    Forms\Components\Select::make('pipeline_stage_id')
+                                        ->label('Stage')
+                                        ->options(PipelineStage::orderBy('order')->pluck('name', 'id'))
+                                        ->required(),
+                                    Forms\Components\Select::make('assigned_to')
+                                        ->label('Assigned To')
+                                        ->options(fn (): array => User::query()
+                                            ->whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager']))
+                                            ->whereHas('businesses', fn ($query) => $query
+                                                ->whereKey(currentBusiness()?->getKey())
+                                                ->where('business_users.is_active', true))
+                                            ->orderBy('name')
+                                            ->pluck('name', 'id')
+                                            ->all())
+                                        ->searchable(),
+                                    Forms\Components\Select::make('source')
+                                        ->options(['calculator' => 'Calculator', 'contact_form' => 'Contact Form', 'referral' => 'Referral', 'cold_outreach' => 'Cold Outreach', 'social_media' => 'Social Media', 'other' => 'Other'])
+                                        ->default('contact_form'),
+                                    Forms\Components\TextInput::make('value')->numeric()->prefix(fn () => FilamentCurrency::symbol()),
+                                    Forms\Components\Select::make('currency')->options(fn () => FilamentCurrency::options())->default(fn () => FilamentCurrency::default()),
+                                    Forms\Components\DatePicker::make('expected_close_date'),
+                                ]),
                         ]),
-                    Forms\Components\Select::make('pipeline_stage_id')
-                        ->label('Stage')
-                        ->options(PipelineStage::orderBy('order')->pluck('name', 'id'))
-                        ->required(),
-                    Forms\Components\Select::make('assigned_to')
-                        ->label('Assigned To')
-                        ->options(fn (): array => User::query()
-                            ->whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager']))
-                            ->whereHas('businesses', fn ($query) => $query
-                                ->whereKey(currentBusiness()?->getKey())
-                                ->where('business_users.is_active', true))
-                            ->orderBy('name')
-                            ->pluck('name', 'id')
-                            ->all())
-                        ->searchable(),
-                    Forms\Components\Select::make('source')
-                        ->options(['calculator' => 'Calculator', 'contact_form' => 'Contact Form', 'referral' => 'Referral', 'cold_outreach' => 'Cold Outreach', 'social_media' => 'Social Media', 'other' => 'Other'])
-                        ->default('contact_form'),
-                    Forms\Components\TextInput::make('value')->numeric()->prefix(fn () => FilamentCurrency::symbol()),
-                    Forms\Components\Select::make('currency')->options(fn () => FilamentCurrency::options())->default(fn () => FilamentCurrency::default()),
-                    Forms\Components\DatePicker::make('expected_close_date'),
+                    Tab::make('Notes')
+                        ->schema([
+                            Forms\Components\Textarea::make('notes')->rows(4)->columnSpanFull(),
+                        ]),
+                    Tab::make('Calculator Data')
+                        ->schema([
+                            Section::make('Calculator Data')
+                                ->schema([
+                                    Forms\Components\KeyValue::make('calculator_data')
+                                        ->label('Calculator Configuration')
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
                 ]),
 
-            Section::make('Calculator Data')
-                ->collapsed()
-                ->schema([
-                    Forms\Components\KeyValue::make('calculator_data')
-                        ->label('Calculator Configuration')
-                        ->columnSpanFull(),
-                ]),
 
-            Forms\Components\Textarea::make('notes')->rows(4)->columnSpanFull(),
+
+
+
+
+            
         ]);
     }
 

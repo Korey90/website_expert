@@ -18,6 +18,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;  
 
 class PlanResource extends BaseResource
 {
@@ -40,147 +42,212 @@ class PlanResource extends BaseResource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make('Plan Identity')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('slug')
-                        ->label('Slug')
-                        ->required()
-                        ->maxLength(50)
-                        ->unique(Plan::class, 'slug', ignoreRecord: true)
-                        ->helperText('e.g. free, basic, pro, agency — used internally and in Stripe')
-                        ->alphaDash(),
-
-                    Forms\Components\TextInput::make('name')
-                        ->label('Display Name')
-                        ->required()
-                        ->maxLength(100),
-
-                    Forms\Components\Textarea::make('description')
-                        ->label('Short Description')
-                        ->maxLength(255)
-                        ->columnSpanFull(),
-
-                    Forms\Components\Toggle::make('is_active')
-                        ->label('Visible to users')
-                        ->default(true),
-
-                    Forms\Components\TextInput::make('sort_order')
-                        ->label('Sort Order')
-                        ->numeric()
-                        ->default(0)
-                        ->minValue(0),
-                ]),
-
-            Section::make('Legacy GBP Pricing')
-                ->description('Fallback values kept for existing installs. New checkout uses the price book below.')
-                ->columns(2)
-                ->collapsed()
-                ->schema([
-                    Forms\Components\TextInput::make('price_monthly')
-                        ->label('Monthly Price (pence)')
-                        ->numeric()
-                        ->default(0)
-                        ->minValue(0)
-                        ->suffix('p'),
-
-                    Forms\Components\TextInput::make('price_yearly')
-                        ->label('Yearly Price (pence)')
-                        ->numeric()
-                        ->default(0)
-                        ->minValue(0)
-                        ->suffix('p'),
-
-                    Forms\Components\TextInput::make('stripe_price_id_monthly')
-                        ->label('Stripe Price ID (Monthly)')
-                        ->nullable()
-                        ->maxLength(255)
-                        ->placeholder('price_xxxxx'),
-
-                    Forms\Components\TextInput::make('stripe_price_id_yearly')
-                        ->label('Stripe Price ID (Yearly)')
-                        ->nullable()
-                        ->maxLength(255)
-                        ->placeholder('price_xxxxx'),
-                ]),
-
-            Section::make('Price Book')
-                ->description('Create one monthly/yearly price per supported currency. Stripe subscriptions require a Price ID for each paid currency.')
-                ->schema([
-                    Forms\Components\Repeater::make('planPrices')
-                        ->relationship()
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Plan Identity')
                         ->schema([
-                            Forms\Components\Select::make('currency')
-                                ->options(fn () => FilamentCurrency::options())
-                                ->required(),
+                            Section::make('Plan Identity')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('slug')
+                                        ->label('Slug')
+                                        ->required()
+                                        ->maxLength(50)
+                                        ->unique(Plan::class, 'slug', ignoreRecord: true)
+                                        ->helperText('e.g. free, basic, pro, agency — used internally and in Stripe')
+                                        ->alphaDash(),
 
-                            Forms\Components\Select::make('interval')
-                                ->options([
-                                    PlanPrice::INTERVAL_MONTHLY => 'Monthly',
-                                    PlanPrice::INTERVAL_YEARLY => 'Yearly',
+                                    Forms\Components\TextInput::make('name')
+                                        ->label('Display Name')
+                                        ->required()
+                                        ->maxLength(100),
+
+                                    Forms\Components\Textarea::make('description')
+                                        ->label('Short Description')
+                                        ->maxLength(255)
+                                        ->columnSpanFull(),
+
+                                    Forms\Components\Toggle::make('is_active')
+                                        ->label('Visible to users')
+                                        ->default(true),
+
+                                    Forms\Components\TextInput::make('sort_order')
+                                        ->label('Sort Order')
+                                        ->numeric()
+                                        ->default(0)
+                                        ->minValue(0),
+                                ]),
+                        ]),
+                    Tab::make('Legacy GBP Pricing')
+                        ->schema([
+                            Section::make('Legacy GBP Pricing')
+                                ->description('Fallback values kept for existing installs. New checkout uses the price book below.')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('price_monthly')
+                                        ->label('Monthly Price (pence)')
+                                        ->numeric()
+                                        ->default(0)
+                                        ->minValue(0)
+                                        ->suffix('p'),
+
+                                    Forms\Components\TextInput::make('price_yearly')
+                                        ->label('Yearly Price (pence)')
+                                        ->numeric()
+                                        ->default(0)
+                                        ->minValue(0)
+                                        ->suffix('p'),
+
+                                    Forms\Components\TextInput::make('stripe_price_id_monthly')
+                                        ->label('Stripe Price ID (Monthly)')
+                                        ->nullable()
+                                        ->maxLength(255)
+                                        ->placeholder('price_xxxxx'),
+
+                                    Forms\Components\TextInput::make('stripe_price_id_yearly')
+                                        ->label('Stripe Price ID (Yearly)')
+                                        ->nullable()
+                                        ->maxLength(255)
+                                        ->placeholder('price_xxxxx'),
+                                ]),
+                        ]),
+                    Tab::make('Price Book')
+                        ->schema([
+                            Section::make('Price Book')
+                                ->icon('heroicon-o-banknotes')
+                                ->description('Create one monthly/yearly price per supported currency. Stripe subscriptions require a Price ID for each paid currency.')
+                                ->schema([
+                                    Forms\Components\Repeater::make('planPrices')
+                                        ->label('Plan Prices')
+                                        ->relationship()
+                                        ->schema([
+                                            Forms\Components\Select::make('currency')
+                                                ->label('Currency')
+                                                ->options(fn () => FilamentCurrency::options())
+                                                ->required()
+                                                ->live(),
+
+                                            Forms\Components\Select::make('interval')
+                                                ->label('Billing Interval')
+                                                ->options([
+                                                    PlanPrice::INTERVAL_MONTHLY => 'Monthly',
+                                                    PlanPrice::INTERVAL_YEARLY => 'Yearly',
+                                                ])
+                                                ->required()
+                                                ->live(),
+
+                                            Forms\Components\TextInput::make('amount_minor')
+                                                ->label('Amount (minor units)')
+                                                ->numeric()
+                                                ->minValue(0)
+                                                ->required()
+                                                ->helperText('Example: 2900 = 29.00 for GBP/EUR/PLN.')
+                                                ->live(onBlur: true),
+
+                                            Forms\Components\TextInput::make('stripe_price_id')
+                                                ->label('Stripe Price ID')
+                                                ->nullable()
+                                                ->maxLength(255)
+                                                ->placeholder('price_xxxxx'),
+
+                                            Forms\Components\Toggle::make('is_active')
+                                                ->label('Active')
+                                                ->default(true)
+                                                ->live(),
+                                        ])
+                                        ->columns(5)
+                                        ->itemLabel(function (array $state): string {
+                                            $currency = strtoupper((string) ($state['currency'] ?? ''));
+
+                                            $intervals = [
+                                                PlanPrice::INTERVAL_MONTHLY => 'Monthly',
+                                                PlanPrice::INTERVAL_YEARLY => 'Yearly',
+                                            ];
+
+                                            $interval = $intervals[$state['interval'] ?? '']
+                                                ?? 'Not Set';
+
+                                            if ($currency === '') {
+                                                return 'New Price';
+                                            }
+
+                                            $label = "{$currency} — {$interval}";
+
+                                            if (isset($state['amount_minor']) && is_numeric($state['amount_minor'])) {
+                                                $amountMinor = (int) $state['amount_minor'];
+
+                                                if (in_array($currency, ['GBP', 'EUR', 'PLN'], true)) {
+                                                    $amount = number_format($amountMinor / 100, 2);
+
+                                                    $label .= " — {$amount} {$currency}";
+                                                } else {
+                                                    $label .= " — {$amountMinor} minor units";
+                                                }
+                                            }
+
+                                            if (($state['is_active'] ?? true) === false) {
+                                                $label .= ' (Inactive)';
+                                            }
+
+                                            return $label;
+                                        })
+                                        ->defaultItems(0)
+                                        ->addActionLabel('Add Price')
+                                        ->reorderable()
+                                        ->collapsible()
+                                        ->collapsed()
+                                        ->columnSpanFull(),
                                 ])
-                                ->required(),
+                                ->collapsible(),
+                        ]),
+                    Tab::make('Plan Limits')
+                        ->schema([
+                            Section::make('Limits')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('max_landing_pages')
+                                        ->label('Max Landing Pages')
+                                        ->numeric()
+                                        ->nullable()
+                                        ->minValue(0)
+                                        ->helperText('Leave blank for unlimited'),
 
-                            Forms\Components\TextInput::make('amount_minor')
-                                ->label('Amount (minor units)')
-                                ->numeric()
-                                ->minValue(0)
-                                ->required()
-                                ->helperText('Example: 2900 = 29.00 for GBP/EUR/PLN.'),
+                                    Forms\Components\TextInput::make('max_ai_per_month')
+                                        ->label('Max AI Generations / Month')
+                                        ->numeric()
+                                        ->nullable()
+                                        ->minValue(0)
+                                        ->helperText('Leave blank for unlimited'),
+                                ]),
+                        ]),
+                    Tab::make('Features')
+                        ->schema([
+                            Section::make('Features')
+                                ->columns(3)
+                                ->schema([
+                                    Forms\Components\Toggle::make('multi_user')
+                                        ->label('Multi-user access')
+                                        ->default(false),
 
-                            Forms\Components\TextInput::make('stripe_price_id')
-                                ->label('Stripe Price ID')
-                                ->nullable()
-                                ->maxLength(255)
-                                ->placeholder('price_xxxxx'),
+                                    Forms\Components\Toggle::make('custom_domain')
+                                        ->label('Custom Domain')
+                                        ->default(false),
 
-                            Forms\Components\Toggle::make('is_active')
-                                ->label('Active')
-                                ->default(true),
-                        ])
-                        ->columns(5)
-                        ->defaultItems(0)
-                        ->addActionLabel('Add price'),
+                                    Forms\Components\Toggle::make('ab_testing')
+                                        ->label('A/B Testing')
+                                        ->default(false),
+
+                                    Forms\Components\TagsInput::make('features')
+                                        ->label('Feature Bullet Points')
+                                        ->helperText('Shown on the pricing page. Press Enter after each feature.')
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+
                 ]),
 
-            Section::make('Limits')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('max_landing_pages')
-                        ->label('Max Landing Pages')
-                        ->numeric()
-                        ->nullable()
-                        ->minValue(0)
-                        ->helperText('Leave blank for unlimited'),
-
-                    Forms\Components\TextInput::make('max_ai_per_month')
-                        ->label('Max AI Generations / Month')
-                        ->numeric()
-                        ->nullable()
-                        ->minValue(0)
-                        ->helperText('Leave blank for unlimited'),
-                ]),
-
-            Section::make('Features')
-                ->columns(3)
-                ->schema([
-                    Forms\Components\Toggle::make('multi_user')
-                        ->label('Multi-user access')
-                        ->default(false),
-
-                    Forms\Components\Toggle::make('custom_domain')
-                        ->label('Custom Domain')
-                        ->default(false),
-
-                    Forms\Components\Toggle::make('ab_testing')
-                        ->label('A/B Testing')
-                        ->default(false),
-
-                    Forms\Components\TagsInput::make('features')
-                        ->label('Feature Bullet Points')
-                        ->helperText('Shown on the pricing page. Press Enter after each feature.')
-                        ->columnSpanFull(),
-                ]),
+            
         ]);
     }
 
@@ -191,89 +258,102 @@ class PlanResource extends BaseResource
     public static function infolist(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make('Plan Details')
-                ->columns(3)
-                ->schema([
-                    TextEntry::make('name')
-                        ->label('Name')
-                        ->weight('bold')
-                        ->size('lg'),
-
-                    TextEntry::make('slug')
-                        ->label('Slug')
-                        ->badge()
-                        ->color('gray'),
-
-                    IconEntry::make('is_active')
-                        ->label('Active')
-                        ->boolean(),
-
-                    TextEntry::make('description')
-                        ->label('Description')
-                        ->columnSpanFull()
-                        ->placeholder('—'),
-                ]),
-
-            Section::make('Pricing')
-                ->columns(1)
-                ->schema([
-                    RepeatableEntry::make('planPrices')
-                        ->label('Price Book')
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Plan Details')
                         ->schema([
-                            TextEntry::make('currency')
-                                ->badge()
-                                ->color('gray'),
+                            Section::make('Plan Details')
+                                ->columns(3)
+                                ->schema([
+                                    TextEntry::make('name')
+                                        ->label('Name')
+                                        ->weight('bold')
+                                        ->size('lg'),
 
-                            TextEntry::make('interval')
-                                ->badge()
-                                ->color('info'),
+                                    TextEntry::make('slug')
+                                        ->label('Slug')
+                                        ->badge()
+                                        ->color('gray'),
 
-                            TextEntry::make('amount_minor')
-                                ->label('Amount')
-                                ->formatStateUsing(fn ($state, $record) => self::formatMinorAmount((int) $state, $record?->currency)),
+                                    IconEntry::make('is_active')
+                                        ->label('Active')
+                                        ->boolean(),
 
-                            TextEntry::make('stripe_price_id')
-                                ->label('Stripe Price ID')
-                                ->placeholder('—')
-                                ->copyable(),
+                                    TextEntry::make('description')
+                                        ->label('Description')
+                                        ->columnSpanFull()
+                                        ->placeholder('—'),
+                                ]),
+                        ]),
+                    Tab::make('Plan Pricing')
+                        ->schema([
+                            Section::make('Pricing')
+                                ->columns(1)
+                                ->schema([
+                                    RepeatableEntry::make('planPrices')
+                                        ->label('Price Book')
+                                        ->schema([
+                                            TextEntry::make('currency')
+                                                ->badge()
+                                                ->color('gray'),
 
-                            IconEntry::make('is_active')
-                                ->label('Active')
-                                ->boolean(),
-                        ])
-                        ->columns(5)
-                        ->placeholder('No plan prices configured.'),
+                                            TextEntry::make('interval')
+                                                ->badge()
+                                                ->color('info'),
+
+                                            TextEntry::make('amount_minor')
+                                                ->label('Amount')
+                                                ->formatStateUsing(fn ($state, $record) => self::formatMinorAmount((int) $state, $record?->currency)),
+
+                                            TextEntry::make('stripe_price_id')
+                                                ->label('Stripe Price ID')
+                                                ->placeholder('—')
+                                                ->copyable(),
+
+                                            IconEntry::make('is_active')
+                                                ->label('Active')
+                                                ->boolean(),
+                                        ])
+                                        ->columns(5)
+                                        ->placeholder('No plan prices configured.'),
+                                ]),
+                        ]),
+                    Tab::make('Limits & Features')
+                        ->schema([
+                            Section::make('Limits & Features')
+                                ->columns(3)
+                                ->schema([
+                                    TextEntry::make('max_landing_pages')
+                                        ->label('Landing Pages')
+                                        ->formatStateUsing(fn ($state) => $state === null ? 'Unlimited' : $state),
+
+                                    TextEntry::make('max_ai_per_month')
+                                        ->label('AI Generations / Month')
+                                        ->formatStateUsing(fn ($state) => $state === null ? 'Unlimited' : $state),
+
+                                    IconEntry::make('multi_user')
+                                        ->label('Multi-user')
+                                        ->boolean(),
+
+                                    IconEntry::make('custom_domain')
+                                        ->label('Custom Domain')
+                                        ->boolean(),
+
+                                    IconEntry::make('ab_testing')
+                                        ->label('A/B Testing')
+                                        ->boolean(),
+
+                                    TextEntry::make('features')
+                                        ->label('Feature Bullets')
+                                        ->listWithLineBreaks()
+                                        ->placeholder('—')
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+
                 ]),
 
-            Section::make('Limits & Features')
-                ->columns(3)
-                ->schema([
-                    TextEntry::make('max_landing_pages')
-                        ->label('Landing Pages')
-                        ->formatStateUsing(fn ($state) => $state === null ? 'Unlimited' : $state),
-
-                    TextEntry::make('max_ai_per_month')
-                        ->label('AI Generations / Month')
-                        ->formatStateUsing(fn ($state) => $state === null ? 'Unlimited' : $state),
-
-                    IconEntry::make('multi_user')
-                        ->label('Multi-user')
-                        ->boolean(),
-
-                    IconEntry::make('custom_domain')
-                        ->label('Custom Domain')
-                        ->boolean(),
-
-                    IconEntry::make('ab_testing')
-                        ->label('A/B Testing')
-                        ->boolean(),
-
-                    TextEntry::make('features')
-                        ->label('Feature Bullets')
-                        ->listWithLineBreaks()
-                        ->placeholder('—')
-                        ->columnSpanFull(),
-                ]),
         ]);
     }
 

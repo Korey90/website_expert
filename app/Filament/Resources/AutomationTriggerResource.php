@@ -16,6 +16,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;  
 
 class AutomationTriggerResource extends BaseResource
 {
@@ -30,70 +32,104 @@ class AutomationTriggerResource extends BaseResource
     public static function form(Schema $form): Schema
     {
         return $form->schema([
-            Section::make('Trigger Definition')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('key')
-                        ->label('Trigger Key')
-                        ->placeholder('my.custom.trigger')
-                        ->helperText('Unique identifier used in code. Use dot notation, e.g. lead.created')
-                        ->required()
-                        ->unique(ignoreRecord: true)
-                        ->maxLength(100)
-                        ->disabledOn('edit')
-                        ->dehydrated(),
-                    Forms\Components\TextInput::make('label')
-                        ->label('Display Name')
-                        ->placeholder('Lead Created')
-                        ->required()
-                        ->maxLength(255),
-                    Forms\Components\Select::make('group')
-                        ->label('Group')
-                        ->options([
-                            'Leads'     => 'Leads',
-                            'Projects'  => 'Projects',
-                            'Invoices'  => 'Invoices',
-                            'Quotes'    => 'Quotes',
-                            'Contracts' => 'Contracts',
-                            'Custom'    => 'Custom',
-                        ])
-                        ->createOptionForm([
-                            Forms\Components\TextInput::make('label')->required(),
-                        ])
-                        ->nullable()
-                        ->searchable(),
-                    Forms\Components\Toggle::make('is_active')
-                        ->label('Active')
-                        ->default(true)
-                        ->inline(false),
-                    Forms\Components\Textarea::make('description')
-                        ->label('Description')
-                        ->placeholder('Describe when this trigger fires and what it does.')
-                        ->rows(3)
-                        ->columnSpanFull(),
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Trigger Definition')
+                        ->schema([
+                            Section::make('Trigger Definition')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('key')
+                                        ->label('Trigger Key')
+                                        ->placeholder('my.custom.trigger')
+                                        ->helperText('Unique identifier used in code. Use dot notation, e.g. lead.created')
+                                        ->required()
+                                        ->unique(ignoreRecord: true)
+                                        ->maxLength(100)
+                                        ->disabledOn('edit')
+                                        ->dehydrated(),
+                                    Forms\Components\TextInput::make('label')
+                                        ->label('Display Name')
+                                        ->placeholder('Lead Created')
+                                        ->required()
+                                        ->maxLength(255),
+                                    Forms\Components\Select::make('group')
+                                        ->label('Group')
+                                        ->options([
+                                            'Leads'     => 'Leads',
+                                            'Projects'  => 'Projects',
+                                            'Invoices'  => 'Invoices',
+                                            'Quotes'    => 'Quotes',
+                                            'Contracts' => 'Contracts',
+                                            'Custom'    => 'Custom',
+                                        ])
+                                        ->createOptionForm([
+                                            Forms\Components\TextInput::make('label')->required(),
+                                        ])
+                                        ->nullable()
+                                        ->searchable(),
+                                    Forms\Components\Toggle::make('is_active')
+                                        ->label('Active')
+                                        ->default(true)
+                                        ->inline(false),
+                                    Forms\Components\Textarea::make('description')
+                                        ->label('Description')
+                                        ->placeholder('Describe when this trigger fires and what it does.')
+                                        ->rows(3)
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+
+                    Tab::make('Available Variables')
+                        ->schema([
+                            Section::make('Available Variables')
+                                ->icon('heroicon-o-code-bracket')
+                                ->description('Variables available in SMS/Email templates when this trigger fires. Use {variable_name} syntax in templates.')
+                                ->schema([
+                                    Forms\Components\Repeater::make('variables')
+                                        ->label('Variables')
+                                        ->schema([
+                                            Forms\Components\TextInput::make('name')
+                                                ->label('Variable Name')
+                                                ->placeholder('client_name')
+                                                ->helperText('No curly braces — just the key')
+                                                ->required()
+                                                ->live(onBlur: true),
+                            
+                                            Forms\Components\TextInput::make('description')
+                                                ->label('Description')
+                                                ->placeholder('The contact\'s full name')
+                                                ->required()
+                                                ->live(onBlur: true),
+                                        ])
+                                        ->columns(2)
+                                        ->itemLabel(function (array $state): string {
+                                            $name = trim((string) ($state['name'] ?? ''));
+                                            $description = trim((string) ($state['description'] ?? ''));
+                            
+                                            if ($name !== '' && $description !== '') {
+                                                return "{{$name}} — {$description}";
+                                            }
+                            
+                                            if ($name !== '') {
+                                                return "{{$name}}";
+                                            }
+                            
+                                            return $description ?: 'New Variable';
+                                        })
+                                        ->addActionLabel('Add Variable')
+                                        ->defaultItems(0)
+                                        ->reorderable()
+                                        ->collapsible()
+                                        ->collapsed()
+                                        ->columnSpanFull(),
+                                ])
+                                ->collapsible(),
+                        ]),
+
                 ]),
 
-            Section::make('Available Variables')
-                ->description('Variables available in SMS/Email templates when this trigger fires. Use {variable_name} syntax in templates.')
-                ->schema([
-                    Forms\Components\Repeater::make('variables')
-                        ->schema([
-                            Forms\Components\TextInput::make('name')
-                                ->label('Variable Name')
-                                ->placeholder('client_name')
-                                ->helperText('No curly braces — just the key')
-                                ->required(),
-                            Forms\Components\TextInput::make('description')
-                                ->label('Description')
-                                ->placeholder('The contact\'s full name')
-                                ->required(),
-                        ])
-                        ->columns(2)
-                        ->addActionLabel('Add Variable')
-                        ->defaultItems(0)
-                        ->collapsible(),
-                ])
-                ->collapsible(),
         ]);
     }
 
@@ -104,6 +140,7 @@ class AutomationTriggerResource extends BaseResource
         return $schema->schema([
             Section::make()
                 ->columns(3)
+                ->columnSpanFull()
                 ->schema([
                     TextEntry::make('key')->badge()->color('gray')->copyable(),
                     TextEntry::make('label')->weight('bold'),
@@ -113,6 +150,8 @@ class AutomationTriggerResource extends BaseResource
                     TextEntry::make('description')->columnSpanFull()->placeholder('—'),
                 ]),
             Section::make('Available Variables')
+                ->description('Set of variables available for this automation')
+                ->columnSpanFull()
                 ->schema([
                     KeyValueEntry::make('variables')
                         ->label('')

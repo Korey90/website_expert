@@ -49,7 +49,7 @@ class AccountingPeriodResource extends BaseResource
                     Forms\Components\TextInput::make('period_number')->label(__('finance.accounting_periods.fields.period_number'))->numeric()->minValue(1)->maxValue(999),
                     Forms\Components\DatePicker::make('start_date')->label(__('finance.accounting_periods.fields.start_date'))->required(),
                     Forms\Components\DatePicker::make('end_date')->label(__('finance.accounting_periods.fields.end_date'))->afterOrEqual('start_date')->required(),
-                ]),
+                ])->columnSpanFull(),
         ]);
     }
 

@@ -23,6 +23,8 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 
 class ClientResource extends BaseResource
 {
@@ -198,93 +200,108 @@ class ClientResource extends BaseResource
     public static function form(Schema $form): Schema
     {
         return $form->schema([
-            Section::make('Company Details')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('company_name')->required()->maxLength(255),
-                    Forms\Components\TextInput::make('trading_name')->maxLength(255),
-                    Forms\Components\TextInput::make('companies_house_number')->label('Companies House No.')->maxLength(20),
-                    Forms\Components\TextInput::make('vat_number')->label('VAT Number')->maxLength(30),
-                    Forms\Components\TextInput::make('website')->url()->maxLength(255),
-                    Forms\Components\TextInput::make('industry')->maxLength(255),
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Company Details & Primary Contact')
+                        ->schema([
+                            Section::make('Company Details')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('company_name')->required()->maxLength(255),
+                                    Forms\Components\TextInput::make('trading_name')->maxLength(255),
+                                    Forms\Components\TextInput::make('companies_house_number')->label('Companies House No.')->maxLength(20),
+                                    Forms\Components\TextInput::make('vat_number')->label('VAT Number')->maxLength(30),
+                                    Forms\Components\TextInput::make('website')->url()->maxLength(255),
+                                    Forms\Components\TextInput::make('industry')->maxLength(255),
+                                ]),
+                            Section::make('Primary Contact')
+                                ->columns(3)
+                                ->schema([
+                                    Forms\Components\TextInput::make('primary_contact_name'),
+                                    Forms\Components\TextInput::make('primary_contact_email')->email(),
+                                    Forms\Components\TextInput::make('primary_contact_phone'),
+                                ]),
+                        ]),
+                    Tab::make('Status & Assignment')
+                        ->schema([
+                            Section::make('Status & Assignment')
+                                ->columns(3)
+                                ->schema([
+                                    Forms\Components\Select::make('status')
+                                        ->options(['prospect' => 'Prospect', 'active' => 'Active', 'inactive' => 'Inactive', 'archived' => 'Archived'])
+                                        ->default('prospect')->required(),
+                                    Forms\Components\Select::make('source')
+                                        ->options(['website' => 'Website', 'referral' => 'Referral', 'cold_outreach' => 'Cold Outreach', 'social_media' => 'Social Media', 'google_ads' => 'Google Ads', 'other' => 'Other'])
+                                        ->default('website'),
+                                    Forms\Components\Select::make('assigned_to')
+                                        ->label('Assigned To')
+                                        ->options(fn (): array => User::query()
+                                            ->whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager']))
+                                            ->whereHas('businesses', fn ($query) => $query
+                                                ->whereKey(currentBusiness()?->getKey())
+                                                ->where('business_users.is_active', true))
+                                            ->orderBy('name')
+                                            ->pluck('name', 'id')
+                                            ->all())
+                                        ->searchable(),
+                                ]),
+                        ]),
+                    Tab::make('Company Address')
+                        ->schema([
+                            Section::make('UK Address')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('address_line1')->label('Address Line 1'),
+                                    Forms\Components\TextInput::make('address_line2')->label('Address Line 2'),
+                                    Forms\Components\TextInput::make('city'),
+                                    Forms\Components\TextInput::make('county'),
+                                    Forms\Components\TextInput::make('postcode')->maxLength(20),
+                                    Forms\Components\Select::make('country')->options(['GB' => 'United Kingdom', 'PL' => 'Poland', 'PT' => 'Portugal', 'IE' => 'Ireland', 'US' => 'United States'])->default(fn () => config('currencies.locale_country_map.'.app()->getLocale(), 'GB')),
+                                ]),
+
+
+                            ]),
+                    Tab::make('Financial')
+                        ->schema([
+                            Section::make('Financial')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\Select::make('currency')->options(fn () => FilamentCurrency::options())->default(fn () => FilamentCurrency::default()),
+                                    Forms\Components\TextInput::make('lifetime_value')->label('Lifetime Value')->numeric()->prefix(fn () => FilamentCurrency::symbol())->disabled(),
+                                ]),
+                            Forms\Components\Textarea::make('notes')->columnSpanFull()->rows(3),
+                        ]),
+                    Tab::make('Communication Preferences')
+                        ->schema([
+                            Section::make('Communication Preferences')
+                                ->description('Manage client consent for emails and SMS notifications.')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\Toggle::make('notify_email_transactional')
+                                        ->label('Transactional Emails')
+                                        ->helperText('Invoices, payment receipts, quotes, contracts.')
+                                        ->default(true),
+                                    Forms\Components\Toggle::make('notify_email_projects')
+                                        ->label('Project Update Emails')
+                                        ->helperText('Project status changes, messages.')
+                                        ->default(true),
+                                    Forms\Components\Toggle::make('notify_email_marketing')
+                                        ->label('Marketing / Automation Emails')
+                                        ->helperText('Automated campaign and marketing emails.')
+                                        ->default(true),
+                                    Forms\Components\Toggle::make('notify_sms')
+                                        ->label('SMS Notifications')
+                                        ->helperText('All SMS messages (payment receipts, reminders).')
+                                        ->default(true),
+                                    Forms\Components\Placeholder::make('communication_prefs_updated_at')
+                                        ->label('Preferences Last Updated')
+                                        ->content(fn ($record) => $record?->communication_prefs_updated_at?->diffForHumans() ?? 'Never')
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
                 ]),
 
-            Section::make('Status & Assignment')
-                ->columns(3)
-                ->schema([
-                    Forms\Components\Select::make('status')
-                        ->options(['prospect' => 'Prospect', 'active' => 'Active', 'inactive' => 'Inactive', 'archived' => 'Archived'])
-                        ->default('prospect')->required(),
-                    Forms\Components\Select::make('source')
-                        ->options(['website' => 'Website', 'referral' => 'Referral', 'cold_outreach' => 'Cold Outreach', 'social_media' => 'Social Media', 'google_ads' => 'Google Ads', 'other' => 'Other'])
-                        ->default('website'),
-                    Forms\Components\Select::make('assigned_to')
-                        ->label('Assigned To')
-                        ->options(fn (): array => User::query()
-                            ->whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager']))
-                            ->whereHas('businesses', fn ($query) => $query
-                                ->whereKey(currentBusiness()?->getKey())
-                                ->where('business_users.is_active', true))
-                            ->orderBy('name')
-                            ->pluck('name', 'id')
-                            ->all())
-                        ->searchable(),
-                ]),
-
-            Section::make('UK Address')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('address_line1')->label('Address Line 1'),
-                    Forms\Components\TextInput::make('address_line2')->label('Address Line 2'),
-                    Forms\Components\TextInput::make('city'),
-                    Forms\Components\TextInput::make('county'),
-                    Forms\Components\TextInput::make('postcode')->maxLength(20),
-                    Forms\Components\Select::make('country')->options(['GB' => 'United Kingdom', 'PL' => 'Poland', 'PT' => 'Portugal', 'IE' => 'Ireland', 'US' => 'United States'])->default(fn () => config('currencies.locale_country_map.'.app()->getLocale(), 'GB')),
-                ]),
-
-            Section::make('Primary Contact')
-                ->columns(3)
-                ->schema([
-                    Forms\Components\TextInput::make('primary_contact_name'),
-                    Forms\Components\TextInput::make('primary_contact_email')->email(),
-                    Forms\Components\TextInput::make('primary_contact_phone'),
-                ]),
-
-            Section::make('Financial')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\Select::make('currency')->options(fn () => FilamentCurrency::options())->default(fn () => FilamentCurrency::default()),
-                    Forms\Components\TextInput::make('lifetime_value')->label('Lifetime Value')->numeric()->prefix(fn () => FilamentCurrency::symbol())->disabled(),
-                ]),
-
-            Forms\Components\Textarea::make('notes')->columnSpanFull()->rows(3),
-
-            Section::make('Communication Preferences')
-                ->description('Manage client consent for emails and SMS notifications.')
-                ->collapsed()
-                ->columns(2)
-                ->schema([
-                    Forms\Components\Toggle::make('notify_email_transactional')
-                        ->label('Transactional Emails')
-                        ->helperText('Invoices, payment receipts, quotes, contracts.')
-                        ->default(true),
-                    Forms\Components\Toggle::make('notify_email_projects')
-                        ->label('Project Update Emails')
-                        ->helperText('Project status changes, messages.')
-                        ->default(true),
-                    Forms\Components\Toggle::make('notify_email_marketing')
-                        ->label('Marketing / Automation Emails')
-                        ->helperText('Automated campaign and marketing emails.')
-                        ->default(true),
-                    Forms\Components\Toggle::make('notify_sms')
-                        ->label('SMS Notifications')
-                        ->helperText('All SMS messages (payment receipts, reminders).')
-                        ->default(true),
-                    Forms\Components\Placeholder::make('communication_prefs_updated_at')
-                        ->label('Preferences Last Updated')
-                        ->content(fn ($record) => $record?->communication_prefs_updated_at?->diffForHumans() ?? 'Never')
-                        ->columnSpanFull(),
-                ]),
         ]);
     }
 

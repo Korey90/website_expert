@@ -15,6 +15,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;  
 
 class BusinessResource extends BaseResource
 {
@@ -32,74 +34,90 @@ class BusinessResource extends BaseResource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make('Business Details')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->label('Business Name')
-                        ->required()
-                        ->maxLength(255),
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Business Details')
+                        ->schema([
+                            Section::make('Business Details')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('name')
+                                        ->label('Business Name')
+                                        ->required()
+                                        ->maxLength(255),
 
-                    Forms\Components\TextInput::make('slug')
-                        ->label('Slug')
-                        ->required()
-                        ->maxLength(255),
+                                    Forms\Components\TextInput::make('slug')
+                                        ->label('Slug')
+                                        ->required()
+                                        ->maxLength(255),
 
-                    Forms\Components\Select::make('locale')
-                        ->label('Locale')
-                        ->options(['en' => 'English', 'pl' => 'Polski', 'pt' => 'Português'])
-                        ->default('en'),
+                                    Forms\Components\Select::make('locale')
+                                        ->label('Locale')
+                                        ->options(['en' => 'English', 'pl' => 'Polski', 'pt' => 'Português'])
+                                        ->default('en'),
 
-                    Forms\Components\Select::make('timezone')
-                        ->label('Timezone')
-                        ->options(
-                            collect(\DateTimeZone::listIdentifiers())->mapWithKeys(fn ($tz) => [$tz => $tz])->toArray()
-                        )
-                        ->searchable()
-                        ->default('UTC'),
+                                    Forms\Components\Select::make('timezone')
+                                        ->label('Timezone')
+                                        ->options(
+                                            collect(\DateTimeZone::listIdentifiers())->mapWithKeys(fn ($tz) => [$tz => $tz])->toArray()
+                                        )
+                                        ->searchable()
+                                        ->default('UTC'),
 
-                    Forms\Components\Toggle::make('is_active')
-                        ->label('Account Active'),
+                                    Forms\Components\Toggle::make('is_active')
+                                        ->label('Account Active'),
+                                ]),
+                        ]),
+                    Tab::make('Plan & Billing')
+                        ->schema([
+                            Section::make('Plan & Billing')
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\Select::make('plan')
+                                        ->label('Plan')
+                                        ->options(
+                                            collect(PlanService::PLANS)
+                                                ->mapWithKeys(fn ($v, $k) => [$k => $v['name']])
+                                                ->toArray()
+                                        )
+                                        ->default('free')
+                                        ->required(),
+
+                                    Forms\Components\DateTimePicker::make('trial_ends_at')
+                                        ->label('Trial Ends At')
+                                        ->nullable(),
+
+                                    Forms\Components\TextInput::make('stripe_customer_id')
+                                        ->label('Stripe Customer ID')
+                                        ->nullable()
+                                        ->maxLength(255),
+
+                                    Forms\Components\TextInput::make('stripe_subscription_id')
+                                        ->label('Stripe Subscription ID')
+                                        ->nullable()
+                                        ->maxLength(255),
+
+                                    Forms\Components\Select::make('stripe_subscription_status')
+                                        ->label('Stripe Subscription Status')
+                                        ->options([
+                                            'active'    => 'Active',
+                                            'trialing'  => 'Trialing',
+                                            'past_due'  => 'Past Due',
+                                            'canceled'  => 'Canceled',
+                                            'ended'     => 'Ended',
+                                        ])
+                                        ->nullable(),
+                                ]),
+                        ]),
+
                 ]),
 
-            Section::make('Plan & Billing')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\Select::make('plan')
-                        ->label('Plan')
-                        ->options(
-                            collect(PlanService::PLANS)
-                                ->mapWithKeys(fn ($v, $k) => [$k => $v['name']])
-                                ->toArray()
-                        )
-                        ->default('free')
-                        ->required(),
 
-                    Forms\Components\DateTimePicker::make('trial_ends_at')
-                        ->label('Trial Ends At')
-                        ->nullable(),
 
-                    Forms\Components\TextInput::make('stripe_customer_id')
-                        ->label('Stripe Customer ID')
-                        ->nullable()
-                        ->maxLength(255),
+            
 
-                    Forms\Components\TextInput::make('stripe_subscription_id')
-                        ->label('Stripe Subscription ID')
-                        ->nullable()
-                        ->maxLength(255),
-
-                    Forms\Components\Select::make('stripe_subscription_status')
-                        ->label('Stripe Subscription Status')
-                        ->options([
-                            'active'    => 'Active',
-                            'trialing'  => 'Trialing',
-                            'past_due'  => 'Past Due',
-                            'canceled'  => 'Canceled',
-                            'ended'     => 'Ended',
-                        ])
-                        ->nullable(),
-                ]),
+            
         ]);
     }
 
@@ -110,84 +128,101 @@ class BusinessResource extends BaseResource
     public static function infolist(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make('Business Details')
-                ->columns(3)
-                ->schema([
-                    TextEntry::make('name')
-                        ->label('Name')
-                        ->weight('bold')
-                        ->size('lg')
-                        ->columnSpan(2),
+            Tabs::make('Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Business Details')
+                        ->schema([
+                            Section::make('Business Details')
+                                ->columns(3)
+                                ->schema([
+                                    TextEntry::make('name')
+                                        ->label('Name')
+                                        ->weight('bold')
+                                        ->size('lg')
+                                        ->columnSpan(2),
 
-                    IconEntry::make('is_active')
-                        ->label('Active')
-                        ->boolean(),
+                                    IconEntry::make('is_active')
+                                        ->label('Active')
+                                        ->boolean(),
 
-                    TextEntry::make('slug')
-                        ->label('Slug'),
+                                    TextEntry::make('slug')
+                                        ->label('Slug'),
 
-                    TextEntry::make('locale')
-                        ->label('Locale')
-                        ->badge()
-                        ->color('gray'),
+                                    TextEntry::make('locale')
+                                        ->label('Locale')
+                                        ->badge()
+                                        ->color('gray'),
 
-                    TextEntry::make('timezone')
-                        ->label('Timezone'),
+                                    TextEntry::make('timezone')
+                                        ->label('Timezone'),
+                                ]),
+                        ]),
+                    Tab::make('Plan & Billing')
+                        ->schema([
+                            Section::make('Plan & Billing')
+                                ->columns(2)
+                                ->schema([
+                                    TextEntry::make('plan')
+                                        ->label('Plan')
+                                        ->badge()
+                                        ->color(fn ($state) => match ($state) {
+                                            'free'   => 'gray',
+                                            'pro'    => 'info',
+                                            'agency' => 'success',
+                                            default  => 'gray',
+                                        })
+                                        ->formatStateUsing(fn ($state) => PlanService::PLANS[$state]['name'] ?? ucfirst((string) $state)),
+
+                                    TextEntry::make('stripe_subscription_status')
+                                        ->label('Stripe Status')
+                                        ->badge()
+                                        ->color(fn ($state) => match ($state) {
+                                            'active'            => 'success',
+                                            'trialing'          => 'info',
+                                            'past_due'          => 'warning',
+                                            'canceled', 'ended' => 'danger',
+                                            default             => 'gray',
+                                        })
+                                        ->formatStateUsing(fn ($state) => $state ? ucfirst((string) $state) : 'None'),
+
+                                    TextEntry::make('stripe_customer_id')
+                                        ->label('Stripe Customer ID')
+                                        ->placeholder('—')
+                                        ->copyable(),
+
+                                    TextEntry::make('stripe_subscription_id')
+                                        ->label('Stripe Subscription ID')
+                                        ->placeholder('—')
+                                        ->copyable(),
+
+                                    TextEntry::make('trial_ends_at')
+                                        ->label('Trial Ends At')
+                                        ->dateTime()
+                                        ->placeholder('No trial'),
+                                ]),
+                        ]),
+                    Tab::make('Meta Data')
+                        ->schema([
+                            Section::make('Meta')
+                                ->columns(2)
+                                ->schema([
+                                    TextEntry::make('created_at')
+                                        ->label('Created')
+                                        ->dateTime(),
+
+                                    TextEntry::make('updated_at')
+                                        ->label('Updated')
+                                        ->dateTime(),
+                                ]),
+                        ]),
                 ]),
 
-            Section::make('Plan & Billing')
-                ->columns(2)
-                ->schema([
-                    TextEntry::make('plan')
-                        ->label('Plan')
-                        ->badge()
-                        ->color(fn ($state) => match ($state) {
-                            'free'   => 'gray',
-                            'pro'    => 'info',
-                            'agency' => 'success',
-                            default  => 'gray',
-                        })
-                        ->formatStateUsing(fn ($state) => PlanService::PLANS[$state]['name'] ?? ucfirst((string) $state)),
+            
 
-                    TextEntry::make('stripe_subscription_status')
-                        ->label('Stripe Status')
-                        ->badge()
-                        ->color(fn ($state) => match ($state) {
-                            'active'            => 'success',
-                            'trialing'          => 'info',
-                            'past_due'          => 'warning',
-                            'canceled', 'ended' => 'danger',
-                            default             => 'gray',
-                        })
-                        ->formatStateUsing(fn ($state) => $state ? ucfirst((string) $state) : 'None'),
+            
 
-                    TextEntry::make('stripe_customer_id')
-                        ->label('Stripe Customer ID')
-                        ->placeholder('—')
-                        ->copyable(),
-
-                    TextEntry::make('stripe_subscription_id')
-                        ->label('Stripe Subscription ID')
-                        ->placeholder('—')
-                        ->copyable(),
-
-                    TextEntry::make('trial_ends_at')
-                        ->label('Trial Ends At')
-                        ->dateTime()
-                        ->placeholder('No trial'),
-                ]),
-
-            Section::make('Meta')
-                ->columns(2)
-                ->schema([
-                    TextEntry::make('created_at')
-                        ->label('Created')
-                        ->dateTime(),
-
-                    TextEntry::make('updated_at')
-                        ->label('Updated')
-                        ->dateTime(),
-                ]),
+            
         ]);
     }
 

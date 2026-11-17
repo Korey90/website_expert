@@ -24,6 +24,8 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;  
 
 class ProjectResource extends BaseResource
 {
@@ -241,52 +243,65 @@ class ProjectResource extends BaseResource
     public static function form(Schema $form): Schema
     {
         return $form->schema([
-            Section::make('Project Details')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('title')->required()->maxLength(255)->columnSpanFull(),
-                    Forms\Components\Select::make('client_id')
-                        ->label('Client')
-                        ->options(Client::withTrashed()->pluck('company_name', 'id'))
-                        ->searchable()
-                        ->required(),
-                    Forms\Components\Select::make('assigned_to')
-                        ->label('Lead Developer')
-                        ->options(fn (): array => User::query()
-                            ->whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager', 'developer']))
-                            ->whereHas('businesses', fn ($query) => $query
-                                ->whereKey(currentBusiness()?->getKey())
-                                ->where('business_users.is_active', true))
-                            ->orderBy('name')
-                            ->pluck('name', 'id')
-                            ->all())
-                        ->searchable(),
-                    Forms\Components\Select::make('status')
-                        ->options(['draft' => 'Draft', 'active' => 'Active', 'on_hold' => 'On Hold', 'completed' => 'Completed', 'cancelled' => 'Cancelled'])
-                        ->default('draft')->required(),
-                    Forms\Components\Select::make('service_type')
-                        ->options(['wizytowka' => 'Business Card Site', 'landing' => 'Landing Page', 'ecommerce' => 'E-Commerce', 'aplikacja' => 'Web Application', 'seo' => 'SEO', 'other' => 'Other']),
-                    Forms\Components\Select::make('template_id')
-                        ->label('Project Template')
-                        ->options(ProjectTemplate::where('is_active', true)->pluck('name', 'id'))
-                        ->reactive()
-                        ->helperText('Selecting a template will auto-create project phases on save.'),
-                    Forms\Components\Select::make('domain_order_id')
-                        ->label('Domain order')
-                        ->relationship('domainOrder', 'full_domain')
-                        ->searchable()
-                        ->preload()
-                        ->nullable()
-                        ->placeholder('None')
-                        ->columnSpanFull(),
-                    Forms\Components\Select::make('currency')->options(fn () => FilamentCurrency::options())->default(fn () => FilamentCurrency::default()),
-                    Forms\Components\TextInput::make('budget')->numeric()->prefix(fn () => FilamentCurrency::symbol()),
-                    Forms\Components\DatePicker::make('start_date'),
-                    Forms\Components\DatePicker::make('deadline'),
-                ]),
-
-            Forms\Components\Textarea::make('description')->rows(4)->columnSpanFull(),
-        ]);
+                    Tabs::make('Tabs')
+                        ->columnSpanFull()
+                        ->tabs([
+                            Tab::make('Template Details')
+                                ->schema([
+                                    Section::make('Project Details')
+                                        ->columns(2)
+                                        ->schema([
+                                            Forms\Components\TextInput::make('title')->required()->maxLength(255)->columnSpanFull(),
+                                            Forms\Components\Select::make('client_id')
+                                                ->label('Client')
+                                                ->options(Client::withTrashed()->pluck('company_name', 'id'))
+                                                ->searchable()
+                                                ->required(),
+                                            Forms\Components\Select::make('assigned_to')
+                                                ->label('Lead Developer')
+                                                ->options(fn (): array => User::query()
+                                                    ->whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager', 'developer']))
+                                                    ->whereHas('businesses', fn ($query) => $query
+                                                        ->whereKey(currentBusiness()?->getKey())
+                                                        ->where('business_users.is_active', true))
+                                                    ->orderBy('name')
+                                                    ->pluck('name', 'id')
+                                                    ->all())
+                                                ->searchable(),
+                                            Forms\Components\Select::make('status')
+                                                ->options(['draft' => 'Draft', 'active' => 'Active', 'on_hold' => 'On Hold', 'completed' => 'Completed', 'cancelled' => 'Cancelled'])
+                                                ->default('draft')->required(),
+                                            Forms\Components\Select::make('service_type')
+                                                ->options(['wizytowka' => 'Business Card Site', 'landing' => 'Landing Page', 'ecommerce' => 'E-Commerce', 'aplikacja' => 'Web Application', 'seo' => 'SEO', 'other' => 'Other']),
+                                            Forms\Components\Select::make('template_id')
+                                                ->label('Project Template')
+                                                ->options(ProjectTemplate::where('is_active', true)->pluck('name', 'id'))
+                                                ->reactive()
+                                                ->helperText('Selecting a template will auto-create project phases on save.'),
+                                            Forms\Components\Select::make('domain_order_id')
+                                                ->label('Domain order')
+                                                ->relationship('domainOrder', 'full_domain')
+                                                ->searchable()
+                                                ->preload()
+                                                ->nullable()
+                                                ->placeholder('None')
+                                                ->columnSpanFull(),
+                                            Forms\Components\DatePicker::make('start_date'),
+                                            Forms\Components\DatePicker::make('deadline'),
+                                        ]),
+                                ]),
+                            Tab::make('Description')
+                                ->schema([
+                                    Forms\Components\Textarea::make('description')->rows(4)->columnSpanFull(),
+                                ]),
+                            Tab::make('Financial')
+                                ->schema([
+                                    Forms\Components\Select::make('currency')->options(fn () => FilamentCurrency::options())->default(fn () => FilamentCurrency::default()),
+                                    Forms\Components\TextInput::make('budget')->numeric()->prefix(fn () => FilamentCurrency::symbol()),
+                                ]),
+                        ]),
+                        
+                ]);
     }
 
     public static function table(Table $table): Table

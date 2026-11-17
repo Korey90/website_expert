@@ -127,21 +127,32 @@ class ServiceItemResource extends BaseResource
                             Forms\Components\Repeater::make('features')
                                 ->label('Feature / Benefit Items')
                                 ->columnSpanFull()
+                                ->collapsible()
+                                ->collapsed()
                                 ->addActionLabel('Add Feature')
                                 ->schema([
-                                    Forms\Components\TextInput::make('text_en')
+                                    Forms\Components\TextInput::make('text_pl')
                                         ->label('English')
                                         ->maxLength(200)
-                                        ->nullable(),
-                                    Forms\Components\TextInput::make('text_pl')
+                                        ->live(onBlur: true),
+
+                                    Forms\Components\TextInput::make('text_en')
                                         ->label('Polski')
                                         ->maxLength(200)
-                                        ->nullable(),
+                                        ->live(onBlur: true),
+
                                     Forms\Components\TextInput::make('text_pt')
                                         ->label('Português')
                                         ->maxLength(200)
-                                        ->nullable(),
+                                        ->live(onBlur: true),
                                 ])
+                                ->columns(3)
+                                ->itemLabel(fn (array $state): string =>
+                                    $state['text_pl']
+                                        ?: $state['text_en']
+                                        ?: $state['text_pt']
+                                        ?: 'New Feature'
+                                )
                                 ->defaultItems(0)
                                 ->nullable(),
                         ]),
@@ -152,18 +163,69 @@ class ServiceItemResource extends BaseResource
                             Forms\Components\Repeater::make('faq')
                                 ->label('FAQ Items')
                                 ->columnSpanFull()
+                                ->collapsible()
+                                ->collapsed()
                                 ->addActionLabel('Add FAQ')
                                 ->schema([
-                                    Forms\Components\TextInput::make('q_en')->label('Question EN')->maxLength(255)->nullable(),
-                                    Forms\Components\TextInput::make('q_pl')->label('Question PL')->maxLength(255)->nullable(),
-                                    Forms\Components\TextInput::make('q_pt')->label('Question PT')->maxLength(255)->nullable(),
-                                    Forms\Components\Textarea::make('a_en')->label('Answer EN')->rows(3)->nullable(),
-                                    Forms\Components\Textarea::make('a_pl')->label('Answer PL')->rows(3)->nullable(),
-                                    Forms\Components\Textarea::make('a_pt')->label('Answer PT')->rows(3)->nullable(),
+                                    Tabs::make('Tabs')
+                                        ->columnSpanFull()
+                                        ->tabs([
+                                            Tab::make('Polish')
+                                                ->schema([
+                                                    Forms\Components\TextInput::make('q_pl')
+                                                        ->label('Question PL')
+                                                        ->maxLength(255)
+                                                        ->nullable()
+                                                        ->live(onBlur: true),
+
+                                                    Forms\Components\Textarea::make('a_pl')
+                                                        ->label('Answer PL')
+                                                        ->rows(6)
+                                                        ->nullable(),
+                                                    
+                                                ]),
+                                            Tab::make('English')
+                                                ->schema([
+                                                    Forms\Components\TextInput::make('q_en')
+                                                        ->label('Question EN')
+                                                        ->maxLength(255)
+                                                        ->nullable()
+                                                        ->live(onBlur: true),
+
+                                                    Forms\Components\Textarea::make('a_en')
+                                                        ->label('Answer EN')
+                                                        ->rows(6)
+                                                        ->nullable(),
+                                                    
+                                                ]),
+                                            Tab::make('Portugese')
+                                                ->schema([
+                                                    Forms\Components\TextInput::make('q_pt')
+                                                        ->label('Question PT')
+                                                        ->maxLength(255)
+                                                        ->nullable()
+                                                        ->live(onBlur: true),                    
+
+                                                    Forms\Components\Textarea::make('a_pt')
+                                                        ->label('Answer PT')
+                                                        ->rows(6)
+                                                        ->nullable(),
+                                                ]),
+                                            
+                                        ]),
+
+                                    
                                 ])
+                                ->columns(3)
+                                ->itemLabel(fn (array $state): string =>
+                                    $state['q_en']
+                                        ?: ($state['q_pl']
+                                        ?: ($state['q_pt'] ?: 'New FAQ'))
+                                )
                                 ->defaultItems(0)
                                 ->nullable(),
                         ]),
+
 
                     Tab::make('Settings')
                         ->icon('heroicon-o-cog-6-tooth')

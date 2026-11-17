@@ -39,8 +39,8 @@ class TrackingSettingsPage extends BasePage
 
     public function form(Schema $form): Schema
     {
-        return $form
-            ->schema([
+        return $form->schema([
+
                 Section::make('Google Tag Manager')
                     ->description('GTM manages all other tracking tags — enable this first.')
                     ->schema([
@@ -50,7 +50,7 @@ class TrackingSettingsPage extends BasePage
                             ->label('GTM Container ID')
                             ->placeholder('GTM-XXXXXXX')
                             ->helperText('Found in tagmanager.google.com → Container → Overview'),
-                    ]),
+                    ])->collapsed(),
 
                 Section::make('Google Analytics 4')
                     ->description('Use only if NOT loading GA4 through GTM.')
@@ -60,7 +60,7 @@ class TrackingSettingsPage extends BasePage
                         Forms\Components\TextInput::make('ga4_id')
                             ->label('Measurement ID')
                             ->placeholder('G-XXXXXXXXXX'),
-                    ]),
+                    ])->collapsed(),
 
                 Section::make('Meta Pixel')
                     ->schema([
@@ -69,7 +69,7 @@ class TrackingSettingsPage extends BasePage
                         Forms\Components\TextInput::make('pixel_id')
                             ->label('Pixel ID')
                             ->placeholder('XXXXXXXXXXXXXXXXX'),
-                    ]),
+                    ])->collapsed(),
 
                 Section::make('Google Ads')
                     ->schema([
@@ -78,14 +78,14 @@ class TrackingSettingsPage extends BasePage
                         Forms\Components\TextInput::make('gads_id')
                             ->label('Conversion ID')
                             ->placeholder('AW-XXXXXXXXX'),
-                    ]),
+                    ])->collapsed(),
 
                 Section::make('Cookie Consent')
                     ->description('Controls the custom cookie consent banner.')
                     ->schema([
                         Forms\Components\Toggle::make('cookie_consent_enabled')
                             ->label('Show cookie consent banner'),
-                    ]),
+                    ])->collapsed(),
             ])
             ->statePath('data');
     }
