@@ -1,10 +1,32 @@
 # Current Task
 
-**Status:** Zakończone — audyt wszystkich modułów i tras `/admin/*`
-**Zadanie:** RBAC, menu i izolacja tenantów w panelu administracyjnym
-**Data rozpoczęcia:** 2026-11-13
-**Plan nadrzędny:** audyt bezpieczeństwa panelu administracyjnego
+**Status:** Plan gotowy - oczekuje na rozpoczęcie implementacji
+**Zadanie:** UKFIN-402R1 - import rzeczywistego CSV Revolut PL
+**Data rozpoczęcia:** 2026-11-20
+**Plan:** `docs/plans/bank-statement-csv-real-bank-import-fix-plan.md`
 **Ochrona równoległej pracy:** nie modyfikować `resources/js/Pages/Landing/PlStronyInternetowe.tsx`.
+
+## Bieżąca diagnoza
+
+- Automatyczne mapowanie nie rozpoznaje polskich nagłówków `Data zrealizowania`, `Kwota`, `Waluta` i `Opis`.
+- Po ręcznym mapowaniu wszystkie wiersze odpadają, ponieważ bank używa timestampu `Y-m-d H:i:s`, a parser przyjmuje tylko datę.
+- Prywatny plik ma 7 wierszy, poprawny separator/kodowanie/limity i diagnostycznie daje 7/7 poprawnych wierszy po naprawie mapowania i daty.
+- Dodatkowo wymagane są bezpieczna deduplikacja z timestampem, kontrola statusu/opłaty/waluty oraz użyteczne komunikaty bez ujawniania danych.
+- `docs/private/` musi zostać dodany do `.gitignore` przed pracą z fixture'ami.
+
+## Plan wykonania
+
+1. Ochronić `docs/private/` przed Git.
+2. Dodać failing tests na fikcyjnych danych o strukturze Revolut PL.
+3. Dodać profil mapowania, timestamp i bezpieczną source identity.
+4. Dodać kontrolę statusu, opłaty i zgodności waluty rachunku.
+5. Poprawić diagnostykę UI i tłumaczenia PL/EN/PT.
+6. Uruchomić targeted i Finance regression.
+7. Potwierdzić prywatnym dry run wynik 7 valid / 0 failed / 0 writes.
+
+---
+
+## Poprzednie zakończone zadanie - RBAC panelu administracyjnego
 
 ## Delta Analysis: RBAC i tenant isolation panelu `/admin/*`
 
