@@ -9,6 +9,7 @@ use App\Actions\Finance\PostExpenseAction;
 use App\Actions\Finance\UpdateExpenseAction;
 use App\Actions\Finance\VoidExpenseAction;
 use App\Filament\Resources\ExpenseResource;
+use App\Filament\Resources\ExpenseResource\Pages\CreateExpense;
 use App\Models\AccountingPeriod;
 use App\Models\Business;
 use App\Models\BusinessUser;
@@ -16,9 +17,11 @@ use App\Models\Expense;
 use App\Models\Supplier;
 use App\Models\TaxCode;
 use App\Models\User;
+use App\Services\Finance\PurchaseTaxCalculator;
 use DomainException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
@@ -78,6 +81,28 @@ class ExpenseWorkflowTest extends TestCase
         $this->assertSame('170.00', $expense->total_gbp);
         $this->assertSame('2026-11-15', $expense->due_date?->toDateString());
         $this->assertSame('20.00', $expense->items->first()->vat_rate_snapshot);
+    }
+
+    public function test_fractional_unit_price_is_preserved_and_preview_matches_saved_totals(): void
+    {
+        $taxCode = $this->taxCodeFor($this->business, 'S20');
+        $items = [[
+            'description' => 'Usage-based service',
+            'quantity' => 1250,
+            'unit_price' => '0.0333333333',
+            'tax_code_id' => $taxCode->id,
+        ]];
+
+        $preview = app(PurchaseTaxCalculator::class)->preview($items, $this->business->id);
+        $expense = $this->createExpense($items);
+
+        $this->assertEqualsWithDelta(41.67, $preview['subtotal'], 0.00001);
+        $this->assertEqualsWithDelta(8.33, $preview['vat_amount'], 0.00001);
+        $this->assertEqualsWithDelta(50.00, $preview['total'], 0.00001);
+        $this->assertSame('0.0333333333', $expense->items->first()->unit_price);
+        $this->assertSame('41.67', $expense->subtotal);
+        $this->assertSame('8.33', $expense->vat_amount);
+        $this->assertSame('50.00', $expense->total);
     }
 
     public function test_foreign_currency_expense_snapshots_gbp_values(): void
@@ -239,11 +264,39 @@ class ExpenseWorkflowTest extends TestCase
             ->assertOk()
             ->assertSee('BILL-001');
 
-        $this->get(ExpenseResource::getUrl('create'))->assertOk();
+        $this->get(ExpenseResource::getUrl('create'))
+            ->assertOk()
+            ->assertSee('Cost preview');
         $this->get(ExpenseResource::getUrl('view', ['record' => $expense]))
             ->assertOk()
             ->assertSee('Panel expense');
         $this->get(ExpenseResource::getUrl('edit', ['record' => $expense]))->assertOk();
+    }
+
+    public function test_create_form_previews_fractional_cost_before_saving(): void
+    {
+        $this->user->update(['is_active' => true]);
+        foreach (['access_admin_panel', 'view_finance', 'manage_finance'] as $permission) {
+            Permission::findOrCreate($permission, 'web');
+        }
+        $this->user->givePermissionTo(['access_admin_panel', 'view_finance', 'manage_finance']);
+
+        Livewire::actingAs($this->user)
+            ->test(CreateExpense::class)
+            ->fillForm([
+                'currency' => 'GBP',
+                'items' => [[
+                    'description' => 'Usage-based service',
+                    'quantity' => 1250,
+                    'unit_price' => '0.0333333333',
+                    'tax_code_id' => $this->taxCodeFor($this->business, 'S20')->id,
+                ]],
+            ])
+            ->assertSee('£41.67')
+            ->assertSee('£8.33')
+            ->assertSee('£50.00');
+
+        $this->assertDatabaseCount('expenses', 0);
     }
 
     /**

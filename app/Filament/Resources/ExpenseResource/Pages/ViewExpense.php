@@ -6,6 +6,7 @@ use App\Actions\Finance\ApproveExpenseAction;
 use App\Actions\Finance\CreatePurchaseCreditNoteAction;
 use App\Actions\Finance\PostExpenseAction;
 use App\Actions\Finance\RecordExpensePaymentAction;
+use App\Actions\Finance\RetryFinancialAttachmentScanAction;
 use App\Actions\Finance\VoidExpenseAction;
 use App\Filament\Resources\ExpenseResource;
 use App\Filament\Resources\PurchaseCreditNoteResource;
@@ -125,6 +126,46 @@ class ViewExpense extends ViewRecord
                             $data['document_type'],
                         ),
                         __('finance.attachments.notifications.uploaded'),
+                    );
+                }),
+            Action::make('retry_attachment_scan')
+                ->label(__('finance.attachments.actions.retry_scan'))
+                ->icon('heroicon-o-arrow-path')
+                ->color('warning')
+                ->visible(fn (): bool => Gate::allows('create', FinancialAttachment::class)
+                    && $expense->attachments()
+                        ->whereIn('scan_status', [
+                            FinancialAttachment::SCAN_PENDING,
+                            FinancialAttachment::SCAN_FAILED,
+                        ])
+                        ->exists())
+                ->form([
+                    Select::make('attachment_id')
+                        ->label(__('finance.attachments.fields.file'))
+                        ->options(fn (): array => $expense->attachments()
+                            ->whereIn('scan_status', [
+                                FinancialAttachment::SCAN_PENDING,
+                                FinancialAttachment::SCAN_FAILED,
+                            ])
+                            ->orderBy('original_name')
+                            ->pluck('original_name', 'id')
+                            ->all())
+                        ->required(),
+                ])
+                ->action(function (array $data) use ($expense): void {
+                    $attachment = $expense->attachments()
+                        ->whereIn('scan_status', [
+                            FinancialAttachment::SCAN_PENDING,
+                            FinancialAttachment::SCAN_FAILED,
+                        ])
+                        ->findOrFail((int) $data['attachment_id']);
+
+                    $this->runWorkflowAction(
+                        fn () => app(RetryFinancialAttachmentScanAction::class)->execute(
+                            $attachment,
+                            auth()->user(),
+                        ),
+                        __('finance.attachments.notifications.scan_queued'),
                     );
                 }),
             Action::make('approve')

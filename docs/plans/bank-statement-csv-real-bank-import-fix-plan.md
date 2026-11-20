@@ -1,9 +1,9 @@
 # UKFIN-402R1 - zgodność importu CSV z rzeczywistym wyciągiem bankowym
 
-**Data analizy:** 2026-11-20  
-**Status:** plan gotowy do implementacji  
-**Priorytet:** wysoki  
-**Dane diagnostyczne:** prywatny plik lokalny, nie może trafić do Git, logów ani fixture testowego  
+**Data analizy:** 2026-11-20
+**Status:** implementacja i walidacja zakończone, właściwy import oczekuje na decyzję użytkownika
+**Priorytet:** wysoki
+**Dane diagnostyczne:** prywatny plik lokalny, nie może trafić do Git, logów ani fixture testowego
 **Anchor files:** BankStatementCsvParser, ImportBankStatementCsvAction, ViewBankAccount, BankStatementCsvImportTest
 
 ## 1. Cel
@@ -159,87 +159,87 @@ Ręczne mapowanie użytkownika zachowa pierwszeństwo przed profilem i aliasami.
 
 ### Etap 0 - ochrona danych
 
-- [ ] Dodać docs/private/ do .gitignore.
-- [ ] Potwierdzić przez git check-ignore, że prawdziwy CSV jest ignorowany.
-- [ ] Nie kopiować rzeczywistych wierszy do testów, raportów, logów ani dokumentacji.
-- [ ] Zachować usuwanie pliku tymczasowego po próbie.
+- [x] Dodać docs/private/ do .gitignore.
+- [x] Potwierdzić przez git check-ignore, że prawdziwy CSV jest ignorowany.
+- [x] Nie kopiować rzeczywistych wierszy do testów, raportów, logów ani dokumentacji.
+- [x] Zachować usuwanie pliku tymczasowego po próbie.
 
 ### Etap 1 - profil i mapowanie
 
-- [ ] Dodać mały resolver profilu CSV lub równoważną testowalną strukturę Finance.
-- [ ] Rozpoznawać profil revolut_pl po nagłówkach.
-- [ ] Zwracać resolved mapping niezależnie od źródła mapowania.
-- [ ] Zachować zgodność z dotychczasowymi formatami.
-- [ ] Nie mapować niepewnych semantycznie kolumn na podstawie podobnej nazwy.
+- [x] Dodać mały resolver profilu CSV lub równoważną testowalną strukturę Finance.
+- [x] Rozpoznawać profil revolut_pl po nagłówkach.
+- [x] Zwracać resolved mapping niezależnie od źródła mapowania.
+- [x] Zachować zgodność z dotychczasowymi formatami.
+- [x] Nie mapować niepewnych semantycznie kolumn na podstawie podobnej nazwy.
 
 ### Etap 2 - daty i timestamp
 
-- [ ] Rozszerzyć auto-detection o Y-m-d H:i:s.
-- [ ] Dodać format jawny do UI albo wyraźnie pokazać wykryty profil.
-- [ ] Do booking_date zapisywać datę kalendarzową z Data zrealizowania.
-- [ ] Pełny timestamp zachować tylko w pamięci na potrzeby source identity.
-- [ ] Pustą datę zrealizowania traktować jako błąd wiersza.
+- [x] Rozszerzyć auto-detection o Y-m-d H:i:s.
+- [x] Dodać format jawny do UI albo wyraźnie pokazać wykryty profil.
+- [x] Do booking_date zapisywać datę kalendarzową z Data zrealizowania.
+- [x] Pełny timestamp zachować tylko w pamięci na potrzeby source identity.
+- [x] Pustą datę zrealizowania traktować jako błąd wiersza.
 
 ### Etap 3 - tożsamość i deduplikacja
 
-- [ ] Dla profilu bez transaction ID wyliczać stabilny identyfikator z completed timestamp, started timestamp, typu, kwoty, opłaty, waluty i opisu.
-- [ ] Nie zapisywać surowego wiersza ani odwracalnych danych pomocniczych.
-- [ ] Zachować provider ID banku jako preferowane źródło, jeżeli przyszły format je udostępni.
-- [ ] Potwierdzić, że podobne transakcje z różnym timestampem nie są fałszywym duplikatem.
-- [ ] Potwierdzić, że ponowny import tego samego wyciągu wykrywa wszystkie duplikaty.
+- [x] Dla profilu bez transaction ID wyliczać stabilny identyfikator z completed timestamp, started timestamp, typu, kwoty, opłaty, waluty i opisu.
+- [x] Nie zapisywać surowego wiersza ani odwracalnych danych pomocniczych.
+- [x] Zachować provider ID banku jako preferowane źródło, jeżeli przyszły format je udostępni.
+- [x] Potwierdzić, że podobne transakcje z różnym timestampem nie są fałszywym duplikatem.
+- [x] Potwierdzić, że ponowny import tego samego wyciągu wykrywa wszystkie duplikaty na danych testowych.
 
 ### Etap 4 - status, opłata i waluta
 
-- [ ] Importować automatycznie tylko status jednoznacznie zakończony.
-- [ ] Pending, reverted, failed i nieznane statusy raportować, a nie księgować.
-- [ ] Dla niezerowej opłaty nie zgadywać ujęcia. Do czasu potwierdzenia semantyki oznaczyć wiersz jako wymagający obsługi.
-- [ ] Sprawdzić zgodność waluty każdego wiersza z BankAccount.currency.
-- [ ] Zablokować różną walutę z bezpiecznym komunikatem.
+- [x] Importować automatycznie tylko status jednoznacznie zakończony.
+- [x] Pending, reverted, failed i nieznane statusy raportować, a nie księgować.
+- [x] Dla niezerowej opłaty nie zgadywać ujęcia. Do czasu potwierdzenia semantyki oznaczyć wiersz jako wymagający obsługi.
+- [x] Sprawdzić zgodność waluty każdego wiersza z BankAccount.currency.
+- [x] Zablokować różną walutę z bezpiecznym komunikatem.
 - [ ] Opcjonalnie wykorzystać Saldo jako kontrolę ostrzegawczą, bez księgowania z samego salda.
 
 ### Etap 5 - diagnostyka i UX
 
-- [ ] Wprowadzić strukturalne kody błędów lub bezpieczną warstwę mapowania wyjątków.
-- [ ] Dodać lokalizowane komunikaty PL/EN/PT dla nierozpoznanych kolumn, timestampu, 0 valid, waluty, statusu i opłaty.
-- [ ] W dry run pokazać wykryty profil, resolved mapping, total/valid/failed/duplicates i kategorie błędów.
-- [ ] Nie pokazywać kwot, opisów, pełnych dat-czasów ani innych danych transakcji.
-- [ ] Import z 0 valid oznaczać jako failure, nie completed.
-- [ ] Przy imporcie właściwym zapisywać resolved mapping i profil.
+- [x] Wprowadzić strukturalne kody błędów lub bezpieczną warstwę mapowania wyjątków.
+- [x] Dodać lokalizowane komunikaty PL/EN/PT dla nierozpoznanych kolumn, timestampu, 0 valid, waluty, statusu i opłaty.
+- [x] W dry run pokazać wykryty profil, resolved mapping, total/valid/failed/duplicates i kategorie błędów.
+- [x] Nie pokazywać kwot, opisów, pełnych dat-czasów ani innych danych transakcji.
+- [x] Import z 0 valid oznaczać jako failure, nie completed.
+- [x] Przy imporcie właściwym zapisywać resolved mapping i profil.
 
 ### Etap 6 - testy regresyjne
 
-- [ ] Utworzyć tylko fikcyjny fixture z tą samą strukturą.
-- [ ] Test auto-detection revolut_pl.
-- [ ] Test 10 nagłówków i timestampu Y-m-d H:i:s.
-- [ ] Test pierwszeństwa ręcznego mapowania.
-- [ ] Test statusu zakończonego i odrzucenia nieukończonego.
-- [ ] Test zachowania dla niezerowej opłaty.
-- [ ] Test waluty zgodnej i niezgodnej z rachunkiem.
-- [ ] Test podobnych transakcji z różnymi timestampami.
-- [ ] Test ponownego importu tego samego pliku.
-- [ ] Test dry run bez zapisów.
-- [ ] Test zapisu resolved mapping.
-- [ ] Test braku raw payload w bazie, logach i notyfikacjach.
-- [ ] Zachować testy limitów, RBAC, membership i tenant isolation.
+- [x] Utworzyć tylko fikcyjny fixture z tą samą strukturą.
+- [x] Test auto-detection revolut_pl.
+- [x] Test 10 nagłówków i timestampu Y-m-d H:i:s.
+- [x] Test pierwszeństwa ręcznego mapowania.
+- [x] Test statusu zakończonego i odrzucenia nieukończonego.
+- [x] Test zachowania dla niezerowej opłaty.
+- [x] Test waluty zgodnej i niezgodnej z rachunkiem.
+- [x] Test podobnych transakcji z różnymi timestampami.
+- [x] Test ponownego importu tego samego pliku.
+- [x] Test dry run bez zapisów.
+- [x] Test zapisu resolved mapping.
+- [x] Test braku raw payload w bazie, logach i notyfikacjach.
+- [x] Zachować testy limitów, RBAC, membership i tenant isolation.
 
 ### Etap 7 - weryfikacja na prywatnym pliku
 
-- [ ] Uruchomić parser i dry run lokalnie na docs/private/statement-rev.csv.
-- [ ] Oczekiwany wynik: total 7, valid 7, failed 0.
-- [ ] Potwierdzić imported 0 i brak zmian bazy podczas dry run.
+- [x] Uruchomić parser i dry run lokalnie na docs/private/statement-rev.csv.
+- [x] Oczekiwany wynik: total 7, valid 7, failed 0.
+- [x] Potwierdzić imported 0 i brak zmian bazy podczas dry run.
 - [ ] Po zatwierdzeniu przez użytkownika wykonać właściwy import z wyłączonym dry run.
 - [ ] Potwierdzić, że ponowny dry run wykazuje 7 duplikatów.
-- [ ] Nie ujawniać treści transakcji w raporcie.
+- [x] Nie ujawniać treści transakcji w raporcie.
 
 ### Etap 8 - walidacja jakości
 
-- [ ] Uruchomić BankStatementCsvImportTest.
-- [ ] Uruchomić powiązane testy bank reconciliation.
-- [ ] Uruchomić Finance regression proporcjonalnie do zmian.
-- [ ] Uruchomić Pint.
-- [ ] Sprawdzić kompletność PL/EN/PT.
-- [ ] Uruchomić git diff --check.
-- [ ] Potwierdzić git check-ignore dla prywatnego CSV.
+- [x] Uruchomić BankStatementCsvImportTest.
+- [x] Uruchomić powiązane testy bank reconciliation.
+- [x] Uruchomić Finance regression proporcjonalnie do zmian.
+- [x] Uruchomić Pint.
+- [x] Sprawdzić kompletność PL/EN/PT.
+- [x] Uruchomić git diff --check.
+- [x] Potwierdzić git check-ignore dla prywatnego CSV.
 
 ## 8. Kryteria akceptacji
 
@@ -279,4 +279,16 @@ Ręczne mapowanie użytkownika zachowa pierwszeństwo przed profilem i aliasami.
 - Prywatny plik z automatycznym mapowaniem: globalny błąd booking date.
 - Prywatny plik z ręcznym mapowaniem: 0 valid, 7 failed przez timestamp.
 - Diagnostycznie z poprawnym mapowaniem i datą: 7 valid, 0 failed.
+
+## 12. Wynik implementacji
+
+- Prywatny plik: 7 total, 7 valid, 0 failed, 0 zapisów podczas pełnego dry run.
+- Profil: automatycznie wykryty `revolut_pl`, bez ręcznego mapowania kolumn.
+- Deduplikacja: pełny timestamp uczestniczy w nieodwracalnej tożsamości źródłowej; ponowienie na fikcyjnym wyciągu wykrywa wszystkie duplikaty.
+- Bezpieczeństwo: `docs/private/` jest ignorowany przez Git, a surowe wartości transakcji nie trafiają do komunikatów ani metadanych importu.
+- Test importu CSV: 12 testów, 85 asercji.
+- Powiązane testy bankowe: 52 testy, 359 asercji.
+- Pełny moduł Finance: 357 testów zaliczonych, 2512 asercji, 1 test pominięty z powodu braku blokad wierszy w SQLite.
+- Tłumaczenia: EN, PL i PT mają po 1277 zgodnych kluczy.
+- Właściwy import prywatnego wyciągu nie został wykonany. Pozostaje świadomą decyzją użytkownika po weryfikacji wyniku dry run w interfejsie.
 

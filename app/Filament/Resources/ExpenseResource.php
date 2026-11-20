@@ -13,6 +13,7 @@ use App\Models\Project;
 use App\Models\PurchaseCreditNote;
 use App\Models\Supplier;
 use App\Models\TaxCode;
+use App\Services\Finance\PurchaseTaxCalculator;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -25,6 +26,8 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
@@ -32,8 +35,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\Unique;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 
 class ExpenseResource extends BaseResource
 {
@@ -188,6 +189,7 @@ class ExpenseResource extends BaseResource
                                                     ])->all())
                                                 ->searchable()
                                                 ->preload()
+                                                ->live()
                                                 ->required()
                                                 ->columnSpan(2),
                                             Forms\Components\Select::make('category')
@@ -209,11 +211,14 @@ class ExpenseResource extends BaseResource
                                                 ->numeric()
                                                 ->minValue(0.01)
                                                 ->default(1)
+                                                ->live(debounce: 300)
                                                 ->required(),
                                             Forms\Components\TextInput::make('unit_price')
                                                 ->label(__('finance.expenses.fields.unit_price'))
                                                 ->numeric()
+                                                ->step('0.0000000001')
                                                 ->minValue(0)
+                                                ->live(debounce: 300)
                                                 ->required()
                                                 ->columnSpan(2),
                                             Forms\Components\Toggle::make('billable')
@@ -237,6 +242,30 @@ class ExpenseResource extends BaseResource
                                         ->minItems(1)
                                         ->required(),
                                 ]),
+                            Section::make(__('finance.expenses.sections.preview'))
+                                ->description(__('finance.expenses.preview.help'))
+                                ->schema([
+                                    Forms\Components\Placeholder::make('expense_totals_preview')
+                                        ->hiddenLabel()
+                                        ->content(function (Get $get) {
+                                            $currency = strtoupper((string) ($get('currency') ?: 'GBP'));
+                                            $business = currentBusiness();
+                                            $totals = $business
+                                                ? app(PurchaseTaxCalculator::class)->preview(
+                                                    array_values((array) $get('items')),
+                                                    $business->id,
+                                                    $currency,
+                                                    filled($get('gbp_exchange_rate')) ? (float) $get('gbp_exchange_rate') : null,
+                                                )
+                                                : ['subtotal' => 0, 'vat_amount' => 0, 'total' => 0];
+
+                                            return view('filament.forms.components.expense-totals-preview', [
+                                                'subtotal' => FilamentCurrency::format($totals['subtotal'], $currency),
+                                                'vatAmount' => FilamentCurrency::format($totals['vat_amount'], $currency),
+                                                'total' => FilamentCurrency::format($totals['total'], $currency),
+                                            ]);
+                                        }),
+                                ]),
                         ]),
                     Tab::make(__('finance.expenses.sections.purpose'))
                         ->schema([
@@ -251,7 +280,7 @@ class ExpenseResource extends BaseResource
                                         ->rows(3),
                                 ]),
                         ]),
-                    
+
                 ]),
 
         ]);
@@ -283,7 +312,7 @@ class ExpenseResource extends BaseResource
                                     TextEntry::make('business_purpose')->label(__('finance.expenses.fields.business_purpose'))->columnSpanFull(),
                                 ]),
                         ]),
-                    Tab::make(__('finance.expenses.sections.items') . ' & ' . __('finance.expenses.sections.totals'))
+                    Tab::make(__('finance.expenses.sections.items').' & '.__('finance.expenses.sections.totals'))
                         ->schema([
                             Section::make(__('finance.expenses.sections.items'))
                                 ->schema([
@@ -314,7 +343,7 @@ class ExpenseResource extends BaseResource
                                 ->schema([
                                     RepeatableEntry::make('attachments')
                                         ->hiddenLabel()
-                                        ->columns(4)
+                                        ->columns(6)
                                         ->schema([
                                             TextEntry::make('original_name')
                                                 ->label(__('finance.attachments.fields.file'))
@@ -335,9 +364,17 @@ class ExpenseResource extends BaseResource
                                                 ->formatStateUsing(fn (string $state): string => __('finance.attachments.scan_statuses.'.$state))
                                                 ->color(fn (string $state): string => match ($state) {
                                                     FinancialAttachment::SCAN_CLEAN => 'success',
-                                                    FinancialAttachment::SCAN_REJECTED => 'danger',
+                                                    FinancialAttachment::SCAN_REJECTED, FinancialAttachment::SCAN_FAILED => 'danger',
                                                     default => 'warning',
                                                 }),
+                                            TextEntry::make('scanned_at')
+                                                ->label(__('finance.attachments.fields.scanned_at'))
+                                                ->dateTime()
+                                                ->placeholder('-'),
+                                            TextEntry::make('scan_error_code')
+                                                ->label(__('finance.attachments.fields.scan_error'))
+                                                ->formatStateUsing(fn (string $state): string => __('finance.attachments.scan_errors.'.$state))
+                                                ->placeholder('-'),
                                         ]),
                                 ]),
                         ]),
@@ -364,9 +401,7 @@ class ExpenseResource extends BaseResource
                                 ]),
                         ]),
                 ]),
-                    
 
-            
         ]);
     }
 

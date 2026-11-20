@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\Finance\FinancialAttachmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
@@ -33,6 +34,7 @@ class FinancialAttachmentAccessTest extends TestCase
         parent::setUp();
 
         Storage::fake('financial');
+        Queue::fake();
         Permission::findOrCreate('view_finance', 'web');
         $this->business = Business::create([
             'name' => 'Secure Files Ltd',
@@ -95,13 +97,18 @@ class FinancialAttachmentAccessTest extends TestCase
         $this->assertStringContainsString('evidence.pdf', (string) $response->headers->get('Content-Disposition'));
     }
 
-    public function test_pending_or_rejected_files_are_not_served(): void
+    public function test_pending_rejected_or_failed_files_are_not_served(): void
     {
         $this->actingAs($this->user)
             ->get(route('admin.finance.attachments.download', $this->attachment))
             ->assertStatus(423);
 
         $this->attachment->update(['scan_status' => FinancialAttachment::SCAN_REJECTED]);
+
+        $this->get(route('admin.finance.attachments.download', $this->attachment))
+            ->assertStatus(423);
+
+        $this->attachment->update(['scan_status' => FinancialAttachment::SCAN_FAILED]);
 
         $this->get(route('admin.finance.attachments.download', $this->attachment))
             ->assertStatus(423);

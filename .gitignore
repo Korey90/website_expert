@@ -30,3 +30,6 @@ notatki.txt
 
 # Private HMRC receipt exports
 /docs/hmrc-vat-receipt-*.pdf
+
+# Private financial source files
+/docs/private/

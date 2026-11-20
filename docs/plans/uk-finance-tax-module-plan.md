@@ -383,6 +383,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 
 - [x] `UKFIN-201` [M] Supplier model, policy, factory i Filament Resource. *(tenant scope, soft archive, dane UK/VAT, warunki płatności, RBAC `view_finance`/`manage_finance`, PL/EN/PT)*
 - [x] `UKFIN-202` [M] Expense + ExpenseItem schema i status workflow. *(mixed purchase VAT, tax/FX snapshots, billable client/project, reverse charge VAT bez zwiększania salda dostawcy, panel Filament PL/EN/PT)*
+- [x] `UKFIN-202R1` [S] Precyzja ceny jednostkowej kosztu i podgląd przed zapisem. *(10 miejsc dziesiętnych w expense/recurring/purchase credit items, wspólne zaokrąglenie pozycji do najmniejszej jednostki waluty, podgląd netto/VAT/brutto w Filament i regresja dla `1250 x 0.0333333333 = 41.67 netto + 8.33 VAT = 50.00 GBP`)*
 - [x] `UKFIN-203` [M] Actions: Create/Update/Approve/Post/VoidExpense. *(transakcje i blokady, audit metadata, niezmienność po approval; posted wymaga przyszłego ledger reversal)*
 - [x] `UKFIN-204` [M] Form Requests i walidacja duplikatu supplier invoice. *(unikalność tenant + supplier, walidacja effective tax code/FX oraz referencji tenantowych)*
 - [x] `UKFIN-205` [M] Private FinancialAttachment service z SHA-256. *(prywatny dysk, tenant scope, MIME/limit 10 MB, deduplikacja hash, 6-letnia retencja, kwarantanna `pending`, relacje do invoice/expense/payment/credit note)*

@@ -24,6 +24,7 @@ use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
@@ -43,6 +44,7 @@ class VatAdjustmentWorkflowTest extends TestCase
         parent::setUp();
 
         Storage::fake('financial');
+        Queue::fake();
         $this->business = Business::create([
             'name' => 'VAT Adjustment Books',
             'slug' => 'vat-adjustment-books',

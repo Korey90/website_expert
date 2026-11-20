@@ -4,13 +4,16 @@ namespace App\Filament\Resources\BankTransactionResource\Pages;
 
 use App\Actions\Finance\CreateRecordFromBankTransactionAction;
 use App\Actions\Finance\FindBankTransactionMatchesAction;
+use App\Actions\Finance\LinkExistingExpenseToBankTransactionAction;
 use App\Actions\Finance\ReconcileBankTransactionAction;
 use App\Actions\Finance\UndoBankReconciliationAction;
 use App\Data\Finance\BankTransactionMatchCandidate;
 use App\Filament\Resources\BankTransactionResource;
 use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\BankReconciliation;
+use App\Models\BankReconciliationAllocation;
 use App\Models\BankTransaction;
+use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\LedgerAccount;
 use App\Models\Supplier;
@@ -166,6 +169,32 @@ class ViewBankTransaction extends ViewRecord
                         ->maxLength(2000),
                 ])
                 ->action(fn (array $data) => $this->createRecord($transaction, $data)),
+            Action::make('link_existing_expense')
+                ->label(__('finance.bank_reconciliation.actions.link_existing_expense'))
+                ->icon('heroicon-o-link')
+                ->color('info')
+                ->visible(fn (): bool => (float) $transaction->amount < 0
+                    && in_array($transaction->reconciliation_status, [
+                        BankTransaction::STATUS_UNMATCHED,
+                        BankTransaction::STATUS_PARTIALLY_RECONCILED,
+                    ], true)
+                    && PermissionHelper::allows(auth()->user(), 'manage_finance')
+                    && PermissionHelper::allows(auth()->user(), 'post_finance'))
+                ->modalHeading(__('finance.bank_reconciliation.link_expense.heading'))
+                ->modalDescription(__('finance.bank_reconciliation.link_expense.description'))
+                ->form([
+                    Select::make('expense_id')
+                        ->label(__('finance.bank_reconciliation.link_expense.expense'))
+                        ->options(fn (): array => $this->existingExpenseOptions($transaction))
+                        ->helperText(__('finance.bank_reconciliation.link_expense.expense_help'))
+                        ->searchable()
+                        ->preload()
+                        ->required(),
+                    Textarea::make('notes')
+                        ->label(__('finance.bank_reconciliation.fields.notes'))
+                        ->maxLength(2000),
+                ])
+                ->action(fn (array $data) => $this->linkExistingExpense($transaction, $data)),
             Action::make('undo_reconciliation')
                 ->label(__('finance.bank_reconciliation.actions.undo'))
                 ->icon('heroicon-o-arrow-uturn-left')
@@ -301,6 +330,93 @@ class ViewBankTransaction extends ViewRecord
         } catch (DomainException $exception) {
             Notification::make()->title($exception->getMessage())->danger()->send();
         }
+    }
+
+    /** @return array<int, string> */
+    private function existingExpenseOptions(BankTransaction $transaction): array
+    {
+        $remaining = $this->remainingBankAmount($transaction);
+
+        if ($remaining <= 0) {
+            return [];
+        }
+
+        $statuses = [
+            Expense::STATUS_APPROVED,
+            Expense::STATUS_POSTED,
+            Expense::STATUS_PARTIALLY_PAID,
+        ];
+
+        if (PermissionHelper::allows(auth()->user(), 'approve_finance')) {
+            $statuses[] = Expense::STATUS_DRAFT;
+        }
+
+        return Expense::query()
+            ->with('supplier')
+            ->where('business_id', $transaction->business_id)
+            ->whereIn('status', $statuses)
+            ->where('currency', strtoupper((string) $transaction->currency))
+            ->where('amount_due', '>=', $remaining)
+            ->orderBy('due_date')
+            ->orderBy('id')
+            ->get()
+            ->mapWithKeys(fn (Expense $expense): array => [
+                $expense->id => __('finance.bank_reconciliation.link_expense.option', [
+                    'number' => $expense->supplier_invoice_number ?: "#{$expense->id}",
+                    'supplier' => $expense->supplier?->name ?: __('finance.bank_reconciliation.link_expense.no_supplier'),
+                    'amount' => number_format((float) $expense->amount_due, 2),
+                    'currency' => $expense->currency,
+                    'status' => __('finance.expenses.statuses.'.$expense->status),
+                ]),
+            ])
+            ->all();
+    }
+
+    /** @param array<string, mixed> $data */
+    private function linkExistingExpense(BankTransaction $transaction, array $data): void
+    {
+        try {
+            $user = auth()->user();
+
+            if (! $user instanceof User) {
+                throw new DomainException('An authenticated user is required.');
+            }
+
+            $expense = Expense::withoutGlobalScopes()
+                ->where('business_id', $transaction->business_id)
+                ->find((int) ($data['expense_id'] ?? 0));
+
+            if (! $expense) {
+                throw new DomainException('The selected expense does not belong to the bank transaction business.');
+            }
+
+            app(LinkExistingExpenseToBankTransactionAction::class)->execute(
+                $transaction,
+                $expense,
+                $user,
+                $data['notes'] ?? null,
+            );
+            Notification::make()
+                ->title(__('finance.bank_reconciliation.notifications.expense_linked'))
+                ->success()
+                ->send();
+            $this->redirect(BankTransactionResource::getUrl('view', ['record' => $transaction->id]));
+        } catch (DomainException $exception) {
+            Notification::make()->title($exception->getMessage())->danger()->send();
+        }
+    }
+
+    private function remainingBankAmount(BankTransaction $transaction): float
+    {
+        $allocated = (float) BankReconciliationAllocation::withoutGlobalScopes()
+            ->where('business_id', $transaction->business_id)
+            ->where('bank_transaction_id', $transaction->id)
+            ->whereHas('reconciliation', fn ($query) => $query
+                ->withoutGlobalScopes()
+                ->where('status', BankReconciliation::STATUS_ACTIVE))
+            ->sum('amount');
+
+        return max(0, round(abs((float) $transaction->amount) - $allocated, 2));
     }
 
     /** @return array<int, string> */

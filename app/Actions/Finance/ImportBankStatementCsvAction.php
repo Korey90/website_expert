@@ -2,6 +2,7 @@
 
 namespace App\Actions\Finance;
 
+use App\Data\Finance\BankStatementCsvError;
 use App\Data\Finance\BankStatementCsvRow;
 use App\Data\Finance\BankStatementImportResult;
 use App\Models\BankAccount;
@@ -9,6 +10,7 @@ use App\Models\BankStatementImport;
 use App\Models\BankTransaction;
 use App\Models\User;
 use App\Services\Finance\BankStatementCsvParser;
+use App\Services\Finance\Exceptions\BankStatementCsvImportException;
 use App\Support\PermissionHelper;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -39,13 +41,27 @@ class ImportBankStatementCsvAction
             'original_filename' => $this->safeFilename((string) ($options['original_filename'] ?? basename($path))),
         ];
         $parsed = $this->parser->parse($path, $mapping, $options);
+
+        if ($parsed->validRows() === 0) {
+            $errorCodes = array_values(array_unique(array_map(
+                fn (BankStatementCsvError $error): string => $error->code,
+                $parsed->errors,
+            )));
+            $errorCode = count($errorCodes) === 1 ? $errorCodes[0] : 'no_valid_rows';
+
+            throw new BankStatementCsvImportException(
+                $errorCode,
+                'The CSV file does not contain any valid transaction rows.',
+            );
+        }
+
         [$uniqueRows, $knownDuplicates] = $this->uniqueRows($account, $parsed->rows);
 
         if ($options['dry_run']) {
             return new BankStatementImportResult(true, $parsed, 0, $knownDuplicates);
         }
 
-        return DB::transaction(function () use ($account, $actor, $mapping, $options, $parsed, $uniqueRows): BankStatementImportResult {
+        return DB::transaction(function () use ($account, $actor, $options, $parsed, $uniqueRows): BankStatementImportResult {
             $lockedAccount = BankAccount::withoutGlobalScopes()->lockForUpdate()->findOrFail($account->id);
             $this->assertAuthorized($lockedAccount, $actor);
 
@@ -66,11 +82,12 @@ class ImportBankStatementCsvAction
                 'imported_rows' => 0,
                 'duplicate_rows' => 0,
                 'failed_rows' => $parsed->failedRows(),
-                'column_mapping' => array_filter($mapping, fn (mixed $value): bool => filled($value)),
+                'column_mapping' => array_filter($parsed->resolvedMapping, fn (mixed $value): bool => filled($value)),
                 'options' => [
                     'date_format' => $options['date_format'],
                     'decimal_separator' => $options['decimal_separator'],
                     'delimiter' => $options['delimiter'],
+                    'profile' => $parsed->profile,
                 ],
                 'imported_by' => $actor->id,
                 'completed_at' => now(),

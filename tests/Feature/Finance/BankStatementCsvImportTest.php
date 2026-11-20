@@ -15,6 +15,7 @@ use App\Models\BusinessUser;
 use App\Models\LedgerAccount;
 use App\Models\User;
 use App\Services\Finance\BankStatementCsvParser;
+use App\Services\Finance\Exceptions\BankStatementCsvImportException;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -256,6 +257,116 @@ class BankStatementCsvImportTest extends TestCase
         );
     }
 
+    public function test_polish_revolut_profile_is_detected_and_timestamps_are_parsed(): void
+    {
+        $path = $this->revolutPolishStatementFile();
+        $result = app(BankStatementCsvParser::class)->parse($path, [], [
+            'delimiter' => 'auto',
+            'date_format' => 'Y-m-d',
+            'decimal_separator' => 'auto',
+            'default_currency' => 'GBP',
+        ]);
+
+        $this->assertSame('revolut_pl', $result->profile);
+        $this->assertSame('Data zrealizowania', $result->resolvedMapping['booking_date']);
+        $this->assertSame('Kwota', $result->resolvedMapping['amount']);
+        $this->assertSame('Waluta', $result->resolvedMapping['currency']);
+        $this->assertSame('Opis', $result->resolvedMapping['reference']);
+        $this->assertSame(2, $result->totalRows);
+        $this->assertSame(2, $result->validRows());
+        $this->assertSame(0, $result->failedRows());
+        $this->assertSame('2026-11-20', $result->rows[0]->bookingDate);
+        $this->assertSame('2026-11-20', $result->rows[1]->bookingDate);
+        $this->assertNotSame($result->rows[0]->providerId, $result->rows[1]->providerId);
+        $this->assertNotSame($result->rows[0]->sourceHash, $result->rows[1]->sourceHash);
+        $this->assertStringStartsWith('revolut-pl:', (string) $result->rows[0]->providerId);
+
+        $manuallyMapped = app(BankStatementCsvParser::class)->parse($path, [
+            'reference' => 'Rodzaj',
+        ], [
+            'delimiter' => 'auto',
+            'date_format' => 'Y-m-d',
+            'decimal_separator' => 'auto',
+            'default_currency' => 'GBP',
+        ]);
+
+        $this->assertSame('Rodzaj', $manuallyMapped->resolvedMapping['reference']);
+    }
+
+    public function test_revolut_profile_rejects_unfinished_status_and_non_zero_fee(): void
+    {
+        $path = $this->putCsv(
+            'revolut-validation.csv',
+            $this->revolutPolishHeader()
+            ."Płatność kartą,Pro,2026-11-20 08:00:00,2026-11-20 08:01:00,Fictional completed,-10.00,0.00,GBP,ZAKOŃCZONO,90.00\n"
+            ."Płatność kartą,Pro,2026-11-20 09:00:00,2026-11-20 09:01:00,Fictional pending,-10.00,0.00,GBP,OCZEKUJĄCA,80.00\n"
+            ."Przelew,Pro,2026-11-20 10:00:00,2026-11-20 10:01:00,Fictional fee,-10.00,1.00,GBP,ZAKOŃCZONO,69.00\n",
+        );
+
+        $result = app(BankStatementCsvParser::class)->parse($path, [], [
+            'delimiter' => 'auto',
+            'date_format' => 'auto',
+            'decimal_separator' => 'auto',
+            'default_currency' => 'GBP',
+        ]);
+
+        $this->assertSame(3, $result->totalRows);
+        $this->assertSame(1, $result->validRows());
+        $this->assertSame(2, $result->failedRows());
+        $this->assertSame(['unsupported_status', 'unsupported_fee'], collect($result->errors)->pluck('code')->all());
+        $this->assertStringNotContainsString('OCZEKUJĄCA', implode(' ', $result->errors[0]->messages));
+        $this->assertStringNotContainsString('1.00', implode(' ', $result->errors[1]->messages));
+    }
+
+    public function test_revolut_currency_mismatch_fails_safely_when_no_rows_are_valid(): void
+    {
+        $path = $this->putCsv(
+            'revolut-eur.csv',
+            $this->revolutPolishHeader()
+            ."Przelew,Pro,2026-11-20 10:00:00,2026-11-20 10:01:00,Fictional EUR,10.00,0.00,EUR,ZAKOŃCZONO,10.00\n",
+        );
+
+        try {
+            $this->import($path, true);
+            $this->fail('A statement in another currency must not pass the dry run.');
+        } catch (BankStatementCsvImportException $exception) {
+            $this->assertSame('currency_mismatch', $exception->errorCode);
+            $this->assertStringNotContainsString('EUR', $exception->getMessage());
+        }
+
+        $this->assertDatabaseCount('bank_statement_imports', 0);
+        $this->assertDatabaseCount('bank_transactions', 0);
+    }
+
+    public function test_revolut_import_persists_resolved_mapping_and_deduplicates_by_full_timestamp(): void
+    {
+        $path = $this->revolutPolishStatementFile();
+        $options = ['decimal_separator' => 'auto'];
+        $first = $this->import($path, false, $options);
+        $second = $this->import($path, false, $options);
+
+        $this->assertSame(2, $first->importedRows);
+        $this->assertSame(0, $first->duplicateRows);
+        $this->assertSame(0, $second->importedRows);
+        $this->assertSame(2, $second->duplicateRows);
+        $this->assertDatabaseCount('bank_transactions', 2);
+        $this->assertSame(
+            ['-10.00', '-10.00'],
+            BankTransaction::withoutGlobalScopes()->orderBy('id')->pluck('amount')->all(),
+        );
+        $this->assertDatabaseHas('bank_statement_imports', [
+            'id' => $first->importId,
+            'valid_rows' => 2,
+            'imported_rows' => 2,
+            'failed_rows' => 0,
+        ]);
+
+        $import = BankStatementImport::withoutGlobalScopes()->findOrFail($first->importId);
+        $this->assertSame('Data zrealizowania', $import->column_mapping['booking_date']);
+        $this->assertSame('Kwota', $import->column_mapping['amount']);
+        $this->assertSame('revolut_pl', $import->options['profile']);
+    }
+
     public function test_import_enforces_limits_account_state_permission_and_tenant_membership(): void
     {
         config()->set('finance.bank_statement_import.max_rows', 1);
@@ -327,6 +438,21 @@ class BankStatementCsvImportTest extends TestCase
             ."05/11/2026;;12,34;;GBP;Hosting;Vendor;tx-1\n"
             ."06/11/2026;06/11/2026;;1000,50;GBP;Client payment;Client A;tx-2\n"
             ."31/02/2026;;;5,00;GBP;Invalid;Unknown;tx-3\n");
+    }
+
+    private function revolutPolishStatementFile(): string
+    {
+        return $this->putCsv(
+            'revolut-polish.csv',
+            $this->revolutPolishHeader()
+            ."Płatność kartą,Pro,2026-11-20 08:00:00,2026-11-20 08:01:00,Fictional repeated,-10.00,0.00,GBP,ZAKOŃCZONO,90.00\n"
+            ."Płatność kartą,Pro,2026-11-20 09:00:00,2026-11-20 09:01:00,Fictional repeated,-10.00,0.00,GBP,ZAKOŃCZONO,80.00\n",
+        );
+    }
+
+    private function revolutPolishHeader(): string
+    {
+        return "Rodzaj,Produkt,Data rozpoczęcia,Data zrealizowania,Opis,Kwota,Opłata,Waluta,State,Saldo\n";
     }
 
     private function putCsv(string $name, string $contents): string

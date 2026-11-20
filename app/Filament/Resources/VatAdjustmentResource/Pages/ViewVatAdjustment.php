@@ -4,6 +4,7 @@ namespace App\Filament\Resources\VatAdjustmentResource\Pages;
 
 use App\Actions\Finance\ApproveVatAdjustmentAction;
 use App\Actions\Finance\PostVatAdjustmentAction;
+use App\Actions\Finance\RetryFinancialAttachmentScanAction;
 use App\Filament\Resources\VatAdjustmentResource;
 use App\Models\FinancialAttachment;
 use App\Models\VatAdjustment;
@@ -12,6 +13,7 @@ use DomainException;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Http\UploadedFile;
@@ -52,6 +54,46 @@ class ViewVatAdjustment extends ViewRecord
                             'vat_adjustment_evidence',
                         ),
                         __('finance.vat_adjustments.notifications.evidence_uploaded'),
+                    );
+                }),
+            Action::make('retry_attachment_scan')
+                ->label(__('finance.attachments.actions.retry_scan'))
+                ->icon('heroicon-o-arrow-path')
+                ->color('warning')
+                ->visible(fn (): bool => Gate::allows('create', FinancialAttachment::class)
+                    && $adjustment->attachments()
+                        ->whereIn('scan_status', [
+                            FinancialAttachment::SCAN_PENDING,
+                            FinancialAttachment::SCAN_FAILED,
+                        ])
+                        ->exists())
+                ->form([
+                    Select::make('attachment_id')
+                        ->label(__('finance.attachments.fields.file'))
+                        ->options(fn (): array => $adjustment->attachments()
+                            ->whereIn('scan_status', [
+                                FinancialAttachment::SCAN_PENDING,
+                                FinancialAttachment::SCAN_FAILED,
+                            ])
+                            ->orderBy('original_name')
+                            ->pluck('original_name', 'id')
+                            ->all())
+                        ->required(),
+                ])
+                ->action(function (array $data) use ($adjustment): void {
+                    $attachment = $adjustment->attachments()
+                        ->whereIn('scan_status', [
+                            FinancialAttachment::SCAN_PENDING,
+                            FinancialAttachment::SCAN_FAILED,
+                        ])
+                        ->findOrFail((int) $data['attachment_id']);
+
+                    $this->runAction(
+                        fn () => app(RetryFinancialAttachmentScanAction::class)->execute(
+                            $attachment,
+                            auth()->user(),
+                        ),
+                        __('finance.attachments.notifications.scan_queued'),
                     );
                 }),
             Action::make('approve')

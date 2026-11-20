@@ -19,16 +19,22 @@ class FinancialAttachment extends Model
 
     public const SCAN_REJECTED = 'rejected';
 
+    public const SCAN_FAILED = 'failed';
+
     protected $fillable = [
         'business_id', 'attachable_type', 'attachable_id', 'uploaded_by',
         'document_type', 'disk', 'path', 'original_name', 'mime_type', 'size',
-        'sha256', 'scan_status', 'retention_until',
+        'sha256', 'scan_status', 'scan_attempts', 'scan_engine', 'scan_error_code',
+        'scan_requested_at', 'scanned_at', 'retention_until',
     ];
 
     protected function casts(): array
     {
         return [
             'size' => 'integer',
+            'scan_attempts' => 'integer',
+            'scan_requested_at' => 'datetime',
+            'scanned_at' => 'datetime',
             'retention_until' => 'date',
         ];
     }

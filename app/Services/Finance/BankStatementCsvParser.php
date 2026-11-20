@@ -5,11 +5,39 @@ namespace App\Services\Finance;
 use App\Data\Finance\BankStatementCsvError;
 use App\Data\Finance\BankStatementCsvParseResult;
 use App\Data\Finance\BankStatementCsvRow;
+use App\Services\Finance\Exceptions\BankStatementCsvImportException;
 use DateTimeImmutable;
 use DomainException;
 
 class BankStatementCsvParser
 {
+    private const PROFILE_REVOLUT_PL = 'revolut_pl';
+
+    private const REVOLUT_PL_HEADERS = [
+        'Rodzaj',
+        'Produkt',
+        'Data rozpoczęcia',
+        'Data zrealizowania',
+        'Opis',
+        'Kwota',
+        'Opłata',
+        'Waluta',
+        'State',
+        'Saldo',
+    ];
+
+    private const REVOLUT_PL_MAPPING = [
+        'booking_date' => 'Data zrealizowania',
+        'value_date' => null,
+        'amount' => 'Kwota',
+        'debit' => null,
+        'credit' => null,
+        'currency' => 'Waluta',
+        'reference' => 'Opis',
+        'counterparty' => null,
+        'provider_id' => null,
+    ];
+
     private const COLUMN_ALIASES = [
         'booking_date' => ['booking_date', 'booking date', 'date', 'transaction date', 'transaction_date'],
         'value_date' => ['value_date', 'value date'],
@@ -51,8 +79,10 @@ class BankStatementCsvParser
             $headers = array_map(fn (mixed $header): string => trim((string) $header), $headers);
             $headers[0] = preg_replace('/^\xEF\xBB\xBF/', '', $headers[0]) ?? $headers[0];
             $this->validateHeaders($headers);
-            $resolvedMapping = $this->resolveMapping($headers, $mapping);
+            $profile = $this->resolveProfile($headers);
+            $resolvedMapping = $this->resolveMapping($headers, $mapping, $profile);
             $this->validateMapping($resolvedMapping);
+            $options['profile'] = $profile;
 
             $rows = [];
             $errors = [];
@@ -73,7 +103,11 @@ class BankStatementCsvParser
                 }
 
                 if (count($values) !== count($headers)) {
-                    $errors[] = new BankStatementCsvError($rowNumber, ['The row has a different number of columns than the header.']);
+                    $errors[] = new BankStatementCsvError(
+                        $rowNumber,
+                        ['The row has a different number of columns than the header.'],
+                        'column_count_mismatch',
+                    );
 
                     continue;
                 }
@@ -84,7 +118,11 @@ class BankStatementCsvParser
                 try {
                     $rows[] = $this->normalizeRow($record, $resolvedMapping, $rowNumber, $options);
                 } catch (DomainException $exception) {
-                    $errors[] = new BankStatementCsvError($rowNumber, [$exception->getMessage()]);
+                    $errors[] = new BankStatementCsvError(
+                        $rowNumber,
+                        [$exception->getMessage()],
+                        $exception instanceof BankStatementCsvImportException ? $exception->errorCode : 'invalid_row',
+                    );
                 }
             }
 
@@ -92,7 +130,15 @@ class BankStatementCsvParser
                 throw new DomainException('The CSV file does not contain any transaction rows.');
             }
 
-            return new BankStatementCsvParseResult($fileHash, $headers, $rows, $errors, $totalRows);
+            return new BankStatementCsvParseResult(
+                $fileHash,
+                $headers,
+                $rows,
+                $errors,
+                $totalRows,
+                $resolvedMapping,
+                $profile,
+            );
         } finally {
             fclose($stream);
         }
@@ -213,7 +259,7 @@ class BankStatementCsvParser
      * @param  array<string, string|null>  $mapping
      * @return array<string, string|null>
      */
-    private function resolveMapping(array $headers, array $mapping): array
+    private function resolveMapping(array $headers, array $mapping, ?string $profile): array
     {
         $headerLookup = [];
 
@@ -222,6 +268,7 @@ class BankStatementCsvParser
         }
 
         $resolved = [];
+        $profileMapping = $profile === self::PROFILE_REVOLUT_PL ? self::REVOLUT_PL_MAPPING : [];
 
         foreach (self::COLUMN_ALIASES as $target => $aliases) {
             $requested = trim((string) ($mapping[$target] ?? ''));
@@ -234,6 +281,14 @@ class BankStatementCsvParser
                 }
 
                 $resolved[$target] = $actual;
+
+                continue;
+            }
+
+            $profileColumn = $profileMapping[$target] ?? null;
+
+            if ($profileColumn !== null && isset($headerLookup[$this->normalizeHeader($profileColumn)])) {
+                $resolved[$target] = $headerLookup[$this->normalizeHeader($profileColumn)];
 
                 continue;
             }
@@ -251,15 +306,32 @@ class BankStatementCsvParser
         return $resolved;
     }
 
+    /** @param array<int, string> $headers */
+    private function resolveProfile(array $headers): ?string
+    {
+        $normalizedHeaders = array_map($this->normalizeHeader(...), $headers);
+        $normalizedRevolutHeaders = array_map($this->normalizeHeader(...), self::REVOLUT_PL_HEADERS);
+
+        return count(array_diff($normalizedRevolutHeaders, $normalizedHeaders)) === 0
+            ? self::PROFILE_REVOLUT_PL
+            : null;
+    }
+
     /** @param array<string, string|null> $mapping */
     private function validateMapping(array $mapping): void
     {
         if (empty($mapping['booking_date'])) {
-            throw new DomainException('A booking date column must be mapped.');
+            throw new BankStatementCsvImportException(
+                'missing_booking_date',
+                'A booking date column must be mapped.',
+            );
         }
 
         if (empty($mapping['amount']) && empty($mapping['debit']) && empty($mapping['credit'])) {
-            throw new DomainException('Map an amount column or at least one debit/credit column.');
+            throw new BankStatementCsvImportException(
+                'missing_amount',
+                'Map an amount column or at least one debit/credit column.',
+            );
         }
     }
 
@@ -270,18 +342,38 @@ class BankStatementCsvParser
      */
     private function normalizeRow(array $record, array $mapping, int $rowNumber, array $options): BankStatementCsvRow
     {
+        $profile = is_string($options['profile'] ?? null) ? $options['profile'] : null;
+        $decimalSeparator = (string) ($options['decimal_separator'] ?? 'auto');
+        $sourceIdentity = $this->profileSourceIdentity($record, $profile, $decimalSeparator);
         $bookingDate = $this->normalizeDate($this->mappedValue($record, $mapping, 'booking_date'), (string) ($options['date_format'] ?? 'auto'), true);
         $valueDate = $this->normalizeDate($this->mappedValue($record, $mapping, 'value_date'), (string) ($options['date_format'] ?? 'auto'), false);
-        $amount = $this->normalizeMappedAmount($record, $mapping, (string) ($options['decimal_separator'] ?? 'auto'));
+        $amount = $this->normalizeMappedAmount($record, $mapping, $decimalSeparator);
         $currency = strtoupper($this->mappedValue($record, $mapping, 'currency') ?: (string) ($options['default_currency'] ?? 'GBP'));
 
         if (! array_key_exists($currency, (array) config('currencies.supported', []))) {
-            throw new DomainException("Currency [{$currency}] is not supported.");
+            throw new BankStatementCsvImportException(
+                'unsupported_currency',
+                'The transaction currency is not supported.',
+            );
+        }
+
+        $accountCurrency = strtoupper(trim((string) ($options['default_currency'] ?? '')));
+
+        if ($accountCurrency !== '' && $currency !== $accountCurrency) {
+            throw new BankStatementCsvImportException(
+                'currency_mismatch',
+                'The transaction currency does not match the selected bank account.',
+            );
         }
 
         $reference = $this->normalizeText($this->mappedValue($record, $mapping, 'reference'), 500, 'reference');
         $counterparty = $this->normalizeText($this->mappedValue($record, $mapping, 'counterparty'), 255, 'counterparty');
         $providerId = $this->normalizeText($this->mappedValue($record, $mapping, 'provider_id'), 191, 'provider ID');
+
+        if ($providerId === null && $profile === self::PROFILE_REVOLUT_PL && $sourceIdentity !== null) {
+            $providerId = 'revolut-pl:'.$sourceIdentity;
+        }
+
         $canonical = [
             'booking_date' => $bookingDate,
             'value_date' => $valueDate,
@@ -289,6 +381,7 @@ class BankStatementCsvParser
             'currency' => $currency,
             'reference' => $this->canonicalText($reference),
             'counterparty' => $this->canonicalText($counterparty),
+            'source_identity' => $sourceIdentity,
         ];
 
         return new BankStatementCsvRow(
@@ -316,16 +409,17 @@ class BankStatementCsvParser
     {
         if ($value === '') {
             if ($required) {
-                throw new DomainException('Booking date is required.');
+                throw new BankStatementCsvImportException('booking_date_required', 'Booking date is required.');
             }
 
             return null;
         }
 
         $formats = match ($formatOption) {
-            'auto' => ['d/m/Y', 'Y-m-d', 'd-m-Y', 'd.m.Y', 'm/d/Y'],
-            'd/m/Y', 'Y-m-d', 'd-m-Y', 'd.m.Y', 'm/d/Y' => [$formatOption],
-            default => throw new DomainException('The selected date format is invalid.'),
+            'auto' => ['d/m/Y', 'Y-m-d H:i:s', 'Y-m-d', 'd-m-Y', 'd.m.Y', 'm/d/Y'],
+            'Y-m-d' => ['Y-m-d', 'Y-m-d H:i:s'],
+            'Y-m-d H:i:s', 'd/m/Y', 'd-m-Y', 'd.m.Y', 'm/d/Y' => [$formatOption],
+            default => throw new BankStatementCsvImportException('invalid_date_format', 'The selected date format is invalid.'),
         };
 
         foreach ($formats as $format) {
@@ -337,7 +431,46 @@ class BankStatementCsvParser
             }
         }
 
-        throw new DomainException("Date [{$value}] does not match the selected format.");
+        throw new BankStatementCsvImportException(
+            'invalid_date',
+            'A transaction date does not match the selected format.',
+        );
+    }
+
+    /** @param array<string, string|null> $record */
+    private function profileSourceIdentity(array $record, ?string $profile, string $decimalSeparator): ?string
+    {
+        if ($profile !== self::PROFILE_REVOLUT_PL) {
+            return null;
+        }
+
+        $status = mb_strtoupper(trim((string) ($record['State'] ?? '')));
+
+        if (! in_array($status, ['ZAKOŃCZONO', 'COMPLETED'], true)) {
+            throw new BankStatementCsvImportException(
+                'unsupported_status',
+                'The transaction status is not completed and cannot be imported.',
+            );
+        }
+
+        $feeValue = trim((string) ($record['Opłata'] ?? ''));
+        $fee = $feeValue === '' ? '0.00' : $this->normalizeAmount($feeValue, $decimalSeparator, true);
+
+        if ((float) $fee !== 0.0) {
+            throw new BankStatementCsvImportException(
+                'unsupported_fee',
+                'A non-zero bank fee requires an explicit accounting treatment and cannot be imported yet.',
+            );
+        }
+
+        $identity = [];
+
+        foreach (self::REVOLUT_PL_HEADERS as $header) {
+            $value = trim(preg_replace('/\s+/u', ' ', (string) ($record[$header] ?? '')) ?? (string) ($record[$header] ?? ''));
+            $identity[$this->normalizeHeader($header)] = mb_strtolower($value);
+        }
+
+        return hash('sha256', json_encode($identity, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
     }
 
     /** @param array<string, string|null> $record @param array<string, string|null> $mapping */
@@ -353,7 +486,10 @@ class BankStatementCsvParser
         $credit = $this->mappedValue($record, $mapping, 'credit');
 
         if ($debit !== '' && $credit !== '') {
-            throw new DomainException('A row cannot contain both debit and credit amounts.');
+            throw new BankStatementCsvImportException(
+                'conflicting_amount_columns',
+                'A row cannot contain both debit and credit amounts.',
+            );
         }
 
         if ($debit !== '') {
@@ -364,23 +500,23 @@ class BankStatementCsvParser
             return number_format(abs((float) $this->normalizeAmount($credit, $separator)), 2, '.', '');
         }
 
-        throw new DomainException('Transaction amount is required.');
+        throw new BankStatementCsvImportException('amount_required', 'Transaction amount is required.');
     }
 
-    private function normalizeAmount(string $value, string $separator): string
+    private function normalizeAmount(string $value, string $separator, bool $allowZero = false): string
     {
         $negativeParentheses = str_starts_with(trim($value), '(') && str_ends_with(trim($value), ')');
         $clean = preg_replace('/[^0-9,.+\-]/u', '', $value) ?? '';
 
         if ($clean === '' || ! preg_match('/^[+\-]?[0-9][0-9,.]*$/', $clean)) {
-            throw new DomainException("Amount [{$value}] is invalid.");
+            throw new BankStatementCsvImportException('invalid_amount', 'A transaction amount is invalid.');
         }
 
         $decimal = match ($separator) {
             'dot', '.' => '.',
             'comma', ',' => ',',
             'auto' => $this->detectDecimalSeparator($clean),
-            default => throw new DomainException('The selected decimal separator is invalid.'),
+            default => throw new BankStatementCsvImportException('invalid_decimal_separator', 'The selected decimal separator is invalid.'),
         };
 
         $thousands = $decimal === '.' ? ',' : '.';
@@ -388,14 +524,17 @@ class BankStatementCsvParser
         $normalized = $decimal === ',' ? str_replace(',', '.', $normalized) : $normalized;
 
         if (! is_numeric($normalized)) {
-            throw new DomainException("Amount [{$value}] is invalid.");
+            throw new BankStatementCsvImportException('invalid_amount', 'A transaction amount is invalid.');
         }
 
         $numeric = (float) $normalized;
         $numeric = $negativeParentheses ? -abs($numeric) : $numeric;
 
-        if ($numeric == 0.0 || abs($numeric) > 9999999999999.99) {
-            throw new DomainException('Transaction amount must be non-zero and within the supported range.');
+        if ((! $allowZero && $numeric == 0.0) || abs($numeric) > 9999999999999.99) {
+            throw new BankStatementCsvImportException(
+                'amount_out_of_range',
+                'A transaction amount must be non-zero and within the supported range.',
+            );
         }
 
         return number_format($numeric, 2, '.', '');

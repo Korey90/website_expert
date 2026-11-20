@@ -77,6 +77,30 @@ class RecurringExpenseGenerationTest extends TestCase
         $this->assertSame(1, Expense::withoutGlobalScopes()->where('recurring_expense_template_id', $template->id)->count());
     }
 
+    public function test_fractional_unit_price_survives_recurring_template_generation(): void
+    {
+        $template = $this->createTemplate([
+            'items' => [[
+                'description' => 'Usage-based service',
+                'quantity' => 1250,
+                'unit_price' => '0.0333333333',
+                'tax_code_id' => TaxCode::withoutGlobalScopes()
+                    ->where('business_id', $this->business->id)
+                    ->where('code', 'S20')
+                    ->value('id'),
+            ]],
+        ]);
+
+        app(GenerateDueRecurringExpensesAction::class)->execute(CarbonImmutable::parse('2026-11-01'));
+        $expense = $template->generatedExpenses()->with('items')->firstOrFail();
+
+        $this->assertSame('0.0333333333', $template->items->first()->unit_price);
+        $this->assertSame('0.0333333333', $expense->items->first()->unit_price);
+        $this->assertSame('41.67', $expense->subtotal);
+        $this->assertSame('8.33', $expense->vat_amount);
+        $this->assertSame('50.00', $expense->total);
+    }
+
     public function test_paused_template_does_not_generate_an_expense(): void
     {
         $template = $this->createTemplate([

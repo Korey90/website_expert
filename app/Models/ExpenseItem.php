@@ -12,6 +12,8 @@ class ExpenseItem extends Model
 {
     use BelongsToTenant, HasFactory;
 
+    public const UNIT_PRICE_SCALE = 10;
+
     protected $fillable = [
         'business_id', 'expense_id', 'tax_code_id', 'ledger_account_id', 'category', 'client_id', 'project_id',
         'description', 'quantity', 'unit_price', 'supply_date',
@@ -23,7 +25,7 @@ class ExpenseItem extends Model
     protected function casts(): array
     {
         return [
-            'quantity' => 'decimal:2', 'unit_price' => 'decimal:2', 'supply_date' => 'date',
+            'quantity' => 'decimal:2', 'unit_price' => 'decimal:'.self::UNIT_PRICE_SCALE, 'supply_date' => 'date',
             'net_amount' => 'decimal:2', 'net_amount_gbp' => 'decimal:2',
             'vat_rate_snapshot' => 'decimal:2', 'vat_amount' => 'decimal:2',
             'vat_amount_gbp' => 'decimal:2', 'gross_amount' => 'decimal:2',

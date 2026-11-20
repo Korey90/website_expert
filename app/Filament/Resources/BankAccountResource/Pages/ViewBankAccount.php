@@ -7,6 +7,7 @@ use App\Filament\Resources\BankAccountResource;
 use App\Models\BankAccount;
 use App\Models\User;
 use App\Services\Finance\BankStatementCsvParser;
+use App\Services\Finance\Exceptions\BankStatementCsvImportException;
 use DomainException;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -76,6 +77,7 @@ class ViewBankAccount extends ViewRecord
                                 'auto' => __('finance.bank_imports.options.auto_uk_date'),
                                 'd/m/Y' => 'DD/MM/YYYY',
                                 'Y-m-d' => 'YYYY-MM-DD',
+                                'Y-m-d H:i:s' => 'YYYY-MM-DD HH:MM:SS',
                                 'd-m-Y' => 'DD-MM-YYYY',
                                 'd.m.Y' => 'DD.MM.YYYY',
                                 'm/d/Y' => 'MM/DD/YYYY',
@@ -164,6 +166,33 @@ class ViewBankAccount extends ViewRecord
                         $body .= ' '.__('finance.bank_imports.notifications.invalid_rows', ['rows' => $invalidRows]);
                     }
 
+                    if ($result->parseResult->profile !== null) {
+                        $body .= ' '.__('finance.bank_imports.notifications.profile_detected', [
+                            'profile' => $this->profileLabel($result->parseResult->profile),
+                        ]);
+                    }
+
+                    $detectedMapping = collect($result->parseResult->resolvedMapping)
+                        ->filter()
+                        ->map(fn (string $source, string $target): string => __("finance.bank_imports.fields.{$target}").': '.$source)
+                        ->implode(', ');
+
+                    if ($detectedMapping !== '') {
+                        $body .= ' '.__('finance.bank_imports.notifications.mapping_detected', ['mapping' => $detectedMapping]);
+                    }
+
+                    $errorReasons = collect($result->parseResult->errors)
+                        ->countBy('code')
+                        ->map(fn (int $count, string $code): string => __('finance.bank_imports.notifications.error_count', [
+                            'reason' => $this->importErrorMessage($code),
+                            'count' => $count,
+                        ]))
+                        ->implode('; ');
+
+                    if ($errorReasons !== '') {
+                        $body .= ' '.__('finance.bank_imports.notifications.error_summary', ['reasons' => $errorReasons]);
+                    }
+
                     Notification::make()
                         ->title(__($result->dryRun
                             ? 'finance.bank_imports.notifications.dry_run_complete'
@@ -171,16 +200,54 @@ class ViewBankAccount extends ViewRecord
                         ->body($body)
                         ->color($result->parseResult->failedRows() > 0 ? 'warning' : 'success')
                         ->send();
-                } catch (DomainException) {
+                } catch (DomainException $exception) {
+                    $errorCode = $exception instanceof BankStatementCsvImportException
+                        ? $exception->errorCode
+                        : 'generic';
+
                     Notification::make()
                         ->title(__('finance.bank_imports.notifications.failed'))
-                        ->body(__('finance.bank_imports.notifications.check_file'))
+                        ->body($this->importErrorMessage($errorCode))
                         ->danger()
                         ->send();
                 } finally {
                     Storage::disk('local')->delete($storedPath);
                 }
             });
+    }
+
+    private function importErrorMessage(string $code): string
+    {
+        $supported = [
+            'missing_booking_date',
+            'missing_amount',
+            'invalid_date',
+            'invalid_date_format',
+            'booking_date_required',
+            'invalid_amount',
+            'amount_required',
+            'amount_out_of_range',
+            'conflicting_amount_columns',
+            'invalid_decimal_separator',
+            'unsupported_currency',
+            'currency_mismatch',
+            'unsupported_status',
+            'unsupported_fee',
+            'column_count_mismatch',
+            'no_valid_rows',
+        ];
+
+        return in_array($code, $supported, true)
+            ? __("finance.bank_imports.errors.{$code}")
+            : __('finance.bank_imports.notifications.check_file');
+    }
+
+    private function profileLabel(string $profile): string
+    {
+        return match ($profile) {
+            'revolut_pl' => __('finance.bank_imports.profiles.revolut_pl'),
+            default => $profile,
+        };
     }
 
     private function mappingSelect(string $field): Select

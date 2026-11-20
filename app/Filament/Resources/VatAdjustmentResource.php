@@ -123,7 +123,7 @@ class VatAdjustmentResource extends BaseResource
                         ->required()
                         ->columnSpanFull(),
                 ])->columnSpanFull(),
-                
+
             Section::make(__('finance.vat_adjustments.sections.error_correction'))
                 ->description(__('finance.vat_adjustments.help.error_correction'))
                 ->columns(3)
@@ -194,7 +194,7 @@ class VatAdjustmentResource extends BaseResource
                 ->schema([
                     RepeatableEntry::make('attachments')
                         ->hiddenLabel()
-                        ->columns(4)
+                        ->columns(6)
                         ->schema([
                             TextEntry::make('original_name')
                                 ->label(__('finance.attachments.fields.file'))
@@ -209,9 +209,17 @@ class VatAdjustmentResource extends BaseResource
                                 ->formatStateUsing(fn (string $state): string => __('finance.attachments.scan_statuses.'.$state))
                                 ->color(fn (string $state): string => match ($state) {
                                     FinancialAttachment::SCAN_CLEAN => 'success',
-                                    FinancialAttachment::SCAN_REJECTED => 'danger',
+                                    FinancialAttachment::SCAN_REJECTED, FinancialAttachment::SCAN_FAILED => 'danger',
                                     default => 'warning',
                                 }),
+                            TextEntry::make('scanned_at')
+                                ->label(__('finance.attachments.fields.scanned_at'))
+                                ->dateTime()
+                                ->placeholder('-'),
+                            TextEntry::make('scan_error_code')
+                                ->label(__('finance.attachments.fields.scan_error'))
+                                ->formatStateUsing(fn (string $state): string => __('finance.attachments.scan_errors.'.$state))
+                                ->placeholder('-'),
                         ]),
                 ]),
             Section::make(__('finance.vat_adjustments.sections.audit'))

@@ -19,6 +19,10 @@
 
 ### Done
 
+- [x] `UKFIN-202R2` [M] - automatyczne skanowanie ClamAV załączników finansowych, kontrola SHA-256, retry/backoff, statusy clean/rejected/failed, ręczny rescan, audit i bezpieczne prawa plików; produkcja 8/8 clean.
+- [x] `UKFIN-202R1` [S] - ceny jednostkowe kosztów do 10 miejsc dziesiętnych, spójne zaokrąglenie kwot pieniężnych, podgląd netto/VAT/brutto przed zapisem oraz zachowanie precyzji w kosztach cyklicznych i purchase credits.
+- [x] `UKFIN-402R2` [S] - atomowe połączenie wychodzącej transakcji bankowej z istniejącym kosztem, z właściwym rachunkiem, płatnością, księgowaniem, uzgodnieniem, RBAC i tenant isolation.
+- [x] `UKFIN-402R1` [S] - zgodność importera z rzeczywistym polskim CSV Revolut: auto-profil, timestamp, bezpieczna deduplikacja, status/opłata/waluta, diagnostyka PL/EN/PT oraz prywatny dry run 7/7 bez zapisów.
 - [x] Audyt `/admin/*` RBAC/tenant isolation — 56 Resources i 24 Pages objęte fail-closed registry, niestandardowe trasy i dashboard zabezpieczone, role/menu zgodne, selektory i powiadomienia tenantowe, automatyczny kontrakt 1140 asercji.
 - [x] `UKFIN-611` [M] — deterministyczna macierz success/invalid VRN/expired token/duplicate/5xx/timeout, ścisły katalog submission scenarios, audytowane `rejected` i GET-only reconciliation duplikatu; live run nadal za gate'em FPH.
 - [x] `UKFIN-610` [M] — append-only SHA-256 event chain oraz prywatny, integrity-checked PDF receipt po bezpośrednim HTTP 201.

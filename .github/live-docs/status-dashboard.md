@@ -1,18 +1,22 @@
 # Website Expert NI — Project Status Dashboard
 
-**Last Full Validation:** 2026-11-13
-**Last Targeted Validation:** 2026-11-13 — deploy `ef15028`, migracja i produkcyjny smoke test RBAC
+**Last Full Validation:** 2026-11-20 - pełny Finance po UKFIN-202R2
+**Last Targeted Validation:** 2026-11-20 - UKFIN-202R2, skaner załączników finansowych
 
 ## Health Checks
 - **Code Quality:** 🟡 ESLint, Blade i build przechodzą; repozytoryjny `pint --test` nadal wykazuje istniejący dług formatowania w plikach legacy, niezwiązany z wdrożeniem HMRC
-- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 1249 kluczy liściowe w PL/EN/PT
-- **Tests:** audyt admina 8 passed / 1140 assertions; Filament targeted 14 passed / 1185 assertions; eksporty/polityki 44 passed / 74 assertions. Pełna regresja ujawniła 24 testy fixture'ów dostosowane do nowych bramek oraz 6 potwierdzonych, niezwiązanych błędów baseline.
+- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 1300 kluczy liściowe w PL/EN/PT
+- **Tests:** UKFIN-202R2 targeted 8 passed / 33 assertions; pełny Finance 373 passed / 1 skipped / 2601 assertions. Pominięcie dotyczy blokad wierszy niedostępnych w SQLite.
 - **Multi-Tenancy Compliance:** 100% dla modułów panelu ✅; `SearchRankingCheck` ma teraz `BelongsToTenant`, a publiczne rekordy nullable pozostają dostępne poza panelem zgodnie z przeznaczeniem.
 - **Security Review:** 🟡 HMRC production fail-closed, pełne audyty Composer/NPM i secret scan czyste; produkcja nadal zablokowana przez niezależny pentest oraz zewnętrzne gate'y FPH/HMRC
 - **Build (Vite):** ✅ Brak błędów TS/JS
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-11-20 - **UKFIN-202R2 financial attachment scanner:** dodano automatyczny job ClamAV po uploadzie, ponowną kontrolę rozmiaru i SHA-256, retry/backoff, jawne `failed`, bezpieczne kody błędów, ręczny rescan i bazodanową blokadę unikalności. Produkcja ma ClamAV 1.5.4, poprawne prawa wspólnej grupy `www-data`, test zwykłego pliku `exit 0` i EICAR `exit 1`. Wszystkie 8 dokumentów jest `clean`, kolejka i failed jobs są puste, tenant audit przechodzi. Finance 373 passed / 1 skipped / 2601 assertions; EN/PL/PT po 1300 kluczy ✅
+- 2026-11-20 - **UKFIN-202R1 expense unit price precision:** usunięto zaokrąglenie ceny jednostkowej kosztu do 2 miejsc i rozszerzono purchase-side `unit_price` do `DECIMAL(24,10)`. Formularz kosztu pokazuje na żywo netto, VAT i brutto, korzystając z tych samych reguł co zapis. Scenariusz `1250 x 0.0333333333` daje `41.67 + 8.33 = 50.00 GBP`; precyzja przechodzi także przez koszty cykliczne i purchase credits. Migracja `000034` wykonana lokalnie; Finance 365 passed / 1 skipped / 2565 assertions; EN/PL/PT po 1287 kluczy ✅
+- 2026-11-20 - **UKFIN-402R2 existing expense link:** dodano akcję `Połącz z istniejącym kosztem` na wychodzącej transakcji. System nie tworzy duplikatu, lecz zatwierdza i księguje uprawniony szkic, tworzy płatność na rachunku źródłowej transakcji i wykonuje uzgodnienie w jednej transakcji DB. Filtry wymagają tego samego tenanta, waluty i wystarczającego salda; zamknięty okres i błędy powodują pełny rollback. Test scenariusza 10/69, bank suite 56/392, pełny Finance przechodzi; EN/PL/PT po 1285 kluczy ✅
+- 2026-11-20 - **UKFIN-402R1 real bank CSV:** importer automatycznie rozpoznaje polski eksport Revolut, obsługuje timestamp `Y-m-d H:i:s`, zapisuje resolved mapping i profil oraz używa nieodwracalnej tożsamości źródłowej z pełnym timestampem. Status inny niż zakończony, niezerowa opłata i waluta niezgodna z rachunkiem są bezpiecznie odrzucane. UI pokazuje lokalizowane kategorie bez wartości transakcji. `docs/private/` jest ignorowany przez Git. Prywatny dry run: 7/7 poprawnych, 0 zapisów. Finance: 357 passed / 1 skipped / 2512 assertions; EN/PL/PT po 1277 kluczy ✅
 - 2026-11-13 — **Deploy RBAC/tenant isolation:** commit `ef15028` wdrożony do `/var/www/website-expert.uk`; przed zmianą wykonano i zweryfikowano SHA-256 kopię kodu oraz pełny zrzut MySQL w `storage/app/deploy-backups/20261113-rbac-ef15028-v2`. Migracja `000033` jest w batch 11, permission/cache reset i `optimize` przeszły, kolejka otrzymała restart. Produkcja potwierdza 4 nowe klucze, pełny dostęp admina, tenantowe klucze managera/developera i 0 zabronionych uprawnień platformowych managera; HTTP `/`, `/admin` i guest calendar: `200/302/302`, brak świeżych błędów Laravel ✅
 - 2026-11-13 — **Audyt `/admin/*` RBAC i tenant isolation:** wszystkie 56 Resources i 24 Pages mają jawne, fail-closed permission keys; dashboard, quick actions, topbar, kalendarz, HMRC OAuth, eksporty i custom routes respektują role. Cross-tenant dostęp wymaga `view_businesses`; `manager` utracił uprawnienia platformowe, selektory użytkowników i powiadomienia są tenantowe. Migracja `000033` aktualizuje istniejące role. Kontrakt automatyczny: 1140 asercji ✅
 - 2026-11-11 — **HMRC live account read:** poprawnie pobrano testową liability i payment z osobnymi correlation IDs; panel zachował wyniki efemerycznie i nie utworzył księgowań. Tenant evidence chain 9/9 jest integralny. Prywatny redacted export ma file SHA-256 `ab210110fdc9900fbd39645d6f2e3743b08001177d58de74a6c7b01b4fc17d05` i payload SHA-256 `8bfc4c27a51873e7c137a6ccef524cae76a009babdd96da6e8c86df7e33c882f` ✅

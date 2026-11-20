@@ -4,6 +4,7 @@ namespace Tests\Feature\Finance;
 
 use App\Actions\Finance\CreateExpenseAction;
 use App\Actions\Finance\InitializeAccountingSetupAction;
+use App\Jobs\ScanFinancialAttachmentJob;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\Expense;
@@ -13,6 +14,7 @@ use App\Services\Finance\FinancialAttachmentService;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -31,6 +33,7 @@ class FinancialAttachmentServiceTest extends TestCase
         parent::setUp();
 
         Storage::fake('financial');
+        Queue::fake();
         $this->business = Business::create([
             'name' => 'Attachment Books Ltd',
             'slug' => 'attachment-books',
@@ -82,6 +85,11 @@ class FinancialAttachmentServiceTest extends TestCase
         $this->assertStringStartsWith($this->business->id.'/expense/'.$this->expense->id.'/', $attachment->path);
         $this->assertStringNotContainsString('supplier-bill', $attachment->path);
         $this->assertTrue($this->expense->attachments()->whereKey($attachment->id)->exists());
+        $this->assertNotNull($attachment->scan_requested_at);
+        Queue::assertPushed(
+            ScanFinancialAttachmentJob::class,
+            fn (ScanFinancialAttachmentJob $job): bool => $job->attachmentId === $attachment->id,
+        );
     }
 
     public function test_it_rejects_a_duplicate_file_for_the_same_financial_record(): void

@@ -8,5 +8,6 @@ final readonly class BankStatementCsvError
     public function __construct(
         public int $rowNumber,
         public array $messages,
+        public string $code = 'invalid_row',
     ) {}
 }

@@ -61,6 +61,23 @@ class ExpenseRequestTest extends TestCase
         $this->assertTrue($validator->passes(), json_encode($validator->errors()->toArray()));
     }
 
+    public function test_unit_price_accepts_ten_decimal_places_but_rejects_more(): void
+    {
+        $payload = $this->validPayload();
+        $payload['items'][0]['unit_price'] = '0.0333333333';
+        $request = $this->request(StoreExpenseRequest::class, $payload);
+        $validator = Validator::make($request->all(), $request->rules());
+
+        $this->assertTrue($validator->passes(), json_encode($validator->errors()->toArray()));
+
+        $payload['items'][0]['unit_price'] = '0.03333333333';
+        $request = $this->request(StoreExpenseRequest::class, $payload);
+        $validator = Validator::make($request->all(), $request->rules());
+
+        $this->assertFalse($validator->passes());
+        $this->assertArrayHasKey('items.0.unit_price', $validator->errors()->toArray());
+    }
+
     public function test_duplicate_supplier_invoice_number_is_rejected_for_the_same_supplier(): void
     {
         $expense = $this->createExpense();

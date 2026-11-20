@@ -42,6 +42,17 @@ return [
             'driver' => 'local',
             'root' => storage_path('app/private/finance'),
             'visibility' => 'private',
+            'directory_visibility' => 'private',
+            'permissions' => [
+                'file' => [
+                    'public' => 0644,
+                    'private' => 0660,
+                ],
+                'dir' => [
+                    'public' => 0755,
+                    'private' => 0770,
+                ],
+            ],
             'serve' => false,
             'throw' => true,
             'report' => true,

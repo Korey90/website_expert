@@ -3,9 +3,11 @@
 namespace Tests\Feature\Finance;
 
 use App\Actions\Finance\CreateBankAccountAction;
+use App\Actions\Finance\CreateExpenseAction;
 use App\Actions\Finance\CreateRecordFromBankTransactionAction;
 use App\Actions\Finance\InitializeAccountingSetupAction;
 use App\Actions\Finance\IssueInvoiceAction;
+use App\Actions\Finance\LinkExistingExpenseToBankTransactionAction;
 use App\Filament\Resources\BankTransactionResource;
 use App\Models\AccountingPeriod;
 use App\Models\BankAccount;
@@ -54,11 +56,11 @@ class BankTransactionRecordCreationTest extends TestCase
         $this->user = User::factory()->create(['is_active' => true]);
         $this->addMember($this->business, $this->user);
 
-        foreach (['access_admin_panel', 'view_finance', 'manage_finance', 'post_finance'] as $permission) {
+        foreach (['access_admin_panel', 'view_finance', 'manage_finance', 'approve_finance', 'post_finance'] as $permission) {
             Permission::findOrCreate($permission, 'web');
         }
 
-        $this->user->givePermissionTo(['access_admin_panel', 'view_finance', 'manage_finance', 'post_finance']);
+        $this->user->givePermissionTo(['access_admin_panel', 'view_finance', 'manage_finance', 'approve_finance', 'post_finance']);
         app(InitializeAccountingSetupAction::class)->execute($this->business, $this->user);
         $this->period = AccountingPeriod::withoutGlobalScopes()->create([
             'business_id' => $this->business->id,
@@ -144,6 +146,135 @@ class BankTransactionRecordCreationTest extends TestCase
         $this->assertSame('120.00', $bankLine->credit_gbp);
         $this->assertSame(BankTransaction::STATUS_RECONCILED, $transaction->fresh()->reconciliation_status);
         $this->assertSame($payment->id, $reconciliation->allocations->sole()->reconcilable_id);
+    }
+
+    public function test_outflow_links_existing_draft_expense_without_creating_a_duplicate(): void
+    {
+        $expense = $this->draftExpense();
+        $transaction = $this->transaction(-50, 'EXISTING-EXPENSE-50', 'Existing Supplier Ltd');
+
+        $reconciliation = app(LinkExistingExpenseToBankTransactionAction::class)->execute(
+            $transaction,
+            $expense,
+            $this->user,
+            'Matched to the supplier payment on the imported statement.',
+        );
+
+        $expense->refresh();
+        $payment = ExpensePayment::withoutGlobalScopes()->sole();
+        $bankLine = $payment->journalEntries()->firstOrFail()->lines()
+            ->where('ledger_account_id', $this->bankLedger->id)
+            ->firstOrFail();
+        $allocation = $reconciliation->allocations->sole();
+
+        $this->assertDatabaseCount('expenses', 1);
+        $this->assertSame(Expense::STATUS_PARTIALLY_PAID, $expense->status);
+        $this->assertSame('50.00', $expense->amount_paid);
+        $this->assertSame('70.00', $expense->amount_due);
+        $this->assertSame($this->user->id, $expense->approved_by);
+        $this->assertSame($this->user->id, $expense->posted_by);
+        $this->assertSame($expense->id, $payment->expense_id);
+        $this->assertSame($this->bankAccount->id, $payment->bank_account_id);
+        $this->assertSame('50.00', $payment->amount);
+        $this->assertSame('50.00', $bankLine->credit_gbp);
+        $this->assertSame(BankTransaction::STATUS_RECONCILED, $transaction->fresh()->reconciliation_status);
+        $this->assertSame($payment->id, $allocation->reconcilable_id);
+        $this->assertSame('supplier_payment', $allocation->event_type);
+        $this->assertSame('50.00', $allocation->amount);
+    }
+
+    public function test_existing_expense_link_requires_post_and_draft_approval_permissions(): void
+    {
+        $expense = $this->draftExpense();
+        $transaction = $this->transaction(-120, 'EXISTING-PERMISSION', 'Existing Supplier Ltd');
+        $this->user->revokePermissionTo('post_finance');
+
+        try {
+            app(LinkExistingExpenseToBankTransactionAction::class)->execute($transaction, $expense, $this->user);
+            $this->fail('Posting permission is required to link an existing expense.');
+        } catch (DomainException $exception) {
+            $this->assertStringContainsString('cannot link and post', $exception->getMessage());
+        }
+
+        $this->user->givePermissionTo('post_finance');
+        $this->user->revokePermissionTo('approve_finance');
+
+        try {
+            app(LinkExistingExpenseToBankTransactionAction::class)->execute($transaction, $expense, $this->user);
+            $this->fail('Approval permission is required for a draft expense.');
+        } catch (DomainException $exception) {
+            $this->assertStringContainsString('cannot approve', $exception->getMessage());
+        }
+
+        $this->assertSame(Expense::STATUS_DRAFT, $expense->fresh()->status);
+        $this->assertSame(BankTransaction::STATUS_UNMATCHED, $transaction->fresh()->reconciliation_status);
+        $this->assertDatabaseCount('expense_payments', 0);
+        $this->assertDatabaseCount('bank_reconciliations', 0);
+    }
+
+    public function test_existing_expense_link_rolls_back_draft_transition_when_period_is_closed(): void
+    {
+        $expense = $this->draftExpense();
+        $transaction = $this->transaction(-120, 'EXISTING-CLOSED-PERIOD', 'Existing Supplier Ltd');
+        $this->period->update(['status' => AccountingPeriod::STATUS_CLOSED]);
+
+        try {
+            app(LinkExistingExpenseToBankTransactionAction::class)->execute($transaction, $expense, $this->user);
+            $this->fail('A closed period must roll back the existing expense link workflow.');
+        } catch (DomainException $exception) {
+            $this->assertStringContainsString('is closed', $exception->getMessage());
+        }
+
+        $this->assertSame(Expense::STATUS_DRAFT, $expense->fresh()->status);
+        $this->assertNull($expense->approved_at);
+        $this->assertNull($expense->posted_at);
+        $this->assertSame(BankTransaction::STATUS_UNMATCHED, $transaction->fresh()->reconciliation_status);
+        $this->assertDatabaseCount('expense_payments', 0);
+        $this->assertDatabaseCount('bank_reconciliations', 0);
+    }
+
+    public function test_existing_expense_link_rejects_foreign_tenant_and_currency(): void
+    {
+        $transaction = $this->transaction(-120, 'EXISTING-BOUNDARY', 'Existing Supplier Ltd');
+        $otherBusiness = Business::create(['name' => 'Foreign Expense Ltd', 'slug' => 'foreign-expense', 'is_active' => true]);
+        $foreignExpense = Expense::withoutGlobalScopes()->create([
+            'business_id' => $otherBusiness->id,
+            'created_by' => $this->user->id,
+            'status' => Expense::STATUS_POSTED,
+            'currency' => 'GBP',
+            'issue_date' => '2026-11-01',
+            'tax_point' => '2026-11-01',
+            'subtotal' => 120,
+            'vat_amount' => 0,
+            'total' => 120,
+            'amount_paid' => 0,
+            'amount_due' => 120,
+            'business_purpose' => 'Foreign tenant fixture',
+        ]);
+
+        try {
+            app(LinkExistingExpenseToBankTransactionAction::class)->execute($transaction, $foreignExpense, $this->user);
+            $this->fail('A foreign tenant expense must not be linked.');
+        } catch (DomainException $exception) {
+            $this->assertStringContainsString('does not belong', $exception->getMessage());
+        }
+
+        $eurExpense = $this->draftExpense([
+            'currency' => 'EUR',
+            'gbp_exchange_rate' => '0.85000000',
+            'exchange_rate_source' => 'manual',
+            'exchange_rate_date' => '2026-11-01',
+        ]);
+
+        try {
+            app(LinkExistingExpenseToBankTransactionAction::class)->execute($transaction, $eurExpense, $this->user);
+            $this->fail('An expense in another currency must not be linked.');
+        } catch (DomainException $exception) {
+            $this->assertStringContainsString('same currency', $exception->getMessage());
+        }
+
+        $this->assertDatabaseCount('expense_payments', 0);
+        $this->assertSame(BankTransaction::STATUS_UNMATCHED, $transaction->fresh()->reconciliation_status);
     }
 
     public function test_gbp_receipt_can_settle_foreign_invoice_with_derived_fx_snapshot(): void
@@ -254,6 +385,7 @@ class BankTransactionRecordCreationTest extends TestCase
         $this->get(BankTransactionResource::getUrl('view', ['record' => $outflow]))
             ->assertOk()
             ->assertSee(__('finance.bank_reconciliation.actions.create_supplier_expense'))
+            ->assertSee(__('finance.bank_reconciliation.actions.link_existing_expense'))
             ->assertDontSee(__('finance.bank_reconciliation.actions.create_customer_payment'));
     }
 
@@ -293,6 +425,34 @@ class BankTransactionRecordCreationTest extends TestCase
         ]);
 
         return app(IssueInvoiceAction::class)->execute($invoice, $this->user);
+    }
+
+    /** @param array<string, mixed> $overrides */
+    private function draftExpense(array $overrides = []): Expense
+    {
+        $supplier = Supplier::factory()->for($this->business)->create();
+
+        return app(CreateExpenseAction::class)->execute($this->business, $this->user, [
+            'supplier_id' => $supplier->id,
+            'supplier_invoice_number' => 'EXISTING-'.fake()->unique()->numerify('######'),
+            'currency' => 'GBP',
+            'issue_date' => '2026-11-01',
+            'tax_point' => '2026-11-01',
+            'due_date' => '2026-11-30',
+            'received_date' => '2026-11-01',
+            'payment_method' => 'bank_transfer',
+            'business_purpose' => 'Existing software cost used for client work',
+            'items' => [[
+                'description' => 'Existing software expense',
+                'category' => 'software',
+                'quantity' => 1,
+                'unit_price' => 100,
+                'tax_code_id' => $this->taxCode('S20')->id,
+                'ledger_account_id' => $this->expenseLedger()->id,
+                'supply_date' => '2026-11-01',
+            ]],
+            ...$overrides,
+        ]);
     }
 
     private function transaction(float $amount, string $reference, string $counterparty): BankTransaction

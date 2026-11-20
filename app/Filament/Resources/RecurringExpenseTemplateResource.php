@@ -17,13 +17,13 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 
 class RecurringExpenseTemplateResource extends BaseResource
 {
@@ -87,7 +87,7 @@ class RecurringExpenseTemplateResource extends BaseResource
                                     Forms\Components\TextInput::make('currency')->label(__('finance.expenses.fields.currency'))->default('GBP')->disabled()->dehydrated(false),
                                     Forms\Components\Textarea::make('business_purpose')->label(__('finance.expenses.fields.business_purpose'))->required()->columnSpanFull(),
                                     Forms\Components\Textarea::make('notes')->label(__('finance.expenses.fields.notes'))->columnSpanFull(),
-                                ]),                            
+                                ]),
                         ]),
                     Tab::make(__('finance.recurring_expenses.sections.items'))
                         ->schema([
@@ -100,7 +100,7 @@ class RecurringExpenseTemplateResource extends BaseResource
                                             Forms\Components\Select::make('category')->label(__('finance.expenses.fields.category'))->options(collect(config('finance.expense_categories', []))->mapWithKeys(fn (string $category): array => [$category => __('finance.expense_categories.'.$category)])->all())->default('other')->required()->columnSpan(2),
                                             Forms\Components\Select::make('ledger_account_id')->label(__('finance.expenses.fields.ledger_account'))->options(fn (): array => LedgerAccount::activePostable()->where('type', 'expense')->orderBy('code')->get()->mapWithKeys(fn (LedgerAccount $account): array => [$account->id => "{$account->code} — {$account->name}"])->all())->searchable()->preload()->columnSpan(2),
                                             Forms\Components\TextInput::make('quantity')->label(__('finance.expenses.fields.quantity'))->numeric()->minValue(0.01)->default(1)->required(),
-                                            Forms\Components\TextInput::make('unit_price')->label(__('finance.expenses.fields.unit_price'))->numeric()->minValue(0)->required()->columnSpan(2),
+                                            Forms\Components\TextInput::make('unit_price')->label(__('finance.expenses.fields.unit_price'))->numeric()->step('0.0000000001')->minValue(0)->required()->columnSpan(2),
                                             Forms\Components\Toggle::make('billable')->label(__('finance.expenses.fields.billable'))->live(),
                                             Forms\Components\Select::make('client_id')->label(__('finance.expenses.fields.billable_client'))->options(fn (): array => Client::orderBy('company_name')->pluck('company_name', 'id')->all())->searchable()->required(fn (Get $get): bool => (bool) $get('billable'))->visible(fn (Get $get): bool => (bool) $get('billable'))->columnSpan(2),
                                             Forms\Components\Select::make('project_id')->label(__('finance.expenses.fields.project'))->options(fn (): array => Project::orderBy('title')->pluck('title', 'id')->all())->searchable()->columnSpan(2),
@@ -109,7 +109,7 @@ class RecurringExpenseTemplateResource extends BaseResource
                                         ->defaultItems(1)
                                         ->minItems(1)
                                         ->required(),
-                                ]),                            
+                                ]),
                         ]),
 
                 ]),

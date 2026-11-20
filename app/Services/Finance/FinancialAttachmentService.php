@@ -2,6 +2,7 @@
 
 namespace App\Services\Finance;
 
+use App\Jobs\ScanFinancialAttachmentJob;
 use App\Models\FinancialAttachment;
 use App\Models\User;
 use DomainException;
@@ -56,7 +57,7 @@ class FinancialAttachmentService
         }
 
         try {
-            return FinancialAttachment::withoutGlobalScopes()->create([
+            $attachment = FinancialAttachment::withoutGlobalScopes()->create([
                 'business_id' => $businessId,
                 'attachable_type' => $attachable->getMorphClass(),
                 'attachable_id' => $attachable->getKey(),
@@ -69,6 +70,7 @@ class FinancialAttachmentService
                 'size' => $file->getSize(),
                 'sha256' => $sha256,
                 'scan_status' => FinancialAttachment::SCAN_PENDING,
+                'scan_requested_at' => now(),
                 'retention_until' => today()->addYears((int) config('finance.attachments.retention_years', 6)),
             ]);
         } catch (Throwable $exception) {
@@ -76,6 +78,12 @@ class FinancialAttachmentService
 
             throw $exception;
         }
+
+        ScanFinancialAttachmentJob::dispatch($attachment->id)
+            ->onQueue((string) config('finance.attachments.scanner.queue', 'default'))
+            ->afterCommit();
+
+        return $attachment;
     }
 
     private function businessId(Model $attachable): string

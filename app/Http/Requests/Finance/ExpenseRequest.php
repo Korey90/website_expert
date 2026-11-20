@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Finance;
 
 use App\Models\Expense;
+use App\Models\ExpenseItem;
 use App\Support\PermissionHelper;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -67,7 +68,7 @@ abstract class ExpenseRequest extends FormRequest
             'items' => ['required', 'array', 'min:1'],
             'items.*.description' => ['required', 'string', 'max:255'],
             'items.*.quantity' => ['required', 'numeric', 'gt:0'],
-            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'items.*.unit_price' => ['required', 'numeric', 'decimal:0,'.ExpenseItem::UNIT_PRICE_SCALE, 'min:0'],
             'items.*.supply_date' => ['nullable', 'date'],
             'items.*.tax_code_id' => ['required', 'integer', $taxCodeExists],
             'items.*.ledger_account_id' => [

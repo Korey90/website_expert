@@ -22,6 +22,7 @@ use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Spatie\Permission\Models\Permission;
@@ -41,6 +42,7 @@ class AccountantPackTest extends TestCase
         parent::setUp();
 
         Storage::fake('financial');
+        Queue::fake();
 
         $this->business = Business::create([
             'name' => 'Website Expert NI',

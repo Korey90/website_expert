@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\Finance\FinancialAttachmentScanner;
 use App\Events\LeadAssigned;
 use App\Events\LeadCaptured;
 use App\Listeners\AutomationEventListener;
@@ -44,6 +45,7 @@ use App\Policies\SalesOfferTemplatePolicy;
 use App\Policies\SupplierPolicy;
 use App\Policies\VatAdjustmentPolicy;
 use App\Policies\VatReturnPolicy;
+use App\Services\Finance\ClamAvFinancialAttachmentScanner;
 use App\Services\Hmrc\Contracts\HmrcClientInterface;
 use App\Services\Hmrc\HmrcEnvironmentGuard;
 use App\Services\Hmrc\HmrcProductionClient;
@@ -59,6 +61,8 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(FinancialAttachmentScanner::class, ClamAvFinancialAttachmentScanner::class);
+
         $this->app->bind(HmrcClientInterface::class, function () {
             return app(HmrcEnvironmentGuard::class)->environment() === 'production'
                 ? new HmrcProductionClient

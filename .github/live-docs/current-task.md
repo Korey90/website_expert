@@ -1,28 +1,72 @@
 # Current Task
 
-**Status:** Plan gotowy - oczekuje na rozpoczęcie implementacji
-**Zadanie:** UKFIN-402R1 - import rzeczywistego CSV Revolut PL
+**Status:** Zakończone
+**Zadanie:** UKFIN-202R2 - automatyczne skanowanie załączników finansowych
 **Data rozpoczęcia:** 2026-11-20
-**Plan:** `docs/plans/bank-statement-csv-real-bank-import-fix-plan.md`
 **Ochrona równoległej pracy:** nie modyfikować `resources/js/Pages/Landing/PlStronyInternetowe.tsx`.
 
-## Bieżąca diagnoza
+**Stan wdrożenia:** kod i migracja `000035` działają na `website-expert.uk`; ClamAV i prawa katalogu są skonfigurowane, test EICAR przeszedł, a wszystkie 8 dokumentów ma status `clean`. Runbook: `docs/operations/financial-attachment-security-scanner.md`.
 
-- Automatyczne mapowanie nie rozpoznaje polskich nagłówków `Data zrealizowania`, `Kwota`, `Waluta` i `Opis`.
-- Po ręcznym mapowaniu wszystkie wiersze odpadają, ponieważ bank używa timestampu `Y-m-d H:i:s`, a parser przyjmuje tylko datę.
-- Prywatny plik ma 7 wierszy, poprawny separator/kodowanie/limity i diagnostycznie daje 7/7 poprawnych wierszy po naprawie mapowania i daty.
-- Dodatkowo wymagane są bezpieczna deduplikacja z timestampem, kontrola statusu/opłaty/waluty oraz użyteczne komunikaty bez ujawniania danych.
-- `docs/private/` musi zostać dodany do `.gitignore` przed pracą z fixture'ami.
+## Wynik UKFIN-202R2
+
+- Automatyczny, asynchroniczny skan ClamAV działa po każdym uploadzie.
+- Integralność rozmiaru i SHA-256 jest sprawdzana przed skanem oraz przed wydaniem pliku.
+- Wyniki `clean`, `rejected`, `failed` i retry są audytowane bez surowego outputu skanera.
+- Job ma bazodanową blokadę unikalności i limity `120/135/180` dla skanera, joba i `retry_after`.
+- Panel kosztu i korekty VAT pokazuje wynik oraz pozwala ponowić skan.
+- Produkcja: 8 clean, 0 pending, 0 failed, 0 failed jobs, tenant audit poprawny.
+- Walidacja: 373 passed, 1 skipped, 2601 assertions; EN/PL/PT po 1300 kluczy.
+
+## Bieżąca diagnoza UKFIN-202R2
+
+- Upload poprawnie zapisuje prywatny plik i rekord `financial_attachments`, ale kończy działanie na statusie `pending`.
+- Nie istnieje job, serwis ani komenda, która uruchamia skaner i aktualizuje wynik.
+- Worker serwera działa i nie ma failed jobs, więc przyczyną nie jest zalegająca kolejka.
+- ClamAV nie jest zainstalowany, a katalog `storage/app/private/finance` nie daje workerowi działającemu jako `korey` prawa odczytu.
+- Plan realizacji: `docs/plans/financial-attachment-security-scan-fix-plan.md`.
+
+## Plan wykonania UKFIN-202R2
+
+1. [x] Dodać trwały audit stanu skanowania i status `failed`.
+2. [x] Dodać adapter ClamAV i integralność size/SHA-256 przed skanem.
+3. [x] Dodać job z retry/backoff i dispatch po uploadzie.
+4. [x] Dodać komendę rescan oraz akcję ponowienia w panelu.
+5. [x] Naprawić konfigurację praw plików dla PHP-FPM i workera.
+6. [x] Dodać PL/EN/PT oraz testy wszystkich wyników.
+7. [x] Wdrożyć kod, migrację i wykonać czynności serwerowe wymagające `sudo`.
+
+---
+
+## Poprzednie zakończone zadanie - UKFIN-202R1
+
+## Diagnoza UKFIN-202R1
+
+- `SyncExpenseItemsAction` zaokrąglał cenę jednostkową do 2 miejsc przed zapisem.
+- Kolumna `expense_items.unit_price` miała typ `DECIMAL(15,2)`, więc `0.0333333333` stawało się `0.03`.
+- Dla ilości 1250 i VAT 20% dawało to błędne `45.00 GBP` zamiast `50.00 GBP`.
+- Formularz nie pokazywał netto, VAT i brutto przed zapisaniem kosztu.
 
 ## Plan wykonania
 
-1. Ochronić `docs/private/` przed Git.
-2. Dodać failing tests na fikcyjnych danych o strukturze Revolut PL.
-3. Dodać profil mapowania, timestamp i bezpieczną source identity.
-4. Dodać kontrolę statusu, opłaty i zgodności waluty rachunku.
-5. Poprawić diagnostykę UI i tłumaczenia PL/EN/PT.
-6. Uruchomić targeted i Finance regression.
-7. Potwierdzić prywatnym dry run wynik 7 valid / 0 failed / 0 writes.
+1. [x] Rozszerzyć precyzję ceny jednostkowej do 10 miejsc dziesiętnych.
+2. [x] Usunąć przedwczesne zaokrąglanie do 2 miejsc w akcjach synchronizacji.
+3. [x] Zachować precyzję w kosztach cyklicznych i zakupowych notach kredytowych.
+4. [x] Dodać nieutrwalany podgląd netto, VAT i brutto w formularzu kosztu.
+5. [x] Użyć identycznych reguł zaokrąglania per pozycja w podglądzie i zapisie.
+6. [x] Dodać walidację maksymalnie 10 miejsc oraz tłumaczenia PL/EN/PT.
+7. [x] Wykonać migrację lokalnej bazy i pełną regresję Finance.
+
+## Wynik UKFIN-202R1
+
+- `unit_price` w kosztach, szablonach cyklicznych i zakupowych notach kredytowych ma teraz `DECIMAL(24,10)` oraz cast `decimal:10`.
+- Wartość `0.0333333333` jest zachowywana bez obcięcia do `0.03`.
+- Scenariusz `1250 x 0.0333333333` z VAT 20% daje netto `41.67 GBP`, VAT `8.33 GBP` i brutto `50.00 GBP`.
+- Formularz `/admin/expenses` pokazuje na żywo netto, VAT i brutto przed zapisaniem.
+- Podgląd i zapis korzystają ze wspólnej metody obliczenia pozycji oraz zaokrąglenia do najmniejszej jednostki waluty.
+- Migracja `2026_11_20_000034` została wykonana lokalnie jako batch 26. Niezwiązana migracja RBAC `000033` pozostała nietknięta i oczekująca.
+- Targeted: 29 passed / 109 assertions; pełny Finance: 365 passed / 1 skipped / 2565 assertions.
+- EN/PL/PT: po 1287 zgodnych kluczy, bez braków i nadmiarowych kluczy.
+- Zmiana nie została jeszcze wdrożona na serwer.
 
 ---
 

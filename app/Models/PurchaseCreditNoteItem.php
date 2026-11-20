@@ -22,7 +22,7 @@ class PurchaseCreditNoteItem extends Model
     protected function casts(): array
     {
         return [
-            'quantity' => 'decimal:2', 'unit_price' => 'decimal:2', 'supply_date' => 'date',
+            'quantity' => 'decimal:2', 'unit_price' => 'decimal:'.ExpenseItem::UNIT_PRICE_SCALE, 'supply_date' => 'date',
             'net_amount' => 'decimal:2', 'net_amount_gbp' => 'decimal:2',
             'vat_rate_snapshot' => 'decimal:2', 'vat_amount' => 'decimal:2',
             'vat_amount_gbp' => 'decimal:2', 'gross_amount' => 'decimal:2',

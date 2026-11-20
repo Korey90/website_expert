@@ -29,6 +29,14 @@ return [
         'disk' => env('FINANCE_ATTACHMENTS_DISK', 'financial'),
         'max_bytes' => 10 * 1024 * 1024,
         'retention_years' => 6,
+        'scanner' => [
+            'binary' => env('FINANCE_ATTACHMENT_SCANNER_BINARY', 'clamscan'),
+            'fdpass' => env('FINANCE_ATTACHMENT_SCANNER_FDPASS', false),
+            'timeout_seconds' => (int) env('FINANCE_ATTACHMENT_SCANNER_TIMEOUT', 120),
+            'queue' => env('FINANCE_ATTACHMENT_SCANNER_QUEUE', 'default'),
+            'tries' => (int) env('FINANCE_ATTACHMENT_SCANNER_TRIES', 3),
+            'backoff_seconds' => [60, 300, 900],
+        ],
         'allowed_mime_types' => [
             'application/pdf',
             'image/jpeg',

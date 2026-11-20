@@ -3,6 +3,7 @@
 namespace App\Actions\Finance;
 
 use App\Models\Client;
+use App\Models\ExpenseItem;
 use App\Models\LedgerAccount;
 use App\Models\Project;
 use App\Models\RecurringExpenseTemplate;
@@ -27,7 +28,10 @@ class SyncRecurringExpenseTemplateItemsAction
         foreach ($items as $order => $item) {
             $description = trim((string) ($item['description'] ?? ''));
             $quantity = round((float) ($item['quantity'] ?? 0), 2);
-            $unitPrice = round((float) ($item['unit_price'] ?? -1), 2);
+            $unitPrice = round(
+                (float) ($item['unit_price'] ?? -1),
+                ExpenseItem::UNIT_PRICE_SCALE,
+            );
             $taxCodeId = $this->tenantModelId(TaxCode::class, $item['tax_code_id'] ?? null, $template->business_id);
             $category = in_array($item['category'] ?? null, config('finance.expense_categories', []), true)
                 ? $item['category']

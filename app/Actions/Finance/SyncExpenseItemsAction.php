@@ -30,7 +30,10 @@ class SyncExpenseItemsAction
 
         foreach ($items as $order => $itemData) {
             $quantity = round((float) ($itemData['quantity'] ?? 0), 2);
-            $unitPrice = round((float) ($itemData['unit_price'] ?? -1), 2);
+            $unitPrice = round(
+                (float) ($itemData['unit_price'] ?? -1),
+                ExpenseItem::UNIT_PRICE_SCALE,
+            );
             $description = trim((string) ($itemData['description'] ?? ''));
 
             if ($description === '' || $quantity <= 0 || $unitPrice < 0) {

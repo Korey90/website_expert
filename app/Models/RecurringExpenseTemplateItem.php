@@ -19,7 +19,7 @@ class RecurringExpenseTemplateItem extends Model
     protected function casts(): array
     {
         return [
-            'quantity' => 'decimal:2', 'unit_price' => 'decimal:2',
+            'quantity' => 'decimal:2', 'unit_price' => 'decimal:'.ExpenseItem::UNIT_PRICE_SCALE,
             'billable' => 'boolean', 'order' => 'integer',
         ];
     }
