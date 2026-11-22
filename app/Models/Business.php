@@ -185,6 +185,16 @@ class Business extends Model
         return $this->hasMany(FinancialAttachment::class);
     }
 
+    public function fixedAssetCategories(): HasMany
+    {
+        return $this->hasMany(FixedAssetCategory::class);
+    }
+
+    public function fixedAssets(): HasMany
+    {
+        return $this->hasMany(FixedAsset::class);
+    }
+
     public function purchaseCreditNotes(): HasMany
     {
         return $this->hasMany(PurchaseCreditNote::class);

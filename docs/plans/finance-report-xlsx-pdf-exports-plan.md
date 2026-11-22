@@ -1,6 +1,6 @@
 # UKFIN-512 - Eksport raportów finansowych do XLSX i PDF
 
-**Status:** Zrealizowany lokalnie, gotowy do wdrożenia
+**Status:** Zrealizowany i wdrożony na produkcji
 **Data realizacji:** 2026-11-22
 
 ## Zakres
@@ -42,4 +42,4 @@ Rozszerzyć następujące raporty o eksport Excel XLSX i PDF przy zachowaniu dot
 
 ## Wdrożenie
 
-Zmiana nie wymaga migracji bazy ani nowych pakietów Composer. Po wdrożeniu należy odbudować cache aplikacji i wykonać smoke test pobrania CSV, XLSX oraz PDF z jednego raportu okresowego i jednego raportu opartego na zakresie dat.
+Zmiana nie wymagała migracji bazy ani nowych pakietów Composer. Release `UKFIN-512-4daa50e0` wdrożono 2026-11-22 do `/var/www/website-expert.uk/`. Odbudowano autoloader i cache, zrestartowano kolejkę oraz potwierdzono 24 trasy eksportu. Produkcyjny test kontrolny wygenerował poprawny PDF o rozmiarze 878282 B i XLSX o rozmiarze 7026 B bez użycia danych księgowych. Kopia rollbacku znajduje się w `storage/app/deploy-backups/20261122-ukfin512-4daa50e0`.

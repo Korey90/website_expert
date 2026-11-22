@@ -74,6 +74,21 @@ class LedgerAccount extends Model
         return $this->hasMany(BankAccount::class);
     }
 
+    public function fixedAssetCategories(): HasMany
+    {
+        return $this->hasMany(FixedAssetCategory::class, 'asset_account_id');
+    }
+
+    public function accumulatedDepreciationCategories(): HasMany
+    {
+        return $this->hasMany(FixedAssetCategory::class, 'accumulated_depreciation_account_id');
+    }
+
+    public function depreciationExpenseCategories(): HasMany
+    {
+        return $this->hasMany(FixedAssetCategory::class, 'depreciation_expense_account_id');
+    }
+
     public function scopeActivePostable(Builder $query): Builder
     {
         return $query->where('is_active', true)->where('is_postable', true);
@@ -86,6 +101,9 @@ class LedgerAccount extends Model
             || $this->recurringExpenseItems()->exists()
             || $this->suppliers()->exists()
             || $this->bankAccounts()->exists()
+            || $this->fixedAssetCategories()->exists()
+            || $this->accumulatedDepreciationCategories()->exists()
+            || $this->depreciationExpenseCategories()->exists()
             || $this->journalLines()->exists();
     }
 }

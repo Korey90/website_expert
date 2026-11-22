@@ -28,6 +28,7 @@ class GenerateDocumentNumberActionTest extends TestCase
         $this->assertSame('INV-2026-001', $action->execute($businessA->id, 'invoice', $in2026));
         $this->assertSame('INV-2026-002', $action->execute($businessA->id, 'invoice', $in2026));
         $this->assertSame('QUOT-2026-001', $action->execute($businessA->id, 'quote', $in2026));
+        $this->assertSame('FA-2026-001', $action->execute($businessA->id, 'fixed_asset', $in2026));
         $this->assertSame('INV-2026-001', $action->execute($businessB->id, 'invoice', $in2026));
         $this->assertSame('INV-2027-001', $action->execute($businessA->id, 'invoice', $in2026->addYear()));
     }

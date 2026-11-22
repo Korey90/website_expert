@@ -30,6 +30,8 @@ class FilamentPermissionRegistry
         'DomainResource' => ['view' => 'view_domains'],
         'EmailTemplateResource' => ['view' => 'view_email_templates', 'create' => 'create_email_templates', 'update' => 'edit_email_templates', 'delete' => 'delete_email_templates'],
         'ExpenseResource' => ['view' => 'view_finance', 'create' => 'manage_finance', 'update' => 'manage_finance', 'delete' => 'manage_finance'],
+        'FixedAssetCategoryResource' => ['view' => 'view_finance', 'create' => 'manage_finance', 'update' => 'manage_finance', 'delete' => 'manage_finance'],
+        'FixedAssetResource' => ['view' => 'view_finance', 'create' => 'manage_finance', 'update' => 'manage_finance', 'delete' => 'manage_finance'],
         'InvoiceResource' => ['view' => 'view_invoices', 'create' => 'create_invoices', 'update' => 'edit_invoices', 'delete' => 'delete_invoices'],
         'JournalEntryResource' => ['view' => 'view_finance'],
         'LandingPageResource' => ['view' => 'view_landing_pages', 'create' => 'manage_landing_pages', 'update' => 'manage_landing_pages', 'delete' => 'manage_landing_pages'],

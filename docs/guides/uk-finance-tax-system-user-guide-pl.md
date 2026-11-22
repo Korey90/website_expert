@@ -4,7 +4,7 @@
 
 **Wersja instrukcji:** 1.0
 
-**Stan funkcjonalny opisany na:** 21 listopada 2026
+**Stan funkcjonalny opisany na:** 22 listopada 2026
 
 **Język panelu użyty w przykładach:** angielski
 
@@ -40,6 +40,7 @@ System obsługuje:
 - dokumenty w obsługiwanych walutach ze snapshotem kursu do GBP;
 - płatności klientów i dostawców;
 - sprzedażowe i zakupowe noty kredytowe;
+- roboczy rejestr środków trwałych i kategorie z mapowaniem kont księgowych;
 - import wyciągów CSV i uzgodnienie banku;
 - raporty zarządcze i księgowe;
 - lokalne obliczenie VAT Return;
@@ -55,7 +56,9 @@ System nie obsługuje obecnie:
 - Corporation Tax i CT600;
 - Self Assessment ani MTD Income Tax;
 - CIS;
-- automatycznej ewidencji środków trwałych i amortyzacji;
+- księgowania nabycia, aktywacji, ulepszenia i zbycia środków trwałych;
+- harmonogramów i automatycznego księgowania amortyzacji;
+- obliczania UK capital allowances;
 - automatycznych bank feeds przez Open Banking;
 - automatycznego rozliczania prepayments i accruals;
 - obsługi biura rachunkowego przez Agent Authorisation API;
@@ -192,6 +195,25 @@ Statusy:
 | `Locked` | Blokada końcowa, bez możliwości ponownego otwarcia z panelu |
 
 Nie używaj `Locked`, dopóki raporty nie zostały sprawdzone i zaakceptowane.
+
+### 5.5 Kategorie i roboczy rejestr środków trwałych
+
+W `Finance > Asset categories` albo `Finance > Kategorie środków trwałych` utwórz kategorie używane przez firmę, na przykład sprzęt komputerowy. Każda kategoria wymaga trzech aktywnych kont bieżącego tenanta:
+
+- konta środka trwałego typu `asset/fixed_asset`;
+- konta umorzenia typu `asset/contra_asset`;
+- konta kosztu amortyzacji typu `expense/depreciation`.
+
+Ustaw domyślną metodę amortyzacji księgowej, okres użytkowania w miesiącach i procent wartości rezydualnej. Są to ustawienia książkowe, nie reguły UK capital allowances.
+
+W `Finance > Fixed assets` albo `Finance > Środki trwałe` możesz utworzyć roboczy rekord aktywa. System nada numer `FA-YYYY-NNN` i skopiuje ustawienia z kategorii. Dopóki rekord ma status `Draft` lub `Wersja robocza`:
+
+- można go edytować i usunąć;
+- nie powstaje journal entry;
+- rekord nie wpływa na P&L, Balance Sheet, VAT ani inne raporty;
+- nie oznacza jeszcze aktywacji ani podatkowego rozpoznania środka trwałego.
+
+Na tym etapie rejestr służy do uporządkowania danych podstawowych. Nabycie, powiązanie z kosztem, aktywacja, zbycie i posting amortyzacji będą obsługiwane przez kolejne kontrolowane procesy.
 
 ## 6. Sprzedaż i VAT należny
 

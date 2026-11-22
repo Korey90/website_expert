@@ -1,33 +1,50 @@
 # Current Task
 
-**Status:** Zrealizowane lokalnie, gotowe do wdrożenia
-**Zadanie:** UKFIN-512 - eksport raportów finansowych do XLSX i PDF
-**Data realizacji:** 2026-11-22
-**Plan:** `docs/plans/finance-report-xlsx-pdf-exports-plan.md`
+**Status:** UKFIN-701 zrealizowane lokalnie; delta analysis UKFIN-702 zakończone
+**Zadanie:** UKFIN-702 - Acquisition/disposal workflow
+**Źródło:** `docs/plans/uk-finance-tax-module-plan.md`
+**Poprzedni plan wykonawczy:** `docs/plans/ukfin-701-fixed-assets-and-categories-plan.md`
+**Bieżący plan wykonawczy:** `docs/plans/ukfin-702-acquisition-disposal-workflow-plan.md`
 
-## Wynik
+## Kontekst
 
-- Trial Balance, Expense Report, Profit and Loss, Balance Sheet, Bank Reconciliation, Management Cash Flow, Aged Receivables and Payables oraz VAT Detail eksportują teraz CSV, XLSX i PDF.
-- Dodano wspólny model dokumentu, generator Excel oparty na PhpSpreadsheet i generator PDF oparty na Dompdf.
-- XLSX ma typowane kwoty, style, podsumowania, freeze pane i ustawienia wydruku A4/A3.
-- PDF zawiera nazwę firmy, czas wygenerowania, aktywne filtry, tabele i podsumowania.
-- Wszystkie 24 trasy eksportu wymagają `view_finance`, zachowują tenant isolation i zwracają prywatne odpowiedzi `no-store`.
-- Dotychczasowe trasy i układ CSV pozostają kompatybilne.
-- Dodano tłumaczenia PL/EN/PT oraz instrukcję użytkownika.
+- UKFIN-512 został wdrożony na `website-expert.uk` jako release `UKFIN-512-4daa50e0`.
+- UKFIN-001 został zamknięty decyzją właściciela: grupą docelową produktu jest sole trader.
+- Wszystkie 24 trasy raportów są aktywne, a kontrolne PDF i XLSX generują się poprawnie na produkcji.
+- UKFIN-612 pozostaje otwarte wyłącznie przez zewnętrzny pentest, gate licencji/wyjątku HMRC i formalną zgodę produkcyjną.
+- UKFIN-701 jest zakończone lokalnie i stanowi podstawę dla kontrolowanego nabycia oraz zbycia w UKFIN-702.
 
-## Walidacja
+## Wynik UKFIN-701
 
-- Wszystkie 24 trasy CSV/XLSX/PDF są zarejestrowane.
-- Każdy z ośmiu XLSX został otwarty i zweryfikowany przez PhpSpreadsheet.
-- Każdy z ośmiu PDF ma prawidłową odpowiedź, sygnaturę i prywatne nagłówki.
-- Użytkownik bez `view_finance` otrzymuje 403 dla XLSX i PDF.
-- Regresja dziewięciu klas raportowych: 46 testów i 605 asercji.
-- Pełny pakiet Finance: 387 zaliczonych, 1 pominięty zgodnie z ograniczeniem SQLite, 2815 asercji.
-- Pint, PHP lint, Blade cache i dotychczasowe testy CSV są poprawne.
+- Migracja `000037` tworzy tenantowe kategorie i roboczy rejestr środków trwałych.
+- Kategorie wymuszają właściwe, aktywne konta 1500/1600/7000 lub zgodne konta własne.
+- Aktywa otrzymują numer `FA-YYYY-NNN`, snapshot polityki księgowej i pozostają wyłącznie draftami.
+- UI PL/EN, parytet PT, fail-closed RBAC, tenant isolation i audit command są kompletne.
+- Lokalny MySQL: migracja batch 29, audit `invalid_count=0`.
+- Walidacja: Finance 396 passed, 1 skipped, 2871 assertions; Blade, Pint i 1375 kluczy na locale poprawne.
+
+## Delta analysis UKFIN-702
+
+- Nabycie użyje całej pozycji zaksięgowanego Expense i utworzy tylko reklasyfikację `Dr asset / Cr expense`.
+- VAT, AP, płatność i bank pozostają w istniejącym dokumencie zakupu.
+- Sprzedaż użyje całej pozycji wystawionej Invoice; invoice zachowa VAT i AR, a osobny journal usunie zwykłą sprzedaż i rozpozna gain/loss.
+- Niezmienna tabela transakcji połączy aktywo, źródłową pozycję, journal i ewentualny reversal.
+- Purchase i sales credit notes będą fail-closed do czasu odwrócenia zależnej operacji aktywa.
+- Inne zbycia, capital allowances i amortyzacja pozostają poza UKFIN-702.
 
 ## Następny krok
 
-Wdrożyć kod bez migracji bazy, odbudować cache i pobrać kontrolny XLSX oraz PDF z produkcji. Produkcja nie została zmieniona w ramach tej realizacji.
+Zaimplementować migrację `000038`, `FixedAssetTransaction`, kalkulator kosztu oraz Actions nabycia, ulepszenia, zbycia i reversal według bieżącego planu.
+
+## Poprzednie zakończone zadanie - UKFIN-701
+
+Raport końcowy: `.github/completed-tasks/2026-11-22 - UKFIN-701 rejestr srodkow trwalych.md`.
+
+---
+
+## Poprzednie zakończone zadanie - UKFIN-512
+
+Eksport ośmiu raportów do CSV, XLSX i PDF został wdrożony 2026-11-22. Raport końcowy: `.github/completed-tasks/2026-11-22 - UKFIN-512 eksport raportow do XLSX i PDF.md`.
 
 ---
 

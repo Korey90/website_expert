@@ -32,6 +32,7 @@ class AuditFinanceTenantData extends Command
         'expenses' => ['parent' => 'suppliers', 'foreign_key' => 'supplier_id', 'nullable_parent' => true],
         'expense_items' => ['parent' => 'expenses', 'foreign_key' => 'expense_id'],
         'expense_payments' => ['parent' => 'expenses', 'foreign_key' => 'expense_id'],
+        'fixed_assets' => ['parent' => 'fixed_asset_categories', 'foreign_key' => 'fixed_asset_category_id'],
         'purchase_credit_notes' => ['parent' => 'expenses', 'foreign_key' => 'expense_id'],
         'purchase_credit_note_items' => ['parent' => 'purchase_credit_notes', 'foreign_key' => 'purchase_credit_note_id'],
         'purchase_credit_refunds' => ['parent' => 'purchase_credit_notes', 'foreign_key' => 'purchase_credit_note_id'],
@@ -64,6 +65,9 @@ class AuditFinanceTenantData extends Command
         'bank_transactions.bank_statement_import_id' => ['table' => 'bank_transactions', 'parent' => 'bank_statement_imports', 'foreign_key' => 'bank_statement_import_id'],
         'payments.bank_account_id' => ['table' => 'payments', 'parent' => 'bank_accounts', 'foreign_key' => 'bank_account_id'],
         'expense_payments.bank_account_id' => ['table' => 'expense_payments', 'parent' => 'bank_accounts', 'foreign_key' => 'bank_account_id'],
+        'fixed_asset_categories.asset_account_id' => ['table' => 'fixed_asset_categories', 'parent' => 'ledger_accounts', 'foreign_key' => 'asset_account_id'],
+        'fixed_asset_categories.accumulated_depreciation_account_id' => ['table' => 'fixed_asset_categories', 'parent' => 'ledger_accounts', 'foreign_key' => 'accumulated_depreciation_account_id'],
+        'fixed_asset_categories.depreciation_expense_account_id' => ['table' => 'fixed_asset_categories', 'parent' => 'ledger_accounts', 'foreign_key' => 'depreciation_expense_account_id'],
         'bank_reconciliation_allocations.bank_transaction_id' => ['table' => 'bank_reconciliation_allocations', 'parent' => 'bank_transactions', 'foreign_key' => 'bank_transaction_id'],
         'hmrc_vat_submissions.hmrc_vat_obligation_id' => ['table' => 'hmrc_vat_submissions', 'parent' => 'hmrc_vat_obligations', 'foreign_key' => 'hmrc_vat_obligation_id'],
     ];
@@ -128,6 +132,14 @@ class AuditFinanceTenantData extends Command
         $report['ledger_accounts'] = [
             'invalid_count' => (clone $ledgerQuery)->count(),
             'sample_ids' => (clone $ledgerQuery)->limit(20)->pluck('account.id')->all(),
+        ];
+
+        $fixedAssetCategoryQuery = DB::table('fixed_asset_categories as category')
+            ->leftJoin('businesses as owner', 'owner.id', '=', 'category.business_id')
+            ->where(fn ($query) => $query->whereNull('category.business_id')->orWhereNull('owner.id'));
+        $report['fixed_asset_categories'] = [
+            'invalid_count' => (clone $fixedAssetCategoryQuery)->count(),
+            'sample_ids' => (clone $fixedAssetCategoryQuery)->limit(20)->pluck('category.id')->all(),
         ];
 
         $periodQuery = DB::table('accounting_periods as period')

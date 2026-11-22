@@ -3,6 +3,7 @@
 **Status:** IMPLEMENTACJA W TOKU — Fazy 0–5 zaimplementowane, Faza 6 w toku (`UKFIN-601`–`UKFIN-611` ukończone; techniczna część `UKFIN-612` wdrożona, release gate nadal otwarty); formalny gate księgowego pozostaje przed produkcyjnym submission
 **Data opracowania:** 2026-11-04  
 **Rynek docelowy:** Wielka Brytania  
+**Grupa docelowa:** Sole trader
 **Projekt:** Website Expert NI
 **Priorytet rekomendowany:** najpierw ewidencja finansowa i VAT, następnie MTD VAT; pozostałe deklaracje jako osobne rozszerzenia
 
@@ -27,6 +28,8 @@ System nie może przedstawiać wyliczeń jako profesjonalnej porady podatkowej. 
 ## 2. Zakres i granice produktu
 
 ### 2.1 Zakres podstawowy — rekomendowany do realizacji
+
+Zakres podstawowy jest projektowany i testowany dla sole tradera. Typy `limited_company` i `partnership` mogą pozostać w modelu danych jako rezerwa kompatybilności, ale nie są odbiorcami docelowymi i nie mogą automatycznie odblokowywać workflow właściwych dla tych form działalności.
 
 - utwardzenie istniejących faktur, ofert i płatności pod multi-tenancy;
 - poprawne faktury UK i VAT per pozycja;
@@ -178,7 +181,7 @@ Wymagania prawne i API mogą się zmieniać. Przed rozpoczęciem każdego etapu 
 #### `accounting_profiles`
 
 - `business_id` — unique FK;
-- `entity_type` — `limited_company`, `sole_trader`, `partnership`;
+- `entity_type` - docelowo `sole_trader`; wartości `limited_company` i `partnership` pozostają wyłącznie rezerwą kompatybilności przyszłych rozszerzeń;
 - `legal_name`, `company_number`, `registered_address`;
 - `company_utr` — encrypted;
 - `functional_currency` — domyślnie GBP;
@@ -348,7 +351,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 
 **Cel:** usunąć ryzyka blokujące księgowość i zatwierdzić reguły z księgowym.
 
-- [ ] `UKFIN-001` [S] Potwierdzić grupę użytkowników: limited company, sole trader, partnership.
+- [x] `UKFIN-001` [S] Potwierdzić grupę użytkowników. *(decyzja właściciela 2026-11-22: grupą docelową jest sole trader; limited company i partnership pozostają poza bieżącym zakresem produktu)*
 - [ ] `UKFIN-002` [M] Warsztat z księgowym UK: plan kont, tax codes, VAT schemes, raporty i przykładowe dokumenty.
 - [x] `UKFIN-003` [M] Audyt wszystkich finansowych queries, policies i tenant boundaries. *(2026-11-04: ścieżki zapisu + regresja reports/portal/workflow; kolejne modele obowiązkowo dopisywane do audytu)*
 - [x] `UKFIN-004` [M] Migracja `business_id` do quotes/invoices/payments/projects i tabel pochodnych. *(objęto również contacts)*
@@ -445,7 +448,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 - [x] `UKFIN-508` [M] VAT adjustments z reason, attachment i approval — tenantowy workflow draft → approved → posted z obowiązkowym powodem i czystym dowodem, rozróżnieniem normal adjustment/error correction, metodą current return/separate notification, progami HMRC liczonymi od błędów netto, niezmiennym journalem i integracją VAT Detail/Return (ukończone 2026-11-10).
 - [x] `UKFIN-509` [M] VAT return review/lock/snapshot workflow — tenantowy, niezmienny snapshot SHA-256 z dziewięcioma polami i źródłowymi journal/line IDs, rozdzielone uprawnienia create/review/lock, kontrolowany supersede oraz centralna blokada nowych journal entries w locked VAT period przy zachowaniu idempotentnych retry (ukończone 2026-11-10).
 - [x] `UKFIN-510` [M] Accountant pack ZIP — generowany wyłącznie z locked VAT Return snapshotu, z PDF/XLSX/CSV, źródłowymi journalami, tylko czystymi i ponownie zweryfikowanymi załącznikami, manifestem included/excluded oraz SHA-256 każdego pliku; prywatny download usuwa ZIP po odpowiedzi (ukończone 2026-11-10).
-- [x] `UKFIN-512` [M] Wieloformatowy eksport ośmiu raportów finansowych do CSV, XLSX i PDF z identycznymi filtrami, wspólnym modelem dokumentu, typowanymi komórkami Excel, firmowym PDF, `view_finance`, tenant isolation i prywatnym `no-store` downloadem (ukończone lokalnie 2026-11-22; bez migracji bazy).
+- [x] `UKFIN-512` [M] Wieloformatowy eksport ośmiu raportów finansowych do CSV, XLSX i PDF z identycznymi filtrami, wspólnym modelem dokumentu, typowanymi komórkami Excel, firmowym PDF, `view_finance`, tenant isolation i prywatnym `no-store` downloadem (wdrożone 2026-11-22 jako `UKFIN-512-4daa50e0`; bez migracji bazy; kopia rollbacku: `storage/app/deploy-backups/20261122-ukfin512-4daa50e0`).
 - [ ] `UKFIN-511` [M] Golden dataset testowany względem ręcznie zaakceptowanych wyników księgowego.
 
 **Gate:** wszystkie 9 pól uzgodnione z ledgerem i zaakceptowanym zestawem referencyjnym.
@@ -472,7 +475,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 
 ### Faza 7 — środki trwałe i zamknięcie roku (opcjonalnie, 1–2 tygodnie)
 
-- [ ] `UKFIN-701` [M] FixedAsset i kategorie aktywów.
+- [x] `UKFIN-701` [M] FixedAsset i kategorie aktywów. *(ukończone lokalnie 2026-11-22: tenantowe kategorie z mapowaniem kont 1500/1600/7000, draft-only rejestr `FA-YYYY-NNN`, Actions, RBAC, audyt, panel PL/EN/PT i brak wpływu na ledger; migracja `000037` przeszła na MySQL, Finance 396 passed + 1 skipped / 2871 assertions)*
 - [ ] `UKFIN-702` [M] Acquisition/disposal workflow.
 - [ ] `UKFIN-703` [M] Book depreciation schedules.
 - [ ] `UKFIN-704` [M] Asset register report.
@@ -723,7 +726,7 @@ Następnie Fazy 3–5 jako **Accounting Core**, a dopiero potem Faza 6 jako **MT
 
 Przed rozpoczęciem Fazy 0 użytkownik powinien zatwierdzić:
 
-1. czy pierwszym odbiorcą jest limited company, sole trader, czy oba typy;
+1. [rozstrzygnięte 2026-11-22] pierwszym i docelowym odbiorcą jest sole trader;
 2. czy system ma zastąpić księgowość, czy przygotowywać dane dla zewnętrznego księgowego;
 3. czy firma jest VAT registered i z jakiego VAT scheme korzysta;
 4. czy podstawą ma być accrual czy cash accounting;

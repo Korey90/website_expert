@@ -1,18 +1,21 @@
 # Website Expert NI — Project Status Dashboard
 
-**Last Full Validation:** 2026-11-20 - pełny Finance po UKFIN-202R2
-**Last Targeted Validation:** 2026-11-20 - UKFIN-202R2, skaner załączników finansowych
+**Last Full Validation:** 2026-11-22 - pełna regresja przed wdrożeniem UKFIN-512
+**Last Targeted Validation:** 2026-11-22 - UKFIN-701 rejestr środków trwałych i kategorii
 
 ## Health Checks
 - **Code Quality:** 🟡 ESLint, Blade i build przechodzą; repozytoryjny `pint --test` nadal wykazuje istniejący dług formatowania w plikach legacy, niezwiązany z wdrożeniem HMRC
-- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 1300 kluczy liściowe w PL/EN/PT
-- **Tests:** UKFIN-202R2 targeted 8 passed / 33 assertions; pełny Finance 373 passed / 1 skipped / 2601 assertions. Pominięcie dotyczy blokad wierszy niedostępnych w SQLite.
+- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 1375 kluczy liściowe w PL/EN/PT
+- **Tests:** UKFIN-701 Finance 396 passed / 1 skipped / 2871 assertions; panel i tenant audit 17 passed / 1201 assertions. Ostatnia pełna regresja repo: 909 passed / 9 znanych baseline failures / 11 skipped / 5429 assertions. Frontend 16/16.
 - **Multi-Tenancy Compliance:** 100% dla modułów panelu ✅; `SearchRankingCheck` ma teraz `BelongsToTenant`, a publiczne rekordy nullable pozostają dostępne poza panelem zgodnie z przeznaczeniem.
 - **Security Review:** 🟡 HMRC production fail-closed, pełne audyty Composer/NPM i secret scan czyste; produkcja nadal zablokowana przez niezależny pentest oraz zewnętrzne gate'y FPH/HMRC
 - **Build (Vite):** ✅ Brak błędów TS/JS
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-11-22 - **UKFIN-701 fixed asset register:** dodano tenantowe kategorie środków trwałych z kontrolowanym mapowaniem kont `asset/fixed_asset`, `asset/contra_asset` i `expense/depreciation` oraz draft-only rejestr aktywów z numeracją `FA-YYYY-NNN`. Panel PL/EN, RBAC, bezpośrednie URL-e, factories i `finance:audit-tenants` są objęte testami; draft nie tworzy journalu i nie wpływa na raporty. Migracja `000037` przeszła lokalnie na MySQL jako batch 29, audyt danych ma `invalid_count=0`; Finance 396 passed / 1 skipped / 2871 assertions, EN/PL/PT po 1375 kluczy ✅
+- 2026-11-22 - **UKFIN-001 target group:** właściciel potwierdził, że grupą docelową modułu UK Finance jest sole trader. Limited company i partnership pozostają poza bieżącym zakresem produktu; wielotypowy model może zostać zachowany wyłącznie jako rezerwa kompatybilności bez odblokowywania niezatwierdzonych workflow ✅
+- 2026-11-22 - **Deploy UKFIN-512:** osiem raportów finansowych eksportuje CSV, XLSX i PDF przez 24 zabezpieczone trasy. Produkcyjny release `UKFIN-512-4daa50e0` wdrożono bez migracji, z kopią 30 nadpisywanych plików i listą 7 nowych plików. Cache i autoloader odbudowane, kolejka zrestartowana, HTTP `/` i `/admin` zwracają 200/302. Kontrolne generowanie bez danych produkcyjnych potwierdziło PDF 878282 B i XLSX 7026 B. Backup: `storage/app/deploy-backups/20261122-ukfin512-4daa50e0` ✅
 - 2026-11-20 - **UKFIN-202R2 financial attachment scanner:** dodano automatyczny job ClamAV po uploadzie, ponowną kontrolę rozmiaru i SHA-256, retry/backoff, jawne `failed`, bezpieczne kody błędów, ręczny rescan i bazodanową blokadę unikalności. Produkcja ma ClamAV 1.5.4, poprawne prawa wspólnej grupy `www-data`, test zwykłego pliku `exit 0` i EICAR `exit 1`. Wszystkie 8 dokumentów jest `clean`, kolejka i failed jobs są puste, tenant audit przechodzi. Finance 373 passed / 1 skipped / 2601 assertions; EN/PL/PT po 1300 kluczy ✅
 - 2026-11-20 - **UKFIN-202R1 expense unit price precision:** usunięto zaokrąglenie ceny jednostkowej kosztu do 2 miejsc i rozszerzono purchase-side `unit_price` do `DECIMAL(24,10)`. Formularz kosztu pokazuje na żywo netto, VAT i brutto, korzystając z tych samych reguł co zapis. Scenariusz `1250 x 0.0333333333` daje `41.67 + 8.33 = 50.00 GBP`; precyzja przechodzi także przez koszty cykliczne i purchase credits. Migracja `000034` wykonana lokalnie; Finance 365 passed / 1 skipped / 2565 assertions; EN/PL/PT po 1287 kluczy ✅
 - 2026-11-20 - **UKFIN-402R2 existing expense link:** dodano akcję `Połącz z istniejącym kosztem` na wychodzącej transakcji. System nie tworzy duplikatu, lecz zatwierdza i księguje uprawniony szkic, tworzy płatność na rachunku źródłowej transakcji i wykonuje uzgodnienie w jednej transakcji DB. Filtry wymagają tego samego tenanta, waluty i wystarczającego salda; zamknięty okres i błędy powodują pełny rollback. Test scenariusza 10/69, bank suite 56/392, pełny Finance przechodzi; EN/PL/PT po 1285 kluczy ✅
