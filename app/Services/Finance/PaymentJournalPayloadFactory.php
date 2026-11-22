@@ -78,7 +78,7 @@ class PaymentJournalPayloadFactory
     {
         $payment->loadMissing(['expense', 'bankAccount']);
         $business = Business::query()->findOrFail($payment->business_id);
-        $bank = $this->bankLedgerAccountId($business, $payment->bankAccount);
+        $settlementAccount = $this->expenseSettlementLedgerAccount($business, $payment);
         $payable = $this->accountId($business, '2100');
         $amountGbp = $this->requiredGbpAmount($payment->amount_gbp, 'supplier payment');
         $carryingAmountGbp = $this->requiredGbpAmount(
@@ -112,7 +112,11 @@ class PaymentJournalPayloadFactory
             'source_snapshot' => [
                 'id' => $payment->id,
                 'expense_id' => $payment->expense_id,
+                'settlement_source' => $payment->settlement_source,
+                'method' => $payment->method,
                 ...($payment->bank_account_id ? ['bank_account_id' => $payment->bank_account_id] : []),
+                'settlement_ledger_account_id' => $settlementAccount->id,
+                'settlement_ledger_account_code' => $settlementAccount->code,
                 'reference' => $payment->reference,
                 'amount' => $payment->amount,
                 'currency' => $payment->currency,
@@ -123,7 +127,7 @@ class PaymentJournalPayloadFactory
             ],
             'lines' => [
                 [...$carryingCommon, 'ledger_account_id' => $payable, 'debit_gbp' => $carryingAmountGbp, 'credit_gbp' => '0.00', 'memo' => "Supplier payment {$payment->reference}"],
-                [...$settlementCommon, 'ledger_account_id' => $bank, 'debit_gbp' => '0.00', 'credit_gbp' => $amountGbp, 'memo' => "Bank payment {$payment->reference}"],
+                [...$settlementCommon, 'ledger_account_id' => $settlementAccount->id, 'debit_gbp' => '0.00', 'credit_gbp' => $amountGbp, 'memo' => $this->expenseSettlementMemo($payment)],
             ],
         ];
 
@@ -247,6 +251,59 @@ class PaymentJournalPayloadFactory
         }
 
         return (int) $ledgerAccount->id;
+    }
+
+    private function expenseSettlementLedgerAccount(Business $business, ExpensePayment $payment): LedgerAccount
+    {
+        $accountId = match ($payment->settlement_source) {
+            ExpensePayment::SOURCE_BANK_ACCOUNT => $this->bankExpenseSettlementAccountId($business, $payment),
+            ExpensePayment::SOURCE_CASH_ACCOUNT => $this->cashExpenseSettlementAccountId($business, $payment),
+            ExpensePayment::SOURCE_OWNER_FUNDS => $this->ownerExpenseSettlementAccountId($business, $payment),
+            default => throw new DomainException('The supplier payment settlement source is invalid.'),
+        };
+
+        return LedgerAccount::withoutGlobalScopes()
+            ->where('business_id', $business->id)
+            ->findOrFail($accountId);
+    }
+
+    private function bankExpenseSettlementAccountId(Business $business, ExpensePayment $payment): int
+    {
+        if (! $payment->bankAccount) {
+            throw new DomainException('A business bank settlement requires a bank account.');
+        }
+
+        return $this->bankLedgerAccountId($business, $payment->bankAccount);
+    }
+
+    private function cashExpenseSettlementAccountId(Business $business, ExpensePayment $payment): int
+    {
+        if ($payment->bank_account_id !== null) {
+            throw new DomainException('A cash settlement cannot reference a bank account.');
+        }
+
+        return $this->accountId($business, '1100');
+    }
+
+    private function ownerExpenseSettlementAccountId(Business $business, ExpensePayment $payment): int
+    {
+        if ($payment->bank_account_id !== null) {
+            throw new DomainException('An owner-funded settlement cannot reference a bank account.');
+        }
+
+        return $this->accountId($business, '3300');
+    }
+
+    private function expenseSettlementMemo(ExpensePayment $payment): string
+    {
+        $label = match ($payment->settlement_source) {
+            ExpensePayment::SOURCE_BANK_ACCOUNT => 'Bank payment',
+            ExpensePayment::SOURCE_CASH_ACCOUNT => 'Cash payment',
+            ExpensePayment::SOURCE_OWNER_FUNDS => 'Owner-funded supplier payment',
+            default => throw new DomainException('The supplier payment settlement source is invalid.'),
+        };
+
+        return "{$label} {$payment->reference}";
     }
 
     private function requiredGbpAmount(mixed $amount, string $label): string

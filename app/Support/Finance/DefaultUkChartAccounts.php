@@ -23,6 +23,7 @@ class DefaultUkChartAccounts
             self::account('3000', 'Equity', 'Kapitał własny', 'Capital próprio', 'equity', 'heading', 'credit', null, false),
             self::account('3100', 'Share capital', 'Kapitał zakładowy', 'Capital social', 'equity', 'share_capital', 'credit', '3000'),
             self::account('3200', 'Retained earnings', 'Zyski zatrzymane', 'Resultados transitados', 'equity', 'retained_earnings', 'credit', '3000'),
+            self::account('3300', "Owner's capital introduced", 'Kapitał wniesiony przez właściciela', 'Capital introduzido pelo proprietário', 'equity', 'owner_capital', 'credit', '3000'),
             self::account('4000', 'Income', 'Przychody', 'Rendimentos', 'income', 'heading', 'credit', null, false),
             self::account('4100', 'Sales', 'Sprzedaż', 'Vendas', 'income', 'sales', 'credit', '4000'),
             self::account('4200', 'Other income', 'Pozostałe przychody', 'Outros rendimentos', 'income', 'other_income', 'credit', '4000'),

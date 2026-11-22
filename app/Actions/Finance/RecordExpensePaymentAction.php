@@ -2,12 +2,14 @@
 
 namespace App\Actions\Finance;
 
+use App\Models\AccountingProfile;
 use App\Models\BankAccount;
 use App\Models\Business;
 use App\Models\Expense;
 use App\Models\ExpensePayment;
 use App\Models\User;
 use App\Services\Finance\RealisedFxCalculator;
+use App\Support\PermissionHelper;
 use DomainException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +22,7 @@ class RecordExpensePaymentAction
         private readonly RealisedFxCalculator $fxCalculator,
     ) {}
 
-    /** @param array{amount: float|int|string, method: string, bank_account_id?: int|string|null, reference?: string|null, paid_at?: string|null, notes?: string|null, gbp_exchange_rate?: float|int|string|null, exchange_rate_source?: string|null, exchange_rate_date?: string|null} $data */
+    /** @param array{amount: float|int|string, method: string, settlement_source?: string|null, bank_account_id?: int|string|null, reference?: string|null, paid_at?: string|null, notes?: string|null, gbp_exchange_rate?: float|int|string|null, exchange_rate_source?: string|null, exchange_rate_date?: string|null} $data */
     public function execute(Expense $expense, User $actor, array $data): ExpensePayment
     {
         return DB::transaction(function () use ($expense, $actor, $data): ExpensePayment {
@@ -29,7 +31,13 @@ class RecordExpensePaymentAction
             $this->assertActorMembership($actor, $locked->business_id);
             $reference = trim((string) ($data['reference'] ?? '')) ?: 'EPAY-'.Str::uuid();
             $amount = round((float) ($data['amount'] ?? 0), 2);
-            $bankAccountId = $this->bankAccountId($locked->business_id, $data['bank_account_id'] ?? null);
+            $settlementSource = $this->settlementSource($data);
+            $bankAccountId = $this->bankAccountId(
+                $locked->business_id,
+                $settlementSource,
+                $data['bank_account_id'] ?? null,
+            );
+            $this->assertSettlementSourceIsAllowed($locked->business_id, $settlementSource);
 
             $existing = ExpensePayment::withoutGlobalScopes()
                 ->where('business_id', $locked->business_id)
@@ -43,7 +51,9 @@ class RecordExpensePaymentAction
 
                 if ($existing->expense_id !== $locked->id
                     || round((float) $existing->amount, 2) !== $amount
-                    || ($bankAccountId !== null && $existing->bank_account_id !== $bankAccountId)
+                    || $existing->settlement_source !== $settlementSource
+                    || $existing->bank_account_id !== $bankAccountId
+                    || $existing->method !== (string) ($data['method'] ?? '')
                     || ($requestedRate !== null && round((float) $existing->gbp_exchange_rate, 8) !== $requestedRate)) {
                     throw new DomainException('The supplier payment reference is already used for different payment data.');
                 }
@@ -88,6 +98,7 @@ class RecordExpensePaymentAction
                 'business_id' => $locked->business_id,
                 'expense_id' => $locked->id,
                 'bank_account_id' => $bankAccountId,
+                'settlement_source' => $settlementSource,
                 'created_by' => $actor->id,
                 'amount' => $amount,
                 'currency' => $currency,
@@ -123,22 +134,68 @@ class RecordExpensePaymentAction
         if (! $actor->businessMemberships()->where('business_id', $businessId)->where('is_active', true)->exists()) {
             throw new DomainException('The actor does not belong to the expense business.');
         }
+
+        if (! PermissionHelper::allows($actor, 'post_finance')) {
+            throw new DomainException('The actor cannot post supplier payments.');
+        }
     }
 
-    private function bankAccountId(string $businessId, mixed $bankAccountId): ?int
+    /** @param array<string, mixed> $data */
+    private function settlementSource(array $data): string
     {
-        if (blank($bankAccountId)) {
+        $source = trim((string) ($data['settlement_source'] ?? ''));
+
+        if ($source === '') {
+            $source = filled($data['bank_account_id'] ?? null)
+                ? ExpensePayment::SOURCE_BANK_ACCOUNT
+                : ExpensePayment::SOURCE_CASH_ACCOUNT;
+        }
+
+        if (! in_array($source, ExpensePayment::settlementSources(), true)) {
+            throw new DomainException('The supplier payment settlement source is invalid.');
+        }
+
+        return $source;
+    }
+
+    private function bankAccountId(string $businessId, string $source, mixed $bankAccountId): ?int
+    {
+        if ($source !== ExpensePayment::SOURCE_BANK_ACCOUNT) {
+            if (filled($bankAccountId)) {
+                throw new DomainException('Only a business bank settlement may specify a bank account.');
+            }
+
             return null;
+        }
+
+        if (blank($bankAccountId)) {
+            throw new DomainException('A business bank account is required for a bank settlement.');
         }
 
         $account = BankAccount::withoutGlobalScopes()
             ->where('business_id', $businessId)
+            ->active()
             ->find($bankAccountId);
 
         if (! $account) {
-            throw new DomainException('The bank account does not belong to the supplier payment business.');
+            throw new DomainException('The supplier payment requires an active bank account from the same business.');
         }
 
         return (int) $account->id;
+    }
+
+    private function assertSettlementSourceIsAllowed(string $businessId, string $source): void
+    {
+        if ($source !== ExpensePayment::SOURCE_OWNER_FUNDS) {
+            return;
+        }
+
+        $entityType = AccountingProfile::withoutGlobalScopes()
+            ->where('business_id', $businessId)
+            ->value('entity_type');
+
+        if ($entityType !== 'sole_trader') {
+            throw new DomainException('Owner-funded supplier payments are available only to sole traders.');
+        }
     }
 }

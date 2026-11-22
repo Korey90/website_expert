@@ -311,6 +311,47 @@ class AuditFinanceTenantData extends Command
         ])), 0, 20);
         $report['bank_reconciliation_allocations.source'] = $sourceReport;
 
+        $expensePaymentSettlementQuery = DB::table('expense_payments as payment')
+            ->leftJoin('accounting_profiles as profile', 'profile.business_id', '=', 'payment.business_id')
+            ->where(function ($invalid): void {
+                $invalid->whereNotIn('payment.settlement_source', ExpensePayment::settlementSources())
+                    ->orWhere(function ($bank): void {
+                        $bank->where('payment.settlement_source', ExpensePayment::SOURCE_BANK_ACCOUNT)
+                            ->whereNull('payment.bank_account_id');
+                    })
+                    ->orWhere(function ($nonBank): void {
+                        $nonBank->whereIn('payment.settlement_source', [
+                            ExpensePayment::SOURCE_CASH_ACCOUNT,
+                            ExpensePayment::SOURCE_OWNER_FUNDS,
+                        ])->whereNotNull('payment.bank_account_id');
+                    })
+                    ->orWhere(function ($owner): void {
+                        $owner->where('payment.settlement_source', ExpensePayment::SOURCE_OWNER_FUNDS)
+                            ->where(function ($profileMismatch): void {
+                                $profileMismatch->whereNull('profile.id')
+                                    ->orWhere('profile.entity_type', '!=', 'sole_trader');
+                            });
+                    });
+            });
+        $report['expense_payments.settlement_source'] = [
+            'invalid_count' => (clone $expensePaymentSettlementQuery)->count(),
+            'sample_ids' => (clone $expensePaymentSettlementQuery)->limit(20)->pluck('payment.id')->all(),
+        ];
+
+        $expenseReconciliationQuery = DB::table('bank_reconciliation_allocations as allocation')
+            ->leftJoin('expense_payments as payment', 'payment.id', '=', 'allocation.reconcilable_id')
+            ->leftJoin('bank_transactions as bank_transaction', 'bank_transaction.id', '=', 'allocation.bank_transaction_id')
+            ->where('allocation.reconcilable_type', ExpensePayment::class)
+            ->where(function ($invalid): void {
+                $invalid->whereNull('payment.id')
+                    ->orWhere('payment.settlement_source', '!=', ExpensePayment::SOURCE_BANK_ACCOUNT)
+                    ->orWhereColumn('payment.bank_account_id', '!=', 'bank_transaction.bank_account_id');
+            });
+        $report['bank_reconciliation_allocations.expense_settlement'] = [
+            'invalid_count' => (clone $expenseReconciliationQuery)->count(),
+            'sample_ids' => (clone $expenseReconciliationQuery)->limit(20)->pluck('allocation.id')->all(),
+        ];
+
         $invalidCount = array_sum(array_column($report, 'invalid_count'));
 
         if ($this->option('json')) {

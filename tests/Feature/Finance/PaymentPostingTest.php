@@ -13,16 +13,24 @@ use App\Actions\Finance\RecordExpensePaymentAction;
 use App\Actions\Finance\RecordInvoicePaymentAction;
 use App\Actions\Finance\RecordPurchaseCreditRefundAction;
 use App\Actions\Finance\RefundInvoicePaymentAction;
+use App\Actions\Finance\UpdateAccountingProfileAction;
 use App\Models\AccountingPeriod;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\Client;
 use App\Models\Expense;
+use App\Models\ExpensePayment;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Supplier;
 use App\Models\TaxCode;
 use App\Models\User;
+use App\Services\Finance\AgedReceivablesPayablesService;
+use App\Services\Finance\BalanceSheetService;
+use App\Services\Finance\ManagementCashFlowService;
+use App\Services\Finance\PaymentJournalPayloadFactory;
+use App\Services\Finance\ProfitAndLossService;
+use App\Services\Finance\TrialBalanceService;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
@@ -62,7 +70,8 @@ class PaymentPostingTest extends TestCase
         ]);
         $this->supplier = Supplier::factory()->for($this->business)->create();
         Permission::findOrCreate('post_finance', 'web');
-        $this->user->givePermissionTo('post_finance');
+        Permission::findOrCreate('manage_finance', 'web');
+        $this->user->givePermissionTo(['post_finance', 'manage_finance']);
         app(InitializeAccountingSetupAction::class)->execute($this->business, $this->user);
         $this->period = AccountingPeriod::withoutGlobalScopes()->create([
             'business_id' => $this->business->id,
@@ -122,6 +131,164 @@ class PaymentPostingTest extends TestCase
         $this->assertSame('40.00', $payment->expense->amount_paid);
         $this->assertSame('80.00', $payment->expense->amount_due);
         $this->assertSame($this->supplier->id, $journal->lines->first()->supplier_id);
+    }
+
+    public function test_sole_trader_owner_funded_payment_posts_capital_without_moving_business_cash(): void
+    {
+        $this->business->accountingProfile()->withoutGlobalScopes()->update(['entity_type' => 'sole_trader']);
+        $expense = $this->postedExpense();
+
+        $payment = app(RecordExpensePaymentAction::class)->execute($expense, $this->user, [
+            'amount' => 40,
+            'method' => 'card',
+            'settlement_source' => ExpensePayment::SOURCE_OWNER_FUNDS,
+            'reference' => 'OWNER-FUNDS-001',
+            'paid_at' => '2026-11-05',
+        ]);
+        $journal = $payment->journalEntries()->with('lines.ledgerAccount')->firstOrFail();
+
+        $this->assertSame('40.00', $journal->lines->firstWhere('ledgerAccount.code', '2100')->debit_gbp);
+        $this->assertSame('40.00', $journal->lines->firstWhere('ledgerAccount.code', '3300')->credit_gbp);
+        $this->assertNull($journal->lines->firstWhere('ledgerAccount.code', '1100'));
+        $this->assertNull($payment->bank_account_id);
+        $payload = app(PaymentJournalPayloadFactory::class)->forExpensePayment($payment);
+        $this->assertSame('owner_funds', $payload['source_snapshot']['settlement_source']);
+        $this->assertSame('3300', $payload['source_snapshot']['settlement_ledger_account_code']);
+
+        $profitAndLoss = app(ProfitAndLossService::class)->report($this->business->id, $this->period->id);
+        $balanceSheet = app(BalanceSheetService::class)->report($this->business->id, $this->period->id);
+        $trialBalance = app(TrialBalanceService::class)->report($this->business->id, $this->period->id);
+        $cashFlow = app(ManagementCashFlowService::class)->report($this->business->id, $this->period->id);
+        $ageing = app(AgedReceivablesPayablesService::class)->report($this->business->id, '2026-11-05');
+        $balanceRows = $balanceSheet['sections']->flatMap(fn (object $section) => $section->rows)->keyBy('code');
+
+        $this->assertSame(100.0, $profitAndLoss['totals']->operating_expenses_gbp);
+        $this->assertSame(40.0, $balanceRows['3300']->amount_gbp);
+        $this->assertTrue($balanceSheet['totals']->is_balanced);
+        $this->assertTrue($trialBalance['totals']->is_balanced);
+        $this->assertSame(0.0, $cashFlow['totals']->cash_inflows_gbp);
+        $this->assertSame(0.0, $cashFlow['totals']->cash_outflows_gbp);
+        $this->assertSame(80.0, $ageing['sections']->firstWhere('key', 'payables')->totals->total_gbp);
+    }
+
+    public function test_owner_funded_payment_is_rejected_for_a_limited_company(): void
+    {
+        $this->business->accountingProfile()->withoutGlobalScopes()->update(['entity_type' => 'limited_company']);
+        $expense = $this->postedExpense();
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('available only to sole traders');
+
+        app(RecordExpensePaymentAction::class)->execute($expense, $this->user, [
+            'amount' => 40,
+            'method' => 'card',
+            'settlement_source' => ExpensePayment::SOURCE_OWNER_FUNDS,
+            'reference' => 'OWNER-FUNDS-INVALID',
+            'paid_at' => '2026-11-05',
+        ]);
+    }
+
+    public function test_owner_funded_payment_requires_post_finance_permission(): void
+    {
+        $this->business->accountingProfile()->withoutGlobalScopes()->update(['entity_type' => 'sole_trader']);
+        $expense = $this->postedExpense();
+        $this->user->revokePermissionTo('post_finance');
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('cannot post supplier payments');
+
+        app(RecordExpensePaymentAction::class)->execute($expense, $this->user, [
+            'amount' => 40,
+            'method' => 'card',
+            'settlement_source' => ExpensePayment::SOURCE_OWNER_FUNDS,
+            'reference' => 'OWNER-FUNDS-FORBIDDEN',
+            'paid_at' => '2026-11-05',
+        ]);
+    }
+
+    public function test_entity_type_cannot_change_after_an_owner_funded_payment_is_posted(): void
+    {
+        $profile = $this->business->accountingProfile()->withoutGlobalScopes()->firstOrFail();
+        $profile->update(['entity_type' => 'sole_trader']);
+        $expense = $this->postedExpense();
+        app(RecordExpensePaymentAction::class)->execute($expense, $this->user, [
+            'amount' => 40,
+            'method' => 'card',
+            'settlement_source' => ExpensePayment::SOURCE_OWNER_FUNDS,
+            'reference' => 'OWNER-FUNDS-LOCK',
+            'paid_at' => '2026-11-05',
+        ]);
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('entity type cannot be changed');
+
+        app(UpdateAccountingProfileAction::class)->execute($profile, $this->user, [
+            'entity_type' => 'limited_company',
+        ]);
+    }
+
+    public function test_owner_funded_payments_are_idempotent_and_can_settle_an_expense_in_parts(): void
+    {
+        $this->business->accountingProfile()->withoutGlobalScopes()->update(['entity_type' => 'sole_trader']);
+        $expense = $this->postedExpense();
+        $data = [
+            'amount' => 40,
+            'method' => 'card',
+            'settlement_source' => ExpensePayment::SOURCE_OWNER_FUNDS,
+            'reference' => 'OWNER-PART-1',
+            'paid_at' => '2026-11-05',
+        ];
+
+        $first = app(RecordExpensePaymentAction::class)->execute($expense, $this->user, $data);
+        $retry = app(RecordExpensePaymentAction::class)->execute($expense, $this->user, $data);
+        $this->assertTrue($retry->is($first));
+        $this->assertDatabaseCount('expense_payments', 1);
+
+        try {
+            app(RecordExpensePaymentAction::class)->execute($expense, $this->user, [
+                ...$data,
+                'settlement_source' => ExpensePayment::SOURCE_CASH_ACCOUNT,
+            ]);
+            $this->fail('Changing settlement source for the same reference should fail.');
+        } catch (DomainException $exception) {
+            $this->assertStringContainsString('different payment data', $exception->getMessage());
+        }
+
+        $second = app(RecordExpensePaymentAction::class)->execute($expense->fresh(), $this->user, [
+            'amount' => 80,
+            'method' => 'card',
+            'settlement_source' => ExpensePayment::SOURCE_OWNER_FUNDS,
+            'reference' => 'OWNER-PART-2',
+            'paid_at' => '2026-11-06',
+        ]);
+
+        $this->assertSame(Expense::STATUS_PAID, $second->expense->status);
+        $this->assertSame('120.00', $second->expense->amount_paid);
+        $this->assertSame('0.00', $second->expense->amount_due);
+    }
+
+    public function test_missing_owner_capital_account_rolls_back_the_payment_and_expense_status(): void
+    {
+        $this->business->accountingProfile()->withoutGlobalScopes()->update(['entity_type' => 'sole_trader']);
+        $expense = $this->postedExpense();
+        $this->business->ledgerAccounts()->withoutGlobalScopes()->where('code', '3300')->delete();
+
+        try {
+            app(RecordExpensePaymentAction::class)->execute($expense, $this->user, [
+                'amount' => 40,
+                'method' => 'card',
+                'settlement_source' => ExpensePayment::SOURCE_OWNER_FUNDS,
+                'reference' => 'OWNER-NO-ACCOUNT',
+                'paid_at' => '2026-11-05',
+            ]);
+            $this->fail('An owner-funded payment without account 3300 should fail.');
+        } catch (DomainException $exception) {
+            $this->assertStringContainsString('3300', $exception->getMessage());
+        }
+
+        $this->assertDatabaseCount('expense_payments', 0);
+        $this->assertSame(Expense::STATUS_POSTED, $expense->fresh()->status);
+        $this->assertSame('120.00', $expense->fresh()->amount_due);
     }
 
     public function test_customer_refund_reverses_receipt_and_reopens_invoice_balance(): void
@@ -278,6 +445,7 @@ class PaymentPostingTest extends TestCase
 
     public function test_supplier_payment_posts_realised_fx_gain_and_loss(): void
     {
+        $this->business->accountingProfile()->withoutGlobalScopes()->update(['entity_type' => 'sole_trader']);
         $gainExpense = $this->postedExpense([
             'currency' => 'EUR',
             'gbp_exchange_rate' => '0.85000000',
@@ -287,6 +455,7 @@ class PaymentPostingTest extends TestCase
         $gainPayment = app(RecordExpensePaymentAction::class)->execute($gainExpense, $this->user, [
             'amount' => 120,
             'method' => 'bank_transfer',
+            'settlement_source' => ExpensePayment::SOURCE_OWNER_FUNDS,
             'reference' => 'SUP-FX-GAIN',
             'paid_at' => '2026-11-05',
             'gbp_exchange_rate' => '0.80000000',
@@ -299,9 +468,9 @@ class PaymentPostingTest extends TestCase
         $this->assertSame('102.00', $gainPayment->carrying_amount_gbp);
         $this->assertSame('6.00', $gainPayment->realised_fx_gbp);
         $this->assertSame('102.00', $gainJournal->lines->firstWhere('ledgerAccount.code', '2100')->debit_gbp);
-        $this->assertSame('96.00', $gainJournal->lines->firstWhere('ledgerAccount.code', '1100')->credit_gbp);
+        $this->assertSame('96.00', $gainJournal->lines->firstWhere('ledgerAccount.code', '3300')->credit_gbp);
         $this->assertSame('0.85000000', $gainJournal->lines->firstWhere('ledgerAccount.code', '2100')->exchange_rate);
-        $this->assertSame('0.80000000', $gainJournal->lines->firstWhere('ledgerAccount.code', '1100')->exchange_rate);
+        $this->assertSame('0.80000000', $gainJournal->lines->firstWhere('ledgerAccount.code', '3300')->exchange_rate);
         $this->assertSame('6.00', $gainJournal->lines->firstWhere('ledgerAccount.code', '4300')->credit_gbp);
 
         $lossExpense = $this->postedExpense([

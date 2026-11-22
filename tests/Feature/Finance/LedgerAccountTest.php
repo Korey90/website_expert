@@ -50,7 +50,7 @@ class LedgerAccountTest extends TestCase
     {
         $software = $this->account('6200');
 
-        $this->assertSame(35, LedgerAccount::withoutGlobalScopes()->where('business_id', $this->business->id)->count());
+        $this->assertSame(36, LedgerAccount::withoutGlobalScopes()->where('business_id', $this->business->id)->count());
         $this->assertSame('expense', $software->type);
         $this->assertSame('software', $software->subtype);
         $this->assertSame('debit', $software->normal_balance);
@@ -70,7 +70,7 @@ class LedgerAccountTest extends TestCase
 
         $this->actingAs($this->user);
 
-        $this->assertSame(36, LedgerAccount::count());
+        $this->assertSame(37, LedgerAccount::count());
         $this->assertTrue(Gate::forUser($this->user)->allows('view', $ownAccount));
         $this->assertTrue(Gate::forUser($this->user)->allows('update', $ownAccount));
         $this->assertFalse(Gate::forUser($this->user)->allows('delete', $ownAccount));

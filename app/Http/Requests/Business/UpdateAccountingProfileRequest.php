@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Business;
 
 use App\Models\AccountingProfile;
+use App\Support\PermissionHelper;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,12 +24,13 @@ class UpdateAccountingProfileRequest extends FormRequest
             return false;
         }
 
-        return $this->user()
-            ->businessMemberships()
-            ->where('business_id', $business->id)
-            ->where('is_active', true)
-            ->whereIn('role', ['owner', 'admin'])
-            ->exists();
+        return PermissionHelper::allows($this->user(), 'manage_finance')
+            && $this->user()
+                ->businessMemberships()
+                ->where('business_id', $business->id)
+                ->where('is_active', true)
+                ->whereIn('role', ['owner', 'admin'])
+                ->exists();
     }
 
     protected function prepareForValidation(): void

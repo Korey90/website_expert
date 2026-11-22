@@ -13,8 +13,14 @@ class ExpensePayment extends Model
 {
     use BelongsToTenant, HasFactory;
 
+    public const SOURCE_BANK_ACCOUNT = 'bank_account';
+
+    public const SOURCE_CASH_ACCOUNT = 'cash_account';
+
+    public const SOURCE_OWNER_FUNDS = 'owner_funds';
+
     protected $fillable = [
-        'business_id', 'expense_id', 'bank_account_id', 'created_by', 'amount', 'currency', 'amount_gbp',
+        'business_id', 'expense_id', 'bank_account_id', 'settlement_source', 'created_by', 'amount', 'currency', 'amount_gbp',
         'carrying_amount_gbp', 'realised_fx_gbp',
         'gbp_exchange_rate', 'exchange_rate_source', 'exchange_rate_date', 'method',
         'reference', 'notes', 'paid_at',
@@ -81,5 +87,15 @@ class ExpensePayment extends Model
     public function bankReconciliationAllocations(): MorphMany
     {
         return $this->morphMany(BankReconciliationAllocation::class, 'reconcilable');
+    }
+
+    /** @return list<string> */
+    public static function settlementSources(): array
+    {
+        return [
+            self::SOURCE_BANK_ACCOUNT,
+            self::SOURCE_CASH_ACCOUNT,
+            self::SOURCE_OWNER_FUNDS,
+        ];
     }
 }

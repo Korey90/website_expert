@@ -208,6 +208,7 @@ class CreateRecordFromBankTransactionAction
         $payment = $this->recordExpensePayment->execute($expense, $actor, [
             'amount' => $this->penniesToMoney($sourceAmount),
             'method' => 'bank_transfer',
+            'settlement_source' => ExpensePayment::SOURCE_BANK_ACCOUNT,
             'bank_account_id' => $bankAccount->id,
             'reference' => "BANK-TXN-{$transaction->id}-EXPENSE",
             'paid_at' => $bookingDate,

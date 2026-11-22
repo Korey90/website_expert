@@ -8,10 +8,14 @@ use App\Actions\Finance\PostExpenseAction;
 use App\Actions\Finance\RecordExpensePaymentAction;
 use App\Actions\Finance\RetryFinancialAttachmentScanAction;
 use App\Actions\Finance\VoidExpenseAction;
+use App\Filament\Pages\AccountingProfilePage;
 use App\Filament\Resources\ExpenseResource;
 use App\Filament\Resources\PurchaseCreditNoteResource;
 use App\Filament\Support\Currency as FilamentCurrency;
+use App\Models\AccountingProfile;
+use App\Models\BankAccount;
 use App\Models\Expense;
+use App\Models\ExpensePayment;
 use App\Models\FinancialAttachment;
 use App\Models\PurchaseCreditNote;
 use App\Services\Finance\FinancialAttachmentService;
@@ -19,6 +23,7 @@ use App\Support\PermissionHelper;
 use DomainException;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -27,6 +32,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 
@@ -189,20 +195,87 @@ class ViewExpense extends ViewRecord
                     __('finance.expenses.notifications.posted'),
                 )),
             Action::make('record_payment')
-                ->label('Record payment')
+                ->label(__('finance.expenses.actions.record_payment'))
                 ->icon('heroicon-o-banknotes')
                 ->color('success')
                 ->visible(fn (): bool => in_array($expense->status, [Expense::STATUS_POSTED, Expense::STATUS_PARTIALLY_PAID], true)
                     && (float) $expense->amount_due > 0
                     && PermissionHelper::allows(auth()->user(), 'post_finance'))
                 ->form([
+                    Forms\Components\Placeholder::make('accounting_profile_notice')
+                        ->hiddenLabel()
+                        ->content(fn () => view('filament.forms.components.accounting-profile-notice', [
+                            'url' => AccountingProfilePage::getUrl(),
+                        ]))
+                        ->visible(fn (): bool => ! AccountingProfile::withoutGlobalScopes()
+                            ->where('business_id', $this->record->business_id)
+                            ->whereNotNull('entity_type')
+                            ->exists()),
                     TextInput::make('amount')
+                        ->label(__('finance.expenses.payment.fields.amount'))
                         ->numeric()
                         ->minValue(0.01)
                         ->maxValue((float) $expense->amount_due)
                         ->default((float) $expense->amount_due)
                         ->required(),
+                    Select::make('settlement_source')
+                        ->label(__('finance.expenses.payment.fields.settlement_source'))
+                        ->options(function (): array {
+                            $options = [
+                                ExpensePayment::SOURCE_BANK_ACCOUNT => __('finance.expenses.payment.sources.bank_account'),
+                                ExpensePayment::SOURCE_CASH_ACCOUNT => __('finance.expenses.payment.sources.cash_account'),
+                            ];
+
+                            $isSoleTrader = AccountingProfile::withoutGlobalScopes()
+                                ->where('business_id', $this->record->business_id)
+                                ->where('entity_type', 'sole_trader')
+                                ->exists();
+
+                            if ($isSoleTrader) {
+                                $options[ExpensePayment::SOURCE_OWNER_FUNDS] = __('finance.expenses.payment.sources.owner_funds');
+                            }
+
+                            return $options;
+                        })
+                        ->default(fn (): string => BankAccount::withoutGlobalScopes()
+                            ->where('business_id', $this->record->business_id)
+                            ->active()
+                            ->exists()
+                                ? ExpensePayment::SOURCE_BANK_ACCOUNT
+                                : ExpensePayment::SOURCE_CASH_ACCOUNT)
+                        ->helperText(__('finance.expenses.payment.hints.settlement_source'))
+                        ->live()
+                        ->required(),
+                    Select::make('bank_account_id')
+                        ->label(__('finance.expenses.payment.fields.bank_account'))
+                        ->options(fn (): array => BankAccount::withoutGlobalScopes()
+                            ->where('business_id', $this->record->business_id)
+                            ->active()
+                            ->orderBy('name')
+                            ->get()
+                            ->mapWithKeys(fn (BankAccount $account): array => [
+                                $account->id => $account->name.' ('.$account->currency.', '.$account->masked_account_number.')',
+                            ])->all())
+                        ->searchable()
+                        ->preload()
+                        ->visible(fn (Get $get): bool => $get('settlement_source') === ExpensePayment::SOURCE_BANK_ACCOUNT)
+                        ->required(fn (Get $get): bool => $get('settlement_source') === ExpensePayment::SOURCE_BANK_ACCOUNT)
+                        ->dehydrated(fn (Get $get): bool => $get('settlement_source') === ExpensePayment::SOURCE_BANK_ACCOUNT),
+                    Forms\Components\Placeholder::make('journal_preview')
+                        ->label(__('finance.expenses.payment.fields.journal_preview'))
+                        ->content(function (Get $get): string {
+                            $source = (string) $get('settlement_source');
+                            $credit = match ($source) {
+                                ExpensePayment::SOURCE_OWNER_FUNDS => '3300 '.__('finance.expenses.payment.ledger.owner_capital'),
+                                ExpensePayment::SOURCE_CASH_ACCOUNT => '1100 '.__('finance.expenses.payment.ledger.business_cash'),
+                                ExpensePayment::SOURCE_BANK_ACCOUNT => $this->bankLedgerLabel($get('bank_account_id')),
+                                default => __('finance.expenses.payment.ledger.select_source'),
+                            };
+
+                            return __('finance.expenses.payment.hints.journal_preview', ['credit' => $credit]);
+                        }),
                     Select::make('method')
+                        ->label(__('finance.expenses.fields.payment_method'))
                         ->options([
                             'bank_transfer' => __('finance.expenses.payment_methods.bank_transfer'),
                             'card' => __('finance.expenses.payment_methods.card'),
@@ -213,8 +286,8 @@ class ViewExpense extends ViewRecord
                         ])
                         ->default('bank_transfer')
                         ->required(),
-                    TextInput::make('reference')->label('Payment reference'),
-                    DatePicker::make('paid_at')->default(today())->required(),
+                    TextInput::make('reference')->label(__('finance.expenses.payment.fields.reference')),
+                    DatePicker::make('paid_at')->label(__('finance.expenses.payment.fields.paid_at'))->default(today())->required(),
                     TextInput::make('gbp_exchange_rate')
                         ->label('Payment GBP exchange rate')
                         ->numeric()
@@ -237,7 +310,7 @@ class ViewExpense extends ViewRecord
                 ])
                 ->action(fn (array $data) => $this->runWorkflowAction(
                     fn () => app(RecordExpensePaymentAction::class)->execute($expense, auth()->user(), $data),
-                    'Supplier payment recorded and posted.',
+                    __('finance.expenses.notifications.payment_recorded'),
                 )),
             Action::make('void')
                 ->label(__('finance.expenses.actions.void'))
@@ -256,6 +329,20 @@ class ViewExpense extends ViewRecord
                 )),
             EditAction::make(),
         ];
+    }
+
+    private function bankLedgerLabel(mixed $bankAccountId): string
+    {
+        $account = filled($bankAccountId)
+            ? BankAccount::withoutGlobalScopes()
+                ->with('ledgerAccount')
+                ->where('business_id', $this->record->business_id)
+                ->find($bankAccountId)
+            : null;
+
+        return $account?->ledgerAccount
+            ? $account->ledgerAccount->code.' '.$account->name
+            : __('finance.expenses.payment.ledger.selected_bank');
     }
 
     private function runWorkflowAction(callable $action, string $successTitle): void

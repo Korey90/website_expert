@@ -54,6 +54,8 @@ class BankTransactionMatchingService
         $expensePayments = ExpensePayment::withoutGlobalScopes()
             ->with(['expense.supplier'])
             ->where('business_id', $transaction->business_id)
+            ->where('settlement_source', ExpensePayment::SOURCE_BANK_ACCOUNT)
+            ->where('bank_account_id', $transaction->bank_account_id)
             ->whereBetween('paid_at', [$dateFrom, $dateTo])
             ->get();
 

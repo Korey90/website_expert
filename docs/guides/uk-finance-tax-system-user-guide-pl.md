@@ -119,7 +119,7 @@ Nie nadawaj `submit_tax_returns` osobie, która ma jedynie wprowadzać dokumenty
 
 ### 5.1 Profil księgowy
 
-Otwórz ustawienia firmy i przejdź do `Accounting profile` albo użyj ścieżki `/business/accounting`.
+W panelu `/admin` przejdź do `Finance > Accounting profile`. Bezpośrednia ścieżka to `/admin/accounting-profile`. Starsza ścieżka `/business/accounting` pozostaje dostępna dla zgodności.
 
 Uzupełnij:
 
@@ -142,7 +142,9 @@ Pierwsze otwarcie profilu inicjalizuje dla bieżącej firmy:
 - domyślne UK tax codes;
 - domyślny plan kont UK.
 
-Dane Company UTR, PAYE Reference i Accounts Office Reference są szyfrowane. Pozostawienie pola pustego przy kolejnej edycji nie usuwa zapisanej wartości.
+Dane UTR, PAYE Reference i Accounts Office Reference są szyfrowane. Pozostawienie pola pustego przy kolejnej edycji nie usuwa zapisanej wartości.
+
+Użytkownik z `view_finance` może wyświetlić profil. Zapis wymaga `manage_finance` oraz aktywnej roli owner albo admin w bieżącej firmie.
 
 ### 5.2 Tax codes
 
@@ -341,11 +343,25 @@ System wymaga pozycji, dodatniej kwoty i business purpose przed zatwierdzeniem. 
 Na zaksięgowanym koszcie wybierz `Record payment` i podaj:
 
 - kwotę;
-- metodę;
-- rachunek bankowy;
+- źródło `Paid from`;
+- metodę płatności;
+- rachunek bankowy, jeżeli źródłem jest firmowy rachunek bankowy;
 - referencję;
 - datę;
 - kurs rozliczenia dla waluty obcej.
+
+Pole `Paid from` i metoda płatności mają różne znaczenie. Metoda opisuje sposób zapłaty, na przykład karta albo przelew. `Paid from` wskazuje, czy użyto firmowego rachunku bankowego, gotówki firmowej, czy prywatnych środków właściciela.
+
+Dla profilu `sole_trader` dostępna jest opcja `Prywatne środki właściciela` (`Owner's personal funds` w interfejsie angielskim). Użyj jej, jeżeli właściciel opłacił firmowy koszt prywatnymi środkami. System pokaże podgląd i zaksięguje płatność jako:
+
+```text
+Dr 2100 Trade creditors
+Cr 3300 Owner's capital introduced
+```
+
+Taka płatność nie zmienia salda konta 1100 ani żadnego firmowego rachunku bankowego i nie pojawia się w bank matching. Sam koszt nadal wpływa na P&L w momencie postingu. Płatność zmniejsza zobowiązanie wobec dostawcy i zwiększa kapitał właściciela w Balance Sheet.
+
+Opcja prywatnych środków nie jest dostępna dla limited company ani partnership. Najpierw ustaw poprawny rodzaj podmiotu w `Finance > Accounting profile`. Nie używaj tej funkcji do owner drawings, director loan ani wydatków prywatnych niezwiązanych z działalnością.
 
 Możesz również otworzyć ujemną transakcję bankową i wybrać `Link existing expense`. Ta akcja może zatwierdzić draft, zaksięgować koszt, utworzyć płatność i uzgodnić transakcję, jeżeli użytkownik ma wszystkie wymagane uprawnienia.
 

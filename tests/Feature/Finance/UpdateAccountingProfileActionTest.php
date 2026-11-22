@@ -5,8 +5,10 @@ namespace Tests\Feature\Finance;
 use App\Actions\Finance\InitializeAccountingSetupAction;
 use App\Actions\Finance\UpdateAccountingProfileAction;
 use App\Models\Business;
+use App\Models\BusinessUser;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class UpdateAccountingProfileActionTest extends TestCase
@@ -17,6 +19,7 @@ class UpdateAccountingProfileActionTest extends TestCase
     {
         $business = Business::create(['name' => 'UK Books Ltd', 'slug' => 'uk-books', 'is_active' => true]);
         $actor = User::factory()->create();
+        $this->authorizeActor($business, $actor);
         $profile = app(InitializeAccountingSetupAction::class)->execute($business, $actor)['profile'];
 
         $updated = app(UpdateAccountingProfileAction::class)->execute($profile, $actor, [
@@ -50,6 +53,7 @@ class UpdateAccountingProfileActionTest extends TestCase
     {
         $business = Business::create(['name' => 'UK Books Ltd', 'slug' => 'uk-books', 'is_active' => true]);
         $actor = User::factory()->create();
+        $this->authorizeActor($business, $actor);
         $profile = app(InitializeAccountingSetupAction::class)->execute($business, $actor)['profile'];
         $profile->update([
             'company_utr' => '1234567890',
@@ -67,5 +71,18 @@ class UpdateAccountingProfileActionTest extends TestCase
         $this->assertSame('1234567890', $updated->company_utr);
         $this->assertSame('123/AB456', $updated->paye_reference);
         $this->assertSame('123PA00045678', $updated->accounts_office_reference);
+    }
+
+    private function authorizeActor(Business $business, User $actor): void
+    {
+        BusinessUser::create([
+            'business_id' => $business->id,
+            'user_id' => $actor->id,
+            'role' => 'owner',
+            'is_active' => true,
+            'joined_at' => now(),
+        ]);
+        Permission::findOrCreate('manage_finance', 'web');
+        $actor->givePermissionTo('manage_finance');
     }
 }

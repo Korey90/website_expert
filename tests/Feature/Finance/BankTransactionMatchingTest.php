@@ -5,6 +5,7 @@ namespace Tests\Feature\Finance;
 use App\Actions\Finance\CreateBankAccountAction;
 use App\Actions\Finance\FindBankTransactionMatchesAction;
 use App\Actions\Finance\InitializeAccountingSetupAction;
+use App\Actions\Finance\ReconcileBankTransactionAction;
 use App\Data\Finance\BankTransactionMatchCandidate;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
@@ -132,6 +133,42 @@ class BankTransactionMatchingTest extends TestCase
         $this->assertSame('supplier_payment', $candidates[1]->eventType);
         $this->assertSame('outflow', $candidates[1]->direction);
         $this->assertNotContains('payment:'.$refundedPayment->id.':receipt', array_column($candidates, 'candidateKey'));
+    }
+
+    public function test_owner_funded_supplier_payment_is_not_a_bank_match_candidate(): void
+    {
+        $ownerPayment = $this->supplierPayment([
+            'settlement_source' => ExpensePayment::SOURCE_OWNER_FUNDS,
+            'bank_account_id' => null,
+            'amount' => 80,
+            'amount_gbp' => 80,
+            'reference' => 'OWNER-80',
+        ]);
+        $transaction = $this->transaction(-80, ['reference' => 'OWNER-80']);
+
+        $candidateKeys = array_column($this->find($transaction), 'candidateKey');
+
+        $this->assertNotContains('expense_payment:'.$ownerPayment->id, $candidateKeys);
+    }
+
+    public function test_owner_funded_supplier_payment_cannot_be_forced_into_bank_reconciliation(): void
+    {
+        $ownerPayment = $this->supplierPayment([
+            'settlement_source' => ExpensePayment::SOURCE_OWNER_FUNDS,
+            'bank_account_id' => null,
+            'amount' => 80,
+            'amount_gbp' => 80,
+            'reference' => 'OWNER-FORCED-80',
+        ]);
+        $transaction = $this->transaction(-80, ['reference' => 'OWNER-FORCED-80']);
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Only a supplier payment from this business bank account can be reconciled.');
+
+        app(ReconcileBankTransactionAction::class)->execute($transaction, $this->user, [[
+            'candidate_key' => 'expense_payment:'.$ownerPayment->id,
+            'amount' => 80,
+        ]]);
     }
 
     public function test_supplier_refund_is_an_inflow_candidate(): void
@@ -377,6 +414,8 @@ class BankTransactionMatchingTest extends TestCase
         return ExpensePayment::withoutGlobalScopes()->create([
             'business_id' => $this->business->id,
             'expense_id' => $expense->id,
+            'bank_account_id' => $this->account->id,
+            'settlement_source' => ExpensePayment::SOURCE_BANK_ACCOUNT,
             'created_by' => $this->user->id,
             'amount' => 100,
             'amount_gbp' => 100,

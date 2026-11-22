@@ -67,6 +67,7 @@ class FilamentPermissionRegistry
 
     private const PAGE_PERMISSIONS = [
         'AccountProfilePage' => 'access_admin_panel',
+        'AccountingProfilePage' => 'view_finance',
         'AdminDashboard' => 'access_admin_panel',
         'AgedReceivablesPayablesPage' => 'view_finance',
         'CalculatorAdminPage' => 'manage_calculator',

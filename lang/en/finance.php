@@ -306,9 +306,21 @@ return [
         ],
         'statuses' => ['draft' => 'Draft', 'approved' => 'Approved', 'posted' => 'Posted', 'partially_paid' => 'Partially paid', 'paid' => 'Paid', 'void' => 'Void'],
         'payment_methods' => ['bank_transfer' => 'Bank transfer', 'card' => 'Card', 'cash' => 'Cash', 'direct_debit' => 'Direct Debit', 'cheque' => 'Cheque', 'other' => 'Other'],
+        'payment' => [
+            'section' => 'Payments',
+            'fields' => ['amount' => 'Amount', 'settlement_source' => 'Paid from', 'bank_account' => 'Business bank account', 'reference' => 'Payment reference', 'paid_at' => 'Payment date', 'journal_preview' => 'Posting preview'],
+            'sources' => ['bank_account' => 'Business bank account', 'cash_account' => 'Business cash', 'owner_funds' => "Owner's personal funds"],
+            'hints' => [
+                'settlement_source' => 'The payment method describes how it was paid. Paid from identifies whose money was used.',
+                'journal_preview' => 'Debit 2100 Trade creditors / Credit :credit',
+                'profile_required' => 'Set the legal entity type before recording owner-funded payments.',
+                'open_profile' => 'Open accounting profile',
+            ],
+            'ledger' => ['owner_capital' => "Owner's capital introduced", 'business_cash' => 'Bank and cash', 'selected_bank' => 'selected business bank ledger', 'select_source' => 'select a payment source'],
+        ],
         'preview' => ['help' => 'Calculated before saving with each line rounded to the smallest currency unit, using the selected tax code.'],
-        'actions' => ['approve' => 'Approve', 'post' => 'Post', 'void' => 'Void'],
-        'notifications' => ['approved' => 'Expense approved.', 'posted' => 'Expense posted.', 'voided' => 'Expense voided.'],
+        'actions' => ['approve' => 'Approve', 'post' => 'Post', 'record_payment' => 'Record payment', 'void' => 'Void'],
+        'notifications' => ['approved' => 'Expense approved.', 'posted' => 'Expense posted.', 'payment_recorded' => 'Supplier payment recorded and posted.', 'voided' => 'Expense voided.'],
     ],
     'attachments' => [
         'section' => 'Source documents',
@@ -723,9 +735,11 @@ return [
         ],
     ],
     'accounting' => [
+        'navigation' => 'Accounting profile',
         'title' => 'Accounting profile',
-        'subtitle' => 'Configure the UK company, accounting period, VAT and PAYE details used on financial documents.',
+        'subtitle' => 'Configure the UK business, accounting period, VAT and PAYE details used on financial documents.',
         'saved' => 'Accounting profile saved.',
+        'read_only' => 'You can view this profile, but only an active owner or administrator with finance management permission can change it.',
         'save' => 'Save accounting profile',
         'saving' => 'Saving…',
         'back_to_settings' => 'Business settings',
@@ -743,7 +757,7 @@ return [
         ],
         'fields' => [
             'entity_type' => 'Entity type', 'legal_name' => 'Legal name',
-            'company_number' => 'Companies House number', 'company_utr' => 'Company UTR',
+            'company_number' => 'Companies House number', 'company_utr' => 'Unique Taxpayer Reference (UTR)',
             'line_1' => 'Address line 1', 'line_2' => 'Address line 2', 'city' => 'City',
             'county' => 'County', 'postcode' => 'Postcode', 'country' => 'Country',
             'functional_currency' => 'Functional currency', 'accounting_basis' => 'Accounting basis',
@@ -763,6 +777,7 @@ return [
             'secret_saved' => 'A value is already stored securely.',
             'utr' => 'Enter the 10-digit Unique Taxpayer Reference.',
             'gbp_only' => 'The UK accounting ledger currently uses GBP.',
+            'select_entity_type' => 'Select the legal entity type',
         ],
     ],
 ];

@@ -8,6 +8,7 @@ use App\Models\BankReconciliationAllocation;
 use App\Models\BankTransaction;
 use App\Models\Business;
 use App\Models\Expense;
+use App\Models\ExpensePayment;
 use App\Models\User;
 use App\Support\PermissionHelper;
 use DomainException;
@@ -117,6 +118,7 @@ class LinkExistingExpenseToBankTransactionAction
             $payment = $this->recordExpensePayment->execute($lockedExpense, $actor, [
                 'amount' => $this->penniesToMoney($remainingPennies),
                 'method' => 'bank_transfer',
+                'settlement_source' => ExpensePayment::SOURCE_BANK_ACCOUNT,
                 'bank_account_id' => $bankAccount->id,
                 'reference' => "BANK-TXN-{$lockedTransaction->id}-EXISTING-EXPENSE-{$lockedExpense->id}",
                 'paid_at' => $bookingDate,

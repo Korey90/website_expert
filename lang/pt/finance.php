@@ -306,9 +306,21 @@ return [
         ],
         'statuses' => ['draft' => 'Rascunho', 'approved' => 'Aprovada', 'posted' => 'Lançada', 'partially_paid' => 'Parcialmente paga', 'paid' => 'Paga', 'void' => 'Anulada'],
         'payment_methods' => ['bank_transfer' => 'Transferência bancária', 'card' => 'Cartão', 'cash' => 'Dinheiro', 'direct_debit' => 'Débito direto', 'cheque' => 'Cheque', 'other' => 'Outro'],
+        'payment' => [
+            'section' => 'Pagamentos',
+            'fields' => ['amount' => 'Montante', 'settlement_source' => 'Pago a partir de', 'bank_account' => 'Conta bancária da empresa', 'reference' => 'Referência do pagamento', 'paid_at' => 'Data do pagamento', 'journal_preview' => 'Pré-visualização do lançamento'],
+            'sources' => ['bank_account' => 'Conta bancária da empresa', 'cash_account' => 'Dinheiro da empresa', 'owner_funds' => 'Fundos pessoais do proprietário'],
+            'hints' => [
+                'settlement_source' => 'O método descreve como foi pago. Pago a partir de identifica de quem era o dinheiro utilizado.',
+                'journal_preview' => 'Débito 2100 Fornecedores / Crédito :credit',
+                'profile_required' => 'Defina o tipo de entidade jurídica antes de registar pagamentos com fundos do proprietário.',
+                'open_profile' => 'Abrir perfil contabilístico',
+            ],
+            'ledger' => ['owner_capital' => 'Capital introduzido pelo proprietário', 'business_cash' => 'Banco e caixa', 'selected_bank' => 'conta contabilística do banco selecionado', 'select_source' => 'selecione uma origem do pagamento'],
+        ],
         'preview' => ['help' => 'Cálculo antes de guardar. Cada item é arredondado à menor unidade monetária com base no código fiscal selecionado.'],
-        'actions' => ['approve' => 'Aprovar', 'post' => 'Lançar', 'void' => 'Anular'],
-        'notifications' => ['approved' => 'Despesa aprovada.', 'posted' => 'Despesa lançada.', 'voided' => 'Despesa anulada.'],
+        'actions' => ['approve' => 'Aprovar', 'post' => 'Lançar', 'record_payment' => 'Registar pagamento', 'void' => 'Anular'],
+        'notifications' => ['approved' => 'Despesa aprovada.', 'posted' => 'Despesa lançada.', 'payment_recorded' => 'Pagamento ao fornecedor registado e lançado.', 'voided' => 'Despesa anulada.'],
     ],
     'attachments' => [
         'section' => 'Documentos de origem',
@@ -723,9 +735,11 @@ return [
         ],
     ],
     'accounting' => [
+        'navigation' => 'Perfil contabilístico',
         'title' => 'Perfil contabilístico',
         'subtitle' => 'Configure a empresa britânica, o período contabilístico, o IVA e os dados PAYE usados nos documentos financeiros.',
         'saved' => 'Perfil contabilístico guardado.',
+        'read_only' => 'Pode consultar este perfil, mas apenas um proprietário ou administrador ativo com permissão para gerir finanças pode alterá-lo.',
         'save' => 'Guardar perfil contabilístico',
         'saving' => 'A guardar…',
         'back_to_settings' => 'Definições da empresa',
@@ -743,7 +757,7 @@ return [
         ],
         'fields' => [
             'entity_type' => 'Tipo de entidade', 'legal_name' => 'Nome legal',
-            'company_number' => 'Número da Companies House', 'company_utr' => 'UTR da empresa',
+            'company_number' => 'Número da Companies House', 'company_utr' => 'Unique Taxpayer Reference (UTR)',
             'line_1' => 'Morada — linha 1', 'line_2' => 'Morada — linha 2', 'city' => 'Cidade',
             'county' => 'Condado', 'postcode' => 'Código postal', 'country' => 'País',
             'functional_currency' => 'Moeda funcional', 'accounting_basis' => 'Regime contabilístico',
@@ -764,6 +778,7 @@ return [
             'secret_saved' => 'Já existe um valor guardado em segurança.',
             'utr' => 'Introduza a Unique Taxpayer Reference de 10 dígitos.',
             'gbp_only' => 'O livro contabilístico britânico utiliza atualmente GBP.',
+            'select_entity_type' => 'Selecione o tipo de entidade jurídica',
         ],
     ],
 ];

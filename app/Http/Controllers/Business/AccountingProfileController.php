@@ -8,6 +8,7 @@ use App\Http\Controllers\Portal\BasePortalController;
 use App\Http\Requests\Business\UpdateAccountingProfileRequest;
 use App\Models\AccountingProfile;
 use App\Models\Business;
+use App\Support\PermissionHelper;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -58,7 +59,7 @@ class AccountingProfileController extends BasePortalController
             ->whereIn('role', ['owner', 'admin'])
             ->exists();
 
-        abort_unless($canManage, 403);
+        abort_unless($canManage && PermissionHelper::allows(auth()->user(), 'manage_finance'), 403);
     }
 
     /**

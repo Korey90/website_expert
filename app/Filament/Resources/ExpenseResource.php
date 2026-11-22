@@ -7,6 +7,7 @@ use App\Filament\Support\Currency as FilamentCurrency;
 use App\Models\Client;
 use App\Models\Expense;
 use App\Models\ExpenseItem;
+use App\Models\ExpensePayment;
 use App\Models\FinancialAttachment;
 use App\Models\LedgerAccount;
 use App\Models\Project;
@@ -335,6 +336,36 @@ class ExpenseResource extends BaseResource
                                     TextEntry::make('vat_amount')->label(__('finance.expenses.fields.vat'))->formatStateUsing(fn ($state, Expense $record): string => FilamentCurrency::format($state, $record->currency)),
                                     TextEntry::make('total')->label(__('finance.expenses.fields.total'))->weight('bold')->formatStateUsing(fn ($state, Expense $record): string => FilamentCurrency::format($state, $record->currency)),
                                     TextEntry::make('amount_due')->label(__('finance.expenses.fields.amount_due'))->formatStateUsing(fn ($state, Expense $record): string => FilamentCurrency::format($state, $record->currency)),
+                                ]),
+                        ]),
+                    Tab::make(__('finance.expenses.payment.section'))
+                        ->schema([
+                            Section::make(__('finance.expenses.payment.section'))
+                                ->schema([
+                                    RepeatableEntry::make('payments')
+                                        ->hiddenLabel()
+                                        ->columns(6)
+                                        ->schema([
+                                            TextEntry::make('amount')
+                                                ->label(__('finance.expenses.payment.fields.amount'))
+                                                ->formatStateUsing(fn ($state, ExpensePayment $record): string => FilamentCurrency::format($state, $record->currency)),
+                                            TextEntry::make('settlement_source')
+                                                ->label(__('finance.expenses.payment.fields.settlement_source'))
+                                                ->badge()
+                                                ->formatStateUsing(fn (string $state): string => __('finance.expenses.payment.sources.'.$state)),
+                                            TextEntry::make('method')
+                                                ->label(__('finance.expenses.fields.payment_method'))
+                                                ->formatStateUsing(fn (string $state): string => __('finance.expenses.payment_methods.'.$state)),
+                                            TextEntry::make('bankAccount.name')
+                                                ->label(__('finance.expenses.payment.fields.bank_account'))
+                                                ->placeholder('-'),
+                                            TextEntry::make('reference')
+                                                ->label(__('finance.expenses.payment.fields.reference'))
+                                                ->placeholder('-'),
+                                            TextEntry::make('paid_at')
+                                                ->label(__('finance.expenses.payment.fields.paid_at'))
+                                                ->date(),
+                                        ]),
                                 ]),
                         ]),
                     Tab::make(__('finance.attachments.section'))

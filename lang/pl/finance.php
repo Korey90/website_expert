@@ -306,9 +306,21 @@ return [
         ],
         'statuses' => ['draft' => 'Szkic', 'approved' => 'Zatwierdzony', 'posted' => 'Zaksięgowany', 'partially_paid' => 'Częściowo opłacony', 'paid' => 'Opłacony', 'void' => 'Unieważniony'],
         'payment_methods' => ['bank_transfer' => 'Przelew bankowy', 'card' => 'Karta', 'cash' => 'Gotówka', 'direct_debit' => 'Direct Debit', 'cheque' => 'Czek', 'other' => 'Inna'],
+        'payment' => [
+            'section' => 'Płatności',
+            'fields' => ['amount' => 'Kwota', 'settlement_source' => 'Zapłacono z', 'bank_account' => 'Firmowy rachunek bankowy', 'reference' => 'Referencja płatności', 'paid_at' => 'Data płatności', 'journal_preview' => 'Podgląd dekretacji'],
+            'sources' => ['bank_account' => 'Firmowy rachunek bankowy', 'cash_account' => 'Gotówka firmowa', 'owner_funds' => 'Prywatne środki właściciela'],
+            'hints' => [
+                'settlement_source' => 'Metoda płatności opisuje sposób zapłaty. Pole Zapłacono z wskazuje, czyje środki zostały użyte.',
+                'journal_preview' => 'Winien 2100 Zobowiązania handlowe / Ma :credit',
+                'profile_required' => 'Ustaw formę prawną przed rejestrowaniem płatności ze środków właściciela.',
+                'open_profile' => 'Otwórz profil księgowy',
+            ],
+            'ledger' => ['owner_capital' => 'Kapitał wniesiony przez właściciela', 'business_cash' => 'Bank i kasa', 'selected_bank' => 'wybrane konto księgowe rachunku bankowego', 'select_source' => 'wybierz źródło płatności'],
+        ],
         'preview' => ['help' => 'Obliczenie przed zapisem. Każda pozycja jest zaokrąglana do najmniejszej jednostki waluty zgodnie z wybranym kodem podatkowym.'],
-        'actions' => ['approve' => 'Zatwierdź', 'post' => 'Zaksięguj', 'void' => 'Unieważnij'],
-        'notifications' => ['approved' => 'Koszt został zatwierdzony.', 'posted' => 'Koszt został zaksięgowany.', 'voided' => 'Koszt został unieważniony.'],
+        'actions' => ['approve' => 'Zatwierdź', 'post' => 'Zaksięguj', 'record_payment' => 'Zarejestruj płatność', 'void' => 'Unieważnij'],
+        'notifications' => ['approved' => 'Koszt został zatwierdzony.', 'posted' => 'Koszt został zaksięgowany.', 'payment_recorded' => 'Płatność dla dostawcy została zarejestrowana i zaksięgowana.', 'voided' => 'Koszt został unieważniony.'],
     ],
     'attachments' => [
         'section' => 'Dokumenty źródłowe',
@@ -723,9 +735,11 @@ return [
         ],
     ],
     'accounting' => [
+        'navigation' => 'Profil księgowy',
         'title' => 'Profil księgowy',
         'subtitle' => 'Skonfiguruj dane brytyjskiej firmy, okres księgowy, VAT i PAYE używane w dokumentach finansowych.',
         'saved' => 'Profil księgowy został zapisany.',
+        'read_only' => 'Możesz wyświetlić ten profil, ale zmienić go może tylko aktywny właściciel lub administrator z uprawnieniem do zarządzania finansami.',
         'save' => 'Zapisz profil księgowy',
         'saving' => 'Zapisywanie…',
         'back_to_settings' => 'Ustawienia firmy',
@@ -743,7 +757,7 @@ return [
         ],
         'fields' => [
             'entity_type' => 'Rodzaj podmiotu', 'legal_name' => 'Nazwa prawna',
-            'company_number' => 'Numer Companies House', 'company_utr' => 'Company UTR',
+            'company_number' => 'Numer Companies House', 'company_utr' => 'Unique Taxpayer Reference (UTR)',
             'line_1' => 'Adres — wiersz 1', 'line_2' => 'Adres — wiersz 2', 'city' => 'Miejscowość',
             'county' => 'Hrabstwo', 'postcode' => 'Kod pocztowy', 'country' => 'Kraj',
             'functional_currency' => 'Waluta funkcjonalna', 'accounting_basis' => 'Metoda księgowania',
@@ -763,6 +777,7 @@ return [
             'secret_saved' => 'Wartość jest już bezpiecznie zapisana.',
             'utr' => 'Wpisz 10-cyfrowy Unique Taxpayer Reference.',
             'gbp_only' => 'Brytyjska księga rachunkowa używa obecnie GBP.',
+            'select_entity_type' => 'Wybierz formę prawną',
         ],
     ],
 ];

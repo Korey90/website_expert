@@ -8,6 +8,7 @@ use App\Models\BusinessUser;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class AccountingProfileControllerTest extends TestCase
@@ -35,6 +36,8 @@ class AccountingProfileControllerTest extends TestCase
             'is_active' => true,
             'joined_at' => now(),
         ]);
+        Permission::findOrCreate('manage_finance', 'web');
+        $this->owner->givePermissionTo('manage_finance');
     }
 
     public function test_owner_can_open_the_profile_without_exposing_sensitive_values(): void

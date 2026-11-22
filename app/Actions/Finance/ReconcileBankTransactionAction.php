@@ -67,7 +67,7 @@ class ReconcileBankTransactionAction
             sort($keys);
 
             foreach ($keys as $key) {
-                $this->lockCandidateSource($key, $lockedTransaction->business_id);
+                $this->lockCandidateSource($key, $lockedTransaction);
             }
 
             $candidates = collect($this->matchingService->findCandidates($lockedTransaction))
@@ -170,7 +170,7 @@ class ReconcileBankTransactionAction
         }
     }
 
-    private function lockCandidateSource(string $candidateKey, string $businessId): Model
+    private function lockCandidateSource(string $candidateKey, BankTransaction $transaction): Model
     {
         [$model, $id] = match (true) {
             preg_match('/^payment:(\d+):(receipt|refund)$/', $candidateKey, $matches) === 1 => [Payment::class, (int) $matches[1]],
@@ -180,13 +180,19 @@ class ReconcileBankTransactionAction
         };
 
         $source = $model::withoutGlobalScopes()
-            ->where('business_id', $businessId)
+            ->where('business_id', $transaction->business_id)
             ->whereKey($id)
             ->lockForUpdate()
             ->first();
 
         if (! $source) {
             throw new DomainException('The selected reconciliation source does not belong to this business.');
+        }
+
+        if ($source instanceof ExpensePayment
+            && ($source->settlement_source !== ExpensePayment::SOURCE_BANK_ACCOUNT
+                || $source->bank_account_id !== $transaction->bank_account_id)) {
+            throw new DomainException('Only a supplier payment from this business bank account can be reconciled.');
         }
 
         return $source;
