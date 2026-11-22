@@ -1,8 +1,25 @@
 # Current Task
 
 **Status:** Zakończone
-**Zadanie:** UKFIN-202R2 - automatyczne skanowanie załączników finansowych
+**Zadanie:** Kompletna instrukcja obsługi systemu finansów, księgowości i podatków UK
+**Data realizacji:** 2026-11-21
+
+## Wynik
+
+- Utworzono polski przewodnik użytkownika w `docs/guides/uk-finance-tax-system-user-guide-pl.md`.
+- Opisano konfigurację, role, sprzedaż, koszty, dokumenty cykliczne, bank, ledger, raporty, VAT adjustments, VAT Return i HMRC MTD VAT.
+- Dodano procedurę kwartalną, cykle statusów, zasady dokumentowania, diagnostykę oraz granice niewdrożonych podatków i schematów VAT.
+- Treść zweryfikowano względem aktualnego kodu, dokumentacji integracyjnej i oficjalnych źródeł GOV.UK/HMRC.
+- Sprawdzono wszystkie odnośniki wewnętrzne i wykluczono typograficzne długie myślniki.
+
+---
+
+## Poprzednie zakończone zadanie - UKFIN-202R2
+
+**Zadanie:** automatyczne skanowanie załączników finansowych
+
 **Data rozpoczęcia:** 2026-11-20
+
 **Ochrona równoległej pracy:** nie modyfikować `resources/js/Pages/Landing/PlStronyInternetowe.tsx`.
 
 **Stan wdrożenia:** kod i migracja `000035` działają na `website-expert.uk`; ClamAV i prawa katalogu są skonfigurowane, test EICAR przeszedł, a wszystkie 8 dokumentów ma status `clean`. Runbook: `docs/operations/financial-attachment-security-scanner.md`.
