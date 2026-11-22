@@ -10,6 +10,12 @@ return [
         'exchange_rate_date' => 'Exchange rate date',
         'vat_amount_gbp' => 'VAT amount in GBP',
     ],
+    'exports' => [
+        'formats' => ['csv' => 'Export CSV', 'xlsx' => 'Export Excel', 'pdf' => 'Export PDF'],
+        'business' => 'Business', 'generated_at' => 'Generated at', 'period' => 'Period',
+        'summary' => 'Summary', 'metric' => 'Metric', 'amount_gbp' => 'Amount GBP',
+        'total' => 'Total', 'no_rows' => 'No data for the selected filters.',
+    ],
     'expense_categories' => ['cost_of_sales' => 'Cost of sales', 'software' => 'Software', 'office' => 'Office', 'travel' => 'Travel', 'professional_fees' => 'Professional fees', 'marketing' => 'Marketing', 'utilities' => 'Utilities', 'insurance' => 'Insurance', 'rent' => 'Rent', 'bank_fees' => 'Bank fees', 'other' => 'Other'],
     'expense_report' => [
         'navigation' => 'Expense report', 'title' => 'Expense report', 'export_csv' => 'Export CSV', 'empty' => 'No expense data for this period.',

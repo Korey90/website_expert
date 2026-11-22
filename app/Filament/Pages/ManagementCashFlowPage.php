@@ -93,13 +93,13 @@ class ManagementCashFlowPage extends BasePage
             ->all();
     }
 
-    public function getExportUrl(): ?string
+    public function getExportUrl(string $format = 'csv'): ?string
     {
-        if ($this->periodId === '') {
+        if ($this->periodId === '' || ! in_array($format, ['csv', 'xlsx', 'pdf'], true)) {
             return null;
         }
 
-        return route('admin.finance.management-cash-flow.csv', array_filter([
+        return route('admin.finance.management-cash-flow.'.$format, array_filter([
             'period_id' => $this->periodId,
             'comparison_period_id' => $this->comparisonPeriodId !== '' ? $this->comparisonPeriodId : null,
         ], fn (mixed $value): bool => $value !== null));

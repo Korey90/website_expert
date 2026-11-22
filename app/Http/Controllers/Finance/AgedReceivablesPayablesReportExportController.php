@@ -5,17 +5,26 @@ namespace App\Http\Controllers\Finance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\AgedReceivablesPayablesReportRequest;
 use App\Services\Finance\AgedReceivablesPayablesService;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Services\Finance\FinanceReportDocumentFactory;
+use App\Services\Finance\FinanceReportExportService;
+use Symfony\Component\HttpFoundation\Response;
 
 class AgedReceivablesPayablesReportExportController extends Controller
 {
     public function __invoke(
         AgedReceivablesPayablesReportRequest $request,
         AgedReceivablesPayablesService $service,
-    ): StreamedResponse {
+        FinanceReportDocumentFactory $documents,
+        FinanceReportExportService $exporter,
+        string $format = 'csv',
+    ): Response {
         $business = currentBusiness();
         abort_unless($business, 403);
         $report = $service->report($business->id, $request->validated('as_of'));
+
+        if ($format !== 'csv') {
+            return $exporter->download($documents->agedReceivablesPayables($business, $report), $format);
+        }
 
         return response()->streamDownload(function () use ($report): void {
             $stream = fopen('php://output', 'wb');

@@ -44,12 +44,12 @@ class AgedReceivablesPayablesPage extends BasePage
         return app(AgedReceivablesPayablesService::class)->report(currentBusiness()->id, $this->asOf);
     }
 
-    public function getExportUrl(): ?string
+    public function getExportUrl(string $format = 'csv'): ?string
     {
-        if ($this->asOf === '') {
+        if ($this->asOf === '' || ! in_array($format, ['csv', 'xlsx', 'pdf'], true)) {
             return null;
         }
 
-        return route('admin.finance.aged-receivables-payables.csv', ['as_of' => $this->asOf]);
+        return route('admin.finance.aged-receivables-payables.'.$format, ['as_of' => $this->asOf]);
     }
 }

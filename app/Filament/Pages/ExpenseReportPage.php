@@ -50,9 +50,13 @@ class ExpenseReportPage extends BasePage
         );
     }
 
-    public function getExportUrl(): string
+    public function getExportUrl(string $format = 'csv'): ?string
     {
-        return route('admin.finance.expense-report.csv', [
+        if (! in_array($format, ['csv', 'xlsx', 'pdf'], true)) {
+            return null;
+        }
+
+        return route('admin.finance.expense-report.'.$format, [
             'date_from' => $this->dateFrom,
             'date_to' => $this->dateTo,
             'group_by' => $this->groupBy,

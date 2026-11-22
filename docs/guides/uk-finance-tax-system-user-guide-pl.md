@@ -567,7 +567,13 @@ Nie poprawiaj zaksięgowanego dokumentu przez bezpośrednią zmianę journalu. U
 | VAT Detail | Ledger i tax codes | Zaksięgowane linie w zakresie | Źródła output VAT, input VAT i pól VAT Return |
 | General Ledger | Journal lines | Zaksięgowane i odwrócone journale | Pełny ślad księgowy konta |
 
-Większość raportów pozwala eksportować CSV. Paczka dla księgowego jest dostępna na zablokowanym VAT Return.
+Trial Balance, Expense Report, Profit and Loss, Balance Sheet, Bank Reconciliation, Management Cash Flow, Aged Receivables and Payables oraz VAT Detail mają trzy formaty eksportu:
+
+- `CSV` do prostego przetwarzania danych;
+- `Excel` jako skoroszyt XLSX z komórkami liczbowymi, formatami kwot i podsumowaniami;
+- `PDF` jako gotowy do przekazania lub archiwizacji dokument z nazwą firmy, parametrami raportu i tabelami.
+
+Eksport zawsze używa filtrów aktualnie ustawionych na ekranie. Pliki są generowane na żądanie, nie są publiczne i wymagają uprawnienia `view_finance`. Paczka dla księgowego jest nadal dostępna osobno na zablokowanym VAT Return.
 
 Jeżeli raport jest pusty, sprawdź kolejno:
 

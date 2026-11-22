@@ -21,9 +21,7 @@
                 </select>
             </label>
             <div class="flex items-end">
-                <a href="{{ $this->getExportUrl() }}" class="inline-flex w-full items-center justify-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-500">
-                    {{ __('finance.bank_reconciliation_report.export_csv') }}
-                </a>
+                @include('filament.pages.partials.report-export-buttons')
             </div>
         </div>
 

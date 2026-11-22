@@ -5,13 +5,20 @@ namespace App\Http\Controllers\Finance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\BankReconciliationReportRequest;
 use App\Services\Finance\BankReconciliationReportService;
+use App\Services\Finance\FinanceReportDocumentFactory;
+use App\Services\Finance\FinanceReportExportService;
 use App\Support\PermissionHelper;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class BankReconciliationReportExportController extends Controller
 {
-    public function __invoke(BankReconciliationReportRequest $request, BankReconciliationReportService $service): StreamedResponse
-    {
+    public function __invoke(
+        BankReconciliationReportRequest $request,
+        BankReconciliationReportService $service,
+        FinanceReportDocumentFactory $documents,
+        FinanceReportExportService $exporter,
+        string $format = 'csv',
+    ): Response {
         abort_unless(PermissionHelper::allows($request->user(), 'view_finance'), 403);
         $business = currentBusiness();
         abort_unless($business, 403);
@@ -22,6 +29,10 @@ class BankReconciliationReportExportController extends Controller
             $validated['date_to'],
             isset($validated['account_id']) ? (int) $validated['account_id'] : null,
         );
+
+        if ($format !== 'csv') {
+            return $exporter->download($documents->bankReconciliation($business, $report, $validated), $format);
+        }
 
         return response()->streamDownload(function () use ($report): void {
             $stream = fopen('php://output', 'wb');

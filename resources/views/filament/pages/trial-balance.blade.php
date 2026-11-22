@@ -22,9 +22,7 @@
                 </select>
             </label>
             @if ($this->getExportUrl())
-                <a href="{{ $this->getExportUrl() }}" class="fi-btn fi-btn-color-primary fi-color-primary rounded-lg px-4 py-2 text-center text-sm font-semibold text-white shadow-sm">
-                    {{ __('finance.trial_balance.export_csv') }}
-                </a>
+                @include('filament.pages.partials.report-export-buttons')
             @endif
         </div>
 

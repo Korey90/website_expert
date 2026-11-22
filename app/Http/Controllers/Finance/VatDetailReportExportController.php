@@ -4,17 +4,28 @@ namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\VatDetailReportRequest;
+use App\Services\Finance\FinanceReportDocumentFactory;
+use App\Services\Finance\FinanceReportExportService;
 use App\Services\Finance\VatDetailService;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class VatDetailReportExportController extends Controller
 {
-    public function __invoke(VatDetailReportRequest $request, VatDetailService $service): StreamedResponse
-    {
+    public function __invoke(
+        VatDetailReportRequest $request,
+        VatDetailService $service,
+        FinanceReportDocumentFactory $documents,
+        FinanceReportExportService $exporter,
+        string $format = 'csv',
+    ): Response {
         $business = currentBusiness();
         abort_unless($business, 403);
         $validated = $request->validated();
         $report = $service->report($business->id, $validated['date_from'], $validated['date_to']);
+
+        if ($format !== 'csv') {
+            return $exporter->download($documents->vatDetail($business, $report), $format);
+        }
 
         return response()->streamDownload(function () use ($report): void {
             $stream = fopen('php://output', 'wb');

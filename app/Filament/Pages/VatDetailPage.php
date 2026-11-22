@@ -71,13 +71,16 @@ class VatDetailPage extends BasePage
         return $this->getWorkspace()['vat_detail'] ?? null;
     }
 
-    public function getExportUrl(): ?string
+    public function getExportUrl(string $format = 'csv'): ?string
     {
-        if ($this->dateFrom === '' || $this->dateTo === '' || $this->dateFrom > $this->dateTo) {
+        if ($this->dateFrom === ''
+            || $this->dateTo === ''
+            || $this->dateFrom > $this->dateTo
+            || ! in_array($format, ['csv', 'xlsx', 'pdf'], true)) {
             return null;
         }
 
-        return route('admin.finance.vat-detail.csv', [
+        return route('admin.finance.vat-detail.'.$format, [
             'date_from' => $this->dateFrom,
             'date_to' => $this->dateTo,
         ]);

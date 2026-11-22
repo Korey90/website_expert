@@ -63,9 +63,13 @@ class BankReconciliationReportPage extends BasePage
             ->all();
     }
 
-    public function getExportUrl(): string
+    public function getExportUrl(string $format = 'csv'): ?string
     {
-        return route('admin.finance.bank-reconciliation-report.csv', array_filter([
+        if (! in_array($format, ['csv', 'xlsx', 'pdf'], true)) {
+            return null;
+        }
+
+        return route('admin.finance.bank-reconciliation-report.'.$format, array_filter([
             'date_from' => $this->dateFrom,
             'date_to' => $this->dateTo,
             'account_id' => $this->accountId !== '' ? $this->accountId : null,

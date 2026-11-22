@@ -47,37 +47,25 @@ Route::middleware('auth')->group(function () {
             ->name('download');
     });
 
-    Route::get('/admin/finance/expense-report.csv', ExpenseReportExportController::class)
-        ->middleware('can:view_finance')
-        ->name('admin.finance.expense-report.csv');
+    $financeReportExports = [
+        'expense-report' => ExpenseReportExportController::class,
+        'bank-reconciliation-report' => BankReconciliationReportExportController::class,
+        'trial-balance' => TrialBalanceReportExportController::class,
+        'profit-and-loss' => ProfitAndLossReportExportController::class,
+        'balance-sheet' => BalanceSheetReportExportController::class,
+        'management-cash-flow' => ManagementCashFlowReportExportController::class,
+        'aged-receivables-payables' => AgedReceivablesPayablesReportExportController::class,
+        'vat-detail' => VatDetailReportExportController::class,
+    ];
 
-    Route::get('/admin/finance/bank-reconciliation-report.csv', BankReconciliationReportExportController::class)
-        ->middleware('can:view_finance')
-        ->name('admin.finance.bank-reconciliation-report.csv');
-
-    Route::get('/admin/finance/trial-balance.csv', TrialBalanceReportExportController::class)
-        ->middleware('can:view_finance')
-        ->name('admin.finance.trial-balance.csv');
-
-    Route::get('/admin/finance/profit-and-loss.csv', ProfitAndLossReportExportController::class)
-        ->middleware('can:view_finance')
-        ->name('admin.finance.profit-and-loss.csv');
-
-    Route::get('/admin/finance/balance-sheet.csv', BalanceSheetReportExportController::class)
-        ->middleware('can:view_finance')
-        ->name('admin.finance.balance-sheet.csv');
-
-    Route::get('/admin/finance/management-cash-flow.csv', ManagementCashFlowReportExportController::class)
-        ->middleware('can:view_finance')
-        ->name('admin.finance.management-cash-flow.csv');
-
-    Route::get('/admin/finance/aged-receivables-payables.csv', AgedReceivablesPayablesReportExportController::class)
-        ->middleware('can:view_finance')
-        ->name('admin.finance.aged-receivables-payables.csv');
-
-    Route::get('/admin/finance/vat-detail.csv', VatDetailReportExportController::class)
-        ->middleware('can:view_finance')
-        ->name('admin.finance.vat-detail.csv');
+    foreach ($financeReportExports as $report => $controller) {
+        foreach (['csv', 'xlsx', 'pdf'] as $format) {
+            Route::get("/admin/finance/{$report}.{$format}", $controller)
+                ->defaults('format', $format)
+                ->middleware('can:view_finance')
+                ->name("admin.finance.{$report}.{$format}");
+        }
+    }
 
     Route::get('/admin/finance/vat-returns/{vatReturn}/accountant-pack.zip', AccountantPackController::class)
         ->middleware('can:view_finance')

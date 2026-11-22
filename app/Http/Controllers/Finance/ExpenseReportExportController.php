@@ -4,15 +4,22 @@ namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
 use App\Services\Finance\ExpenseReportService;
+use App\Services\Finance\FinanceReportDocumentFactory;
+use App\Services\Finance\FinanceReportExportService;
 use App\Support\PermissionHelper;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class ExpenseReportExportController extends Controller
 {
-    public function __invoke(Request $request, ExpenseReportService $service): StreamedResponse
-    {
+    public function __invoke(
+        Request $request,
+        ExpenseReportService $service,
+        FinanceReportDocumentFactory $documents,
+        FinanceReportExportService $exporter,
+        string $format = 'csv',
+    ): Response {
         abort_unless(PermissionHelper::allows($request->user(), 'view_finance'), 403);
         $business = currentBusiness();
         abort_unless($business, 403);
@@ -22,6 +29,10 @@ class ExpenseReportExportController extends Controller
             'group_by' => ['required', Rule::in(ExpenseReportService::GROUPS)],
         ]);
         $report = $service->report($business->id, $validated['date_from'], $validated['date_to'], $validated['group_by']);
+
+        if ($format !== 'csv') {
+            return $exporter->download($documents->expense($business, $report, $validated), $format);
+        }
 
         return response()->streamDownload(function () use ($report): void {
             $stream = fopen('php://output', 'wb');

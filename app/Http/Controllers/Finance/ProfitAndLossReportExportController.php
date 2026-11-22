@@ -4,13 +4,20 @@ namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\ProfitAndLossReportRequest;
+use App\Services\Finance\FinanceReportDocumentFactory;
+use App\Services\Finance\FinanceReportExportService;
 use App\Services\Finance\ProfitAndLossService;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProfitAndLossReportExportController extends Controller
 {
-    public function __invoke(ProfitAndLossReportRequest $request, ProfitAndLossService $service): StreamedResponse
-    {
+    public function __invoke(
+        ProfitAndLossReportRequest $request,
+        ProfitAndLossService $service,
+        FinanceReportDocumentFactory $documents,
+        FinanceReportExportService $exporter,
+        string $format = 'csv',
+    ): Response {
         $business = currentBusiness();
         abort_unless($business, 403);
         $validated = $request->validated();
@@ -19,6 +26,10 @@ class ProfitAndLossReportExportController extends Controller
             (int) $validated['period_id'],
             isset($validated['comparison_period_id']) ? (int) $validated['comparison_period_id'] : null,
         );
+
+        if ($format !== 'csv') {
+            return $exporter->download($documents->profitAndLoss($business, $report), $format);
+        }
 
         return response()->streamDownload(function () use ($report): void {
             $stream = fopen('php://output', 'wb');

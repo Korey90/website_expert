@@ -4,13 +4,20 @@ namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\ManagementCashFlowReportRequest;
+use App\Services\Finance\FinanceReportDocumentFactory;
+use App\Services\Finance\FinanceReportExportService;
 use App\Services\Finance\ManagementCashFlowService;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class ManagementCashFlowReportExportController extends Controller
 {
-    public function __invoke(ManagementCashFlowReportRequest $request, ManagementCashFlowService $service): StreamedResponse
-    {
+    public function __invoke(
+        ManagementCashFlowReportRequest $request,
+        ManagementCashFlowService $service,
+        FinanceReportDocumentFactory $documents,
+        FinanceReportExportService $exporter,
+        string $format = 'csv',
+    ): Response {
         $business = currentBusiness();
         abort_unless($business, 403);
         $validated = $request->validated();
@@ -19,6 +26,10 @@ class ManagementCashFlowReportExportController extends Controller
             (int) $validated['period_id'],
             isset($validated['comparison_period_id']) ? (int) $validated['comparison_period_id'] : null,
         );
+
+        if ($format !== 'csv') {
+            return $exporter->download($documents->managementCashFlow($business, $report), $format);
+        }
 
         return response()->streamDownload(function () use ($report): void {
             $stream = fopen('php://output', 'wb');

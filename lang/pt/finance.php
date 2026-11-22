@@ -10,6 +10,12 @@ return [
         'exchange_rate_date' => 'Data da taxa de câmbio',
         'vat_amount_gbp' => 'Montante de IVA em GBP',
     ],
+    'exports' => [
+        'formats' => ['csv' => 'Exportar CSV', 'xlsx' => 'Exportar Excel', 'pdf' => 'Exportar PDF'],
+        'business' => 'Empresa', 'generated_at' => 'Gerado em', 'period' => 'Período',
+        'summary' => 'Resumo', 'metric' => 'Métrica', 'amount_gbp' => 'Montante GBP',
+        'total' => 'Total', 'no_rows' => 'Sem dados para os filtros selecionados.',
+    ],
     'expense_categories' => ['cost_of_sales' => 'Custo das vendas', 'software' => 'Software', 'office' => 'Escritório', 'travel' => 'Viagens', 'professional_fees' => 'Serviços profissionais', 'marketing' => 'Marketing', 'utilities' => 'Serviços públicos', 'insurance' => 'Seguros', 'rent' => 'Renda', 'bank_fees' => 'Taxas bancárias', 'other' => 'Outro'],
     'expense_report' => [
         'navigation' => 'Relatório de despesas', 'title' => 'Relatório de despesas', 'export_csv' => 'Exportar CSV', 'empty' => 'Sem dados de despesas neste período.',

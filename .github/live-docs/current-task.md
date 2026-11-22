@@ -1,32 +1,39 @@
 # Current Task
 
 **Status:** Zrealizowane lokalnie, gotowe do wdrożenia
-**Zadanie:** UKFIN-101R1 / UKFIN-307R1 - Accounting profile w panelu i owner-funded expenses
+**Zadanie:** UKFIN-512 - eksport raportów finansowych do XLSX i PDF
 **Data realizacji:** 2026-11-22
-**Plan:** `docs/plans/sole-trader-owner-funds-and-accounting-profile-plan.md`
+**Plan:** `docs/plans/finance-report-xlsx-pdf-exports-plan.md`
 
 ## Wynik
 
-- Dodano `/admin/accounting-profile` do grupy Finance, z odczytem `view_finance` i zapisem ograniczonym do aktywnego owner/admin z `manage_finance`.
-- Dodano `settlement_source` z wartościami `bank_account`, `cash_account` i `owner_funds` oraz osobny wybór `Paid from` w płatności kosztu.
-- Dodano systemowe konto 3300 Owner's capital introduced do planu kont i migrację istniejących tenantów.
-- Owner-funded payment działa wyłącznie dla `sole_trader` i księguje `Dr 2100 / Cr 3300` bez ruchu na 1100 lub rachunku bankowym.
-- Matching i reconciliation bankowe wymagają zgodnego źródła `bank_account` oraz tego samego rachunku.
-- Widok kosztu pokazuje historię płatności wraz ze źródłem, metodą i rachunkiem.
-- Dodano walidację, audyt spójności, tłumaczenia PL/EN/PT oraz instrukcję użytkownika.
+- Trial Balance, Expense Report, Profit and Loss, Balance Sheet, Bank Reconciliation, Management Cash Flow, Aged Receivables and Payables oraz VAT Detail eksportują teraz CSV, XLSX i PDF.
+- Dodano wspólny model dokumentu, generator Excel oparty na PhpSpreadsheet i generator PDF oparty na Dompdf.
+- XLSX ma typowane kwoty, style, podsumowania, freeze pane i ustawienia wydruku A4/A3.
+- PDF zawiera nazwę firmy, czas wygenerowania, aktywne filtry, tabele i podsumowania.
+- Wszystkie 24 trasy eksportu wymagają `view_finance`, zachowują tenant isolation i zwracają prywatne odpowiedzi `no-store`.
+- Dotychczasowe trasy i układ CSV pozostają kompatybilne.
+- Dodano tłumaczenia PL/EN/PT oraz instrukcję użytkownika.
 
 ## Walidacja
 
-- Pełny pakiet Finance: 385 zaliczonych, 1 pominięty zgodnie z ograniczeniem SQLite, 2653 asercje.
-- `php artisan view:cache` oraz Pint zakończone poprawnie.
-- Trasa `GET /admin/accounting-profile` jest zarejestrowana.
-- Migracja `2026_11_22_000036` została wykonana lokalnie jako batch 28.
-- Lokalny audit tenantów: `valid = true`, `invalid_count = 0`.
-- Lokalna baza: brak płatności bez źródła i brak tenantów z planem kont bez konta 3300.
+- Wszystkie 24 trasy CSV/XLSX/PDF są zarejestrowane.
+- Każdy z ośmiu XLSX został otwarty i zweryfikowany przez PhpSpreadsheet.
+- Każdy z ośmiu PDF ma prawidłową odpowiedź, sygnaturę i prywatne nagłówki.
+- Użytkownik bez `view_finance` otrzymuje 403 dla XLSX i PDF.
+- Regresja dziewięciu klas raportowych: 46 testów i 605 asercji.
+- Pełny pakiet Finance: 387 zaliczonych, 1 pominięty zgodnie z ograniczeniem SQLite, 2815 asercji.
+- Pint, PHP lint, Blade cache i dotychczasowe testy CSV są poprawne.
 
 ## Następny krok
 
-Wdrożyć kod i migrację na serwer, otworzyć `/admin/accounting-profile`, ustawić Website Expert NI jako `sole_trader`, a następnie wykonać kontrolny owner-funded payment i sprawdzić raporty. Produkcja nie została zmieniona w ramach tej realizacji.
+Wdrożyć kod bez migracji bazy, odbudować cache i pobrać kontrolny XLSX oraz PDF z produkcji. Produkcja nie została zmieniona w ramach tej realizacji.
+
+---
+
+## Poprzednie zakończone zadanie - Accounting profile i owner-funded expenses
+
+UKFIN-101R1 i UKFIN-307R1 zostały zrealizowane lokalnie. Szczegóły są w `docs/plans/sole-trader-owner-funds-and-accounting-profile-plan.md`.
 
 ---
 

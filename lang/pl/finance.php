@@ -10,6 +10,12 @@ return [
         'exchange_rate_date' => 'Data kursu',
         'vat_amount_gbp' => 'Kwota VAT w GBP',
     ],
+    'exports' => [
+        'formats' => ['csv' => 'Eksportuj CSV', 'xlsx' => 'Eksportuj Excel', 'pdf' => 'Eksportuj PDF'],
+        'business' => 'Firma', 'generated_at' => 'Wygenerowano', 'period' => 'Okres',
+        'summary' => 'Podsumowanie', 'metric' => 'Pozycja', 'amount_gbp' => 'Kwota GBP',
+        'total' => 'Razem', 'no_rows' => 'Brak danych dla wybranych filtrów.',
+    ],
     'expense_categories' => ['cost_of_sales' => 'Koszt sprzedaży', 'software' => 'Oprogramowanie', 'office' => 'Biuro', 'travel' => 'Podróże', 'professional_fees' => 'Usługi profesjonalne', 'marketing' => 'Marketing', 'utilities' => 'Media', 'insurance' => 'Ubezpieczenia', 'rent' => 'Najem', 'bank_fees' => 'Opłaty bankowe', 'other' => 'Inne'],
     'expense_report' => [
         'navigation' => 'Raport kosztów', 'title' => 'Raport kosztów', 'export_csv' => 'Eksportuj CSV', 'empty' => 'Brak danych kosztowych w tym okresie.',

@@ -15,9 +15,7 @@
                 <input type="date" wire:model.live="dateTo" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800">
             </label>
             @if ($this->getExportUrl())
-                <a href="{{ $this->getExportUrl() }}" class="fi-btn fi-btn-color-primary inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white">
-                    {{ __('finance.vat_detail.export_csv') }}
-                </a>
+                @include('filament.pages.partials.report-export-buttons')
             @endif
         </div>
 
