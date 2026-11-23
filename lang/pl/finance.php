@@ -221,6 +221,7 @@ return [
         'pack' => [
             'readme_title' => 'Paczka dowodowa Universal Credit',
             'not_submission' => 'Ta paczka dowodowa nie jest potwierdzeniem wysłania wartości do Universal Credit.',
+            'review_snapshot_hash' => 'Hash snapshotu weryfikacji',
             'review_title' => 'Review i oświadczenie Universal Credit',
             'review_audit' => 'Audit review i blokady',
             'reviewed_at' => 'Data review', 'locked_at' => 'Data blokady',

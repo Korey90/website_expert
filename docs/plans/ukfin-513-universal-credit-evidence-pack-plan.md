@@ -491,6 +491,20 @@ Stan na 2026-11-23: UKFIN-513F ukończony lokalnie.
 4. Wykonać dry run na izolowanym tenantcie demonstracyjnym.
 5. Dopuścić produkcję po porównaniu jednego okresu z formularzem UC.
 
+Stan na 2026-11-23: część techniczna UKFIN-513G przygotowana lokalnie, gate zewnętrzny pozostaje otwarty.
+
+- dodano instrukcję użytkownika i checklistę dowodów w wersji EN oraz PL w `docs/guides`;
+- dodano wersjonowany kandydat golden dataset `uk-universal-credit-golden-v1` z niezmiennym SHA-256, statusem `pending_specialist_review` i oczekiwanymi sumami GBP 1 290,00 income, GBP 199,00 expenses oraz GBP 1 091,00 net;
+- izolowany test E2E tworzy osobny tenant, klasyfikuje included/excluded cash items, dodaje business-use, limit loan interest, mileage i home working, wykonuje calculate, amber preflight, review, lock, generuje zweryfikowany ZIP, zapisuje ręczne reported i uruchamia tenant audit;
+- dry run przeszedł: 1 test, 38 asercji, wynik i komenda powtórzenia są w `docs/review/uk-universal-credit-golden-dataset-v1/dry-run-result.md`;
+- kontrolowany tryb testu eksportuje dokładny ZIP z właściwego generatora do `docs/demo/uk-universal-credit-golden-v1`; standardowe testy używają fake private storage i nie nadpisują artefaktu;
+- paczka dla specjalisty ma osobny SHA-256 i rozmiar zapisane w `artifact.sha256.json`, a instrukcja regeneracji wymaga jawnej flagi `GENERATE_UC_GOLDEN_PACK=1`;
+- hash snapshotu review ma osobną etykietę EN/PL/PT i nie jest błędnie przedstawiany jako hash kalkulacji;
+- checklisty specjalisty EN i PL są związane z dokładnym hashem fixture, więc zmiana danych wymaga nowej wersji i ponownej akceptacji;
+- do zamknięcia UKFIN-513G nadal wymagane są: przegląd przez osobę znającą UC w Irlandii Północnej, porównanie z aktualnym zadaniem na koncie UC oraz zapisana decyzja dla dokładnego hasha fixture;
+- do czasu tej akceptacji moduł nie ma gate produkcyjnego mimo poprawnego wyniku technicznego.
+- pełna regresja Finance po dodaniu dry runu i artefaktu: 447 passed, 1 skipped, 3305 assertions; Pint: poprawny.
+
 ## 14. Testy akceptacyjne
 
 - granice dat okresu są włączne i nie pobierają pozycji spoza zakresu;

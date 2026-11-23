@@ -143,6 +143,9 @@ class UniversalCreditEvidencePackTest extends TestCase
 
             $manifest = json_decode((string) $archive->getFromName('manifest.sha256.json'), true, flags: JSON_THROW_ON_ERROR);
             $this->assertSame($this->period->review_snapshot_hash, data_get($manifest, 'assessment_period.review_snapshot_hash'));
+            $readme = (string) $archive->getFromName('README.txt');
+            $this->assertStringContainsString('Hash snapshotu weryfikacji: '.$this->period->review_snapshot_hash, $readme);
+            $this->assertStringNotContainsString('Hash snapshotu obliczeń: '.$this->period->review_snapshot_hash, $readme);
             $this->assertTrue(collect($manifest['excluded'])->contains(fn (array $item): bool => $item['attachment_id'] === $pending['attachment']->id && $item['reason'] === 'scan_pending'));
             $this->assertStringNotContainsString(Storage::disk('financial')->path(''), json_encode($manifest, JSON_THROW_ON_ERROR));
 

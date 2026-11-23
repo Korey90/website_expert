@@ -240,6 +240,7 @@ return [
         'pack' => [
             'readme_title' => 'Universal Credit evidence pack',
             'not_submission' => 'This evidence pack is not confirmation that values were submitted to Universal Credit.',
+            'review_snapshot_hash' => 'Review snapshot hash',
             'review_title' => 'Universal Credit review and declaration',
             'review_audit' => 'Review and lock audit',
             'reviewed_at' => 'Reviewed at', 'locked_at' => 'Locked at',

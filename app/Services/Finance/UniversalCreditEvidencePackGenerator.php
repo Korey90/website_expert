@@ -172,7 +172,7 @@ class UniversalCreditEvidencePackGenerator
             __('finance.exports.business') => $businessName,
             __('finance.universal_credit.report.period_number') => $period->number,
             __('finance.exports.period') => $period->date_from->toDateString().' - '.$period->date_to->toDateString(),
-            __('finance.universal_credit.report.snapshot_hash') => $period->review_snapshot_hash,
+            __('finance.universal_credit.pack.review_snapshot_hash') => $period->review_snapshot_hash,
         ];
         $files[] = $this->put($staging, '01-summary/review-and-declaration.pdf', Pdf::loadView(
             'pdf.universal-credit-pack-document',
@@ -209,7 +209,7 @@ class UniversalCreditEvidencePackGenerator
             __('finance.universal_credit.pack.not_submission'),
             __('finance.exports.business').': '.$businessName,
             __('finance.exports.period').': '.$period->date_from->toDateString().' - '.$period->date_to->toDateString(),
-            __('finance.universal_credit.report.snapshot_hash').': '.$period->review_snapshot_hash,
+            __('finance.universal_credit.pack.review_snapshot_hash').': '.$period->review_snapshot_hash,
         ]).PHP_EOL;
         $files[] = $this->put($staging, 'README.txt', $readme, 'metadata');
         $files[] = $this->put($staging, '04-audit/generation-metadata.json', json_encode([

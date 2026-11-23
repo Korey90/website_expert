@@ -1,0 +1,132 @@
+{
+    "schema_version": 1,
+    "dataset_id": "uk-universal-credit-golden-v1",
+    "review_status": "pending_specialist_review",
+    "business_name": "Website Expert NI - Universal Credit Review",
+    "profile": {
+        "entity_type": "sole_trader",
+        "vat_registered": false,
+        "vat_reporting_method": null
+    },
+    "assessment_period": {
+        "from": "2026-11-23",
+        "to": "2026-12-22"
+    },
+    "manual_entries": [
+        {
+            "case_id": "UC-INCOME-SERVICE",
+            "direction": "income",
+            "event_type": "cash_receipt",
+            "category": "goods_and_services",
+            "cash_date": "2026-11-28",
+            "amount_gbp": "1250.00",
+            "description": "Website project payment received by bank transfer.",
+            "classification": "included",
+            "business_use_percentage": "100.00"
+        },
+        {
+            "case_id": "UC-INCOME-TIPS",
+            "direction": "income",
+            "event_type": "tips",
+            "category": "tips_and_gratuities",
+            "cash_date": "2026-12-02",
+            "amount_gbp": "40.00",
+            "description": "Customer gratuities received during the assessment period.",
+            "classification": "included",
+            "business_use_percentage": "100.00"
+        },
+        {
+            "case_id": "UC-EXPENSE-MIXED-INTERNET",
+            "direction": "expense",
+            "event_type": "cash_payment",
+            "category": "office_and_equipment",
+            "cash_date": "2026-12-05",
+            "amount_gbp": "120.00",
+            "description": "Internet and telephone payment with equal business and personal use.",
+            "classification": "included",
+            "business_use_percentage": "50.00",
+            "business_use_reason": "Half of the service was used for Website Expert NI business activity."
+        },
+        {
+            "case_id": "UC-EXPENSE-TAX-NI",
+            "direction": "expense",
+            "event_type": "tax_ni_pension_or_vat_payment",
+            "category": "tax_ni_pension_and_vat",
+            "cash_date": "2026-12-08",
+            "amount_gbp": "35.00",
+            "description": "Eligible self-employed National Insurance payment made in the period.",
+            "classification": "included",
+            "business_use_percentage": "100.00"
+        },
+        {
+            "case_id": "UC-EXPENSE-LOAN-INTEREST",
+            "direction": "expense",
+            "event_type": "cash_payment",
+            "category": "legal_financial_and_insurance",
+            "cash_date": "2026-12-12",
+            "amount_gbp": "50.00",
+            "description": "Business loan interest paid during the assessment period.",
+            "classification": "included",
+            "business_use_percentage": "100.00",
+            "calculation_rule": "business_loan_interest"
+        },
+        {
+            "case_id": "UC-EXCLUDED-PERSONAL",
+            "direction": "expense",
+            "event_type": "other",
+            "category": "excluded_or_disallowed",
+            "cash_date": "2026-12-15",
+            "amount_gbp": "75.00",
+            "description": "Personal purchase retained in the source review but excluded from the UC report.",
+            "classification": "excluded",
+            "classification_reason": "Personal expense not incurred for the business."
+        }
+    ],
+    "simplified_expenses": [
+        {
+            "case_id": "UC-SIMPLIFIED-MILEAGE",
+            "type": "vehicle_mileage",
+            "description": "100 business miles in a car during the assessment period.",
+            "inputs": {
+                "vehicle_type": "car_van_or_other_motor_vehicle",
+                "miles": "100.00"
+            }
+        },
+        {
+            "case_id": "UC-SIMPLIFIED-HOME",
+            "type": "home_working",
+            "description": "60 hours of business work from home during the assessment period.",
+            "inputs": {
+                "hours": 60
+            }
+        }
+    ],
+    "expected": {
+        "income_total_pence": 129000,
+        "expense_total_pence": 19900,
+        "net_total_pence": 109100,
+        "included_report_items": 5,
+        "excluded_report_items": 1,
+        "active_simplified_expenses": 2,
+        "category_reportable_pence": {
+            "goods_and_services": 125000,
+            "tips_and_gratuities": 4000,
+            "office_and_equipment": 6000,
+            "tax_ni_pension_and_vat": 3500,
+            "legal_financial_and_insurance": 4100
+        },
+        "simplified_reportable_pence": {
+            "vehicle_mileage": 4500,
+            "home_working": 1800
+        },
+        "preflight_status_before_review": "amber",
+        "final_status": "reported"
+    },
+    "specialist_sign_off": {
+        "reviewer_name": null,
+        "reviewer_role": null,
+        "reviewed_at": null,
+        "decision": "pending",
+        "notes": null
+    }
+}

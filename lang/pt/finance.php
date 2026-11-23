@@ -221,6 +221,7 @@ return [
         'pack' => [
             'readme_title' => 'Pacote de provas do Universal Credit',
             'not_submission' => 'Este pacote de provas não confirma o envio dos valores ao Universal Credit.',
+            'review_snapshot_hash' => 'Hash do snapshot de revisão',
             'review_title' => 'Revisão e declaração do Universal Credit',
             'review_audit' => 'Auditoria de revisão e bloqueio',
             'reviewed_at' => 'Revisto em', 'locked_at' => 'Bloqueado em',

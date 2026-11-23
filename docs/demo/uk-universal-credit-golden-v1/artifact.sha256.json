@@ -1,0 +1,12 @@
+{
+    "classification": "DEMO / NOT FOR SUBMISSION",
+    "dataset_id": "uk-universal-credit-golden-v1",
+    "dataset_sha256": "ef92a67e1c458f001334f4659f9dd87bc54986cd2660c3fd757dd3caa6f0436a",
+    "review_status": "pending_specialist_review",
+    "review_snapshot_sha256": "9d77b04d03e7eac0e2a542b179f71c985b34cdc5014b9ce3098f34457d970855",
+    "artifact": "universal-credit-golden-v1.zip",
+    "artifact_sha256": "9ff818fd84d26b5c01215f4d4477e0f30b6e02793714e6558d7552762154f732",
+    "artifact_bytes": 2801322,
+    "generated_at": "2026-11-23T22:19:32+00:00",
+    "generator": "Tests\\Feature\\Finance\\UniversalCreditGoldenDatasetTest"
+}
