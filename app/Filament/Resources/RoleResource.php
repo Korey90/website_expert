@@ -34,7 +34,7 @@ class RoleResource extends BaseResource
     {
         return [
             'crm' => ['label' => 'CRM',          'icon' => 'heroicon-o-building-office-2', 'suffixes' => ['clients', 'leads', 'contracts', 'briefings', 'sales_offers']],
-            'finance' => ['label' => 'Finance, Accounting & UK Tax', 'icon' => 'heroicon-o-banknotes', 'suffixes' => ['quotes', 'invoices', 'payments', 'finance', 'finance_periods', 'tax_returns']],
+            'finance' => ['label' => 'Finance, Accounting & UK Tax', 'icon' => 'heroicon-o-banknotes', 'suffixes' => ['quotes', 'invoices', 'payments', 'finance', 'finance_periods', 'tax_returns', 'universal_credit_reporting', 'universal_credit_pack']],
             'projects' => ['label' => 'Projects',      'icon' => 'heroicon-o-briefcase',          'suffixes' => ['projects', 'portfolio_projects', 'services']],
             'productivity' => ['label' => 'Productivity', 'icon' => 'heroicon-o-calendar-days', 'suffixes' => ['calendar']],
             'domains' => ['label' => 'Domains', 'icon' => 'heroicon-o-globe-alt', 'suffixes' => ['domains', 'domain_pricing']],

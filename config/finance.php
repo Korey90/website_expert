@@ -63,4 +63,8 @@ return [
         'max_attachments' => 100,
         'max_attachment_bytes' => 100 * 1024 * 1024,
     ],
+    'universal_credit' => [
+        'policy_code' => 'ni_uc_self_employment',
+        'max_period_days' => 31,
+    ],
 ];

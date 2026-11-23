@@ -49,6 +49,7 @@ class AdminSeeder extends Seeder
             // Finance — accounting and tax workflows
             'view_finance', 'manage_finance', 'approve_finance', 'post_finance',
             'close_finance_periods', 'submit_tax_returns',
+            'view_universal_credit_reporting', 'manage_universal_credit_reporting', 'export_universal_credit_pack',
             // Projects — ProjectResource
             'view_projects', 'create_projects', 'edit_projects', 'delete_projects',
             'view_portfolio_projects', 'create_portfolio_projects', 'edit_portfolio_projects', 'delete_portfolio_projects',
@@ -130,6 +131,7 @@ class AdminSeeder extends Seeder
             'manage_pipeline', 'manage_project_templates', 'manage_domain_pricing',
             'export_leads', 'view_security_events', 'manage_security_events',
             'close_finance_periods', 'submit_tax_returns',
+            'view_universal_credit_reporting', 'manage_universal_credit_reporting', 'export_universal_credit_pack',
         ];
         $manager->syncPermissions(array_values(array_filter($permissions, fn ($p) => ! in_array($p, $managerExclude))));
 

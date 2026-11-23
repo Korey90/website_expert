@@ -75,6 +75,16 @@ class Business extends Model
         return $this->hasMany(AccountingPeriod::class);
     }
 
+    public function universalCreditProfile(): HasOne
+    {
+        return $this->hasOne(UniversalCreditProfile::class);
+    }
+
+    public function universalCreditAssessmentPeriods(): HasMany
+    {
+        return $this->hasMany(UniversalCreditAssessmentPeriod::class);
+    }
+
     public function taxCodes(): HasMany
     {
         return $this->hasMany(TaxCode::class);

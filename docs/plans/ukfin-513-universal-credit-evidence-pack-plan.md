@@ -1,6 +1,6 @@
 # UKFIN-513 - paczka dowodowa Universal Credit dla sole tradera
 
-**Status:** Plan gotowy do realizacji  
+**Status:** Implementacja w toku - UKFIN-513A ukończone lokalnie
 **Data:** 2026-11-23  
 **Projekt:** Website Expert NI  
 **Grupa docelowa:** Sole trader w Irlandii Północnej  
@@ -345,12 +345,25 @@ Preflight ocenia kompletność, nie potwierdza akceptacji wydatku przez DWP.
 
 ## 13. Etapy implementacji
 
-### UKFIN-513A - profil i reguły
+### UKFIN-513A - profil i reguły - ukończone lokalnie 2026-11-23
 
 1. Dodać profil UC, assessment periods i wersjonowane policies.
 2. Dodać kategorie income/expense i pierwszą politykę nidirect.
 3. Dodać permissions, policies i tenant audit.
 4. Dodać VAT inclusive/exclusive z effective date.
+
+Wynik etapu:
+
+- migracja `000040` tworzy profil UC, assessment periods oraz wersjonowane polityki;
+- pierwsza polityka `ni_uc_self_employment` zawiera aktualne kategorie, flat rates, limity i oficjalne źródła nidirect;
+- reguły są kanonizowane, zabezpieczone SHA-256, niezmienne i kopiowane do snapshotu okresu;
+- okresy używają dokładnych dat, maksymalnie 31 dni, nie mogą się nakładać i powstają z zerowymi totals;
+- VAT inclusive/exclusive ma effective date i snapshot na okresie;
+- dodano osobne uprawnienia view/manage/export, widoczne w edytorze ról;
+- profile i okresy mają tenant policies, relacje, blokady zmiany entity type i rozszerzony audit;
+- migracja przeszła na lokalnym MySQL, tenant audit wykazał 0 błędów;
+- Finance: 418 passed, 1 skipped, 3017 assertions;
+- tłumaczenia finance: PL/EN/PT po 1467 identycznych kluczy.
 
 ### UKFIN-513B - źródła i klasyfikacja
 

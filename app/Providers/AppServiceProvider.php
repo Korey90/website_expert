@@ -27,6 +27,8 @@ use App\Models\SalesOffer;
 use App\Models\SalesOfferTemplate;
 use App\Models\Setting;
 use App\Models\Supplier;
+use App\Models\UniversalCreditAssessmentPeriod;
+use App\Models\UniversalCreditProfile;
 use App\Models\VatAdjustment;
 use App\Models\VatReturn;
 use App\Notifications\LeadAssignedNotification;
@@ -47,6 +49,8 @@ use App\Policies\RecurringExpenseTemplatePolicy;
 use App\Policies\SalesOfferPolicy;
 use App\Policies\SalesOfferTemplatePolicy;
 use App\Policies\SupplierPolicy;
+use App\Policies\UniversalCreditAssessmentPeriodPolicy;
+use App\Policies\UniversalCreditProfilePolicy;
 use App\Policies\VatAdjustmentPolicy;
 use App\Policies\VatReturnPolicy;
 use App\Services\Finance\ClamAvFinancialAttachmentScanner;
@@ -110,6 +114,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(SalesOffer::class, SalesOfferPolicy::class);
         Gate::policy(SalesOfferTemplate::class, SalesOfferTemplatePolicy::class);
         Gate::policy(Supplier::class, SupplierPolicy::class);
+        Gate::policy(UniversalCreditProfile::class, UniversalCreditProfilePolicy::class);
+        Gate::policy(UniversalCreditAssessmentPeriod::class, UniversalCreditAssessmentPeriodPolicy::class);
         Gate::policy(VatAdjustment::class, VatAdjustmentPolicy::class);
         Gate::policy(VatReturn::class, VatReturnPolicy::class);
 

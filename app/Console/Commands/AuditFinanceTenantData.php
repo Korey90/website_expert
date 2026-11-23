@@ -6,6 +6,7 @@ use App\Models\BankReconciliation;
 use App\Models\ExpensePayment;
 use App\Models\Payment;
 use App\Models\PurchaseCreditRefund;
+use App\Services\Finance\UniversalCreditPolicyHashService;
 use App\Services\Finance\VatReturnSnapshotService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,7 @@ class AuditFinanceTenantData extends Command
         'bank_reconciliation_allocations' => ['parent' => 'bank_reconciliations', 'foreign_key' => 'bank_reconciliation_id'],
         'hmrc_vat_submissions' => ['parent' => 'vat_returns', 'foreign_key' => 'vat_return_id'],
         'hmrc_vat_submission_events' => ['parent' => 'hmrc_vat_submissions', 'foreign_key' => 'hmrc_vat_submission_id'],
+        'universal_credit_assessment_periods' => ['parent' => 'universal_credit_profiles', 'foreign_key' => 'universal_credit_profile_id'],
     ];
 
     /** @var array<string, array{table: string, parent: string, foreign_key: string}> */
@@ -156,6 +158,44 @@ class AuditFinanceTenantData extends Command
         $report['accounting_periods'] = [
             'invalid_count' => (clone $periodQuery)->count(),
             'sample_ids' => (clone $periodQuery)->limit(20)->pluck('period.id')->all(),
+        ];
+
+        $universalCreditProfileQuery = DB::table('universal_credit_profiles as profile')
+            ->leftJoin('businesses as owner', 'owner.id', '=', 'profile.business_id')
+            ->where(fn ($query) => $query->whereNull('profile.business_id')->orWhereNull('owner.id'));
+        $report['universal_credit_profiles'] = [
+            'invalid_count' => (clone $universalCreditProfileQuery)->count(),
+            'sample_ids' => (clone $universalCreditProfileQuery)->limit(20)->pluck('profile.id')->all(),
+        ];
+
+        $invalidUniversalCreditSnapshots = [];
+        $universalCreditHasher = app(UniversalCreditPolicyHashService::class);
+
+        DB::table('universal_credit_assessment_periods as period')
+            ->leftJoin('universal_credit_policy_versions as policy', 'policy.id', '=', 'period.policy_version_id')
+            ->select([
+                'period.id', 'period.policy_rules_snapshot', 'period.policy_rules_hash',
+                'policy.id as policy_id', 'policy.rules_hash as policy_rules_hash_source',
+            ])
+            ->orderBy('period.id')
+            ->chunk(100, function ($periods) use (&$invalidUniversalCreditSnapshots, $universalCreditHasher): void {
+                foreach ($periods as $period) {
+                    $rules = is_string($period->policy_rules_snapshot)
+                        ? json_decode($period->policy_rules_snapshot, true)
+                        : $period->policy_rules_snapshot;
+
+                    if (! is_array($rules)
+                        || $period->policy_id === null
+                        || ! hash_equals((string) $period->policy_rules_hash, $universalCreditHasher->hash($rules))
+                        || ! hash_equals((string) $period->policy_rules_hash, (string) $period->policy_rules_hash_source)) {
+                        $invalidUniversalCreditSnapshots[] = $period->id;
+                    }
+                }
+            });
+
+        $report['universal_credit_assessment_periods.policy_snapshot'] = [
+            'invalid_count' => count($invalidUniversalCreditSnapshots),
+            'sample_ids' => array_slice($invalidUniversalCreditSnapshots, 0, 20),
         ];
 
         $vatReturnQuery = DB::table('vat_returns as vat_return')

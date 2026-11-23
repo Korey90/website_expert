@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ukfin-513-universal-credit-evidence-pack-plan.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="ukfin-513---paczka-dowodowa-universal-credit-dla-sole-tradera">UKFIN-513 - paczka dowodowa Universal Credit dla sole tradera</h1>
+<p><strong>Status:</strong> Plan gotowy do realizacji<br>
+<strong>Data:</strong> 2026-11-23<br>
+<strong>Projekt:</strong> Website Expert NI<br>
+<strong>Grupa docelowa:</strong> Sole trader w Irlandii Północnej<br>
+<strong>UI:</strong> polski i angielski, z zachowaniem parytetu istniejących kluczy portugalskich</p>
+<h2 id="1-cel">1. Cel</h2>
+<p>Dodać funkcję, która dla dokładnego miesięcznego okresu rozliczeniowego Universal Credit przygotuje jedną prywatną paczkę ZIP zawierającą:</p>
+<ul>
+<li>podsumowanie przychodów i kosztów do przepisania do konta Universal Credit;</li>
+<li>szczegółową listę pozycji uwzględnionych i wykluczonych;</li>
+<li>faktury, rachunki, paragony, wyciągi bankowe i inne dowody;</li>
+<li>uzgodnienie raportowanych kwot z płatnościami, gotówką i rachunkami bankowymi;</li>
+<li>raport brakujących dowodów, nierozliczonych operacji i pozycji wymagających decyzji;</li>
+<li>manifest plików oraz sumy SHA-256 pozwalające wykryć zmianę paczki.</li>
+</ul>
+<p>Funkcja nie wysyła danych do Universal Credit. Oficjalna ścieżka nadal wymaga zalogowania do konta UC i wykonania zadania <code>Report your income and expenses</code>. System przygotuje wartości i dowody, a po ręcznym zgłoszeniu pozwoli zapisać datę oraz potwierdzenie.</p>
+<h2 id="2-oficjalna-podstawa-wymagań">2. Oficjalna podstawa wymagań</h2>
+<p>Plan opiera się na oficjalnych informacjach aktualnych na 2026-11-23:</p>
+<ul>
+<li>osoba samozatrudniona raportuje przychody i koszty co miesiąc, także gdy w okresie wynoszą zero;</li>
+<li>okres obejmuje wszystko faktycznie otrzymane lub zapłacone w datach wskazanych przez UC, niezależnie od daty wykonania pracy lub wystawienia faktury;</li>
+<li>dowodami mogą być między innymi rachunki, faktury i rachunki bankowe;</li>
+<li>przychód obejmuje płatności kartą, gotówką, czekiem i przelewem, zapłatę rzeczową, napiwki, określone zwroty podatku lub National Insurance, dotacje oraz wskazane zbycia aktywów;</li>
+<li>koszt musi być związany z biznesem, konieczny i odpowiedni oraz nie może być nadmierny;</li>
+<li>przy koszcie mieszanym raportuje się tylko część biznesową;</li>
+<li>podatnik VAT wybiera wariant z VAT albo bez VAT i musi stosować go konsekwentnie;</li>
+<li>uproszczone koszty mogą dotyczyć pojazdów, pracy z domu i mieszkania w miejscu prowadzenia działalności.</li>
+</ul>
+<p>Źródła:</p>
+<ul>
+<li><a href="https://www.nidirect.gov.uk/articles/report-business-income-and-expenses-if-youre-self-employed">Report business income and expenses if you're self-employed - nidirect</a></li>
+<li><a href="https://www.nidirect.gov.uk/articles/business-expenses-you-can-report-if-youre-self-employed">Business expenses you can report if you're self-employed - nidirect</a></li>
+<li><a href="https://www.gov.uk/self-employed-records/what-records-to-keep">Business records if you're self-employed - GOV.UK</a></li>
+<li><a href="https://www.gov.uk/expenses-if-youre-self-employed/how-to-claim">Expenses if you're self-employed - GOV.UK</a></li>
+</ul>
+<p>Reguły UC nie są tym samym co księgowy Profit and Loss ani wyliczenie podatku dla Self Assessment. Przykładowo lista UC obejmuje faktycznie zapłacony Income Tax, wybrane składki National Insurance i składki emerytalne. Nie są to zwykłe koszty księgowe P&amp;L. Obecnego P&amp;L nie wolno więc przedstawiać jako raportu UC przez samo przemianowanie kolumn.</p>
+<h2 id="3-zakres">3. Zakres</h2>
+<h3 id="w-zakresie-ukfin-513">W zakresie UKFIN-513</h3>
+<ul>
+<li>wyłącznie firma z <code>AccountingProfile.entity_type = sole_trader</code>;</li>
+<li>jeden jawny assessment period z datą <code>from</code> i <code>to</code>, włącznie z obiema datami;</li>
+<li>kalkulacja według dnia faktycznego otrzymania lub zapłaty, niezależna od księgowego <code>cash/accrual</code>;</li>
+<li>wpływy bankowe, kartowe, gotówkowe, czeki i płatności rzeczowe;</li>
+<li>koszty z rachunku firmowego, gotówki i prywatnych środków właściciela;</li>
+<li>osobna klasyfikacja UC, która nie zmienia kont ledgeru ani klasyfikacji podatkowej;</li>
+<li>wariant VAT inclusive albo VAT exclusive;</li>
+<li>rzeczywiste koszty, procent wykorzystania biznesowego i uproszczone koszty;</li>
+<li>PDF, XLSX, CSV, dokumenty źródłowe oraz manifest w ZIP;</li>
+<li>wersja robocza i finalna, niezmienna paczka po review;</li>
+<li>UI PL/EN oraz parytet kluczy PT;</li>
+<li>tenant isolation, RBAC, audit trail, prywatny storage i skan antywirusowy.</li>
+</ul>
+<h3 id="poza-zakresem">Poza zakresem</h3>
+<ul>
+<li>automatyczne wysyłanie danych do UC lub wyliczanie kwoty świadczenia;</li>
+<li>decyzja prawna, czy wydatek jest dopuszczalny w indywidualnej sytuacji;</li>
+<li>Self Assessment, MTD Income Tax, payroll i prywatne dochody właściciela;</li>
+<li>partnership i podział wartości między partnerów;</li>
+<li>OCR podejmujący automatyczne decyzje podatkowe;</li>
+<li>modyfikacja oryginalnych dokumentów źródłowych.</li>
+</ul>
+<h2 id="4-delta-analysis">4. Delta analysis</h2>
+<h3 id="elementy-do-ponownego-użycia">Elementy do ponownego użycia</h3>
+<ul>
+<li><code>GenerateAccountantPackAction</code> jako wzorzec bezpiecznego ZIP, ponownej weryfikacji hashy i manifestu. Obecna akcja pozostaje paczką VAT.</li>
+<li><code>FinanceReportDocumentFactory</code> i kontrolery eksportów jako wspólny model PDF, XLSX i CSV.</li>
+<li>Generowane PDF faktur i sales credit notes.</li>
+<li><code>FinancialAttachmentService</code> z prywatnym storage, SHA-256 i skanem bezpieczeństwa.</li>
+<li>Ledger, expense payments, bank transactions i reconciliation jako źródła przepływów.</li>
+<li>Owner-funded expense payment dla kosztu zapłaconego prywatnie przez sole tradera.</li>
+<li>Istniejące tenant scopes, audit i permissions.</li>
+</ul>
+<h3 id="luki">Luki</h3>
+<ol>
+<li>Obecna paczka księgowa zależy od locked VAT Return, a nie od assessment period UC.</li>
+<li>Obecny P&amp;L nie odwzorowuje zasad faktycznie otrzymanych i zapłaconych kwot UC.</li>
+<li>Brakuje osobnej klasyfikacji UC oraz pozycji <code>excluded</code> i <code>review_required</code>.</li>
+<li>Brakuje kontrolowanego procentu business use i uzasadnienia podziału kosztu mieszanego.</li>
+<li>Brakuje mileage, godzin pracy z domu i osób mieszkających w miejscu prowadzenia firmy.</li>
+<li>Brakuje dedykowanego zapisu barteru, napiwku, dotacji, zwrotu tax/NI i innych nietypowych wpływów.</li>
+<li>Oryginalny CSV banku jest usuwany po imporcie. Zachowane transakcje i hash nie pozwalają odtworzyć pliku.</li>
+<li>Brakuje polityki VAT dla UC i kontroli jej konsekwentnego stosowania.</li>
+<li>Brakuje wersjonowanych stawek UC obowiązujących w dacie okresu.</li>
+<li><code>view_finance</code> jest zbyt szerokie dla zbiorczego eksportu dokumentów i wyciągów.</li>
+<li>Brakuje review, lock, oznaczenia jako zgłoszone oraz załączenia potwierdzenia UC.</li>
+</ol>
+<h2 id="5-decyzje-projektowe">5. Decyzje projektowe</h2>
+<h3 id="osobny-workflow-uc">Osobny workflow UC</h3>
+<p>Powstanie <code>Universal Credit evidence pack</code>. Nie będzie to tryb obecnej paczki VAT, ponieważ oba produkty mają inne okresy, zasady i odbiorców.</p>
+<h3 id="data-przepływu-jest-nadrzędna">Data przepływu jest nadrzędna</h3>
+<ul>
+<li>przychód trafia do okresu według daty otrzymania;</li>
+<li>koszt trafia do okresu według daty zapłaty;</li>
+<li>data faktury, tax point i posting date pozostają informacyjne;</li>
+<li>częściowa płatność raportuje wyłącznie otrzymaną lub zapłaconą część;</li>
+<li>refund lub reversal trafia do okresu faktycznego przepływu i nie zmienia starej finalnej paczki.</li>
+</ul>
+<h3 id="niezależna-klasyfikacja-uc">Niezależna klasyfikacja UC</h3>
+<p>Mapowanie UC będzie nakładką na źródło i nie zmieni journalu, expense category ani VAT Return. Każda pozycja zachowa:</p>
+<ul>
+<li>typ <code>income</code>, <code>expense</code>, <code>excluded</code> albo <code>review_required</code>;</li>
+<li>kategorię UC;</li>
+<li>kwotę brutto, VAT, kwotę raportowaną i snapshot GBP;</li>
+<li>metodę <code>actual</code>, <code>business_use_percentage</code>, <code>simplified</code> albo <code>manual</code>;</li>
+<li>procent biznesowy i uzasadnienie, jeżeli dotyczą;</li>
+<li>płatność, bank transaction, dokumenty i dowody;</li>
+<li>wersję polityki, która wyliczyła wynik.</li>
+</ul>
+<p>Automatyczne mapowanie z konta lub kategorii kosztu będzie tylko podpowiedzią. Finalizacja wymaga review i nie może uznać kosztu za dopuszczalny wyłącznie na podstawie nazwy konta.</p>
+<h3 id="polityka-vat">Polityka VAT</h3>
+<ul>
+<li><code>vat_inclusive</code>: raportowane są kwoty z VAT, a płatności VAT do HMRC i zwroty VAT stanowią osobne pozycje zgodnie z regułami UC;</li>
+<li><code>vat_exclusive</code>: raportowane są kwoty bez odzyskiwalnego VAT, a ruchy rozliczeniowe VAT nie są doliczane drugi raz.</li>
+</ul>
+<p>Metoda jest wersjonowana od wskazanej daty. Zmiana nie przelicza finalnych paczek, wywołuje ostrzeżenie i wymaga uzasadnienia.</p>
+<h3 id="wersjonowane-stawki">Wersjonowane stawki</h3>
+<p>Flat rates i limity będą zapisane jako audytowalna polityka z <code>effective_from</code>. Pierwsza wersja odwzoruje aktualne nidirect, w tym:</p>
+<ul>
+<li>samochód lub van: 45p za milę do 833 mil miesięcznie i 25p powyżej;</li>
+<li>motorbike lub scooter: 24p za milę;</li>
+<li>aktualne progi i stawki pracy z domu;</li>
+<li>aktualne odliczenia dla mieszkania w miejscu prowadzenia firmy;</li>
+<li>aktualny miesięczny limit business loan interest;</li>
+<li>zakaz łączenia simplified expense z objętym nim kosztem faktycznym.</li>
+</ul>
+<p>Zmiana oficjalnych zasad utworzy nową wersję. Stara paczka zachowa snapshot poprzedniej polityki.</p>
+<h2 id="6-model-danych">6. Model danych</h2>
+<h3 id="universal_credit_profiles"><code>universal_credit_profiles</code></h3>
+<ul>
+<li>tenant, <code>is_enabled</code> i <code>vat_reporting_method</code>;</li>
+<li><code>vat_method_effective_from</code>;</li>
+<li>opcjonalny domyślny dzień początku okresu, wyłącznie jako podpowiedź;</li>
+<li>autorzy i timestamps.</li>
+</ul>
+<p>Daty każdego okresu muszą zostać potwierdzone na podstawie konta UC.</p>
+<h3 id="universal_credit_assessment_periods"><code>universal_credit_assessment_periods</code></h3>
+<ul>
+<li>tenant, numer, <code>date_from</code> i <code>date_to</code>;</li>
+<li>status <code>draft</code>, <code>in_review</code>, <code>locked</code>, <code>reported</code> lub <code>superseded</code>;</li>
+<li>snapshot VAT method i policy version;</li>
+<li>income, expenses i net w pensach GBP;</li>
+<li>source snapshot hash;</li>
+<li>aktorzy i czasy review, lock i report;</li>
+<li>opcjonalna referencja lub notatka z potwierdzenia;</li>
+<li>kontrola nakładania okresów.</li>
+</ul>
+<p>Okres z zerowym income i expenses jest poprawny i może zostać zablokowany oraz wyeksportowany.</p>
+<h3 id="universal_credit_report_items"><code>universal_credit_report_items</code></h3>
+<ul>
+<li>tenant i assessment period;</li>
+<li>direction, category i classification status;</li>
+<li>source morph do payment, expense payment, bank transaction, manual entry lub fixed asset transaction;</li>
+<li>cash date i document date;</li>
+<li>original amount/currency oraz snapshot GBP;</li>
+<li>gross, VAT, business share i reportable amount w pensach;</li>
+<li>method, business-use percent, reason i policy version;</li>
+<li>dowody i reconciliation IDs;</li>
+<li>review actor/time;</li>
+<li>idempotency key zapobiegający podwójnemu ujęciu źródła.</li>
+</ul>
+<h3 id="universal_credit_manual_entries"><code>universal_credit_manual_entries</code></h3>
+<p>Kontrolowany model dla gotówki, barteru, tips, grant/subsidy, business-related tax/NI refund, asset transfer/sale, tax/NI/pension/VAT payment i korekt. Wpis wymaga daty, kwoty, kategorii, opisu, autora oraz dowodu albo jawnego powodu jego braku.</p>
+<p>Jeśli zdarzenie powinno być również w ledgerze, preflight pokaże brak powiązania zamiast tworzyć journal w tle.</p>
+<h3 id="universal_credit_simplified_expenses"><code>universal_credit_simplified_expenses</code></h3>
+<ul>
+<li>typ <code>vehicle_mileage</code>, <code>home_working</code> albo <code>business_premises_living</code>;</li>
+<li>dane wejściowe, wersja polityki i snapshot progów;</li>
+<li>wyliczona kwota GBP;</li>
+<li>dowód lub dziennik pomocniczy;</li>
+<li>kontrola braku podwójnego ujęcia kosztu faktycznego.</li>
+</ul>
+<h3 id="universal_credit_evidence_packs-i-manifest-items"><code>universal_credit_evidence_packs</code> i manifest items</h3>
+<p>Pack zapisze status, hash snapshotu, prywatną ścieżkę, SHA-256 ZIP, rozmiar, liczby included/excluded, autora, czasy i sanitizowany kod błędu. Manifest item zapisze logiczną ścieżkę, źródło, inclusion status/reason, rozmiar i hash. Usunięcie wygasłego ZIP nie usunie audytu.</p>
+<h3 id="retencja-oryginalnych-wyciągów">Retencja oryginalnych wyciągów</h3>
+<p>Po poprawnym imporcie innym niż dry-run oryginalny plik zostanie prywatnym <code>FinancialAttachment</code> powiązanym z <code>BankStatementImport</code>, z typem <code>bank_statement</code>, SHA-256 i skanem bezpieczeństwa. Dry-run nadal usunie plik.</p>
+<p>Starych plików nie da się odtworzyć z bazy. Ich transakcje pozostaną w raporcie, ale manifest pokaże <code>source_not_retained</code>. Użytkownik będzie mógł ponownie dołączyć oryginał po kontroli hasha lub zapisać przyczynę braku.</p>
+<h2 id="7-kategorie-uc">7. Kategorie UC</h2>
+<h3 id="przychody">Przychody</h3>
+<ul>
+<li>goods and services paid by bank/card/cheque/cash;</li>
+<li>payment in kind;</li>
+<li>tips and gratuities;</li>
+<li>business-related Income Tax or National Insurance refunds;</li>
+<li>taxable grants and subsidies;</li>
+<li>sale or transfer of an asset previously reported as an expense;</li>
+<li>other business income;</li>
+<li>excluded personal/non-trading receipt;</li>
+<li>review required.</li>
+</ul>
+<h3 id="koszty">Koszty</h3>
+<ul>
+<li>car/minicab simplified travel;</li>
+<li>other vehicle and business travel;</li>
+<li>place of business;</li>
+<li>dopuszczone przez UC tax, National Insurance, pension i VAT payments;</li>
+<li>legal, accounting, insurance, banking and loan interest;</li>
+<li>office and equipment;</li>
+<li>staff and subcontractors;</li>
+<li>goods, raw materials and work clothing;</li>
+<li>payment in kind;</li>
+<li>marketing and advertising;</li>
+<li>professional subscriptions and relevant training;</li>
+<li>use of home for business;</li>
+<li>living at business premises;</li>
+<li>other necessary and appropriate business expense;</li>
+<li>excluded/disallowed;</li>
+<li>review required.</li>
+</ul>
+<p>System pokaże osobno kwotę zapłaconą, część prywatną, część niedopuszczalną, VAT i końcową kwotę UC. Przykładowy rachunek internetowy £36 zapłacony gotówką, z 50 procent business use, da £18 reportable.</p>
+<h2 id="8-zawartość-zip">8. Zawartość ZIP</h2>
+<pre class="hljs"><code><div>README.txt
+manifest.sha256.json
+01-summary/
+  universal-credit-summary.pdf
+  universal-credit-summary.xlsx
+  universal-credit-summary.csv
+  review-and-declaration.pdf
+02-details/
+  income-detail.csv
+  expense-detail.csv
+  excluded-and-private.csv
+  bank-and-cash-reconciliation.xlsx
+  missing-evidence-and-warnings.csv
+  calculation-policy.pdf
+03-evidence/
+  income/invoices/
+  income/other/
+  expenses/receipts-and-invoices/
+  expenses/other/
+  banking/statements/
+  simplified-expenses/
+  owner-funded/
+04-audit/
+  source-inventory.csv
+  exclusions.csv
+  generation-metadata.json
+</div></code></pre>
+<p>Podsumowanie zawiera firmę, dokładne daty, VAT method, kategorie, totals, liczbę dowodów i ostrzeżenia. Nie zawiera pełnego UTR, NINO, numerów kart ani sekretów. Każdy plik korzysta z jednego immutable snapshotu. README wyjaśnia, że ZIP nie jest potwierdzeniem zgłoszenia do UC.</p>
+<h2 id="9-dobór-dokumentów">9. Dobór dokumentów</h2>
+<p>Automatycznie dołączane będą:</p>
+<ul>
+<li>PDF faktury lub sales credit note dla otrzymanej płatności;</li>
+<li>czyste purchase invoices, receipts i credit notes zapłaconych kosztów;</li>
+<li>dowody płatności i refundów;</li>
+<li>oryginalne, czyste wyciągi obejmujące okres;</li>
+<li>dokumenty owner-funded i cash expenses;</li>
+<li>dowody VAT, tax, NI, pension, grant i asset transactions;</li>
+<li>dzienniki kalkulacji uproszczonych kosztów.</li>
+</ul>
+<p>Plik <code>pending</code>, <code>rejected</code>, brakujący, o niezgodnym hashu, z innego tenanta albo niezwiązany z okresem nie trafi do ZIP. Każdy brak będzie widoczny w raporcie.</p>
+<p>Historyczny PDF faktury musi korzystać z danych z chwili wystawienia. Jeśli model nie ma kompletnego snapshotu nazw i adresów, trzeba go dodać albo oznaczyć dokument jako <code>system-generated copy</code> z datą wygenerowania. Aktualnych danych nie wolno przedstawiać jako historycznych.</p>
+<h2 id="10-workflow">10. Workflow</h2>
+<ol>
+<li>Owner włącza <code>Universal Credit reporting</code> i wybiera metodę VAT.</li>
+<li>Tworzy okres z dokładnymi datami pokazanymi w koncie UC.</li>
+<li>System zbiera faktycznie otrzymane i zapłacone kwoty.</li>
+<li>Użytkownik dopisuje gotówkę, barter, tips i zdarzenia bez standardowej płatności.</li>
+<li>Klasyfikuje pozycje, określa business use lub wybiera simplified expense.</li>
+<li>System uzgadnia pozycje z bankiem, dokumentami i ledgerem.</li>
+<li>Preflight pokazuje błędy, ostrzeżenia i wartości do wpisania do UC.</li>
+<li>Użytkownik wykonuje review i lock. Powstaje immutable snapshot oraz hash.</li>
+<li>Job kolejki generuje prywatny ZIP z <code>Cache-Control: no-store</code>.</li>
+<li>Użytkownik ręcznie raportuje dane w Universal Credit.</li>
+<li>Oznacza okres jako <code>reported</code> i opcjonalnie dodaje potwierdzenie.</li>
+</ol>
+<p>Korekta finalnego okresu tworzy wersję superseding z powodem. Nie zmienia starej paczki.</p>
+<h2 id="11-preflight">11. Preflight</h2>
+<h3 id="blokery-finalizacji">Blokery finalizacji</h3>
+<ul>
+<li>firma nie jest sole traderem;</li>
+<li>okresy nakładają się lub mają nieprawidłowe daty;</li>
+<li>firma VAT registered nie ma aktywnej metody UC VAT;</li>
+<li>istnieje <code>review_required</code>;</li>
+<li>źródło ujęto dwa razy;</li>
+<li>reportable amount nie uzgadnia się z przepływem lub wpisem ręcznym;</li>
+<li>actual i simplified expense obejmują ten sam koszt;</li>
+<li>dokument ma obcy tenant, błędny hash albo malware;</li>
+<li>przekroczono bezpieczny limit paczki.</li>
+</ul>
+<h3 id="ostrzeżenia-wymagające-potwierdzenia">Ostrzeżenia wymagające potwierdzenia</h3>
+<ul>
+<li>brak dokumentu wraz z zapisanym powodem;</li>
+<li>historyczny bank statement nie był zachowany;</li>
+<li>bank transaction została jawnie uznana za prywatną lub poza biznesem;</li>
+<li>koszt gotówkowy lub owner-funded nie ma bank trace;</li>
+<li>nietypowy business-use percentage;</li>
+<li>VAT method zmieniła się od poprzedniego okresu;</li>
+<li>pozycja nie ma właściwego powiązania z ledgerem;</li>
+<li>okres ma zero income i expenses.</li>
+</ul>
+<p>Preflight ocenia kompletność, nie potwierdza akceptacji wydatku przez DWP.</p>
+<h2 id="12-bezpieczeństwo-i-operacje">12. Bezpieczeństwo i operacje</h2>
+<ul>
+<li>permissions: <code>view_universal_credit_reporting</code>, <code>manage_universal_credit_reporting</code>, <code>export_universal_credit_pack</code>;</li>
+<li>domyślnie owner/admin, bookkeeper dopiero po jawnym nadaniu;</li>
+<li>tenant authorization przy preview, lock, generation i każdym downloadzie;</li>
+<li>jeden aktywny build per business/period;</li>
+<li>prywatny storage, losowa nazwa techniczna i ochrona zip-slip;</li>
+<li>ponowna kontrola SHA-256 przy kopiowaniu dokumentu;</li>
+<li>ochrona CSV przed formula injection i typowane komórki XLSX;</li>
+<li>brak NINO, UTR, numerów kart, tokenów i pełnych danych bankowych w logach;</li>
+<li>rekomendowany czas downloadu 7 dni;</li>
+<li>cleanup usuwa ZIP, ale zachowuje audit i manifest;</li>
+<li>dokumenty źródłowe zachowują obecną politykę retencji finansowej.</li>
+</ul>
+<h2 id="13-etapy-implementacji">13. Etapy implementacji</h2>
+<h3 id="ukfin-513a---profil-i-reguły">UKFIN-513A - profil i reguły</h3>
+<ol>
+<li>Dodać profil UC, assessment periods i wersjonowane policies.</li>
+<li>Dodać kategorie income/expense i pierwszą politykę nidirect.</li>
+<li>Dodać permissions, policies i tenant audit.</li>
+<li>Dodać VAT inclusive/exclusive z effective date.</li>
+</ol>
+<h3 id="ukfin-513b---źródła-i-klasyfikacja">UKFIN-513B - źródła i klasyfikacja</h3>
+<ol>
+<li>Zbudować source collector dla payments, refunds, expense payments, bank transactions, owner-funded i asset flows.</li>
+<li>Dodać klasyfikację UC, review i idempotency.</li>
+<li>Dodać manual entries dla gotówki, barteru, tips, grants i tax/NI refunds.</li>
+<li>Dodać business-use percentage i reason.</li>
+<li>Zachowywać committed bank statement jako bezpieczny attachment.</li>
+</ol>
+<h3 id="ukfin-513c---kalkulatory">UKFIN-513C - kalkulatory</h3>
+<ol>
+<li>Zaimplementować VAT inclusive/exclusive.</li>
+<li>Zaimplementować mileage, home working i living at business premises.</li>
+<li>Dodać loan-interest limit i pozostałe limity polityki.</li>
+<li>Zablokować double claim actual/simplified.</li>
+<li>Użyć arytmetyki w pensach, FX snapshot i kontrolowanych zaokrągleń.</li>
+</ol>
+<h3 id="ukfin-513d---review-i-raporty">UKFIN-513D - review i raporty</h3>
+<ol>
+<li>Dodać completeness preflight.</li>
+<li>Dodać podgląd kategorii, wykluczeń, dowodów i uzgodnień.</li>
+<li>Dodać review/lock/supersede z kanonicznym SHA-256 snapshotu.</li>
+<li>Zbudować wspólny model summary/detail/reconciliation.</li>
+<li>Generować identyczne wartości w PDF, XLSX i CSV.</li>
+</ol>
+<h3 id="ukfin-513e---generator-zip">UKFIN-513E - generator ZIP</h3>
+<ol>
+<li>Dodać inventory builder dokumentów.</li>
+<li>Dodać queue job, statusy i kontrolowane retry.</li>
+<li>Kopiować tylko czyste, ponownie zweryfikowane pliki.</li>
+<li>Dodać included/excluded manifest i hash każdego pliku.</li>
+<li>Dodać prywatny download, expiry i scheduled cleanup.</li>
+</ol>
+<h3 id="ukfin-513f---panel-i-języki">UKFIN-513F - panel i języki</h3>
+<ol>
+<li>Dodać <code>Finance &gt; Universal Credit</code>.</li>
+<li>Dodać kreator okresu, klasyfikację i simplified expenses.</li>
+<li>Dodać wskaźniki green/amber/red.</li>
+<li>Dodać review, lock, generate, download, mark as reported i supersede.</li>
+<li>Dodać PL/EN oraz parytet kluczy PT.</li>
+</ol>
+<h3 id="ukfin-513g---testy-i-gate">UKFIN-513G - testy i gate</h3>
+<ol>
+<li>Przygotować golden dataset zaakceptowany przez księgowego lub doradcę znającego UC w Irlandii Północnej.</li>
+<li>Dodać instrukcję użytkownika i checklistę dokumentów.</li>
+<li>Uruchomić security, tenant, queue, report i package tests.</li>
+<li>Wykonać dry run na izolowanym tenantcie demonstracyjnym.</li>
+<li>Dopuścić produkcję po porównaniu jednego okresu z formularzem UC.</li>
+</ol>
+<h2 id="14-testy-akceptacyjne">14. Testy akceptacyjne</h2>
+<ul>
+<li>granice dat okresu są włączne i nie pobierają pozycji spoza zakresu;</li>
+<li>invoice wystawiona wcześniej trafia do okresu dopiero według daty płatności;</li>
+<li>częściowa płatność raportuje wyłącznie zapłaconą część;</li>
+<li>unpaid expense nie trafia do okresu, ale cash/owner-funded payment trafia;</li>
+<li>refund i reversal używają daty rzeczywistego przepływu;</li>
+<li>pusty okres generuje prawidłowe podsumowanie zerowe;</li>
+<li>VAT inclusive i exclusive dają różne, oczekiwane wyniki bez podwójnego VAT;</li>
+<li>zmiana VAT method nie zmienia poprzedniej finalnej paczki;</li>
+<li>rachunek £36 z 50 procent business use daje £18 reportable;</li>
+<li>mileage stosuje próg i blokuje podwójne ujęcie paliwa;</li>
+<li>home working używa polityki obowiązującej w okresie;</li>
+<li>loan interest pokazuje limit i wykluczoną nadwyżkę;</li>
+<li>barter, tips, grant, tax/NI refund i asset sale są możliwe do wykazania;</li>
+<li>osobisty bank transaction pozostaje widoczny jako reviewed exclusion;</li>
+<li>brak starego wyciągu daje <code>source_not_retained</code>;</li>
+<li>pending/rejected/missing attachment nie trafia do ZIP;</li>
+<li>niezgodny hash blokuje build;</li>
+<li>totals w PDF, XLSX i CSV są identyczne;</li>
+<li>retry nie dubluje items ani plików;</li>
+<li>wygasły download nie działa, ale audit pozostaje;</li>
+<li>permissions, direct URL i cross-tenant source są poprawnie blokowane;</li>
+<li>PL/EN są kompletne, a PT ma ten sam zestaw kluczy;</li>
+<li>ZIP otwiera się, nie ma niebezpiecznych ścieżek i przechodzi walidację manifestu.</li>
+</ul>
+<h2 id="15-definition-of-done">15. Definition of Done</h2>
+<ul>
+<li>paczka używa dokładnego assessment period z konta UC;</li>
+<li>income wynika z receipts, a expenses z payments;</li>
+<li>każdy przepływ jest uwzględniony albo jawnie wykluczony z powodem;</li>
+<li>każda raportowana pozycja ma dowód albo widoczny brak dowodu;</li>
+<li>VAT i simplified expenses wynikają z wersjonowanych reguł;</li>
+<li>totals uzgadniają się z details i źródłami bez dryfu pensa;</li>
+<li>snapshot i finalny ZIP są niezmienne, hashowane i tenant-safe;</li>
+<li>można zapisać ręczne zgłoszenie w Universal Credit;</li>
+<li>UI odróżnia raport UC od P&amp;L, Self Assessment i VAT Return;</li>
+<li>golden dataset został ręcznie zaakceptowany przed produkcją.</li>
+</ul>
+<h2 id="16-kolejność-w-roadmapie">16. Kolejność w roadmapie</h2>
+<p>UKFIN-513 można rozpocząć niezależnie od UKFIN-704, ale asset register report powinien być gotowy przed finalnym testem sprzedaży lub transferu aktywów:</p>
+<ol>
+<li>UKFIN-704 - asset register report;</li>
+<li>UKFIN-513A i UKFIN-513B;</li>
+<li>UKFIN-513C i UKFIN-513D;</li>
+<li>UKFIN-513E i UKFIN-513F;</li>
+<li>UKFIN-513G i gate księgowego lub doradcy UC.</li>
+</ol>
+<p>Szacowany nakład pełnego zakresu: 8-12 dni roboczych implementacji i testów, bez czasu oczekiwania na zewnętrzną weryfikację rzeczywistego assessment period.</p>
+
+</body>
+</html>
