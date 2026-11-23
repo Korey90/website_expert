@@ -65,6 +65,7 @@ class FilamentPermissionRegistry
         'UserResource' => ['view' => 'view_users', 'create' => 'create_users', 'update' => 'edit_users', 'delete' => 'delete_users'],
         'VatAdjustmentResource' => ['view' => 'view_finance', 'create' => 'manage_finance', 'update' => 'manage_finance'],
         'VatReturnResource' => ['view' => 'view_finance'],
+        'UniversalCreditAssessmentPeriodResource' => ['view' => 'view_universal_credit_reporting', 'create' => 'manage_universal_credit_reporting', 'update' => 'manage_universal_credit_reporting'],
     ];
 
     private const PAGE_PERMISSIONS = [

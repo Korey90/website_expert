@@ -471,6 +471,18 @@ Wynik etapu:
 4. Dodać review, lock, generate, download, mark as reported i supersede.
 5. Dodać PL/EN oraz parytet kluczy PT.
 
+Stan na 2026-11-23: UKFIN-513F ukończony lokalnie.
+
+- panel `Finance > Universal Credit` udostępnia tenantową listę i szczegóły okresów z osobnymi uprawnieniami view, manage oraz export;
+- owner lub admin może włączyć profil UC, zapisać metodę VAT i pomocniczy dzień początku, a użytkownik z uprawnieniem manage tworzy okres na podstawie dokładnych dat z konta UC;
+- draft obsługuje idempotentne pobranie cash sources, klasyfikację included/excluded, business-use, ręczne zdarzenia kasowe z dowodem lub powodem jego braku oraz trzy rodzaje simplified expenses;
+- ekran okresu pokazuje wartości income, expenses i net, status green/amber/red, błędy i ostrzeżenia preflightu, snapshot hashes oraz pełne metadane review, lock, report i supersede;
+- kontrolowane akcje realizują calculate, review z jawnym potwierdzeniem ostrzeżeń, lock z powodem, generate pack, retry, prywatny download ZIP, supersede oraz eksport podsumowania do CSV, XLSX i PDF;
+- po ręcznym zgłoszeniu do Universal Credit można zmienić wyłącznie locked na reported, zachować referencję i opcjonalny prywatny plik potwierdzenia; metadane zgłoszenia są niezmienne, a system jawnie informuje, że nie wysyła danych do UC;
+- interfejs i komunikaty mają kompletne tłumaczenia EN, PL i PT: po 1823 identyczne klucze finance;
+- nowe trasy eksportu i ZIP wymagają `export_universal_credit_pack`, panel respektuje dedykowane RBAC, aktywne członkostwo oraz tenant scope;
+- Finance: 446 passed, 1 skipped, 3265 assertions; tenant audit: 0 błędów; Pint i kontrola składni: poprawne.
+
 ### UKFIN-513G - testy i gate
 
 1. Przygotować golden dataset zaakceptowany przez księgowego lub doradcę znającego UC w Irlandii Północnej.

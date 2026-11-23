@@ -9,9 +9,11 @@ use App\Actions\Finance\CreateUniversalCreditManualEntryAction;
 use App\Actions\Finance\ExportUniversalCreditAssessmentPeriodReportAction;
 use App\Actions\Finance\InitializeAccountingSetupAction;
 use App\Actions\Finance\LockUniversalCreditAssessmentPeriodAction;
+use App\Actions\Finance\MarkUniversalCreditAssessmentPeriodReportedAction;
 use App\Actions\Finance\ReviewUniversalCreditAssessmentPeriodAction;
 use App\Actions\Finance\SupersedeUniversalCreditAssessmentPeriodAction;
 use App\Actions\Finance\UpdateUniversalCreditProfileAction;
+use App\Filament\Resources\UniversalCreditAssessmentPeriodResource;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\FinancialAttachment;
@@ -24,8 +26,13 @@ use App\Services\Finance\UniversalCreditReportDocumentFactory;
 use App\Services\Finance\UniversalCreditReportModelService;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Spatie\Permission\Models\Permission;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Tests\TestCase;
@@ -44,6 +51,8 @@ class UniversalCreditReviewAndReportsTest extends TestCase
     {
         parent::setUp();
 
+        Permission::findOrCreate('access_admin_panel', 'web');
+
         $this->business = Business::create([
             'name' => 'Website Expert NI',
             'slug' => 'website-expert-ni-uc-review',
@@ -58,6 +67,7 @@ class UniversalCreditReviewAndReportsTest extends TestCase
             'joined_at' => now(),
         ]);
         $this->owner->givePermissionTo([
+            'access_admin_panel',
             'view_universal_credit_reporting',
             'manage_universal_credit_reporting',
             'export_universal_credit_pack',
@@ -218,6 +228,80 @@ class UniversalCreditReviewAndReportsTest extends TestCase
 
         $this->expectException(DomainException::class);
         app(ExportUniversalCreditAssessmentPeriodReportAction::class)->execute($superseded, $member, 'csv');
+    }
+
+    public function test_locked_period_can_be_marked_as_reported_with_immutable_confirmation(): void
+    {
+        Storage::fake('financial');
+        Queue::fake();
+        $this->calculate();
+        $reviewed = app(ReviewUniversalCreditAssessmentPeriodAction::class)->execute(
+            $this->period->fresh(), $this->owner, true,
+        );
+        $locked = app(LockUniversalCreditAssessmentPeriodAction::class)->execute(
+            $reviewed, $this->owner, 'Reviewed and ready for manual Universal Credit submission.',
+        );
+        $reported = app(MarkUniversalCreditAssessmentPeriodReportedAction::class)->execute(
+            $locked,
+            $this->owner,
+            'UC-CONFIRM-2026-001',
+            UploadedFile::fake()->createWithContent('uc-confirmation.pdf', "%PDF-1.4\nUC confirmation\n%%EOF"),
+        );
+
+        $this->assertSame(UniversalCreditAssessmentPeriod::STATUS_REPORTED, $reported->status);
+        $this->assertSame($this->owner->id, $reported->reported_by);
+        $this->assertNotNull($reported->reported_at);
+        $this->assertSame('UC-CONFIRM-2026-001', $reported->report_confirmation_reference);
+        $this->assertCount(1, $reported->attachments);
+        Storage::disk('financial')->assertExists($reported->attachments->first()->path);
+
+        $this->expectException(DomainException::class);
+        $reported->update(['report_confirmation_reference' => 'CHANGED']);
+    }
+
+    public function test_authorised_owner_can_open_the_panel_and_export_through_the_protected_route(): void
+    {
+        $this->assertTrue(UniversalCreditAssessmentPeriodResource::canAccess());
+        $this->get(UniversalCreditAssessmentPeriodResource::getUrl())->assertOk()
+            ->assertSee(__('finance.universal_credit.ui.navigation'));
+        $this->get(UniversalCreditAssessmentPeriodResource::getUrl('view', ['record' => $this->period]))
+            ->assertOk()
+            ->assertSee($this->period->number);
+
+        $this->get(route('admin.finance.universal-credit.assessment-periods.report', [
+            'assessmentPeriod' => $this->period,
+            'format' => 'csv',
+        ]))->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+        $viewer = User::factory()->create(['is_active' => true]);
+        BusinessUser::create([
+            'business_id' => $this->business->id,
+            'user_id' => $viewer->id,
+            'role' => 'member',
+            'is_active' => true,
+            'joined_at' => now(),
+        ]);
+        $viewer->givePermissionTo(['access_admin_panel', 'view_universal_credit_reporting']);
+        $this->actingAs($viewer)
+            ->get(route('admin.finance.universal-credit.assessment-periods.report', [
+                'assessmentPeriod' => $this->period,
+                'format' => 'csv',
+            ]))
+            ->assertForbidden();
+    }
+
+    public function test_universal_credit_ui_translations_have_en_pl_pt_key_parity(): void
+    {
+        $keys = [];
+
+        foreach (['en', 'pl', 'pt'] as $locale) {
+            $translations = require lang_path("{$locale}/finance.php");
+            $keys[$locale] = array_keys(Arr::dot($translations['universal_credit']['ui']));
+            sort($keys[$locale]);
+        }
+
+        $this->assertSame($keys['en'], $keys['pl']);
+        $this->assertSame($keys['en'], $keys['pt']);
     }
 
     public function test_tenant_audit_detects_a_tampered_review_snapshot_hash(): void

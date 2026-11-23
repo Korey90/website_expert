@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class UniversalCreditAssessmentPeriod extends Model
 {
@@ -126,6 +127,13 @@ class UniversalCreditAssessmentPeriod extends Model
                 throw new DomainException(__('finance.universal_credit.errors.lock_metadata_immutable'));
             }
 
+            if ($period->isDirty(['reported_by', 'reported_at', 'report_confirmation_reference'])
+                && ! ($originalStatus === self::STATUS_LOCKED
+                    && $period->isDirty('status')
+                    && $period->status === self::STATUS_REPORTED)) {
+                throw new DomainException(__('finance.universal_credit.errors.report_metadata_immutable'));
+            }
+
             if ($period->isDirty(['superseded_by_user_id', 'superseding_period_id', 'superseded_at', 'supersede_reason'])
                 && ! ($period->isDirty('status') && $period->status === self::STATUS_SUPERSEDED)) {
                 throw new DomainException(__('finance.universal_credit.errors.supersede_metadata_immutable'));
@@ -162,6 +170,11 @@ class UniversalCreditAssessmentPeriod extends Model
                 if ($to === self::STATUS_LOCKED
                     && ($period->locked_by === null || $period->locked_at === null || blank($period->lock_reason))) {
                     throw new DomainException(__('finance.universal_credit.errors.invalid_lock_transition'));
+                }
+
+                if ($to === self::STATUS_REPORTED
+                    && ($period->reported_by === null || $period->reported_at === null)) {
+                    throw new DomainException(__('finance.universal_credit.errors.invalid_report_transition'));
                 }
 
                 if ($to === self::STATUS_SUPERSEDED
@@ -259,5 +272,10 @@ class UniversalCreditAssessmentPeriod extends Model
     public function evidencePacks(): HasMany
     {
         return $this->hasMany(UniversalCreditEvidencePack::class, 'assessment_period_id');
+    }
+
+    public function attachments(): MorphMany
+    {
+        return $this->morphMany(FinancialAttachment::class, 'attachable');
     }
 }

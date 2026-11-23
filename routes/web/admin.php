@@ -12,6 +12,7 @@ use App\Http\Controllers\Finance\HmrcVatReceiptController;
 use App\Http\Controllers\Finance\ManagementCashFlowReportExportController;
 use App\Http\Controllers\Finance\ProfitAndLossReportExportController;
 use App\Http\Controllers\Finance\TrialBalanceReportExportController;
+use App\Http\Controllers\Finance\UniversalCreditAssessmentPeriodReportExportController;
 use App\Http\Controllers\Finance\UniversalCreditEvidencePackController;
 use App\Http\Controllers\Finance\VatDetailReportExportController;
 use App\Http\Controllers\ReportController;
@@ -79,6 +80,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/finance/universal-credit/evidence-packs/{evidencePack}.zip', UniversalCreditEvidencePackController::class)
         ->middleware('can:export_universal_credit_pack')
         ->name('admin.finance.universal-credit.evidence-packs.download');
+
+    Route::get('/admin/finance/universal-credit/assessment-periods/{assessmentPeriod}/report.{format}', UniversalCreditAssessmentPeriodReportExportController::class)
+        ->whereIn('format', ['csv', 'xlsx', 'pdf'])
+        ->middleware('can:export_universal_credit_pack')
+        ->name('admin.finance.universal-credit.assessment-periods.report');
 
     // Reports — admin only
     Route::middleware(['can:view_reports', 'can:export_reports'])->prefix('reports')->name('reports.')->group(function () {

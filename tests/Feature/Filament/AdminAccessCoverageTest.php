@@ -176,6 +176,8 @@ class AdminAccessCoverageTest extends TestCase
             'admin.finance.expense-report.csv' => ['can:view_finance'],
             'admin.finance.vat-returns.accountant-pack' => ['can:view_finance'],
             'admin.finance.vat-returns.hmrc-receipt' => ['can:submit_tax_returns'],
+            'admin.finance.universal-credit.evidence-packs.download' => ['can:export_universal_credit_pack'],
+            'admin.finance.universal-credit.assessment-periods.report' => ['can:export_universal_credit_pack'],
             'reports.leads.csv' => ['can:view_reports', 'can:export_reports'],
             'admin.domain-price-list.export' => ['can:manage_domain_pricing'],
             'admin.google-calendar.connect' => ['can:manage_calendar'],
