@@ -1,7 +1,7 @@
 # UKFIN-513 - paczka dowodowa Universal Credit dla sole tradera
 
-**Status:** Implementacja w toku - UKFIN-513A, UKFIN-513B, UKFIN-513C, UKFIN-513D i UKFIN-513E ukończone lokalnie
-**Data:** 2026-11-23  
+**Status:** Ukończone lokalnie - UKFIN-513A do UKFIN-513G, gate specjalisty i porównanie z aktualnym zadaniem UC zaakceptowane
+**Data:** 2026-11-24
 **Projekt:** Website Expert NI  
 **Grupa docelowa:** Sole trader w Irlandii Północnej  
 **UI:** polski i angielski, z zachowaniem parytetu istniejących kluczy portugalskich
@@ -483,7 +483,7 @@ Stan na 2026-11-23: UKFIN-513F ukończony lokalnie.
 - nowe trasy eksportu i ZIP wymagają `export_universal_credit_pack`, panel respektuje dedykowane RBAC, aktywne członkostwo oraz tenant scope;
 - Finance: 446 passed, 1 skipped, 3265 assertions; tenant audit: 0 błędów; Pint i kontrola składni: poprawne.
 
-### UKFIN-513G - testy i gate
+### UKFIN-513G - testy i gate - ukończone lokalnie 2026-11-24
 
 1. Przygotować golden dataset zaakceptowany przez księgowego lub doradcę znającego UC w Irlandii Północnej.
 2. Dodać instrukcję użytkownika i checklistę dokumentów.
@@ -491,7 +491,7 @@ Stan na 2026-11-23: UKFIN-513F ukończony lokalnie.
 4. Wykonać dry run na izolowanym tenantcie demonstracyjnym.
 5. Dopuścić produkcję po porównaniu jednego okresu z formularzem UC.
 
-Stan na 2026-11-24: część techniczna UKFIN-513G jest ukończona lokalnie, a przegląd specjalisty został zaakceptowany w wersji papierowej. Otwarty pozostaje wyłącznie gate porównania z aktualnym zadaniem lub formularzem UC.
+Stan na 2026-11-24: część techniczna UKFIN-513G jest ukończona lokalnie, przegląd specjalisty został zaakceptowany w wersji papierowej, a porównanie z aktualnym zadaniem lub formularzem UC zakończyło się bez problemów. Gate walidacyjny jest zamknięty.
 
 - dodano instrukcję użytkownika i checklistę dowodów w wersji EN oraz PL w `docs/guides`;
 - dodano wersjonowany kandydat golden dataset `uk-universal-credit-golden-v1` z niezmiennym SHA-256, statusem `pending_specialist_review` i oczekiwanymi sumami GBP 1 290,00 income, GBP 199,00 expenses oraz GBP 1 091,00 net;
@@ -503,8 +503,8 @@ Stan na 2026-11-24: część techniczna UKFIN-513G jest ukończona lokalnie, a p
 - checklisty specjalisty EN i PL są związane z dokładnym hashem fixture, więc zmiana danych wymaga nowej wersji i ponownej akceptacji;
 - 24 listopada 2026 właściciel projektu potwierdził papierową akceptację dokładnego fixture i ZIP; referencja `UC-GOLDEN-V1-PAPER-20261124`, a dane reviewera i oryginał pozostają na dokumencie papierowym poza repozytorium;
 - niezmienny fixture zachowuje historyczne pole `pending_specialist_review`, ponieważ jego zmiana unieważniłaby zaakceptowany SHA-256; autorytatywna decyzja znajduje się w osobnym `specialist-sign-off.json`;
-- do zamknięcia UKFIN-513G pozostaje porównanie tych samych przypadków z aktualnym zadaniem lub formularzem na koncie UC oraz zapisanie wyniku;
-- do czasu tego porównania moduł nie ma zamkniętego gate produkcyjnego mimo poprawnego wyniku technicznego i akceptacji specjalisty.
+- 24 listopada 2026 właściciel projektu potwierdził, że księgowy porównał te same przypadki z aktualnym zadaniem lub formularzem na koncie UC i nie stwierdził problemu;
+- gate walidacyjny został zaakceptowany dla dokładnego fixture i ZIP; każda późniejsza zmiana danych, oczekiwanych wyników, polityki lub oficjalnego workflow UC wymaga nowej wersji i ponownej akceptacji.
 - pełna regresja Finance po dodaniu dry runu i artefaktu: 447 passed, 1 skipped, 3305 assertions; Pint: poprawny.
 
 ## 14. Testy akceptacyjne

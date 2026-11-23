@@ -15,7 +15,9 @@ The immutable fixture retains its original `pending_specialist_review` field bec
 
 ## Production gate
 
-The specialist acceptance requirement is complete. The separate comparison with the current Universal Credit account task or form has not been confirmed in the acceptance notification and remains required before the production gate can be closed.
+The specialist acceptance requirement is complete. On 24 November 2026, the project owner also confirmed that the accountant compared the reviewed cases with the current Universal Credit account task or form and found no issue. The production validation gate for this exact dataset and ZIP is accepted.
+
+Any later change to the fixture, expected values, classifications, official UC workflow or calculation policy requires a new version and a new review decision.
 
 ## Zapis polski
 
@@ -27,4 +29,6 @@ The specialist acceptance requirement is complete. The separate comparison with 
 
 Papierowy oryginał pozostaje u właściciela projektu. Dane reviewera, jego rola, właściwa data przeglądu i odręczne uwagi pozostają na oryginale i nie są kopiowane do repozytorium.
 
-Akceptacja specjalisty jest zakończona. Do zamknięcia gate produkcyjnego nadal wymagane jest potwierdzenie porównania z aktualnym zadaniem lub formularzem na koncie Universal Credit.
+Akceptacja specjalisty jest zakończona. 24 listopada 2026 właściciel projektu potwierdził również, że księgowy porównał przypadki z aktualnym zadaniem lub formularzem na koncie Universal Credit i nie stwierdził problemu. Gate walidacyjny dla tego dokładnego datasetu i ZIP został zaakceptowany.
+
+Każda późniejsza zmiana fixture, oczekiwanych wartości, klasyfikacji, oficjalnego workflow UC albo polityki obliczeń wymaga nowej wersji i ponownej akceptacji.

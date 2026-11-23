@@ -11,7 +11,8 @@
     "reviewer_identity": "recorded_on_paper_original",
     "reviewer_personal_data_stored_in_repository": false,
     "paper_original_custody": "project_owner",
-    "current_uc_task_comparison": "not_confirmed",
-    "production_gate": "pending_current_uc_task_comparison",
-    "notes": "The project owner confirmed in the project session that the demonstration pack was accepted on paper. The immutable pre-review fixture remains unchanged; this separate record is authoritative for the specialist decision."
+    "current_uc_task_comparison": "passed",
+    "current_uc_task_comparison_confirmed_on": "2026-11-24",
+    "production_gate": "accepted",
+    "notes": "The project owner confirmed in the project session that the demonstration pack was accepted on paper and that the accountant compared it with the current Universal Credit task or form without finding an issue. The immutable pre-review fixture remains unchanged; this separate record is authoritative for the specialist decision and production gate."
 }

@@ -49,12 +49,10 @@ php artisan test tests/Feature/Finance/UniversalCreditGoldenDatasetTest.php
 Remove-Item Env:GENERATE_UC_GOLDEN_PACK
 ```
 
-## Specialist decision and remaining production gate
+## Specialist decision and production gate
 
 The specialist review of the exact fixture and review ZIP was accepted on paper and recorded in `specialist-sign-off-record.md` and `specialist-sign-off.json`.
 
-The remaining production acceptance requirement is:
+On 24 November 2026, the project owner confirmed that the accountant also compared the cases with the current Universal Credit account task or form and found no issue. The validation gate for the exact fixture and ZIP is accepted.
 
-- comparison with the current official Universal Credit form or task for the same cases;
-- a recorded confirmation that the comparison passed;
-- a new fixture version and a new specialist decision if the comparison changes any expected value or classification.
+A new fixture version and a new specialist decision are required if any expected value, classification, calculation policy or relevant official UC workflow changes.
