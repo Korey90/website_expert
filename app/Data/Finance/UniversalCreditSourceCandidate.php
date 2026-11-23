@@ -22,6 +22,11 @@ readonly class UniversalCreditSourceCandidate
         public string $originalAmount,
         public string $originalCurrency,
         public ?int $grossAmountPence,
+        public ?string $gbpExchangeRate = null,
+        public ?string $exchangeRateSource = null,
+        public ?CarbonImmutable $exchangeRateDate = null,
+        public ?int $vatAmountPence = null,
+        public ?string $vatSnapshotSource = null,
         public array $context = [],
     ) {}
 
@@ -49,6 +54,11 @@ readonly class UniversalCreditSourceCandidate
             'original_amount' => $this->originalAmount,
             'original_currency' => $this->originalCurrency,
             'gross_amount_pence' => $this->grossAmountPence,
+            'gbp_exchange_rate' => $this->gbpExchangeRate,
+            'exchange_rate_source' => $this->exchangeRateSource,
+            'exchange_rate_date' => $this->exchangeRateDate?->toDateString(),
+            'vat_amount_pence' => $this->vatAmountPence,
+            'vat_snapshot_source' => $this->vatSnapshotSource,
             'context' => $this->canonicalize($this->context),
         ];
 

@@ -6,14 +6,20 @@ use App\Models\UniversalCreditAssessmentPeriod;
 use App\Models\UniversalCreditManualEntry;
 use App\Models\UniversalCreditReportItem;
 use App\Models\User;
+use App\Services\Finance\UniversalCreditCalculationInvalidator;
 use App\Services\Finance\UniversalCreditCategoryService;
+use App\Services\Finance\UniversalCreditDoubleClaimGuard;
 use App\Support\PermissionHelper;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
 class ClassifyUniversalCreditReportItemAction
 {
-    public function __construct(private readonly UniversalCreditCategoryService $categories) {}
+    public function __construct(
+        private readonly UniversalCreditCategoryService $categories,
+        private readonly UniversalCreditDoubleClaimGuard $doubleClaimGuard,
+        private readonly UniversalCreditCalculationInvalidator $invalidator,
+    ) {}
 
     public function execute(
         UniversalCreditReportItem $item,
@@ -23,6 +29,7 @@ class ClassifyUniversalCreditReportItemAction
         int|float|string $businessUsePercentage = 100,
         ?string $businessUseReason = null,
         ?string $classificationReason = null,
+        ?string $calculationRule = null,
     ): UniversalCreditReportItem {
         $this->authorize($item, $actor);
         $basisPoints = $this->basisPoints($businessUsePercentage);
@@ -37,6 +44,7 @@ class ClassifyUniversalCreditReportItemAction
             $basisPoints,
             $businessUseReason,
             $classificationReason,
+            $calculationRule,
         ): UniversalCreditReportItem {
             $period = UniversalCreditAssessmentPeriod::withoutGlobalScopes()
                 ->where('business_id', $item->business_id)
@@ -98,6 +106,11 @@ class ClassifyUniversalCreditReportItemAction
                 throw new DomainException(__('finance.universal_credit.errors.classification_reason_required'));
             }
 
+            $calculationRule = $classificationStatus === UniversalCreditReportItem::STATUS_INCLUDED
+                ? $this->calculationRule($locked, $category, $calculationRule)
+                : null;
+            $this->doubleClaimGuard->assertCanClassify($locked, $classificationStatus, $category);
+
             $manualMorph = (new UniversalCreditManualEntry)->getMorphClass();
             $locked->update([
                 'category' => $category,
@@ -110,15 +123,37 @@ class ClassifyUniversalCreditReportItemAction
                     : ($basisPoints < 10000
                         ? UniversalCreditReportItem::METHOD_BUSINESS_USE
                         : UniversalCreditReportItem::METHOD_ACTUAL),
+                'calculation_rule' => $calculationRule,
                 'business_share_pence' => null,
                 'reportable_amount_pence' => null,
                 'source_change_reason' => null,
                 'reviewed_by' => $actor->id,
                 'reviewed_at' => now(),
             ]);
+            $this->invalidator->invalidate($period);
 
             return $locked->fresh();
         }, 3);
+    }
+
+    private function calculationRule(
+        UniversalCreditReportItem $item,
+        string $category,
+        ?string $rule,
+    ): ?string {
+        $rule = trim((string) $rule);
+
+        if ($rule === '') {
+            return null;
+        }
+
+        if ($rule !== UniversalCreditReportItem::RULE_BUSINESS_LOAN_INTEREST
+            || $item->direction !== UniversalCreditReportItem::DIRECTION_EXPENSE
+            || $category !== 'legal_financial_and_insurance') {
+            throw new DomainException(__('finance.universal_credit.errors.invalid_calculation_rule'));
+        }
+
+        return $rule;
     }
 
     private function basisPoints(int|float|string $percentage): int
@@ -129,7 +164,9 @@ class ClassifyUniversalCreditReportItemAction
             throw new DomainException(__('finance.universal_credit.errors.invalid_business_use'));
         }
 
-        return (int) round((float) $value * 100);
+        [$whole, $fraction] = array_pad(explode('.', $value, 2), 2, '');
+
+        return ((int) $whole * 100) + (int) str_pad($fraction, 2, '0');
     }
 
     private function optionalText(?string $value, int $maximum): ?string

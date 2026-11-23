@@ -60,4 +60,9 @@ class UniversalCreditPolicyVersion extends Model
     {
         return $this->hasMany(UniversalCreditAssessmentPeriod::class, 'policy_version_id');
     }
+
+    public function simplifiedExpenses(): HasMany
+    {
+        return $this->hasMany(UniversalCreditSimplifiedExpense::class, 'policy_version_id');
+    }
 }

@@ -57,6 +57,7 @@ class AuditFinanceTenantData extends Command
         'universal_credit_assessment_periods' => ['parent' => 'universal_credit_profiles', 'foreign_key' => 'universal_credit_profile_id'],
         'universal_credit_manual_entries' => ['parent' => 'universal_credit_assessment_periods', 'foreign_key' => 'assessment_period_id'],
         'universal_credit_report_items' => ['parent' => 'universal_credit_assessment_periods', 'foreign_key' => 'assessment_period_id'],
+        'universal_credit_simplified_expenses' => ['parent' => 'universal_credit_assessment_periods', 'foreign_key' => 'assessment_period_id'],
     ];
 
     /** @var array<string, array{table: string, parent: string, foreign_key: string}> */
@@ -245,6 +246,60 @@ class AuditFinanceTenantData extends Command
         $report['universal_credit_report_items.source'] = [
             'invalid_count' => count($invalidUniversalCreditSources),
             'sample_ids' => array_slice($invalidUniversalCreditSources, 0, 20),
+        ];
+
+        $invalidUniversalCreditFxSnapshots = DB::table('universal_credit_report_items')
+            ->where(function ($query): void {
+                $query->where(function ($missingSnapshot): void {
+                    $missingSnapshot->whereNotNull('gross_amount_pence')
+                        ->where(function ($missingMetadata): void {
+                            $missingMetadata->whereNull('gbp_exchange_rate')
+                                ->orWhere('gbp_exchange_rate', '<=', 0)
+                                ->orWhereNull('exchange_rate_source')
+                                ->orWhere('exchange_rate_source', '')
+                                ->orWhereNull('exchange_rate_date');
+                        });
+                })->orWhere(function ($orphanedMetadata): void {
+                    $orphanedMetadata->whereNull('gross_amount_pence')
+                        ->where(function ($metadata): void {
+                            $metadata->whereNotNull('gbp_exchange_rate')
+                                ->orWhereNotNull('exchange_rate_source')
+                                ->orWhereNotNull('exchange_rate_date');
+                        });
+                });
+            });
+        $report['universal_credit_report_items.fx_snapshot'] = [
+            'invalid_count' => (clone $invalidUniversalCreditFxSnapshots)->count(),
+            'sample_ids' => (clone $invalidUniversalCreditFxSnapshots)->limit(20)->pluck('id')->all(),
+        ];
+
+        $invalidUniversalCreditSimplifiedExpenses = [];
+
+        DB::table('universal_credit_simplified_expenses as expense')
+            ->leftJoin('universal_credit_assessment_periods as period', 'period.id', '=', 'expense.assessment_period_id')
+            ->leftJoin('universal_credit_policy_versions as policy', 'policy.id', '=', 'expense.policy_version_id')
+            ->select([
+                'expense.id', 'expense.policy_version_id', 'expense.policy_rules_hash',
+                'period.policy_version_id as period_policy_version_id',
+                'period.policy_rules_hash as period_policy_rules_hash',
+                'policy.rules_hash as policy_rules_hash_source',
+            ])
+            ->orderBy('expense.id')
+            ->chunk(100, function ($expenses) use (&$invalidUniversalCreditSimplifiedExpenses): void {
+                foreach ($expenses as $expense) {
+                    if ($expense->period_policy_version_id === null
+                        || $expense->policy_rules_hash_source === null
+                        || (int) $expense->policy_version_id !== (int) $expense->period_policy_version_id
+                        || ! hash_equals((string) $expense->policy_rules_hash, (string) $expense->period_policy_rules_hash)
+                        || ! hash_equals((string) $expense->policy_rules_hash, (string) $expense->policy_rules_hash_source)) {
+                        $invalidUniversalCreditSimplifiedExpenses[] = $expense->id;
+                    }
+                }
+            });
+
+        $report['universal_credit_simplified_expenses.policy_snapshot'] = [
+            'invalid_count' => count($invalidUniversalCreditSimplifiedExpenses),
+            'sample_ids' => array_slice($invalidUniversalCreditSimplifiedExpenses, 0, 20),
         ];
 
         $vatReturnQuery = DB::table('vat_returns as vat_return')

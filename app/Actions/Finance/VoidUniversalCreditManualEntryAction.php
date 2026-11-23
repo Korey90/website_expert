@@ -6,12 +6,15 @@ use App\Models\UniversalCreditAssessmentPeriod;
 use App\Models\UniversalCreditManualEntry;
 use App\Models\UniversalCreditReportItem;
 use App\Models\User;
+use App\Services\Finance\UniversalCreditCalculationInvalidator;
 use App\Support\PermissionHelper;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
 class VoidUniversalCreditManualEntryAction
 {
+    public function __construct(private readonly UniversalCreditCalculationInvalidator $invalidator) {}
+
     public function execute(
         UniversalCreditManualEntry $entry,
         User $actor,
@@ -72,6 +75,7 @@ class VoidUniversalCreditManualEntryAction
                     'reviewed_by' => $actor->id,
                     'reviewed_at' => now(),
                 ]);
+            $this->invalidator->invalidate($period);
 
             return $locked->fresh(['reportItems']);
         }, 3);

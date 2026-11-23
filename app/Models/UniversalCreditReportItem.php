@@ -29,14 +29,18 @@ class UniversalCreditReportItem extends Model
 
     public const METHOD_MANUAL = 'manual';
 
+    public const RULE_BUSINESS_LOAN_INTEREST = 'business_loan_interest';
+
     protected $fillable = [
         'business_id', 'assessment_period_id', 'source_type', 'source_id',
         'source_event_key', 'source_identity_hash', 'source_fingerprint',
         'direction', 'category', 'classification_status', 'cash_date',
         'document_date', 'original_amount', 'original_currency',
-        'gross_amount_pence', 'vat_amount_pence', 'business_use_basis_points',
+        'gross_amount_pence', 'gbp_exchange_rate', 'exchange_rate_source',
+        'exchange_rate_date', 'fx_snapshot_reason', 'vat_amount_pence', 'vat_snapshot_source',
+        'vat_snapshot_reason', 'business_use_basis_points',
         'business_use_reason', 'classification_reason', 'calculation_method',
-        'business_share_pence', 'reportable_amount_pence', 'source_context',
+        'calculation_rule', 'business_share_pence', 'reportable_amount_pence', 'source_context',
         'source_is_current', 'source_change_reason', 'reviewed_by', 'reviewed_at',
     ];
 
@@ -47,6 +51,8 @@ class UniversalCreditReportItem extends Model
             'document_date' => 'date',
             'original_amount' => 'decimal:2',
             'gross_amount_pence' => 'integer',
+            'gbp_exchange_rate' => 'decimal:8',
+            'exchange_rate_date' => 'date',
             'vat_amount_pence' => 'integer',
             'business_use_basis_points' => 'integer',
             'business_share_pence' => 'integer',
@@ -91,6 +97,28 @@ class UniversalCreditReportItem extends Model
 
             if ($item->business_use_basis_points < 0 || $item->business_use_basis_points > 10000) {
                 throw new DomainException(__('finance.universal_credit.errors.invalid_business_use'));
+            }
+
+            if ($item->vat_amount_pence !== null
+                && ($item->vat_amount_pence < 0
+                    || $item->gross_amount_pence === null
+                    || $item->vat_amount_pence > $item->gross_amount_pence)) {
+                throw new DomainException(__('finance.universal_credit.errors.invalid_vat_snapshot'));
+            }
+
+            $hasFxSnapshot = $item->gross_amount_pence !== null;
+            $hasCompleteFxMetadata = $item->gbp_exchange_rate !== null
+                && preg_match('/^(?!0+(?:\.0+)?$)\d{1,10}(?:\.\d{1,8})?$/', (string) $item->gbp_exchange_rate) === 1
+                && filled($item->exchange_rate_source)
+                && $item->exchange_rate_date !== null;
+
+            if ($hasFxSnapshot !== $hasCompleteFxMetadata) {
+                throw new DomainException(__('finance.universal_credit.errors.invalid_fx_snapshot'));
+            }
+
+            if ($item->calculation_rule !== null
+                && $item->calculation_rule !== self::RULE_BUSINESS_LOAN_INTEREST) {
+                throw new DomainException(__('finance.universal_credit.errors.invalid_calculation_rule'));
             }
 
             if ($item->direction === self::DIRECTION_INCOME

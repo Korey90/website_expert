@@ -8,7 +8,9 @@ use App\Models\UniversalCreditManualEntry;
 use App\Models\UniversalCreditReportItem;
 use App\Models\User;
 use App\Services\Finance\FinancialAttachmentService;
+use App\Services\Finance\UniversalCreditCalculationInvalidator;
 use App\Services\Finance\UniversalCreditCategoryService;
+use App\Services\Finance\UniversalCreditFxSnapshotCalculator;
 use App\Support\PermissionHelper;
 use Carbon\CarbonImmutable;
 use DomainException;
@@ -20,6 +22,8 @@ class CreateUniversalCreditManualEntryAction
     public function __construct(
         private readonly UniversalCreditCategoryService $categories,
         private readonly FinancialAttachmentService $attachments,
+        private readonly UniversalCreditCalculationInvalidator $invalidator,
+        private readonly UniversalCreditFxSnapshotCalculator $fxCalculator,
     ) {}
 
     /** @param array<string, mixed> $data */
@@ -62,9 +66,23 @@ class CreateUniversalCreditManualEntryAction
             throw new DomainException(__('finance.universal_credit.errors.manual_evidence_required'));
         }
 
-        $amountGbpPence = $currency === 'GBP'
-            ? $this->pence($originalAmount)
-            : $this->pence($this->positiveMoney($data['amount_gbp'] ?? null));
+        if ($currency === 'GBP') {
+            $amountGbpPence = $this->pence($originalAmount);
+            $gbpExchangeRate = '1.00000000';
+            $exchangeRateSource = 'identity';
+            $exchangeRateDate = $cashDate;
+        } else {
+            $exchangeRateSource = trim((string) ($data['exchange_rate_source'] ?? ''));
+            $exchangeRateDate = $this->date((string) ($data['exchange_rate_date'] ?? ''));
+
+            if (mb_strlen($exchangeRateSource) < 2 || mb_strlen($exchangeRateSource) > 100) {
+                throw new DomainException(__('finance.universal_credit.errors.invalid_fx_snapshot'));
+            }
+
+            $fxSnapshot = $this->fxCalculator->calculate($originalAmount, $data['gbp_exchange_rate'] ?? '');
+            $amountGbpPence = $fxSnapshot['amount_pence'];
+            $gbpExchangeRate = $fxSnapshot['rate'];
+        }
 
         return DB::transaction(function () use (
             $period,
@@ -76,6 +94,9 @@ class CreateUniversalCreditManualEntryAction
             $originalAmount,
             $currency,
             $amountGbpPence,
+            $gbpExchangeRate,
+            $exchangeRateSource,
+            $exchangeRateDate,
             $description,
             $missingReason,
             $evidence,
@@ -123,6 +144,9 @@ class CreateUniversalCreditManualEntryAction
                 originalAmount: $originalAmount,
                 originalCurrency: $currency,
                 grossAmountPence: $amountGbpPence,
+                gbpExchangeRate: $gbpExchangeRate,
+                exchangeRateSource: $exchangeRateSource,
+                exchangeRateDate: $exchangeRateDate,
                 context: [
                     'event_type' => $eventType,
                     'manual_entry' => true,
@@ -144,6 +168,9 @@ class CreateUniversalCreditManualEntryAction
                 'original_amount' => $originalAmount,
                 'original_currency' => $currency,
                 'gross_amount_pence' => $amountGbpPence,
+                'gbp_exchange_rate' => $gbpExchangeRate,
+                'exchange_rate_source' => $exchangeRateSource,
+                'exchange_rate_date' => $exchangeRateDate->toDateString(),
                 'business_use_basis_points' => 10000,
                 'calculation_method' => UniversalCreditReportItem::METHOD_MANUAL,
                 'source_context' => $candidate->context,
@@ -153,6 +180,8 @@ class CreateUniversalCreditManualEntryAction
             if ($evidence !== null) {
                 $this->attachments->store($entry, $evidence, $actor, 'other');
             }
+
+            $this->invalidator->invalidate($locked);
 
             return $entry->fresh(['attachments', 'reportItems']);
         }, 3);
@@ -195,16 +224,25 @@ class CreateUniversalCreditManualEntryAction
     {
         $value = trim((string) $value);
 
-        if (! preg_match('/^\d+(?:\.\d{1,2})?$/', $value) || (float) $value <= 0) {
+        if (! preg_match('/^\d{1,12}(?:\.\d{1,2})?$/', $value)) {
             throw new DomainException(__('finance.universal_credit.errors.invalid_manual_amount'));
         }
 
-        return number_format((float) $value, 2, '.', '');
+        [$whole, $fraction] = array_pad(explode('.', $value, 2), 2, '');
+        $pence = ((int) $whole * 100) + (int) str_pad($fraction, 2, '0');
+
+        if ($pence <= 0) {
+            throw new DomainException(__('finance.universal_credit.errors.invalid_manual_amount'));
+        }
+
+        return sprintf('%d.%02d', intdiv($pence, 100), $pence % 100);
     }
 
     private function pence(string $amount): int
     {
-        return (int) round((float) $amount * 100);
+        [$whole, $fraction] = explode('.', $amount, 2);
+
+        return ((int) $whole * 100) + (int) $fraction;
     }
 
     private function authorize(UniversalCreditAssessmentPeriod $period, User $actor): void

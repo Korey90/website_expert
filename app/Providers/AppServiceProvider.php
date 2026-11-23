@@ -31,6 +31,7 @@ use App\Models\UniversalCreditAssessmentPeriod;
 use App\Models\UniversalCreditManualEntry;
 use App\Models\UniversalCreditProfile;
 use App\Models\UniversalCreditReportItem;
+use App\Models\UniversalCreditSimplifiedExpense;
 use App\Models\VatAdjustment;
 use App\Models\VatReturn;
 use App\Notifications\LeadAssignedNotification;
@@ -55,6 +56,7 @@ use App\Policies\UniversalCreditAssessmentPeriodPolicy;
 use App\Policies\UniversalCreditManualEntryPolicy;
 use App\Policies\UniversalCreditProfilePolicy;
 use App\Policies\UniversalCreditReportItemPolicy;
+use App\Policies\UniversalCreditSimplifiedExpensePolicy;
 use App\Policies\VatAdjustmentPolicy;
 use App\Policies\VatReturnPolicy;
 use App\Services\Finance\ClamAvFinancialAttachmentScanner;
@@ -122,6 +124,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(UniversalCreditAssessmentPeriod::class, UniversalCreditAssessmentPeriodPolicy::class);
         Gate::policy(UniversalCreditManualEntry::class, UniversalCreditManualEntryPolicy::class);
         Gate::policy(UniversalCreditReportItem::class, UniversalCreditReportItemPolicy::class);
+        Gate::policy(UniversalCreditSimplifiedExpense::class, UniversalCreditSimplifiedExpensePolicy::class);
         Gate::policy(VatAdjustment::class, VatAdjustmentPolicy::class);
         Gate::policy(VatReturn::class, VatReturnPolicy::class);
 

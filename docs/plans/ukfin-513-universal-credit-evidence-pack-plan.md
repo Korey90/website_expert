@@ -1,6 +1,6 @@
 # UKFIN-513 - paczka dowodowa Universal Credit dla sole tradera
 
-**Status:** Implementacja w toku - UKFIN-513A i UKFIN-513B ukończone lokalnie
+**Status:** Implementacja w toku - UKFIN-513A, UKFIN-513B i UKFIN-513C ukończone lokalnie
 **Data:** 2026-11-23  
 **Projekt:** Website Expert NI  
 **Grupa docelowa:** Sole trader w Irlandii Północnej  
@@ -387,13 +387,31 @@ Wynik etapu:
 - Finance: 424 passed, 1 skipped, 3060 assertions;
 - tłumaczenia finance: PL/EN/PT po 1491 identycznych kluczy.
 
-### UKFIN-513C - kalkulatory
+### UKFIN-513C - kalkulatory - ukończone lokalnie 2026-11-23
 
 1. Zaimplementować VAT inclusive/exclusive.
 2. Zaimplementować mileage, home working i living at business premises.
 3. Dodać loan-interest limit i pozostałe limity polityki.
 4. Zablokować double claim actual/simplified.
 5. Użyć arytmetyki w pensach, FX snapshot i kontrolowanych zaokrągleń.
+
+Wynik etapu:
+
+- migracja `000042` dodaje jawne snapshoty VAT i FX do pozycji raportu oraz tenantowe `universal_credit_simplified_expenses`;
+- kalkulacja okresu obsługuje metodę VAT inclusive oraz VAT exclusive, przy czym dla zakupów odejmuje wyłącznie VAT odzyskiwalny, a VAT nieodzyskiwalny pozostaje częścią kosztu;
+- częściowe płatności dzielą VAT dokumentu proporcjonalnie i zaokrąglają wynik do pełnych pensów;
+- ręczny snapshot VAT i GBP wymaga źródła lub uzasadnienia, aktora i daty, a każda zmiana unieważnia poprzednie totals oraz hash;
+- snapshot FX zapisuje kurs do GBP, źródło kursu, datę i powód korekty, a przeliczenie działa na liczbach całkowitych bez arytmetyki float;
+- uproszczone mileage liczy 45p do 833 mil i 25p powyżej dla samochodu lub vana oraz 24p dla motorbike lub scooter;
+- home working stosuje progi 25-50, 51-100 i ponad 100 godzin, a living at business premises odejmuje właściwy policy deduction według liczby mieszkańców;
+- business loan interest jest ograniczony do 4100 pensów na assessment period i rozdzielany deterministycznie między pozycje;
+- centralny double-claim guard blokuje jednoczesne użycie kosztu rzeczywistego i kolidującego simplified expense;
+- kalkulacja zapisuje income, expenses, net oraz kanoniczny SHA-256 snapshot źródeł, klasyfikacji, VAT, FX i simplified expenses;
+- uproszczone koszty są niezmienne, mogą być tylko audytowalnie unieważnione, wymagają dowodu albo przyczyny jego braku i mają osobną tenant policy;
+- tenant audit sprawdza właściciela, snapshot FX oraz zgodność wersji polityki uproszczonych kosztów;
+- migracja przeszła na lokalnym MySQL, tenant audit wykazał 0 błędów;
+- Finance: 431 passed, 1 skipped, 3092 assertions;
+- tłumaczenia finance: PL/EN/PT po 1510 identycznych kluczy.
 
 ### UKFIN-513D - review i raporty
 

@@ -66,6 +66,7 @@ class UniversalCreditSourceCollector
                     && $invoiceItems->every(fn ($item): bool => $item->fixedAssetTransactions
                         ->contains(fn (FixedAssetTransaction $transaction): bool => $transaction->type === FixedAssetTransaction::TYPE_DISPOSAL
                             && $transaction->status === FixedAssetTransaction::STATUS_POSTED));
+                $grossAmountPence = $this->gbpPence($payment->amount_gbp, $payment->amount, $payment->currency);
 
                 return new UniversalCreditSourceCandidate(
                     source: $payment,
@@ -76,7 +77,16 @@ class UniversalCreditSourceCollector
                     documentDate: $this->immutableDate($payment->invoice?->tax_point ?? $payment->invoice?->issue_date),
                     originalAmount: $this->money($payment->amount),
                     originalCurrency: strtoupper((string) $payment->currency),
-                    grossAmountPence: $this->gbpPence($payment->amount_gbp, $payment->amount, $payment->currency),
+                    grossAmountPence: $grossAmountPence,
+                    gbpExchangeRate: $payment->gbp_exchange_rate,
+                    exchangeRateSource: $payment->exchange_rate_source,
+                    exchangeRateDate: $this->immutableDate($payment->exchange_rate_date),
+                    vatAmountPence: $this->proportionalVat(
+                        $grossAmountPence,
+                        $payment->invoice?->total,
+                        $payment->invoice?->vat_amount,
+                    ),
+                    vatSnapshotSource: $payment->invoice !== null ? 'document' : null,
                     context: [
                         'invoice_id' => $payment->invoice_id,
                         'bank_account_id' => $payment->bank_account_id,
@@ -101,23 +111,36 @@ class UniversalCreditSourceCollector
             ->whereHas('journalEntries', fn ($query) => $query->withoutGlobalScopes())
             ->orderBy('id')
             ->get()
-            ->map(fn (Payment $payment): UniversalCreditSourceCandidate => new UniversalCreditSourceCandidate(
-                source: $payment,
-                eventKey: 'refund',
-                direction: UniversalCreditReportItem::DIRECTION_EXPENSE,
-                category: 'review_required',
-                cashDate: CarbonImmutable::parse($payment->refunded_at),
-                documentDate: $this->immutableDate($payment->invoice?->tax_point ?? $payment->invoice?->issue_date),
-                originalAmount: $this->money($payment->amount),
-                originalCurrency: strtoupper((string) $payment->currency),
-                grossAmountPence: $this->gbpPence($payment->amount_gbp, $payment->amount, $payment->currency),
-                context: [
-                    'invoice_id' => $payment->invoice_id,
-                    'bank_account_id' => $payment->bank_account_id,
-                    'customer_refund' => true,
-                    'classification_suggestion_only' => true,
-                ],
-            ))
+            ->map(function (Payment $payment): UniversalCreditSourceCandidate {
+                $grossAmountPence = $this->gbpPence($payment->amount_gbp, $payment->amount, $payment->currency);
+
+                return new UniversalCreditSourceCandidate(
+                    source: $payment,
+                    eventKey: 'refund',
+                    direction: UniversalCreditReportItem::DIRECTION_EXPENSE,
+                    category: 'review_required',
+                    cashDate: CarbonImmutable::parse($payment->refunded_at),
+                    documentDate: $this->immutableDate($payment->invoice?->tax_point ?? $payment->invoice?->issue_date),
+                    originalAmount: $this->money($payment->amount),
+                    originalCurrency: strtoupper((string) $payment->currency),
+                    grossAmountPence: $grossAmountPence,
+                    gbpExchangeRate: $payment->gbp_exchange_rate,
+                    exchangeRateSource: $payment->exchange_rate_source,
+                    exchangeRateDate: $this->immutableDate($payment->exchange_rate_date),
+                    vatAmountPence: $this->proportionalVat(
+                        $grossAmountPence,
+                        $payment->invoice?->total,
+                        $payment->invoice?->vat_amount,
+                    ),
+                    vatSnapshotSource: $payment->invoice !== null ? 'document' : null,
+                    context: [
+                        'invoice_id' => $payment->invoice_id,
+                        'bank_account_id' => $payment->bank_account_id,
+                        'customer_refund' => true,
+                        'classification_suggestion_only' => true,
+                    ],
+                );
+            })
             ->all();
     }
 
@@ -125,7 +148,7 @@ class UniversalCreditSourceCollector
     private function expensePayments(UniversalCreditAssessmentPeriod $period): array
     {
         return ExpensePayment::withoutGlobalScopes()
-            ->with(['expense.items.fixedAssetTransactions'])
+            ->with(['expense.items.fixedAssetTransactions', 'expense.items.taxCode'])
             ->where('business_id', $period->business_id)
             ->whereDate('paid_at', '>=', $period->date_from)
             ->whereDate('paid_at', '<=', $period->date_to)
@@ -144,6 +167,7 @@ class UniversalCreditSourceCollector
                             FixedAssetTransaction::TYPE_ACQUISITION,
                             FixedAssetTransaction::TYPE_IMPROVEMENT,
                         ], true) && $transaction->status === FixedAssetTransaction::STATUS_POSTED));
+                $grossAmountPence = $this->gbpPence($payment->amount_gbp, $payment->amount, $payment->currency);
 
                 return new UniversalCreditSourceCandidate(
                     source: $payment,
@@ -154,7 +178,16 @@ class UniversalCreditSourceCollector
                     documentDate: $this->immutableDate($payment->expense?->tax_point ?? $payment->expense?->issue_date),
                     originalAmount: $this->money($payment->amount),
                     originalCurrency: strtoupper((string) $payment->currency),
-                    grossAmountPence: $this->gbpPence($payment->amount_gbp, $payment->amount, $payment->currency),
+                    grossAmountPence: $grossAmountPence,
+                    gbpExchangeRate: $payment->gbp_exchange_rate,
+                    exchangeRateSource: $payment->exchange_rate_source,
+                    exchangeRateDate: $this->immutableDate($payment->exchange_rate_date),
+                    vatAmountPence: $this->proportionalVat(
+                        $grossAmountPence,
+                        $payment->expense?->total,
+                        $this->recoverablePurchaseVat($items),
+                    ),
+                    vatSnapshotSource: $payment->expense !== null ? 'document' : null,
                     context: [
                         'expense_id' => $payment->expense_id,
                         'bank_account_id' => $payment->bank_account_id,
@@ -172,30 +205,44 @@ class UniversalCreditSourceCollector
     private function purchaseCreditRefunds(UniversalCreditAssessmentPeriod $period): array
     {
         return PurchaseCreditRefund::withoutGlobalScopes()
-            ->with(['expense', 'purchaseCreditNote'])
+            ->with(['expense', 'purchaseCreditNote.items.taxCode'])
             ->where('business_id', $period->business_id)
             ->whereDate('received_at', '>=', $period->date_from)
             ->whereDate('received_at', '<=', $period->date_to)
             ->whereHas('journalEntries', fn ($query) => $query->withoutGlobalScopes())
             ->orderBy('id')
             ->get()
-            ->map(fn (PurchaseCreditRefund $refund): UniversalCreditSourceCandidate => new UniversalCreditSourceCandidate(
-                source: $refund,
-                eventKey: 'supplier_refund',
-                direction: UniversalCreditReportItem::DIRECTION_INCOME,
-                category: 'review_required',
-                cashDate: CarbonImmutable::parse($refund->received_at),
-                documentDate: $this->immutableDate($refund->purchaseCreditNote?->tax_point ?? $refund->purchaseCreditNote?->issue_date),
-                originalAmount: $this->money($refund->amount),
-                originalCurrency: strtoupper((string) $refund->currency),
-                grossAmountPence: $this->gbpPence($refund->amount_gbp, $refund->amount, $refund->currency),
-                context: [
-                    'expense_id' => $refund->expense_id,
-                    'purchase_credit_note_id' => $refund->purchase_credit_note_id,
-                    'supplier_refund' => true,
-                    'classification_suggestion_only' => true,
-                ],
-            ))
+            ->map(function (PurchaseCreditRefund $refund): UniversalCreditSourceCandidate {
+                $grossAmountPence = $this->gbpPence($refund->amount_gbp, $refund->amount, $refund->currency);
+                $items = $refund->purchaseCreditNote?->items ?? collect();
+
+                return new UniversalCreditSourceCandidate(
+                    source: $refund,
+                    eventKey: 'supplier_refund',
+                    direction: UniversalCreditReportItem::DIRECTION_INCOME,
+                    category: 'review_required',
+                    cashDate: CarbonImmutable::parse($refund->received_at),
+                    documentDate: $this->immutableDate($refund->purchaseCreditNote?->tax_point ?? $refund->purchaseCreditNote?->issue_date),
+                    originalAmount: $this->money($refund->amount),
+                    originalCurrency: strtoupper((string) $refund->currency),
+                    grossAmountPence: $grossAmountPence,
+                    gbpExchangeRate: $refund->gbp_exchange_rate,
+                    exchangeRateSource: $refund->exchange_rate_source,
+                    exchangeRateDate: $this->immutableDate($refund->exchange_rate_date),
+                    vatAmountPence: $this->proportionalVat(
+                        $grossAmountPence,
+                        $refund->purchaseCreditNote?->total,
+                        $this->recoverablePurchaseVat($items),
+                    ),
+                    vatSnapshotSource: $refund->purchaseCreditNote !== null ? 'document' : null,
+                    context: [
+                        'expense_id' => $refund->expense_id,
+                        'purchase_credit_note_id' => $refund->purchase_credit_note_id,
+                        'supplier_refund' => true,
+                        'classification_suggestion_only' => true,
+                    ],
+                );
+            })
             ->all();
     }
 
@@ -248,6 +295,9 @@ class UniversalCreditSourceCollector
                     originalAmount: $this->fromPence($remainingPence),
                     originalCurrency: $currency,
                     grossAmountPence: $currency === 'GBP' ? $remainingPence : null,
+                    gbpExchangeRate: $currency === 'GBP' ? '1.00000000' : null,
+                    exchangeRateSource: $currency === 'GBP' ? 'identity' : null,
+                    exchangeRateDate: $currency === 'GBP' ? CarbonImmutable::parse($transaction->booking_date) : null,
                     context: [
                         'bank_account_id' => $transaction->bank_account_id,
                         'bank_statement_import_id' => $transaction->bank_statement_import_id,
@@ -290,6 +340,37 @@ class UniversalCreditSourceCollector
         return strtoupper((string) $currency) === 'GBP'
             ? abs($this->pence($originalAmount))
             : null;
+    }
+
+    private function proportionalVat(?int $grossAmountPence, mixed $documentTotal, mixed $documentVat): ?int
+    {
+        if ($grossAmountPence === null || $documentTotal === null || $documentVat === null) {
+            return null;
+        }
+
+        $totalPence = abs($this->pence($documentTotal));
+        $vatPence = abs($this->pence($documentVat));
+
+        if ($totalPence <= 0 || $vatPence > $totalPence) {
+            return null;
+        }
+
+        $numerator = $grossAmountPence * $vatPence;
+
+        return intdiv($numerator + intdiv($totalPence, 2), $totalPence);
+    }
+
+    private function recoverablePurchaseVat(Collection $items): string
+    {
+        $vatPence = $items->sum(function ($item): int {
+            if (! $item->taxCode?->input_eligible || $item->taxCode->type === 'reverse_charge') {
+                return 0;
+            }
+
+            return abs($this->pence($item->vat_amount));
+        });
+
+        return $this->fromPence($vatPence);
     }
 
     private function pence(mixed $amount): int

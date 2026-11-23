@@ -198,6 +198,8 @@ class UniversalCreditSourcesTest extends TestCase
             'direction' => UniversalCreditReportItem::DIRECTION_INCOME,
             'cash_date' => '2026-11-25 00:00:00',
             'gross_amount_pence' => 4000,
+            'vat_amount_pence' => 667,
+            'vat_snapshot_source' => 'document',
         ]);
         $this->assertDatabaseHas('universal_credit_report_items', [
             'source_type' => Payment::class,
@@ -210,6 +212,8 @@ class UniversalCreditSourcesTest extends TestCase
             'source_type' => ExpensePayment::class,
             'source_event_key' => 'payment',
             'gross_amount_pence' => 3000,
+            'vat_amount_pence' => 500,
+            'vat_snapshot_source' => 'document',
         ]);
         $this->assertDatabaseHas('universal_credit_report_items', [
             'source_type' => BankTransaction::class,
@@ -329,6 +333,41 @@ class UniversalCreditSourcesTest extends TestCase
         $this->assertSame($this->owner->id, $classified->reviewed_by);
         $this->assertNotNull($classified->reviewed_at);
         $this->assertNull($classified->reportable_amount_pence);
+    }
+
+    public function test_non_recoverable_purchase_vat_remains_in_the_cash_cost(): void
+    {
+        $blockedTaxCode = TaxCode::withoutGlobalScopes()->create([
+            'business_id' => $this->business->id,
+            'code' => 'BLOCKED20',
+            'label' => ['en' => 'Blocked input VAT 20%', 'pl' => 'Nieodzyskiwalny VAT 20%', 'pt' => 'IVA não recuperável 20%'],
+            'type' => 'standard',
+            'rate' => 20,
+            'input_eligible' => false,
+            'output_eligible' => false,
+            'vat_return_mapping' => [],
+            'valid_from' => '2026-01-01',
+            'is_active' => true,
+            'is_system' => false,
+        ]);
+        $expense = $this->postedExpense($blockedTaxCode);
+        $payment = app(RecordExpensePaymentAction::class)->execute($expense, $this->owner, [
+            'amount' => 30,
+            'method' => 'card',
+            'settlement_source' => ExpensePayment::SOURCE_OWNER_FUNDS,
+            'reference' => 'UC-BLOCKED-VAT-1',
+            'paid_at' => '2026-12-02',
+        ]);
+
+        app(CollectUniversalCreditSourcesAction::class)->execute($this->ucPeriod, $this->owner);
+
+        $this->assertDatabaseHas('universal_credit_report_items', [
+            'source_type' => ExpensePayment::class,
+            'source_id' => $payment->id,
+            'gross_amount_pence' => 3000,
+            'vat_amount_pence' => 0,
+            'vat_snapshot_source' => 'document',
+        ]);
     }
 
     public function test_paid_fixed_asset_cost_is_flagged_from_the_cash_flow_without_a_duplicate_asset_event(): void
@@ -504,7 +543,7 @@ class UniversalCreditSourcesTest extends TestCase
         return app(IssueInvoiceAction::class)->execute($invoice, $this->owner);
     }
 
-    private function postedExpense(): Expense
+    private function postedExpense(?TaxCode $taxCode = null): Expense
     {
         $expense = app(CreateExpenseAction::class)->execute($this->business, $this->owner, [
             'supplier_id' => $this->supplier->id,
@@ -517,7 +556,7 @@ class UniversalCreditSourcesTest extends TestCase
                 'category' => 'software',
                 'quantity' => 1,
                 'unit_price' => 100,
-                'tax_code_id' => $this->taxCode('S20')->id,
+                'tax_code_id' => ($taxCode ?? $this->taxCode('S20'))->id,
             ]],
         ]);
         $expense = app(ApproveExpenseAction::class)->execute($expense, $this->owner);

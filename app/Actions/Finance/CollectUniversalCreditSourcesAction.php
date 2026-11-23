@@ -8,6 +8,7 @@ use App\Models\UniversalCreditAssessmentPeriod;
 use App\Models\UniversalCreditManualEntry;
 use App\Models\UniversalCreditReportItem;
 use App\Models\User;
+use App\Services\Finance\UniversalCreditCalculationInvalidator;
 use App\Services\Finance\UniversalCreditSourceCollector;
 use App\Support\PermissionHelper;
 use DomainException;
@@ -15,7 +16,10 @@ use Illuminate\Support\Facades\DB;
 
 class CollectUniversalCreditSourcesAction
 {
-    public function __construct(private readonly UniversalCreditSourceCollector $collector) {}
+    public function __construct(
+        private readonly UniversalCreditSourceCollector $collector,
+        private readonly UniversalCreditCalculationInvalidator $invalidator,
+    ) {}
 
     public function execute(
         UniversalCreditAssessmentPeriod $period,
@@ -86,6 +90,7 @@ class CollectUniversalCreditSourcesAction
                     'business_use_reason' => null,
                     'classification_reason' => null,
                     'calculation_method' => UniversalCreditReportItem::METHOD_ACTUAL,
+                    'calculation_rule' => null,
                     'business_share_pence' => null,
                     'reportable_amount_pence' => null,
                     'source_is_current' => true,
@@ -120,6 +125,7 @@ class CollectUniversalCreditSourcesAction
                     'business_use_reason' => null,
                     'classification_reason' => null,
                     'calculation_method' => UniversalCreditReportItem::METHOD_ACTUAL,
+                    'calculation_rule' => null,
                     'business_share_pence' => null,
                     'reportable_amount_pence' => null,
                     'source_is_current' => false,
@@ -128,6 +134,10 @@ class CollectUniversalCreditSourcesAction
                     'reviewed_at' => null,
                 ]);
                 $markedStale++;
+            }
+
+            if ($created > 0 || $updated > 0 || $removed > 0 || $markedStale > 0) {
+                $this->invalidator->invalidate($locked);
             }
 
             return new UniversalCreditCollectionResult(
@@ -155,7 +165,13 @@ class CollectUniversalCreditSourcesAction
             'original_amount' => $candidate->originalAmount,
             'original_currency' => $candidate->originalCurrency,
             'gross_amount_pence' => $candidate->grossAmountPence,
-            'vat_amount_pence' => null,
+            'gbp_exchange_rate' => $candidate->gbpExchangeRate,
+            'exchange_rate_source' => $candidate->exchangeRateSource,
+            'exchange_rate_date' => $candidate->exchangeRateDate?->toDateString(),
+            'fx_snapshot_reason' => null,
+            'vat_amount_pence' => $candidate->vatAmountPence,
+            'vat_snapshot_source' => $candidate->vatSnapshotSource,
+            'vat_snapshot_reason' => null,
             'source_context' => $candidate->context,
         ];
     }
