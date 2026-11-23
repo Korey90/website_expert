@@ -108,7 +108,12 @@ class UniversalCreditCalculatorsTest extends TestCase
 
     public function test_vat_exclusive_period_requires_and_subtracts_an_explicit_vat_snapshot(): void
     {
-        $this->period->update(['status' => UniversalCreditAssessmentPeriod::STATUS_SUPERSEDED]);
+        $this->period->update([
+            'status' => UniversalCreditAssessmentPeriod::STATUS_SUPERSEDED,
+            'superseded_by_user_id' => $this->owner->id,
+            'superseded_at' => now(),
+            'supersede_reason' => 'Replaced by the VAT-exclusive calculator test period.',
+        ]);
         $this->business->accountingProfile()->withoutGlobalScopes()->update([
             'vat_registered' => true,
             'vat_number' => 'GB123456789',

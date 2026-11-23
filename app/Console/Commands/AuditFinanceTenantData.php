@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\PurchaseCreditRefund;
 use App\Models\UniversalCreditManualEntry;
 use App\Models\UniversalCreditReportItem;
+use App\Services\Finance\UniversalCreditCalculationHashService;
 use App\Services\Finance\UniversalCreditPolicyHashService;
 use App\Services\Finance\VatReturnSnapshotService;
 use Illuminate\Console\Command;
@@ -211,6 +212,50 @@ class AuditFinanceTenantData extends Command
         $report['universal_credit_assessment_periods.policy_snapshot'] = [
             'invalid_count' => count($invalidUniversalCreditSnapshots),
             'sample_ids' => array_slice($invalidUniversalCreditSnapshots, 0, 20),
+        ];
+
+        $invalidUniversalCreditReviewSnapshots = [];
+        $universalCreditCalculationHasher = app(UniversalCreditCalculationHashService::class);
+
+        DB::table('universal_credit_assessment_periods')
+            ->select([
+                'id', 'status', 'review_snapshot_version', 'review_snapshot', 'review_snapshot_hash',
+                'reviewed_by', 'reviewed_at', 'locked_by', 'locked_at',
+            ])
+            ->orderBy('id')
+            ->chunk(100, function ($periods) use (&$invalidUniversalCreditReviewSnapshots, $universalCreditCalculationHasher): void {
+                foreach ($periods as $period) {
+                    $snapshot = is_string($period->review_snapshot)
+                        ? json_decode($period->review_snapshot, true)
+                        : $period->review_snapshot;
+                    $requiresSnapshot = in_array($period->status, ['in_review', 'locked', 'reported'], true);
+                    $hasSnapshot = is_array($snapshot)
+                        && (int) $period->review_snapshot_version === 1
+                        && preg_match('/^[a-f0-9]{64}$/', (string) $period->review_snapshot_hash) === 1;
+                    $invalid = ($requiresSnapshot && ! $hasSnapshot)
+                        || ($period->status === 'draft' && ($period->review_snapshot !== null || $period->review_snapshot_hash !== null));
+
+                    if ($hasSnapshot
+                        && ! hash_equals((string) $period->review_snapshot_hash, $universalCreditCalculationHasher->hash($snapshot))) {
+                        $invalid = true;
+                    }
+
+                    if ($requiresSnapshot
+                        && ($period->reviewed_by === null || $period->reviewed_at === null
+                            || (in_array($period->status, ['locked', 'reported'], true)
+                                && ($period->locked_by === null || $period->locked_at === null)))) {
+                        $invalid = true;
+                    }
+
+                    if ($invalid) {
+                        $invalidUniversalCreditReviewSnapshots[] = $period->id;
+                    }
+                }
+            });
+
+        $report['universal_credit_assessment_periods.review_snapshot'] = [
+            'invalid_count' => count($invalidUniversalCreditReviewSnapshots),
+            'sample_ids' => array_slice($invalidUniversalCreditReviewSnapshots, 0, 20),
         ];
 
         $invalidUniversalCreditSources = [];

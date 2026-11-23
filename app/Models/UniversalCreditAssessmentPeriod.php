@@ -29,6 +29,8 @@ class UniversalCreditAssessmentPeriod extends Model
         'date_from', 'date_to', 'status', 'vat_reporting_method_snapshot',
         'policy_rules_snapshot', 'policy_rules_hash', 'income_total_pence',
         'expense_total_pence', 'net_total_pence', 'source_snapshot_hash',
+        'review_snapshot_version', 'review_snapshot', 'review_snapshot_hash',
+        'preflight_warning_count', 'review_confirmation_version',
         'created_by', 'reviewed_by', 'reviewed_at', 'review_notes', 'locked_by',
         'locked_at', 'lock_reason', 'reported_by', 'reported_at',
         'report_confirmation_reference', 'superseded_by_user_id',
@@ -44,6 +46,9 @@ class UniversalCreditAssessmentPeriod extends Model
             'income_total_pence' => 'integer',
             'expense_total_pence' => 'integer',
             'net_total_pence' => 'integer',
+            'review_snapshot_version' => 'integer',
+            'review_snapshot' => 'array',
+            'preflight_warning_count' => 'integer',
             'reviewed_at' => 'datetime',
             'locked_at' => 'datetime',
             'reported_at' => 'datetime',
@@ -90,8 +95,44 @@ class UniversalCreditAssessmentPeriod extends Model
                 throw new DomainException(__('finance.universal_credit.errors.period_foundation_immutable'));
             }
 
+            $originalStatus = (string) $period->getOriginal('status');
+
+            if ($originalStatus !== self::STATUS_DRAFT && $period->isDirty([
+                'income_total_pence', 'expense_total_pence', 'net_total_pence', 'source_snapshot_hash',
+            ])) {
+                throw new DomainException(__('finance.universal_credit.errors.period_calculation_immutable'));
+            }
+
+            if ($period->isDirty([
+                'review_snapshot_version', 'review_snapshot', 'review_snapshot_hash',
+                'preflight_warning_count', 'review_confirmation_version',
+            ]) && ! ($originalStatus === self::STATUS_DRAFT
+                && $period->isDirty('status')
+                && $period->status === self::STATUS_IN_REVIEW)) {
+                throw new DomainException(__('finance.universal_credit.errors.review_snapshot_immutable'));
+            }
+
+            if ($period->isDirty(['reviewed_by', 'reviewed_at', 'review_notes'])
+                && ! ($originalStatus === self::STATUS_DRAFT
+                    && $period->isDirty('status')
+                    && $period->status === self::STATUS_IN_REVIEW)) {
+                throw new DomainException(__('finance.universal_credit.errors.review_metadata_immutable'));
+            }
+
+            if ($period->isDirty(['locked_by', 'locked_at', 'lock_reason'])
+                && ! ($originalStatus === self::STATUS_IN_REVIEW
+                    && $period->isDirty('status')
+                    && $period->status === self::STATUS_LOCKED)) {
+                throw new DomainException(__('finance.universal_credit.errors.lock_metadata_immutable'));
+            }
+
+            if ($period->isDirty(['superseded_by_user_id', 'superseding_period_id', 'superseded_at', 'supersede_reason'])
+                && ! ($period->isDirty('status') && $period->status === self::STATUS_SUPERSEDED)) {
+                throw new DomainException(__('finance.universal_credit.errors.supersede_metadata_immutable'));
+            }
+
             if ($period->isDirty('status')) {
-                $from = (string) $period->getOriginal('status');
+                $from = $originalStatus;
                 $to = (string) $period->status;
                 $allowed = match ($from) {
                     self::STATUS_DRAFT => [self::STATUS_IN_REVIEW, self::STATUS_SUPERSEDED],
@@ -106,6 +147,28 @@ class UniversalCreditAssessmentPeriod extends Model
                         'from' => $from,
                         'to' => $to,
                     ]));
+                }
+
+                if ($to === self::STATUS_IN_REVIEW
+                    && ($period->reviewed_by === null
+                        || $period->reviewed_at === null
+                        || $period->review_snapshot_version === null
+                        || ! is_array($period->review_snapshot)
+                        || preg_match('/^[a-f0-9]{64}$/', (string) $period->review_snapshot_hash) !== 1
+                        || blank($period->review_confirmation_version))) {
+                    throw new DomainException(__('finance.universal_credit.errors.invalid_review_transition'));
+                }
+
+                if ($to === self::STATUS_LOCKED
+                    && ($period->locked_by === null || $period->locked_at === null || blank($period->lock_reason))) {
+                    throw new DomainException(__('finance.universal_credit.errors.invalid_lock_transition'));
+                }
+
+                if ($to === self::STATUS_SUPERSEDED
+                    && ($period->superseded_by_user_id === null
+                        || $period->superseded_at === null
+                        || blank($period->supersede_reason))) {
+                    throw new DomainException(__('finance.universal_credit.errors.invalid_supersede_transition'));
                 }
             }
         });
@@ -151,6 +214,26 @@ class UniversalCreditAssessmentPeriod extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function reviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function lockedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'locked_by');
+    }
+
+    public function reportedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reported_by');
+    }
+
+    public function supersededBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'superseded_by_user_id');
     }
 
     public function supersedingPeriod(): BelongsTo

@@ -23,10 +23,53 @@ class FinanceReportExportService
     public function download(array $document, string $format): Response
     {
         return match ($format) {
+            'csv' => $this->csv($document),
             'xlsx' => $this->xlsx($document),
             'pdf' => $this->pdf($document),
             default => throw new InvalidArgumentException('Unsupported finance report export format.'),
         };
+    }
+
+    /** @param array<string, mixed> $document */
+    private function csv(array $document): Response
+    {
+        return response()->streamDownload(function () use ($document): void {
+            $stream = fopen('php://output', 'wb');
+            if ($stream === false) {
+                throw new InvalidArgumentException('Unable to open CSV output stream.');
+            }
+
+            fwrite($stream, "\xEF\xBB\xBF");
+            fputcsv($stream, [$document['title']]);
+            fputcsv($stream, [__('finance.exports.business'), $this->csvText($document['business_name'])]);
+            fputcsv($stream, [__('finance.exports.generated_at'), $this->csvText($document['generated_at'])]);
+            foreach ($document['metadata'] as $label => $value) {
+                fputcsv($stream, [$this->csvText($label), $this->csvText($value)]);
+            }
+
+            foreach ($document['tables'] as $table) {
+                fputcsv($stream, []);
+                if (filled($table['title'] ?? null)) {
+                    fputcsv($stream, [$this->csvText($table['title'])]);
+                }
+                fputcsv($stream, array_map(fn (array $column): string => $this->csvText($column['label']), $table['columns']));
+                foreach ($table['rows'] as $row) {
+                    fputcsv($stream, array_map(function (mixed $value, int $index) use ($table): mixed {
+                        $type = (string) ($table['columns'][$index]['type'] ?? 'text');
+
+                        return in_array($type, ['money', 'number', 'integer', 'percent'], true) && is_numeric($value)
+                            ? $value
+                            : $this->csvText($value);
+                    }, $row['values'], array_keys($row['values'])));
+                }
+            }
+
+            fclose($stream);
+        }, $document['filename'].'.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     /** @param array<string, mixed> $document */
@@ -205,5 +248,12 @@ class FinanceReportExportService
         $title = str_replace(['\\', '/', '?', '*', '[', ']', ':'], ' ', $title);
 
         return mb_substr(trim($title), 0, 31) ?: 'Report';
+    }
+
+    private function csvText(mixed $value): string
+    {
+        $value = (string) $value;
+
+        return preg_match('/^[=+\-@]/u', $value) === 1 ? "'".$value : $value;
     }
 }

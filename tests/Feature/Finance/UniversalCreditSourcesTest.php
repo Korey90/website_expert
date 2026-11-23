@@ -3,6 +3,7 @@
 namespace Tests\Feature\Finance;
 
 use App\Actions\Finance\ApproveExpenseAction;
+use App\Actions\Finance\CalculateUniversalCreditAssessmentPeriodAction;
 use App\Actions\Finance\ClassifyUniversalCreditReportItemAction;
 use App\Actions\Finance\CollectUniversalCreditSourcesAction;
 use App\Actions\Finance\CreateBankAccountAction;
@@ -40,6 +41,8 @@ use App\Models\UniversalCreditAssessmentPeriod;
 use App\Models\UniversalCreditManualEntry;
 use App\Models\UniversalCreditReportItem;
 use App\Models\User;
+use App\Services\Finance\UniversalCreditPreflightService;
+use App\Services\Finance\UniversalCreditReportModelService;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use DomainException;
@@ -289,6 +292,44 @@ class UniversalCreditSourcesTest extends TestCase
         $this->assertNull($bankItem->reviewed_at);
         $this->assertSame('source_snapshot_changed', $bankItem->source_change_reason);
         $this->assertSame(2, $this->ucPeriod->reportItems()->count());
+    }
+
+    public function test_personal_bank_transaction_remains_a_visible_exclusion_and_source_changes_block_preflight(): void
+    {
+        $transaction = BankTransaction::withoutGlobalScopes()->create([
+            'business_id' => $this->business->id,
+            'bank_account_id' => $this->bankAccount->id,
+            'provider_id' => 'UC-PERSONAL-1',
+            'booking_date' => '2026-12-03',
+            'amount' => '20.00',
+            'currency' => 'GBP',
+            'reference' => 'Personal transfer',
+            'source_hash' => hash('sha256', 'UC-PERSONAL-1'),
+            'reconciliation_status' => BankTransaction::STATUS_UNMATCHED,
+        ]);
+        app(CollectUniversalCreditSourcesAction::class)->execute($this->ucPeriod, $this->owner);
+        $item = UniversalCreditReportItem::withoutGlobalScopes()
+            ->where('source_type', BankTransaction::class)->where('source_id', $transaction->id)->firstOrFail();
+        app(ClassifyUniversalCreditReportItemAction::class)->execute(
+            $item,
+            $this->owner,
+            UniversalCreditReportItem::STATUS_EXCLUDED,
+            'excluded_personal_or_non_trading',
+            classificationReason: 'Personal transfer unrelated to the business.',
+        );
+        app(CalculateUniversalCreditAssessmentPeriodAction::class)->execute($this->ucPeriod, $this->owner);
+
+        $preflight = app(UniversalCreditPreflightService::class)->inspect($this->ucPeriod->fresh());
+        $report = app(UniversalCreditReportModelService::class)->build($this->ucPeriod->fresh());
+        $this->assertSame('green', $preflight->status());
+        $this->assertSame(UniversalCreditReportItem::STATUS_EXCLUDED, $report['details'][0]['classification_status']);
+        $this->assertSame('Personal transfer unrelated to the business.', $report['details'][0]['exclusion_reason']);
+        $this->assertSame('source_not_retained', $report['details'][0]['evidence']['state']);
+
+        $transaction->update(['amount' => '21.00']);
+        $changed = app(UniversalCreditPreflightService::class)->inspect($this->ucPeriod->fresh());
+        $this->assertSame('red', $changed->status());
+        $this->assertContains('source_changed', array_column($changed->errors, 'code'));
     }
 
     public function test_classification_requires_valid_categories_and_mixed_use_reason(): void

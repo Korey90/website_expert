@@ -1,6 +1,6 @@
 # UKFIN-513 - paczka dowodowa Universal Credit dla sole tradera
 
-**Status:** Implementacja w toku - UKFIN-513A, UKFIN-513B i UKFIN-513C ukończone lokalnie
+**Status:** Implementacja w toku - UKFIN-513A, UKFIN-513B, UKFIN-513C i UKFIN-513D ukończone lokalnie
 **Data:** 2026-11-23  
 **Projekt:** Website Expert NI  
 **Grupa docelowa:** Sole trader w Irlandii Północnej  
@@ -413,13 +413,30 @@ Wynik etapu:
 - Finance: 431 passed, 1 skipped, 3092 assertions;
 - tłumaczenia finance: PL/EN/PT po 1510 identycznych kluczy.
 
-### UKFIN-513D - review i raporty
+### UKFIN-513D - review i raporty - ukończone lokalnie 2026-11-23
 
 1. Dodać completeness preflight.
 2. Dodać podgląd kategorii, wykluczeń, dowodów i uzgodnień.
 3. Dodać review/lock/supersede z kanonicznym SHA-256 snapshotu.
 4. Zbudować wspólny model summary/detail/reconciliation.
 5. Generować identyczne wartości w PDF, XLSX i CSV.
+
+Wynik etapu:
+
+- migracja `000043` dodaje wersjonowany snapshot review, jego SHA-256, liczbę potwierdzonych ostrzeżeń i wersję oświadczenia review;
+- completeness preflight działa bez zapisu i sprawdza integralność polityki, finalną klasyfikację, aktualność fingerprintów źródeł, kompletność VAT i FX, wynik kalkulacji, double claim, zgodność sum oraz stan dowodów i uzgodnień bankowych;
+- wynik preflight ma stabilne statusy `green`, `amber` i `red`; błędy blokują review, a ostrzeżenia wymagają jawnego potwierdzenia;
+- pusty, prawidłowo przeliczony okres przechodzi preflight jako `green` i może zostać poddany review oraz zablokowany;
+- kontrolowane akcje `review`, `lock` i `supersede` sprawdzają aktywne członkostwo, dedykowane uprawnienie, poprawny stan oraz wymagane potwierdzenia lub uzasadnienia;
+- review zapisuje kanoniczny snapshot obejmujący raport i wynik preflight, a lock buduje go ponownie i porównuje SHA-256; zmiana danych, dowodu albo uzgodnienia po review blokuje lock;
+- model okresu chroni wartości kalkulacji, snapshot i metadane workflow przed bezpośrednią zmianą poza właściwym przejściem;
+- wspólny model danych zawiera summary, szczegóły pozycji uwzględnionych i wykluczonych, simplified expenses, stan dowodów oraz reconciliation;
+- osobista transakcja bankowa pozostaje widocznym wykluczeniem z powodem, a brak zachowanego wyciągu jest oznaczony jako `source_not_retained`;
+- wszystkie trzy formaty PDF, XLSX i CSV powstają z tego samego modelu i tych samych wartości; eksport CSV ma ochronę tekstowych komórek przed formułami;
+- tenant audit weryfikuje obecność, wersję i hash snapshotu review oraz wymagane metadane workflow;
+- migracja przeszła na lokalnym MySQL, tenant audit wykazał 0 błędów;
+- Finance: 438 passed, 1 skipped, 3129 assertions;
+- tłumaczenia finance: PL/EN/PT po 1621 identycznych kluczy.
 
 ### UKFIN-513E - generator ZIP
 
