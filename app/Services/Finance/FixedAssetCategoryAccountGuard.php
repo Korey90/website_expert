@@ -46,10 +46,14 @@ class FixedAssetCategoryAccountGuard
     }
 
     /**
-     * @return array{method: string, useful_life_months: int|null, residual_value_percent: string}
+     * @return array{method: string, useful_life_months: int|null, residual_value_percent: string, rate_percent: string|null}
      */
-    public function validatePolicy(mixed $method, mixed $usefulLifeMonths, mixed $residualValuePercent): array
-    {
+    public function validatePolicy(
+        mixed $method,
+        mixed $usefulLifeMonths,
+        mixed $residualValuePercent,
+        mixed $ratePercent = null,
+    ): array {
         $method = trim((string) $method);
 
         if (! in_array($method, FixedAssetCategory::DEPRECIATION_METHODS, true)) {
@@ -68,6 +72,17 @@ class FixedAssetCategoryAccountGuard
             $life = null;
         }
 
+        $rate = trim((string) ($ratePercent ?? ''));
+        if ($method === FixedAssetCategory::METHOD_REDUCING_BALANCE) {
+            if (! preg_match('/^\d{1,3}(?:\.\d{1,2})?$/', $rate) || (float) $rate <= 0 || (float) $rate > 100) {
+                throw new DomainException('Reducing-balance depreciation requires an annual rate above 0 and not above 100 percent.');
+            }
+
+            $rate = number_format((float) $rate, 2, '.', '');
+        } else {
+            $rate = null;
+        }
+
         $residual = trim((string) ($residualValuePercent ?? '0'));
         if (! preg_match('/^\d{1,3}(?:\.\d{1,2})?$/', $residual) || (float) $residual < 0 || (float) $residual > 100) {
             throw new DomainException('Residual value percentage must be between 0 and 100 with at most two decimal places.');
@@ -77,6 +92,7 @@ class FixedAssetCategoryAccountGuard
             'method' => $method,
             'useful_life_months' => $life ? (int) $life : null,
             'residual_value_percent' => number_format((float) $residual, 2, '.', ''),
+            'rate_percent' => $rate,
         ];
     }
 }

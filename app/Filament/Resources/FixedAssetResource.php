@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\FixedAssetResource\Pages;
 use App\Models\FixedAsset;
 use App\Models\FixedAssetCategory;
+use App\Models\FixedAssetDepreciationEntry;
 use App\Models\FixedAssetTransaction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -75,6 +76,7 @@ class FixedAssetResource extends BaseResource
                             $set('depreciation_method', $category->default_depreciation_method);
                             $set('useful_life_months', $category->default_useful_life_months);
                             $set('residual_value_percent', $category->default_residual_value_percent);
+                            $set('depreciation_rate_percent', $category->default_depreciation_rate_percent);
                         })
                         ->required(),
                     Forms\Components\TextInput::make('name')
@@ -122,6 +124,15 @@ class FixedAssetResource extends BaseResource
                         ->suffix('%')
                         ->default(0)
                         ->required(),
+                    Forms\Components\TextInput::make('depreciation_rate_percent')
+                        ->label(__('finance.fixed_assets.fields.depreciation_rate_percent'))
+                        ->numeric()
+                        ->minValue(0.01)
+                        ->maxValue(100)
+                        ->step('0.01')
+                        ->suffix('%')
+                        ->required(fn (Get $get): bool => $get('depreciation_method') === FixedAssetCategory::METHOD_REDUCING_BALANCE)
+                        ->visible(fn (Get $get): bool => $get('depreciation_method') === FixedAssetCategory::METHOD_REDUCING_BALANCE),
                     Forms\Components\Textarea::make('notes')
                         ->label(__('finance.fixed_assets.fields.notes'))
                         ->maxLength(10000)
@@ -161,6 +172,10 @@ class FixedAssetResource extends BaseResource
                     TextEntry::make('in_service_date')->label(__('finance.fixed_assets.fields.in_service_date'))->date()->placeholder('-'),
                     TextEntry::make('acquisition_cost_gbp')->label(__('finance.fixed_assets.fields.acquisition_cost_gbp'))->money('GBP')->placeholder('-'),
                     TextEntry::make('accumulated_depreciation_gbp')->label(__('finance.fixed_assets.fields.accumulated_depreciation_gbp'))->money('GBP')->placeholder('-'),
+                    TextEntry::make('net_book_value_gbp')
+                        ->label(__('finance.fixed_assets.fields.net_book_value_gbp'))
+                        ->state(fn (FixedAsset $record): float => max(0, (float) ($record->acquisition_cost_gbp ?? 0) - (float) ($record->accumulated_depreciation_gbp ?? 0)))
+                        ->money('GBP'),
                     TextEntry::make('disposed_at')->label(__('finance.fixed_assets.fields.disposal_date'))->date()->placeholder('-'),
                     TextEntry::make('disposal_proceeds_gbp')->label(__('finance.fixed_assets.fields.disposal_proceeds_gbp'))->money('GBP')->placeholder('-'),
                     TextEntry::make('disposal_gain_loss_gbp')->label(__('finance.fixed_assets.fields.disposal_gain_loss_gbp'))->money('GBP')->placeholder('-'),
@@ -202,7 +217,35 @@ class FixedAssetResource extends BaseResource
                     TextEntry::make('residual_value_percent')
                         ->label(__('finance.fixed_assets.fields.residual_value_percent'))
                         ->suffix('%'),
+                    TextEntry::make('depreciation_rate_percent')
+                        ->label(__('finance.fixed_assets.fields.depreciation_rate_percent'))
+                        ->suffix('%')
+                        ->placeholder('-'),
                     TextEntry::make('notes')->label(__('finance.fixed_assets.fields.notes'))->placeholder('-')->columnSpanFull(),
+                ]),
+            Section::make(__('finance.fixed_assets.sections.depreciation_schedule'))
+                ->description(__('finance.fixed_assets.depreciation_schedule_help'))
+                ->schema([
+                    RepeatableEntry::make('depreciationEntries')
+                        ->hiddenLabel()
+                        ->schema([
+                            TextEntry::make('period_start')->label(__('finance.fixed_assets.fields.period_start'))->date(),
+                            TextEntry::make('period_end')->label(__('finance.fixed_assets.fields.period_end'))->date(),
+                            TextEntry::make('status')
+                                ->label(__('finance.fixed_assets.fields.depreciation_status'))
+                                ->badge()
+                                ->formatStateUsing(fn (string $state): string => __('finance.fixed_assets.depreciation_statuses.'.$state))
+                                ->color(fn (string $state): string => match ($state) {
+                                    FixedAssetDepreciationEntry::STATUS_POSTED => 'success',
+                                    FixedAssetDepreciationEntry::STATUS_REVERSED => 'danger',
+                                    default => 'gray',
+                                }),
+                            TextEntry::make('amount_gbp')->label(__('finance.fixed_assets.fields.depreciation_amount_gbp'))->money('GBP'),
+                            TextEntry::make('closing_net_book_value_gbp')->label(__('finance.fixed_assets.fields.closing_net_book_value_gbp'))->money('GBP'),
+                            TextEntry::make('journalEntry.entry_number')->label(__('finance.fixed_assets.fields.journal'))->placeholder('-')->copyable(),
+                            TextEntry::make('reversalJournalEntry.entry_number')->label(__('finance.fixed_assets.fields.reversal_journal'))->placeholder('-')->copyable(),
+                            TextEntry::make('reversal_reason')->label(__('finance.fixed_assets.fields.reversal_reason'))->placeholder('-')->columnSpanFull(),
+                        ])->columns(4),
                 ]),
         ]);
     }
@@ -289,6 +332,8 @@ class FixedAssetResource extends BaseResource
             'category.assetAccount',
             'transactions.journalEntry',
             'transactions.reversalJournalEntry',
+            'depreciationEntries.journalEntry',
+            'depreciationEntries.reversalJournalEntry',
         ]);
     }
 }

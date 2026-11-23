@@ -24,6 +24,7 @@ class FixedAssetCategoryFactory extends Factory
             'default_depreciation_method' => FixedAssetCategory::METHOD_STRAIGHT_LINE,
             'default_useful_life_months' => 36,
             'default_residual_value_percent' => 0,
+            'default_depreciation_rate_percent' => null,
             'is_active' => true,
         ];
     }

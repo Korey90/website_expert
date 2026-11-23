@@ -36,6 +36,7 @@ class CreateFixedAssetAction
                 $data['depreciation_method'] ?? $category->default_depreciation_method,
                 $data['useful_life_months'] ?? $category->default_useful_life_months,
                 $data['residual_value_percent'] ?? $category->default_residual_value_percent,
+                $data['depreciation_rate_percent'] ?? $category->default_depreciation_rate_percent,
             );
             $details = $this->normalizeDetails($data);
 
@@ -49,6 +50,7 @@ class CreateFixedAssetAction
                 'depreciation_method' => $policy['method'],
                 'useful_life_months' => $policy['useful_life_months'],
                 'residual_value_percent' => $policy['residual_value_percent'],
+                'depreciation_rate_percent' => $policy['rate_percent'],
                 'created_by' => $actor->id,
                 'updated_by' => $actor->id,
             ]);

@@ -36,6 +36,7 @@ class UpdateFixedAssetCategoryAction
                 $data['default_depreciation_method'] ?? $locked->default_depreciation_method,
                 $data['default_useful_life_months'] ?? $locked->default_useful_life_months,
                 $data['default_residual_value_percent'] ?? $locked->default_residual_value_percent,
+                $data['default_depreciation_rate_percent'] ?? $locked->default_depreciation_rate_percent,
             );
 
             if ($code === '' || strlen($code) > 32 || $en === '' || mb_strlen($en) > 255 || mb_strlen($pl) > 255 || mb_strlen($pt) > 255) {
@@ -49,7 +50,8 @@ class UpdateFixedAssetCategoryAction
             $accountingFieldsChanged = collect($accounts)->contains(fn (int $id, string $field): bool => (int) $locked->{$field} !== $id)
                 || $locked->default_depreciation_method !== $policy['method']
                 || $locked->default_useful_life_months !== $policy['useful_life_months']
-                || (string) $locked->default_residual_value_percent !== $policy['residual_value_percent'];
+                || (string) $locked->default_residual_value_percent !== $policy['residual_value_percent']
+                || (string) $locked->default_depreciation_rate_percent !== (string) $policy['rate_percent'];
 
             if ($accountingFieldsChanged && FixedAsset::withoutGlobalScopes()
                 ->where('fixed_asset_category_id', $locked->id)
@@ -65,6 +67,7 @@ class UpdateFixedAssetCategoryAction
                 'default_depreciation_method' => $policy['method'],
                 'default_useful_life_months' => $policy['useful_life_months'],
                 'default_residual_value_percent' => $policy['residual_value_percent'],
+                'default_depreciation_rate_percent' => $policy['rate_percent'],
                 'is_active' => (bool) ($data['is_active'] ?? $locked->is_active),
             ]);
 

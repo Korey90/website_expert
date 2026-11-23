@@ -101,6 +101,15 @@ class FixedAssetCategoryResource extends BaseResource
                         ->suffix('%')
                         ->default(0)
                         ->required(),
+                    Forms\Components\TextInput::make('default_depreciation_rate_percent')
+                        ->label(__('finance.fixed_asset_categories.fields.default_depreciation_rate_percent'))
+                        ->numeric()
+                        ->minValue(0.01)
+                        ->maxValue(100)
+                        ->step('0.01')
+                        ->suffix('%')
+                        ->required(fn (Get $get): bool => $get('default_depreciation_method') === FixedAssetCategory::METHOD_REDUCING_BALANCE)
+                        ->visible(fn (Get $get): bool => $get('default_depreciation_method') === FixedAssetCategory::METHOD_REDUCING_BALANCE),
                 ])->columnSpanFull(),
         ]);
     }

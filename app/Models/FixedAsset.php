@@ -30,7 +30,7 @@ class FixedAsset extends Model
     protected $fillable = [
         'business_id', 'fixed_asset_category_id', 'number', 'name', 'description',
         'serial_number', 'location', 'status', 'depreciation_method', 'useful_life_months',
-        'residual_value_percent', 'notes', 'created_by', 'updated_by', 'acquisition_date',
+        'residual_value_percent', 'depreciation_rate_percent', 'notes', 'created_by', 'updated_by', 'acquisition_date',
         'in_service_date', 'acquisition_cost_gbp', 'accumulated_depreciation_gbp',
         'disposed_at', 'disposal_proceeds_gbp', 'disposal_gain_loss_gbp', 'activated_by',
         'activated_at', 'disposed_by', 'disposal_recorded_at',
@@ -41,6 +41,7 @@ class FixedAsset extends Model
         return [
             'useful_life_months' => 'integer',
             'residual_value_percent' => 'decimal:2',
+            'depreciation_rate_percent' => 'decimal:2',
             'acquisition_date' => 'date',
             'in_service_date' => 'date',
             'acquisition_cost_gbp' => 'decimal:2',
@@ -101,6 +102,11 @@ class FixedAsset extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(FixedAssetTransaction::class)->orderBy('event_date')->orderBy('id');
+    }
+
+    public function depreciationEntries(): HasMany
+    {
+        return $this->hasMany(FixedAssetDepreciationEntry::class)->orderBy('period_end')->orderBy('id');
     }
 
     public function attachments(): MorphMany

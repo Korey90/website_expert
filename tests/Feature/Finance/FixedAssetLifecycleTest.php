@@ -96,6 +96,7 @@ class FixedAssetLifecycleTest extends TestCase
         $this->asset = app(CreateFixedAssetAction::class)->execute($this->business, $this->user, [
             'fixed_asset_category_id' => $category->id,
             'name' => 'Workstation',
+            'depreciation_method' => FixedAssetCategory::METHOD_NONE,
         ]);
     }
 

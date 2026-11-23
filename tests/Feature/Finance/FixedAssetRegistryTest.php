@@ -75,6 +75,7 @@ class FixedAssetRegistryTest extends TestCase
             'fixed_asset_category_id' => $category->id,
             'name' => 'Primary development workstation',
             'depreciation_method' => FixedAssetCategory::METHOD_REDUCING_BALANCE,
+            'depreciation_rate_percent' => '25.00',
             'useful_life_months' => 24,
             'residual_value_percent' => '10.50',
         ]);
@@ -82,6 +83,7 @@ class FixedAssetRegistryTest extends TestCase
         $this->assertSame(48, $category->default_useful_life_months);
         $this->assertSame('Primary development workstation', $asset->name);
         $this->assertSame(FixedAssetCategory::METHOD_REDUCING_BALANCE, $asset->depreciation_method);
+        $this->assertSame('25.00', $asset->depreciation_rate_percent);
         $this->assertSame('10.50', $asset->residual_value_percent);
         $this->assertDatabaseCount('journal_entries', 0);
     }

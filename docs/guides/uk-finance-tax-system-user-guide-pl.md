@@ -203,7 +203,7 @@ W `Finance > Asset categories` albo `Finance > Kategorie środków trwałych` ut
 - konta umorzenia typu `asset/contra_asset`;
 - konta kosztu amortyzacji typu `expense/depreciation`.
 
-Ustaw domyślną metodę amortyzacji księgowej, okres użytkowania w miesiącach i procent wartości rezydualnej. Są to ustawienia książkowe, nie reguły UK capital allowances.
+Ustaw domyślną metodę amortyzacji księgowej, okres użytkowania w miesiącach i procent wartości rezydualnej. Dla metody `Malejące saldo` albo `Reducing balance` podaj również jawną roczną stawkę procentową. Są to ustawienia książkowe, nie reguły UK capital allowances.
 
 W `Finance > Fixed assets` albo `Finance > Środki trwałe` możesz utworzyć roboczy rekord aktywa. System nada numer `FA-YYYY-NNN` i skopiuje ustawienia z kategorii. Dopóki rekord ma status `Draft` lub `Wersja robocza`:
 
@@ -237,17 +237,45 @@ Jedna pozycja Expense może zostać użyta tylko raz i zawsze w całości. Jeże
 
 Dla aktywnego środka trwałego użyj `Dodaj ulepszenie` albo `Add improvement`. Źródłem musi być inna, zaksięgowana pozycja Expense z czystym dokumentem. System wykonuje tę samą reklasyfikację i zwiększa koszt historyczny aktywa bez ponownego ujęcia VAT lub zobowiązania.
 
+Jeżeli amortyzacja obejmująca dzień ulepszenia została już zaksięgowana, najpierw odwróć okresy amortyzacji od najnowszego do okresu obejmującego tę datę. Po dodaniu ulepszenia wygeneruj harmonogram ponownie. System zachowa zaksięgowane wcześniejsze okresy i przeliczy wyłącznie część planowaną.
+
+#### Amortyzacja księgowa
+
+Po aktywacji środka wybierz `Wygeneruj harmonogram amortyzacji` albo `Generate depreciation schedule`.
+
+- pozostaw `Nalicz do dnia` puste, aby utworzyć plan do końca okresu użytkowania;
+- podaj konkretną datę, jeżeli przygotowujesz ostatni częściowy okres przed sprzedażą;
+- pozycje `Planowana` nie wpływają jeszcze na księgę ani raporty;
+- akcja `Zaksięguj następną amortyzację` księguje wyłącznie najstarszy wymagalny okres;
+- przyszłego okresu nie można zaksięgować;
+- zamknięty albo zablokowany okres księgowy i locked VAT range blokują posting.
+
+Każdy posting tworzy:
+
+```text
+Wn konto kosztu amortyzacji z kategorii
+Ma konto skumulowanego umorzenia z kategorii
+```
+
+Koszt trafia do Profit and Loss, umorzenie do Balance Sheet, a karta środka pokazuje zaktualizowaną wartość księgową netto. Posting nie zawiera tax code i nie wpływa na VAT Return.
+
+Zaksięgowanego okresu nie można edytować ani usunąć. Akcja `Odwróć ostatnią amortyzację` albo `Reverse latest depreciation` wymaga powodu, tworzy dokładny journal lustrzany i usuwa nieaktualną planowaną część harmonogramu. Następnie można wygenerować poprawiony plan.
+
+Jeżeli aktywny środek z wcześniejszej wersji systemu ma metodę reducing balance, ale nie ma stawki, użyj jednorazowej akcji `Uzupełnij stawkę amortyzacji`. Po zapisaniu stawka aktywnego środka jest niezmienna.
+
 #### Sprzedaż i zbycie
 
 Pierwsza wersja obsługuje zbycie wyłącznie przez sprzedaż udokumentowaną fakturą:
 
 1. utwórz fakturę sprzedaży z osobną pozycją dotyczącą środka trwałego;
 2. wystaw fakturę, aby powstał journal należności, sprzedaży i VAT;
-3. na aktywnym środku trwałym wybierz `Zaksięguj sprzedaż i zbycie` albo `Record sale and disposal`;
-4. wybierz całą pozycję faktury i ustaw datę równą tax point faktury;
-5. sprawdź podgląd i zatwierdź.
+3. na środku wybierz `Wygeneruj harmonogram amortyzacji` i w polu `Nalicz do dnia` podaj tax point faktury sprzedaży;
+4. zaksięguj wszystkie wymagalne okresy amortyzacji, łącznie z ostatnim okresem częściowym kończącym się w dniu sprzedaży;
+5. wybierz `Zaksięguj sprzedaż i zbycie` albo `Record sale and disposal`;
+6. wybierz całą pozycję faktury i ustaw datę równą tax point faktury;
+7. sprawdź podgląd i zatwierdź.
 
-Faktura zachowuje VAT i saldo klienta. Journal zbycia usuwa zwykły przychód ze sprzedaży, wyksięgowuje koszt historyczny i umorzenie oraz pokazuje zysk albo stratę na właściwych kontach.
+Faktura zachowuje VAT i saldo klienta. Journal zbycia usuwa zwykły przychód ze sprzedaży, wyksięgowuje koszt historyczny i umorzenie oraz pokazuje zysk albo stratę na właściwych kontach. System nie pozwoli zaksięgować zbycia, jeżeli brakuje amortyzacji do dnia sprzedaży albo istnieje amortyzacja zaksięgowana po tej dacie.
 
 #### Korekta
 
@@ -255,7 +283,7 @@ Zaksięgowanych operacji aktywa nie można edytować ani usuwać. Użyj `Odwró�
 
 Purchase credit note dla wykorzystanej pozycji kosztu oraz sales credit note dla pozycji użytej przy zbyciu są blokowane. Najpierw odwróć zależną operację środka trwałego, a dopiero potem wystaw notę.
 
-Ten workflow nie oblicza UK capital allowances, nie księguje jeszcze amortyzacji książkowej i nie obsługuje darowizny, prywatnego wycofania, częściowego zbycia ani zamiany aktywa. Te przypadki wymagają osobnej decyzji księgowej.
+Ten workflow księguje amortyzację książkową, ale nie oblicza UK capital allowances i nie obsługuje darowizny, prywatnego wycofania, częściowego zbycia ani zamiany aktywa. Te przypadki wymagają osobnej decyzji księgowej.
 
 ## 6. Sprzedaż i VAT należny
 

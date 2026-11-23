@@ -32,7 +32,8 @@ class FixedAssetCategory extends Model
     protected $fillable = [
         'business_id', 'code', 'name', 'asset_account_id', 'accumulated_depreciation_account_id',
         'depreciation_expense_account_id', 'default_depreciation_method',
-        'default_useful_life_months', 'default_residual_value_percent', 'is_active',
+        'default_useful_life_months', 'default_residual_value_percent',
+        'default_depreciation_rate_percent', 'is_active',
     ];
 
     protected function casts(): array
@@ -40,6 +41,7 @@ class FixedAssetCategory extends Model
         return [
             'default_useful_life_months' => 'integer',
             'default_residual_value_percent' => 'decimal:2',
+            'default_depreciation_rate_percent' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }

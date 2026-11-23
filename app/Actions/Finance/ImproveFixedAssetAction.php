@@ -5,6 +5,7 @@ namespace App\Actions\Finance;
 use App\Models\Business;
 use App\Models\ExpenseItem;
 use App\Models\FixedAsset;
+use App\Models\FixedAssetDepreciationEntry;
 use App\Models\FixedAssetTransaction;
 use App\Models\User;
 use App\Services\Finance\FixedAssetCostBasisService;
@@ -56,6 +57,20 @@ class ImproveFixedAssetAction
             if (! $taxPoint || $date->lt($taxPoint) || ($locked->in_service_date && $date->lt($locked->in_service_date))) {
                 throw new DomainException('The improvement date cannot predate its expense tax point or the asset in-service date.');
             }
+
+            if (FixedAssetDepreciationEntry::withoutGlobalScopes()
+                ->where('fixed_asset_id', $locked->id)
+                ->where('status', FixedAssetDepreciationEntry::STATUS_POSTED)
+                ->whereDate('period_end', '>=', $date)
+                ->exists()) {
+                throw new DomainException('Reverse depreciation covering or following the improvement date first.');
+            }
+
+            FixedAssetDepreciationEntry::withoutGlobalScopes()
+                ->where('fixed_asset_id', $locked->id)
+                ->where('status', FixedAssetDepreciationEntry::STATUS_PLANNED)
+                ->get()
+                ->each->delete();
 
             $amount = $this->costBasis->forExpenseItem($source);
             $transaction = FixedAssetTransaction::withoutGlobalScopes()->create([

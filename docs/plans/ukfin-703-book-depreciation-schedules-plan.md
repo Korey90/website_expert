@@ -1,7 +1,7 @@
 # UKFIN-703 - harmonogramy amortyzacji książkowej
 
-**Status:** Delta analysis zakończone, plan gotowy do realizacji
-**Data:** 2026-11-22
+**Status:** Ukończone lokalnie
+**Data:** 2026-11-23
 **Źródło:** `docs/plans/uk-finance-tax-module-plan.md`
 **Grupa docelowa:** Sole trader
 
@@ -88,7 +88,8 @@ Nie należy wyprowadzać reducing-balance rate automatycznie z useful life. Stop
 - `amount_gbp`, closing accumulated depreciation i closing NBV;
 - `journal_entry_id`, `reversal_journal_entry_id`;
 - created/posted/reversed actor, czas i powód;
-- unikalność aktywa i `period_end`;
+- brak twardej unikalności aktywa i `period_end`, ponieważ odwrócona pozycja pozostaje w historii, a poprawiony plan może utworzyć jej następcę dla tego samego okresu;
+- aplikacyjne wymuszenie jednej aktywnej sekwencji planned/posted oraz postingu chronologicznego;
 - indeksy tenant, aktywo, status i posting date.
 
 Pozycja po posted jest niezmienna. Zmiana historii odbywa się wyłącznie przez reversal. Planowane pozycje można bezpiecznie przeliczyć, jeżeli nie istnieją po nich zaksięgowane pozycje.
@@ -151,3 +152,24 @@ Pozycja po posted jest niezmienna. Zmiana historii odbywa się wyłącznie przez
 - Finance, raporty, Filament, audit, Pint, Blade i tłumaczenia przechodzą;
 - dokumentacja jasno oddziela book depreciation od UK capital allowances;
 - produkcja nie jest modyfikowana bez osobnej decyzji wdrożeniowej.
+
+## Wynik implementacji
+
+Etap został ukończony lokalnie 2026-11-23:
+
+- migracja `000039` dodaje jawne stawki reducing balance oraz tenantowe pozycje harmonogramu;
+- straight line i reducing balance pracują w integer pennies, obsługują częściowe miesiące, ulepszenia oraz końcowe wyrównanie do residual value;
+- planned entries można przeliczać, posted entries są niezmienne, a korekta tworzy dokładny journal lustrzany;
+- posting używa `Dr depreciation expense / Cr accumulated depreciation` i aktualizuje NBV środka;
+- P&L pokazuje koszt amortyzacji, a Balance Sheet historyczny koszt i konto umorzenia;
+- zbycie wymaga amortyzacji naliczonej i zaksięgowanej dokładnie do dnia sprzedaży;
+- reversal nabycia i ulepszenia respektuje zależne pozycje amortyzacji;
+- istniejący aktywny środek z legacy reducing balance i pustą stawką ma jednorazową kontrolowaną akcję uzupełnienia stawki;
+- panel i komunikaty mają parytet PL/EN/PT;
+- migracja przeszła lokalnie jako batch 31;
+- pełny pakiet Finance wraz z dodatkowym testem aktywnego widoku: 408 passed, 1 skipped, 2978 assertions;
+- tenant audit: 0 błędów;
+- Blade cache: poprawny;
+- tłumaczenia: po 1442 identyczne klucze w PL, EN i PT.
+
+Produkcja nie została zmieniona w ramach tego etapu.

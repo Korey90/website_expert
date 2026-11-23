@@ -4,10 +4,13 @@ namespace App\Actions\Finance;
 
 use App\Models\Business;
 use App\Models\FixedAsset;
+use App\Models\FixedAssetCategory;
+use App\Models\FixedAssetDepreciationEntry;
 use App\Models\FixedAssetTransaction;
 use App\Models\InvoiceItem;
 use App\Models\User;
 use App\Services\Finance\FixedAssetCostBasisService;
+use App\Services\Finance\FixedAssetDepreciationScheduleCalculator;
 use App\Services\Finance\FixedAssetJournalPayloadFactory;
 use App\Services\Finance\FixedAssetLifecycleGuard;
 use DomainException;
@@ -18,6 +21,7 @@ class DisposeFixedAssetAction
     public function __construct(
         private readonly FixedAssetLifecycleGuard $guard,
         private readonly FixedAssetCostBasisService $money,
+        private readonly FixedAssetDepreciationScheduleCalculator $depreciation,
         private readonly FixedAssetJournalPayloadFactory $payloads,
         private readonly PostJournalEntryAction $postJournal,
     ) {}
@@ -52,6 +56,29 @@ class DisposeFixedAssetAction
             if (! $taxPoint || ! $date->isSameDay($taxPoint)) {
                 throw new DomainException('The disposal date must equal the invoice tax point.');
             }
+
+            if ($locked->in_service_date && $date->lt($locked->in_service_date)) {
+                throw new DomainException('The disposal date cannot predate the asset in-service date.');
+            }
+
+            if (FixedAssetDepreciationEntry::withoutGlobalScopes()
+                ->where('fixed_asset_id', $locked->id)
+                ->where('status', FixedAssetDepreciationEntry::STATUS_POSTED)
+                ->whereDate('period_end', '>', $date)
+                ->exists()) {
+                throw new DomainException('Reverse depreciation posted after the disposal date first.');
+            }
+
+            if ($locked->depreciation_method !== FixedAssetCategory::METHOD_NONE
+                && $this->depreciation->calculate($locked, $date) !== []) {
+                throw new DomainException('Generate and post depreciation through the disposal date before disposing of the asset.');
+            }
+
+            FixedAssetDepreciationEntry::withoutGlobalScopes()
+                ->where('fixed_asset_id', $locked->id)
+                ->where('status', FixedAssetDepreciationEntry::STATUS_PLANNED)
+                ->get()
+                ->each->delete();
 
             $cost = $this->money->toMinorUnits($locked->acquisition_cost_gbp, 'asset acquisition cost');
             $accumulated = $this->money->toMinorUnits($locked->accumulated_depreciation_gbp ?? '0.00', 'accumulated depreciation');

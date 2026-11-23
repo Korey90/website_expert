@@ -25,6 +25,7 @@ class CreateFixedAssetCategoryAction
             $data['default_depreciation_method'] ?? null,
             $data['default_useful_life_months'] ?? null,
             $data['default_residual_value_percent'] ?? 0,
+            $data['default_depreciation_rate_percent'] ?? null,
         );
 
         if ($code === '' || strlen($code) > 32) {
@@ -46,6 +47,7 @@ class CreateFixedAssetCategoryAction
                 'default_depreciation_method' => $policy['method'],
                 'default_useful_life_months' => $policy['useful_life_months'],
                 'default_residual_value_percent' => $policy['residual_value_percent'],
+                'default_depreciation_rate_percent' => $policy['rate_percent'],
                 'is_active' => (bool) ($data['is_active'] ?? true),
             ]);
         }, 3);

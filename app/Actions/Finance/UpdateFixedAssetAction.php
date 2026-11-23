@@ -36,6 +36,7 @@ class UpdateFixedAssetAction
                 $data['depreciation_method'] ?? $locked->depreciation_method,
                 $data['useful_life_months'] ?? $locked->useful_life_months,
                 $data['residual_value_percent'] ?? $locked->residual_value_percent,
+                $data['depreciation_rate_percent'] ?? $locked->depreciation_rate_percent,
             );
             $details = $this->normalizeDetails($data);
 
@@ -46,6 +47,7 @@ class UpdateFixedAssetAction
                 'depreciation_method' => $policy['method'],
                 'useful_life_months' => $policy['useful_life_months'],
                 'residual_value_percent' => $policy['residual_value_percent'],
+                'depreciation_rate_percent' => $policy['rate_percent'],
                 'updated_by' => $actor->id,
             ]);
 

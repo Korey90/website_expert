@@ -4,14 +4,20 @@ namespace App\Filament\Resources\FixedAssetResource\Pages;
 
 use App\Actions\Finance\AcquireFixedAssetAction;
 use App\Actions\Finance\DisposeFixedAssetAction;
+use App\Actions\Finance\GenerateFixedAssetDepreciationScheduleAction;
 use App\Actions\Finance\ImproveFixedAssetAction;
+use App\Actions\Finance\PostFixedAssetDepreciationAction;
+use App\Actions\Finance\ReverseFixedAssetDepreciationAction;
 use App\Actions\Finance\ReverseFixedAssetTransactionAction;
+use App\Actions\Finance\SetFixedAssetDepreciationRateAction;
 use App\Filament\Resources\FixedAssetResource;
 use App\Models\CreditNote;
 use App\Models\Expense;
 use App\Models\ExpenseItem;
 use App\Models\FinancialAttachment;
 use App\Models\FixedAsset;
+use App\Models\FixedAssetCategory;
+use App\Models\FixedAssetDepreciationEntry;
 use App\Models\FixedAssetTransaction;
 use App\Models\InvoiceItem;
 use App\Models\JournalEntry;
@@ -27,6 +33,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Utilities\Get;
@@ -43,6 +50,109 @@ class ViewFixedAsset extends ViewRecord
         $asset = $this->record;
 
         return [
+            Action::make('complete_depreciation_rate')
+                ->label(__('finance.fixed_assets.actions.complete_depreciation_rate'))
+                ->icon('heroicon-o-pencil-square')
+                ->color('warning')
+                ->visible(fn (): bool => $asset->status === FixedAsset::STATUS_ACTIVE
+                    && $asset->depreciation_method === FixedAssetCategory::METHOD_REDUCING_BALANCE
+                    && $asset->depreciation_rate_percent === null
+                    && $this->canManage())
+                ->form([
+                    TextInput::make('depreciation_rate_percent')
+                        ->label(__('finance.fixed_assets.fields.depreciation_rate_percent'))
+                        ->numeric()->minValue(0.01)->maxValue(100)->step('0.01')->suffix('%')->required(),
+                ])
+                ->requiresConfirmation()
+                ->action(function (array $data) use ($asset): void {
+                    $this->runWorkflow(
+                        fn () => app(SetFixedAssetDepreciationRateAction::class)->execute(
+                            $asset,
+                            auth()->user(),
+                            $data['depreciation_rate_percent'],
+                        ),
+                        __('finance.fixed_assets.notifications.depreciation_rate_completed'),
+                    );
+                }),
+            Action::make('generate_depreciation')
+                ->label(__('finance.fixed_assets.actions.generate_depreciation'))
+                ->icon('heroicon-o-calculator')
+                ->color('gray')
+                ->visible(fn (): bool => $asset->status === FixedAsset::STATUS_ACTIVE
+                    && $asset->depreciation_method !== FixedAssetCategory::METHOD_NONE
+                    && ! ($asset->depreciation_method === FixedAssetCategory::METHOD_REDUCING_BALANCE && $asset->depreciation_rate_percent === null)
+                    && $this->canManage())
+                ->form([
+                    DatePicker::make('through_date')
+                        ->label(__('finance.fixed_assets.fields.schedule_through_date'))
+                        ->helperText(__('finance.fixed_assets.schedule_through_help')),
+                ])
+                ->action(function (array $data) use ($asset): void {
+                    $this->runWorkflow(
+                        fn () => app(GenerateFixedAssetDepreciationScheduleAction::class)->execute(
+                            $asset,
+                            auth()->user(),
+                            $data['through_date'] ?? null,
+                        ),
+                        __('finance.fixed_assets.notifications.depreciation_generated'),
+                    );
+                }),
+            Action::make('post_depreciation')
+                ->label(__('finance.fixed_assets.actions.post_depreciation'))
+                ->icon('heroicon-o-check-circle')
+                ->color('success')
+                ->visible(fn (): bool => $asset->status === FixedAsset::STATUS_ACTIVE && $this->nextDueDepreciation() !== null && $this->canPost())
+                ->form([
+                    Placeholder::make('journal_preview')
+                        ->label(__('finance.fixed_assets.journal_preview.title'))
+                        ->content(fn (): string => $this->depreciationPreview()),
+                ])
+                ->requiresConfirmation()
+                ->action(function (): void {
+                    $entry = $this->nextDueDepreciation();
+                    if (! $entry) {
+                        Notification::make()->title(__('finance.fixed_assets.notifications.no_due_depreciation'))->danger()->send();
+
+                        return;
+                    }
+
+                    $this->runWorkflow(
+                        fn () => app(PostFixedAssetDepreciationAction::class)->execute($entry, auth()->user()),
+                        __('finance.fixed_assets.notifications.depreciation_posted'),
+                    );
+                }),
+            Action::make('reverse_depreciation')
+                ->label(__('finance.fixed_assets.actions.reverse_depreciation'))
+                ->icon('heroicon-o-arrow-uturn-left')
+                ->color('danger')
+                ->visible(fn (): bool => $asset->status === FixedAsset::STATUS_ACTIVE && $this->latestPostedDepreciation() !== null && $this->canPost())
+                ->form([
+                    Textarea::make('reason')
+                        ->label(__('finance.fixed_assets.fields.reversal_reason'))
+                        ->required()->maxLength(2000),
+                    DatePicker::make('reversal_date')
+                        ->label(__('finance.fixed_assets.fields.reversal_date'))
+                        ->default(today())->required(),
+                ])
+                ->requiresConfirmation()
+                ->action(function (array $data): void {
+                    $entry = $this->latestPostedDepreciation();
+                    if (! $entry) {
+                        Notification::make()->title(__('finance.fixed_assets.notifications.no_posted_depreciation'))->danger()->send();
+
+                        return;
+                    }
+
+                    $this->runWorkflow(
+                        fn () => app(ReverseFixedAssetDepreciationAction::class)->execute(
+                            $entry,
+                            auth()->user(),
+                            $data['reason'],
+                            $data['reversal_date'],
+                        ),
+                        __('finance.fixed_assets.notifications.depreciation_reversed'),
+                    );
+                }),
             Action::make('acquire')
                 ->label(__('finance.fixed_assets.actions.acquire'))
                 ->icon('heroicon-o-arrow-down-tray')
@@ -249,9 +359,47 @@ class ViewFixedAsset extends ViewRecord
             ->orderByDesc('event_date')->orderByDesc('id')->first();
     }
 
+    private function nextDueDepreciation(): ?FixedAssetDepreciationEntry
+    {
+        return FixedAssetDepreciationEntry::query()
+            ->where('fixed_asset_id', $this->record->id)
+            ->where('status', FixedAssetDepreciationEntry::STATUS_PLANNED)
+            ->whereDate('posting_date', '<=', today())
+            ->orderBy('period_end')->orderBy('id')->first();
+    }
+
+    private function latestPostedDepreciation(): ?FixedAssetDepreciationEntry
+    {
+        return FixedAssetDepreciationEntry::query()
+            ->where('fixed_asset_id', $this->record->id)
+            ->where('status', FixedAssetDepreciationEntry::STATUS_POSTED)
+            ->orderByDesc('period_end')->orderByDesc('id')->first();
+    }
+
+    private function depreciationPreview(): string
+    {
+        $entry = $this->nextDueDepreciation();
+        if (! $entry) {
+            return __('finance.fixed_assets.notifications.no_due_depreciation');
+        }
+
+        return __('finance.fixed_assets.journal_preview.depreciation', [
+            'date' => $entry->posting_date->toDateString(),
+            'expense' => $this->record->category?->depreciationExpenseAccount?->code,
+            'accumulated' => $this->record->category?->accumulatedDepreciationAccount?->code,
+            'amount' => $entry->amount_gbp,
+            'nbv' => $entry->closing_net_book_value_gbp,
+        ]);
+    }
+
     private function canPost(): bool
     {
         return PermissionHelper::allows(auth()->user(), 'post_finance');
+    }
+
+    private function canManage(): bool
+    {
+        return PermissionHelper::allows(auth()->user(), 'manage_finance');
     }
 
     private function runWorkflow(callable $workflow, string $successTitle): void
