@@ -491,7 +491,7 @@ Stan na 2026-11-23: UKFIN-513F ukończony lokalnie.
 4. Wykonać dry run na izolowanym tenantcie demonstracyjnym.
 5. Dopuścić produkcję po porównaniu jednego okresu z formularzem UC.
 
-Stan na 2026-11-23: część techniczna UKFIN-513G przygotowana lokalnie, gate zewnętrzny pozostaje otwarty.
+Stan na 2026-11-24: część techniczna UKFIN-513G jest ukończona lokalnie, a przegląd specjalisty został zaakceptowany w wersji papierowej. Otwarty pozostaje wyłącznie gate porównania z aktualnym zadaniem lub formularzem UC.
 
 - dodano instrukcję użytkownika i checklistę dowodów w wersji EN oraz PL w `docs/guides`;
 - dodano wersjonowany kandydat golden dataset `uk-universal-credit-golden-v1` z niezmiennym SHA-256, statusem `pending_specialist_review` i oczekiwanymi sumami GBP 1 290,00 income, GBP 199,00 expenses oraz GBP 1 091,00 net;
@@ -501,8 +501,10 @@ Stan na 2026-11-23: część techniczna UKFIN-513G przygotowana lokalnie, gate z
 - paczka dla specjalisty ma osobny SHA-256 i rozmiar zapisane w `artifact.sha256.json`, a instrukcja regeneracji wymaga jawnej flagi `GENERATE_UC_GOLDEN_PACK=1`;
 - hash snapshotu review ma osobną etykietę EN/PL/PT i nie jest błędnie przedstawiany jako hash kalkulacji;
 - checklisty specjalisty EN i PL są związane z dokładnym hashem fixture, więc zmiana danych wymaga nowej wersji i ponownej akceptacji;
-- do zamknięcia UKFIN-513G nadal wymagane są: przegląd przez osobę znającą UC w Irlandii Północnej, porównanie z aktualnym zadaniem na koncie UC oraz zapisana decyzja dla dokładnego hasha fixture;
-- do czasu tej akceptacji moduł nie ma gate produkcyjnego mimo poprawnego wyniku technicznego.
+- 24 listopada 2026 właściciel projektu potwierdził papierową akceptację dokładnego fixture i ZIP; referencja `UC-GOLDEN-V1-PAPER-20261124`, a dane reviewera i oryginał pozostają na dokumencie papierowym poza repozytorium;
+- niezmienny fixture zachowuje historyczne pole `pending_specialist_review`, ponieważ jego zmiana unieważniłaby zaakceptowany SHA-256; autorytatywna decyzja znajduje się w osobnym `specialist-sign-off.json`;
+- do zamknięcia UKFIN-513G pozostaje porównanie tych samych przypadków z aktualnym zadaniem lub formularzem na koncie UC oraz zapisanie wyniku;
+- do czasu tego porównania moduł nie ma zamkniętego gate produkcyjnego mimo poprawnego wyniku technicznego i akceptacji specjalisty.
 - pełna regresja Finance po dodaniu dry runu i artefaktu: 447 passed, 1 skipped, 3305 assertions; Pint: poprawny.
 
 ## 14. Testy akceptacyjne

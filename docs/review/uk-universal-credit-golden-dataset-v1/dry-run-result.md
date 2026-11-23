@@ -3,7 +3,7 @@
 - Run date: 2026-11-23
 - Environment: local automated test database with `RefreshDatabase` and fake private storage
 - Fixture SHA-256: `ef92a67e1c458f001334f4659f9dd87bc54986cd2660c3fd757dd3caa6f0436a`
-- Specialist review: pending
+- Specialist review: accepted on paper, record `UC-GOLDEN-V1-PAPER-20261124`
 
 ## Result
 
@@ -49,11 +49,12 @@ php artisan test tests/Feature/Finance/UniversalCreditGoldenDatasetTest.php
 Remove-Item Env:GENERATE_UC_GOLDEN_PACK
 ```
 
-## Remaining production gate
+## Specialist decision and remaining production gate
 
-This successful technical dry run is not professional approval of Universal Credit treatment. Production acceptance still requires:
+The specialist review of the exact fixture and review ZIP was accepted on paper and recorded in `specialist-sign-off-record.md` and `specialist-sign-off.json`.
 
-- a specialist to complete one of the review checklists in this directory;
+The remaining production acceptance requirement is:
+
 - comparison with the current official Universal Credit form or task for the same cases;
-- a decision recorded against the exact fixture hash;
-- a new fixture version if any expected value or classification changes.
+- a recorded confirmation that the comparison passed;
+- a new fixture version and a new specialist decision if the comparison changes any expected value or classification.

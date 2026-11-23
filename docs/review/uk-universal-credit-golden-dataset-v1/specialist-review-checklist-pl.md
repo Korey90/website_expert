@@ -1,10 +1,12 @@
 # Golden dataset Universal Credit v1 - checklista specjalisty
 
-- Status przeglądu: oczekuje
+- Status przeglądu: zaakceptowano w wersji papierowej
 - Dataset: `uk-universal-credit-golden-v1`
 - Niezmienny SHA-256 fixture: `ef92a67e1c458f001334f4659f9dd87bc54986cd2660c3fd757dd3caa6f0436a`
 - Assessment period: 23 listopada 2026 do 22 grudnia 2026
 - Podmiot: sole trader w Irlandii Północnej, niezarejestrowany do VAT
+
+Uzupełnione odpowiedzi i dane reviewera pozostają na papierowym oryginale. Decyzja w repozytorium znajduje się w `specialist-sign-off-record.md` pod referencją `UC-GOLDEN-V1-PAPER-20261124`.
 
 ## Cel przeglądu
 

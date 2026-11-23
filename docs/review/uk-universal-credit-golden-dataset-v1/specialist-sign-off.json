@@ -1,0 +1,17 @@
+{
+    "schema_version": 1,
+    "record_id": "UC-GOLDEN-V1-PAPER-20261124",
+    "dataset_id": "uk-universal-credit-golden-v1",
+    "dataset_sha256": "ef92a67e1c458f001334f4659f9dd87bc54986cd2660c3fd757dd3caa6f0436a",
+    "artifact": "docs/demo/uk-universal-credit-golden-v1/universal-credit-golden-v1.zip",
+    "artifact_sha256": "9ff818fd84d26b5c01215f4d4477e0f30b6e02793714e6558d7552762154f732",
+    "decision": "accepted",
+    "decision_medium": "paper_review_record",
+    "acceptance_reported_on": "2026-11-24",
+    "reviewer_identity": "recorded_on_paper_original",
+    "reviewer_personal_data_stored_in_repository": false,
+    "paper_original_custody": "project_owner",
+    "current_uc_task_comparison": "not_confirmed",
+    "production_gate": "pending_current_uc_task_comparison",
+    "notes": "The project owner confirmed in the project session that the demonstration pack was accepted on paper. The immutable pre-review fixture remains unchanged; this separate record is authoritative for the specialist decision."
+}

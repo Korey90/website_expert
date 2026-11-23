@@ -1,10 +1,12 @@
 # Universal Credit golden dataset v1 - specialist review checklist
 
-- Review status: pending
+- Review status: accepted on paper
 - Dataset: `uk-universal-credit-golden-v1`
 - Immutable fixture SHA-256: `ef92a67e1c458f001334f4659f9dd87bc54986cd2660c3fd757dd3caa6f0436a`
 - Assessment period: 23 November 2026 to 22 December 2026
 - Entity: Northern Ireland sole trader, not VAT registered
+
+The completed responses and reviewer details remain on the paper original. The repository decision record is `specialist-sign-off-record.md`, reference `UC-GOLDEN-V1-PAPER-20261124`.
 
 ## Purpose
 
