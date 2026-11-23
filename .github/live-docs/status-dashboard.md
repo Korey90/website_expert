@@ -1,18 +1,19 @@
 # Website Expert NI — Project Status Dashboard
 
 **Last Full Validation:** 2026-11-22 - pełna regresja przed wdrożeniem UKFIN-512
-**Last Targeted Validation:** 2026-11-22 - UKFIN-701 rejestr środków trwałych i kategorii
+**Last Targeted Validation:** 2026-11-22 - UKFIN-702 nabycie i zbycie środków trwałych
 
 ## Health Checks
 - **Code Quality:** 🟡 ESLint, Blade i build przechodzą; repozytoryjny `pint --test` nadal wykazuje istniejący dług formatowania w plikach legacy, niezwiązany z wdrożeniem HMRC
-- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 1375 kluczy liściowe w PL/EN/PT
-- **Tests:** UKFIN-701 Finance 396 passed / 1 skipped / 2871 assertions; panel i tenant audit 17 passed / 1201 assertions. Ostatnia pełna regresja repo: 909 passed / 9 znanych baseline failures / 11 skipped / 5429 assertions. Frontend 16/16.
+- **Translations (pl/en/pt):** ✅ `finance.php` ma identyczne 1416 kluczy liściowych w PL/EN/PT
+- **Tests:** UKFIN-702 Finance 400 passed / 1 skipped / 2925 assertions; lifecycle 4 passed / 54 assertions. Ostatnia pełna regresja repo: 909 passed / 9 znanych baseline failures / 11 skipped / 5429 assertions. Frontend 16/16.
 - **Multi-Tenancy Compliance:** 100% dla modułów panelu ✅; `SearchRankingCheck` ma teraz `BelongsToTenant`, a publiczne rekordy nullable pozostają dostępne poza panelem zgodnie z przeznaczeniem.
 - **Security Review:** 🟡 HMRC production fail-closed, pełne audyty Composer/NPM i secret scan czyste; produkcja nadal zablokowana przez niezależny pentest oraz zewnętrzne gate'y FPH/HMRC
 - **Build (Vite):** ✅ Brak błędów TS/JS
 - **Hardcoded £/GBP scan:** ✅ Brak trafień w app/, resources/, seeders/
 
 ## Recent Activity
+- 2026-11-22 - **UKFIN-702 fixed asset lifecycle:** dodano nabycie i ulepszenie na podstawie całych pozycji posted Expense bez podwójnego VAT/AP, sprzedaż na podstawie issued Invoice bez podwójnego VAT/AR, append-only transakcje, exact reversal i blokady credit notes. Panel pokazuje kwalifikujące źródła, podgląd journalu oraz historię. Migracja `000038` przeszła lokalnie jako batch 30, tenant audit ma `invalid_count=0`; Finance 400 passed / 1 skipped / 2925 assertions, EN/PL/PT po 1416 kluczy. Produkcja bez zmian ✅
 - 2026-11-22 - **UKFIN-701 fixed asset register:** dodano tenantowe kategorie środków trwałych z kontrolowanym mapowaniem kont `asset/fixed_asset`, `asset/contra_asset` i `expense/depreciation` oraz draft-only rejestr aktywów z numeracją `FA-YYYY-NNN`. Panel PL/EN, RBAC, bezpośrednie URL-e, factories i `finance:audit-tenants` są objęte testami; draft nie tworzy journalu i nie wpływa na raporty. Migracja `000037` przeszła lokalnie na MySQL jako batch 29, audyt danych ma `invalid_count=0`; Finance 396 passed / 1 skipped / 2871 assertions, EN/PL/PT po 1375 kluczy ✅
 - 2026-11-22 - **UKFIN-001 target group:** właściciel potwierdził, że grupą docelową modułu UK Finance jest sole trader. Limited company i partnership pozostają poza bieżącym zakresem produktu; wielotypowy model może zostać zachowany wyłącznie jako rezerwa kompatybilności bez odblokowywania niezatwierdzonych workflow ✅
 - 2026-11-22 - **Deploy UKFIN-512:** osiem raportów finansowych eksportuje CSV, XLSX i PDF przez 24 zabezpieczone trasy. Produkcyjny release `UKFIN-512-4daa50e0` wdrożono bez migracji, z kopią 30 nadpisywanych plików i listą 7 nowych plików. Cache i autoloader odbudowane, kolejka zrestartowana, HTTP `/` i `/admin` zwracają 200/302. Kontrolne generowanie bez danych produkcyjnych potwierdziło PDF 878282 B i XLSX 7026 B. Backup: `storage/app/deploy-backups/20261122-ukfin512-4daa50e0` ✅

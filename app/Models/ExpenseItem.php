@@ -7,6 +7,7 @@ use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ExpenseItem extends Model
 {
@@ -80,6 +81,16 @@ class ExpenseItem extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class)->withTrashed();
+    }
+
+    public function fixedAssetTransactions(): HasMany
+    {
+        return $this->hasMany(FixedAssetTransaction::class);
+    }
+
+    public function purchaseCreditNoteItems(): HasMany
+    {
+        return $this->hasMany(PurchaseCreditNoteItem::class);
     }
 
     private function assertExpenseIsUnposted(): void

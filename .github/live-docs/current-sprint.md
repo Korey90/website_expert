@@ -19,6 +19,7 @@
 
 ### Done
 
+- [x] `UKFIN-702` [M] - kontrolowane nabycie i ulepszenie z posted Expense, sprzedaż z issued Invoice, append-only historia, dokładny reversal, credit-note guards oraz panel PL/EN/PT. Migracja `000038` przeszła lokalnie jako batch 30; Finance 400 passed / 1 skipped / 2925 assertions.
 - [x] `UKFIN-701` [M] - tenantowy rejestr kategorii i roboczych środków trwałych, mapowanie kont, numeracja FA, draft-only workflow, RBAC, audit oraz UI PL/EN z zachowaniem parytetu PT. Migracja `000037` przeszła lokalnie na MySQL; Finance 396 passed / 1 skipped / 2871 assertions.
 - [x] `UKFIN-512` [M] - eksport ośmiu raportów finansowych do CSV, XLSX i PDF; 24 trasy, tenant/RBAC, prywatne odpowiedzi i produkcyjny smoke test obu nowych formatów. Release `UKFIN-512-4daa50e0` wdrożony 2026-11-22 bez migracji.
 - [x] `UKFIN-202R2` [M] - automatyczne skanowanie ClamAV załączników finansowych, kontrola SHA-256, retry/backoff, statusy clean/rejected/failed, ręczny rescan, audit i bezpieczne prawa plików; produkcja 8/8 clean.

@@ -4,6 +4,7 @@ namespace App\Actions\Finance;
 
 use App\Models\Expense;
 use App\Models\ExpenseItem;
+use App\Models\FixedAssetTransaction;
 use App\Models\PurchaseCreditNote;
 use App\Models\PurchaseCreditNoteItem;
 use App\Models\User;
@@ -79,6 +80,13 @@ class CreatePurchaseCreditNoteAction
 
                 if (! $expenseItem) {
                     throw new DomainException('A purchase credit item does not belong to the expense.');
+                }
+
+                if (FixedAssetTransaction::withoutGlobalScopes()
+                    ->where('expense_item_id', $expenseItem->id)
+                    ->where('status', FixedAssetTransaction::STATUS_POSTED)
+                    ->exists()) {
+                    throw new DomainException('Reverse the fixed asset transaction before crediting this expense item.');
                 }
 
                 $quantity = round((float) $requestedItem['quantity'], 2);

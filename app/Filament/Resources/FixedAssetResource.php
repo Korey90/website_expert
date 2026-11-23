@@ -5,11 +5,13 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\FixedAssetResource\Pages;
 use App\Models\FixedAsset;
 use App\Models\FixedAssetCategory;
+use App\Models\FixedAssetTransaction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -142,11 +144,51 @@ class FixedAssetResource extends BaseResource
                         ->label(__('finance.fixed_assets.fields.status'))
                         ->badge()
                         ->formatStateUsing(fn (string $state): string => __('finance.fixed_assets.statuses.'.$state))
-                        ->color('gray'),
+                        ->color(fn (string $state): string => match ($state) {
+                            FixedAsset::STATUS_ACTIVE => 'success',
+                            FixedAsset::STATUS_DISPOSED => 'warning',
+                            default => 'gray',
+                        }),
                     TextEntry::make('category.name')->label(__('finance.fixed_assets.fields.category')),
                     TextEntry::make('serial_number')->label(__('finance.fixed_assets.fields.serial_number'))->placeholder('-'),
                     TextEntry::make('location')->label(__('finance.fixed_assets.fields.location'))->placeholder('-'),
                     TextEntry::make('description')->label(__('finance.fixed_assets.fields.description'))->placeholder('-')->columnSpanFull(),
+                ]),
+            Section::make(__('finance.fixed_assets.sections.lifecycle'))
+                ->columns(3)
+                ->schema([
+                    TextEntry::make('acquisition_date')->label(__('finance.fixed_assets.fields.acquisition_date'))->date()->placeholder('-'),
+                    TextEntry::make('in_service_date')->label(__('finance.fixed_assets.fields.in_service_date'))->date()->placeholder('-'),
+                    TextEntry::make('acquisition_cost_gbp')->label(__('finance.fixed_assets.fields.acquisition_cost_gbp'))->money('GBP')->placeholder('-'),
+                    TextEntry::make('accumulated_depreciation_gbp')->label(__('finance.fixed_assets.fields.accumulated_depreciation_gbp'))->money('GBP')->placeholder('-'),
+                    TextEntry::make('disposed_at')->label(__('finance.fixed_assets.fields.disposal_date'))->date()->placeholder('-'),
+                    TextEntry::make('disposal_proceeds_gbp')->label(__('finance.fixed_assets.fields.disposal_proceeds_gbp'))->money('GBP')->placeholder('-'),
+                    TextEntry::make('disposal_gain_loss_gbp')->label(__('finance.fixed_assets.fields.disposal_gain_loss_gbp'))->money('GBP')->placeholder('-'),
+                ]),
+            Section::make(__('finance.fixed_assets.sections.transactions'))
+                ->schema([
+                    RepeatableEntry::make('transactions')
+                        ->hiddenLabel()
+                        ->schema([
+                            TextEntry::make('event_date')->label(__('finance.fixed_assets.fields.event_date'))->date(),
+                            TextEntry::make('type')
+                                ->label(__('finance.fixed_assets.fields.transaction_type'))
+                                ->badge()
+                                ->formatStateUsing(fn (string $state): string => __('finance.fixed_assets.transaction_types.'.$state)),
+                            TextEntry::make('status')
+                                ->label(__('finance.fixed_assets.fields.transaction_status'))
+                                ->badge()
+                                ->formatStateUsing(fn (string $state): string => __('finance.fixed_assets.transaction_statuses.'.$state))
+                                ->color(fn (string $state): string => match ($state) {
+                                    FixedAssetTransaction::STATUS_POSTED => 'success',
+                                    FixedAssetTransaction::STATUS_REVERSED => 'danger',
+                                    default => 'gray',
+                                }),
+                            TextEntry::make('amount_gbp')->label(__('finance.fixed_assets.fields.amount_gbp'))->money('GBP'),
+                            TextEntry::make('journalEntry.entry_number')->label(__('finance.fixed_assets.fields.journal'))->placeholder('-')->copyable(),
+                            TextEntry::make('reversalJournalEntry.entry_number')->label(__('finance.fixed_assets.fields.reversal_journal'))->placeholder('-')->copyable(),
+                            TextEntry::make('reversal_reason')->label(__('finance.fixed_assets.fields.reversal_reason'))->placeholder('-')->columnSpanFull(),
+                        ])->columns(3),
                 ]),
             Section::make(__('finance.fixed_assets.sections.depreciation'))
                 ->columns(3)
@@ -185,7 +227,16 @@ class FixedAssetResource extends BaseResource
                     ->label(__('finance.fixed_assets.fields.status'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => __('finance.fixed_assets.statuses.'.$state))
-                    ->color('gray'),
+                    ->color(fn (string $state): string => match ($state) {
+                        FixedAsset::STATUS_ACTIVE => 'success',
+                        FixedAsset::STATUS_DISPOSED => 'warning',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('acquisition_cost_gbp')
+                    ->label(__('finance.fixed_assets.fields.acquisition_cost_gbp'))
+                    ->money('GBP')
+                    ->placeholder('-')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('serial_number')
                     ->label(__('finance.fixed_assets.fields.serial_number'))
                     ->searchable()
@@ -208,7 +259,9 @@ class FixedAssetResource extends BaseResource
                     ->preload(),
                 Tables\Filters\SelectFilter::make('status')
                     ->label(__('finance.fixed_assets.fields.status'))
-                    ->options([FixedAsset::STATUS_DRAFT => __('finance.fixed_assets.statuses.draft')]),
+                    ->options(collect(FixedAsset::statuses())->mapWithKeys(fn (string $status): array => [
+                        $status => __('finance.fixed_assets.statuses.'.$status),
+                    ])->all()),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
@@ -232,6 +285,10 @@ class FixedAssetResource extends BaseResource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->withTrashed()->with('category');
+        return parent::getEloquentQuery()->withTrashed()->with([
+            'category.assetAccount',
+            'transactions.journalEntry',
+            'transactions.reversalJournalEntry',
+        ]);
     }
 }

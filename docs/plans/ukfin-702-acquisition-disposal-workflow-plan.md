@@ -1,9 +1,25 @@
 # UKFIN-702 - kontrolowane nabycie i zbycie środka trwałego
 
-**Status:** Delta analysis zakończone, plan gotowy do realizacji
+**Status:** Zrealizowane lokalnie
 **Data:** 2026-11-22
 **Źródło:** `docs/plans/uk-finance-tax-module-plan.md`
 **Grupa docelowa:** Sole trader
+
+## Wynik realizacji
+
+- Migracja `000038` rozszerza `fixed_assets` i dodaje append-only `fixed_asset_transactions`.
+- Nabycie i ulepszenie korzystają z całej pozycji zaksięgowanego Expense oraz tworzą wyłącznie reklasyfikację `Dr asset / Cr expense`.
+- Wspólny kalkulator zachowuje zgodność z journalem zakupu dla odliczalnego VAT, nieodliczalnego VAT, walut obcych i reverse charge.
+- Sprzedaż korzysta z pozycji wystawionej Invoice, pozostawia VAT i AR w fakturze oraz księguje wycofanie kosztu i wynik na zbyciu.
+- Reversal działa wyłącznie od najnowszej operacji, tworzy dokładny journal lustrzany i przywraca status oraz wartości aktywa.
+- Purchase i sales credit notes są blokowane do czasu odwrócenia powiązanej aktywnej operacji.
+- Panel pokazuje kwalifikujące się źródła, podgląd journalu, statusy `draft`, `active`, `disposed` i pełną historię transakcji.
+- Lokalny MySQL wykonał migrację jako batch 30. Migracja `000033` pozostała niezależnie oczekująca.
+- `finance:audit-tenants --json`: `valid=true`, `invalid_count=0`.
+- Finance: 400 testów zaliczonych, 1 pominięty, 2925 asercji.
+- EN/PL/PT: po 1416 zgodnych kluczy liściowych, bez braków.
+- Pint, Blade cache i kontrola diffu przeszły poprawnie.
+- Produkcja nie została zmieniona.
 
 ## Cel
 
@@ -163,16 +179,16 @@ Cr Other income 4200                 zysk, jeżeli występuje
 
 ## Plan implementacji
 
-1. Dodać migrację `000038` rozszerzającą `fixed_assets` i tworzącą `fixed_asset_transactions`.
-2. Dodać model, factory, relacje, casty i ochronę niezmienności transakcji.
-3. Wyodrębnić wspólny kalkulator kapitalizowanej wartości pozycji Expense i pokryć zgodność z purchase journal.
-4. Dodać payload factory dla nabycia, ulepszenia i zbycia.
-5. Dodać `AcquireFixedAssetAction`, `ImproveFixedAssetAction`, `DisposeFixedAssetAction` i `ReverseFixedAssetTransactionAction`.
-6. Rozszerzyć status guard modelu aktywa o kontrolowane przejścia wykonywane wyłącznie przez Actions.
-7. Dodać blokady do `CreatePurchaseCreditNoteAction` i `CreateCreditNoteAction`.
-8. Dodać akcje, podgląd journalu i historię transakcji na `ViewFixedAsset`.
-9. Rozszerzyć tenant audit o źródłowe pozycje, journale i reversal journals.
-10. Dodać PL/EN/PT, instrukcję użytkownika oraz testy end-to-end i regresję raportów.
+1. [x] Dodać migrację `000038` rozszerzającą `fixed_assets` i tworzącą `fixed_asset_transactions`.
+2. [x] Dodać model, factory, relacje, casty i ochronę niezmienności transakcji.
+3. [x] Wyodrębnić wspólny kalkulator kapitalizowanej wartości pozycji Expense i pokryć zgodność z purchase journal.
+4. [x] Dodać payload factory dla nabycia, ulepszenia i zbycia.
+5. [x] Dodać `AcquireFixedAssetAction`, `ImproveFixedAssetAction`, `DisposeFixedAssetAction` i `ReverseFixedAssetTransactionAction`.
+6. [x] Rozszerzyć status guard modelu aktywa o kontrolowane przejścia wykonywane wyłącznie przez Actions.
+7. [x] Dodać blokady do `CreatePurchaseCreditNoteAction` i `CreateCreditNoteAction`.
+8. [x] Dodać akcje, podgląd journalu i historię transakcji na `ViewFixedAsset`.
+9. [x] Rozszerzyć tenant audit o źródłowe pozycje, journale i reversal journals.
+10. [x] Dodać PL/EN/PT, instrukcję użytkownika oraz testy end-to-end i regresję raportów.
 
 ## Planowane pliki
 

@@ -1,10 +1,10 @@
 # Current Task
 
-**Status:** UKFIN-701 zrealizowane lokalnie; delta analysis UKFIN-702 zakończone
-**Zadanie:** UKFIN-702 - Acquisition/disposal workflow
+**Status:** UKFIN-702 zrealizowane lokalnie; delta analysis UKFIN-703 zakończone
+**Zadanie:** UKFIN-703 - Book depreciation schedules
 **Źródło:** `docs/plans/uk-finance-tax-module-plan.md`
-**Poprzedni plan wykonawczy:** `docs/plans/ukfin-701-fixed-assets-and-categories-plan.md`
-**Bieżący plan wykonawczy:** `docs/plans/ukfin-702-acquisition-disposal-workflow-plan.md`
+**Poprzedni plan wykonawczy:** `docs/plans/ukfin-702-acquisition-disposal-workflow-plan.md`
+**Bieżący plan wykonawczy:** `docs/plans/ukfin-703-book-depreciation-schedules-plan.md`
 
 ## Kontekst
 
@@ -12,29 +12,37 @@
 - UKFIN-001 został zamknięty decyzją właściciela: grupą docelową produktu jest sole trader.
 - Wszystkie 24 trasy raportów są aktywne, a kontrolne PDF i XLSX generują się poprawnie na produkcji.
 - UKFIN-612 pozostaje otwarte wyłącznie przez zewnętrzny pentest, gate licencji/wyjątku HMRC i formalną zgodę produkcyjną.
-- UKFIN-701 jest zakończone lokalnie i stanowi podstawę dla kontrolowanego nabycia oraz zbycia w UKFIN-702.
+- UKFIN-702 jest zakończone lokalnie i dostarcza koszt historyczny, transakcje oraz workflow zbycia wymagane przez UKFIN-703.
 
-## Wynik UKFIN-701
+## Wynik UKFIN-702
 
-- Migracja `000037` tworzy tenantowe kategorie i roboczy rejestr środków trwałych.
-- Kategorie wymuszają właściwe, aktywne konta 1500/1600/7000 lub zgodne konta własne.
-- Aktywa otrzymują numer `FA-YYYY-NNN`, snapshot polityki księgowej i pozostają wyłącznie draftami.
+- Migracja `000038` dodaje lifecycle aktywa oraz append-only `fixed_asset_transactions`.
+- Nabycie i ulepszenie reklasyfikują posted Expense do aktywa bez ponownego VAT lub AP.
+- Sprzedaż korzysta z issued Invoice, zachowuje VAT i AR oraz księguje wycofanie kosztu i wynik na zbyciu.
+- Reversal działa od najnowszej operacji, a credit notes są blokowane do czasu odwrócenia zależności.
 - UI PL/EN, parytet PT, fail-closed RBAC, tenant isolation i audit command są kompletne.
-- Lokalny MySQL: migracja batch 29, audit `invalid_count=0`.
-- Walidacja: Finance 396 passed, 1 skipped, 2871 assertions; Blade, Pint i 1375 kluczy na locale poprawne.
+- Lokalny MySQL: migracja batch 30, audit `invalid_count=0`.
+- Walidacja: Finance 400 passed, 1 skipped, 2925 assertions; Blade, Pint i 1416 kluczy na locale poprawne.
 
-## Delta analysis UKFIN-702
+## Delta analysis UKFIN-703
 
-- Nabycie użyje całej pozycji zaksięgowanego Expense i utworzy tylko reklasyfikację `Dr asset / Cr expense`.
-- VAT, AP, płatność i bank pozostają w istniejącym dokumencie zakupu.
-- Sprzedaż użyje całej pozycji wystawionej Invoice; invoice zachowa VAT i AR, a osobny journal usunie zwykłą sprzedaż i rozpozna gain/loss.
-- Niezmienna tabela transakcji połączy aktywo, źródłową pozycję, journal i ewentualny reversal.
-- Purchase i sales credit notes będą fail-closed do czasu odwrócenia zależnej operacji aktywa.
-- Inne zbycia, capital allowances i amortyzacja pozostają poza UKFIN-702.
+- Harmonogram będzie miesięczny, z proporcjonalnym pierwszym i ostatnim miesiącem.
+- Straight-line i reducing-balance będą pracować w integer pennies i nie zejdą poniżej residual value.
+- Reducing balance otrzyma jawny procent na kategorii i aktywie; system nie będzie zgadywał stopy.
+- Posting użyje `Dr depreciation expense / Cr accumulated depreciation` przez istniejący silnik journalu.
+- Posted depreciation będzie append-only, a korekta powstanie przez dokładny reversal.
+- Zbycie i reversal UKFIN-702 zostaną powiązane z zależnymi księgowaniami amortyzacji.
+- UK capital allowances pozostają jawnie poza automatyczną księgą.
 
 ## Następny krok
 
-Zaimplementować migrację `000038`, `FixedAssetTransaction`, kalkulator kosztu oraz Actions nabycia, ulepszenia, zbycia i reversal według bieżącego planu.
+Zaimplementować migrację `000039`, model harmonogramu, kalkulator pensowy oraz Actions generowania, księgowania i reversal amortyzacji według bieżącego planu.
+
+## Poprzednie zakończone zadanie - UKFIN-702
+
+Raport końcowy: `.github/completed-tasks/2026-11-22 - UKFIN-702 nabycie i zbycie srodkow trwalych.md`.
+
+---
 
 ## Poprzednie zakończone zadanie - UKFIN-701
 

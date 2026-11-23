@@ -476,7 +476,7 @@ Każde zadanie jest mniejsze niż 8 godzin. Estymaty: XS < 1h, S 1–3h, M 3–8
 ### Faza 7 — środki trwałe i zamknięcie roku (opcjonalnie, 1–2 tygodnie)
 
 - [x] `UKFIN-701` [M] FixedAsset i kategorie aktywów. *(ukończone lokalnie 2026-11-22: tenantowe kategorie z mapowaniem kont 1500/1600/7000, draft-only rejestr `FA-YYYY-NNN`, Actions, RBAC, audyt, panel PL/EN/PT i brak wpływu na ledger; migracja `000037` przeszła na MySQL, Finance 396 passed + 1 skipped / 2871 assertions)*
-- [ ] `UKFIN-702` [M] Acquisition/disposal workflow.
+- [x] `UKFIN-702` [M] Acquisition/disposal workflow. *(ukończone lokalnie 2026-11-22: nabycie i ulepszenie z posted Expense bez podwójnego VAT/AP, sprzedaż z issued Invoice bez podwójnego VAT/AR, append-only transakcje, dokładny reversal, credit-note guards, panel PL/EN/PT i tenant audit; migracja `000038` przeszła lokalnie jako batch 30, Finance 400 passed + 1 skipped / 2925 assertions)*
 - [ ] `UKFIN-703` [M] Book depreciation schedules.
 - [ ] `UKFIN-704` [M] Asset register report.
 - [ ] `UKFIN-705` [M] Year-end close i opening balance journals.

@@ -40,7 +40,7 @@ System obsługuje:
 - dokumenty w obsługiwanych walutach ze snapshotem kursu do GBP;
 - płatności klientów i dostawców;
 - sprzedażowe i zakupowe noty kredytowe;
-- roboczy rejestr środków trwałych i kategorie z mapowaniem kont księgowych;
+- rejestr środków trwałych, kategorie oraz kontrolowane nabycie, ulepszenie, sprzedaż i odwrócenie;
 - import wyciągów CSV i uzgodnienie banku;
 - raporty zarządcze i księgowe;
 - lokalne obliczenie VAT Return;
@@ -56,7 +56,6 @@ System nie obsługuje obecnie:
 - Corporation Tax i CT600;
 - Self Assessment ani MTD Income Tax;
 - CIS;
-- księgowania nabycia, aktywacji, ulepszenia i zbycia środków trwałych;
 - harmonogramów i automatycznego księgowania amortyzacji;
 - obliczania UK capital allowances;
 - automatycznych bank feeds przez Open Banking;
@@ -196,7 +195,7 @@ Statusy:
 
 Nie używaj `Locked`, dopóki raporty nie zostały sprawdzone i zaakceptowane.
 
-### 5.5 Kategorie i roboczy rejestr środków trwałych
+### 5.5 Kategorie i rejestr środków trwałych
 
 W `Finance > Asset categories` albo `Finance > Kategorie środków trwałych` utwórz kategorie używane przez firmę, na przykład sprzęt komputerowy. Każda kategoria wymaga trzech aktywnych kont bieżącego tenanta:
 
@@ -213,7 +212,50 @@ W `Finance > Fixed assets` albo `Finance > Środki trwałe` możesz utworzyć ro
 - rekord nie wpływa na P&L, Balance Sheet, VAT ani inne raporty;
 - nie oznacza jeszcze aktywacji ani podatkowego rozpoznania środka trwałego.
 
-Na tym etapie rejestr służy do uporządkowania danych podstawowych. Nabycie, powiązanie z kosztem, aktywacja, zbycie i posting amortyzacji będą obsługiwane przez kolejne kontrolowane procesy.
+#### Nabycie i aktywacja
+
+Przed aktywacją środka trwałego:
+
+1. wprowadź zakup jako zwykły koszt z osobną pozycją dla danego aktywa;
+2. dodaj fakturę albo rachunek jako załącznik i poczekaj na status skanu `Clean`;
+3. zatwierdź i zaksięguj koszt;
+4. otwórz roboczy środek trwały i wybierz `Nabądź i aktywuj` albo `Acquire and activate`;
+5. wybierz całą pozycję kosztu, ustaw datę oddania do użytkowania i sprawdź podgląd journalu.
+
+System przenosi koszt z konta pozycji Expense na konto aktywa z kategorii:
+
+```text
+Wn konto środka trwałego
+Ma pierwotne konto kosztowe
+```
+
+VAT, zobowiązanie wobec dostawcy, płatność i uzgodnienie bankowe pozostają w dokumencie Expense. System nie tworzy drugiego zakupu. Wartość aktywa obejmuje kwotę netto GBP i nieodliczalny VAT. Odliczalny VAT oraz neutralny reverse charge nie zwiększają kosztu aktywa.
+
+Jedna pozycja Expense może zostać użyta tylko raz i zawsze w całości. Jeżeli jedna faktura obejmuje kilka aktywów, przygotuj osobne pozycje przed zaksięgowaniem kosztu.
+
+#### Ulepszenie
+
+Dla aktywnego środka trwałego użyj `Dodaj ulepszenie` albo `Add improvement`. Źródłem musi być inna, zaksięgowana pozycja Expense z czystym dokumentem. System wykonuje tę samą reklasyfikację i zwiększa koszt historyczny aktywa bez ponownego ujęcia VAT lub zobowiązania.
+
+#### Sprzedaż i zbycie
+
+Pierwsza wersja obsługuje zbycie wyłącznie przez sprzedaż udokumentowaną fakturą:
+
+1. utwórz fakturę sprzedaży z osobną pozycją dotyczącą środka trwałego;
+2. wystaw fakturę, aby powstał journal należności, sprzedaży i VAT;
+3. na aktywnym środku trwałym wybierz `Zaksięguj sprzedaż i zbycie` albo `Record sale and disposal`;
+4. wybierz całą pozycję faktury i ustaw datę równą tax point faktury;
+5. sprawdź podgląd i zatwierdź.
+
+Faktura zachowuje VAT i saldo klienta. Journal zbycia usuwa zwykły przychód ze sprzedaży, wyksięgowuje koszt historyczny i umorzenie oraz pokazuje zysk albo stratę na właściwych kontach.
+
+#### Korekta
+
+Zaksięgowanych operacji aktywa nie można edytować ani usuwać. Użyj `Odwróć ostatnią operację`, podaj datę i uzasadnienie. Operacje odwraca się od najnowszej do najstarszej. System zachowuje oryginalny journal i tworzy dokładny zapis lustrzany.
+
+Purchase credit note dla wykorzystanej pozycji kosztu oraz sales credit note dla pozycji użytej przy zbyciu są blokowane. Najpierw odwróć zależną operację środka trwałego, a dopiero potem wystaw notę.
+
+Ten workflow nie oblicza UK capital allowances, nie księguje jeszcze amortyzacji książkowej i nie obsługuje darowizny, prywatnego wycofania, częściowego zbycia ani zamiany aktywa. Te przypadki wymagają osobnej decyzji księgowej.
 
 ## 6. Sprzedaż i VAT należny
 

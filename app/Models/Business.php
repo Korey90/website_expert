@@ -195,6 +195,11 @@ class Business extends Model
         return $this->hasMany(FixedAsset::class);
     }
 
+    public function fixedAssetTransactions(): HasMany
+    {
+        return $this->hasMany(FixedAssetTransaction::class);
+    }
+
     public function purchaseCreditNotes(): HasMany
     {
         return $this->hasMany(PurchaseCreditNote::class);

@@ -4,6 +4,7 @@ namespace App\Actions\Finance;
 
 use App\Models\CreditNote;
 use App\Models\CreditNoteItem;
+use App\Models\FixedAssetTransaction;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\User;
@@ -66,6 +67,13 @@ class CreateCreditNoteAction
                     ->where('invoice_id', $lockedInvoice->id)
                     ->lockForUpdate()
                     ->findOrFail($invoiceItemId);
+
+                if (FixedAssetTransaction::withoutGlobalScopes()
+                    ->where('invoice_item_id', $invoiceItem->id)
+                    ->where('status', FixedAssetTransaction::STATUS_POSTED)
+                    ->exists()) {
+                    throw new DomainException('Reverse the fixed asset disposal before crediting this invoice item.');
+                }
                 $quantity = round((float) $requestedItem['quantity'], 2);
                 $originalQuantity = (float) $invoiceItem->quantity;
                 $alreadyCredited = (float) DB::table('credit_note_items')

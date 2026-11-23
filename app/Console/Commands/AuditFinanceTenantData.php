@@ -33,6 +33,7 @@ class AuditFinanceTenantData extends Command
         'expense_items' => ['parent' => 'expenses', 'foreign_key' => 'expense_id'],
         'expense_payments' => ['parent' => 'expenses', 'foreign_key' => 'expense_id'],
         'fixed_assets' => ['parent' => 'fixed_asset_categories', 'foreign_key' => 'fixed_asset_category_id'],
+        'fixed_asset_transactions' => ['parent' => 'fixed_assets', 'foreign_key' => 'fixed_asset_id'],
         'purchase_credit_notes' => ['parent' => 'expenses', 'foreign_key' => 'expense_id'],
         'purchase_credit_note_items' => ['parent' => 'purchase_credit_notes', 'foreign_key' => 'purchase_credit_note_id'],
         'purchase_credit_refunds' => ['parent' => 'purchase_credit_notes', 'foreign_key' => 'purchase_credit_note_id'],
@@ -68,6 +69,10 @@ class AuditFinanceTenantData extends Command
         'fixed_asset_categories.asset_account_id' => ['table' => 'fixed_asset_categories', 'parent' => 'ledger_accounts', 'foreign_key' => 'asset_account_id'],
         'fixed_asset_categories.accumulated_depreciation_account_id' => ['table' => 'fixed_asset_categories', 'parent' => 'ledger_accounts', 'foreign_key' => 'accumulated_depreciation_account_id'],
         'fixed_asset_categories.depreciation_expense_account_id' => ['table' => 'fixed_asset_categories', 'parent' => 'ledger_accounts', 'foreign_key' => 'depreciation_expense_account_id'],
+        'fixed_asset_transactions.expense_item_id' => ['table' => 'fixed_asset_transactions', 'parent' => 'expense_items', 'foreign_key' => 'expense_item_id'],
+        'fixed_asset_transactions.invoice_item_id' => ['table' => 'fixed_asset_transactions', 'parent' => 'invoice_items', 'foreign_key' => 'invoice_item_id'],
+        'fixed_asset_transactions.journal_entry_id' => ['table' => 'fixed_asset_transactions', 'parent' => 'journal_entries', 'foreign_key' => 'journal_entry_id'],
+        'fixed_asset_transactions.reversal_journal_entry_id' => ['table' => 'fixed_asset_transactions', 'parent' => 'journal_entries', 'foreign_key' => 'reversal_journal_entry_id'],
         'bank_reconciliation_allocations.bank_transaction_id' => ['table' => 'bank_reconciliation_allocations', 'parent' => 'bank_transactions', 'foreign_key' => 'bank_transaction_id'],
         'hmrc_vat_submissions.hmrc_vat_obligation_id' => ['table' => 'hmrc_vat_submissions', 'parent' => 'hmrc_vat_obligations', 'foreign_key' => 'hmrc_vat_obligation_id'],
     ];

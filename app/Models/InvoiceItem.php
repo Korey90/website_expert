@@ -80,6 +80,11 @@ class InvoiceItem extends Model
         return $this->hasMany(CreditNoteItem::class);
     }
 
+    public function fixedAssetTransactions(): HasMany
+    {
+        return $this->hasMany(FixedAssetTransaction::class);
+    }
+
     private function assertInvoiceIsUnposted(): void
     {
         if (! $this->invoice_id) {
