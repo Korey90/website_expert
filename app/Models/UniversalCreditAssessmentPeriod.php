@@ -8,6 +8,7 @@ use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class UniversalCreditAssessmentPeriod extends Model
 {
@@ -155,5 +156,15 @@ class UniversalCreditAssessmentPeriod extends Model
     public function supersedingPeriod(): BelongsTo
     {
         return $this->belongsTo(self::class, 'superseding_period_id');
+    }
+
+    public function reportItems(): HasMany
+    {
+        return $this->hasMany(UniversalCreditReportItem::class, 'assessment_period_id');
+    }
+
+    public function manualEntries(): HasMany
+    {
+        return $this->hasMany(UniversalCreditManualEntry::class, 'assessment_period_id');
     }
 }

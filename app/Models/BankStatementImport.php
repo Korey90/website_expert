@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class BankStatementImport extends Model
 {
@@ -49,5 +50,10 @@ class BankStatementImport extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(BankTransaction::class);
+    }
+
+    public function attachments(): MorphMany
+    {
+        return $this->morphMany(FinancialAttachment::class, 'attachable');
     }
 }

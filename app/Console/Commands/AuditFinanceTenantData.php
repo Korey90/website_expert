@@ -3,9 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Models\BankReconciliation;
+use App\Models\BankTransaction;
 use App\Models\ExpensePayment;
 use App\Models\Payment;
 use App\Models\PurchaseCreditRefund;
+use App\Models\UniversalCreditManualEntry;
+use App\Models\UniversalCreditReportItem;
 use App\Services\Finance\UniversalCreditPolicyHashService;
 use App\Services\Finance\VatReturnSnapshotService;
 use Illuminate\Console\Command;
@@ -52,6 +55,8 @@ class AuditFinanceTenantData extends Command
         'hmrc_vat_submissions' => ['parent' => 'vat_returns', 'foreign_key' => 'vat_return_id'],
         'hmrc_vat_submission_events' => ['parent' => 'hmrc_vat_submissions', 'foreign_key' => 'hmrc_vat_submission_id'],
         'universal_credit_assessment_periods' => ['parent' => 'universal_credit_profiles', 'foreign_key' => 'universal_credit_profile_id'],
+        'universal_credit_manual_entries' => ['parent' => 'universal_credit_assessment_periods', 'foreign_key' => 'assessment_period_id'],
+        'universal_credit_report_items' => ['parent' => 'universal_credit_assessment_periods', 'foreign_key' => 'assessment_period_id'],
     ];
 
     /** @var array<string, array{table: string, parent: string, foreign_key: string}> */
@@ -87,6 +92,15 @@ class AuditFinanceTenantData extends Command
         Payment::class => 'payments',
         ExpensePayment::class => 'expense_payments',
         PurchaseCreditRefund::class => 'purchase_credit_refunds',
+    ];
+
+    /** @var array<class-string, string> */
+    private const UNIVERSAL_CREDIT_SOURCES = [
+        Payment::class => 'payments',
+        ExpensePayment::class => 'expense_payments',
+        PurchaseCreditRefund::class => 'purchase_credit_refunds',
+        BankTransaction::class => 'bank_transactions',
+        UniversalCreditManualEntry::class => 'universal_credit_manual_entries',
     ];
 
     public function handle(): int
@@ -196,6 +210,41 @@ class AuditFinanceTenantData extends Command
         $report['universal_credit_assessment_periods.policy_snapshot'] = [
             'invalid_count' => count($invalidUniversalCreditSnapshots),
             'sample_ids' => array_slice($invalidUniversalCreditSnapshots, 0, 20),
+        ];
+
+        $invalidUniversalCreditSources = [];
+
+        DB::table('universal_credit_report_items')
+            ->select([
+                'id', 'business_id', 'assessment_period_id', 'source_type', 'source_id',
+                'source_event_key', 'source_identity_hash',
+            ])
+            ->orderBy('id')
+            ->chunk(100, function ($items) use (&$invalidUniversalCreditSources): void {
+                foreach ($items as $item) {
+                    $sourceTable = self::UNIVERSAL_CREDIT_SOURCES[$item->source_type] ?? null;
+                    $sourceBusinessId = $sourceTable === null
+                        ? null
+                        : DB::table($sourceTable)->where('id', $item->source_id)->value('business_id');
+                    $expectedIdentity = UniversalCreditReportItem::identityHash(
+                        (string) $item->business_id,
+                        (int) $item->assessment_period_id,
+                        (string) $item->source_type,
+                        (int) $item->source_id,
+                        (string) $item->source_event_key,
+                    );
+
+                    if ($sourceBusinessId === null
+                        || $sourceBusinessId !== $item->business_id
+                        || ! hash_equals((string) $item->source_identity_hash, $expectedIdentity)) {
+                        $invalidUniversalCreditSources[] = $item->id;
+                    }
+                }
+            });
+
+        $report['universal_credit_report_items.source'] = [
+            'invalid_count' => count($invalidUniversalCreditSources),
+            'sample_ids' => array_slice($invalidUniversalCreditSources, 0, 20),
         ];
 
         $vatReturnQuery = DB::table('vat_returns as vat_return')

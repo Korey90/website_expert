@@ -19,6 +19,7 @@ use App\Services\Finance\Exceptions\BankStatementCsvImportException;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
@@ -38,6 +39,8 @@ class BankStatementCsvImportTest extends TestCase
         parent::setUp();
 
         Storage::fake('local');
+        Storage::fake('financial');
+        Queue::fake();
         $this->business = Business::create(['name' => 'Import Ltd', 'slug' => 'import-ltd', 'is_active' => true]);
         $this->user = User::factory()->create(['is_active' => true]);
         BusinessUser::create([
@@ -120,6 +123,7 @@ class BankStatementCsvImportTest extends TestCase
         $this->assertSame(0, $result->duplicateRows);
         $this->assertDatabaseCount('bank_statement_imports', 0);
         $this->assertDatabaseCount('bank_transactions', 0);
+        $this->assertDatabaseCount('financial_attachments', 0);
         $this->assertNull($this->account->fresh()->last_synced_at);
     }
 
@@ -157,6 +161,12 @@ class BankStatementCsvImportTest extends TestCase
         $this->assertNotNull($this->account->fresh()->last_synced_at);
         $this->assertSame(2, $this->account->transactions()->count());
         $this->assertSame(2, $this->business->bankTransactions()->count());
+        $import = BankStatementImport::withoutGlobalScopes()->findOrFail($result->importId);
+        $attachment = $import->attachments()->firstOrFail();
+        $this->assertSame('bank_statement', $attachment->document_type);
+        $this->assertSame($import->file_hash, $attachment->sha256);
+        $this->assertSame('statement.csv', $attachment->original_name);
+        Storage::disk('financial')->assertExists($attachment->path);
     }
 
     public function test_provider_id_and_canonical_hash_prevent_duplicates_per_account(): void

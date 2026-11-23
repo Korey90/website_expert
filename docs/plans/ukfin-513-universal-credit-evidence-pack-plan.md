@@ -1,6 +1,6 @@
 # UKFIN-513 - paczka dowodowa Universal Credit dla sole tradera
 
-**Status:** Implementacja w toku - UKFIN-513A ukończone lokalnie
+**Status:** Implementacja w toku - UKFIN-513A i UKFIN-513B ukończone lokalnie
 **Data:** 2026-11-23  
 **Projekt:** Website Expert NI  
 **Grupa docelowa:** Sole trader w Irlandii Północnej  
@@ -365,13 +365,27 @@ Wynik etapu:
 - Finance: 418 passed, 1 skipped, 3017 assertions;
 - tłumaczenia finance: PL/EN/PT po 1467 identycznych kluczy.
 
-### UKFIN-513B - źródła i klasyfikacja
+### UKFIN-513B - źródła i klasyfikacja - ukończone lokalnie 2026-11-23
 
 1. Zbudować source collector dla payments, refunds, expense payments, bank transactions, owner-funded i asset flows.
 2. Dodać klasyfikację UC, review i idempotency.
 3. Dodać manual entries dla gotówki, barteru, tips, grants i tax/NI refunds.
 4. Dodać business-use percentage i reason.
 5. Zachowywać committed bank statement jako bezpieczny attachment.
+
+Wynik etapu:
+
+- migracja `000041` dodaje tenantowe, audytowalne `universal_credit_report_items` i `universal_credit_manual_entries`;
+- kolektor używa daty faktycznego przepływu i pobiera częściowe customer receipts, customer refunds, expense payments, owner-funded i cash payments, supplier refunds oraz nierozliczone części bank transactions;
+- powiązane acquisition, improvement i disposal są rozpoznawane przez płatność faktury lub kosztu, bez tworzenia drugiego przepływu na podstawie daty księgowej aktywa;
+- każda pozycja ma stabilny identity hash i source fingerprint, a ponowne zebranie jest idempotentne oraz resetuje review po zmianie źródła;
+- klasyfikacja waliduje kategorie snapshotu polityki, included/excluded, business-use percentage, uzasadnienie podziału i przyczynę wykluczenia;
+- ręczne cash, barter, tips, grants, tax/NI refunds, asset transfers i tax/NI/pension/VAT payments wymagają dowodu albo jawnej przyczyny jego braku i mogą zostać wyłącznie audytowalnie unieważnione;
+- committed bank statement CSV jest zachowywany jako prywatny `FinancialAttachment` typu `bank_statement`, z SHA-256 i skanem bezpieczeństwa; dry-run nadal nie zapisuje pliku;
+- dodano dedykowane policies, relacje i audyt tenant/source identity dla nowych rekordów;
+- migracja przeszła na lokalnym MySQL, tenant audit wykazał 0 błędów;
+- Finance: 424 passed, 1 skipped, 3060 assertions;
+- tłumaczenia finance: PL/EN/PT po 1491 identycznych kluczy.
 
 ### UKFIN-513C - kalkulatory
 

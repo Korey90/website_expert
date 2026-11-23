@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\File\File;
 use Throwable;
 
 class FinancialAttachmentService
@@ -17,6 +18,46 @@ class FinancialAttachmentService
     public function store(
         Model $attachable,
         UploadedFile $file,
+        User $actor,
+        string $documentType,
+    ): FinancialAttachment {
+        if (! $file->isValid()) {
+            throw new DomainException('The uploaded attachment is invalid.');
+        }
+
+        return $this->storeFile(
+            $attachable,
+            $file,
+            basename($file->getClientOriginalName()),
+            $actor,
+            $documentType,
+        );
+    }
+
+    public function storePath(
+        Model $attachable,
+        string $path,
+        string $originalName,
+        User $actor,
+        string $documentType,
+    ): FinancialAttachment {
+        if (! is_file($path) || ! is_readable($path)) {
+            throw new DomainException('The attachment source file is not readable.');
+        }
+
+        return $this->storeFile(
+            $attachable,
+            new File($path),
+            basename(str_replace('\\', '/', $originalName)),
+            $actor,
+            $documentType,
+        );
+    }
+
+    private function storeFile(
+        Model $attachable,
+        File $file,
+        string $originalName,
         User $actor,
         string $documentType,
     ): FinancialAttachment {
@@ -43,7 +84,7 @@ class FinancialAttachmentService
         }
 
         $disk = (string) config('finance.attachments.disk', 'financial');
-        $extension = strtolower($file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'bin');
+        $extension = strtolower($file->guessExtension() ?: pathinfo($originalName, PATHINFO_EXTENSION) ?: 'bin');
         $directory = implode('/', [
             $businessId,
             Str::kebab(class_basename($attachable)),
@@ -65,7 +106,7 @@ class FinancialAttachmentService
                 'document_type' => $documentType,
                 'disk' => $disk,
                 'path' => $path,
-                'original_name' => basename($file->getClientOriginalName()),
+                'original_name' => $originalName !== '' ? $originalName : 'document.'.$extension,
                 'mime_type' => (string) $file->getMimeType(),
                 'size' => $file->getSize(),
                 'sha256' => $sha256,
@@ -104,12 +145,8 @@ class FinancialAttachmentService
         }
     }
 
-    private function assertValidFile(UploadedFile $file, string $documentType): void
+    private function assertValidFile(File $file, string $documentType): void
     {
-        if (! $file->isValid()) {
-            throw new DomainException('The uploaded attachment is invalid.');
-        }
-
         if (! in_array($documentType, config('finance.attachments.document_types', []), true)) {
             throw new DomainException('Unsupported financial document type.');
         }

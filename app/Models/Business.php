@@ -85,6 +85,16 @@ class Business extends Model
         return $this->hasMany(UniversalCreditAssessmentPeriod::class);
     }
 
+    public function universalCreditReportItems(): HasMany
+    {
+        return $this->hasMany(UniversalCreditReportItem::class);
+    }
+
+    public function universalCreditManualEntries(): HasMany
+    {
+        return $this->hasMany(UniversalCreditManualEntry::class);
+    }
+
     public function taxCodes(): HasMany
     {
         return $this->hasMany(TaxCode::class);

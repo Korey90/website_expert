@@ -11,6 +11,7 @@ use App\Models\BankTransaction;
 use App\Models\User;
 use App\Services\Finance\BankStatementCsvParser;
 use App\Services\Finance\Exceptions\BankStatementCsvImportException;
+use App\Services\Finance\FinancialAttachmentService;
 use App\Support\PermissionHelper;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,10 @@ use Illuminate\Support\Str;
 
 class ImportBankStatementCsvAction
 {
-    public function __construct(private readonly BankStatementCsvParser $parser) {}
+    public function __construct(
+        private readonly BankStatementCsvParser $parser,
+        private readonly FinancialAttachmentService $attachments,
+    ) {}
 
     /**
      * @param  array<string, string|null>  $mapping
@@ -61,7 +65,7 @@ class ImportBankStatementCsvAction
             return new BankStatementImportResult(true, $parsed, 0, $knownDuplicates);
         }
 
-        return DB::transaction(function () use ($account, $actor, $options, $parsed, $uniqueRows): BankStatementImportResult {
+        return DB::transaction(function () use ($account, $actor, $path, $options, $parsed, $uniqueRows): BankStatementImportResult {
             $lockedAccount = BankAccount::withoutGlobalScopes()->lockForUpdate()->findOrFail($account->id);
             $this->assertAuthorized($lockedAccount, $actor);
 
@@ -123,6 +127,13 @@ class ImportBankStatementCsvAction
                 'duplicate_rows' => $duplicateRows,
             ]);
             $lockedAccount->forceFill(['last_synced_at' => $now])->save();
+            $this->attachments->storePath(
+                $import,
+                $path,
+                $options['original_filename'],
+                $actor,
+                'bank_statement',
+            );
 
             return new BankStatementImportResult(false, $parsed, $importedRows, $duplicateRows, $import->id);
         });
