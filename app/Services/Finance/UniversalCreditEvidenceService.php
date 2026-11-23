@@ -12,6 +12,7 @@ use App\Models\UniversalCreditManualEntry;
 use App\Models\UniversalCreditReportItem;
 use App\Models\UniversalCreditSimplifiedExpense;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class UniversalCreditEvidenceService
 {
@@ -35,19 +36,34 @@ class UniversalCreditEvidenceService
             return $import ? $this->fromAttachable($import, null, 'source_document') : $this->missing('source_not_retained');
         }
 
-        $structured = match ($item->source_type) {
-            (new Payment)->getMorphClass() => Payment::withoutGlobalScopes()
-                ->where('business_id', $item->business_id)->whereKey($item->source_id)->exists(),
-            (new ExpensePayment)->getMorphClass() => ExpensePayment::withoutGlobalScopes()
-                ->where('business_id', $item->business_id)->whereKey($item->source_id)->exists(),
-            (new PurchaseCreditRefund)->getMorphClass() => PurchaseCreditRefund::withoutGlobalScopes()
-                ->where('business_id', $item->business_id)->whereKey($item->source_id)->exists(),
-            default => false,
-        };
+        if ($item->source_type === (new Payment)->getMorphClass()) {
+            $payment = Payment::withoutGlobalScopes()->with('invoice')
+                ->where('business_id', $item->business_id)->find($item->source_id);
 
-        return $structured
-            ? ['state' => 'structured_record', 'attachment_ids' => [], 'attachment_hashes' => [], 'scan_statuses' => []]
-            : $this->missing('source_not_retained');
+            return $payment
+                ? $this->fromStructuredRecords(collect([$payment, $payment->invoice]))
+                : $this->missing('source_not_retained');
+        }
+
+        if ($item->source_type === (new ExpensePayment)->getMorphClass()) {
+            $payment = ExpensePayment::withoutGlobalScopes()->with('expense')
+                ->where('business_id', $item->business_id)->find($item->source_id);
+
+            return $payment
+                ? $this->fromStructuredRecords(collect([$payment, $payment->expense]))
+                : $this->missing('source_not_retained');
+        }
+
+        if ($item->source_type === (new PurchaseCreditRefund)->getMorphClass()) {
+            $refund = PurchaseCreditRefund::withoutGlobalScopes()->with(['purchaseCreditNote', 'expense'])
+                ->where('business_id', $item->business_id)->find($item->source_id);
+
+            return $refund
+                ? $this->fromStructuredRecords(collect([$refund, $refund->purchaseCreditNote, $refund->expense]))
+                : $this->missing('source_not_retained');
+        }
+
+        return $this->missing('source_not_retained');
     }
 
     /** @return array<string, mixed> */
@@ -59,8 +75,37 @@ class UniversalCreditEvidenceService
     /** @return array<string, mixed> */
     private function fromAttachable(Model $model, ?string $missingReason, string $cleanState = 'clean_attachment'): array
     {
-        $attachments = $model->attachments()->withoutGlobalScopes()
-            ->where('business_id', $model->business_id)
+        return $this->fromAttachables(collect([$model]), $missingReason, $cleanState);
+    }
+
+    /** @param Collection<int, Model|null> $models @return array<string, mixed> */
+    private function fromStructuredRecords(Collection $models): array
+    {
+        return $this->fromAttachables($models, null, 'structured_record');
+    }
+
+    /** @param Collection<int, Model|null> $models @return array<string, mixed> */
+    private function fromAttachables(
+        Collection $models,
+        ?string $missingReason,
+        string $cleanState,
+    ): array {
+        $models = $models->filter(fn (?Model $model): bool => $model !== null && $model->exists)->values();
+        $businessId = $models->first()?->getAttribute('business_id');
+        $groups = $models
+            ->filter(fn (Model $model): bool => $model->getAttribute('business_id') === $businessId)
+            ->groupBy(fn (Model $model): string => $model->getMorphClass())
+            ->map(fn (Collection $group): array => $group->map(fn (Model $model): mixed => $model->getKey())->all());
+        $attachments = FinancialAttachment::withoutGlobalScopes()
+            ->where('business_id', $businessId)
+            ->whereNull('deleted_at')
+            ->where(function ($query) use ($groups): void {
+                foreach ($groups as $type => $ids) {
+                    $query->orWhere(function ($source) use ($type, $ids): void {
+                        $source->where('attachable_type', $type)->whereIn('attachable_id', $ids);
+                    });
+                }
+            })
             ->orderBy('id')
             ->get(['id', 'sha256', 'scan_status']);
         $clean = $attachments->where('scan_status', FinancialAttachment::SCAN_CLEAN);
@@ -68,19 +113,23 @@ class UniversalCreditEvidenceService
         if ($clean->isNotEmpty()) {
             return [
                 'state' => $cleanState,
-                'attachment_ids' => $clean->pluck('id')->values()->all(),
-                'attachment_hashes' => $clean->pluck('sha256')->values()->all(),
+                'attachment_ids' => $attachments->pluck('id')->values()->all(),
+                'attachment_hashes' => $attachments->pluck('sha256')->values()->all(),
                 'scan_statuses' => $attachments->pluck('scan_status')->values()->all(),
             ];
         }
 
         if ($attachments->isNotEmpty()) {
             return [
-                'state' => 'attachment_not_clean',
+                'state' => $cleanState === 'structured_record' ? $cleanState : 'attachment_not_clean',
                 'attachment_ids' => $attachments->pluck('id')->values()->all(),
                 'attachment_hashes' => $attachments->pluck('sha256')->values()->all(),
                 'scan_statuses' => $attachments->pluck('scan_status')->values()->all(),
             ];
+        }
+
+        if ($cleanState === 'structured_record') {
+            return ['state' => $cleanState, 'attachment_ids' => [], 'attachment_hashes' => [], 'scan_statuses' => []];
         }
 
         return filled($missingReason)

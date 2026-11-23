@@ -12,6 +12,7 @@ use App\Http\Controllers\Finance\HmrcVatReceiptController;
 use App\Http\Controllers\Finance\ManagementCashFlowReportExportController;
 use App\Http\Controllers\Finance\ProfitAndLossReportExportController;
 use App\Http\Controllers\Finance\TrialBalanceReportExportController;
+use App\Http\Controllers\Finance\UniversalCreditEvidencePackController;
 use App\Http\Controllers\Finance\VatDetailReportExportController;
 use App\Http\Controllers\ReportController;
 use App\Models\LeadNote;
@@ -74,6 +75,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/finance/vat-returns/{vatReturn}/hmrc-receipt.pdf', HmrcVatReceiptController::class)
         ->middleware('can:submit_tax_returns')
         ->name('admin.finance.vat-returns.hmrc-receipt');
+
+    Route::get('/admin/finance/universal-credit/evidence-packs/{evidencePack}.zip', UniversalCreditEvidencePackController::class)
+        ->middleware('can:export_universal_credit_pack')
+        ->name('admin.finance.universal-credit.evidence-packs.download');
 
     // Reports — admin only
     Route::middleware(['can:view_reports', 'can:export_reports'])->prefix('reports')->name('reports.')->group(function () {

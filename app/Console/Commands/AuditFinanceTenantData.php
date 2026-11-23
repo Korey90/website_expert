@@ -59,6 +59,8 @@ class AuditFinanceTenantData extends Command
         'universal_credit_manual_entries' => ['parent' => 'universal_credit_assessment_periods', 'foreign_key' => 'assessment_period_id'],
         'universal_credit_report_items' => ['parent' => 'universal_credit_assessment_periods', 'foreign_key' => 'assessment_period_id'],
         'universal_credit_simplified_expenses' => ['parent' => 'universal_credit_assessment_periods', 'foreign_key' => 'assessment_period_id'],
+        'universal_credit_evidence_packs' => ['parent' => 'universal_credit_assessment_periods', 'foreign_key' => 'assessment_period_id'],
+        'universal_credit_evidence_pack_items' => ['parent' => 'universal_credit_evidence_packs', 'foreign_key' => 'evidence_pack_id'],
     ];
 
     /** @var array<string, array{table: string, parent: string, foreign_key: string}> */
@@ -256,6 +258,70 @@ class AuditFinanceTenantData extends Command
         $report['universal_credit_assessment_periods.review_snapshot'] = [
             'invalid_count' => count($invalidUniversalCreditReviewSnapshots),
             'sample_ids' => array_slice($invalidUniversalCreditReviewSnapshots, 0, 20),
+        ];
+
+        $invalidUniversalCreditEvidencePacks = [];
+        DB::table('universal_credit_evidence_packs as pack')
+            ->leftJoin('universal_credit_assessment_periods as period', 'period.id', '=', 'pack.assessment_period_id')
+            ->select([
+                'pack.id', 'pack.status', 'pack.snapshot_hash', 'pack.disk', 'pack.path', 'pack.filename',
+                'pack.zip_sha256', 'pack.bytes', 'pack.included_count', 'pack.excluded_count',
+                'pack.generated_at', 'pack.expires_at', 'pack.failed_at', 'pack.last_error_code',
+                'pack.file_deleted_at', 'period.review_snapshot_hash',
+            ])
+            ->orderBy('pack.id')
+            ->chunk(100, function ($packs) use (&$invalidUniversalCreditEvidencePacks): void {
+                $ids = $packs->pluck('id');
+                $counts = DB::table('universal_credit_evidence_pack_items')
+                    ->whereIn('evidence_pack_id', $ids)
+                    ->selectRaw('evidence_pack_id, inclusion_status, COUNT(*) as aggregate')
+                    ->groupBy('evidence_pack_id', 'inclusion_status')
+                    ->get()
+                    ->groupBy('evidence_pack_id');
+
+                foreach ($packs as $pack) {
+                    $packCounts = $counts->get($pack->id, collect());
+                    $included = (int) ($packCounts->firstWhere('inclusion_status', 'included')?->aggregate ?? 0);
+                    $excluded = (int) ($packCounts->firstWhere('inclusion_status', 'excluded')?->aggregate ?? 0);
+                    $finished = in_array($pack->status, ['completed', 'expired'], true);
+                    $invalid = ! in_array($pack->status, ['pending', 'processing', 'completed', 'failed', 'expired'], true)
+                        || preg_match('/^[a-f0-9]{64}$/', (string) $pack->snapshot_hash) !== 1
+                        || ! hash_equals((string) $pack->snapshot_hash, (string) $pack->review_snapshot_hash)
+                        || ($finished && (blank($pack->disk) || blank($pack->path) || blank($pack->filename)
+                            || preg_match('/^[a-f0-9]{64}$/', (string) $pack->zip_sha256) !== 1
+                            || $pack->bytes === null || $pack->generated_at === null || $pack->expires_at === null
+                            || (int) $pack->included_count !== $included || (int) $pack->excluded_count !== $excluded))
+                        || (! $finished && ($included !== 0 || $excluded !== 0))
+                        || ($pack->status === 'failed' && (blank($pack->last_error_code) || $pack->failed_at === null))
+                        || ($pack->status === 'expired' && $pack->file_deleted_at === null);
+
+                    if ($invalid) {
+                        $invalidUniversalCreditEvidencePacks[] = $pack->id;
+                    }
+                }
+            });
+        $report['universal_credit_evidence_packs.snapshot'] = [
+            'invalid_count' => count($invalidUniversalCreditEvidencePacks),
+            'sample_ids' => array_slice($invalidUniversalCreditEvidencePacks, 0, 20),
+        ];
+
+        $invalidUniversalCreditEvidencePackItems = DB::table('universal_credit_evidence_pack_items as item')
+            ->where(function ($query): void {
+                $query->where(function ($included): void {
+                    $included->where('item.inclusion_status', 'included')
+                        ->where(function ($metadata): void {
+                            $metadata->whereNull('item.bytes')
+                                ->orWhereNull('item.sha256')
+                                ->orWhereRaw('LENGTH(item.sha256) <> 64');
+                        });
+                })->orWhere(function ($excluded): void {
+                    $excluded->where('item.inclusion_status', 'excluded')
+                        ->where(fn ($reason) => $reason->whereNull('item.reason')->orWhere('item.reason', ''));
+                })->orWhereNotIn('item.inclusion_status', ['included', 'excluded']);
+            });
+        $report['universal_credit_evidence_pack_items.manifest'] = [
+            'invalid_count' => (clone $invalidUniversalCreditEvidencePackItems)->count(),
+            'sample_ids' => (clone $invalidUniversalCreditEvidencePackItems)->limit(20)->pluck('item.id')->all(),
         ];
 
         $invalidUniversalCreditSources = [];

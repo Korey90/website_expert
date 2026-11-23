@@ -1,6 +1,6 @@
 # UKFIN-513 - paczka dowodowa Universal Credit dla sole tradera
 
-**Status:** Implementacja w toku - UKFIN-513A, UKFIN-513B, UKFIN-513C i UKFIN-513D ukończone lokalnie
+**Status:** Implementacja w toku - UKFIN-513A, UKFIN-513B, UKFIN-513C, UKFIN-513D i UKFIN-513E ukończone lokalnie
 **Data:** 2026-11-23  
 **Projekt:** Website Expert NI  
 **Grupa docelowa:** Sole trader w Irlandii Północnej  
@@ -438,13 +438,30 @@ Wynik etapu:
 - Finance: 438 passed, 1 skipped, 3129 assertions;
 - tłumaczenia finance: PL/EN/PT po 1621 identycznych kluczy.
 
-### UKFIN-513E - generator ZIP
+### UKFIN-513E - generator ZIP - ukończone lokalnie 2026-11-23
 
 1. Dodać inventory builder dokumentów.
 2. Dodać queue job, statusy i kontrolowane retry.
 3. Kopiować tylko czyste, ponownie zweryfikowane pliki.
 4. Dodać included/excluded manifest i hash każdego pliku.
 5. Dodać prywatny download, expiry i scheduled cleanup.
+
+Wynik etapu:
+
+- migracja `000044` dodaje tenantowe `universal_credit_evidence_packs` oraz niezmienne pozycje manifestu z wersją, statusem, hashem snapshotu, hashem i rozmiarem ZIP, licznikami, próbami, czasem wygaśnięcia i sanitizowanym kodem błędu;
+- inventory builder działa wyłącznie na immutable review snapshot i ponownie sprawdza tenant, rekord załącznika oraz SHA-256 zapisany podczas review;
+- snapshot dowodów standardowych płatności obejmuje załączniki płatności oraz powiązanej faktury, expense lub purchase credit note; czyste dokumenty są dołączane, a `pending`, `rejected` i `failed` pozostają w manifeście jako wykluczone;
+- job kolejki jest unikalny per pack, ma kontrolowane próby i backoff, zapisuje statusy `pending`, `processing`, `completed`, `failed` oraz pozwala na jawny retry bez dublowania pozycji manifestu;
+- generator tworzy README, manifest JSON, podsumowanie PDF/XLSX/CSV, review PDF, policy PDF, szczegóły income/expense/exclusions, uzgodnienie XLSX, warnings CSV i metadane audytowe;
+- każdy dołączony dokument jest kopiowany strumieniowo, a jego rozmiar i SHA-256 są ponownie sprawdzane przed utworzeniem ZIP; niespójność blokuje cały build i usuwa częściowy plik;
+- wszystkie logiczne ścieżki przechodzą ochronę przed zip-slip, tekst CSV przechodzi ochronę przed formula injection, a manifest nie zawiera fizycznych ścieżek storage;
+- gotowy ZIP trafia pod losową nazwę na prywatny dysk `financial`, jest ponownie odczytywany i hashowany, a download przed wysłaniem ponownie kontroluje pełny rozmiar i SHA-256;
+- download wymaga `export_universal_credit_pack`, aktywnego tenanta, statusu completed i niewygasłego terminu oraz zwraca `Cache-Control: private, no-store` i kontrolne hashe w nagłówkach;
+- codzienny cleanup o 02:30 usuwa tylko wygasły ZIP, zmienia status na `expired` i zachowuje rekord paczki, manifest, hashe oraz metadane audytowe;
+- tenant audit kontroluje właściciela okresu i paczki, zgodność review snapshot hash, kompletność metadanych gotowej paczki, liczniki manifestu oraz wymagane hashe i powody wykluczenia;
+- migracja przeszła na lokalnym MySQL, trasa downloadu i harmonogram są zarejestrowane, tenant audit wykazał 0 błędów;
+- Finance: 443 passed, 1 skipped, 3247 assertions;
+- tłumaczenia finance: PL/EN/PT po 1663 identyczne klucze.
 
 ### UKFIN-513F - panel i języki
 

@@ -66,5 +66,16 @@ return [
     'universal_credit' => [
         'policy_code' => 'ni_uc_self_employment',
         'max_period_days' => 31,
+        'evidence_pack' => [
+            'disk' => env('UNIVERSAL_CREDIT_PACK_DISK', 'financial'),
+            'prefix' => 'universal-credit-packs',
+            'expiry_days' => 7,
+            'max_attachments' => 100,
+            'max_attachment_bytes' => 100 * 1024 * 1024,
+            'queue' => env('UNIVERSAL_CREDIT_PACK_QUEUE', 'default'),
+            'tries' => 3,
+            'max_attempts' => 6,
+            'backoff_seconds' => [60, 300, 900],
+        ],
     ],
 ];

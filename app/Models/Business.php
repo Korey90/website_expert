@@ -100,6 +100,11 @@ class Business extends Model
         return $this->hasMany(UniversalCreditSimplifiedExpense::class);
     }
 
+    public function universalCreditEvidencePacks(): HasMany
+    {
+        return $this->hasMany(UniversalCreditEvidencePack::class);
+    }
+
     public function taxCodes(): HasMany
     {
         return $this->hasMany(TaxCode::class);

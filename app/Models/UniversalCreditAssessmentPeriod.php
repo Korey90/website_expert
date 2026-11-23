@@ -255,4 +255,9 @@ class UniversalCreditAssessmentPeriod extends Model
     {
         return $this->hasMany(UniversalCreditSimplifiedExpense::class, 'assessment_period_id');
     }
+
+    public function evidencePacks(): HasMany
+    {
+        return $this->hasMany(UniversalCreditEvidencePack::class, 'assessment_period_id');
+    }
 }

@@ -88,5 +88,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Daily: create idempotent draft expenses from active recurring templates
         $schedule->command('finance:generate-recurring-expenses')->dailyAt('01:30')->withoutOverlapping()->onOneServer();
+
+        // Daily: delete expired Universal Credit ZIP files while retaining their audit manifests
+        $schedule->command('finance:cleanup-universal-credit-packs')->dailyAt('02:30')->withoutOverlapping()->onOneServer();
     })
     ->create();
