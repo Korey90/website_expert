@@ -105,7 +105,7 @@ function AiLeadCapture({ locale, onClose }: { locale: Locale; onClose: () => voi
         setSending(true);
         setError('');
         try {
-            await axios.post('/ai/lead', { ...form, website: '' }, requestConfig);
+            await axios.post('/ai/lead', { ...form, locale, website: '' }, requestConfig);
             setDone(true);
         } catch {
             setError(labels.error);

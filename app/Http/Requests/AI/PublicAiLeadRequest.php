@@ -19,6 +19,7 @@ final class PublicAiLeadRequest extends FormRequest
             'company' => ['nullable', 'string', 'max:120'],
             'project' => ['required', 'string', 'min:10', 'max:1000'],
             'consent' => ['required', 'accepted'],
+            'locale' => ['required', 'in:en,pl,pt'],
             'website' => ['nullable', 'max:0'], // Honeypot.
         ];
     }

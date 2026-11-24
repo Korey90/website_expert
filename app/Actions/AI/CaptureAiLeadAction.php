@@ -27,7 +27,7 @@ final class CaptureAiLeadAction
             throw new AiUnavailable('consent_required');
         }
 
-        $conversation = $this->conversations->getOrStart($request, $assistant, 'en');
+        $conversation = $this->conversations->getOrStart($request, $assistant, $data['locale']);
 
         return DB::transaction(function () use ($request, $assistant, $conversation, $data) {
             $locked = AiConversation::withoutGlobalScope(BusinessScope::class)
