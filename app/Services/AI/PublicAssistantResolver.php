@@ -14,7 +14,8 @@ final class PublicAssistantResolver
      */
     public function resolve(): ?AiAssistant
     {
-        if (! config('ai_assistant.enabled')) {
+        // Public collection of chat data requires an active retention policy.
+        if (! config('ai_assistant.enabled') || ! config('ai_assistant.retention_enabled')) {
             return null;
         }
 

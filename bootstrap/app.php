@@ -71,6 +71,9 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withSchedule(function (Schedule $schedule): void {
+        // Private AI chat retention, fail-closed unless explicitly enabled in config.
+        $schedule->command('ai:prune-conversations')->dailyAt('03:30')->withoutOverlapping()->onOneServer();
+
         // Daily: flag leads with no activity in 7+ days → triggers lead.inactive automation
         $schedule->command('leads:check-stale')->dailyAt('08:00')->onOneServer();
 
