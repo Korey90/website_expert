@@ -290,6 +290,16 @@ class UniversalCreditReviewAndReportsTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_period_page_renders_preflight_issue_context_without_a_type_error(): void
+    {
+        $item = $this->manualIncome('50.00');
+
+        $this->get(UniversalCreditAssessmentPeriodResource::getUrl('view', ['record' => $this->period]))
+            ->assertOk()
+            ->assertSee(__('finance.universal_credit.preflight.classification_required'))
+            ->assertSee('"item_id":'.$item->id);
+    }
+
     public function test_universal_credit_ui_translations_have_en_pl_pt_key_parity(): void
     {
         $keys = [];

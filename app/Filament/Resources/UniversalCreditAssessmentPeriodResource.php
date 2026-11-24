@@ -91,21 +91,21 @@ class UniversalCreditAssessmentPeriodResource extends BaseResource
                 ->schema([
                     RepeatableEntry::make('preflight_errors')
                         ->label(__('finance.universal_credit.ui.fields.errors'))
-                        ->state(fn (UniversalCreditAssessmentPeriod $record): array => self::preflight($record)->errors)
+                        ->state(fn (UniversalCreditAssessmentPeriod $record): array => self::formatPreflightIssues(self::preflight($record)->errors))
                         ->schema([
                             TextEntry::make('code')->hiddenLabel()
                                 ->formatStateUsing(fn (string $state): string => __('finance.universal_credit.preflight.'.$state)),
                             TextEntry::make('context')->hiddenLabel()
-                                ->formatStateUsing(fn (array $state): string => json_encode($state, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)),
+                                ->placeholder('-'),
                         ]),
                     RepeatableEntry::make('preflight_warnings')
                         ->label(__('finance.universal_credit.ui.fields.warnings'))
-                        ->state(fn (UniversalCreditAssessmentPeriod $record): array => self::preflight($record)->warnings)
+                        ->state(fn (UniversalCreditAssessmentPeriod $record): array => self::formatPreflightIssues(self::preflight($record)->warnings))
                         ->schema([
                             TextEntry::make('code')->hiddenLabel()
                                 ->formatStateUsing(fn (string $state): string => __('finance.universal_credit.preflight.'.$state)),
                             TextEntry::make('context')->hiddenLabel()
-                                ->formatStateUsing(fn (array $state): string => json_encode($state, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)),
+                                ->placeholder('-'),
                         ]),
                 ]),
             Section::make(__('finance.universal_credit.ui.sections.audit'))
@@ -213,9 +213,27 @@ class UniversalCreditAssessmentPeriodResource extends BaseResource
         return '£'.number_format($pence / 100, 2);
     }
 
+    /**
+     * @param  list<array{code: string, context: array<string, mixed>}>  $issues
+     * @return list<array{code: string, context: string|null}>
+     */
+    private static function formatPreflightIssues(array $issues): array
+    {
+        return array_map(static function (array $issue): array {
+            $context = $issue['context'] ?? [];
+
+            return [
+                'code' => (string) ($issue['code'] ?? ''),
+                'context' => $context === []
+                    ? null
+                    : json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+            ];
+        }, $issues);
+    }
+
     private static function preflight(UniversalCreditAssessmentPeriod $period): UniversalCreditPreflightResult
     {
-        $key = $period->id.'|'.$period->updated_at?->getTimestamp();
+        $key = spl_object_id($period).'|'.$period->id.'|'.$period->updated_at?->getTimestamp();
 
         return self::$preflightCache[$key] ??= app(UniversalCreditPreflightService::class)->inspect($period);
     }
