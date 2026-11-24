@@ -58,8 +58,108 @@ const requestConfig = {
     headers: { Accept: 'application/json' },
 };
 
+
+type LeadLabels = {
+    cta: string; heading: string; name: string; email: string; company: string; project: string;
+    consent: string; send: string; submitted: string; error: string; back: string;
+};
+
+const leadCopy: Record<Locale, LeadLabels> = {
+    en: {
+        cta: 'Request a free quote', heading: 'Tell us about your project', name: 'Your name',
+        email: 'Email address', company: 'Company (optional)', project: 'What would you like to build?',
+        consent: 'I agree that Website Expert may contact me about this enquiry and process these details under its privacy policy.',
+        send: 'Send enquiry', submitted: 'Thanks! Your enquiry has been sent.',
+        error: 'We could not send your enquiry. Try again or use the contact page.',
+        back: 'Back to chat',
+    },
+    pl: {
+        cta: 'Poproś o bezpłatną wycenę', heading: 'Opowiedz o swoim projekcie', name: 'Imię i nazwisko',
+        email: 'Adres e-mail', company: 'Firma (opcjonalnie)', project: 'Co chcesz stworzyć?',
+        consent: 'Zgadzam się na kontakt Website Expert w sprawie zapytania oraz przetwarzanie podanych danych zgodnie z polityką prywatności.',
+        send: 'Wyślij zapytanie', submitted: 'Dziękujemy! Zapytanie zostało wysłane.',
+        error: 'Nie udało się wysłać zapytania. Spróbuj ponownie lub skorzystaj z formularza kontaktowego.',
+        back: 'Powrót do czatu',
+    },
+    pt: {
+        cta: 'Pedir orçamento gratuito', heading: 'Fale-nos do seu projeto', name: 'O seu nome',
+        email: 'Email', company: 'Empresa (opcional)', project: 'O que gostaria de criar?',
+        consent: 'Concordo que a Website Expert me contacte sobre este pedido e trate os dados segundo a política de privacidade.',
+        send: 'Enviar pedido', submitted: 'Obrigado! O seu pedido foi enviado.',
+        error: 'Não foi possível enviar o pedido. Tente novamente ou use o formulário de contacto.',
+        back: 'Voltar ao chat',
+    },
+};
+
+function AiLeadCapture({ locale, onClose }: { locale: Locale; onClose: () => void }) {
+    const labels = leadCopy[locale];
+    const [form, setForm] = useState({ name: '', email: '', company: '', project: '', consent: false });
+    const [sending, setSending] = useState(false);
+    const [done, setDone] = useState(false);
+    const [error, setError] = useState('');
+
+    const submit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (sending || !form.consent) return;
+
+        setSending(true);
+        setError('');
+        try {
+            await axios.post('/ai/lead', { ...form, website: '' }, requestConfig);
+            setDone(true);
+        } catch {
+            setError(labels.error);
+        } finally {
+            setSending(false);
+        }
+    };
+
+    return (
+        <section className="max-h-[50%] overflow-y-auto border-t border-neutral-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="flex items-center justify-between gap-2">
+                <h3 className="font-semibold text-sm">{labels.heading}</h3>
+                <button type="button" onClick={onClose} className="text-xs underline">{labels.back}</button>
+            </div>
+            {done ? (
+                <p role="status" className="mt-3 text-sm text-green-700 dark:text-green-400">{labels.submitted}</p>
+            ) : (
+                <form onSubmit={submit} className="mt-3 space-y-2">
+                    <input aria-label={labels.name} placeholder={labels.name} autoComplete="name"
+                        required minLength={2} maxLength={120} value={form.name}
+                        onChange={e => setForm(old => ({ ...old, name: e.target.value }))}
+                        className="w-full rounded-lg border border-neutral-300 bg-white p-2 text-sm text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white" />
+                    <input aria-label={labels.email} placeholder={labels.email} type="email" autoComplete="email"
+                        required maxLength={254} value={form.email}
+                        onChange={e => setForm(old => ({ ...old, email: e.target.value }))}
+                        className="w-full rounded-lg border border-neutral-300 bg-white p-2 text-sm text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white" />
+                    <input aria-label={labels.company} placeholder={labels.company} autoComplete="organization"
+                        maxLength={120} value={form.company}
+                        onChange={e => setForm(old => ({ ...old, company: e.target.value }))}
+                        className="w-full rounded-lg border border-neutral-300 bg-white p-2 text-sm text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white" />
+                    <textarea aria-label={labels.project} placeholder={labels.project} required rows={2} minLength={10}
+                        maxLength={1000} value={form.project}
+                        onChange={e => setForm(old => ({ ...old, project: e.target.value }))}
+                        className="w-full rounded-lg border border-neutral-300 bg-white p-2 text-sm text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white" />
+                    <label className="flex items-start gap-2 text-xs text-neutral-600 dark:text-neutral-300">
+                        <input type="checkbox" required checked={form.consent}
+                            onChange={e => setForm(old => ({ ...old, consent: e.target.checked }))}
+                            className="mt-0.5 accent-[#ff2b17]" />
+                        <span>{labels.consent} <a href="/privacy-policy" className="underline">{copy[locale].privacyLink}</a></span>
+                    </label>
+                    {error && <p role="alert" className="text-xs text-red-600">{error}</p>}
+                    <button type="submit" disabled={sending || !form.consent}
+                        className="rounded-lg bg-[#ff2b17] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                        {labels.send}
+                    </button>
+                </form>
+            )}
+        </section>
+    );
+}
+
 export default function PublicAiWidget() {
     const [enabled, setEnabled] = useState(false);
+    const [leadOpen, setLeadOpen] = useState(false);
     const [name, setName] = useState('Website Expert AI');
     const [open, setOpen] = useState(false);
     const [busy, setBusy] = useState(false);
@@ -229,6 +329,16 @@ export default function PublicAiWidget() {
                         <div ref={bottomRef} />
                     </div>
 
+                    {leadOpen ? (
+                        <AiLeadCapture locale={locale} onClose={() => setLeadOpen(false)} />
+                    ) : (
+                        <div className="border-t border-neutral-200 px-4 py-2 dark:border-neutral-700">
+                            <button type="button" onClick={() => setLeadOpen(true)}
+                                className="w-full rounded-lg border border-[#ff2b17] px-3 py-2 text-sm font-semibold text-[#ff2b17] hover:bg-red-50 dark:hover:bg-red-950">
+                                {leadCopy[locale].cta}
+                            </button>
+                        </div>
+                    )}
                     <div className="border-t border-neutral-200 px-4 py-3 dark:border-neutral-700">
                         {error && <p role="alert" className="mb-2 text-sm text-red-600">{error}</p>}
                         <form onSubmit={sendMessage} className="flex items-end gap-2">
