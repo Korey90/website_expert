@@ -19,6 +19,7 @@ The implementation is **code-complete for the core Sprint 02 and Sprint 03 paths
 - Retrieval only from approved/published RAG chunks. The answerer validates every exact evidence quote against the source. An unknown question fails closed and is logged for manual review.
 - Language labels and messages in EN, PL and PT; no browser-side API key.
 - Rate limits: 6 messages/min per IP, 30 history/bootstrap/min, 5 restart/min.
+- Server-side reCAPTCHA v3 is fail-closed for public POSTs. It verifies action, hostname and score. The existing permissive RecaptchaService is not used.
 - Same-origin integration, NOT an embeddable third-party SaaS widget. External multi-tenant embed is postponed to Sprint 05.
 
 ### Sprint 03 — CRM & learning
@@ -52,6 +53,9 @@ For public widget testing in local staging:
 - AI_ASSISTANT_ENABLED=true
 - AI_ASSISTANT_RETENTION_ENABLED=true
 - AI_ASSISTANT_RETENTION_DAYS=30
+- AI_ASSISTANT_RECAPTCHA_REQUIRED=true (recommended for production)
+- Configure RECAPTCHA_SITE_KEY, RECAPTCHA_SECRET_KEY, and VITE_RECAPTCHA_SITE_KEY with the corresponding v3 site key. All keys must belong to the same site and hostname.
+- For offline local testing only: AI_ASSISTANT_RECAPTCHA_REQUIRED=false, never use this shortcut for real public traffic.
 - AI_ASSISTANT_PUBLIC_BUSINESS_ID=<explicit ULID of approved agency tenant>
 - For the target tenant set ai_assistants.enabled=true via authorized Filament page.
 - Publish approved public-only knowledge, ensure ai queue worker consumes jobs and embeddings have compatible configured model/dimensions.
@@ -73,6 +77,7 @@ Run migrations against isolated SQLite AND MySQL 8 test databases, then:
 - php artisan view:cache
 - php artisan route:list --path=ai
 - php artisan ai:prune-conversations --dry-run (retention flag true)
+- Manual strict reCAPTCHA test: wrong action, invalid score, wrong hostname, API failure and missing token must be rejected; only correct v3 token succeeds.
 - Manual CSRF checks: invalid/absent token must give 419; outsider must not change business_id; unauthenticated visitors cannot access any Filament AI page.
 - Manual prompt injection tests: user prompt and retrieved documents cannot override evidence validation; only literal approved excerpts may appear.
 - Manual accessibility check: responsive layout/mobile/keyboard/Escape/aria, EN/PL/PT translations.
@@ -85,6 +90,6 @@ Run migrations against isolated SQLite AND MySQL 8 test databases, then:
 
 - Strict evidence quotes are grounded, but not yet fluent paraphrases. Natural-language claim verification needs evaluation before enabling creative generation.
 - The widget is same-origin only. SaaS third-party embedding, per-site public widget tokens, allowlisted domains, tenant-specific API budgets, cross-origin cookie handling and client billing belong to Sprint 05.
-- Rate limiting and budgets are designed conservatively, but production abuse protection needs CAPTCHA, audit and monitoring.
+- Rate limiting, cost caps and strict reCAPTCHA are implemented, but production abuse monitoring and incident response still require a live test and security review.
 - MySQL schema and all PHP/TS/Blade changes need actual local runtime tests.
 - Consent and retention are technical controls and do not replace legal review of the live privacy policy.
