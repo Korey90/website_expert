@@ -86,7 +86,7 @@ final class OpenAiAssistantProvider implements AiProvider
         $budget = (int) config('ai_assistant.daily_budget_microusd');
         $reserve = (int) config('ai_assistant.reservation_microusd');
 
-        if (! config('ai_assistant.preview_enabled') || $key === '' || $model === ''
+        if ((! config('ai_assistant.preview_enabled') && ! config('ai_assistant.enabled')) || $key === '' || $model === ''
             || $url !== 'https://api.openai.com/v1' || $limit <= 0 || $budget <= 0 || $reserve <= 0 || $reserve > $budget) {
             throw new AiUnavailable('disabled_or_unconfigured');
         }

@@ -2,6 +2,11 @@
 
 return [
     'enabled' => (bool) env('AI_ASSISTANT_ENABLED', false),
+    // Server-owned agency tenant; never accept this identifier from a public request.
+    'public_business_id' => env('AI_ASSISTANT_PUBLIC_BUSINESS_ID'),
+    'max_messages_per_conversation' => 40,
+    'conversation_retention_days' => 30,
+    'max_history_messages' => 30,
     'preview_enabled' => (bool) env('AI_ASSISTANT_PREVIEW_ENABLED', false),
     'chat_model' => env('AI_ASSISTANT_CHAT_MODEL', 'gpt-4o-mini'),
     'embedding_model' => env('AI_ASSISTANT_EMBEDDING_MODEL', 'text-embedding-3-small'),
