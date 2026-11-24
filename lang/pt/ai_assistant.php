@@ -41,4 +41,5 @@ return [
     'empty_questions' => 'Sem perguntas nesta categoria.',
     'learning_manual' => 'O novo conhecimento é adicionado manualmente em AI Knowledge e só é publicado após aprovação explícita.',
     'review_saved' => 'Estado da revisão guardado',
+    'lead_consent' => 'Concordo que a Website Expert me contacte sobre este pedido e trate os meus dados segundo a política de privacidade.',
 ];

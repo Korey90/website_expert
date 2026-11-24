@@ -41,4 +41,5 @@ return [
     'empty_questions' => 'Brak pytań w tej kategorii.',
     'learning_manual' => 'Nowa wiedza jest dodawana ręcznie w sekcji AI Knowledge i publikowana dopiero po zatwierdzeniu.',
     'review_saved' => 'Zapisano status pytania',
+    'lead_consent' => 'Wyrażam zgodę na kontakt Website Expert w sprawie zapytania oraz przetwarzanie moich danych zgodnie z polityką prywatności.',
 ];

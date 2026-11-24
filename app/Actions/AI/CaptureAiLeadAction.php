@@ -6,6 +6,7 @@ use App\Actions\CreateLeadAction;
 use App\Models\AiAssistant;
 use App\Models\AiConversation;
 use App\Models\AiLead;
+use App\Models\LeadConsent;
 use App\Scopes\BusinessScope;
 use App\Services\AI\AiUnavailable;
 use App\Services\AI\PublicConversationService;
@@ -22,9 +23,13 @@ final class CaptureAiLeadAction
     /** @return array{success:bool} */
     public function execute(Request $request, AiAssistant $assistant, array $data): array
     {
+        if (! $request->boolean('consent')) {
+            throw new AiUnavailable('consent_required');
+        }
+
         $conversation = $this->conversations->getOrStart($request, $assistant, 'en');
 
-        return DB::transaction(function () use ($assistant, $conversation, $data) {
+        return DB::transaction(function () use ($request, $assistant, $conversation, $data) {
             $locked = AiConversation::withoutGlobalScope(BusinessScope::class)
                 ->where('business_id', $assistant->business_id)
                 ->where('assistant_id', $assistant->id)
@@ -53,10 +58,21 @@ final class CaptureAiLeadAction
                 'email' => mb_strtolower(trim($data['email'])),
                 'company' => filled($data['company'] ?? null) ? trim($data['company']) : null,
                 'project_type' => 'AI Website Enquiry',
-                'source' => 'ai_chat',
+                'source' => 'other', // Existing MySQL ENUM; specific channel is source_type.
                 'source_type' => 'ai_chat',
                 'notes' => trim($data['project']),
                 'business_id' => $assistant->business_id,
+                'locale' => $locked->locale,
+            ]);
+
+            LeadConsent::create([
+                'lead_id' => $lead->id,
+                'given' => true,
+                'consent_text' => __('ai_assistant.lead_consent', [], $locked->locale),
+                'consent_version' => 'ai-1.0',
+                'collected_at' => now(),
+                'source_url' => url('/ai/lead'),
+                'ip_hash' => hash_hmac('sha256', (string) $request->ip(), (string) config('app.key')),
                 'locale' => $locked->locale,
             ]);
 

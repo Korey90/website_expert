@@ -41,4 +41,5 @@ return [
     'empty_questions' => 'No questions in this category.',
     'learning_manual' => 'New knowledge is added manually in AI Knowledge and published only after explicit approval.',
     'review_saved' => 'Review status saved',
+    'lead_consent' => 'I agree that Website Expert may contact me about this enquiry and process these details under its privacy policy.',
 ];
