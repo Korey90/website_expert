@@ -52,6 +52,23 @@ services:
       app:
         condition: service_started
 
+  # Optional development worker for manually approved AI knowledge indexing.
+  # Start only with: docker compose --profile ai up -d ai_queue
+  ai_queue:
+    profiles: ["ai"]
+    image: web-dev-app/php:local
+    command: ["php", "artisan", "queue:work", "--queue=ai", "--tries=1", "--timeout=120"]
+    volumes:
+      - .:/var/www/html
+    env_file: .env
+    environment:
+      DB_HOST: mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+      app:
+        condition: service_started
+
   reverb:
     image: web-dev-app/php:local
     command: ["php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]

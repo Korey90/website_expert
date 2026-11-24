@@ -33,7 +33,9 @@ The implementation is **code-complete for the core Sprint 02 and Sprint 03 paths
 
 ### Sprint 04 — privacy and operations groundwork
 
-- New retention command ai:prune-conversations, scheduled daily. Disabled unless AI_ASSISTANT_RETENTION_ENABLED=true.
+- New retention command ai:prune-conversations, scheduled daily.
+- Authorized admin can erase transcripts manually. With an associated lead, the CRM consent link is preserved.
+- Optional Docker AI queue worker uses profile ai; it is not started by default. Disabled unless AI_ASSISTANT_RETENTION_ENABLED=true.
 - After N days, delete conversations without a CRM lead. Conversations with a lead retain the consent linkage but delete transcript, unanswered questions and session fingerprint.
 - Analytics dashboard: grounded/unknown/unavailable counts, open questions, leads, provider calls, reserved maximum cost (NOT provider invoice).
 - PublicAssistantResolver will refuse to activate if retention is disabled.

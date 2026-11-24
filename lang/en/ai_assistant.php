@@ -53,4 +53,6 @@ return [
     'provider_calls' => 'Provider API calls',
     'reserved_usd' => 'Reserved budget (USD)',
     'usage_warning' => 'Reserved budget is a conservative maximum per API call. It is not the provider\'s actual invoice.',
+    'erase' => 'Erase transcript',
+    'erase_confirm' => 'Erase this conversation? The transcript cannot be recovered. Existing CRM lead consent will be preserved.',
 ];

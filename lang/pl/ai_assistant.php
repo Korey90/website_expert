@@ -53,4 +53,6 @@ return [
     'provider_calls' => 'Wywołania API',
     'reserved_usd' => 'Rezerwacja budżetu (USD)',
     'usage_warning' => 'Rezerwacja budżetu jest konserwatywnym limitem każdego wywołania. Nie jest rzeczywistym rachunkiem dostawcy.',
+    'erase' => 'Usuń zapis rozmowy',
+    'erase_confirm' => 'Usunąć tę rozmowę? Historii nie będzie można odzyskać. Zgoda istniejącego leada w CRM zostanie zachowana.',
 ];

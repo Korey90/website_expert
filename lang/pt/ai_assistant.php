@@ -53,4 +53,6 @@ return [
     'provider_calls' => 'Chamadas à API',
     'reserved_usd' => 'Orçamento reservado (USD)',
     'usage_warning' => 'O orçamento reservado é um limite conservador por chamada. Não representa a fatura real do fornecedor.',
+    'erase' => 'Eliminar transcrição',
+    'erase_confirm' => 'Eliminar esta conversa? A transcrição não pode ser recuperada. O consentimento do lead de CRM será preservado.',
 ];

@@ -20,7 +20,15 @@
             @endforelse
         </section>
         <section class="space-y-3 rounded-xl border border-gray-200 p-5 dark:border-gray-700">
-            <h2 class="text-lg font-semibold">{{ __('ai_assistant.messages') }}</h2>
+            <div class="flex items-center justify-between gap-2">
+                <h2 class="text-lg font-semibold">{{ __('ai_assistant.messages') }}</h2>
+                @if ($selectedConversationId && \App\Services\AI\AiAccess::allows('manage_ai_conversations'))
+                    <x-filament::button size="xs" color="danger" wire:click="erase"
+                        wire:confirm="{{ __('ai_assistant.erase_confirm') }}">
+                        {{ __('ai_assistant.erase') }}
+                    </x-filament::button>
+                @endif
+            </div>
             @forelse ($this->selectedMessages() as $message)
                 <div class="rounded-lg bg-gray-50 p-3 text-sm dark:bg-gray-800">
                     <div class="mb-1 flex justify-between text-xs text-gray-500">

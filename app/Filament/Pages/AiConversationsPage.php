@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Actions\AI\EraseAiConversationAction;
 use App\Models\AiConversation;
 use App\Models\AiLead;
 use App\Models\AiMessage;
@@ -63,6 +64,18 @@ class AiConversationsPage extends BasePage
             ->firstOrFail();
 
         $this->selectedConversationId = $conversationId;
+    }
+
+    public function erase(EraseAiConversationAction $action): void
+    {
+        AiAccess::business('manage_ai_conversations');
+
+        if (! $this->selectedConversationId) {
+            return;
+        }
+
+        $action->execute($this->selectedConversationId);
+        $this->selectedConversationId = null;
     }
 
     public function selectedMessages(): array
