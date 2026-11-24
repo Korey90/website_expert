@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import Navbar from '@/Components/Marketing/Navbar';
 import Footer from '@/Components/Marketing/Footer';
 import CookieBanner from '@/Components/Marketing/CookieBanner';
@@ -9,6 +10,8 @@ function TrackingInit() {
     useMetaPixel();
     return null;
 }
+
+const PublicAiWidget = lazy(() => import('@/Components/AI/PublicAiWidget'));
 
 // Height of the top banner in pixels — must match the banner's rendered height (py-2 + text-xs ≈ 32px)
 const BANNER_HEIGHT = 32;
@@ -32,6 +35,7 @@ export default function MarketingLayout({ children, auth, footer, topBanner = nu
                 <main className="">{children}</main>
                 {footer && <Footer data={footer} />}
                 <CookieBanner />
+                <Suspense fallback={null}><PublicAiWidget /></Suspense>
                 <TrackingInit />
             </div>
         </ConsentContext.Provider>
