@@ -12,6 +12,8 @@ Route::prefix('ai')->name('ai.')->group(function () {
         ->name('history')->middleware('throttle:30,1');
     Route::post('/message', [PublicAiChatController::class, 'send'])
         ->name('message')->middleware('throttle:6,1');
+    Route::post('/lead', [PublicAiChatController::class, 'captureLead'])
+        ->name('lead')->middleware('throttle:2,1');
     Route::post('/restart', [PublicAiChatController::class, 'restart'])
         ->name('restart')->middleware('throttle:5,1');
 });

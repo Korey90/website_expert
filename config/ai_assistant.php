@@ -5,7 +5,8 @@ return [
     // Server-owned agency tenant; never accept this identifier from a public request.
     'public_business_id' => env('AI_ASSISTANT_PUBLIC_BUSINESS_ID'),
     'max_messages_per_conversation' => 40,
-    'conversation_retention_days' => 30,
+    'conversation_retention_days' => (int) env('AI_ASSISTANT_RETENTION_DAYS', 30),
+    'retention_enabled' => (bool) env('AI_ASSISTANT_RETENTION_ENABLED', false),
     'max_history_messages' => 30,
     'preview_enabled' => (bool) env('AI_ASSISTANT_PREVIEW_ENABLED', false),
     'chat_model' => env('AI_ASSISTANT_CHAT_MODEL', 'gpt-4o-mini'),

@@ -31,6 +31,7 @@ class AdminSeeder extends Seeder
         $permissions = [
             'access_admin_panel',
             'view_ai_knowledge', 'manage_ai_knowledge', 'publish_ai_knowledge', 'test_ai_knowledge',
+            'view_ai_conversations', 'review_ai_questions',
             // CRM — ClientResource
             'view_clients', 'create_clients', 'edit_clients', 'delete_clients',
             // CRM — LeadResource / PipelinePage
