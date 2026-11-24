@@ -8,6 +8,7 @@ use App\Models\Business;
 use App\Models\User;
 use App\Scopes\BusinessScope;
 use App\Services\AI\AiAssistantManager;
+use App\Services\AI\AiAccess;
 use App\Services\AI\AiUnavailable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -18,6 +19,8 @@ final class SaveKnowledgeDraftAction
 
     public function execute(Business $business, User $author, array $input, ?string $documentId = null): AiKnowledgeVersion
     {
+        AiAccess::business('manage_ai_knowledge', $business->id);
+
         $data = Validator::make($input, [
             'title' => ['required', 'string', 'max:200'],
             'category' => ['nullable', 'string', 'max:100'],
@@ -44,6 +47,15 @@ final class SaveKnowledgeDraftAction
 
                 if ($document->archived_at !== null) {
                     throw new AiUnavailable('archived_document');
+                }
+
+                // Public metadata belongs to the active version. Do not change it while
+                // creating drafts; versioned metadata requires a separate schema change.
+                if ($document->active_version_id !== null
+                    && ($document->title !== trim($data['title'])
+                        || ($document->category ?? null) !== ($data['category'] ?? null)
+                        || $document->locale !== $data['locale'])) {
+                    throw new AiUnavailable('published_metadata_immutable');
                 }
             } else {
                 $document = new AiKnowledgeDocument;

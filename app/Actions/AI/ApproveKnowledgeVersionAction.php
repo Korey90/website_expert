@@ -9,12 +9,15 @@ use App\Models\Business;
 use App\Models\User;
 use App\Scopes\BusinessScope;
 use App\Services\AI\AiUnavailable;
+use App\Services\AI\AiAccess;
 use Illuminate\Support\Facades\DB;
 
 final class ApproveKnowledgeVersionAction
 {
     public function execute(Business $business, User $approver, string $documentId, string $versionId): void
     {
+        AiAccess::business('publish_ai_knowledge', $business->id);
+
         if (! $business->is_active || ! $approver->businessMemberships()
             ->where('business_id', $business->id)->where('is_active', true)->exists()) {
             throw new AiUnavailable('tenant_forbidden');

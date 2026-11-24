@@ -7,7 +7,6 @@ use App\Models\AiKnowledgeDocument;
 use App\Models\AiKnowledgeVersion;
 use App\Models\Business;
 use App\Scopes\BusinessScope;
-use App\Services\AI\AiAssistantManager;
 use App\Services\AI\AiProvider;
 use App\Services\AI\AiUnavailable;
 use App\Services\AI\AiVector;
@@ -19,7 +18,6 @@ final class IndexKnowledgeVersionAction
     public function __construct(
         private readonly AiProvider $provider,
         private readonly KnowledgeChunker $chunker,
-        private readonly AiAssistantManager $assistants,
     ) {}
 
     public function execute(string $businessId, string $versionId): void
