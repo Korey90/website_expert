@@ -48,8 +48,10 @@ const copy: Record<Locale, Labels> = {
 };
 
 function detectLocale(): Locale {
-    const path = window.location.pathname.split('/')[1];
-    const lang = path || document.documentElement.lang.slice(0, 2);
+    const segment = window.location.pathname.split('/')[1];
+    if (segment === 'pl' || segment === 'pt' || segment === 'en') return segment;
+
+    const lang = document.documentElement.lang.slice(0, 2);
     return lang === 'pl' || lang === 'pt' ? lang : 'en';
 }
 
@@ -77,7 +79,7 @@ const leadCopy: Record<Locale, LeadLabels> = {
     pl: {
         cta: 'Poproś o bezpłatną wycenę', heading: 'Opowiedz o swoim projekcie', name: 'Imię i nazwisko',
         email: 'Adres e-mail', company: 'Firma (opcjonalnie)', project: 'Co chcesz stworzyć?',
-        consent: 'Zgadzam się na kontakt Website Expert w sprawie zapytania oraz przetwarzanie podanych danych zgodnie z polityką prywatności.',
+        consent: 'Wyrażam zgodę na kontakt Website Expert w sprawie zapytania oraz przetwarzanie moich danych zgodnie z polityką prywatności.',
         send: 'Wyślij zapytanie', submitted: 'Dziękujemy! Zapytanie zostało wysłane.',
         error: 'Nie udało się wysłać zapytania. Spróbuj ponownie lub skorzystaj z formularza kontaktowego.',
         back: 'Powrót do czatu',
@@ -85,7 +87,7 @@ const leadCopy: Record<Locale, LeadLabels> = {
     pt: {
         cta: 'Pedir orçamento gratuito', heading: 'Fale-nos do seu projeto', name: 'O seu nome',
         email: 'Email', company: 'Empresa (opcional)', project: 'O que gostaria de criar?',
-        consent: 'Concordo que a Website Expert me contacte sobre este pedido e trate os dados segundo a política de privacidade.',
+        consent: 'Concordo que a Website Expert me contacte sobre este pedido e trate os meus dados segundo a política de privacidade.',
         send: 'Enviar pedido', submitted: 'Obrigado! O seu pedido foi enviado.',
         error: 'Não foi possível enviar o pedido. Tente novamente ou use o formulário de contacto.',
         back: 'Voltar ao chat',
