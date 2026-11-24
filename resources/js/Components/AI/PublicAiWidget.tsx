@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { MessageCircle, Send, RotateCcw, X, Bot, ShieldCheck, LoaderCircle } from 'lucide-react';
 
@@ -93,6 +94,7 @@ const leadCopy: Record<Locale, LeadLabels> = {
 
 function AiLeadCapture({ locale, onClose }: { locale: Locale; onClose: () => void }) {
     const labels = leadCopy[locale];
+    const { executeRecaptcha } = useGoogleReCaptcha();
     const [form, setForm] = useState({ name: '', email: '', company: '', project: '', consent: false });
     const [sending, setSending] = useState(false);
     const [done, setDone] = useState(false);
@@ -105,7 +107,8 @@ function AiLeadCapture({ locale, onClose }: { locale: Locale; onClose: () => voi
         setSending(true);
         setError('');
         try {
-            await axios.post('/ai/lead', { ...form, locale, website: '' }, requestConfig);
+            const recaptchaToken = executeRecaptcha ? await executeRecaptcha('website_ai_lead') : null;
+            await axios.post('/ai/lead', { ...form, locale, recaptcha_token: recaptchaToken, website: '' }, requestConfig);
             setDone(true);
         } catch {
             setError(labels.error);
@@ -158,6 +161,7 @@ function AiLeadCapture({ locale, onClose }: { locale: Locale; onClose: () => voi
 }
 
 export default function PublicAiWidget() {
+    const { executeRecaptcha } = useGoogleReCaptcha();
     const [enabled, setEnabled] = useState(false);
     const [leadOpen, setLeadOpen] = useState(false);
     const [name, setName] = useState('Website Expert AI');
@@ -228,8 +232,9 @@ export default function PublicAiWidget() {
         setMessages(previous => [...previous, { id, role: 'user', text, status: null, sources: [] }]);
 
         try {
+            const recaptchaToken = executeRecaptcha ? await executeRecaptcha('website_ai_chat') : null;
             const { data } = await axios.post<ChatResponse>(
-                '/ai/message', { message: text, locale, client_message_id: id, website: '' }, requestConfig,
+                '/ai/message', { message: text, locale, client_message_id: id, recaptcha_token: recaptchaToken, website: '' }, requestConfig,
             );
 
             setMessages(previous => [...previous, {

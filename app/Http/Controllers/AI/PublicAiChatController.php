@@ -76,7 +76,7 @@ final class PublicAiChatController extends Controller
         abort_unless($assistant, 404);
 
         try {
-            $guard->verify($request, 'website_ai_chat');
+            $guard->verify($request, 'website_ai_lead');
             $result = $action->execute($request, $assistant, $request->validated());
         } catch (\Throwable $exception) {
             report($exception);

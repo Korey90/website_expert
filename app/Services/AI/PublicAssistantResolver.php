@@ -19,7 +19,7 @@ final class PublicAssistantResolver
             return null;
         }
 
-        if (config('ai_assistant.recaptcha_required') && blank(config('services.recaptcha.secret_key'))) {
+        if (config('ai_assistant.recaptcha_required') && (blank(config('services.recaptcha.secret_key')) || blank(config('services.recaptcha.site_key')))) {
             return null;
         }
 
