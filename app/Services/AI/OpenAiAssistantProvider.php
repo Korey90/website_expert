@@ -106,11 +106,15 @@ final class OpenAiAssistantProvider implements AiProvider
                 throw new AiUnavailable('budget_exhausted');
             }
 
-            return (new AiUsageLog)->forceFill([
+            $log = new AiUsageLog;
+            $log->forceFill([
                 'business_id' => $businessId, 'assistant_id' => $assistantId,
                 'request_id' => (string) Str::uuid(), 'operation' => $operation,
                 'model' => $model, 'reserved_microusd' => $reserve, 'status' => 'reserved',
-            ])->tap(fn ($log) => $log->save());
+            ]);
+            $log->save();
+
+            return $log;
         });
 
         $started = hrtime(true);

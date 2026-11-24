@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Contracts\Finance\FinancialAttachmentScanner;
+use App\Services\AI\AiProvider;
+use App\Services\AI\OpenAiAssistantProvider;
 use App\Events\LeadAssigned;
 use App\Events\LeadCaptured;
 use App\Listeners\AutomationEventListener;
@@ -78,6 +80,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(FinancialAttachmentScanner::class, ClamAvFinancialAttachmentScanner::class);
+        $this->app->bind(AiProvider::class, OpenAiAssistantProvider::class);
 
         $this->app->bind(HmrcClientInterface::class, function () {
             return app(HmrcEnvironmentGuard::class)->environment() === 'production'
