@@ -30,6 +30,7 @@ class AdminSeeder extends Seeder
         // ---------------------------------------------------
         $permissions = [
             'access_admin_panel',
+            'view_ai_knowledge', 'manage_ai_knowledge', 'publish_ai_knowledge', 'test_ai_knowledge',
             // CRM — ClientResource
             'view_clients', 'create_clients', 'edit_clients', 'delete_clients',
             // CRM — LeadResource / PipelinePage
@@ -49,6 +50,7 @@ class AdminSeeder extends Seeder
             // Finance — accounting and tax workflows
             'view_finance', 'manage_finance', 'approve_finance', 'post_finance',
             'close_finance_periods', 'submit_tax_returns',
+            'view_ai_knowledge', 'manage_ai_knowledge', 'publish_ai_knowledge', 'test_ai_knowledge',
             'view_universal_credit_reporting', 'manage_universal_credit_reporting', 'export_universal_credit_pack',
             // Projects — ProjectResource
             'view_projects', 'create_projects', 'edit_projects', 'delete_projects',
