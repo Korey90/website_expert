@@ -12,8 +12,6 @@ use App\Services\AI\AiAccess;
 use App\Services\AI\AiAssistantManager;
 use App\Services\AI\AiUnavailable;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class AiKnowledgePage extends BasePage
 {

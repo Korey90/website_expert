@@ -121,6 +121,34 @@ class AiKnowledgeWorkflowTest extends TestCase
         ], $version->document_id);
     }
 
+    public function test_another_tenant_cannot_retrieve_an_active_document(): void
+    {
+        $version = $this->save($this->alpha);
+        app(ApproveKnowledgeVersionAction::class)->execute($this->alpha, $this->admin, $version->document_id, $version->id);
+        app(IndexKnowledgeVersionAction::class)->execute($this->alpha->id, $version->id);
+
+        $this->withSession([User::CURRENT_BUSINESS_SESSION_KEY => $this->beta->id]);
+        app(AiAssistantManager::class)->setEnabled($this->beta, true);
+
+        $result = app(TestAiKnowledgeAction::class)->execute($this->beta, [
+            'question' => 'What is the website price?', 'locale' => 'en',
+        ]);
+
+        $this->assertSame('unknown', $result['status']);
+        $this->assertSame([], $result['sources']);
+    }
+
+    public function test_missing_knowledge_does_not_call_model_for_answer(): void
+    {
+        app(AiAssistantManager::class)->setEnabled($this->alpha, true);
+        $result = app(TestAiKnowledgeAction::class)->execute($this->alpha, [
+            'question' => 'What is the website price?', 'locale' => 'en',
+        ]);
+
+        $this->assertSame('unknown', $result['status']);
+        $this->assertSame([], $result['sources']);
+    }
+
     public function test_unauthenticated_user_cannot_save_document(): void
     {
         auth()->logout();
