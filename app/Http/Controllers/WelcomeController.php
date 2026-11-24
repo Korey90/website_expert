@@ -96,7 +96,10 @@ class WelcomeController extends Controller
             'subtitle' => $s->subtitle,
             'button_text' => $s->button_text,
             'button_url' => $s->button_url,
-            'extra' => array_merge($s->extra ?? [], ['services' => $serviceItemsArray]),
+            'extra' => array_merge($s->extra ?? [], [
+                'services' => $serviceItemsArray,
+                'show_prices' => (bool) (($s->extra ?? [])['show_prices'] ?? true),
+            ]),
         ] : null;
 
         $portfolioProjects = app(PortfolioProjectService::class)

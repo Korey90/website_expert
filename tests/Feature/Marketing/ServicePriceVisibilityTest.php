@@ -23,7 +23,7 @@ class ServicePriceVisibilityTest extends TestCase
 
         $this->get('/')->assertOk()->assertInertia(fn ($page) => $page
             ->component('Welcome')
-            ->where('services.extra.show_prices', null)
+            ->where('services.extra.show_prices', true)
         );
 
         $this->get('/services')->assertOk()->assertInertia(fn ($page) => $page
