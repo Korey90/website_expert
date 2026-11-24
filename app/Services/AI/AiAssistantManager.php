@@ -11,6 +11,8 @@ final class AiAssistantManager
 {
     public function forBusiness(Business $business): AiAssistant
     {
+        AiAccess::business('view_ai_knowledge', $business->id);
+
         return DB::transaction(function () use ($business) {
             Business::whereKey($business->id)->lockForUpdate()->firstOrFail();
 
@@ -36,6 +38,8 @@ final class AiAssistantManager
 
     public function setEnabled(Business $business, bool $enabled): AiAssistant
     {
+        AiAccess::business('manage_ai_knowledge', $business->id);
+
         $assistant = $this->forBusiness($business);
         $assistant->forceFill(['enabled' => $enabled])->save();
 

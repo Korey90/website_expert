@@ -45,7 +45,7 @@ class AiKnowledgeWorkflowTest extends TestCase
         }
 
         $this->actingAs($this->admin);
-        $this->withSession([User::CURRENT_BUSINESS_SESSION_KEY => $this->alpha->id]);
+        $this->selectBusiness($this->alpha);
 
         config()->set('ai_assistant.preview_enabled', true);
         config()->set('ai_assistant.dimensions', 2);
@@ -67,6 +67,14 @@ class AiKnowledgeWorkflowTest extends TestCase
                 ];
             }
         });
+    }
+
+    private function selectBusiness(Business $business): void
+    {
+        $session = app('session')->driver();
+        $session->start();
+        request()->setLaravelSession($session);
+        $session->put(User::CURRENT_BUSINESS_SESSION_KEY, $business->id);
     }
 
     private function save(Business $business, string $content = 'Website price is 599 pounds including five pages.'): AiKnowledgeVersion
@@ -127,7 +135,7 @@ class AiKnowledgeWorkflowTest extends TestCase
         app(ApproveKnowledgeVersionAction::class)->execute($this->alpha, $this->admin, $version->document_id, $version->id);
         app(IndexKnowledgeVersionAction::class)->execute($this->alpha->id, $version->id);
 
-        $this->withSession([User::CURRENT_BUSINESS_SESSION_KEY => $this->beta->id]);
+        $this->selectBusiness($this->beta);
         app(AiAssistantManager::class)->setEnabled($this->beta, true);
 
         $result = app(TestAiKnowledgeAction::class)->execute($this->beta, [
