@@ -24,6 +24,13 @@ class EditSiteSection extends EditRecord
         }
 
         $extra = $record->extra ?? [];
+
+        // Legacy Services sections have no visibility flag yet. Preserve the
+        // existing behaviour (prices shown) until an admin changes the switch.
+        if ($record->key === 'services') {
+            $extra['show_prices'] ??= true;
+        }
+
         $data['extra'] = $extra;
 
         // Feed extra_kv for sections that use the KeyValue fallback panel.
@@ -45,7 +52,7 @@ class EditSiteSection extends EditRecord
         // the edited key-value pairs (already cast back to associative by
         // KeyValueStateCast::get() during dehydration).
         $extraKv = $data['extra_kv'] ?? null;
-        if (is_array($extraKv) && ! empty($extraKv)) {
+        if ($record->key !== 'services' && is_array($extraKv) && ! empty($extraKv)) {
             $submitted = array_merge($submitted, $extraKv);
         }
 

@@ -50,7 +50,7 @@ const labels = {
     },
 };
 
-export default function ServicesIndex({ locale: localeProp, items, auth }) {
+export default function ServicesIndex({ locale: localeProp, items, auth, showPrices = true }) {
     useScrollReveal('.reveal');
 
     const { footer } = usePage().props;
@@ -105,7 +105,7 @@ export default function ServicesIndex({ locale: localeProp, items, auth }) {
                                     {/* Title + price */}
                                     <div className="flex items-start justify-between gap-2 mb-2">
                                         <h2 className="font-semibold text-lg text-neutral-900 dark:text-white leading-snug">{title}</h2>
-                                        {priceLabel && (
+                                        {showPrices && priceLabel && (
                                             <span className="text-xs text-brand-500 font-semibold whitespace-nowrap mt-0.5 shrink-0">
                                                 {locale === 'en' ? 'from ' : locale === 'pl' ? 'od ' : 'a partir de '}{priceLabel}
                                             </span>

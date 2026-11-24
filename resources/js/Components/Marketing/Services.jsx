@@ -89,6 +89,7 @@ export default function Services({ data }) {
     const buttonText   = d.button_text || DEFAULTS.button_text[locale] || DEFAULTS.button_text.en;
     const buttonUrl    = d.button_url  || DEFAULTS.button_url;
     const sectionLabel = t(extra, 'section_label') || DEFAULTS.section_label[locale];
+    const showPrices   = extra.show_prices !== false;
     const allItems     = (extra.services ?? DEFAULTS.services).filter(s => s.is_featured !== false);
 
     const mainItems    = allItems.filter(s => !s.group || s.group === 'main');
@@ -110,7 +111,7 @@ export default function Services({ data }) {
                 </div>
                 <div className="flex items-center gap-1.5 mb-2">
                     <h3 className="font-semibold text-neutral-900 dark:text-white">{itemTitle}</h3>
-                    {priceLabel && (
+                    {showPrices && priceLabel && (
                         <span className="text-xs text-brand-500 font-medium ml-auto shrink-0">{priceLabel}</span>
                     )}
                 </div>

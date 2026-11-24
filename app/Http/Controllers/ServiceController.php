@@ -53,10 +53,13 @@ class ServiceController extends Controller
     {
         $locale = $this->resolveLocale();
         $items = $this->service->getAll()->map(fn (ServiceItem $item) => $this->mapItem($item, $locale))->values();
+        $servicesSection = SiteSection::where('key', 'services')->first();
+        $showPrices = ($servicesSection?->extra ?? [])['show_prices'] ?? true;
 
         return Inertia::render('Services/Index', array_merge($this->sharedSections(), [
             'locale' => $locale,
             'items' => $items,
+            'showPrices' => (bool) $showPrices,
         ]));
     }
 

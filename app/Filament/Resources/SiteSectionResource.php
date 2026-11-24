@@ -354,6 +354,11 @@ class SiteSectionResource extends BaseResource
                                 ->columns(1)
                                 ->visible(fn ($record) => ($record?->key ?? '') === 'services')
                                 ->schema([
+                                    Forms\Components\Toggle::make('extra.show_prices')
+                                        ->label('Show service prices')
+                                        ->helperText('Display service prices on the homepage and /services page.')
+                                        ->default(true)
+                                        ->inline(false),
                                     Forms\Components\Placeholder::make('services_items_notice')
                                         ->label('')
                                         ->content('Service cards are managed in the dedicated Services resource. Changes there are reflected automatically on the homepage.'),
