@@ -17,6 +17,9 @@ final class ApproveKnowledgeVersionAction
     public function execute(Business $business, User $approver, string $documentId, string $versionId): void
     {
         AiAccess::business('publish_ai_knowledge', $business->id);
+        if (auth()->id() !== $approver->id) {
+            throw new AiUnavailable('invalid_approver');
+        }
 
         if (! $business->is_active || ! $approver->businessMemberships()
             ->where('business_id', $business->id)->where('is_active', true)->exists()) {

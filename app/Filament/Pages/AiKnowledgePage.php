@@ -44,6 +44,11 @@ class AiKnowledgePage extends BasePage
     /** @var array<string,mixed>|null */
     public ?array $testResult = null;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('ai_assistant.knowledge');
+    }
+
     public function mount(AiAssistantManager $manager): void
     {
         $business = AiAccess::business('view_ai_knowledge');

@@ -20,6 +20,9 @@ final class SaveKnowledgeDraftAction
     public function execute(Business $business, User $author, array $input, ?string $documentId = null): AiKnowledgeVersion
     {
         AiAccess::business('manage_ai_knowledge', $business->id);
+        if (auth()->id() !== $author->id) {
+            throw new AiUnavailable('invalid_author');
+        }
 
         $data = Validator::make($input, [
             'title' => ['required', 'string', 'max:200'],
@@ -51,7 +54,12 @@ final class SaveKnowledgeDraftAction
 
                 // Public metadata belongs to the active version. Do not change it while
                 // creating drafts; versioned metadata requires a separate schema change.
-                if ($document->active_version_id !== null
+                $hasApprovedVersion = AiKnowledgeVersion::withoutGlobalScope(BusinessScope::class)
+                    ->where('business_id', $business->id)
+                    ->where('document_id', $document->id)
+                    ->whereIn('status', ['indexing', 'published'])->exists();
+
+                if (($document->active_version_id !== null || $hasApprovedVersion)
                     && ($document->title !== trim($data['title'])
                         || ($document->category ?? null) !== ($data['category'] ?? null)
                         || $document->locale !== $data['locale'])) {
