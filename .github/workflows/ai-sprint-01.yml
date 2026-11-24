@@ -1,0 +1,62 @@
+name: AI Sprint 01 validation
+
+on:
+  push:
+    branches:
+      - feature/website-expert-ai-sprint-01
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ai-validation:
+    name: Laravel AI tests (PHP 8.3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      APP_ENV: testing
+      APP_DEBUG: false
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      BROADCAST_CONNECTION: 'null'
+      MAIL_MAILER: array
+      AI_ASSISTANT_PREVIEW_ENABLED: 'false'
+      OPENAI_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, xml, curl, zip, gd, intl, bcmath, pdo_sqlite, sqlite3, pdo_mysql, fileinfo
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate composer manifest
+        run: composer validate --no-check-publish
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Configure test environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+
+      - name: PHP syntax - new AI code
+        run: |
+          find app/Actions/AI app/Services/AI app/Jobs/IndexAiKnowledgeVersionJob.php app/Filament/Pages/AiKnowledgePage.php app/Models/AiAssistant.php app/Models/AiKnowledgeDocument.php app/Models/AiKnowledgeVersion.php app/Models/AiKnowledgeChunk.php app/Models/AiUsageLog.php database/migrations/2026_11_24_200001_create_ai_knowledge_tables.php tests/Feature/AI tests/Unit/AI -name '*.php' -print0 | xargs -0 -n 1 php -l
+
+      - name: AI-specific tests
+        run: php artisan test tests/Unit/AI tests/Feature/AI --stop-on-failure
+
+      - name: Tenant and Filament regression tests
+        run: php artisan test tests/Feature/TenantIsolationTest.php tests/Feature/Filament/FilamentPermissionAccessTest.php --stop-on-failure
+
+      - name: Filament view compilation
+        run: php artisan view:cache
