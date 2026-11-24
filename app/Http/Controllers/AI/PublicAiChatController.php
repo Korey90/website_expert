@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AI\PublicAiMessageRequest;
 use App\Http\Requests\AI\PublicAiLeadRequest;
 use App\Services\AI\AiUnavailable;
+use App\Services\AI\PublicAiBotGuard;
 use App\Services\AI\PublicAssistantResolver;
 use App\Services\AI\PublicConversationService;
 use Illuminate\Http\JsonResponse;
@@ -44,11 +45,13 @@ final class PublicAiChatController extends Controller
         PublicAiMessageRequest $request,
         PublicAssistantResolver $resolver,
         SendPublicAiMessageAction $action,
+        PublicAiBotGuard $guard,
     ): JsonResponse {
         $assistant = $resolver->resolve();
         abort_unless($assistant, 404);
 
         try {
+            $guard->verify($request, 'website_ai_chat');
             $result = $action->execute($request, $assistant, $request->validated());
         } catch (AiUnavailable $exception) {
             $status = $exception->reason === 'request_in_progress' ? 409 : 503;
@@ -67,11 +70,13 @@ final class PublicAiChatController extends Controller
         PublicAiLeadRequest $request,
         PublicAssistantResolver $resolver,
         CaptureAiLeadAction $action,
+        PublicAiBotGuard $guard,
     ): JsonResponse {
         $assistant = $resolver->resolve();
         abort_unless($assistant, 404);
 
         try {
+            $guard->verify($request, 'website_ai_chat');
             $result = $action->execute($request, $assistant, $request->validated());
         } catch (\Throwable $exception) {
             report($exception);

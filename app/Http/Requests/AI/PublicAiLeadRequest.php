@@ -20,6 +20,7 @@ final class PublicAiLeadRequest extends FormRequest
             'project' => ['required', 'string', 'min:10', 'max:1000'],
             'consent' => ['required', 'accepted'],
             'locale' => ['required', 'in:en,pl,pt'],
+            'recaptcha_token' => ['nullable', 'string', 'max:4096'],
             'website' => ['nullable', 'max:0'], // Honeypot.
         ];
     }

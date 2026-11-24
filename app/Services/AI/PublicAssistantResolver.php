@@ -19,6 +19,10 @@ final class PublicAssistantResolver
             return null;
         }
 
+        if (config('ai_assistant.recaptcha_required') && blank(config('services.recaptcha.secret_key'))) {
+            return null;
+        }
+
         $businessId = config('ai_assistant.public_business_id');
         if (! is_string($businessId) || ! preg_match('/^[0-9A-HJKMNP-TV-Z]{26}$/i', $businessId)) {
             return null;

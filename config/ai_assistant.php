@@ -4,6 +4,7 @@ return [
     'enabled' => (bool) env('AI_ASSISTANT_ENABLED', false),
     // Server-owned agency tenant; never accept this identifier from a public request.
     'public_business_id' => env('AI_ASSISTANT_PUBLIC_BUSINESS_ID'),
+    'recaptcha_required' => (bool) env('AI_ASSISTANT_RECAPTCHA_REQUIRED', true),
     'max_messages_per_conversation' => 40,
     'conversation_retention_days' => (int) env('AI_ASSISTANT_RETENTION_DAYS', 30),
     'retention_enabled' => (bool) env('AI_ASSISTANT_RETENTION_ENABLED', false),

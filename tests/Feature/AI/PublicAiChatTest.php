@@ -40,6 +40,7 @@ class PublicAiChatTest extends TestCase
 
         config()->set('ai_assistant.enabled', true);
         config()->set('ai_assistant.retention_enabled', true);
+        config()->set('ai_assistant.recaptcha_required', false); // Test-only bypass.
         config()->set('ai_assistant.public_business_id', $this->business->id);
     }
 
