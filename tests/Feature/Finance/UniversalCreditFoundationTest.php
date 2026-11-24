@@ -66,6 +66,8 @@ class UniversalCreditFoundationTest extends TestCase
 
         $this->assertSame('ni_uc_self_employment', $policy->code);
         $this->assertSame(1, $policy->version);
+        $this->assertSame('2026-05-01', $policy->effective_from?->toDateString());
+        $this->assertSame('2026-11-23', $policy->verified_at?->toDateString());
         $this->assertSame(
             $policy->rules_hash,
             app(UniversalCreditPolicyHashService::class)->hash($policy->rules),
@@ -157,11 +159,11 @@ class UniversalCreditFoundationTest extends TestCase
         $period = app(CreateUniversalCreditAssessmentPeriodAction::class)->execute(
             $this->business,
             $this->owner,
+            '2026-10-24',
             '2026-11-23',
-            '2026-12-22',
         );
 
-        $this->assertSame('UC-20261123-20261222-V1', $period->number);
+        $this->assertSame('UC-20261024-20261123-V1', $period->number);
         $this->assertSame(UniversalCreditAssessmentPeriod::STATUS_DRAFT, $period->status);
         $this->assertSame(0, $period->income_total_pence);
         $this->assertSame(0, $period->expense_total_pence);
@@ -215,7 +217,7 @@ class UniversalCreditFoundationTest extends TestCase
         foreach ([
             ['2026-12-01', '2026-12-30', 'period_overlap'],
             ['2027-01-01', '2027-02-01', 'period_too_long'],
-            ['2026-10-23', '2026-11-21', 'policy_not_found'],
+            ['2026-04-01', '2026-04-30', 'policy_not_found'],
         ] as [$from, $to, $error]) {
             try {
                 $action->execute($this->business, $this->owner, $from, $to);

@@ -365,6 +365,14 @@ Wynik etapu:
 - Finance: 418 passed, 1 skipped, 3017 assertions;
 - tłumaczenia finance: PL/EN/PT po 1467 identycznych kluczy.
 
+Korekta pokrycia polityki z 24 listopada 2026:
+
+- migracja `000045` koryguje `effective_from` polityki V1 z daty jej technicznego utworzenia `2026-11-23` na `2026-05-01`;
+- data wynika z oficjalnej historii zmian DWP, w której 1 maja 2026 opublikowano ostatnią zmianę merytoryczną zasad wydatków uwzględnioną przez bieżącą politykę; aktualizacja z 28 lipca 2026 dotyczyła wyłącznie doprecyzowania obowiązku zgłaszania samozatrudnienia;
+- stawki, kategorie, obliczenia, `rules_hash`, numer V1 i zaakceptowany dataset pozostają bez zmian;
+- migracja sprawdza integralność SHA-256 i odmawia korekty, jeśli polityka została już użyta przez assessment period;
+- regresja obejmuje rzeczywisty okres `2026-10-24` - `2026-11-23`.
+
 ### UKFIN-513B - źródła i klasyfikacja - ukończone lokalnie 2026-11-23
 
 1. Zbudować source collector dla payments, refunds, expense payments, bank transactions, owner-funded i asset flows.
