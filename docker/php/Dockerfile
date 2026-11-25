@@ -13,6 +13,7 @@ RUN apk add --no-cache \
         oniguruma-dev \
         sqlite-dev \
         mariadb-client \
+        mariadb-connector-c \
         linux-headers \
         $PHPIZE_DEPS \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -30,7 +31,8 @@ RUN apk add --no-cache \
         sockets \
     && apk del $PHPIZE_DEPS \
     && command -v mysql \
-    && mysql --version
+    && mysql --version \
+    && test -f /usr/lib/mariadb/plugin/caching_sha2_password.so
 
 # Local Docker development only: Laravel imports database/schema/mysql-schema.sql
 # through the MariaDB CLI, which rejects MySQL 8's self-signed certificate.
