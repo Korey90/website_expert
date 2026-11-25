@@ -32,6 +32,14 @@ RUN apk add --no-cache \
     && command -v mysql \
     && mysql --version
 
+# Local Docker development only: Laravel imports database/schema/mysql-schema.sql
+# through the MariaDB CLI, which rejects MySQL 8's self-signed certificate.
+# Keep TLS enabled but skip certificate verification for the CLI in this
+# isolated image. Do NOT copy this config to a production image: provision
+# a trusted CA and verify the database server certificate there instead.
+RUN printf '\n[client-mariadb]\ndisable-ssl-verify-server-cert\n' >> /etc/my.cnf \
+    && mysql --print-defaults | grep -- '--disable-ssl-verify-server-cert'
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
