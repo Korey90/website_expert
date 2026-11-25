@@ -12,6 +12,7 @@ RUN apk add --no-cache \
         icu-dev \
         oniguruma-dev \
         sqlite-dev \
+        mariadb-client \
         linux-headers \
         $PHPIZE_DEPS \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -27,7 +28,9 @@ RUN apk add --no-cache \
         zip \
         intl \
         sockets \
-    && apk del $PHPIZE_DEPS
+    && apk del $PHPIZE_DEPS \
+    && command -v mysql \
+    && mysql --version
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
