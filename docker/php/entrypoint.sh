@@ -7,8 +7,25 @@ if [ ! -f vendor/autoload.php ]; then
     composer install --no-interaction --optimize-autoloader
 fi
 
-if [ -z "$APP_KEY" ]; then
-    php artisan key:generate --force
+# Read an existing .env key first: rotating it would break encrypted data.
+if [ -z "${APP_KEY:-}" ]; then
+    file_key="$(sed -n 's/^APP_KEY=//p' .env | head -n 1 | tr -d '\r')"
+
+    if [ -z "$file_key" ]; then
+        if [ "${APP_ENV:-local}" = "production" ]; then
+            echo "APP_KEY is missing; refusing to create a key in production." >&2
+            exit 1
+        fi
+        php artisan key:generate --force
+        file_key="$(sed -n 's/^APP_KEY=//p' .env | head -n 1 | tr -d '\r')"
+    fi
+
+    if [ -z "$file_key" ]; then
+        echo "APP_KEY could not be read from .env." >&2
+        exit 1
+    fi
+
+    export APP_KEY="$file_key"
 fi
 
 if [ "$DB_CONNECTION" = "mysql" ]; then

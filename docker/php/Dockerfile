@@ -12,9 +12,12 @@ RUN apk add --no-cache \
         icu-dev \
         oniguruma-dev \
         sqlite-dev \
+        mariadb-client \
+        mariadb-connector-c \
+        linux-headers \
         $PHPIZE_DEPS \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j"$(nproc)" \
+    && docker-php-ext-install -j2 \
         pdo \
         pdo_mysql \
         pdo_sqlite \
@@ -26,7 +29,18 @@ RUN apk add --no-cache \
         zip \
         intl \
         sockets \
-    && apk del $PHPIZE_DEPS
+    && apk del $PHPIZE_DEPS \
+    && command -v mysql \
+    && mysql --version \
+    && test -f /usr/lib/mariadb/plugin/caching_sha2_password.so
+
+# Local Docker development only: Laravel imports database/schema/mysql-schema.sql
+# through the MariaDB CLI, which rejects MySQL 8's self-signed certificate.
+# Keep TLS enabled but skip certificate verification for the CLI in this
+# isolated image. Do NOT copy this config to a production image: provision
+# a trusted CA and verify the database server certificate there instead.
+RUN printf '\n[client-mariadb]\ndisable-ssl-verify-server-cert\n' >> /etc/my.cnf \
+    && mysql --print-defaults | grep -- '--disable-ssl-verify-server-cert'
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

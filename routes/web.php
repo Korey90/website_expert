@@ -17,6 +17,7 @@ require __DIR__.'/web/portal.php';
 
 require __DIR__.'/web/notifications.php';
 require __DIR__.'/web/contact.php';
+require __DIR__.'/web/ai.php';
 require __DIR__.'/web/public.php';
 require __DIR__.'/web/webhooks.php';
 require __DIR__.'/web/domains.php';

@@ -31,6 +31,7 @@ class AdminSeeder extends Seeder
         $permissions = [
             'access_admin_panel',
             'view_ai_knowledge', 'manage_ai_knowledge', 'publish_ai_knowledge', 'test_ai_knowledge',
+            'view_ai_conversations', 'manage_ai_conversations', 'review_ai_questions', 'view_ai_analytics',
             // CRM — ClientResource
             'view_clients', 'create_clients', 'edit_clients', 'delete_clients',
             // CRM — LeadResource / PipelinePage
@@ -133,6 +134,7 @@ class AdminSeeder extends Seeder
             'export_leads', 'view_security_events', 'manage_security_events',
             'close_finance_periods', 'submit_tax_returns',
             'view_ai_knowledge', 'manage_ai_knowledge', 'publish_ai_knowledge', 'test_ai_knowledge',
+            'view_ai_conversations', 'review_ai_questions', 'view_ai_analytics',
             'view_universal_credit_reporting', 'manage_universal_credit_reporting', 'export_universal_credit_pack',
         ];
         $manager->syncPermissions(array_values(array_filter($permissions, fn ($p) => ! in_array($p, $managerExclude))));

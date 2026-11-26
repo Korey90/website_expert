@@ -44,7 +44,7 @@ class RoleResource extends BaseResource
             'website' => ['label' => 'Website',       'icon' => 'heroicon-o-globe-alt',          'suffixes' => ['pages', 'site_sections', 'landing_pages', 'landing_pages_ai']],
             'billing' => ['label' => 'SaaS Billing',  'icon' => 'heroicon-o-credit-card',        'suffixes' => ['businesses', 'business_settings', 'business_profile', 'plans', 'subscriptions', 'sessions']],
             'users' => ['label' => 'Users & Panel Access', 'icon' => 'heroicon-o-users', 'suffixes' => ['users', 'roles', 'permissions', 'api_tokens', 'lead_sources', 'admin_panel']],
-            'ai' => ['label' => 'AI Assistant', 'icon' => 'heroicon-o-sparkles', 'suffixes' => ['ai_knowledge']],
+            'ai' => ['label' => 'AI Assistant', 'icon' => 'heroicon-o-sparkles', 'suffixes' => ['ai_knowledge', 'ai_conversations', 'ai_questions', 'ai_analytics']],
             'reports' => ['label' => 'Reports',       'icon' => 'heroicon-o-chart-bar',           'suffixes' => ['reports']],
             'system' => ['label' => 'System',        'icon' => 'heroicon-o-cog-6-tooth',         'suffixes' => ['settings', 'roles', 'pipeline', 'calculator', 'project_templates', 'security_events']],
         ];
